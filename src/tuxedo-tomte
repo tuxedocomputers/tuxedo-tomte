@@ -1,0 +1,198 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+
+# just for debug, delete afterwards
+use Data::Dumper qw(Dumper);
+
+my $configfile = '/etc/tomte/tomte.cfg';
+
+# initial definition of all modules/packages
+my %modules = (
+    r8168dkms => {
+        name => 'r8168-dkms',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    realtekclevopinfixdkms => {
+        name => 'realtekclevopinfixdkms',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    }, 
+    tuxedokeyboarddkms => {
+        name => 'tuxedo-keyboard-dkms',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedosoundkernelfix  => {
+        name => 'tuxedo-sound-kernel-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedoxpxcairplanemodefix => {
+        name => 'tuxedo-xp-xc-airplane-mode-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedoxp1609audiosuspendfix => {
+        name => 'tuxedo-xp1609-audio-suspend-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedo144hzbacklightfix => {
+        name => 'tuxedo-144hz-backlight-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedofancontrol => {
+        name => 'tuxedo-fan-control',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedonvidiasuspendfix => {
+        name => 'tuxedo-nvidia-suspend-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedorestoreaudiofix => {
+        name => 'tuxedo-restore-audio-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedoaudiofix => {
+        name => 'tuxedo-audio-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedoucsiccg => {
+        name => 'tuxedo-ucsi_ccg',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedotouchpadfix => {
+        name => 'tuxedo-touchpad-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+    tuxedoOLEDbacklightfix => {
+        name => 'tuxedo-OLED-backlight-fix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+    },
+);
+
+sub read_configfile {
+    
+}
+
+
+
+# check whether the module is required for the system
+sub check_requirements {
+    
+}
+
+# print status from all packages
+# in a nicelz formated output
+sub list_status {
+    my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
+
+    #print "Name Version Active Blacklisted Required\n";
+    foreach my $name (sort keys %modules) {
+
+        push(@arr, ["$modules{$name}{name}", "$modules{$name}{version}", "$modules{$name}{active}", "$modules{$name}{blacklisted}", "$modules{$name}{required}"]);
+    }
+    for my $row (@arr) {
+        format STDOUT =
+@<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
+        @$row
+.
+        write;
+    }
+}
+
+# just for debug, delete afterwards
+print Dumper \%modules;
+
+list_status();
+
+# define for each argvalues procedures
+if (defined $ARGV[0]) {
+    if ($ARGV[0] eq "list") {
+        print "list\n";
+    } elsif ($ARGV[0] eq "FAI") {
+        print "FAI\n";
+    } elsif ($ARGV[0] eq "configure") {
+        print "configure\n";
+    } elsif ($ARGV[0] eq "remove") {
+        print "remove\n";
+    } elsif ($ARGV[0] eq "reconfigure") {
+        print "reconfigure\n";
+    } elsif ($ARGV[0] eq "blacklist") {
+        print "blacklist\n";
+    } elsif ($ARGV[0] eq "unblacklist") {
+        print "unblacklist\n";
+    } else {
+        print "no arguments\n";
+    }
+} else {
+    print "no arguments\n";
+}
+
+
