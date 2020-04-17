@@ -5,7 +5,12 @@ use warnings;
 # just for debug, delete afterwards
 use Data::Dumper qw(Dumper);
 
-my $configfile = '/etc/tomte/tomte.cfg';
+my $fh;
+my $configfile = '/home/pablo/tomte.cfg';
+# definition loaded from configfile
+my %configuration;
+my %comp;
+
 
 # initial definition of all modules/packages
 my %modules = (
@@ -19,7 +24,7 @@ my %modules = (
         package => 1,
     },
     realtekclevopinfixdkms => {
-        name => 'realtekclevopinfixdkms',
+        name => 'realtek-clevo-pin-fix-dkms',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -138,10 +143,29 @@ my %modules = (
 );
 
 sub read_configfile {
-    
+    open ( $fh, '<', $configfile ) or print "configfile can not be opened";
+    while ( my $line=<$fh> ) {
+        chomp $line;
+        print "$line\n";
+        my ($name, @cols) = split /\s+/, $line;
+        my $shortname = $name;
+        $shortname =~ s/[^a-zA-Z0-9]//g;
+        print "shortname: $shortname\n";
+        print "name: $name\n";
+        print "version: $cols[1]\n";
+        @comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
+        $configuration{$shortname} = { %comp };
+    }
+    close $fh;
 }
 
-
+sub write_configfile {
+    open ( $fh, '>', $configfile ) or print "Could not open file $configfile $!";
+    foreach my $name (sort keys %modules) {
+        print $fh "$modules{$name}{name} $modules{$name}{version} $modules{$name}{active} $modules{$name}{blacklisted} $modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
+    }
+    close $fh;
+}
 
 # check whether the module is required for the system
 sub check_requirements {
@@ -153,14 +177,17 @@ sub check_requirements {
 sub list_status {
     my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
 
-    #print "Name Version Active Blacklisted Required\n";
     foreach my $name (sort keys %modules) {
-
-        push(@arr, ["$modules{$name}{name}", "$modules{$name}{version}", "$modules{$name}{active}", "$modules{$name}{blacklisted}", "$modules{$name}{required}"]);
+        push(@arr,
+            ["$modules{$name}{name}",
+             "$modules{$name}{version}",
+             "$modules{$name}{active}",
+             "$modules{$name}{blacklisted}",
+             "$modules{$name}{required}"]);
     }
     for my $row (@arr) {
         format STDOUT =
-@<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
+@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
         @$row
 .
         write;
@@ -168,9 +195,13 @@ sub list_status {
 }
 
 # just for debug, delete afterwards
-print Dumper \%modules;
+#print Dumper \%modules;
 
 list_status();
+write_configfile();
+read_configfile();
+
+print Dumper \%configuration;
 
 # define for each argvalues procedures
 if (defined $ARGV[0]) {
