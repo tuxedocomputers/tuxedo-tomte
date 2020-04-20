@@ -1,0 +1,58 @@
+name: tuxedo-tomte
+version: 1.0.1
+summary: INSERT SUMMARY
+description: |
+    INSERT DESCRIPTIO LINE ONE
+     LINE TWO
+homepage: https://tuxedocomputers.com
+maintainer: TUXEDO Computers
+maintainermail: tux@tuxedocomputers.de
+
+builds:
+    - build_deb
+    - build_rpm
+
+build_deb:
+    type: deb
+    sourceDir: ./deb/tuxedo-tomte-1.0.0/
+    buildDirectory: ./output/deb_output/
+    outputFilename: tuxedo-tomte-1.0.1.deb
+    folderPermissions:
+        - "DEBIAN/:root:root:755"
+        - "usr/:root:root:744"
+    filesPermissions:
+        - "DEBIAN/control:root:root:755"
+    copyRulesFiles: {
+        "src/tuxedo-tomte": "usr/sbin/tuxedo-tomte"
+    } 
+    actions:
+        - 1:createBuild
+        - 2:createFolders
+        - 3:copyFiles
+    actionsParameters:
+        createFolders: ["usr/sbin"] 
+
+build_rpm:
+    type: rpm
+    sourceDir: ./rpm/
+    buildDirectory: ./output/rpm_output/
+    outputFilename: tuxedo-tomte-1.0.1.rpm
+    actions:
+        - 1:createBuild
+        - 2:createFolders
+        - 3:copyFiles
+    copyRulesFiles: {
+        "src/tuxedo-tomte": "SOURCES/usr/sbin/tuxedo-tomte"
+    }
+    actionsParameters:
+        createFolders: ["SOURCES/usr/sbin/"]
+
+changelog: 
+    version-1:
+        builds:
+        - build_deb
+        - build_rpm
+        changes:
+        - Intial Packaging
+        date: Mon, 20 Apr 2020 11:46:46 +0100
+        version: 1

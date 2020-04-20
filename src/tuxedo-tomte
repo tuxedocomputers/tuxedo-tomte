@@ -14,35 +14,8 @@ my %comp;
 
 # initial definition of all modules/packages
 my %modules = (
-    r8168dkms => {
-        name => 'r8168-dkms',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
-    realtekclevopinfixdkms => {
-        name => 'realtek-clevo-pin-fix-dkms',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    }, 
     tuxedokeyboarddkms => {
         name => 'tuxedo-keyboard-dkms',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
-    tuxedosoundkernelfix  => {
-        name => 'tuxedo-sound-kernel-fix',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -59,35 +32,8 @@ my %modules = (
         hwid => 1,
         package => 1,
     },
-    tuxedoxp1609audiosuspendfix => {
-        name => 'tuxedo-xp1609-audio-suspend-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
-    tuxedo144hzbacklightfix => {
-        name => 'tuxedo-144hz-backlight-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
     tuxedofancontrol => {
         name => 'tuxedo-fan-control',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
-    tuxedonvidiasuspendfix => {
-        name => 'tuxedo-nvidia-suspend-fix',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -169,11 +115,39 @@ sub write_configfile {
 
 # check whether the module is required for the system
 sub check_requirements {
-    
+    # tuxedo-keyboard-dkms will be installed on all notebooks
+    $modules{tuxedokeyboarddkms}{required} = 1;
+    # tuxedo-fan-control will be installed on all notebooks
+    $modules{tuxedofancontrol}{required} = 1;
+    # tuxedo-touchpad-fix will be installed on all notebooks
+    $modules{tuxedotouchpadfix}{required} = 1;
+    open $fh, "<", "/sys/devices/virtual/dmi/id/board_name" or die "Could not read /sys/devices/virtual/dmi/id/board_name: $!";
+    my $boardname = <$fh>;
+    if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/)
+    {
+        print "setting tuxedoxpxcairplanemodefix required\n";
+        $modules{tuxedoxpxcairplanemodefix}{required} = 1;
+    }
+    if ($boardname =~ m/(N350TW)/)
+    {
+        print "setting tuxedorestoreaudiofix required\n";
+        $modules{tuxedorestoreaudiofix}{required} = 1;
+    }
+    if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
+    {
+        print "setting tuxedoaudiofix required\n";
+        $modules{tuxedoaudiofix}{required} = 1;
+    }
+    if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/)
+    {
+        print "setting tuxedoucsiccg required\n";
+        $modules{tuxedoucsiccg}{required} = 1;
+    }
+
 }
 
 # print status from all packages
-# in a nicelz formated output
+# in a nice formated output
 sub list_status {
     my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
 
