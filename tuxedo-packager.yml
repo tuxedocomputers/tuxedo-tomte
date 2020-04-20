@@ -19,17 +19,23 @@ build_deb:
     outputFilename: tuxedo-tomte-1.0.1.deb
     folderPermissions:
         - "DEBIAN/:root:root:755"
-        - "usr/:root:root:744"
+        - "usr/:root:root:755"
     filesPermissions:
         - "DEBIAN/control:root:root:755"
+        - "usr/share/doc/tuxedo-tomte/copyright:root:root:644"
     copyRulesFiles: {
         "src/tuxedo-tomte": "usr/sbin/tuxedo-tomte"
-    } 
+    }
+    ignoreFiles:
+        - changelog.gz 
     actions:
         - 1:createBuild
         - 2:createFolders
-        - 3:copyFiles
+        - 3:createChangelog
+        - 4:copyFiles
     actionsParameters:
+        createChangelog_path: ./output/deb_output/usr/share/doc/tuxedo-tomte/changelog
+        createChangelog_overwrite: True
         createFolders: ["usr/sbin"] 
 
 build_rpm:
@@ -53,6 +59,6 @@ changelog:
         - build_deb
         - build_rpm
         changes:
-        - Intial Packaging
+        - Initial release
         date: Mon, 20 Apr 2020 11:46:46 +0100
         version: 1

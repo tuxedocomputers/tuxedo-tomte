@@ -14,7 +14,7 @@ variables:
   RPM_OUTPUTFOLDER: ./output/rpm_output/
   PACKAGENAME: tuxedo-tomte
   DEB_NAME: tuxedo-tomte-1.0.1.deb
-  OUTPUTDIR: <OUTPUTDIR>
+  OUTPUTDIR: ./output/
 
 stages:
   - prepare_container
@@ -38,9 +38,10 @@ build_job_deb:
   script:
     - tuxedo-packager --execute build_deb --log=debug
     - printf "Gzip changelog"
-    - gzip -n9  $DEB_SOURCEFOLDER_DIR/usr/share/doc/$PACKAGENAME/changelog
-    - printf "Gzip Manpages"
-    - gzip -n9 $DEB_SOURCEFOLDER_DIR/usr/share/man/**/*
+    - gzip -n9  $DEB_OUTPUTFOLDER/usr/share/doc/$PACKAGENAME/changelog
+    - chmod 644 $DEB_OUTPUTFOLDER/usr/share/doc/$PACKAGENAME/changelog.gz
+    - echo "" #printf "Gzip Manpages"
+    - echo "" #gzip -n9 $DEB_SOURCEFOLDER_DIR/usr/share/man/**/*
     - printf "Create Debian Package"
     - dpkg-deb -b $DEB_OUTPUTFOLDER $OUTPUTDIR/$DEB_NAME
     - printf "Lintian on Debian Package $BUILD_FOLDER_NAME/$debname"
