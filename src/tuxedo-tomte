@@ -5,6 +5,11 @@ use warnings;
 # just for debug, delete afterwards
 use Data::Dumper qw(Dumper);
 
+# for OLED backlight and edid decrypt
+use FindBin qw($Bin);
+use lib "$Bin/.";
+use Parse::EDID qw(parse_edid);
+
 my $fh;
 my $configfile = '/home/pablo/tomte.cfg';
 # definition loaded from configfile
@@ -111,6 +116,53 @@ sub write_configfile {
         print $fh "$modules{$name}{name} $modules{$name}{version} $modules{$name}{active} $modules{$name}{blacklisted} $modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
     }
     close $fh;
+}
+
+# searches the sysfs subdirectory for active monitor entries
+# and returns them as an array
+sub find_active_edids {
+    my $cards_dir = '/sys/class/drm';
+    my $dir_handle;
+    my @edidfile;
+
+    if ( !opendir ($dir_handle, $cards_dir)) {
+        warn "Unable to open $cards_dir: $!\n";
+        return @edidfile;
+    }
+    my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
+    foreach my $file (@FILES) {
+        my $path = "$cards_dir/$file";
+        if ( -d $path ) {
+            my $enabledfile = "$path/enabled";
+            if ( -e $enabledfile ) {
+                open(FILE, $enabledfile);
+                $_ = <FILE>;
+                close(FILE);
+                if ($_ =~ /enabled/) {
+                    print "enabled found under $path\n";
+                    my $statusfile = "$path/status";
+                    if ( -e $statusfile ) {
+                        open(FILE2, $statusfile);
+                        $_ = <FILE2>;
+                        if ($_ =~ /connected/) {
+                            push @edidfile, "$path/edid";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return @edidfile;
+}
+
+####
+#### convert this into sub which returns edid content at a certain path
+sub get_edid_data {
+    open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
+    my $file_content = do { local $/; <$fh> };
+    close $fh;
+    # returns hashref to module
+    return parse_edid($file_content);
 }
 
 # check whether the module is required for the system
