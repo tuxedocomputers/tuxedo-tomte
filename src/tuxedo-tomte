@@ -10,7 +10,7 @@ use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
 
-my $fh;
+### configfile muss noch ins etc
 my $configfile = '/home/pablo/tomte.cfg';
 # definition loaded from configfile
 my %configuration;
@@ -30,15 +30,6 @@ my %modules = (
     },
     tuxedoxpxcairplanemodefix => {
         name => 'tuxedo-xp-xc-airplane-mode-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-    },
-    tuxedofancontrol => {
-        name => 'tuxedo-fan-control',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -93,30 +84,48 @@ my %modules = (
     },
 );
 
+
+# fills global variable $configuration with data from file in $configfile
+# if there is no configfile then it is left empty
 sub read_configfile {
-    open ( $fh, '<', $configfile ) or print "configfile can not be opened";
-    while ( my $line=<$fh> ) {
-        chomp $line;
-        print "$line\n";
-        my ($name, @cols) = split /\s+/, $line;
-        my $shortname = $name;
-        $shortname =~ s/[^a-zA-Z0-9]//g;
-        print "shortname: $shortname\n";
-        print "name: $name\n";
-        print "version: $cols[1]\n";
-        @comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
-        $configuration{$shortname} = { %comp };
+    my $fh;
+    my $shortname;
+    if ( open $fh, '<', $configfile ) {
+        while ( my $line=<$fh> ) {
+            chomp $line;
+            #print "$line\n";
+            my ($name, @cols) = split /\s+/, $line;
+            $shortname = $name;
+            $shortname =~ s/[^a-zA-Z0-9]//g;
+            #print "shortname: $shortname\n";
+            #print "name: $name\n";
+            #print "version: $cols[1]\n";
+            @comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
+            $configuration{$shortname} = { %comp };
+        }
+        close $fh;
+    } else {
+        warn "Could not open configfile: $configfile\n";
     }
-    close $fh;
 }
 
+
+# overwrites file from $configfile with data from $configuration
+# if file cannot be written then nothing happens
 sub write_configfile {
-    open ( $fh, '>', $configfile ) or print "Could not open file $configfile $!";
-    foreach my $name (sort keys %modules) {
-        print $fh "$modules{$name}{name} $modules{$name}{version} $modules{$name}{active} $modules{$name}{blacklisted} $modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
+    my $fh;
+    if ( open $fh, '>', $configfile ) {
+        foreach my $name (sort keys %modules) {
+            print $fh "$modules{$name}{name} $modules{$name}{version} ".
+            "$modules{$name}{active} $modules{$name}{blacklisted} ".
+            "$modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
+        }
+        close $fh;
+    } else {
+        warn "Can't write to $configfile\n";
     }
-    close $fh;
 }
+
 
 # searches the sysfs subdirectory for active monitor entries
 # and returns them as an array
@@ -139,7 +148,7 @@ sub find_active_edids {
                 $_ = <FILE>;
                 close(FILE);
                 if ($_ =~ /enabled/) {
-                    print "enabled found under $path\n";
+                    #print "enabled found under $path\n";
                     my $statusfile = "$path/status";
                     if ( -e $statusfile ) {
                         open(FILE2, $statusfile);
@@ -155,48 +164,75 @@ sub find_active_edids {
     return @edidfile;
 }
 
-####
-#### convert this into sub which returns edid content at a certain path
+
+# gets valid edid files
+# converts edid data into an array of hash references to modules
 sub get_edid_data {
-    open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
-    my $file_content = do { local $/; <$fh> };
-    close $fh;
+    my @edidfiles = find_active_edids();
+    my @edid_refs;
+    my $fh;
+    my $file_content;
+    foreach ( @edidfiles ) {
+        if ( open $fh, '<', $_ ) {
+            $file_content = do { local $/; <$fh> };
+            close $fh;
+            push @edid_refs, parse_edid($file_content);
+        } else {
+            warn "Could not open file $_";
+        }
+    }
+
+    #open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
+    #my $file_content = do { local $/; <$fh> };
+    #close $fh;
     # returns hashref to module
-    return parse_edid($file_content);
+    #return parse_edid($file_content);
+
+    # returns array of hash references to module
+    return @edid_refs;
 }
+
 
 # check whether the module is required for the system
 sub check_requirements {
-    # tuxedo-keyboard-dkms will be installed on all notebooks
+    my $fh;
+    my $boardname_filename = "/sys/devices/virtual/dmi/id/board_name";
+    
+    # these will be installed on all notebooks
     $modules{tuxedokeyboarddkms}{required} = 1;
-    # tuxedo-fan-control will be installed on all notebooks
-    $modules{tuxedofancontrol}{required} = 1;
-    # tuxedo-touchpad-fix will be installed on all notebooks
     $modules{tuxedotouchpadfix}{required} = 1;
-    open $fh, "<", "/sys/devices/virtual/dmi/id/board_name" or die "Could not read /sys/devices/virtual/dmi/id/board_name: $!";
-    my $boardname = <$fh>;
-    if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/)
-    {
-        print "setting tuxedoxpxcairplanemodefix required\n";
-        $modules{tuxedoxpxcairplanemodefix}{required} = 1;
-    }
-    if ($boardname =~ m/(N350TW)/)
-    {
-        print "setting tuxedorestoreaudiofix required\n";
-        $modules{tuxedorestoreaudiofix}{required} = 1;
-    }
-    if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
-    {
-        print "setting tuxedoaudiofix required\n";
-        $modules{tuxedoaudiofix}{required} = 1;
-    }
-    if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/)
-    {
-        print "setting tuxedoucsiccg required\n";
-        $modules{tuxedoucsiccg}{required} = 1;
-    }
 
+    # check everything that needs the boardname
+    if ( open $fh, "<", $boardname_filename ) {
+        my $boardname = <$fh>;
+
+        if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/)
+        {
+            #print "setting tuxedoxpxcairplanemodefix required\n";
+            $modules{tuxedoxpxcairplanemodefix}{required} = 1;
+        }
+        if ($boardname =~ m/(N350TW)/)
+        {
+            #print "setting tuxedorestoreaudiofix required\n";
+            $modules{tuxedorestoreaudiofix}{required} = 1;
+        }
+        if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
+        {
+            #print "setting tuxedoaudiofix required\n";
+            $modules{tuxedoaudiofix}{required} = 1;
+        }
+        if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/)
+        {
+            #print "setting tuxedoucsiccg required\n";
+            $modules{tuxedoucsiccg}{required} = 1;
+        }
+
+        close $fh;
+    } else {
+        warn "Could not open $boardname_filename";
+    }
 }
+
 
 # print status from all packages
 # in a nice formated output
@@ -220,6 +256,29 @@ sub list_status {
     }
 }
 
+
+# text to print for help
+my $USAGE =<<USAGE;
+tuxedo-tomte {COMMAND}
+
+  list                        List all modules with detailed status
+  configure MODULE ...        Configure an unconfigured module
+  reconfigure MODULE...|ALL   Reconfigure a configured module
+  remove MODULE...|ALL        Remove a configured module
+  blacklist MODULE ...        Blacklist a module
+  unblacklist MODULE ...      Unblacklist a module
+  FAI                         For installation with FAI\
+  help                        Prints this message
+
+USAGE
+
+
+# prints help
+sub help {
+    print "$USAGE\n";
+    exit 0;
+}
+
 # just for debug, delete afterwards
 #print Dumper \%modules;
 
@@ -227,14 +286,18 @@ list_status();
 write_configfile();
 read_configfile();
 
-print Dumper \%configuration;
+my @edid_data = get_edid_data();
+print Dumper @edid_data;
+
+#print Dumper \%configuration;
+
 
 # define for each argvalues procedures
 if (defined $ARGV[0]) {
     if ($ARGV[0] eq "list") {
-        print "list\n";
+        list_status();
     } elsif ($ARGV[0] eq "FAI") {
-        print "FAI\n";
+        warn "Starting tuxedo-tomte in FAI modus\n";
     } elsif ($ARGV[0] eq "configure") {
         print "configure\n";
     } elsif ($ARGV[0] eq "remove") {
@@ -245,11 +308,15 @@ if (defined $ARGV[0]) {
         print "blacklist\n";
     } elsif ($ARGV[0] eq "unblacklist") {
         print "unblacklist\n";
+    } elsif ($ARGV[0] eq "help") {
+        help();
     } else {
-        print "no arguments\n";
+        print "Unknown command: $ARGV[0]";
+        help();
     }
 } else {
-    print "no arguments\n";
+    print "No arguments\n";
+    help();
 }
 
 
