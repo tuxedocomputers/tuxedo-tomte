@@ -16,17 +16,47 @@ my $configfile = '/home/pablo/tomte.cfg';
 my %configuration;
 my %comp;
 
-
+###############################################################################
 # initial definition of all modules/packages
+#   name        name of package or name of solution
+#   version     the package or solution version
+#   active      0 not installed / 1 installed
+#   blacklisted   will not be configured on upgrade, install or deinstall
+#   required    the system requirements are met
+#   hwid        the environment (HW or SW) are in a certain defined state
+#   package     there is a deb or rpm package to solve this problem
+#   fainame     the name to give to FAI to install a certain package
+
 my %modules = (
-    tuxedokeyboarddkms => {
-        name => 'tuxedo-keyboard-dkms',
+    tuxedokeyboard => {
+        name => 'tuxedo-keyboard',
         version => 1,
         active => 0,
         blacklisted => 0,
         required => 0,
         hwid => 1,
         package => 1,
+        fainame => 'a',
+    },
+    tuxedoccwmi => {
+        name => 'tuxedo-cc-wmi',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+        fainame => '',
+    },
+    tuxedocontrolcenter => {
+        name => 'tuxedo-control-center',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 1,
+        fainame => '',
     },
     tuxedoxpxcairplanemodefix => {
         name => 'tuxedo-xp-xc-airplane-mode-fix',
@@ -36,6 +66,7 @@ my %modules = (
         required => 0,
         hwid => 1,
         package => 1,
+        fainame => 'AIRPLANEFIX NOGRUB',
     },
     tuxedorestoreaudiofix => {
         name => 'tuxedo-restore-audio-fix',
@@ -45,15 +76,7 @@ my %modules = (
         required => 0,
         hwid => 1,
         package => 1,
-    },
-    tuxedoaudiofix => {
-        name => 'tuxedo-audio-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
+        fainame => 'AUDIORESTOREFIX',
     },
     tuxedoucsiccg => {
         name => 'tuxedo-ucsi_ccg',
@@ -63,24 +86,187 @@ my %modules = (
         required => 0,
         hwid => 1,
         package => 1,
+        fainame => 'TUXUCIFIX',
     },
-    tuxedotouchpadfix => {
-        name => 'tuxedo-touchpad-fix',
+    tuxedooledbrt => {
+        name => 'tuxedo-oled-brt',
         version => 1,
         active => 0,
         blacklisted => 0,
         required => 0,
         hwid => 1,
         package => 1,
+        fainame => 'TUXOLED',
     },
-    tuxedoOLEDbacklightfix => {
-        name => 'tuxedo-OLED-backlight-fix',
+    chassistype => {
+        name => 'chassis-type',
         version => 1,
         active => 0,
         blacklisted => 0,
         required => 0,
         hwid => 1,
-        package => 1,
+        package => 0,
+        fainame => '',
+    },
+    barebone => {
+        name => 'barebone',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => '',
+    },
+    kfocus => {
+        name => 'kfocus',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOKFOCUS',
+    },
+    tuxedo => {
+        name => 'tuxedo',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOTUXEDO',
+    },
+    manjaro => {
+        name => 'manjaro',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOMANJARO',
+    },
+    aistation => {
+        name => 'aistation',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOAISTATION',
+    },
+    bareboneclass => {
+        name => 'barebone-class',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
+    },
+    i915class => {
+        name => 'i915-class',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOI915',
+    },
+    barebonegrub => {
+        name => 'barebone-grub',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NOGRUB 02GRUB',
+    },
+    audiofix => {
+        name => 'audiofix',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'AUDIOFIX',
+    },
+    fingerprint => {
+        name => 'fingerprint',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'FINGERPRINT',
+    },
+    threeg => {
+        name => 'threeg',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'THREEG',
+    },
+    hybrid => {
+        name => 'hybrid',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'DISCRETE HYBRID',
+    },
+    nvidiadriver => {
+        name => 'nvidia-driver',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'NVIDIATUX NVIDIANOR',
+    },
+    bluetooth => {
+        name => 'bluetooth',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => 'BLUETOOTH',
+    },
+    tuxedowallpapers => {
+        name => 'tuxedo-wallpapers',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => '',
+    },
+    tuxedoplymouthone => {
+        name => 'tuxedo-plymouth-one',
+        version => 1,
+        active => 0,
+        blacklisted => 0,
+        required => 0,
+        hwid => 1,
+        package => 0,
+        fainame => '',
     },
 );
 
@@ -105,7 +291,7 @@ sub read_configfile {
         }
         close $fh;
     } else {
-        warn "Could not open configfile: $configfile\n";
+        warn "Could not open configfile: $configfile $!";
     }
 }
 
@@ -122,7 +308,7 @@ sub write_configfile {
         }
         close $fh;
     } else {
-        warn "Can't write to $configfile\n";
+        warn "Can't write to $configfile $!";
     }
 }
 
@@ -178,7 +364,7 @@ sub get_edid_data {
             close $fh;
             push @edid_refs, parse_edid($file_content);
         } else {
-            warn "Could not open file $_";
+            warn "Could not open file $_ $!";
         }
     }
 
@@ -198,8 +384,10 @@ sub check_requirements {
     my $fh;
     my $boardname_filename = "/sys/devices/virtual/dmi/id/board_name";
     
-    # these will be installed on all notebooks
-    $modules{tuxedokeyboarddkms}{required} = 1;
+    # these will be installed on all notebooks, always
+    $modules{tuxedokeyboard}{required} = 1;
+    $modules{tuxedoccwmi}{required} =1 ;
+    $modules{tuxedocontrolcenter}{required} = 1;
     $modules{tuxedotouchpadfix}{required} = 1;
 
     # check everything that needs the boardname
@@ -229,8 +417,46 @@ sub check_requirements {
 
         close $fh;
     } else {
-        warn "Could not open $boardname_filename";
+        warn "Could not open $boardname_filename $!";
     }
+    my @edid = get_edid_data();
+    foreach ( @edid ) {
+        if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
+            $modules{tuxedooledbrt}{required} = 1;
+        }
+    }
+
+    # by default DESKTOP
+    $modules{chassistype}{fainame} = 'DESKTOP';
+    my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
+    if ( open $fh, "<", $chassis_type_fn ) {
+        my $chassis_type = <fh>;
+        close $fh;
+        if ( $chassis_type =~ m/(9|10)/ ) {
+            $modules{chassistype}{required} = 1;
+            $modules{chassistype}{fainame} = 'LAPTOP';
+        } else {
+            my $battery_folder = '/proc/acpi/battery';
+            if ( opendir $fh, $battery_folder ) {
+                while (my $file = readdir($fh)) {
+                    next unless (-d "$battery_folder/$file");
+                    unless ( $file =~ m/(\.|\.\.)/ ) {
+                        #print "folder: $file\n";
+                        $modules{chassistype}{fainame} = 'LAPTOP';
+                    }
+                }
+            }
+        }
+        unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+            my $acpi_string = 'ACPI: Battery Slot';
+            my $dmesg_output = `dmesg`;
+            if ( $dmesg_output =~ m/$acpi_string/ ) {
+                $modules{chassistype}{fainame} = 'LAPTOP';
+            }
+        }
+    }
+
+
 }
 
 
