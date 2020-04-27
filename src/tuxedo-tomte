@@ -108,16 +108,6 @@ my %modules = (
         package => 0,
         fainame => '',
     },
-    barebone => {
-        name => 'barebone',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => '',
-    },
     kfocus => {
         name => 'kfocus',
         version => 1,
@@ -167,16 +157,6 @@ my %modules = (
         hwid => 1,
         package => 0,
         fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
-    },
-    i915class => {
-        name => 'i915-class',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOI915',
     },
     barebonegrub => {
         name => 'barebone-grub',
@@ -383,39 +363,97 @@ sub get_edid_data {
 sub check_requirements {
     my $fh;
     my $boardname_filename = "/sys/devices/virtual/dmi/id/board_name";
-    
+    my $boardname;
+    my $board_vendor_file;
+    my $boardvendor;
+
     # these will be installed on all notebooks, always
     $modules{tuxedokeyboard}{required} = 1;
     $modules{tuxedoccwmi}{required} =1 ;
     $modules{tuxedocontrolcenter}{required} = 1;
     $modules{tuxedotouchpadfix}{required} = 1;
 
+    if ( open $fh, "<", $board_vendor_file ) {
+        $boardvendor = <$fh>;
+        close $fh;
+
+        if ( $boardvendor =~ m/TUXEDO/ ) {
+            $modules{tuxedo}{required} = 1;
+            ### close the program is not TUXEDO???
+        }
+    }
+
+    if ( open $fh, '<', '/proc/cpuinfo' ) {
+        while ( my $line = <$fh> ) {
+            chomp($line);
+            if ( $line =~ m/model name/ ) {
+                $line =~ s/.*-//;
+                $line = substr($line, 0, 1);
+                if ( $line == 4 ) {
+                    $modules{bareboneclass}{fainame} = 'HASHWELL';
+                } elsif ( $line == 5 ) {
+                    $modules{bareboneclass}{fainame} = 'BROADWELL';
+                } elsif ( $line == 6 ) {
+                    $modules{bareboneclass}{fainame} = 'SKYLAKE';
+                } elsif ( $line == 7 ) {
+                    $modules{bareboneclass}{fainame} = 'KABYLAKE';
+                } elsif ( $line == 8 ) {
+                    $modules{bareboneclass}{fainame} = 'COFFEELAKE';
+                } elsif ( $line == 9 ) {
+                    $modules{bareboneclass}{fainame} = 'COFFEELAKE';
+                } else {
+                    $modules{bareboneclass}{fainame} = 'SKYLAKE'
+                }
+            }
+        }
+        close $fh;
+    }
+
+
+
     # check everything that needs the boardname
     if ( open $fh, "<", $boardname_filename ) {
-        my $boardname = <$fh>;
+        $boardname = <$fh>;
+        close $fh;
 
         if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/)
         {
-            #print "setting tuxedoxpxcairplanemodefix required\n";
             $modules{tuxedoxpxcairplanemodefix}{required} = 1;
         }
         if ($boardname =~ m/(N350TW)/)
         {
-            #print "setting tuxedorestoreaudiofix required\n";
             $modules{tuxedorestoreaudiofix}{required} = 1;
         }
         if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
         {
-            #print "setting tuxedoaudiofix required\n";
             $modules{tuxedoaudiofix}{required} = 1;
         }
         if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/)
         {
-            #print "setting tuxedoucsiccg required\n";
             $modules{tuxedoucsiccg}{required} = 1;
         }
+        if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
+        {
+            $modules{kfocus}{required} = 1;
+        }
+        unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/)
+        {
+            $modules{manjaro}{required} = 1;
+        }
+        unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/)
+        {
+            $modules{aistation}{required} = 1;
+        }
+        if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/)
+        {
+            $modules{barebonegrub}{required} = 1;
+            $modules{barebonegrub}{fainame} = '02GRUB';
+        }
+        if ($boardname =~ m/(P95)/)
+        {
+            $modules{audiofix}{required} = 1;
+        }
 
-        close $fh;
     } else {
         warn "Could not open $boardname_filename $!";
     }
@@ -433,7 +471,6 @@ sub check_requirements {
         my $chassis_type = <fh>;
         close $fh;
         if ( $chassis_type =~ m/(9|10)/ ) {
-            $modules{chassistype}{required} = 1;
             $modules{chassistype}{fainame} = 'LAPTOP';
         } else {
             my $battery_folder = '/proc/acpi/battery';
@@ -456,6 +493,12 @@ sub check_requirements {
         }
     }
 
+    my @lsusb_output = `lsusb`;
+    chomp @output;
+    foreach my $line ( @output )
+    {
+        
+    }
 
 }
 
