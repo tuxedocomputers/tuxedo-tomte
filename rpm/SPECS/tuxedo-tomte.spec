@@ -44,5 +44,5 @@ TUXEDO-Gerät nicht erwünscht wird.
 %defattr(-,root,root)
 
 %changelog
-* Mon Mar 02 2020 Eckhart Mohr <tux@tuxedocomputers.com> 1.0.0
+* Mon Mar 02 2020 E Mohr <tux@tuxedocomputers.com> 1.0.0
 - Initial release
