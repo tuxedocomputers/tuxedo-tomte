@@ -3,18 +3,18 @@ use strict;
 use warnings;
 
 # just for debug, delete afterwards
-use Data::Dumper qw(Dumper);
+#use Data::Dumper qw(Dumper);
 
 # for OLED backlight and edid decrypt
-use FindBin qw($Bin);
-use lib "$Bin/.";
-use Parse::EDID qw(parse_edid);
+#use FindBin qw($Bin);
+#use lib "$Bin/.";
+#use Parse::EDID qw(parse_edid);
 
 ### configfile muss noch ins etc
-my $configfile = '/home/pablo/tomte.cfg';
+#my $configfile = '/home/pablo/tomte.cfg';
 # definition loaded from configfile
-my %configuration;
-my %comp;
+#my %configuration;
+#my %comp;
 
 ###############################################################################
 # initial definition of all modules/packages
@@ -27,80 +27,232 @@ my %comp;
 #   package     there is a deb or rpm package to solve this problem
 #   fainame     the name to give to FAI to install a certain package
 
+
 my %modules = (
-    tuxedokeyboard => {
-        name => 'tuxedo-keyboard',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => 'a',
-    },
-    tuxedoccwmi => {
-        name => 'tuxedo-cc-wmi',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => '',
-    },
-    tuxedocontrolcenter => {
-        name => 'tuxedo-control-center',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => '',
-    },
-    tuxedoxpxcairplanemodefix => {
-        name => 'tuxedo-xp-xc-airplane-mode-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => 'AIRPLANEFIX NOGRUB',
-    },
-    tuxedorestoreaudiofix => {
-        name => 'tuxedo-restore-audio-fix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => 'AUDIORESTOREFIX',
-    },
-    tuxedoucsiccg => {
-        name => 'tuxedo-ucsi_ccg',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => 'TUXUCIFIX',
-    },
-    tuxedooledbrt => {
-        name => 'tuxedo-oled-brt',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 1,
-        fainame => 'TUXOLED',
-    },
-    chassistype => {
-        name => 'chassis-type',
-        version => 1,
+	#	tuxedokeyboard => {
+	#		name => 'tuxedo-keyboard',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'a',
+	#	},
+	#	tuxedoccwmi => {
+	#		name => 'tuxedo-cc-wmi',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => '',
+	#	},
+	#	tuxedocontrolcenter => {
+	#		name => 'tuxedo-control-center',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => '',
+	#	},
+	#	tuxedoxpxcairplanemodefix => {
+	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'AIRPLANEFIX NOGRUB',
+	#	},
+	#	tuxedorestoreaudiofix => {
+	#		name => 'tuxedo-restore-audio-fix',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'AUDIORESTOREFIX',
+	#	},
+	#	tuxedoucsiccg => {
+	#		name => 'tuxedo-ucsi_ccg',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'TUXUCIFIX',
+	#	},
+	#	tuxedooledbrt => {
+	#		name => 'tuxedo-oled-brt',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'TUXOLED',
+	#	},
+	#	chassistype => {
+	#		name => 'chassis-type',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#	},
+	#	kfocus => {
+	#		name => 'kfocus',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOKFOCUS',
+	#	},
+	#	tuxedo => {
+	#		name => 'tuxedo',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOTUXEDO',
+	#	},
+	#	manjaro => {
+	#		name => 'manjaro',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOMANJARO',
+	#	},
+	#	aistation => {
+	#		name => 'aistation',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOAISTATION',
+	#	},
+	#	bareboneclass => {
+	#		name => 'barebone-class',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
+	#	},
+	#	barebonegrub => {
+	#		name => 'barebone-grub',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOGRUB 02GRUB',
+	#	},
+	#	audiofix => {
+	#		name => 'audiofix',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'AUDIOFIX',
+	#	},
+	#	fingerprint => {
+	#		name => 'fingerprint',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'FINGERPRINT',
+	#	},
+	#	threeg => {
+	#		name => 'threeg',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'THREEG',
+	#	},
+	#	hybrid => {
+	#		name => 'hybrid',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'DISCRETE HYBRID',
+	#	},
+	#	nvidiadriver => {
+	#		name => 'nvidia-driver',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NVIDIATUX NVIDIANOR',
+	#	},
+	#	bluetooth => {
+	#		name => 'bluetooth',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'BLUETOOTH',
+	#	},
+	#	tuxedowallpapers => {
+	#		name => 'tuxedo-wallpapers',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#	},
+	#	tuxedoplymouthone => {
+	#		name => 'tuxedo-plymouth-one',
+	#		version => 1,
+	#		active => 0,
+	#		blacklisted => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#	},
+
+	tuxedoi8042fix => {
+		name => 'tuxedo-i8042-fix',
+		version => 1,
         active => 0,
         blacklisted => 0,
         required => 0,
@@ -108,138 +260,8 @@ my %modules = (
         package => 0,
         fainame => '',
     },
-    kfocus => {
-        name => 'kfocus',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOKFOCUS',
-    },
-    tuxedo => {
-        name => 'tuxedo',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOTUXEDO',
-    },
-    manjaro => {
-        name => 'manjaro',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOMANJARO',
-    },
-    aistation => {
-        name => 'aistation',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOAISTATION',
-    },
-    bareboneclass => {
-        name => 'barebone-class',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
-    },
-    barebonegrub => {
-        name => 'barebone-grub',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NOGRUB 02GRUB',
-    },
-    audiofix => {
-        name => 'audiofix',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'AUDIOFIX',
-    },
-    fingerprint => {
-        name => 'fingerprint',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'FINGERPRINT',
-    },
-    threeg => {
-        name => 'threeg',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'THREEG',
-    },
-    hybrid => {
-        name => 'hybrid',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'DISCRETE HYBRID',
-    },
-    nvidiadriver => {
-        name => 'nvidia-driver',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'NVIDIATUX NVIDIANOR',
-    },
-    bluetooth => {
-        name => 'bluetooth',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => 'BLUETOOTH',
-    },
-    tuxedowallpapers => {
-        name => 'tuxedo-wallpapers',
-        version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
-        hwid => 1,
-        package => 0,
-        fainame => '',
-    },
-    tuxedoplymouthone => {
-        name => 'tuxedo-plymouth-one',
+    tuxedonobootonbattery => {
+        name => 'tuxedo-no-boot-on-battery',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -254,251 +276,250 @@ my %modules = (
 # fills global variable $configuration with data from file in $configfile
 # if there is no configfile then it is left empty
 sub read_configfile {
-    my $fh;
-    my $shortname;
-    if ( open $fh, '<', $configfile ) {
-        while ( my $line=<$fh> ) {
-            chomp $line;
-            #print "$line\n";
-            my ($name, @cols) = split /\s+/, $line;
-            $shortname = $name;
-            $shortname =~ s/[^a-zA-Z0-9]//g;
-            #print "shortname: $shortname\n";
-            #print "name: $name\n";
-            #print "version: $cols[1]\n";
-            @comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
-            $configuration{$shortname} = { %comp };
-        }
-        close $fh;
-    } else {
-        warn "Could not open configfile: $configfile $!";
-    }
+	my $fh;
+	my $shortname;
+	if ( open $fh, '<', $configfile ) {
+		while ( my $line=<$fh> ) {
+			chomp $line;
+			#print "$line\n";
+			my ($name, @cols) = split /\s+/, $line;
+			$shortname = $name;
+			$shortname =~ s/[^a-zA-Z0-9]//g;
+			#print "shortname: $shortname\n";
+			#print "name: $name\n";
+			#print "version: $cols[1]\n";
+			@comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
+			$configuration{$shortname} = { %comp };
+		}
+		close $fh;
+	} else {
+		warn "Could not open configfile: $configfile $!";
+	}
 }
 
 
 # overwrites file from $configfile with data from $configuration
 # if file cannot be written then nothing happens
 sub write_configfile {
-    my $fh;
-    if ( open $fh, '>', $configfile ) {
-        foreach my $name (sort keys %modules) {
-            print $fh "$modules{$name}{name} $modules{$name}{version} ".
-            "$modules{$name}{active} $modules{$name}{blacklisted} ".
-            "$modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
-        }
-        close $fh;
-    } else {
-        warn "Can't write to $configfile $!";
-    }
+	my $fh;
+	if ( open $fh, '>', $configfile ) {
+		foreach my $name (sort keys %modules) {
+			print $fh "$modules{$name}{name} $modules{$name}{version} ".
+			"$modules{$name}{active} $modules{$name}{blacklisted} ".
+			"$modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
+		}
+		close $fh;
+	} else {
+		warn "Can't write to $configfile $!";
+	}
 }
 
 
 # searches the sysfs subdirectory for active monitor entries
 # and returns them as an array
 sub find_active_edids {
-    my $cards_dir = '/sys/class/drm';
-    my $dir_handle;
-    my @edidfile;
+	my $cards_dir = '/sys/class/drm';
+	my $dir_handle;
+	my @edidfile;
 
-    if ( !opendir ($dir_handle, $cards_dir)) {
-        warn "Unable to open $cards_dir: $!\n";
-        return @edidfile;
-    }
-    my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
-    foreach my $file (@FILES) {
-        my $path = "$cards_dir/$file";
-        if ( -d $path ) {
-            my $enabledfile = "$path/enabled";
-            if ( -e $enabledfile ) {
-                open(FILE, $enabledfile);
-                $_ = <FILE>;
-                close(FILE);
-                if ($_ =~ /enabled/) {
-                    #print "enabled found under $path\n";
-                    my $statusfile = "$path/status";
-                    if ( -e $statusfile ) {
-                        open(FILE2, $statusfile);
-                        $_ = <FILE2>;
-                        if ($_ =~ /connected/) {
-                            push @edidfile, "$path/edid";
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return @edidfile;
+	if ( !opendir ($dir_handle, $cards_dir)) {
+		warn "Unable to open $cards_dir: $!\n";
+		return @edidfile;
+	}
+	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
+	foreach my $file (@FILES) {
+		my $path = "$cards_dir/$file";
+		if ( -d $path ) {
+			my $enabledfile = "$path/enabled";
+			if ( -e $enabledfile ) {
+				open(FILE, $enabledfile);
+				$_ = <FILE>;
+				close(FILE);
+				if ($_ =~ /enabled/) {
+					#print "enabled found under $path\n";
+					my $statusfile = "$path/status";
+					if ( -e $statusfile ) {
+						open(FILE2, $statusfile);
+						$_ = <FILE2>;
+						if ($_ =~ /connected/) {
+							push @edidfile, "$path/edid";
+						}
+					}
+				}
+			}
+		}
+	}
+	return @edidfile;
 }
 
 
 # gets valid edid files
 # converts edid data into an array of hash references to modules
 sub get_edid_data {
-    my @edidfiles = find_active_edids();
-    my @edid_refs;
-    my $fh;
-    my $file_content;
-    foreach ( @edidfiles ) {
-        if ( open $fh, '<', $_ ) {
-            $file_content = do { local $/; <$fh> };
-            close $fh;
-            push @edid_refs, parse_edid($file_content);
-        } else {
-            warn "Could not open file $_ $!";
-        }
-    }
+	my @edidfiles = find_active_edids();
+	my @edid_refs;
+	my $fh;
+	my $file_content;
+	foreach ( @edidfiles ) {
+		if ( open $fh, '<', $_ ) {
+			$file_content = do { local $/; <$fh> };
+			close $fh;
+			push @edid_refs, parse_edid($file_content);
+		} else {
+			warn "Could not open file $_ $!";
+		}
+	}
 
-    #open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
-    #my $file_content = do { local $/; <$fh> };
-    #close $fh;
-    # returns hashref to module
-    #return parse_edid($file_content);
+	#open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
+	#my $file_content = do { local $/; <$fh> };
+	#close $fh;
+	# returns hashref to module
+	#return parse_edid($file_content);
 
-    # returns array of hash references to module
-    return @edid_refs;
+	# returns array of hash references to module
+	return @edid_refs;
 }
 
 
 # check whether the module is required for the system
 sub check_requirements {
-    my $fh;
-    my $boardname_filename = "/sys/devices/virtual/dmi/id/board_name";
-    my $boardname;
-    my $board_vendor_file;
-    my $boardvendor;
+	my $fh;
+	my $boardname_filename = "/sys/class/dmi/id/board_name";
+	my $boardname;
+	my $board_vendor_file;
+	my $boardvendor;
 
-    # these will be installed on all notebooks, always
-    $modules{tuxedokeyboard}{required} = 1;
-    $modules{tuxedoccwmi}{required} =1 ;
-    $modules{tuxedocontrolcenter}{required} = 1;
-    $modules{tuxedotouchpadfix}{required} = 1;
+	# these will be installed on all notebooks, always
+	#	$modules{tuxedokeyboard}{required} = 1;
+	#	$modules{tuxedoccwmi}{required} =1 ;
+	#	$modules{tuxedocontrolcenter}{required} = 1;
+	#	$modules{tuxedotouchpadfix}{required} = 1;
 
-    if ( open $fh, "<", $board_vendor_file ) {
-        $boardvendor = <$fh>;
-        close $fh;
+	if ( open $fh, "<", $board_vendor_file ) {
+		$boardvendor = <$fh>;
+		close $fh;
 
-        if ( $boardvendor =~ m/TUXEDO/ ) {
-            $modules{tuxedo}{required} = 1;
-            ### close the program is not TUXEDO???
-        }
-    }
+		if ( $boardvendor =~ m/TUXEDO/ ) {
+			$modules{tuxedo}{required} = 1;
+			### close the program if it is not TUXEDO???
+		}
+	}
 
-    if ( open $fh, '<', '/proc/cpuinfo' ) {
-        while ( my $line = <$fh> ) {
-            chomp($line);
-            if ( $line =~ m/model name/ ) {
-                $line =~ s/.*-//;
-                $line = substr($line, 0, 1);
-                if ( $line == 4 ) {
-                    $modules{bareboneclass}{fainame} = 'HASHWELL';
-                } elsif ( $line == 5 ) {
-                    $modules{bareboneclass}{fainame} = 'BROADWELL';
-                } elsif ( $line == 6 ) {
-                    $modules{bareboneclass}{fainame} = 'SKYLAKE';
-                } elsif ( $line == 7 ) {
-                    $modules{bareboneclass}{fainame} = 'KABYLAKE';
-                } elsif ( $line == 8 ) {
-                    $modules{bareboneclass}{fainame} = 'COFFEELAKE';
-                } elsif ( $line == 9 ) {
-                    $modules{bareboneclass}{fainame} = 'COFFEELAKE';
-                } else {
-                    $modules{bareboneclass}{fainame} = 'SKYLAKE'
-                }
-            }
-        }
-        close $fh;
-    }
+	if ( open $fh, '<', '/proc/cpuinfo' ) {
+		while ( my $line = <$fh> ) {
+			chomp($line);
+			if ( $line =~ m/model name/ ) {
+				$line =~ s/.*-//;
+				$line = substr($line, 0, 1);
+				if ( $line == 4 ) {
+					$modules{bareboneclass}{fainame} = 'HASHWELL';
+				} elsif ( $line == 5 ) {
+					$modules{bareboneclass}{fainame} = 'BROADWELL';
+				} elsif ( $line == 6 ) {
+					$modules{bareboneclass}{fainame} = 'SKYLAKE';
+				} elsif ( $line == 7 ) {
+					$modules{bareboneclass}{fainame} = 'KABYLAKE';
+				} elsif ( $line == 8 ) {
+					$modules{bareboneclass}{fainame} = 'COFFEELAKE';
+				} elsif ( $line == 9 ) {
+					$modules{bareboneclass}{fainame} = 'COFFEELAKE';
+				} else {
+					$modules{bareboneclass}{fainame} = 'SKYLAKE'
+				}
+			}
+		}
+		close $fh;
+	}
 
 
 
-    # check everything that needs the boardname
-    if ( open $fh, "<", $boardname_filename ) {
-        $boardname = <$fh>;
-        close $fh;
+	# check everything that needs the boardname
+	if ( open $fh, "<", $boardname_filename ) {
+		$boardname = <$fh>;
+		close $fh;
 
-        if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/)
-        {
-            $modules{tuxedoxpxcairplanemodefix}{required} = 1;
-        }
-        if ($boardname =~ m/(N350TW)/)
-        {
-            $modules{tuxedorestoreaudiofix}{required} = 1;
-        }
-        if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
-        {
-            $modules{tuxedoaudiofix}{required} = 1;
-        }
-        if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/)
-        {
-            $modules{tuxedoucsiccg}{required} = 1;
-        }
-        if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/)
-        {
-            $modules{kfocus}{required} = 1;
-        }
-        unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/)
-        {
-            $modules{manjaro}{required} = 1;
-        }
-        unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/)
-        {
-            $modules{aistation}{required} = 1;
-        }
-        if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/)
-        {
-            $modules{barebonegrub}{required} = 1;
-            $modules{barebonegrub}{fainame} = '02GRUB';
-        }
-        if ($boardname =~ m/(P95)/)
-        {
-            $modules{audiofix}{required} = 1;
-        }
+		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/) {
+			$modules{tuxedoxpxcairplanemodefix}{required} = 1;
+		}
+		if ($boardname =~ m/(N350TW)/) {
+			$modules{tuxedorestoreaudiofix}{required} = 1;
+		}
+		if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
+			$modules{tuxedoaudiofix}{required} = 1;
+		}
+		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
+			$modules{tuxedoucsiccg}{required} = 1;
+		}
+		if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
+			$modules{kfocus}{required} = 1;
+		}
+		unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
+			$modules{manjaro}{required} = 1;
+		}
+		unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
+			$modules{aistation}{required} = 1;
+		}
+		if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
+			$modules{barebonegrub}{required} = 1;
+			$modules{barebonegrub}{fainame} = '02GRUB';
+		}
+		if ($boardname =~ m/(P95)/) {
+			$modules{audiofix}{required} = 1;
+		}
+		if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+			$modules{}{required} = 1;
+			$modules{}{fainame} = '';
+		}
+		if ($boardname =~ m/()/) {
+			$modules{}{required} = 1;
+			$modules{}{fainame} = '':
+		}
 
-    } else {
-        warn "Could not open $boardname_filename $!";
-    }
-    my @edid = get_edid_data();
-    foreach ( @edid ) {
-        if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
-            $modules{tuxedooledbrt}{required} = 1;
-        }
-    }
+	} else {
+		warn "Could not open $boardname_filename $!";
+	}
+	my @edid = get_edid_data();
+	foreach ( @edid ) {
+		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
+			$modules{tuxedooledbrt}{required} = 1;
+		}
+	}
 
-    # by default DESKTOP
-    $modules{chassistype}{fainame} = 'DESKTOP';
-    my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
-    if ( open $fh, "<", $chassis_type_fn ) {
-        my $chassis_type = <fh>;
-        close $fh;
-        if ( $chassis_type =~ m/(9|10)/ ) {
-            $modules{chassistype}{fainame} = 'LAPTOP';
-        } else {
-            my $battery_folder = '/proc/acpi/battery';
-            if ( opendir $fh, $battery_folder ) {
-                while (my $file = readdir($fh)) {
-                    next unless (-d "$battery_folder/$file");
-                    unless ( $file =~ m/(\.|\.\.)/ ) {
-                        #print "folder: $file\n";
-                        $modules{chassistype}{fainame} = 'LAPTOP';
-                    }
-                }
-            }
-        }
-        unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
-            my $acpi_string = 'ACPI: Battery Slot';
-            my $dmesg_output = `dmesg`;
-            if ( $dmesg_output =~ m/$acpi_string/ ) {
-                $modules{chassistype}{fainame} = 'LAPTOP';
-            }
-        }
-    }
+	# by default DESKTOP
+	$modules{chassistype}{fainame} = 'DESKTOP';
+	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
+	if ( open $fh, "<", $chassis_type_fn ) {
+		my $chassis_type = <fh>;
+		close $fh;
+		if ( $chassis_type =~ m/(9|10)/ ) {
+			$modules{chassistype}{fainame} = 'LAPTOP';
+		} else {
+			my $battery_folder = '/proc/acpi/battery';
+			if ( opendir $fh, $battery_folder ) {
+				while (my $file = readdir($fh)) {
+					next unless (-d "$battery_folder/$file");
+					unless ( $file =~ m/(\.|\.\.)/ ) {
+						#print "folder: $file\n";
+						$modules{chassistype}{fainame} = 'LAPTOP';
+					}
+				}
+			}
+		}
+		unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+			my $acpi_string = 'ACPI: Battery Slot';
+			my $dmesg_output = `dmesg`;
+			if ( $dmesg_output =~ m/$acpi_string/ ) {
+				$modules{chassistype}{fainame} = 'LAPTOP';
+			}
+		}
+	}
 
-    my @lsusb_output = `lsusb`;
-    chomp @output;
-    foreach my $line ( @output )
-    {
-        
-    }
+	my @lsusb_output = `lsusb`;
+	chomp @output;
+	foreach my $line ( @output )
+	{
+		
+	}
 
 }
 
@@ -506,23 +527,23 @@ sub check_requirements {
 # print status from all packages
 # in a nice formated output
 sub list_status {
-    my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
+	my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
 
-    foreach my $name (sort keys %modules) {
-        push(@arr,
-            ["$modules{$name}{name}",
-             "$modules{$name}{version}",
-             "$modules{$name}{active}",
-             "$modules{$name}{blacklisted}",
-             "$modules{$name}{required}"]);
-    }
-    for my $row (@arr) {
-        format STDOUT =
+	foreach my $name (sort keys %modules) {
+		push(@arr,
+			["$modules{$name}{name}",
+			 "$modules{$name}{version}",
+			 "$modules{$name}{active}",
+			 "$modules{$name}{blacklisted}",
+			 "$modules{$name}{required}"]);
+	}
+	for my $row (@arr) {
+		format STDOUT =
 @<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
-        @$row
+		@$row
 .
-        write;
-    }
+		write;
+	}
 }
 
 
@@ -544,8 +565,8 @@ USAGE
 
 # prints help
 sub help {
-    print "$USAGE\n";
-    exit 0;
+	print "$USAGE\n";
+	exit 0;
 }
 
 # just for debug, delete afterwards
@@ -563,29 +584,29 @@ print Dumper @edid_data;
 
 # define for each argvalues procedures
 if (defined $ARGV[0]) {
-    if ($ARGV[0] eq "list") {
-        list_status();
-    } elsif ($ARGV[0] eq "FAI") {
-        warn "Starting tuxedo-tomte in FAI modus\n";
-    } elsif ($ARGV[0] eq "configure") {
-        print "configure\n";
-    } elsif ($ARGV[0] eq "remove") {
-        print "remove\n";
-    } elsif ($ARGV[0] eq "reconfigure") {
-        print "reconfigure\n";
-    } elsif ($ARGV[0] eq "blacklist") {
-        print "blacklist\n";
-    } elsif ($ARGV[0] eq "unblacklist") {
-        print "unblacklist\n";
-    } elsif ($ARGV[0] eq "help") {
-        help();
-    } else {
-        print "Unknown command: $ARGV[0]";
-        help();
-    }
+	if ($ARGV[0] eq "list") {
+		list_status();
+	} elsif ($ARGV[0] eq "FAI") {
+		warn "Starting tuxedo-tomte in FAI modus\n";
+	} elsif ($ARGV[0] eq "configure") {
+		print "configure\n";
+	} elsif ($ARGV[0] eq "remove") {
+		print "remove\n";
+	} elsif ($ARGV[0] eq "reconfigure") {
+		print "reconfigure\n";
+	} elsif ($ARGV[0] eq "blacklist") {
+		print "blacklist\n";
+	} elsif ($ARGV[0] eq "unblacklist") {
+		print "unblacklist\n";
+	} elsif ($ARGV[0] eq "help") {
+		help();
+	} else {
+		print "Unknown command: $ARGV[0]";
+		help();
+	}
 } else {
-    print "No arguments\n";
-    help();
+	print "No arguments\n";
+	help();
 }
 
 
