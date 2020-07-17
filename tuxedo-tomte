@@ -2,6 +2,10 @@
 use strict;
 use warnings;
 
+my @grub_entries = ()
+my $grubfh;
+my $grub_file = '/etc/default/grub';
+
 # just for debug, delete afterwards
 #use Data::Dumper qw(Dumper);
 
@@ -250,8 +254,8 @@ my %modules = (
 	#		fainame => '',
 	#	},
 
-	tuxedoi8042fix => {
-		name => 'tuxedo-i8042-fix',
+	i8042fix => {
+		name => 'i8042-fix',
 		version => 1,
         active => 0,
         blacklisted => 0,
@@ -260,8 +264,8 @@ my %modules = (
         package => 0,
         fainame => '',
     },
-    tuxedonobootonbattery => {
-        name => 'tuxedo-no-boot-on-battery',
+    nobootonbattery => {
+        name => 'no-boot-on-battery',
         version => 1,
         active => 0,
         blacklisted => 0,
@@ -271,6 +275,49 @@ my %modules = (
         fainame => '',
     },
 );
+
+# inserts array values as kernel parameters if not present
+# exmaple: my retval = insert_grub(\@kernel_parameters);
+sub insert_grub {
+    my $grubFH;
+    my @grub_lines;
+    my $parameters = shift;
+    my $parameter;
+
+    if ( open $grubFH, "<", $grub_file) {
+        while (<$grubFH>) {
+            push (@grub_lines, $_);
+        }
+        close $grubFH;
+
+        foreach( @grub_lines ) {
+            if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+                foreach $parameter ( @{$parameters} ) {
+                    unless ( $_ =~ m/$parameter/ ) {
+                        if ($_ =~ m/""/) {
+                            $_ +~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
+                            ++$inserted;
+                        } else {
+                            $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
+                            ++$inserted;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        print "no $grub_file present or unable to open the file for reading\n";
+    }
+
+    if ( open $grubFH, ">", $grub_file ) {
+        print $grubFH @grub_lines;
+        close ($grubFH);
+    } else {
+        print "no $grub_file present or unable to open the file for writing\n";
+    }
+
+    return $inserted;
+}
 
 
 # fills global variable $configuration with data from file in $configfile
@@ -382,6 +429,7 @@ sub get_edid_data {
 
 
 # check whether the module is required for the system
+# checks only for hardware
 sub check_requirements {
 	my $fh;
 	my $boardname_filename = "/sys/class/dmi/id/board_name";
@@ -467,60 +515,73 @@ sub check_requirements {
 			$modules{audiofix}{required} = 1;
 		}
 		if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-			$modules{}{required} = 1;
-			$modules{}{fainame} = '';
+			$modules{i8042fix}{required} = 1;
 		}
-		if ($boardname =~ m/()/) {
-			$modules{}{required} = 1;
-			$modules{}{fainame} = '':
+		if ($boardname =~ m/(PF5PU1G)/) {
+			$modules{nobootonbattery}{required} = 1;
 		}
 
 	} else {
 		warn "Could not open $boardname_filename $!";
 	}
-	my @edid = get_edid_data();
-	foreach ( @edid ) {
-		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
-			$modules{tuxedooledbrt}{required} = 1;
-		}
-	}
+	#	my @edid = get_edid_data();
+	#	foreach ( @edid ) {
+	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
+	#			$modules{tuxedooledbrt}{required} = 1;
+	#		}
+	#	}
+	#
+	#	# by default DESKTOP
+	#	$modules{chassistype}{fainame} = 'DESKTOP';
+	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
+	#	if ( open $fh, "<", $chassis_type_fn ) {
+	#		my $chassis_type = <fh>;
+	#		close $fh;
+	#		if ( $chassis_type =~ m/(9|10)/ ) {
+	#			$modules{chassistype}{fainame} = 'LAPTOP';
+	#		} else {
+	#			my $battery_folder = '/proc/acpi/battery';
+	#			if ( opendir $fh, $battery_folder ) {
+	#				while (my $file = readdir($fh)) {
+	#					next unless (-d "$battery_folder/$file");
+	#					unless ( $file =~ m/(\.|\.\.)/ ) {
+	#						#print "folder: $file\n";
+	#						$modules{chassistype}{fainame} = 'LAPTOP';
+	#					}
+	#				}
+	#			}
+	#		}
+	#		unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+	#			my $acpi_string = 'ACPI: Battery Slot';
+	#			my $dmesg_output = `dmesg`;
+	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
+	#				$modules{chassistype}{fainame} = 'LAPTOP';
+	#			}
+	#		}
+	#	}
+	#
+	#	my @lsusb_output = `lsusb`;
+	#	chomp @output;
+	#	foreach my $line ( @output )
+	#	{
+	#		
+	#	}
 
-	# by default DESKTOP
-	$modules{chassistype}{fainame} = 'DESKTOP';
-	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
-	if ( open $fh, "<", $chassis_type_fn ) {
-		my $chassis_type = <fh>;
-		close $fh;
-		if ( $chassis_type =~ m/(9|10)/ ) {
-			$modules{chassistype}{fainame} = 'LAPTOP';
-		} else {
-			my $battery_folder = '/proc/acpi/battery';
-			if ( opendir $fh, $battery_folder ) {
-				while (my $file = readdir($fh)) {
-					next unless (-d "$battery_folder/$file");
-					unless ( $file =~ m/(\.|\.\.)/ ) {
-						#print "folder: $file\n";
-						$modules{chassistype}{fainame} = 'LAPTOP';
-					}
-				}
+}
+
+my @grub_entries = qw(a b c);
+
+sub check_grub() {
+	if ( open $grubfh, "<", $grub_file ) {
+		my $grub_content = <$grubfh>;
+		my $inserted = 0;
+		foreach ( @_ ) {
+			unless ( $grub_content =~ m/(@_)/ ) {
+				# insert into grub
+				$inserted = 1;
 			}
 		}
-		unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
-			my $acpi_string = 'ACPI: Battery Slot';
-			my $dmesg_output = `dmesg`;
-			if ( $dmesg_output =~ m/$acpi_string/ ) {
-				$modules{chassistype}{fainame} = 'LAPTOP';
-			}
-		}
 	}
-
-	my @lsusb_output = `lsusb`;
-	chomp @output;
-	foreach my $line ( @output )
-	{
-		
-	}
-
 }
 
 
