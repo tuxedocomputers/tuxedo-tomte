@@ -2,8 +2,7 @@
 use strict;
 use warnings;
 
-my @grub_entries = ()
-my $grubfh;
+#my @grub_entries = ()
 my $grub_file = '/etc/default/grub';
 
 # just for debug, delete afterwards
@@ -15,10 +14,10 @@ my $grub_file = '/etc/default/grub';
 #use Parse::EDID qw(parse_edid);
 
 ### configfile muss noch ins etc
-#my $configfile = '/home/pablo/tomte.cfg';
+my $configfile = '/etc/tomte/tomte.cfg';
 # definition loaded from configfile
-#my %configuration;
-#my %comp;
+my %configuration;
+my %comp;
 
 ###############################################################################
 # initial definition of all modules/packages
@@ -157,6 +156,8 @@ my %modules = (
 	#		name => 'barebone-class',
 	#		version => 1,
 	#		active => 0,
+	#		version => 1,
+	#		active => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
@@ -276,6 +277,9 @@ my %modules = (
     },
 );
 
+
+my @grub_entries = qw(a b c);
+
 # inserts array values as kernel parameters if not present
 # exmaple: my retval = insert_grub(\@kernel_parameters);
 sub insert_grub {
@@ -283,6 +287,7 @@ sub insert_grub {
     my @grub_lines;
     my $parameters = shift;
     my $parameter;
+	my $inserted = 0;
 
     if ( open $grubFH, "<", $grub_file) {
         while (<$grubFH>) {
@@ -295,7 +300,7 @@ sub insert_grub {
                 foreach $parameter ( @{$parameters} ) {
                     unless ( $_ =~ m/$parameter/ ) {
                         if ($_ =~ m/""/) {
-                            $_ +~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
+                            $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
                             ++$inserted;
                         } else {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
@@ -450,51 +455,6 @@ sub check_requirements {
 		if ( $boardvendor =~ m/TUXEDO/ ) {
 			$modules{tuxedo}{required} = 1;
 			### close the program if it is not TUXEDO???
-		}
-	}
-
-	if ( open $fh, '<', '/proc/cpuinfo' ) {
-		while ( my $line = <$fh> ) {
-			chomp($line);
-			if ( $line =~ m/model name/ ) {
-				$line =~ s/.*-//;
-				$line = substr($line, 0, 1);
-				if ( $line == 4 ) {
-					$modules{bareboneclass}{fainame} = 'HASHWELL';
-				} elsif ( $line == 5 ) {
-					$modules{bareboneclass}{fainame} = 'BROADWELL';
-				} elsif ( $line == 6 ) {
-					$modules{bareboneclass}{fainame} = 'SKYLAKE';
-				} elsif ( $line == 7 ) {
-					$modules{bareboneclass}{fainame} = 'KABYLAKE';
-				} elsif ( $line == 8 ) {
-					$modules{bareboneclass}{fainame} = 'COFFEELAKE';
-				} elsif ( $line == 9 ) {
-					$modules{bareboneclass}{fainame} = 'COFFEELAKE';
-				} else {
-					$modules{bareboneclass}{fainame} = 'SKYLAKE'
-				}
-			}
-		}
-		close $fh;
-	}
-
-
-
-	# check everything that needs the boardname
-	if ( open $fh, "<", $boardname_filename ) {
-		$boardname = <$fh>;
-		close $fh;
-
-		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC)/) {
-			$modules{tuxedoxpxcairplanemodefix}{required} = 1;
-		}
-		if ($boardname =~ m/(N350TW)/) {
-			$modules{tuxedorestoreaudiofix}{required} = 1;
-		}
-		if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
-			$modules{tuxedoaudiofix}{required} = 1;
-		}
 		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
 			$modules{tuxedoucsiccg}{required} = 1;
 		}
@@ -569,20 +529,6 @@ sub check_requirements {
 
 }
 
-my @grub_entries = qw(a b c);
-
-sub check_grub() {
-	if ( open $grubfh, "<", $grub_file ) {
-		my $grub_content = <$grubfh>;
-		my $inserted = 0;
-		foreach ( @_ ) {
-			unless ( $grub_content =~ m/(@_)/ ) {
-				# insert into grub
-				$inserted = 1;
-			}
-		}
-	}
-}
 
 
 # print status from all packages
@@ -608,8 +554,11 @@ sub list_status {
 }
 
 
-# text to print for help
-my $USAGE =<<USAGE;
+# prints help
+sub help {
+
+	# text to print for help
+	my $USAGE =<<USAGE;
 tuxedo-tomte {COMMAND}
 
   list                        List all modules with detailed status
@@ -623,9 +572,6 @@ tuxedo-tomte {COMMAND}
 
 USAGE
 
-
-# prints help
-sub help {
 	print "$USAGE\n";
 	exit 0;
 }
