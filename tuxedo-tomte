@@ -608,29 +608,42 @@ sub nobootonbattery() {
 # traverses the modules hash and starts the subroutine in the list
 # if conditions as noted in the list are met
 # not active, not blacklisted, required
-sub apply_fixes() {
+sub apply_fixes {
+	my $state = shift;
 	my $key;
 	foreach $key (keys %modules) {
 		print "key: $key\n";
 		if ( $modules{$key}{active} eq '0' &&
 	   		$modules{$key}{blacklisted} eq '0' &&
-			$modules{$key}{required} eq '1') {
-			print "required\n";
+			$modules{$key}{required} eq '1'  &&
+			$state eq 'configure') {
+			print "configure\n";
 			$key->();
+		} elsif ( $modules{$key}{active} eq '0' &&
+            $modules{$key}{blacklisted} eq '0' &&
+            $modules{$key}{required} eq '1'  &&
+            $state eq 'reconfigure') {
+			print "reconfigure\n";
+			$key->();
+		
 		}
 	}
 }
 
 # when configure is selected
+# configures requested module or all
 # requires module name or all as parameters
 sub configure {
+	my $state = shift;
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
 			print "configure all\n";
 			check_requirements();
-			apply_fixes();
+			apply_fixes($state);
 		} else {
 			print "configure module: $ARGV[1]\n";
+			check_requirements();
+            apply_fixes($state);
 			# TODO
 			# find hash key with hash name
 			# execute it by $key->();
@@ -639,6 +652,7 @@ sub configure {
 		print "undefined module name\n";
 	}
 }
+
 
 # show description of module
 sub module_description() {
@@ -701,11 +715,11 @@ if (defined $ARGV[0]) {
 		warn "Starting tuxedo-tomte in FAI modus\n";
 	} elsif ($ARGV[0] eq "configure") {
 		print "configure\n";
-		configure();
+		configure("configure");
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
-		print "reconfigure, does nothing yet\n";
+		configure("reconfigure");
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
