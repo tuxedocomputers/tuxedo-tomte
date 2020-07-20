@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
-use strict;
+use strict qw(vars subs);
 use warnings;
 
-#my @grub_entries = ()
+# my @grub_entries = ()
 my $grub_file = '/etc/default/grub';
 
 # just for debug, delete afterwards
@@ -13,7 +13,6 @@ my $grub_file = '/etc/default/grub';
 #use lib "$Bin/.";
 #use Parse::EDID qw(parse_edid);
 
-### configfile muss noch ins etc
 my $configfile = '/etc/tomte/tomte.cfg';
 # definition loaded from configfile
 my %configuration;
@@ -41,6 +40,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'a',
+	#		description => '',
 	#	},
 	#	tuxedoccwmi => {
 	#		name => 'tuxedo-cc-wmi',
@@ -51,6 +51,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => '',
+	#		description => '',
 	#	},
 	#	tuxedocontrolcenter => {
 	#		name => 'tuxedo-control-center',
@@ -61,6 +62,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => '',
+	#		description => '',
 	#	},
 	#	tuxedoxpxcairplanemodefix => {
 	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
@@ -71,6 +73,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'AIRPLANEFIX NOGRUB',
+	#		description => '',
 	#	},
 	#	tuxedorestoreaudiofix => {
 	#		name => 'tuxedo-restore-audio-fix',
@@ -81,6 +84,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'AUDIORESTOREFIX',
+	#		description => '',
 	#	},
 	#	tuxedoucsiccg => {
 	#		name => 'tuxedo-ucsi_ccg',
@@ -91,6 +95,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'TUXUCIFIX',
+	#		description => '',
 	#	},
 	#	tuxedooledbrt => {
 	#		name => 'tuxedo-oled-brt',
@@ -101,6 +106,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'TUXOLED',
+	#		description => '',
 	#	},
 	#	chassistype => {
 	#		name => 'chassis-type',
@@ -111,6 +117,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
+	#		description => '',
 	#	},
 	#	kfocus => {
 	#		name => 'kfocus',
@@ -121,6 +128,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOKFOCUS',
+	#		description => '',
 	#	},
 	#	tuxedo => {
 	#		name => 'tuxedo',
@@ -131,6 +139,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOTUXEDO',
+	#		description => '',
 	#	},
 	#	manjaro => {
 	#		name => 'manjaro',
@@ -141,6 +150,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOMANJARO',
+	#		description => '',
 	#	},
 	#	aistation => {
 	#		name => 'aistation',
@@ -151,6 +161,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOAISTATION',
+	#		description => '',
 	#	},
 	#	bareboneclass => {
 	#		name => 'barebone-class',
@@ -163,6 +174,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
+	#		description => '',
 	#	},
 	#	barebonegrub => {
 	#		name => 'barebone-grub',
@@ -173,6 +185,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOGRUB 02GRUB',
+	#		description => '',
 	#	},
 	#	audiofix => {
 	#		name => 'audiofix',
@@ -183,6 +196,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'AUDIOFIX',
+	#		description => '',
 	#	},
 	#	fingerprint => {
 	#		name => 'fingerprint',
@@ -193,6 +207,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'FINGERPRINT',
+	#		description => '',
 	#	},
 	#	threeg => {
 	#		name => 'threeg',
@@ -203,6 +218,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'THREEG',
+	#		description => '',
 	#	},
 	#	hybrid => {
 	#		name => 'hybrid',
@@ -213,6 +229,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'DISCRETE HYBRID',
+	#		description => '',
 	#	},
 	#	nvidiadriver => {
 	#		name => 'nvidia-driver',
@@ -223,6 +240,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NVIDIATUX NVIDIANOR',
+	#		description => '',
 	#	},
 	#	bluetooth => {
 	#		name => 'bluetooth',
@@ -233,6 +251,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'BLUETOOTH',
+	#		description => '',
 	#	},
 	#	tuxedowallpapers => {
 	#		name => 'tuxedo-wallpapers',
@@ -243,6 +262,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
+	#		description => '',
 	#	},
 	#	tuxedoplymouthone => {
 	#		name => 'tuxedo-plymouth-one',
@@ -253,6 +273,7 @@ my %modules = (
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
+	#		description => '',
 	#	},
 
 	i8042fix => {
@@ -264,6 +285,7 @@ my %modules = (
         hwid => 1,
         package => 0,
         fainame => '',
+		description => 'Fix for no-keyboard-present after boot on XC1711',
     },
     nobootonbattery => {
         name => 'no-boot-on-battery',
@@ -274,6 +296,7 @@ my %modules = (
         hwid => 1,
         package => 0,
         fainame => '',
+		description => 'Fix for no-boot-on-battery on BA15',
     },
 );
 
@@ -281,7 +304,7 @@ my %modules = (
 my @grub_entries = qw(a b c);
 
 # inserts array values as kernel parameters if not present
-# exmaple: my retval = insert_grub(\@kernel_parameters);
+# example: my $retval = insert_grub(\@kernel_parameters);
 sub insert_grub {
     my $grubFH;
     my @grub_lines;
@@ -422,7 +445,7 @@ sub get_edid_data {
 		}
 	}
 
-	#open my $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
+	# open $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
 	#my $file_content = do { local $/; <$fh> };
 	#close $fh;
 	# returns hashref to module
@@ -439,7 +462,7 @@ sub check_requirements {
 	my $fh;
 	my $boardname_filename = "/sys/class/dmi/id/board_name";
 	my $boardname;
-	my $board_vendor_file;
+	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
 	my $boardvendor;
 
 	# these will be installed on all notebooks, always
@@ -448,37 +471,44 @@ sub check_requirements {
 	#	$modules{tuxedocontrolcenter}{required} = 1;
 	#	$modules{tuxedotouchpadfix}{required} = 1;
 
-	if ( open $fh, "<", $board_vendor_file ) {
+	if ( open $fh, "<", $boardvendor_filename ) {
 		$boardvendor = <$fh>;
 		close $fh;
+		if ( open $fh, "<", $boardname_filename ) {
 
-		if ( $boardvendor =~ m/TUXEDO/ ) {
-			$modules{tuxedo}{required} = 1;
+			$boardname = <$fh>;
+			close $fh;
+		#		if ( $boardvendor =~ m/TUXEDO/ ) {
+		#			$modules{tuxedo}{required} = 1;
 			### close the program if it is not TUXEDO???
-		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
-			$modules{tuxedoucsiccg}{required} = 1;
-		}
-		if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
-			$modules{kfocus}{required} = 1;
-		}
-		unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
-			$modules{manjaro}{required} = 1;
-		}
-		unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
-			$modules{aistation}{required} = 1;
-		}
-		if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
-			$modules{barebonegrub}{required} = 1;
-			$modules{barebonegrub}{fainame} = '02GRUB';
-		}
-		if ($boardname =~ m/(P95)/) {
-			$modules{audiofix}{required} = 1;
-		}
-		if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-			$modules{i8042fix}{required} = 1;
-		}
-		if ($boardname =~ m/(PF5PU1G)/) {
-			$modules{nobootonbattery}{required} = 1;
+			#		}
+			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
+			#			$modules{tuxedoucsiccg}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
+			#	$modules{kfocus}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
+			#	$modules{manjaro}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
+			#	$modules{aistation}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
+			#	$modules{barebonegrub}{required} = 1;
+			#	$modules{barebonegrub}{fainame} = '02GRUB';
+			#}
+			#if ($boardname =~ m/(P95)/) {
+			#	$modules{audiofix}{required} = 1;
+			#}
+			if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+				$modules{i8042fix}{required} = 1;
+			}
+			if ($boardname =~ m/(PF5PU1G)/) {
+				$modules{nobootonbattery}{required} = 1;
+			}
+		} else {
+			warn "Could not open $boardvendor_filename $!";
 		}
 
 	} else {
@@ -535,8 +565,9 @@ sub check_requirements {
 # in a nice formated output
 sub list_status {
 	my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
+	my $name;
 
-	foreach my $name (sort keys %modules) {
+	foreach $name (sort keys %modules) {
 		push(@arr,
 			["$modules{$name}{name}",
 			 "$modules{$name}{version}",
@@ -554,24 +585,96 @@ sub list_status {
 }
 
 
-# prints help
-sub help {
+# for keyboard not present on boot
+# for XC1711 on all distributions
+sub i8042fix() {
+	my @kernel_parameters = ("i8042.nopnp");
+	my $retval;
+	print "doing i8042fix\n";
+	$retval = insert_grub(\@kernel_parameters);
+}
 
-	# text to print for help
-	my $USAGE =<<USAGE;
+
+# for not being able to boot if system is on battery
+# affects BA15
+sub nobootonbattery() {
+	my @kernel_parameters = ("iommu=soft");
+	my $retval;
+	print "doing nobootonbattery\n";
+	$retval = insert_grub(\@kernel_parameters);
+}
+
+
+# traverses the modules hash and starts the subroutine in the list
+# if conditions as noted in the list are met
+# not active, not blacklisted, required
+sub apply_fixes() {
+	my $key;
+	foreach $key (keys %modules) {
+		print "key: $key\n";
+		if ( $modules{$key}{active} eq '0' &&
+	   		$modules{$key}{blacklisted} eq '0' &&
+			$modules{$key}{required} eq '1') {
+			print "required\n";
+			$key->();
+		}
+	}
+}
+
+# when configure is selected
+# requires module name or all as parameters
+sub configure {
+	if ($ARGV[1]) {
+		if ($ARGV[1] eq 'all') {
+			print "configure all\n";
+			check_requirements();
+			apply_fixes();
+		} else {
+			print "configure module: $ARGV[1]\n";
+			# TODO
+			# find hash key with hash name
+			# execute it by $key->();
+		}
+	} else {
+		print "undefined module name\n";
+	}
+}
+
+# show description of module
+sub module_description() {
+	my $key;
+	my $found = 0;
+	if ($ARGV[1]) {
+		foreach $key (keys %modules) {
+        	if ( $modules{$key}{name} eq "$ARGV[1]") {
+				++$found;
+            	print "$modules{$key}{description}\n";
+        	}
+		}
+    } else {
+		print "missing module name\n";
+	}
+	if ( $found == 0 ) {
+		print "module: $ARGV[1] is not in the list\n";
+	}
+}
+
+# text to print for help
+my $USAGE =<<USAGE;
 tuxedo-tomte {COMMAND}
-
   list                        List all modules with detailed status
-  configure MODULE ...        Configure an unconfigured module
-  reconfigure MODULE...|ALL   Reconfigure a configured module
+  description MODULE          Shows the description of the module
+  configure MODULE ...|all    Configure an unconfigured module
+  reconfigure MODULE...|all   Reconfigure a configured module
   remove MODULE...|ALL        Remove a configured module
   blacklist MODULE ...        Blacklist a module
   unblacklist MODULE ...      Unblacklist a module
-  FAI                         For installation with FAI\
+  FAI                         For installation with FAI
   help                        Prints this message
-
 USAGE
 
+# prints help
+sub help {
 	print "$USAGE\n";
 	exit 0;
 }
@@ -579,17 +682,18 @@ USAGE
 # just for debug, delete afterwards
 #print Dumper \%modules;
 
-list_status();
-write_configfile();
-read_configfile();
+#list_status();
+#write_configfile();
+#read_configfile();
 
-my @edid_data = get_edid_data();
-print Dumper @edid_data;
+#my @edid_data = get_edid_data();
+#print Dumper @edid_data;
 
 #print Dumper \%configuration;
 
 
 # define for each argvalues procedures
+# modify $USAGE if any modifications here
 if (defined $ARGV[0]) {
 	if ($ARGV[0] eq "list") {
 		list_status();
@@ -597,18 +701,21 @@ if (defined $ARGV[0]) {
 		warn "Starting tuxedo-tomte in FAI modus\n";
 	} elsif ($ARGV[0] eq "configure") {
 		print "configure\n";
+		configure();
 	} elsif ($ARGV[0] eq "remove") {
-		print "remove\n";
+		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
-		print "reconfigure\n";
+		print "reconfigure, does nothing yet\n";
 	} elsif ($ARGV[0] eq "blacklist") {
-		print "blacklist\n";
+		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
-		print "unblacklist\n";
+		print "unblacklist, does nothing yet\n";
+	} elsif ($ARGV[0] eq "description") {
+		module_description();
 	} elsif ($ARGV[0] eq "help") {
 		help();
 	} else {
-		print "Unknown command: $ARGV[0]";
+		print "Unknown command: $ARGV[0]\n";
 		help();
 	}
 } else {
