@@ -609,7 +609,7 @@ sub nobootonbattery() {
 # if conditions as noted in the list are met
 # not active, not blacklisted, required
 sub apply_fixes {
-	my $state = shift;
+	my $state = shift;		# configure or reconfigure
 	my $key;
 	foreach $key (keys %modules) {
 		print "key: $key\n";
@@ -630,23 +630,39 @@ sub apply_fixes {
 	}
 }
 
+
+# get sub name from %modules list from given module name
+sub get_sub_name {
+	my $key;
+	foreach $key ( keys %modules ) {
+		if ( $ARGV[1] eq $modules{$key}{name} ) {
+			return $key;
+		}
+	}
+	return "";
+}
+
+
 # when configure is selected
 # configures requested module or all
-# requires module name or all as parameters
+# requires module name or "all" as parameters
 sub configure {
-	my $state = shift;
+	my $state = shift;		# configure or reconfigure
+	my $key;
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
 			print "configure all\n";
 			check_requirements();
 			apply_fixes($state);
 		} else {
-			print "configure module: $ARGV[1]\n";
-			check_requirements();
-            apply_fixes($state);
-			# TODO
-			# find hash key with hash name
-			# execute it by $key->();
+			$key = get_sub_name();
+			if ( $key ne "" ) {
+				check_requirements();
+				print "configure $key\n";
+				$key->();
+			} else {
+				print "wrong module name\n";
+			}
 		}
 	} else {
 		print "undefined module name\n";
@@ -657,19 +673,15 @@ sub configure {
 # show description of module
 sub module_description() {
 	my $key;
-	my $found = 0;
 	if ($ARGV[1]) {
-		foreach $key (keys %modules) {
-        	if ( $modules{$key}{name} eq "$ARGV[1]") {
-				++$found;
-            	print "$modules{$key}{description}\n";
-        	}
+		$key = get_sub_name();
+		if ( $key ne "" ) {
+            print "$modules{$key}{description}\n";
+		} else {
+			print "module: $ARGV[1] is not in the modules list\n";
 		}
     } else {
 		print "missing module name\n";
-	}
-	if ( $found == 0 ) {
-		print "module: $ARGV[1] is not in the list\n";
 	}
 }
 
