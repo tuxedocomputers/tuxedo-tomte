@@ -2,7 +2,6 @@
 use strict qw(vars subs);
 use warnings;
 
-# my @grub_entries = ()
 my $grub_file = '/etc/default/grub';
 
 # just for debug, delete afterwards
@@ -17,18 +16,20 @@ my $configfile = '/etc/tomte/tomte.cfg';
 # definition loaded from configfile
 my %configuration;
 my %comp;
+my $update_grub_trigger = 0;
 
 ###############################################################################
 # initial definition of all modules/packages
-#   name        name of package or name of solution
-#   version     the package or solution version
-#   active      0 not installed / 1 installed
+#   name          name of package or name of solution
+#   version       the package or solution version
+#   active        0 not installed / 1 installed
 #   blacklisted   will not be configured on upgrade, install or deinstall
-#   required    the system requirements are met
-#   hwid        the environment (HW or SW) are in a certain defined state
-#   package     there is a deb or rpm package to solve this problem
-#   fainame     the name to give to FAI to install a certain package
-
+#   required      the system requirements are met
+#   hwid          the environment (HW or SW) are in a certain defined state
+#   package       there is a deb or rpm package to solve this problem
+#   fainame       the name to give to FAI to install a certain package
+#   description   A description about the module for the user
+#   failed        0 installed correctly/ 1 an error occurred 
 
 my %modules = (
 	#	tuxedokeyboard => {
@@ -41,6 +42,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => 'a',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedoccwmi => {
 	#		name => 'tuxedo-cc-wmi',
@@ -52,6 +54,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => '',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedocontrolcenter => {
 	#		name => 'tuxedo-control-center',
@@ -63,6 +66,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => '',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedoxpxcairplanemodefix => {
 	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
@@ -74,6 +78,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => 'AIRPLANEFIX NOGRUB',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedorestoreaudiofix => {
 	#		name => 'tuxedo-restore-audio-fix',
@@ -85,6 +90,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => 'AUDIORESTOREFIX',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedoucsiccg => {
 	#		name => 'tuxedo-ucsi_ccg',
@@ -96,6 +102,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => 'TUXUCIFIX',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedooledbrt => {
 	#		name => 'tuxedo-oled-brt',
@@ -107,6 +114,7 @@ my %modules = (
 	#		package => 1,
 	#		fainame => 'TUXOLED',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	chassistype => {
 	#		name => 'chassis-type',
@@ -118,6 +126,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	kfocus => {
 	#		name => 'kfocus',
@@ -129,6 +138,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NOKFOCUS',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedo => {
 	#		name => 'tuxedo',
@@ -140,6 +150,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NOTUXEDO',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	manjaro => {
 	#		name => 'manjaro',
@@ -151,6 +162,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NOMANJARO',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	aistation => {
 	#		name => 'aistation',
@@ -162,6 +174,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NOAISTATION',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	bareboneclass => {
 	#		name => 'barebone-class',
@@ -175,6 +188,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	barebonegrub => {
 	#		name => 'barebone-grub',
@@ -186,6 +200,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NOGRUB 02GRUB',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	audiofix => {
 	#		name => 'audiofix',
@@ -197,6 +212,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'AUDIOFIX',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	fingerprint => {
 	#		name => 'fingerprint',
@@ -208,6 +224,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'FINGERPRINT',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	threeg => {
 	#		name => 'threeg',
@@ -219,6 +236,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'THREEG',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	hybrid => {
 	#		name => 'hybrid',
@@ -230,6 +248,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'DISCRETE HYBRID',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	nvidiadriver => {
 	#		name => 'nvidia-driver',
@@ -241,6 +260,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'NVIDIATUX NVIDIANOR',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	bluetooth => {
 	#		name => 'bluetooth',
@@ -252,6 +272,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => 'BLUETOOTH',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedowallpapers => {
 	#		name => 'tuxedo-wallpapers',
@@ -263,6 +284,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
+	#		failed => 0,
 	#	},
 	#	tuxedoplymouthone => {
 	#		name => 'tuxedo-plymouth-one',
@@ -274,6 +296,7 @@ my %modules = (
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
+	#		failed => 0,
 	#	},
 
 	i8042fix => {
@@ -286,6 +309,7 @@ my %modules = (
         package => 0,
         fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
+		failed => 0,
     },
     nobootonbattery => {
         name => 'no-boot-on-battery',
@@ -297,11 +321,11 @@ my %modules = (
         package => 0,
         fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
+		failed => 0,
     },
 );
 
 
-my @grub_entries = qw(a b c);
 
 # inserts array values as kernel parameters if not present
 # example: my $retval = insert_grub(\@kernel_parameters);
@@ -325,9 +349,11 @@ sub insert_grub {
                         if ($_ =~ m/""/) {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
                             ++$inserted;
+							$update_grub_trigger = 1;
                         } else {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
                             ++$inserted;
+							$update_grub_trigger = 1;
                         }
                     }
                 }
@@ -611,10 +637,24 @@ sub nobootonbattery() {
 sub apply_all_fixes {
 	my $state = shift;		# configure or reconfigure
 	my $key;
+	my $exit_status;
 	foreach $key (keys %modules) {
 		print "key: $key\n";
 		if ( installable($key, $state) ne "" ) {
 			$key->();
+		}
+	}
+	update_grub();
+}
+
+
+# call system update-grub
+sub update_grub {
+	my $exit_status;
+	if ($update_grub_trigger) {
+		$exit_status = system("update-grub");
+		if ( $exit_status == 0 ) {
+			print "error starting update-grub\n";
 		}
 	}
 }
@@ -628,7 +668,7 @@ sub installable {
 	print "key: $key state: $state\n";
 	if ( $modules{$key}{active} eq '0' &&
    		 $modules{$key}{blacklisted} eq '0' &&
-		 $modules{$key}{required} eq '1'  &&
+		 $modules{$key}{required} eq '0'  &&
 		 $state eq 'configure') {
 		print "configure\n";
 		return $key;
@@ -676,6 +716,7 @@ sub configure {
 				if ( installable($key, $state) ne "" ) {
 					print "configure $key\n";
 					$key->();
+					update_grub();
 				}
 			} else {
 				print "wrong module name\n";
