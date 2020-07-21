@@ -332,9 +332,12 @@ my %modules = (
 sub insert_grub {
     my $grubFH;
     my @grub_lines;
+	my $key = shift;
     my $parameters = shift;
     my $parameter;
 	my $inserted = 0;
+
+	print "modulename: $modules{$key}{name}\n";
 
     if ( open $grubFH, "<", $grub_file) {
         while (<$grubFH>) {
@@ -614,20 +617,22 @@ sub list_status {
 # for keyboard not present on boot
 # for XC1711 on all distributions
 sub i8042fix() {
+	my $key = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
 	print "doing i8042fix\n";
-	$retval = insert_grub(\@kernel_parameters);
+	$retval = insert_grub($key, \@kernel_parameters);
 }
 
 
 # for not being able to boot if system is on battery
 # affects BA15
 sub nobootonbattery() {
+	my $key = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
 	print "doing nobootonbattery\n";
-	$retval = insert_grub(\@kernel_parameters);
+	$retval = insert_grub($key, \@kernel_parameters);
 }
 
 
@@ -641,7 +646,7 @@ sub apply_all_fixes {
 	foreach $key (keys %modules) {
 		print "key: $key\n";
 		if ( installable($key, $state) ne "" ) {
-			$key->();
+			$key->($key);
 		}
 	}
 	update_grub();
@@ -715,7 +720,7 @@ sub configure {
 				check_requirements();
 				if ( installable($key, $state) ne "" ) {
 					print "configure $key\n";
-					$key->();
+					$key->($key);
 					update_grub();
 				}
 			} else {
