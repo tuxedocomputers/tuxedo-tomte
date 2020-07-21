@@ -608,26 +608,40 @@ sub nobootonbattery() {
 # traverses the modules hash and starts the subroutine in the list
 # if conditions as noted in the list are met
 # not active, not blacklisted, required
-sub apply_fixes {
+sub apply_all_fixes {
 	my $state = shift;		# configure or reconfigure
 	my $key;
 	foreach $key (keys %modules) {
 		print "key: $key\n";
-		if ( $modules{$key}{active} eq '0' &&
-	   		$modules{$key}{blacklisted} eq '0' &&
-			$modules{$key}{required} eq '1'  &&
-			$state eq 'configure') {
-			print "configure\n";
+		if ( installable($key, $state) ne "" ) {
 			$key->();
-		} elsif ( $modules{$key}{active} eq '0' &&
-            $modules{$key}{blacklisted} eq '0' &&
-            $modules{$key}{required} eq '1'  &&
-            $state eq 'reconfigure') {
-			print "reconfigure\n";
-			$key->();
-		
 		}
 	}
+}
+
+
+# checks if some module can be installed
+# requires module key and wether configure or reconfigure
+sub installable {
+	my $key = shift;
+	my $state = shift;
+	print "key: $key state: $state\n";
+	if ( $modules{$key}{active} eq '0' &&
+   		 $modules{$key}{blacklisted} eq '0' &&
+		 $modules{$key}{required} eq '1'  &&
+		 $state eq 'configure') {
+		print "configure\n";
+		return $key;
+	} elsif ( $modules{$key}{active} eq '1' &&
+        	  $modules{$key}{blacklisted} eq '0' &&
+        	  $modules{$key}{required} eq '1'  &&
+        	  $state eq 'reconfigure') {
+		print "reconfigure\n";
+		return $key;
+	} else {
+		return "";
+	}
+
 }
 
 
@@ -639,6 +653,7 @@ sub get_sub_name {
 			return $key;
 		}
 	}
+	# return empty string if module is not found
 	return "";
 }
 
@@ -653,13 +668,15 @@ sub configure {
 		if ($ARGV[1] eq 'all') {
 			print "configure all\n";
 			check_requirements();
-			apply_fixes($state);
+			apply_all_fixes($state);
 		} else {
 			$key = get_sub_name();
 			if ( $key ne "" ) {
 				check_requirements();
-				print "configure $key\n";
-				$key->();
+				if ( installable($key, $state) ne "" ) {
+					print "configure $key\n";
+					$key->();
+				}
 			} else {
 				print "wrong module name\n";
 			}
