@@ -1,0 +1,34 @@
+.TH tuxedo-tomte 1
+.SH NAME
+tuxedo-tomte - manages fixes for TUXEDO notebooks
+.SH SYNOPSIS
+tagcloud
+[
+.B \-p
+|
+.B \-f
+]
+
+.SH DESCRIPTION
+.I tuxedo-tomte
+is a little brownie that provides services, updates and fixes for
+TUXEDO devices in the background. It does not send any information, telemetry
+data or similar stuff out!
+.P
+
+You can click on tags to retrieve the notes, as well as search the
+fulltext of all the notes. Each tag will have to be indicated by an "@"
+prefix in the textfile. For example: "Rock Paper Scissor Lizard Spock
+@tbbt".
+.SH OPTIONS
+.TP
+.B list
+Set the port you want the web server to run on. Default is 8080.
+.TP
+.B description MODULE
+List the textfiles you want to visualize in the tagcloud.
+.TP
+.B configure MODULE | ALL
+.SH AUTHOR
+This manual page was written by Runa Sandvik <runa.sandvik@gmail.com>,
+for the Debian GNU/Linux system (but may be used by others).
