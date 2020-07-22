@@ -337,8 +337,6 @@ sub insert_grub {
     my $parameter;
 	my $inserted = 0;
 
-	print "modulename: $modules{$key}{name}\n";
-
     if ( open $grubFH, "<", $grub_file) {
         while (<$grubFH>) {
             push (@grub_lines, $_);
@@ -363,6 +361,7 @@ sub insert_grub {
             }
         }
     } else {
+		$modules{key}{failed} = 1;
         print "no $grub_file present or unable to open the file for reading\n";
     }
 
@@ -370,6 +369,7 @@ sub insert_grub {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
+		$modules{key}{failed} = 1;
         print "no $grub_file present or unable to open the file for writing\n";
     }
 
@@ -662,6 +662,7 @@ sub update_grub {
 			print "error starting update-grub\n";
 		}
 	}
+	return $exit_status;
 }
 
 
@@ -671,6 +672,7 @@ sub installable {
 	my $key = shift;
 	my $state = shift;
 	print "key: $key state: $state\n";
+	# TODO change for delivery
 	if ( $modules{$key}{active} eq '0' &&
    		 $modules{$key}{blacklisted} eq '0' &&
 		 $modules{$key}{required} eq '0'  &&
@@ -709,6 +711,7 @@ sub get_sub_name {
 sub configure {
 	my $state = shift;		# configure or reconfigure
 	my $key;
+	my $exit_status;
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
 			print "configure all\n";
@@ -721,7 +724,12 @@ sub configure {
 				if ( installable($key, $state) ne "" ) {
 					print "configure $key\n";
 					$key->($key);
-					update_grub();
+					$exit_status = update_grub();
+					if ($exit_status != 0) {
+						print "all good\n";
+					} else {
+						print "Something went wrong, the required fixes could not be applied!\n";
+					}
 				}
 			} else {
 				print "wrong module name\n";
