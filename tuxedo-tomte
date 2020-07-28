@@ -371,13 +371,24 @@ sub init_logging {
 	}
 }
 
+
+sub getLoggingTime {
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+	my $nice_timestamp = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
+									$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	return $nice_timestamp;
+}
+
+
 # to print into logfile
 sub printlog {
 	my $message = shift;
 	if (! $nologfile) {
-		open $LOGFILE, '>>'.$logfile;
-		print $LOGFILE "$message\n";
-		close $LOGFILE;
+		if (open $LOGFILE, '>>'.$logfile) {
+			my $timestamp = getLoggingTime();
+			print $LOGFILE "$timestamp $message\n";
+			close $LOGFILE;
+		}
 	}
 }
 
