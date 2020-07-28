@@ -5,6 +5,7 @@ Priority: optional
 Maintainer: E. Mohr <tux@tuxedocomputers.com>
 Homepage: https://www.tuxedocomputers.com
 Architecture: all
+Depends: perl, libparse-edid-perl
 Description: little brownie that provides services, updates and fixes for TUXEDO devices
  TUXEDO Tomte is a little brownie that provides services, updates and fixes for
  TUXEDO devices in the background. It does not send any information, telemetry

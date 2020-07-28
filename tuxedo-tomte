@@ -3,6 +3,10 @@ use strict qw(vars subs);
 use warnings;
 
 my $grub_file = '/etc/default/grub';
+my $logdir = '/var/log/tuxedo/';
+my $logfile = 'tomte.log';
+my $LOGFILE;
+my $nologfile = 1;  # 0 = logfile ok, 1 = no logfile
 
 # just for debug, delete afterwards
 #use Data::Dumper qw(Dumper);
@@ -324,6 +328,58 @@ my %modules = (
 		failed => 0,
     },
 );
+
+
+# initialize logfile
+# create one if not existing already
+sub init_logging {
+	# create logdir if it does not exist
+	unless ( -d $logdir ) {
+		mkdir($logdir, 0755);
+		unless ( -d $logdir ) {
+			$nologfile = 1;
+			print "Could not create $logdir\n";
+			return;
+		}
+	}
+
+	if ( -f $logfile ) {
+		# append if logfile exists
+		if ( open $LOGFILE, '>>'.$logfile )
+		{
+			$nologfile = 0;
+			print $LOGFILE "Start logging\n";
+			close $LOGFILE;
+			return;
+		} else {
+			$nologfile =1;
+			print "Could not open logfile $logfile\n";
+			return;
+		}
+	} else {
+		# create a new logfile
+		if ( open $LOGFILE, '>'.$logfile ) {
+			$nologfile = 0;
+			print $LOGFILE "Start logging\n";
+			close $LOGFILE;
+			return;
+		} else {
+			$nologfile =1;
+			print "Could not open logfile $logfile\n";
+			return;
+		}
+	}
+}
+
+# to print into logfile
+sub printlog {
+	my $message = shift;
+	if (! $nologfile) {
+		open $LOGFILE, '>>'.$logfile;
+		print $LOGFILE "$message\n";
+		close $LOGFILE;
+	}
+}
 
 
 
@@ -792,6 +848,7 @@ sub help {
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
 if (defined $ARGV[0]) {
+	init_logging();
 	if ($ARGV[0] eq "list") {
 		list_status();
 	} elsif ($ARGV[0] eq "FAI") {
