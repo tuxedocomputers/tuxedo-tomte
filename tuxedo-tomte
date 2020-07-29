@@ -837,7 +837,6 @@ tuxedo-tomte {COMMAND}
   remove MODULE...|ALL        Remove a configured module
   blacklist MODULE ...        Blacklist a module
   unblacklist MODULE ...      Unblacklist a module
-  FAI                         For installation with FAI
   help                        Prints this message
 USAGE
 
@@ -845,6 +844,13 @@ USAGE
 sub help {
 	print "$USAGE\n";
 	exit 0;
+}
+
+sub checkRoot {
+	if( $> != 0 ) {
+		print "this option must be run as root\n";
+		exit (0);
+	}
 }
 
 # just for debug, delete afterwards
@@ -867,13 +873,15 @@ if (defined $ARGV[0]) {
 	if ($ARGV[0] eq "list") {
 		list_status();
 	} elsif ($ARGV[0] eq "FAI") {
-		warn "Starting tuxedo-tomte in FAI modus\n";
+		print "Starting tuxedo-tomte in FAI modus\nThis should not be used in a normal situation\n";
 	} elsif ($ARGV[0] eq "configure") {
 		print "configure\n";
+		checkRoot();
 		configure("configure");
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
+		checkRoot();
 		configure("reconfigure");
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
