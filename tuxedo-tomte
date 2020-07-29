@@ -26,14 +26,14 @@ my $update_grub_trigger = 0;
 # initial definition of all modules/packages
 #   name          name of package or name of solution
 #   version       the package or solution version
-#   active        0 not installed / 1 installed
-#   blacklisted   will not be configured on upgrade, install or deinstall
-#   required      the system requirements are met
+#   active        'no' not installed / 'yes' installed
+#   blacklisted   yes/no will not be configured on upgrade, install or deinstall
+#   required      yes/no the system requirements are met
 #   hwid          the environment (HW or SW) are in a certain defined state
-#   package       there is a deb or rpm package to solve this problem
+#   package       yes/no there is a deb or rpm package to solve this problem
 #   fainame       the name to give to FAI to install a certain package
 #   description   A description about the module for the user
-#   failed        0 installed correctly/ 1 an error occurred 
+#   failed        no installed correctly / yes an error occurred 
 
 my %modules = (
 	#	tuxedokeyboard => {
@@ -306,11 +306,11 @@ my %modules = (
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
+        active => 'no',
+        blacklisted => 'no',
+        required => 'no',
         hwid => 1,
-        package => 0,
+        package => 'no',
         fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		failed => 0,
@@ -318,11 +318,11 @@ my %modules = (
     nobootonbattery => {
         name => 'no-boot-on-battery',
         version => 1,
-        active => 0,
-        blacklisted => 0,
-        required => 0,
+        active => 'no',
+        blacklisted => 'no',
+        required => 'no',
         hwid => 1,
-        package => 0,
+        package => 'no',
         fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		failed => 0,
@@ -342,13 +342,12 @@ sub init_logging {
 			return;
 		}
 	}
-
 	if ( -f $logfile ) {
 		# append if logfile exists
 		if ( open $LOGFILE, '>>'.$logfile )
 		{
 			$nologfile = 0;
-			print $LOGFILE "Start logging\n";
+			print $LOGFILE "start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
@@ -360,7 +359,7 @@ sub init_logging {
 		# create a new logfile
 		if ( open $LOGFILE, '>'.$logfile ) {
 			$nologfile = 0;
-			print $LOGFILE "Start logging\n";
+			print $LOGFILE "start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
@@ -395,8 +394,9 @@ sub printlog {
 
 
 # inserts array values as kernel parameters if not present
-# example: my $retval = insert_grub(\@kernel_parameters);
-sub insert_grub {
+# example: my $retval = insertGrub(\@kernel_parameters);
+# returns number of inserted parameters
+sub insertGrub {
     my $grubFH;
     my @grub_lines;
 	my $key = shift;
@@ -418,10 +418,12 @@ sub insert_grub {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
                             ++$inserted;
 							$update_grub_trigger = 1;
+							printlog("inserted $parameter into grub\n");
                         } else {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
                             ++$inserted;
 							$update_grub_trigger = 1;
+							printlog("inserted $parameter into grub\n");
                         }
                     }
                 }
@@ -429,15 +431,16 @@ sub insert_grub {
         }
     } else {
 		$modules{key}{failed} = 1;
-        print "no $grub_file present or unable to open the file for reading\n";
+        printlog("no $grub_file present or unable to open the file for reading\n");
     }
 
+	# write the changes into grub config
     if ( open $grubFH, ">", $grub_file ) {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
 		$modules{key}{failed} = 1;
-        print "no $grub_file present or unable to open the file for writing\n";
+        printlog("no $grub_file present or unable to open the file for writing\n");
     }
 
     return $inserted;
@@ -464,7 +467,7 @@ sub read_configfile {
 		}
 		close $fh;
 	} else {
-		warn "Could not open configfile: $configfile $!";
+		printlog("could not open configfile: $configfile $!");
 	}
 }
 
@@ -481,7 +484,7 @@ sub write_configfile {
 		}
 		close $fh;
 	} else {
-		warn "Can't write to $configfile $!";
+		printlog("can't write to $configfile $!");
 	}
 }
 
@@ -494,7 +497,7 @@ sub find_active_edids {
 	my @edidfile;
 
 	if ( !opendir ($dir_handle, $cards_dir)) {
-		warn "Unable to open $cards_dir: $!\n";
+		printlog("unable to open $cards_dir: $!\n");
 		return @edidfile;
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
@@ -537,7 +540,7 @@ sub get_edid_data {
 			close $fh;
 			push @edid_refs, parse_edid($file_content);
 		} else {
-			warn "Could not open file $_ $!";
+			printlog("Could not open file $_ $!");
 		}
 	}
 
@@ -604,11 +607,11 @@ sub check_requirements {
 				$modules{nobootonbattery}{required} = 1;
 			}
 		} else {
-			warn "Could not open $boardvendor_filename $!";
+			printlog("Could not open $boardvendor_filename $!");
 		}
 
 	} else {
-		warn "Could not open $boardname_filename $!";
+		printlog("Could not open $boardname_filename $!");
 	}
 	#	my @edid = get_edid_data();
 	#	foreach ( @edid ) {
@@ -687,8 +690,8 @@ sub i8042fix() {
 	my $key = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
-	print "doing i8042fix\n";
-	$retval = insert_grub($key, \@kernel_parameters);
+	printlog("applying i8042fix\n");
+	$retval = insertGrub($key, \@kernel_parameters);
 }
 
 
@@ -698,8 +701,8 @@ sub nobootonbattery() {
 	my $key = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
-	print "doing nobootonbattery\n";
-	$retval = insert_grub($key, \@kernel_parameters);
+	printlog("applying nobootonbattery\n");
+	$retval = insertGrub($key, \@kernel_parameters);
 }
 
 
@@ -711,7 +714,6 @@ sub apply_all_fixes {
 	my $key;
 	my $exit_status;
 	foreach $key (keys %modules) {
-		print "key: $key\n";
 		if ( installable($key, $state) ne "" ) {
 			$key->($key);
 		}
@@ -726,7 +728,7 @@ sub update_grub {
 	if ($update_grub_trigger) {
 		$exit_status = system("update-grub");
 		if ( $exit_status == 0 ) {
-			print "error starting update-grub\n";
+			printlog("error starting update-grub\n");
 		}
 	}
 	return $exit_status;
@@ -738,24 +740,22 @@ sub update_grub {
 sub installable {
 	my $key = shift;
 	my $state = shift;
-	print "key: $key state: $state\n";
 	# TODO change for delivery
-	if ( $modules{$key}{active} eq '0' &&
-   		 $modules{$key}{blacklisted} eq '0' &&
-		 $modules{$key}{required} eq '0'  &&
+	if ( $modules{$key}{active} eq 'no' &&
+   		 $modules{$key}{blacklisted} eq 'no' &&
+		 $modules{$key}{required} eq 'yes'  &&
 		 $state eq 'configure') {
-		print "configure\n";
+		printlog("configure mode active\n");
 		return $key;
-	} elsif ( $modules{$key}{active} eq '1' &&
-        	  $modules{$key}{blacklisted} eq '0' &&
-        	  $modules{$key}{required} eq '1'  &&
+	} elsif ( $modules{$key}{active} eq 'yes' &&
+        	  $modules{$key}{blacklisted} eq 'no' &&
+        	  $modules{$key}{required} eq 'yes'  &&
         	  $state eq 'reconfigure') {
-		print "reconfigure\n";
+		printlog("reconfigure mode active\n");
 		return $key;
 	} else {
 		return "";
 	}
-
 }
 
 
@@ -781,7 +781,7 @@ sub configure {
 	my $exit_status;
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
-			print "configure all\n";
+			printlog("configure all\n");
 			check_requirements();
 			apply_all_fixes($state);
 		} else {
@@ -789,20 +789,24 @@ sub configure {
 			if ( $key ne "" ) {
 				check_requirements();
 				if ( installable($key, $state) ne "" ) {
-					print "configure $key\n";
+					printlog("configure $key\n");
 					$key->($key);
 					$exit_status = update_grub();
 					if ($exit_status != 0) {
-						print "all good\n";
+						printlog("everything is good\n");
+						print "everything is good\n";
 					} else {
-						print "Something went wrong, the required fixes could not be applied!\n";
+						printlog("something went wrong, the required fixes could not be applied!\n");
+						print "something went wrong, the required fixes could not be applied!\n";
 					}
 				}
 			} else {
+				printlog("wrong module name\n");
 				print "wrong module name\n";
 			}
 		}
 	} else {
+		printlog("undefined module name\n");
 		print "undefined module name\n";
 	}
 }
