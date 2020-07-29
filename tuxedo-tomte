@@ -2,11 +2,12 @@
 use strict qw(vars subs);
 use warnings;
 
-my $grub_file = '/etc/default/grub';
-my $logdir = '/var/log/tuxedo/';
-my $logfile = 'tomte.log';
+my $grubFile = '/etc/default/grub';
+my $logDir = '/var/log/tuxedo/';
+my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
-my $nologfile = 1;  # 0 = logfile ok, 1 = no logfile
+my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
+my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 
 # just for debug, delete afterwards
 #use Data::Dumper qw(Dumper);
@@ -16,26 +17,32 @@ my $nologfile = 1;  # 0 = logfile ok, 1 = no logfile
 #use lib "$Bin/.";
 #use Parse::EDID qw(parse_edid);
 
-my $configfile = '/etc/tomte/tomte.cfg';
-# definition loaded from configfile
-my %configuration;
+my $configDir = '/etc/tomte/';
+my $configFile = $configFile.'tomte.cfg';
+
+# definition loaded from configFile
+#my %configuration;
 my %comp;
-my $update_grub_trigger = 0;
+my $updateGrubTrigger = 0;
 
 ###############################################################################
-# initial definition of all modules/packages
-#   name          name of package or name of solution
-#   version       the package or solution version
-#   active        'no' not installed / 'yes' installed
-#   blacklisted   yes/no will not be configured on upgrade, install or deinstall
-#   required      yes/no the system requirements are met
-#   hwid          the environment (HW or SW) are in a certain defined state
-#   package       yes/no there is a deb or rpm package to solve this problem
-#   fainame       the name to give to FAI to install a certain package
-#   description   A description about the module for the user
-#   failed        no installed correctly / yes an error occurred 
+# initial definition of all origConfModules/packages
+# defined by a 'short name' which is the name without '-'
+# e.g. no-boot-on-battery = nobootonbattery
+#   name			name of package or name of solution,
+#   				is 'short name' without '-'
+#   version			the package or solution version
+#   active			'no' not installed / 'yes' installed
+#   blacklisted		'yes' or 'no' will not be configured on upgrade, install or deinstall
+#   required		'yes' or 'no' the system requirements are met
+#   hwid			the environment (HW or SW) are in a certain defined state
+#   package			'yes' or 'no', there is a deb or rpm package to solve this
+#   				problem
+#   fainame			the name to give to FAI to install a certain package
+#   description		A description about the module for the user
+#   failed			'no' installed correctly / 'yes' an error occurred 
 
-my %modules = (
+my %origConfModules = (
 	#	tuxedokeyboard => {
 	#		name => 'tuxedo-keyboard',
 	#		version => 1,
@@ -330,41 +337,44 @@ my %modules = (
 );
 
 
-# initialize logfile
+my %localConfModules = %origConfModules;
+
+
+# initialize logFile
 # create one if not existing already
-sub init_logging {
-	# create logdir if it does not exist
-	unless ( -d $logdir ) {
-		mkdir($logdir, 0755);
-		unless ( -d $logdir ) {
-			$nologfile = 1;
-			print "Could not create $logdir\n";
+sub initLogging {
+	# create logDir if it does not exist
+	unless ( -d $logDir ) {
+		mkdir($logDir, 0755);
+		unless ( -d $logDir ) {
+			$noLogFile = 1;
+			print "Could not create $logDir\n";
 			return;
 		}
 	}
-	if ( -f $logfile ) {
-		# append if logfile exists
-		if ( open $LOGFILE, '>>'.$logfile )
+	if ( -f $logFile ) {
+		# append if logFile exists
+		if ( open $LOGFILE, '>>'.$logFile )
 		{
-			$nologfile = 0;
+			$noLogFile = 0;
 			print $LOGFILE "start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
-			$nologfile =1;
-			print "Could not open logfile $logfile\n";
+			$noLogFile =1;
+			print "Could not open logFile $logFile\n";
 			return;
 		}
 	} else {
-		# create a new logfile
-		if ( open $LOGFILE, '>'.$logfile ) {
-			$nologfile = 0;
+		# create a new logFile
+		if ( open $LOGFILE, '>'.$logFile ) {
+			$noLogFile = 0;
 			print $LOGFILE "start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
-			$nologfile =1;
-			print "Could not open logfile $logfile\n";
+			$noLogFile =1;
+			print "Could not open logFile $logFile\n";
 			return;
 		}
 	}
@@ -379,11 +389,11 @@ sub getLoggingTime {
 }
 
 
-# to print into logfile
-sub printlog {
+# to print into logFile
+sub printLog {
 	my $message = shift;
-	if (! $nologfile) {
-		if (open $LOGFILE, '>>'.$logfile) {
+	if (! $noLogFile) {
+		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
 			print $LOGFILE "$timestamp $message\n";
 			close $LOGFILE;
@@ -404,7 +414,7 @@ sub insertGrub {
     my $parameter;
 	my $inserted = 0;
 
-    if ( open $grubFH, "<", $grub_file) {
+    if ( open $grubFH, "<", $grubFile) {
         while (<$grubFH>) {
             push (@grub_lines, $_);
         }
@@ -417,87 +427,122 @@ sub insertGrub {
                         if ($_ =~ m/""/) {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
                             ++$inserted;
-							$update_grub_trigger = 1;
-							printlog("inserted $parameter into grub\n");
+							$updateGrubTrigger = 1;
+							printLog("inserted $parameter into grub\n");
                         } else {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
                             ++$inserted;
-							$update_grub_trigger = 1;
-							printlog("inserted $parameter into grub\n");
+							$updateGrubTrigger = 1;
+							printLog("inserted $parameter into grub\n");
                         }
                     }
                 }
             }
         }
     } else {
-		$modules{key}{failed} = 1;
-        printlog("no $grub_file present or unable to open the file for reading\n");
+		$origConfModules{key}{failed} = 1;
+        printLog("no $grubFile present or unable to open the file for reading\n");
     }
 
 	# write the changes into grub config
-    if ( open $grubFH, ">", $grub_file ) {
+    if ( open $grubFH, ">", $grubFile ) {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
-		$modules{key}{failed} = 1;
-        printlog("no $grub_file present or unable to open the file for writing\n");
+		$origConfModules{key}{failed} = 1;
+        printLog("no $grubFile present or unable to open the file for writing\n");
     }
 
     return $inserted;
 }
 
 
-# fills global variable $configuration with data from file in $configfile
-# if there is no configfile then it is left empty
-sub read_configfile {
-	my $fh;
+# fills global variable $configuration with data from file in $configFile
+# if there is no configFile then it is left empty
+sub readConfigFile {
+	my $FH;
 	my $shortname;
-	if ( open $fh, '<', $configfile ) {
-		while ( my $line=<$fh> ) {
+	if ( open $FH, '<', $configFile ) {
+		while ( my $line=<$FH> ) {
 			chomp $line;
-			#print "$line\n";
 			my ($name, @cols) = split /\s+/, $line;
 			$shortname = $name;
 			$shortname =~ s/[^a-zA-Z0-9]//g;
-			#print "shortname: $shortname\n";
-			#print "name: $name\n";
-			#print "version: $cols[1]\n";
-			@comp{qw(name version active blacklisted required hwid package)} = ($name, @cols);
-			$configuration{$shortname} = { %comp };
+			# @comp values have to be same as in writeConfigFile
+			@comp{qw(name version active blacklisted required hwid package failed)} = ($name, @cols);
+			$localConfModules{$shortname} = { %comp };
 		}
-		close $fh;
+		close $FH;
 	} else {
-		printlog("could not open configfile: $configfile $!");
+		printLog("could not open configFile: $configFile $!");
 	}
 }
 
 
-# overwrites file from $configfile with data from $configuration
+# overwrites file from $configFile with data from $configuration
 # if file cannot be written then nothing happens
-sub write_configfile {
-	my $fh;
-	if ( open $fh, '>', $configfile ) {
-		foreach my $name (sort keys %modules) {
-			print $fh "$modules{$name}{name} $modules{$name}{version} ".
-			"$modules{$name}{active} $modules{$name}{blacklisted} ".
-			"$modules{$name}{required} $modules{$name}{hwid} $modules{$name}{package}\n";
+sub writeConfigFile {
+	my $FH;
+	if ( open $FH, '>', $configFile ) {
+		foreach my $name (sort keys %origConfModules) {
+			# values have to be same as in readConfigFile
+			print $FH "$origConfModules{$name}{name} $origConfModules{$name}{version} ".
+			"$origConfModules{$name}{active} $origConfModules{$name}{blacklisted} ".
+			"$origConfModules{$name}{required} $origConfModules{$name}{hwid} ".
+			"$origConfModules{$name}{package} $origConfModules{$name}{failed}\n";
 		}
-		close $fh;
+		close $FH;
 	} else {
-		printlog("can't write to $configfile $!");
+		printLog("can't write to $configFile $!");
+	}
+}
+
+# TODO
+sub initConfigFile {
+	# create configDir if it does not exist
+	unless ( -d $configDir ) {
+		mkdir($configDir, 0755);
+		unless ( -d $configDir ) {
+			$noConfigFile = 1;
+			printLog("could not create $configDir\n");
+			return;
+		}
+	}
+	if ( -f $configFile ) {
+		# append if logFile exists
+		if ( open $LOGFILE, '>>'.$configFile ) {
+			$noConfigFile = 0;
+			# read config file
+			return;
+		} else {
+			$noConfigFile =1;
+			printLog("could not open configfile $configFile\n");
+			return;
+		}
+	} else {
+		# create a new logFile
+		if ( open $LOGFILE, '>'.$configFile ) {
+			$noConfigFile = 0;
+			# write configfile
+			return;
+		} else {
+			$noConfigFile =1;
+			printLog("could not open configfile $configFile\n");
+			return;
+		}
 	}
 }
 
 
 # searches the sysfs subdirectory for active monitor entries
 # and returns them as an array
-sub find_active_edids {
+sub findActiveEDIDs {
 	my $cards_dir = '/sys/class/drm';
 	my $dir_handle;
 	my @edidfile;
 
 	if ( !opendir ($dir_handle, $cards_dir)) {
-		printlog("unable to open $cards_dir: $!\n");
+		printLog("unable to open $cards_dir: $!\n");
 		return @edidfile;
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
@@ -528,9 +573,9 @@ sub find_active_edids {
 
 
 # gets valid edid files
-# converts edid data into an array of hash references to modules
-sub get_edid_data {
-	my @edidfiles = find_active_edids();
+# converts edid data into an array of hash references to origConfModules
+sub getEDIDData {
+	my @edidfiles = findActiveEDIDs();
 	my @edid_refs;
 	my $fh;
 	my $file_content;
@@ -540,7 +585,7 @@ sub get_edid_data {
 			close $fh;
 			push @edid_refs, parse_edid($file_content);
 		} else {
-			printlog("Could not open file $_ $!");
+			printLog("Could not open file $_ $!");
 		}
 	}
 
@@ -557,7 +602,7 @@ sub get_edid_data {
 
 # check whether the module is required for the system
 # checks only for hardware
-sub check_requirements {
+sub checkRequirements {
 	my $fh;
 	my $boardname_filename = "/sys/class/dmi/id/board_name";
 	my $boardname;
@@ -565,10 +610,10 @@ sub check_requirements {
 	my $boardvendor;
 
 	# these will be installed on all notebooks, always
-	#	$modules{tuxedokeyboard}{required} = 1;
-	#	$modules{tuxedoccwmi}{required} =1 ;
-	#	$modules{tuxedocontrolcenter}{required} = 1;
-	#	$modules{tuxedotouchpadfix}{required} = 1;
+	#	$origConfModules{tuxedokeyboard}{required} = 1;
+	#	$origConfModules{tuxedoccwmi}{required} =1 ;
+	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
+	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
 
 	if ( open $fh, "<", $boardvendor_filename ) {
 		$boardvendor = <$fh>;
@@ -578,56 +623,56 @@ sub check_requirements {
 			$boardname = <$fh>;
 			close $fh;
 		#		if ( $boardvendor =~ m/TUXEDO/ ) {
-		#			$modules{tuxedo}{required} = 1;
+		#			$origConfModules{tuxedo}{required} = 1;
 			### close the program if it is not TUXEDO???
 			#		}
 			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
-			#			$modules{tuxedoucsiccg}{required} = 1;
+			#			$origConfModules{tuxedoucsiccg}{required} = 1;
 			#}
 			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
-			#	$modules{kfocus}{required} = 1;
+			#	$origConfModules{kfocus}{required} = 1;
 			#}
 			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
-			#	$modules{manjaro}{required} = 1;
+			#	$origConfModules{manjaro}{required} = 1;
 			#}
 			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
-			#	$modules{aistation}{required} = 1;
+			#	$origConfModules{aistation}{required} = 1;
 			#}
 			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
-			#	$modules{barebonegrub}{required} = 1;
-			#	$modules{barebonegrub}{fainame} = '02GRUB';
+			#	$origConfModules{barebonegrub}{required} = 1;
+			#	$origConfModules{barebonegrub}{fainame} = '02GRUB';
 			#}
 			#if ($boardname =~ m/(P95)/) {
-			#	$modules{audiofix}{required} = 1;
+			#	$origConfModules{audiofix}{required} = 1;
 			#}
 			if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-				$modules{i8042fix}{required} = 1;
+				$origConfModules{i8042fix}{required} = 1;
 			}
 			if ($boardname =~ m/(PF5PU1G)/) {
-				$modules{nobootonbattery}{required} = 1;
+				$origConfModules{nobootonbattery}{required} = 1;
 			}
 		} else {
-			printlog("Could not open $boardvendor_filename $!");
+			printLog("Could not open $boardvendor_filename $!");
 		}
 
 	} else {
-		printlog("Could not open $boardname_filename $!");
+		printLog("Could not open $boardname_filename $!");
 	}
-	#	my @edid = get_edid_data();
+	#	my @edid = getEDIDData();
 	#	foreach ( @edid ) {
 	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
-	#			$modules{tuxedooledbrt}{required} = 1;
+	#			$origConfModules{tuxedooledbrt}{required} = 1;
 	#		}
 	#	}
 	#
 	#	# by default DESKTOP
-	#	$modules{chassistype}{fainame} = 'DESKTOP';
+	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
 	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
 	#	if ( open $fh, "<", $chassis_type_fn ) {
 	#		my $chassis_type = <fh>;
 	#		close $fh;
 	#		if ( $chassis_type =~ m/(9|10)/ ) {
-	#			$modules{chassistype}{fainame} = 'LAPTOP';
+	#			$origConfModules{chassistype}{fainame} = 'LAPTOP';
 	#		} else {
 	#			my $battery_folder = '/proc/acpi/battery';
 	#			if ( opendir $fh, $battery_folder ) {
@@ -635,16 +680,16 @@ sub check_requirements {
 	#					next unless (-d "$battery_folder/$file");
 	#					unless ( $file =~ m/(\.|\.\.)/ ) {
 	#						#print "folder: $file\n";
-	#						$modules{chassistype}{fainame} = 'LAPTOP';
+	#						$origConfModules{chassistype}{fainame} = 'LAPTOP';
 	#					}
 	#				}
 	#			}
 	#		}
-	#		unless ( $modules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+	#		unless ( $origConfModules{chassistype}{fainame} =~ m/LAPTOP/ ) {
 	#			my $acpi_string = 'ACPI: Battery Slot';
 	#			my $dmesg_output = `dmesg`;
 	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
-	#				$modules{chassistype}{fainame} = 'LAPTOP';
+	#				$origConfModules{chassistype}{fainame} = 'LAPTOP';
 	#			}
 	#		}
 	#	}
@@ -662,17 +707,17 @@ sub check_requirements {
 
 # print status from all packages
 # in a nice formated output
-sub list_status {
+sub listStatus {
 	my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
 	my $name;
 
-	foreach $name (sort keys %modules) {
+	foreach $name (sort keys %origConfModules) {
 		push(@arr,
-			["$modules{$name}{name}",
-			 "$modules{$name}{version}",
-			 "$modules{$name}{active}",
-			 "$modules{$name}{blacklisted}",
-			 "$modules{$name}{required}"]);
+			["$origConfModules{$name}{name}",
+			 "$origConfModules{$name}{version}",
+			 "$origConfModules{$name}{active}",
+			 "$origConfModules{$name}{blacklisted}",
+			 "$origConfModules{$name}{required}"]);
 	}
 	for my $row (@arr) {
 		format STDOUT =
@@ -690,7 +735,7 @@ sub i8042fix() {
 	my $key = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
-	printlog("applying i8042fix\n");
+	printLog("applying i8042fix\n");
 	$retval = insertGrub($key, \@kernel_parameters);
 }
 
@@ -701,34 +746,34 @@ sub nobootonbattery() {
 	my $key = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
-	printlog("applying nobootonbattery\n");
+	printLog("applying nobootonbattery\n");
 	$retval = insertGrub($key, \@kernel_parameters);
 }
 
 
-# traverses the modules hash and starts the subroutine in the list
+# traverses the origConfModules hash and starts the subroutine in the list
 # if conditions as noted in the list are met
 # not active, not blacklisted, required
-sub apply_all_fixes {
+sub applyAllFixes {
 	my $state = shift;		# configure or reconfigure
 	my $key;
 	my $exit_status;
-	foreach $key (keys %modules) {
+	foreach $key (keys %origConfModules) {
 		if ( installable($key, $state) ne "" ) {
 			$key->($key);
 		}
 	}
-	update_grub();
+	updateGrub();
 }
 
 
 # call system update-grub
-sub update_grub {
+sub updateGrub {
 	my $exit_status;
-	if ($update_grub_trigger) {
+	if ($updateGrubTrigger) {
 		$exit_status = system("update-grub");
 		if ( $exit_status == 0 ) {
-			printlog("error starting update-grub\n");
+			printLog("error starting update-grub\n");
 		}
 	}
 	return $exit_status;
@@ -741,17 +786,17 @@ sub installable {
 	my $key = shift;
 	my $state = shift;
 	# TODO change for delivery
-	if ( $modules{$key}{active} eq 'no' &&
-   		 $modules{$key}{blacklisted} eq 'no' &&
-		 $modules{$key}{required} eq 'yes'  &&
+	if ( $origConfModules{$key}{active} eq 'no' &&
+   		 $origConfModules{$key}{blacklisted} eq 'no' &&
+		 $origConfModules{$key}{required} eq 'yes'  &&
 		 $state eq 'configure') {
-		printlog("configure mode active\n");
+		printLog("configure mode active\n");
 		return $key;
-	} elsif ( $modules{$key}{active} eq 'yes' &&
-        	  $modules{$key}{blacklisted} eq 'no' &&
-        	  $modules{$key}{required} eq 'yes'  &&
+	} elsif ( $origConfModules{$key}{active} eq 'yes' &&
+        	  $origConfModules{$key}{blacklisted} eq 'no' &&
+        	  $origConfModules{$key}{required} eq 'yes'  &&
         	  $state eq 'reconfigure') {
-		printlog("reconfigure mode active\n");
+		printLog("reconfigure mode active\n");
 		return $key;
 	} else {
 		return "";
@@ -759,11 +804,11 @@ sub installable {
 }
 
 
-# get sub name from %modules list from given module name
-sub get_sub_name {
+# get sub name from %origConfModules list from given module name
+sub getSubName {
 	my $key;
-	foreach $key ( keys %modules ) {
-		if ( $ARGV[1] eq $modules{$key}{name} ) {
+	foreach $key ( keys %origConfModules ) {
+		if ( $ARGV[1] eq $origConfModules{$key}{name} ) {
 			return $key;
 		}
 	}
@@ -781,46 +826,46 @@ sub configure {
 	my $exit_status;
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
-			printlog("configure all\n");
-			check_requirements();
-			apply_all_fixes($state);
+			printLog("configure all\n");
+			checkRequirements();
+			applyAllFixes($state);
 		} else {
-			$key = get_sub_name();
+			$key = getSubName();
 			if ( $key ne "" ) {
-				check_requirements();
+				checkRequirements();
 				if ( installable($key, $state) ne "" ) {
-					printlog("configure $key\n");
+					printLog("configure $key\n");
 					$key->($key);
-					$exit_status = update_grub();
+					$exit_status = updateGrub();
 					if ($exit_status != 0) {
-						printlog("everything is good\n");
+						printLog("everything is good\n");
 						print "everything is good\n";
 					} else {
-						printlog("something went wrong, the required fixes could not be applied!\n");
+						printLog("something went wrong, the required fixes could not be applied!\n");
 						print "something went wrong, the required fixes could not be applied!\n";
 					}
 				}
 			} else {
-				printlog("wrong module name\n");
+				printLog("wrong module name\n");
 				print "wrong module name\n";
 			}
 		}
 	} else {
-		printlog("undefined module name\n");
+		printLog("undefined module name\n");
 		print "undefined module name\n";
 	}
 }
 
 
 # show description of module
-sub module_description() {
+sub moduleDescription() {
 	my $key;
 	if ($ARGV[1]) {
-		$key = get_sub_name();
+		$key = getSubName();
 		if ( $key ne "" ) {
-            print "$modules{$key}{description}\n";
+            print "$origConfModules{$key}{description}\n";
 		} else {
-			print "module: $ARGV[1] is not in the modules list\n";
+			print "module: $ARGV[1] is not in the origConfModules list\n";
 		}
     } else {
 		print "missing module name\n";
@@ -830,7 +875,7 @@ sub module_description() {
 # text to print for help
 my $USAGE =<<USAGE;
 tuxedo-tomte {COMMAND}
-  list                        List all modules with detailed status
+  list                        List all origConfModules with detailed status
   description MODULE          Shows the description of the module
   configure MODULE ...|all    Configure an unconfigured module
   reconfigure MODULE...|all   Reconfigure a configured module
@@ -854,13 +899,13 @@ sub checkRoot {
 }
 
 # just for debug, delete afterwards
-#print Dumper \%modules;
+#print Dumper \%origConfModules;
 
-#list_status();
-#write_configfile();
-#read_configfile();
+#listStatus();
+#writeConfigFile();
+#readConfigFile();
 
-#my @edid_data = get_edid_data();
+#my @edid_data = getEDIDData();
 #print Dumper @edid_data;
 
 #print Dumper \%configuration;
@@ -869,9 +914,9 @@ sub checkRoot {
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
 if (defined $ARGV[0]) {
-	init_logging();
+	initLogging();
 	if ($ARGV[0] eq "list") {
-		list_status();
+		listStatus();
 	} elsif ($ARGV[0] eq "FAI") {
 		print "Starting tuxedo-tomte in FAI modus\nThis should not be used in a normal situation\n";
 	} elsif ($ARGV[0] eq "configure") {
@@ -888,7 +933,7 @@ if (defined $ARGV[0]) {
 	} elsif ($ARGV[0] eq "unblacklist") {
 		print "unblacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "description") {
-		module_description();
+		moduleDescription();
 	} elsif ($ARGV[0] eq "help") {
 		help();
 	} else {
