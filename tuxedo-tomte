@@ -3,7 +3,8 @@ use strict qw(vars subs);
 use warnings;
 
 my $grubFile = '/etc/default/grub';
-my $logDir = '/var/log/tuxedo/';
+#my $logDir = '/var/log/tuxedo/';
+my $logDir = '/home/pablo/TUXEDO/tmp/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
@@ -17,8 +18,9 @@ my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 #use lib "$Bin/.";
 #use Parse::EDID qw(parse_edid);
 
-my $configDir = '/etc/tomte/';
-my $configFile = $configFile.'tomte.cfg';
+#my $configDir = '/etc/tomte/';
+my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
+my $configFile = $configDir.'tomte.cfg';
 
 # definition loaded from configFile
 #my %configuration;
@@ -342,14 +344,16 @@ my %localConfModules = %origConfModules;
 
 # initialize logFile
 # create one if not existing already
+# exits program if logfile can not be created
 sub initLogging {
+	my $timestamp;
 	# create logDir if it does not exist
 	unless ( -d $logDir ) {
 		mkdir($logDir, 0755);
 		unless ( -d $logDir ) {
 			$noLogFile = 1;
 			print "Could not create $logDir\n";
-			return;
+			exit (0);
 		}
 	}
 	if ( -f $logFile ) {
@@ -357,25 +361,27 @@ sub initLogging {
 		if ( open $LOGFILE, '>>'.$logFile )
 		{
 			$noLogFile = 0;
-			print $LOGFILE "start logging\n";
+			$timestamp = getLoggingTime();
+			print $LOGFILE "$timestamp start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
 			$noLogFile =1;
 			print "Could not open logFile $logFile\n";
-			return;
+			exit (0);
 		}
 	} else {
 		# create a new logFile
 		if ( open $LOGFILE, '>'.$logFile ) {
 			$noLogFile = 0;
-			print $LOGFILE "start logging\n";
+			$timestamp = getLoggingTime();
+			print $LOGFILE "$timestamp start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
 			$noLogFile =1;
-			print "Could not open logFile $logFile\n";
-			return;
+			print "Could not create logFile $logFile\n";
+			exit (0);
 		}
 	}
 }
@@ -459,6 +465,7 @@ sub insertGrub {
 
 # fills global variable $configuration with data from file in $configFile
 # if there is no configFile then it is left empty
+# exits program if configfile can not be read
 sub readConfigFile {
 	my $FH;
 	my $shortname;
@@ -475,12 +482,15 @@ sub readConfigFile {
 		close $FH;
 	} else {
 		printLog("could not open configFile: $configFile $!");
+		print "Could not open configfile $configFile\n";
+		exit (0);
 	}
 }
 
 
 # overwrites file from $configFile with data from $configuration
 # if file cannot be written then nothing happens
+# exits program if configfile can not be written
 sub writeConfigFile {
 	my $FH;
 	if ( open $FH, '>', $configFile ) {
@@ -494,10 +504,14 @@ sub writeConfigFile {
 		close $FH;
 	} else {
 		printLog("can't write to $configFile $!");
+		print "Can't write to configfile: $configFile\n";
+		exit (0);
 	}
 }
 
-# TODO
+# check if config file and directory exists
+# loads the config or if non existent
+# creates a new directory and configfile
 sub initConfigFile {
 	# create configDir if it does not exist
 	unless ( -d $configDir ) {
@@ -505,31 +519,20 @@ sub initConfigFile {
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
 			printLog("could not create $configDir\n");
-			return;
+			print "Could not create $configDir\n";
+			exit (0);
 		}
 	}
+	# read config file
 	if ( -f $configFile ) {
-		# append if logFile exists
-		if ( open $LOGFILE, '>>'.$configFile ) {
-			$noConfigFile = 0;
-			# read config file
-			return;
-		} else {
-			$noConfigFile =1;
-			printLog("could not open configfile $configFile\n");
-			return;
-		}
+		$noConfigFile = 0;
+		readConfigFile();
+		return;
 	} else {
-		# create a new logFile
-		if ( open $LOGFILE, '>'.$configFile ) {
-			$noConfigFile = 0;
-			# write configfile
-			return;
-		} else {
-			$noConfigFile =1;
-			printLog("could not open configfile $configFile\n");
-			return;
-		}
+		# create a new configFile
+		printLog("no configfile present ... creating one\n");
+		writeConfigFile();
+		return;
 	}
 }
 
@@ -911,22 +914,29 @@ sub checkRoot {
 #print Dumper \%configuration;
 
 
+# initialize logging and read configfile
+# if not possible, program exits
+initLogging();
+initConfigFile();
+
+
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
+# TODO uncomment checkRoot()
 if (defined $ARGV[0]) {
-	initLogging();
 	if ($ARGV[0] eq "list") {
 		listStatus();
 	} elsif ($ARGV[0] eq "FAI") {
-		print "Starting tuxedo-tomte in FAI modus\nThis should not be used in a normal situation\n";
+		print "Starting tuxedo-tomte in FAI modus\ni".
+				"This should not be used in a normal situation\n";
 	} elsif ($ARGV[0] eq "configure") {
 		print "configure\n";
-		checkRoot();
+		#checkRoot();
 		configure("configure");
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
-		checkRoot();
+		#checkRoot();
 		configure("reconfigure");
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
