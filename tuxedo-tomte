@@ -10,8 +10,8 @@ my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 
-# just for debug, delete afterwards
-#use Data::Dumper qw(Dumper);
+# TODO just for debug, delete afterwards
+use Data::Dumper qw(Dumper);
 
 # for OLED backlight and edid decrypt
 #use FindBin qw($Bin);
@@ -480,6 +480,7 @@ sub readConfigFile {
 			$localConfModules{$shortname} = { %comp };
 		}
 		close $FH;
+		print Dumper \%localConfModules;
 	} else {
 		printLog("could not open configFile: $configFile $!");
 		print "Could not open configfile $configFile\n";
@@ -606,7 +607,7 @@ sub getEDIDData {
 # check whether the module is required for the system
 # checks only for hardware
 sub checkRequirements {
-	my $fh;
+	my $FH;
 	my $boardname_filename = "/sys/class/dmi/id/board_name";
 	my $boardname;
 	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
@@ -618,13 +619,19 @@ sub checkRequirements {
 	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
 	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
 
-	if ( open $fh, "<", $boardvendor_filename ) {
-		$boardvendor = <$fh>;
-		close $fh;
-		if ( open $fh, "<", $boardname_filename ) {
-
-			$boardname = <$fh>;
-			close $fh;
+	# load required data into variables
+	if ( open $FH, "<", $boardvendor_filename ) {
+		$boardvendor = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardname_filename $!");
+	}
+	if ( open $FH, "<", $boardname_filename ) {
+		$boardname = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardvendor_filename $!");
+	}
 		#		if ( $boardvendor =~ m/TUXEDO/ ) {
 		#			$origConfModules{tuxedo}{required} = 1;
 			### close the program if it is not TUXEDO???
@@ -648,19 +655,15 @@ sub checkRequirements {
 			#if ($boardname =~ m/(P95)/) {
 			#	$origConfModules{audiofix}{required} = 1;
 			#}
-			if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-				$origConfModules{i8042fix}{required} = 1;
-			}
-			if ($boardname =~ m/(PF5PU1G)/) {
-				$origConfModules{nobootonbattery}{required} = 1;
-			}
-		} else {
-			printLog("Could not open $boardvendor_filename $!");
-		}
 
-	} else {
-		printLog("Could not open $boardname_filename $!");
+	# check values for each module
+	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+		$origConfModules{i8042fix}{required} = 1;
 	}
+	if ($boardname =~ m/(PF5PU1G)/) {
+		$origConfModules{nobootonbattery}{required} = 1;
+	}
+
 	#	my @edid = getEDIDData();
 	#	foreach ( @edid ) {
 	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
@@ -703,24 +706,25 @@ sub checkRequirements {
 	#	{
 	#		
 	#	}
-
 }
 
 
 
 # print status from all packages
 # in a nice formated output
+# uses the data from the local configuration file
 sub listStatus {
 	my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
 	my $name;
 
-	foreach $name (sort keys %origConfModules) {
+	initConfigFile();
+	foreach $name (sort keys %localConfModules) {
 		push(@arr,
-			["$origConfModules{$name}{name}",
-			 "$origConfModules{$name}{version}",
-			 "$origConfModules{$name}{active}",
-			 "$origConfModules{$name}{blacklisted}",
-			 "$origConfModules{$name}{required}"]);
+			["$localConfModules{$name}{name}",
+			 "$localConfModules{$name}{version}",
+			 "$localConfModules{$name}{active}",
+			 "$localConfModules{$name}{blacklisted}",
+			 "$localConfModules{$name}{required}"]);
 	}
 	for my $row (@arr) {
 		format STDOUT =
@@ -729,6 +733,25 @@ sub listStatus {
 .
 		write;
 	}
+}
+
+
+# copies values from local configuration module into new configuration module
+# copies always 'blacklisted'
+# if module version is the same it also copies 'failed' and 'active'
+sub transferConfigValues {
+	my $name;
+	print "before\n";
+	print Dumper \%origConfModules;
+	foreach $name (sort keys %localConfModules) {
+		if ( $origConfModules{$name}{version} eq $localConfModule{$name}{version} ) {
+			$origConfModules{$name}{failed} = $localConfModule{$name}{failed};
+			$origConfModules{$name}{active} = $localConfModule{$name}{active};
+		}
+		$origConfModules{$name}{blacklisted} = $localConfModule{$name}{blacklisted};
+	}
+	print "after";
+	print Dumper \%origConfModules;
 }
 
 
@@ -822,9 +845,8 @@ sub getSubName {
 
 # when configure is selected
 # configures requested module or all
-# requires module name or "all" as parameters
+# requires module name or "all" as parameter
 sub configure {
-	my $state = shift;		# configure or reconfigure
 	my $key;
 	my $exit_status;
 	if ($ARGV[1]) {
@@ -860,6 +882,23 @@ sub configure {
 }
 
 
+# configures a module if not configured, not blacklisted and is required
+sub configureModule {
+}
+
+
+# reconfigures a module if configured, not blacklisted and is required
+sub reconfigureModule {
+}
+
+
+# updates all modules wich are not blacklisted, are required
+# and have a new hwid or version
+# and additionally configures all new modules
+sub configureUpdate {
+}
+
+
 # show description of module
 sub moduleDescription() {
 	my $key;
@@ -868,7 +907,7 @@ sub moduleDescription() {
 		if ( $key ne "" ) {
             print "$origConfModules{$key}{description}\n";
 		} else {
-			print "module: $ARGV[1] is not in the origConfModules list\n";
+			print "module: $ARGV[1] is not in the modules list\n";
 		}
     } else {
 		print "missing module name\n";
@@ -882,11 +921,14 @@ tuxedo-tomte {COMMAND}
   description MODULE          Shows the description of the module
   configure MODULE ...|all    Configure an unconfigured module
   reconfigure MODULE...|all   Reconfigure a configured module
-  remove MODULE...|ALL        Remove a configured module
-  blacklist MODULE ...        Blacklist a module
-  unblacklist MODULE ...      Unblacklist a module
   help                        Prints this message
 USAGE
+
+
+# TODO to be implemented in the future
+#  remove MODULE...|ALL        Remove a configured module
+#  blacklist MODULE ...        Blacklist a module
+#  unblacklist MODULE ...      Unblacklist a module
 
 # prints help
 sub help {
@@ -904,20 +946,11 @@ sub checkRoot {
 # just for debug, delete afterwards
 #print Dumper \%origConfModules;
 
-#listStatus();
-#writeConfigFile();
-#readConfigFile();
-
 #my @edid_data = getEDIDData();
 #print Dumper @edid_data;
 
 #print Dumper \%configuration;
 
-
-# initialize logging and read configfile
-# if not possible, program exits
-initLogging();
-initConfigFile();
 
 
 # define for each argvalues procedures
@@ -925,22 +958,29 @@ initConfigFile();
 # TODO uncomment checkRoot()
 if (defined $ARGV[0]) {
 	if ($ARGV[0] eq "list") {
+		initLogging();
 		listStatus();
 	} elsif ($ARGV[0] eq "FAI") {
-		print "Starting tuxedo-tomte in FAI modus\ni".
-				"This should not be used in a normal situation\n";
+		print "Starting tuxedo-tomte in FAI modus\n".
+				"This should not be used in a normal situation\n".
+				"only when installing a new system with FAI\n";
 	} elsif ($ARGV[0] eq "configure") {
-		print "configure\n";
 		#checkRoot();
-		configure("configure");
+		configure();
 	} elsif ($ARGV[0] eq "remove") {
+		#checkRoot();
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
 		#checkRoot();
-		configure("reconfigure");
+		reconfigure();
+	} elsif ($ARGV[0] eq "update") {
+		#checkRoot();
+		update();
 	} elsif ($ARGV[0] eq "blacklist") {
+		#checkRoot();
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
+		#checkRoot();
 		print "unblacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "description") {
 		moduleDescription();
