@@ -335,6 +335,7 @@ my %origConfModules = (
 );
 
 
+# hash to load the configfile
 my %localConfModules = %origConfModules;
 
 
@@ -342,6 +343,10 @@ my %localConfModules = %origConfModules;
 # create one if not existing already
 # exits program if logfile can not be created
 sub initLogging {
+	# do not log if not necessary (logging requires root)
+	if ($ARGV[0] eq ("FAI" || "list" || "description" || "help" || "")) {
+	   	return;
+	}
 	my $timestamp;
 	# create logDir if it does not exist
 	unless ( -d $logDir ) {
@@ -404,58 +409,6 @@ sub printLog {
 }
 
 
-
-# inserts array values as kernel parameters if not present
-# example: my $retval = insertGrub(\@kernel_parameters);
-# returns number of inserted parameters
-# return value of 0 means it failed
-sub insertGrub {
-    my $grubFH;
-    my @grub_lines;
-	my $module = shift;
-    my $parameters = shift;
-    my $parameter;
-	my $inserted = 0;
-
-    if ( open $grubFH, "<", $grubFile) {
-        while (<$grubFH>) {
-            push (@grub_lines, $_);
-        }
-        close $grubFH;
-
-        foreach( @grub_lines ) {
-            if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
-                foreach $parameter ( @{$parameters} ) {
-                    unless ( $_ =~ m/$parameter/ ) {
-                        if ($_ =~ m/""/) {
-                            $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
-                            ++$inserted;
-							printLog("inserted $parameter into grub\n");
-                        } else {
-                            $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
-                            ++$inserted;
-							printLog("inserted $parameter into grub\n");
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-		$origConfModules{$module}{installed} = "failed";
-        printLog("no $grubFile present or unable to open the file for reading\n");
-    }
-
-	# write the changes into grub config
-    if ( open $grubFH, ">", $grubFile ) {
-        print $grubFH @grub_lines;
-        close ($grubFH);
-    } else {
-		$origConfModules{$module}{installed} = "failed";
-        printLog("no $grubFile present or unable to open the file for writing\n");
-    }
-
-    return $inserted;
-}
 
 
 # fills global variable %localConfModules with data from $configFile
@@ -739,7 +692,7 @@ sub listStatus {
 	}
 }
 
-
+# TODO
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
 # if module version is the same it also copies 'failed' and 'installed'
@@ -761,25 +714,81 @@ sub transferConfigValues {
 # for keyboard not present on boot
 # for XC1711 on all distributions
 sub i8042fix() {
-	my $key = shift;
+	my $module = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
 	printLog("applying i8042fix\n");
-	$retval = insertGrub($key, \@kernel_parameters);
+	$retval = insertGrub($module, \@kernel_parameters);
 }
 
 
 # for not being able to boot if system is on battery
 # affects BA15
 sub nobootonbattery() {
-	my $key = shift;
+	my $module = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
 	printLog("applying nobootonbattery\n");
-	$retval = insertGrub($key, \@kernel_parameters);
+	$retval = insertGrub($module, \@kernel_parameters);
 }
 
 
+# inserts array values as kernel parameters if not present
+# example: my $retval = insertGrub(\@kernel_parameters);
+# returns number of inserted parameters
+# return value of 0 means it failed
+sub insertGrub {
+    my $grubFH;
+    my @grub_lines;
+	my $module = shift;
+    my $parameters = shift;
+    my $parameter;
+	my $inserted = 0;
+
+    if ( open $grubFH, "<", $grubFile) {
+        while (<$grubFH>) {
+            push (@grub_lines, $_);
+        }
+        close $grubFH;
+    } else {
+		$origConfModules{$module}{installed} = "failed";
+        printLog("no $grubFile present or unable to open the file for reading\n");
+		return (0);
+    }
+
+    foreach( @grub_lines ) {
+        if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+            foreach $parameter ( @{$parameters} ) {
+                unless ( $_ =~ m/$parameter/ ) {
+                    if ($_ =~ m/""/) {
+                        $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
+                        ++$inserted;
+						printLog("inserted $parameter into grub\n");
+                    } else {
+                        $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
+                        ++$inserted;
+						printLog("inserted $parameter into grub\n");
+                    }
+                }
+            }
+        }
+    }
+
+	# write the changes into grub config
+    if ( open $grubFH, ">", $grubFile ) {
+        print $grubFH @grub_lines;
+        close ($grubFH);
+    } else {
+		$origConfModules{$module}{installed} = "failed";
+        printLog("no $grubFile present or unable to open the file for writing\n");
+		return (0);
+    }
+
+    return $inserted;
+}
+
+
+#TODO
 # traverses the origConfModules hash and starts the subroutine in the list
 # if conditions as noted in the list are met
 # not installed, not blacklisted, required
@@ -795,7 +804,7 @@ sub applyAllFixes {
 	updateGrub();
 }
 
-
+#TODO
 # call system update-grub
 sub updateGrub {
 	my $exit_status;
@@ -846,12 +855,22 @@ sub getSubName {
 }
 
 
-# when configure is selected
-# configures requested module or all
-# requires module name or "all" as parameter
-sub configure {
-	my $key;
+# configures all modules
+# if not blacklisted, required and not active
+sub configureAllModules {
+	my $module;
 	my $exit_status;
+
+	checkRequirements();
+	foreach $module (keys %origConfModules) {
+		if ( $origConfModules{$module}{installed} eq 'no' &&
+   			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' ) {
+			configureModule($module);
+		}
+	}
+
+
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
 			printLog("configure all\n");
@@ -885,13 +904,22 @@ sub configure {
 }
 
 
-# configures a module if not configured, not blacklisted and is required
-sub configureModule {
+sub configureSingleModule {
 }
 
+sub reconfigureAllModules {
+}
 
-# reconfigures a module if configured, not blacklisted and is required
-sub reconfigureModule {
+sub reconfigureSingleModule {
+}
+
+sub updateAllModules {
+}
+
+# configures a module, does no checks
+sub configureModule {
+	my $module = shift;
+	return $module->($module);
 }
 
 
@@ -940,6 +968,10 @@ sub help {
 }
 
 sub checkRoot {
+	# do not check if not necessary
+	if ($ARGV[0] eq ("FAI" || "list" || "description" || "help" || "")) {
+	   	return;
+	}
 	if( $> != 0 ) {
 		print "this option must be run as root\n";
 		exit (0);
@@ -952,36 +984,38 @@ sub checkRoot {
 #my @edid_data = getEDIDData();
 #print Dumper @edid_data;
 
-
+initLogging();
+# TODO uncomment checkRoot()
+#checkRoot();
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
-# TODO uncomment checkRoot()
 if (defined $ARGV[0]) {
 	if ($ARGV[0] eq "list") {
-		initLogging();
 		listStatus();
 	} elsif ($ARGV[0] eq "FAI") {
 		print "Starting tuxedo-tomte in FAI modus\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 	} elsif ($ARGV[0] eq "configure") {
-		#checkRoot();
-		configure();
+		if ($ARGV[1] eq "all") {
+			configureAllModules();
+		} else {
+			configureSingleModule();
+		}
 	} elsif ($ARGV[0] eq "remove") {
-		#checkRoot();
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
-		#checkRoot();
-		reconfigure();
+		if ($ARGV[1] eq "all") {
+			reconfigureAllModules();
+		} else {
+			reconfigureSingleModule();
+		}
 	} elsif ($ARGV[0] eq "update") {
-		#checkRoot();
-		update();
+		updateAllModules();
 	} elsif ($ARGV[0] eq "blacklist") {
-		#checkRoot();
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
-		#checkRoot();
 		print "unblacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "description") {
 		moduleDescription();
