@@ -13,8 +13,6 @@ my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
-# configure all modules
-$allModules = 0;
 
 # TODO just for debug, delete afterwards
 use Data::Dumper qw(Dumper);
@@ -707,10 +705,10 @@ sub transferConfigValues {
 	print "before\n";
 	print Dumper \%origConfModules;
 	foreach $name (sort keys %localConfModules) {
-		if ( $origConfModules{$name}{version} eq $localConfModule{$name}{version} ) {
-			$origConfModules{$name}{installed} = $localConfModule{$name}{installed};
+		if ( $origConfModules{$name}{version} eq $localConfModules{$name}{version} ) {
+			$origConfModules{$name}{installed} = $localConfModules{$name}{installed};
 		}
-		$origConfModules{$name}{blacklisted} = $localConfModule{$name}{blacklisted};
+		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
 	}
 	print "after";
 	print Dumper \%origConfModules;
@@ -736,7 +734,7 @@ sub i8042fix() {
 		addToConfiguredModules($module, "failed");
 	} else {
 		$origConfModules{$module}{installed} = "yes";
-		$postConfModule{updateGrub}{trigger} = 1;
+		$postConfProgram{updateGrub}{trigger} = 1;
 		addToConfiguredModules($module, "ok");
 	}
 }
@@ -756,7 +754,7 @@ sub nobootonbattery() {
 		addToConfiguredModules($module, "failed");
 	} else {
 		$origConfModules{$module}{installed} = "yes";
-		$postConfModule{updateGrub}{trigger} = 1;
+		$postConfProgram{updateGrub}{trigger} = 1;
 		addToConfiguredModules($module, "ok");
 	}
 }
@@ -766,10 +764,10 @@ sub nobootonbattery() {
 sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
-	my $configuredTmpModule = (
+	my %configuredTmpModule = (
 		$module => $status,
-	)
-	%configuredModules{keys $configuredTmpModule} = values %configuredTmpModule;
+	);
+	@configuredModules{keys %configuredTmpModule} = values %configuredTmpModule;
 }
 
 
@@ -822,20 +820,6 @@ sub insertGrub {
 		return (0);
     }
     return $inserted;
-}
-
-
-#TODO
-# call system update-grub
-sub updateGrub {
-	my $exit_status;
-	if ($updateGrubTrigger) {
-		$exit_status = system("update-grub");
-		if ( $exit_status != 0 ) {
-			printLog("error starting update-grub\n");
-		}
-	}
-	return $exit_status;
 }
 
 
@@ -959,9 +943,11 @@ sub postSetModulesFailed {
 }
 
 
-# lsits which modules and system programs where installed, configured
+# TODO
+# lists which modules and system programs where installed, configured
 # or executed correctly and which not
 sub listSuccess {
+	
 }
 
 
