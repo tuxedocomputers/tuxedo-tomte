@@ -339,6 +339,12 @@ my %origConfModules = (
 my %localConfModules = %origConfModules;
 
 
+# empty hash, will be filled with successfully installed modules
+# as hashes: {modulename}{status}
+# where status can be "ok" or "failed"
+my %configuredModules;
+
+
 # initialize logFile
 # create one if not existing already
 # exits program if logfile can not be created
@@ -727,9 +733,11 @@ sub i8042fix() {
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		$postConfModule{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "ok");
 	}
 }
 
@@ -745,10 +753,23 @@ sub nobootonbattery() {
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		$postConfModule{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "ok");
 	}
+}
+
+
+# adds module hash to list of configured modules with status
+sub addToConfiguredModules {
+	my $module = shift;
+	my $status = shift;
+	my $configuredTmpModule = (
+		$module => $status,
+	)
+	%configuredModules{keys $configuredTmpModule} = values %configuredTmpModule;
 }
 
 
@@ -921,10 +942,28 @@ sub postConfigure {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
 				$postConfProgram{$sysProgram}{state} = "failed";
+				postSetModulesFailed($sysProgram);
 			}
 		}
 	}
 }
+
+
+# sets all modules dependant of some system program to work to status failed
+sub postSetModulesFailed {
+	my $sysProgram = shift;
+	my $module;
+	foreach $module (keys %configuredModules) {
+		$configuredModules{$module}{status} = "failed";
+	}
+}
+
+
+# lsits which modules and system programs where installed, configured
+# or executed correctly and which not
+sub listSuccess {
+}
+
 
 # show description of module
 sub moduleDescription() {
