@@ -33,7 +33,7 @@ my $updateGrubTrigger = 0;
 #   name			name of package or name of solution,
 #   				is 'short name' without '-'
 #   version			the package or solution version
-#   active			'no' not installed / 'yes' installed
+#   installed		'no' not installed / 'yes' installed / 'failed' failed to install
 #   blacklisted		'yes' or 'no' will not be configured on upgrade, install or deinstall
 #   required		'yes' or 'no' the system requirements are met
 #   hwid			the environment (HW or SW) are in a certain defined state
@@ -41,299 +41,274 @@ my $updateGrubTrigger = 0;
 #   				problem
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
-#   failed			'no' installed correctly / 'yes' an error occurred 
 
 my %origConfModules = (
 	#	tuxedokeyboard => {
 	#		name => 'tuxedo-keyboard',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'a',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedoccwmi => {
 	#		name => 'tuxedo-cc-wmi',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => '',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedocontrolcenter => {
 	#		name => 'tuxedo-control-center',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => '',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedoxpxcairplanemodefix => {
 	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'AIRPLANEFIX NOGRUB',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedorestoreaudiofix => {
 	#		name => 'tuxedo-restore-audio-fix',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'AUDIORESTOREFIX',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedoucsiccg => {
 	#		name => 'tuxedo-ucsi_ccg',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'TUXUCIFIX',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedooledbrt => {
 	#		name => 'tuxedo-oled-brt',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
 	#		fainame => 'TUXOLED',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	chassistype => {
 	#		name => 'chassis-type',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	kfocus => {
 	#		name => 'kfocus',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOKFOCUS',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedo => {
 	#		name => 'tuxedo',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOTUXEDO',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	manjaro => {
 	#		name => 'manjaro',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOMANJARO',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	aistation => {
 	#		name => 'aistation',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOAISTATION',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	bareboneclass => {
 	#		name => 'barebone-class',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	barebonegrub => {
 	#		name => 'barebone-grub',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NOGRUB 02GRUB',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	audiofix => {
 	#		name => 'audiofix',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'AUDIOFIX',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	fingerprint => {
 	#		name => 'fingerprint',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'FINGERPRINT',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	threeg => {
 	#		name => 'threeg',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'THREEG',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	hybrid => {
 	#		name => 'hybrid',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'DISCRETE HYBRID',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	nvidiadriver => {
 	#		name => 'nvidia-driver',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'NVIDIATUX NVIDIANOR',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	bluetooth => {
 	#		name => 'bluetooth',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => 'BLUETOOTH',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedowallpapers => {
 	#		name => 'tuxedo-wallpapers',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
-	#		failed => 0,
 	#	},
 	#	tuxedoplymouthone => {
 	#		name => 'tuxedo-plymouth-one',
 	#		version => 1,
-	#		active => 0,
+	#		installed => 0,
 	#		blacklisted => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
 	#		fainame => '',
 	#		description => '',
-	#		failed => 0,
 	#	},
 
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
-        active => 'no',
+        installed => 'no',
         blacklisted => 'no',
         required => 'no',
         hwid => 1,
         package => 'no',
         fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
-		failed => 0,
     },
     nobootonbattery => {
         name => 'no-boot-on-battery',
         version => 1,
-        active => 'no',
+        installed => 'no',
         blacklisted => 'no',
         required => 'no',
         hwid => 1,
         package => 'no',
         fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
-		failed => 0,
     },
 );
 
@@ -445,7 +420,7 @@ sub insertGrub {
             }
         }
     } else {
-		$origConfModules{key}{failed} = 1;
+		$origConfModules{key}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for reading\n");
     }
 
@@ -454,7 +429,7 @@ sub insertGrub {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
-		$origConfModules{key}{failed} = 1;
+		$origConfModules{key}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for writing\n");
     }
 
@@ -476,7 +451,7 @@ sub readConfigFile {
 			$shortname = $name;
 			$shortname =~ s/[^a-zA-Z0-9]//g;
 			# @comp values have to be same as in writeConfigFile
-			@comp{qw(name version active blacklisted required hwid package failed)} = ($name, @cols);
+			@comp{qw(name version installed blacklisted required hwid package)} = ($name, @cols);
 			$localConfModules{$shortname} = { %comp };
 		}
 		close $FH;
@@ -498,9 +473,9 @@ sub writeConfigFile {
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			print $FH "$origConfModules{$name}{name} $origConfModules{$name}{version} ".
-			"$origConfModules{$name}{active} $origConfModules{$name}{blacklisted} ".
+			"$origConfModules{$name}{installed} $origConfModules{$name}{blacklisted} ".
 			"$origConfModules{$name}{required} $origConfModules{$name}{hwid} ".
-			"$origConfModules{$name}{package} $origConfModules{$name}{failed}\n";
+			"$origConfModules{$name}{package}\n";
 		}
 		close $FH;
 	} else {
@@ -722,7 +697,7 @@ sub listStatus {
 		push(@arr,
 			["$localConfModules{$name}{name}",
 			 "$localConfModules{$name}{version}",
-			 "$localConfModules{$name}{active}",
+			 "$localConfModules{$name}{installed}",
 			 "$localConfModules{$name}{blacklisted}",
 			 "$localConfModules{$name}{required}"]);
 	}
@@ -738,15 +713,14 @@ sub listStatus {
 
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
-# if module version is the same it also copies 'failed' and 'active'
+# if module version is the same it also copies 'failed' and 'installed'
 sub transferConfigValues {
 	my $name;
 	print "before\n";
 	print Dumper \%origConfModules;
 	foreach $name (sort keys %localConfModules) {
 		if ( $origConfModules{$name}{version} eq $localConfModule{$name}{version} ) {
-			$origConfModules{$name}{failed} = $localConfModule{$name}{failed};
-			$origConfModules{$name}{active} = $localConfModule{$name}{active};
+			$origConfModules{$name}{installed} = $localConfModule{$name}{installed};
 		}
 		$origConfModules{$name}{blacklisted} = $localConfModule{$name}{blacklisted};
 	}
@@ -779,7 +753,7 @@ sub nobootonbattery() {
 
 # traverses the origConfModules hash and starts the subroutine in the list
 # if conditions as noted in the list are met
-# not active, not blacklisted, required
+# not installed, not blacklisted, required
 sub applyAllFixes {
 	my $state = shift;		# configure or reconfigure
 	my $key;
@@ -812,13 +786,13 @@ sub installable {
 	my $key = shift;
 	my $state = shift;
 	# TODO change for delivery
-	if ( $origConfModules{$key}{active} eq 'no' &&
+	if ( $origConfModules{$key}{installed} eq 'no' &&
    		 $origConfModules{$key}{blacklisted} eq 'no' &&
 		 $origConfModules{$key}{required} eq 'yes'  &&
 		 $state eq 'configure') {
 		printLog("configure mode active\n");
 		return $key;
-	} elsif ( $origConfModules{$key}{active} eq 'yes' &&
+	} elsif ( $origConfModules{$key}{installed} eq 'yes' &&
         	  $origConfModules{$key}{blacklisted} eq 'no' &&
         	  $origConfModules{$key}{required} eq 'yes'  &&
         	  $state eq 'reconfigure') {
