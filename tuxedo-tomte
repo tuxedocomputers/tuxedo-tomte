@@ -33,7 +33,7 @@ use Data::Dumper qw(Dumper);
 #   trigger		'1' / 'undef' wether the command should be executed
 #   state		'undef' / 'failed' wether the command execution failed
 
-my %postConfModule = (
+my %postConfProgram = (
 	updateGrub => {
 		command => 'update-grub',
 		trigger => 'undef',
@@ -911,6 +911,20 @@ sub configureModule {
 sub configureUpdate {
 }
 
+
+# starts system programs (if necessary) to activate the module changes
+sub postConfigure {
+	my $sysProgram;
+	my $exitStatus;
+	foreach $sysProgram (keys %postConfProgram) {
+		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
+			$exitStatus = system($postConfProgram{$sysProgram}{command});
+			if ($exitStatus == 0) {
+				$postConfProgram{$sysProgram}{state} = "failed";
+			}
+		}
+	}
+}
 
 # show description of module
 sub moduleDescription() {
