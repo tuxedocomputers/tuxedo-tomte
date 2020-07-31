@@ -843,12 +843,12 @@ sub installable {
 }
 
 
-# get sub name from %origConfModules list from given module name
+# parses sub name from %origConfModules list from given module parameter name
 sub getSubName {
-	my $key;
-	foreach $key ( keys %origConfModules ) {
-		if ( $ARGV[1] eq $origConfModules{$key}{name} ) {
-			return $key;
+	my $module;
+	foreach $module ( keys %origConfModules ) {
+		if ( $ARGV[1] eq $origConfModules{$module}{name} ) {
+			return $module;
 		}
 	}
 	# return empty string if module is not found
@@ -861,7 +861,6 @@ sub getSubName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
-
 	checkRequirements();
 	foreach $module (keys %origConfModules) {
 		if ( $origConfModules{$module}{installed} eq 'no' &&
@@ -870,42 +869,19 @@ sub configureAllModules {
 			configureModule($module);
 		}
 	}
-
-	# TODO delete
-	if ($ARGV[1]) {
-		if ($ARGV[1] eq 'all') {
-			printLog("configure all\n");
-			checkRequirements();
-			applyAllFixes($state);
-		} else {
-			$key = getSubName();
-			if ( $key ne "" ) {
-				checkRequirements();
-				if ( installable($key, $state) ne "" ) {
-					printLog("configure $key\n");
-					$key->($key);
-					$exit_status = updateGrub();
-					if ($exit_status != 0) {
-						printLog("everything is good\n");
-						print "everything is good\n";
-					} else {
-						printLog("something went wrong, the required fixes could not be applied!\n");
-						print "something went wrong, the required fixes could not be applied!\n";
-					}
-				}
-			} else {
-				printLog("wrong module name\n");
-				print "wrong module name\n";
-			}
-		}
-	} else {
-		printLog("undefined module name\n");
-		print "undefined module name\n";
-	}
 }
 
 
 sub configureSingleModule {
+	my $module;
+	$module = getSubName();
+	if ($module eq "") {
+		printLog("wrong module name\n");
+		print "wrong module name\n";
+		return;
+	}
+	checkRequirements();
+	configureModule($module);
 }
 
 sub reconfigureAllModules {
