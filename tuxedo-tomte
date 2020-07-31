@@ -13,6 +13,9 @@ my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
+# configure all modules
+$allModules = 0;
+
 # TODO just for debug, delete afterwards
 use Data::Dumper qw(Dumper);
 
@@ -21,10 +24,6 @@ use Data::Dumper qw(Dumper);
 #use FindBin qw($Bin);
 #use lib "$Bin/.";
 #use Parse::EDID qw(parse_edid);
-
-
-# definition loaded from configFile
-my $updateGrubTrigger = 0;
 
 
 
@@ -409,10 +408,11 @@ sub printLog {
 # inserts array values as kernel parameters if not present
 # example: my $retval = insertGrub(\@kernel_parameters);
 # returns number of inserted parameters
+# return value of 0 means it failed
 sub insertGrub {
     my $grubFH;
     my @grub_lines;
-	my $key = shift;
+	my $module = shift;
     my $parameters = shift;
     my $parameter;
 	my $inserted = 0;
@@ -430,12 +430,10 @@ sub insertGrub {
                         if ($_ =~ m/""/) {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
                             ++$inserted;
-							$updateGrubTrigger = 1;
 							printLog("inserted $parameter into grub\n");
                         } else {
                             $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
                             ++$inserted;
-							$updateGrubTrigger = 1;
 							printLog("inserted $parameter into grub\n");
                         }
                     }
@@ -443,7 +441,7 @@ sub insertGrub {
             }
         }
     } else {
-		$origConfModules{key}{installed} = "failed";
+		$origConfModules{$module}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for reading\n");
     }
 
@@ -452,7 +450,7 @@ sub insertGrub {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
-		$origConfModules{key}{installed} = "failed";
+		$origConfModules{$module}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for writing\n");
     }
 
@@ -460,7 +458,7 @@ sub insertGrub {
 }
 
 
-# fills global variable %localConfModules with data from file in $configFile
+# fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
 # exits program if configfile can not be read
 sub readConfigFile {
@@ -478,7 +476,6 @@ sub readConfigFile {
 			$localConfModules{$shortname} = { %comp };
 		}
 		close $FH;
-		print Dumper \%localConfModules;
 	} else {
 		printLog("could not open configFile: $configFile $!");
 		print "Could not open configfile $configFile\n";
@@ -487,7 +484,8 @@ sub readConfigFile {
 }
 
 
-# overwrites file from $configFile with data from $origConfModules
+# TODO changes!!
+# overwrites $configFile with data from $origConfModules
 # if file cannot be written then nothing happens
 # exits program if configfile can not be written
 sub writeConfigFile {
@@ -712,24 +710,32 @@ sub checkRequirements {
 # in a nice formated output
 # uses the data from the local configuration file
 sub listStatus {
-	my @arr = ( ['Name', 'Version', 'Active', 'Blacklisted', 'Required'] );
-	my $name;
+	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted'] );
+	my $module;
+	my $none = 1;
 
 	initConfigFile();
-	foreach $name (sort keys %localConfModules) {
-		push(@arr,
-			["$localConfModules{$name}{name}",
-			 "$localConfModules{$name}{version}",
-			 "$localConfModules{$name}{installed}",
-			 "$localConfModules{$name}{blacklisted}",
-			 "$localConfModules{$name}{required}"]);
-	}
-	for my $row (@arr) {
-		format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
-		@$row
+	foreach $module (sort keys %localConfModules) {
+		# only show required modules
+		if ($localConfModules{$module}{required} eq 'yes') {
+			$none = 0;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+			 	"$localConfModules{$module}{version}",
+			 	"$localConfModules{$module}{installed}",
+			 	"$localConfModules{$module}{blacklisted}"]);
+		}
+		if (! $none) {
+			for my $row (@arr) {
+				format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
+				@$row
 .
-		write;
+				write;
+			}
+		} else {
+			print "No fixes available for this system\n";
+		}
 	}
 }
 
@@ -795,7 +801,7 @@ sub updateGrub {
 	my $exit_status;
 	if ($updateGrubTrigger) {
 		$exit_status = system("update-grub");
-		if ( $exit_status == 0 ) {
+		if ( $exit_status != 0 ) {
 			printLog("error starting update-grub\n");
 		}
 	}
