@@ -26,6 +26,23 @@ use Data::Dumper qw(Dumper);
 # definition loaded from configFile
 my $updateGrubTrigger = 0;
 
+
+
+###############################################################################
+# initial definition of post configuration modules
+#   command		the command to be executed on the system
+#   trigger		'1' / 'undef' wether the command should be executed
+#   state		'undef' / 'failed' wether the command execution failed
+
+my %postConfModule = (
+	updateGrub => {
+		command => 'update-grub',
+		trigger => 'undef',
+		state => 'undef',
+	},
+);
+
+
 ###############################################################################
 # initial definition of all origConfModules/packages
 # defined by a 'short name' which is the name without '-'
@@ -43,6 +60,8 @@ my $updateGrubTrigger = 0;
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
+#   postconf		command module to execute after installation of module, empty if none
+#   				the command of the module is defined in	$postConfModule{$postconf}{command}
 
 my %origConfModules = (
 	#	tuxedokeyboard => {
@@ -300,7 +319,8 @@ my %origConfModules = (
         package => 'no',
         fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
-    },
+		postconf => 'updateGrub',
+	},
     nobootonbattery => {
         name => 'no-boot-on-battery',
         version => 1,
@@ -311,6 +331,7 @@ my %origConfModules = (
         package => 'no',
         fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
+		postconf => 'updateGrub',
     },
 );
 
