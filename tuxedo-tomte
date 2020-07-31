@@ -857,7 +857,7 @@ sub getSubName {
 
 
 # configures all modules
-# if not blacklisted, required and not active
+# if not blacklisted, required and not installed
 sub configureAllModules {
 	my $module;
 	my $exit_status;
@@ -872,6 +872,8 @@ sub configureAllModules {
 }
 
 
+# configures a single module named by $ARGV[1]
+# if not blacklisted, required and not installed
 sub configureSingleModule {
 	my $module;
 	$module = getSubName();
@@ -881,7 +883,11 @@ sub configureSingleModule {
 		return;
 	}
 	checkRequirements();
-	configureModule($module);
+	if ( $origConfModules{$module}{installed} eq 'no' &&
+   		$localConfModules{$module}{blacklisted} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes' ) {
+		configureModule($module);
+	}
 }
 
 sub reconfigureAllModules {
