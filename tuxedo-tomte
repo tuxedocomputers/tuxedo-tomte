@@ -711,25 +711,44 @@ sub transferConfigValues {
 }
 
 
+###############################################################################
+###############################################################################
+# each configure one module from %confModules
+# they set 'installed' status and $postConfModule trigger
+
 # for keyboard not present on boot
 # for XC1711 on all distributions
+# returns 0 if failed, 1 if success
 sub i8042fix() {
 	my $module = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
 	printLog("applying i8042fix\n");
 	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfModule{updateGrub}{trigger} = 1;
+	}
 }
 
 
 # for not being able to boot if system is on battery
 # affects BA15
+# returns 0 if failed, 1 if success
 sub nobootonbattery() {
 	my $module = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
 	printLog("applying nobootonbattery\n");
 	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfModule{updateGrub}{trigger} = 1;
+	}
 }
 
 
@@ -751,7 +770,6 @@ sub insertGrub {
         }
         close $grubFH;
     } else {
-		$origConfModules{$module}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for reading\n");
 		return (0);
     }
@@ -779,30 +797,12 @@ sub insertGrub {
         print $grubFH @grub_lines;
         close ($grubFH);
     } else {
-		$origConfModules{$module}{installed} = "failed";
         printLog("no $grubFile present or unable to open the file for writing\n");
 		return (0);
     }
-
     return $inserted;
 }
 
-
-#TODO
-# traverses the origConfModules hash and starts the subroutine in the list
-# if conditions as noted in the list are met
-# not installed, not blacklisted, required
-sub applyAllFixes {
-	my $state = shift;		# configure or reconfigure
-	my $key;
-	my $exit_status;
-	foreach $key (keys %origConfModules) {
-		if ( installable($key, $state) ne "" ) {
-			$key->($key);
-		}
-	}
-	updateGrub();
-}
 
 #TODO
 # call system update-grub
@@ -818,6 +818,7 @@ sub updateGrub {
 }
 
 
+# TODO delete after copy
 # checks if some module can be installed
 # requires module key and wether configure or reconfigure
 sub installable {
@@ -870,7 +871,7 @@ sub configureAllModules {
 		}
 	}
 
-
+	# TODO delete
 	if ($ARGV[1]) {
 		if ($ARGV[1] eq 'all') {
 			printLog("configure all\n");
@@ -919,7 +920,7 @@ sub updateAllModules {
 # configures a module, does no checks
 sub configureModule {
 	my $module = shift;
-	return $module->($module);
+	$module->($module);
 }
 
 
