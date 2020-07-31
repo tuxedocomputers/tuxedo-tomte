@@ -891,9 +891,30 @@ sub configureSingleModule {
 }
 
 sub reconfigureAllModules {
+	my $module;
+	my $exit_status;
+	checkRequirements();
+	foreach $module (keys %origConfModules) {
+		if ( $localConfModules{$module}{blacklisted} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' ) {
+			configureModule($module);
+		}
+	}
 }
 
 sub reconfigureSingleModule {
+	my $module;
+	$module = getSubName();
+	if ($module eq "") {
+		printLog("wrong module name\n");
+		print "wrong module name\n";
+		return;
+	}
+	checkRequirements();
+	if ( $localConfModules{$module}{blacklisted} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes' ) {
+		configureModule($module);
+	}
 }
 
 sub updateAllModules {
