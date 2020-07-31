@@ -818,31 +818,6 @@ sub updateGrub {
 }
 
 
-# TODO delete after copy
-# checks if some module can be installed
-# requires module key and wether configure or reconfigure
-sub installable {
-	my $key = shift;
-	my $state = shift;
-	# TODO change for delivery
-	if ( $origConfModules{$key}{installed} eq 'no' &&
-   		 $origConfModules{$key}{blacklisted} eq 'no' &&
-		 $origConfModules{$key}{required} eq 'yes'  &&
-		 $state eq 'configure') {
-		printLog("configure mode active\n");
-		return $key;
-	} elsif ( $origConfModules{$key}{installed} eq 'yes' &&
-        	  $origConfModules{$key}{blacklisted} eq 'no' &&
-        	  $origConfModules{$key}{required} eq 'yes'  &&
-        	  $state eq 'reconfigure') {
-		printLog("reconfigure mode active\n");
-		return $key;
-	} else {
-		return "";
-	}
-}
-
-
 # parses sub name from %origConfModules list from given module parameter name
 sub getSubName {
 	my $module;
@@ -917,6 +892,8 @@ sub reconfigureSingleModule {
 	}
 }
 
+
+# TODO in next version
 sub updateAllModules {
 }
 
@@ -927,6 +904,7 @@ sub configureModule {
 }
 
 
+# TODO in next version
 # updates all modules wich are not blacklisted, are required
 # and have a new hwid or version
 # and additionally configures all new modules
