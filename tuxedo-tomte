@@ -9,22 +9,21 @@ my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
+#my $configDir = '/etc/tomte/';
+my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
+my $configFile = $configDir.'tomte.cfg';
 
 # TODO just for debug, delete afterwards
 use Data::Dumper qw(Dumper);
 
+# TODO for EDID, comming next
 # for OLED backlight and edid decrypt
 #use FindBin qw($Bin);
 #use lib "$Bin/.";
 #use Parse::EDID qw(parse_edid);
 
-#my $configDir = '/etc/tomte/';
-my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
-my $configFile = $configDir.'tomte.cfg';
 
 # definition loaded from configFile
-#my %configuration;
-my %comp;
 my $updateGrubTrigger = 0;
 
 ###############################################################################
@@ -463,10 +462,11 @@ sub insertGrub {
 }
 
 
-# fills global variable $configuration with data from file in $configFile
+# fills global variable %localConfModules with data from file in $configFile
 # if there is no configFile then it is left empty
 # exits program if configfile can not be read
 sub readConfigFile {
+	my %comp;
 	my $FH;
 	my $shortname;
 	if ( open $FH, '<', $configFile ) {
@@ -489,7 +489,7 @@ sub readConfigFile {
 }
 
 
-# overwrites file from $configFile with data from $configuration
+# overwrites file from $configFile with data from $origConfModules
 # if file cannot be written then nothing happens
 # exits program if configfile can not be written
 sub writeConfigFile {
@@ -948,8 +948,6 @@ sub checkRoot {
 
 #my @edid_data = getEDIDData();
 #print Dumper @edid_data;
-
-#print Dumper \%configuration;
 
 
 
