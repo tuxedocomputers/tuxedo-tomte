@@ -36,6 +36,7 @@ my %postConfProgram = (
 		command => 'update-grub',
 		trigger => 'undef',
 		state => 'undef',
+		description => "builds grub configuration from grub file",
 	},
 );
 
@@ -947,7 +948,55 @@ sub postSetModulesFailed {
 # lists which modules and system programs where installed, configured
 # or executed correctly and which not
 sub listSuccess {
-	
+	my $confProgram;
+	my $confModule;
+	my @failedPrograms;
+	my @failedModules;
+	my @successModules;
+
+	foreach $confProgram (keys %postConfProgram) {
+		if ($postConfProgram{$confProgram}{state} eq "failed") {
+			push(@failedPrograms, $postConfProgram{$confProgram}{command});
+		}
+	}
+	foreach $confModule (keys %configuredModules) {
+		if ($configuredModules{$confModule}{state} eq "failed") {
+			push(@failedModules, $confModule);
+		}
+		if ($configuredModules{$confModule}{state} eq "ok") {
+			push(@successModules, $confModule);
+		}
+	}
+	if (@successModules) {
+		print "The following modules have been installed successfully:\n";
+		printNameDescriptionModules(@successModules);
+	}
+	if (@failedModules) {
+		print "The following modules have failed to be installed:\n";
+		printNameDescriptionModules(@failedModules);
+	}
+	if (@failedPrograms) {
+		print "The following post installation programs have failed:\n";
+		printNameDescriptionPrograms(@failedPrograms);
+	}
+}
+
+
+# print name and description from modules given as array
+sub printNameDescriptionModules {
+	my @elements = @_;
+	foreach (@elements) {
+		print "$_: $origConfModules{$_}{description}\n";
+	}
+}
+
+
+# print name and description for programs given as array
+sub printNameDescriptionPrograms {
+	my @elements = @_;
+	foreach (@elements) {
+		print "$_: $postConfProgram{$_}{description}\n";
+	}
 }
 
 
