@@ -451,10 +451,13 @@ sub writeConfigFile {
 	if ( open $FH, '>', $configFile ) {
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
-			print $FH "$origConfModules{$name}{name} $origConfModules{$name}{version} ".
-			"$origConfModules{$name}{installed} $origConfModules{$name}{blacklisted} ".
-			"$origConfModules{$name}{required} $origConfModules{$name}{hwid} ".
-			"$origConfModules{$name}{package}\n";
+			print $FH "$origConfModules{$name}{name} ".
+					"$origConfModules{$name}{version} ".
+					"$origConfModules{$name}{installed} ".
+					"$origConfModules{$name}{blacklisted} ".
+					"$origConfModules{$name}{required} ".
+					"$origConfModules{$name}{hwid} ".
+					"$origConfModules{$name}{package}\n";
 		}
 		close $FH;
 	} else {
@@ -463,6 +466,7 @@ sub writeConfigFile {
 		exit (0);
 	}
 }
+
 
 # check if config file and directory exists
 # loads the config or if non existent
@@ -697,18 +701,14 @@ sub listStatus {
 	}
 }
 
-# TODO
+# TODO delete dumping
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
-# if module version is the same it also copies 'failed' and 'installed'
 sub transferConfigValues {
 	my $name;
 	print "before\n";
 	print Dumper \%origConfModules;
 	foreach $name (sort keys %localConfModules) {
-		if ( $origConfModules{$name}{version} eq $localConfModules{$name}{version} ) {
-			$origConfModules{$name}{installed} = $localConfModules{$name}{installed};
-		}
 		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
 	}
 	print "after";
@@ -944,7 +944,6 @@ sub postSetModulesFailed {
 }
 
 
-# TODO
 # lists which modules and system programs where installed, configured
 # or executed correctly and which not
 sub listSuccess {
