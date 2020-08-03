@@ -2,15 +2,16 @@
 use strict qw(vars subs);
 use warnings;
 
+# TODO change before delivery
 my $grubFile = '/etc/default/grub';
-#my $logDir = '/var/log/tuxedo/';
-my $logDir = '/home/pablo/TUXEDO/tmp/tomte/';
+my $logDir = '/var/log/tuxedo/';
+# my $logDir = '/var/log/TUXEDO/tmp/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
-#my $configDir = '/etc/tomte/';
-my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
+my $configDir = '/etc/tomte/';
+# my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
 
@@ -310,24 +311,24 @@ my %origConfModules = (
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
-        installed => 'undef',
-        blacklisted => 'undef',
-        required => 'undef',
-        hwid => 1,
-        package => 'no',
-        fainame => '',
+		installed => 'undef',
+		blacklisted => 'undef',
+		required => 'undef',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		postconf => 'updateGrub',
 	},
-    nobootonbattery => {
-        name => 'no-boot-on-battery',
-        version => 1,
-        installed => 'undef',
-        blacklisted => 'undef',
-        required => 'undef',
-        hwid => 1,
-        package => 'no',
-        fainame => '',
+	nobootonbattery => {
+		name => 'no-boot-on-battery',
+		version => 1,
+		installed => 'undef',
+		blacklisted => 'undef',
+		required => 'undef',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
     },
