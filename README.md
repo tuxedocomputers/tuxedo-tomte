@@ -11,18 +11,18 @@ Dies ist ein Meta-Paket und kann ohne Gefahr entfernt werden falls eine
 automatisierte Installation von nützlichen oder notwendigen Paketen für Ihr
 TUXEDO-Gerät nicht erwünscht wird.
 
-To package and use it:
+**To package and use it:**
 
 clone the repo
 
-modify the name of the cloned directory to packagename-version
+modify the name of the cloned directory to *packagename-version*
 
 Eg.:
 
+```
 mv ./tuxedo-tomte tuxedo-tomte-2.0.0
-
 cd  tuxedo-tomte-2.0.0
-
 dh_make --indep --createorigin
-
 debuild -us -uc
+```
+
