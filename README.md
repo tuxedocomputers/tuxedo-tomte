@@ -22,7 +22,7 @@ Eg.:
 ```
 mv ./tuxedo-tomte tuxedo-tomte-2.0.0
 cd  tuxedo-tomte-2.0.0
-dh_make --indep --createorigin
+dh_make --indep --createorig
 debuild -us -uc
 ```
 
