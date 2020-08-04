@@ -1,11 +1,14 @@
-Package: tuxedo-tomte
-Version: 2.0.0
-Section: admin
+Source: tuxedo-tomte
+Section: perl
 Priority: optional
 Maintainer: E. Mohr <tux@tuxedocomputers.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.1.2
 Homepage: https://www.tuxedocomputers.com
+
+Package: tuxedo-tomte
 Architecture: all
-Depends: perl, libparse-edid-perl
+Depends: perl
 Description: little brownie that provides services, updates and fixes for TUXEDO devices
  TUXEDO Tomte is a little brownie that provides services, updates and fixes for
  TUXEDO devices in the background. It does not send any information, telemetry
