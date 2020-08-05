@@ -15,14 +15,12 @@ TUXEDO-Gerät nicht erwünscht wird.
 
 clone the repo
 
-modify the name of the cloned directory to *packagename-version*
-
 Eg.:
 
 ```
-mv ./tuxedo-tomte tuxedo-tomte-2.0.0
-cd  tuxedo-tomte-2.0.0
-dh_make --indep --createorig
+cd  tuxedo-tomte
+dh_make --indep --createorig --packagename tuxedo-tomte_2.0.0
 debuild -us -uc
 ```
 
+Use your Version number instead of *2.0.0*
