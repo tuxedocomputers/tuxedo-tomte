@@ -1097,10 +1097,8 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "configure") {
 		if (defined $ARGV[1]) {
 			if ($ARGV[1] eq "all") {
-				initConfigFile();
 				configureAllModules();
 			} else {
-				initConfigFile();
 				configureSingleModule();
 			}
 		} else {
@@ -1110,14 +1108,11 @@ if (@ARGV != 0) {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
 		if ($ARGV[1] eq "all") {
-			initConfigFile();
 			reconfigureAllModules();
-		} else {	
-			initConfigFile();
+		} else {
 			reconfigureSingleModule();
 		}
-	} elsif ($ARGV[0] eq "update, does nothing yet\n") {
-		initConfigFile();
+	} elsif ($ARGV[0] eq "update") {
 		updateAllModules();
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
