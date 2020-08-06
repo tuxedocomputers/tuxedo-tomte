@@ -2,16 +2,13 @@
 use strict qw(vars subs);
 use warnings;
 
-# TODO change before delivery
 my $grubFile = '/etc/default/grub';
-my $logDir = '/var/log/tuxedo/';
-# my $logDir = '/var/log/TUXEDO/tmp/tomte/';
+my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
-# my $configDir = '/home/pablo/TUXEDO/tmp/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
 
@@ -41,6 +38,16 @@ my %postConfProgram = (
 	},
 );
 
+
+###############################################################################
+#
+# For each new module add an entry into:
+# - %origConfModules
+# - checkRequirements()
+# - the section with all the modules subroutines
+
+# For changes in %origConfModules make the modifications also in:
+# - writeConfigFile()
 
 ###############################################################################
 # initial definition of all origConfModules/packages
@@ -311,9 +318,9 @@ my %origConfModules = (
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
-		installed => 'undef',
-		blacklisted => 'undef',
-		required => 'undef',
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -323,9 +330,9 @@ my %origConfModules = (
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
 		version => 1,
-		installed => 'undef',
-		blacklisted => 'undef',
-		required => 'undef',
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -349,26 +356,32 @@ my %configuredModules;
 # create one if not existing already
 # exits program if logfile can not be created
 sub initLogging {
-
+	my %options;
+	@options{"list", "configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
+	print "initlogging\n";
 	# do not log if not necessary (logging requires root)
 	if (@ARGV == 0) {
+		print "argv == 0";
 		return;
 	}
-	if ($ARGV[0] ne ("list" || "configure" || "reconfigure" ||
-			"remove" || "blacklist" || "unblacklist" || "update")) {
+	if (! (defined $ARGV[0] and exists $options{$ARGV[0]})) {
+		print "false argv: $ARGV[0]\[\n";
 	   	return;
 	}
 	my $timestamp;
 	# create logDir if it does not exist
 	unless ( -d $logDir ) {
+		print "no logdir\n";
 		mkdir($logDir, 0755);
 		unless ( -d $logDir ) {
+			print "still none\n";
 			$noLogFile = 1;
 			print "Could not create $logDir\n";
 			exit (0);
 		}
 	}
 	if ( -f $logFile ) {
+		print "logfile exists\n";
 		# append if logFile exists
 		if ( open $LOGFILE, '>>'.$logFile )
 		{
@@ -383,8 +396,10 @@ sub initLogging {
 			exit (0);
 		}
 	} else {
+		print "create new logfile";
 		# create a new logFile
 		if ( open $LOGFILE, '>'.$logFile ) {
+			print "logfile open\n";
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			print $LOGFILE "$timestamp start logging\n";
@@ -410,6 +425,7 @@ sub getLoggingTime {
 # to print into logFile
 sub printLog {
 	my $message = shift;
+	print "nologfile: $noLogFile\n";
 	if (! $noLogFile) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
@@ -432,6 +448,7 @@ sub readConfigFile {
 	if ( open $FH, '<', $configFile ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
+
 			my ($name, @cols) = split /\s+/, $line;
 			$shortname = $name;
 			$shortname =~ s/[^a-zA-Z0-9]//g;
@@ -439,6 +456,7 @@ sub readConfigFile {
 			@comp{qw(name version installed blacklisted required hwid package)} = ($name, @cols);
 			$localConfModules{$shortname} = { %comp };
 		}
+		print Dumper \%localConfModules; 
 		close $FH;
 	} else {
 		printLog("could not open configFile: $configFile $!");
@@ -453,6 +471,8 @@ sub readConfigFile {
 # if file cannot be written then nothing happens
 # exits program if configfile can not be written
 sub writeConfigFile {
+	printLog("test");
+	print "test";
 	my $FH;
 	if ( open $FH, '>', $configFile ) {
 		foreach my $name (sort keys %origConfModules) {
@@ -1084,6 +1104,7 @@ sub checkRoot {
 # TODO uncomment checkRoot()
 checkRoot();
 initLogging();
+writeConfigFile();
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
