@@ -719,7 +719,7 @@ sub listStatus {
 	my $module;
 	my $none = 1;
 
-	initConfigFile();
+	readConfigFile();
 	foreach $module (sort keys %localConfModules) {
 		# only show required modules
 		if ($localConfModules{$module}{required} eq 'yes') {
@@ -1100,7 +1100,7 @@ sub help {
 # checks if root permissions required and exits if yes
 sub checkRoot {
 	my %options;
-	@options{"list", "configure", "remove", "update", "reconfigure", "blacklist", "unblacklist"} = ();
+	@options{"configure", "remove", "update", "reconfigure", "blacklist", "unblacklist"} = ();
 	# do not check if not necessary
 	if (@ARGV == 0) {
 		# no argument values
@@ -1122,7 +1122,6 @@ sub checkRoot {
 
 
 checkRoot();
-initLogging();
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
@@ -1135,6 +1134,7 @@ if (@ARGV != 0) {
 				"only when installing a new system with FAI\n";
 	} elsif ($ARGV[0] eq "configure") {
 		if (defined $ARGV[1]) {
+			initLogging();
 			if ($ARGV[1] eq "all") {
 				initConfigFile();
 				configureAllModules();
@@ -1150,6 +1150,7 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
+		initLogging();
 		if ($ARGV[1] eq "all") {
 			initConfigFile();
 			reconfigureAllModules();
@@ -1160,6 +1161,7 @@ if (@ARGV != 0) {
 			writeConfigFile();
 		}
 	} elsif ($ARGV[0] eq "update, does nothing yet\n") {
+		initLogging();
 		initConfigFile();
 		updateAllModules();
 		writeConfigFile();
