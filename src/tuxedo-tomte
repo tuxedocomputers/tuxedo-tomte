@@ -437,7 +437,7 @@ sub printLog {
 
 
 
-
+# TODO debug lines
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
 # exits program if configfile can not be read
@@ -448,6 +448,9 @@ sub readConfigFile {
 	if ( open $FH, '<', $configFile ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
+			if ($line =~ m/^(\s)*$/) {
+				next;
+			}
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
 				$shortname = $name;
