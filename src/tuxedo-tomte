@@ -448,13 +448,16 @@ sub readConfigFile {
 	if ( open $FH, '<', $configFile ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
-
-			my ($name, @cols) = split /\s+/, $line;
-			$shortname = $name;
-			$shortname =~ s/[^a-zA-Z0-9]//g;
-			# @comp values have to be same as in writeConfigFile
-			@comp{qw(name version installed blacklisted required hwid package)} = ($name, @cols);
-			$localConfModules{$shortname} = { %comp };
+			if (validConfigLine($line)) {
+				my ($name, @cols) = split /\s+/, $line;
+				$shortname = $name;
+				$shortname =~ s/[^a-zA-Z0-9]//g;
+				# @comp values have to be same as in writeConfigFile
+				@comp{qw(name version installed blacklisted required hwid package)} = ($name, @cols);
+				$localConfModules{$shortname} = { %comp };
+			} else {
+				printLog("invalid line in $configFile\n");
+			}
 		}
 		print Dumper \%localConfModules; 
 		close $FH;
@@ -462,6 +465,19 @@ sub readConfigFile {
 		printLog("could not open configFile: $configFile $!");
 		print "Could not open configfile $configFile\n";
 		exit (0);
+	}
+}
+
+
+# checks if the line has valid values
+# return 0 if invalid, 1 if valid
+sub validConfigLine {
+	my $line = shift;
+	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s(yes|no)$/) {
+		return (1);
+	} else {
+		printLog("found invalid configuration line in $configFile:\n$line\n");
+		return (0);
 	}
 }
 
