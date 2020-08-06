@@ -392,7 +392,7 @@ sub initLogging {
 			return;
 		} else {
 			$noLogFile =1;
-			print "Could not open logFile $logFile\n";
+			print "1Could not open logFile $logFile\n$!\n";
 			exit (0);
 		}
 	} else {
@@ -487,8 +487,6 @@ sub validConfigLine {
 # if file cannot be written then nothing happens
 # exits program if configfile can not be written
 sub writeConfigFile {
-	printLog("test");
-	print "test";
 	my $FH;
 	if ( open $FH, '>', $configFile ) {
 		foreach my $name (sort keys %origConfModules) {
@@ -743,6 +741,7 @@ sub listStatus {
 		print "No fixes available for this system\n";
 	}
 }
+
 
 # TODO delete dumping
 # copies values from local configuration module into new configuration module
@@ -1094,18 +1093,21 @@ sub help {
 	exit 0;
 }
 
+
+# checks if root permissions required and exits if yes
 sub checkRoot {
+	my %options;
+	@options{"list", "configure", "remove", "update", "reconfigure", "blacklist", "unblacklist"} = ();
 	# do not check if not necessary
 	if (@ARGV == 0) {
+		# no argument values
 		return;
 	}
-	if ($ARGV[0] ne ("list" || "configure" || "remove" || "update" ||
-			"reconfigure" || "blacklist" || "unblacklist")) {
-	   	return;
-	}
-	if( $> != 0 ) {
-		print "this option must be run as root\n";
-		exit (0);
+	if (defined $ARGV[0] and exists $options{$ARGV[0]}) {
+		if( $> != 0 ) {
+			print "this option must be run as root\n";
+			exit (0);
+		}
 	}
 }
 
@@ -1116,11 +1118,8 @@ sub checkRoot {
 #print Dumper @edid_data;
 
 
-# TODO Reihenfolge aendern initlogging und checkroot
-# TODO uncomment checkRoot()
 checkRoot();
 initLogging();
-writeConfigFile();
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
@@ -1136,9 +1135,11 @@ if (@ARGV != 0) {
 			if ($ARGV[1] eq "all") {
 				initConfigFile();
 				configureAllModules();
+				writeConfigFile();
 			} else {
 				initConfigFile();
 				configureSingleModule();
+				writeConfigFile();
 			}
 		} else {
 			print "module name or \"all\" missing\n";
@@ -1149,13 +1150,16 @@ if (@ARGV != 0) {
 		if ($ARGV[1] eq "all") {
 			initConfigFile();
 			reconfigureAllModules();
+			writeConfigFile();
 		} else {	
 			initConfigFile();
 			reconfigureSingleModule();
+			writeConfigFile();
 		}
 	} elsif ($ARGV[0] eq "update, does nothing yet\n") {
 		initConfigFile();
 		updateAllModules();
+		writeConfigFile();
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
