@@ -2,7 +2,9 @@
 use strict qw(vars subs);
 use warnings;
 
-my $grubFile = '/etc/default/grub';
+# TODO remove testing stuff
+#my $grubFile = '/etc/default/grub';
+my $grubFile = '/home/pablo/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -63,7 +65,7 @@ my %postConfProgram = (
 #   required		'yes' or 'no' the system requirements are met
 #   				'undef' if unknown
 #   hwid			the environment (HW or SW) are in a certain defined state
-#   package			'yes' or 'no', there is a deb or rpm package as a solution
+#   package			package name or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module, empty if none
@@ -320,7 +322,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -456,7 +458,7 @@ sub readConfigFile {
 				$shortname = $name;
 				$shortname =~ s/[^a-zA-Z0-9]//g;
 				# @comp values have to be same as in writeConfigFile
-				@comp{qw(name version installed blacklisted required hwid package)} = ($name, @cols);
+				@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
 				$localConfModules{$shortname} = { %comp };
 			} else {
 				printLog("invalid line in $configFile\n");
@@ -476,7 +478,7 @@ sub readConfigFile {
 # return 0 if invalid, 1 if valid
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s(yes|no)$/) {
+	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line\n");
@@ -499,8 +501,7 @@ sub writeConfigFile {
 					"$origConfModules{$name}{installed} ".
 					"$origConfModules{$name}{blacklisted} ".
 					"$origConfModules{$name}{required} ".
-					"$origConfModules{$name}{hwid} ".
-					"$origConfModules{$name}{package}\n";
+					"$origConfModules{$name}{hwid}\n";
 		}
 		close $FH;
 	} else {
@@ -840,20 +841,13 @@ sub insertGrub {
     }
 
     foreach( @grub_lines ) {
+		# find the correct line
         if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
             foreach $parameter ( @{$parameters} ) {
-                unless ( $_ =~ m/$parameter/ ) {
-                    if ($_ =~ m/""/) {
-                        $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$parameter"\n/;
-                        ++$inserted;
-						printLog("inserted $parameter into grub\n");
-                    } else {
-                        $_ =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $parameter"\n/;
-                        ++$inserted;
-						printLog("inserted $parameter into grub\n");
-                    }
-                }
-            }
+				if (insertGrubParameter(\$_, \$parameter)) {
+					++$inserted;
+				}
+			}
         }
     }
 
@@ -866,6 +860,26 @@ sub insertGrub {
 		return (0);
     }
     return $inserted;
+}
+
+
+# inserts a parameter into a grub line
+# if the parameter is not present yet
+# returns 1 if inserted, 0 
+sub insertGrubParameter {
+	my ($line, $parameter) = @_;
+
+	if ($$line =~ m/$$parameter/) {
+		return (0);
+	}
+	if ($$line =~ m/""/) {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
+		printLog("inserted $$parameter into grub\n");
+	} else {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+		printLog("inserted $$parameter into grub\n");
+	}
+	return (1);
 }
 
 
@@ -917,17 +931,14 @@ sub configureSingleModule {
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
-			print "- it is already installed\n";
+			print "- it is already installed (maybe use 'reconfigure')\n";
 		}
 		if ( $localConfModules{$module}{blacklisted} eq 'yes' ) {
-			print "- it is blacklisted\n";
+			print "- it is blacklisted (maybe use 'unblacklist')\n";
 		}
 		if ( $origConfModules{$module}{required} eq 'no' ) {
-			print "- it is not required by this system\n";
+			print "- it is not required by this system (this is the main reason)\n";
 		}
-		print "1 $localConfModules{$module}{installed}";
-		print "2 $localConfModules{$module}{blacklisted}";
-		print "3 $origConfModules{$module}{required}";
 	}
 }
 
@@ -1138,10 +1149,12 @@ if (@ARGV != 0) {
 			if ($ARGV[1] eq "all") {
 				initConfigFile();
 				configureAllModules();
+				transferConfigValues();
 				writeConfigFile();
 			} else {
 				initConfigFile();
 				configureSingleModule();
+				transferConfigValues();
 				writeConfigFile();
 			}
 		} else {
@@ -1154,16 +1167,19 @@ if (@ARGV != 0) {
 		if ($ARGV[1] eq "all") {
 			initConfigFile();
 			reconfigureAllModules();
+			transferConfigValues();
 			writeConfigFile();
 		} else {	
 			initConfigFile();
 			reconfigureSingleModule();
+			transferConfigValues();
 			writeConfigFile();
 		}
 	} elsif ($ARGV[0] eq "update, does nothing yet\n") {
 		initLogging();
 		initConfigFile();
 		updateAllModules();
+		transferConfigValues();
 		writeConfigFile();
 	} elsif ($ARGV[0] eq "blacklist") {
 		print "blacklist, does nothing yet\n";
