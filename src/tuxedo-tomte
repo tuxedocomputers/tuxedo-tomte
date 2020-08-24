@@ -354,6 +354,7 @@ my %localConfModules = %origConfModules;
 my %configuredModules;
 
 
+###############################################################################
 # initialize logFile
 # create one if not existing already
 # exits program if logfile can not be created
@@ -416,6 +417,7 @@ sub initLogging {
 }
 
 
+###############################################################################
 sub getLoggingTime {
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
 	my $nice_timestamp = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
@@ -424,6 +426,7 @@ sub getLoggingTime {
 }
 
 
+###############################################################################
 # to print into logFile
 sub printLog {
 	my $message = shift;
@@ -439,6 +442,7 @@ sub printLog {
 
 
 
+###############################################################################
 # TODO debug lines
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
@@ -450,9 +454,15 @@ sub readConfigFile {
 	if ( open $FH, '<', $configFile ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
+			# ignore comments
+			if ($line =~ m/^#/) {
+				next;
+			}
+			# ignore empty files
 			if ($line =~ m/^(\s)*$/) {
 				next;
 			}
+			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
 				$shortname = $name;
@@ -474,6 +484,7 @@ sub readConfigFile {
 }
 
 
+###############################################################################
 # checks if the line has valid values
 # return 0 if invalid, 1 if valid
 sub validConfigLine {
@@ -487,6 +498,7 @@ sub validConfigLine {
 }
 
 
+###############################################################################
 # TODO changes!!
 # overwrites $configFile with data from $origConfModules
 # if file cannot be written then nothing happens
@@ -512,6 +524,7 @@ sub writeConfigFile {
 }
 
 
+###############################################################################
 # check if config file and directory exists
 # loads the config or if non existent
 # creates a new directory and configfile
@@ -540,6 +553,7 @@ sub initConfigFile {
 }
 
 
+###############################################################################
 # searches the sysfs subdirectory for active monitor entries
 # and returns them as an array
 sub findActiveEDIDs {
@@ -578,6 +592,7 @@ sub findActiveEDIDs {
 }
 
 
+###############################################################################
 # gets valid edid files
 # converts edid data into an array of hash references to origConfModules
 sub getEDIDData {
@@ -712,6 +727,7 @@ sub checkRequirements {
 
 
 
+###############################################################################
 # print status from all packages
 # in a nice formated output
 # uses the data from the local configuration file
@@ -747,6 +763,7 @@ sub listStatus {
 }
 
 
+###############################################################################
 # TODO delete dumping
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
@@ -762,6 +779,7 @@ sub transferConfigValues {
 }
 
 
+###############################################################################
 ###############################################################################
 ###############################################################################
 # each configure one module from %confModules
@@ -787,6 +805,7 @@ sub i8042fix() {
 }
 
 
+###############################################################################
 # for not being able to boot if system is on battery
 # affects BA15
 # returns 0 if failed, 1 if success
@@ -807,6 +826,7 @@ sub nobootonbattery() {
 }
 
 
+###############################################################################
 # adds module hash to list of configured modules with status
 sub addToConfiguredModules {
 	my $module = shift;
@@ -818,6 +838,7 @@ sub addToConfiguredModules {
 }
 
 
+###############################################################################
 # inserts array values as kernel parameters if not present
 # example: my $retval = insertGrub(\@kernel_parameters);
 # returns number of inserted parameters
@@ -863,6 +884,7 @@ sub insertGrub {
 }
 
 
+###############################################################################
 # inserts a parameter into a grub line
 # if the parameter is not present yet
 # returns 1 if inserted, 0 
@@ -883,6 +905,7 @@ sub insertGrubParameter {
 }
 
 
+###############################################################################
 # parses sub name from %origConfModules list from given module parameter name
 sub getSubName {
 	my $module;
@@ -896,6 +919,7 @@ sub getSubName {
 }
 
 
+###############################################################################
 # configures all modules
 # if not blacklisted, required and not installed
 sub configureAllModules {
@@ -912,6 +936,7 @@ sub configureAllModules {
 }
 
 
+###############################################################################
 # configures a single module named by $ARGV[1]
 # if not blacklisted, required and not installed
 sub configureSingleModule {
@@ -942,6 +967,8 @@ sub configureSingleModule {
 	}
 }
 
+
+###############################################################################
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
@@ -954,6 +981,8 @@ sub reconfigureAllModules {
 	}
 }
 
+
+###############################################################################
 sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName();
@@ -970,10 +999,13 @@ sub reconfigureSingleModule {
 }
 
 
+###############################################################################
 # TODO in next version
 sub updateAllModules {
 }
 
+
+###############################################################################
 # configures a module, does no checks
 sub configureModule {
 	my $module = shift;
@@ -981,6 +1013,7 @@ sub configureModule {
 }
 
 
+###############################################################################
 # TODO in next version
 # updates all modules wich are not blacklisted, are required
 # and have a new hwid or version
@@ -989,6 +1022,7 @@ sub configureUpdate {
 }
 
 
+###############################################################################
 # starts system programs (if necessary) to activate the module changes
 sub postConfigure {
 	my $sysProgram;
@@ -1005,6 +1039,7 @@ sub postConfigure {
 }
 
 
+###############################################################################
 # sets all modules dependant of some system program to work to status failed
 sub postSetModulesFailed {
 	my $sysProgram = shift;
@@ -1015,6 +1050,7 @@ sub postSetModulesFailed {
 }
 
 
+###############################################################################
 # lists which modules and system programs where installed, configured
 # or executed correctly and which not
 sub listSuccess {
@@ -1052,6 +1088,7 @@ sub listSuccess {
 }
 
 
+###############################################################################
 # print name and description from modules given as array
 sub printNameDescriptionModules {
 	my @elements = @_;
@@ -1061,6 +1098,7 @@ sub printNameDescriptionModules {
 }
 
 
+###############################################################################
 # print name and description for programs given as array
 sub printNameDescriptionPrograms {
 	my @elements = @_;
@@ -1070,6 +1108,7 @@ sub printNameDescriptionPrograms {
 }
 
 
+###############################################################################
 # show description of module
 sub moduleDescription() {
 	my $key;
@@ -1085,6 +1124,8 @@ sub moduleDescription() {
 	}
 }
 
+
+###############################################################################
 # text to print for help
 my $USAGE =<<USAGE;
 tuxedo-tomte {COMMAND}
@@ -1096,11 +1137,12 @@ tuxedo-tomte {COMMAND}
 USAGE
 
 
+###############################################################################
 # TODO to be implemented in the future
 #  remove MODULE...|ALL        Remove a configured module
 #  blacklist MODULE ...        Blacklist a module
 #  unblacklist MODULE ...      Unblacklist a module
-
+#
 # prints help
 sub help {
 	print "$USAGE\n";
@@ -1108,6 +1150,7 @@ sub help {
 }
 
 
+###############################################################################
 # checks if root permissions required and exits if yes
 sub checkRoot {
 	my %options;
@@ -1124,6 +1167,14 @@ sub checkRoot {
 		}
 	}
 }
+
+
+
+
+###############################################################################
+# main program
+
+
 
 # just for debug, delete afterwards
 #print Dumper \%origConfModules;
@@ -1175,7 +1226,8 @@ if (@ARGV != 0) {
 			transferConfigValues();
 			writeConfigFile();
 		}
-	} elsif ($ARGV[0] eq "update, does nothing yet\n") {
+	} elsif ($ARGV[0] eq "update\n") {
+		print "does nothing yet\n";
 		initLogging();
 		initConfigFile();
 		updateAllModules();
