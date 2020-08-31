@@ -19,7 +19,7 @@
 
 Summary:        Little brownie that provides services, updates and fixes for TUXEDO devices
 Name:           %{module}
-Version:        1.0.0
+Version:        2.0.0
 Release:        1
 License:        GPL-3.0+
 Group:          System/Management
