@@ -865,13 +865,13 @@ sub insertGrub {
     }
 
     foreach( @grub_lines ) {
-		# find the correct line
+	# find the correct line
         if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
-            foreach $parameter ( @{$parameters} ) {
-				if (insertGrubParameter(\$_, \$parameter)) {
-					++$inserted;
-				}
+		foreach $parameter ( @{$parameters} ) {
+			if (insertGrubParameter(\$_, \$parameter)) {
+				++$inserted;
 			}
+		}
         }
     }
 
@@ -890,20 +890,20 @@ sub insertGrub {
 ###############################################################################
 # inserts a parameter into a grub line
 # if the parameter is not present yet
-# returns 1 if inserted, 0 
+# returns 1 if inserted or already present
 #
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 
 	if ($$line =~ m/$$parameter/) {
-		return (0);
+		return (1);
 	}
 	if ($$line =~ m/""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted $$parameter into grub\n");
+		printLog("inserted $$parameter into grub line\n");
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted $$parameter into grub\n");
+		printLog("inserted $$parameter into grub line\n");
 	}
 	return (1);
 }
