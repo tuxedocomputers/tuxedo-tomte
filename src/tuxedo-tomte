@@ -397,11 +397,11 @@ sub initLogging {
 			return;
 		} else {
 			$noLogFile =1;
-			print "1Could not open logFile $logFile\n$!\n";
+			print "Could not open logFile $logFile\n$!\n";
 			exit (0);
 		}
 	} else {
-		print "create new logfile";
+		print "create new logfile\n";
 		# create a new logFile
 		if ( open $LOGFILE, '>'.$logFile ) {
 			print "logfile open\n";
