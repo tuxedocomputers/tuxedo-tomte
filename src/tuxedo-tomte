@@ -404,7 +404,6 @@ sub initLogging {
 		print "create new logfile\n";
 		# create a new logFile
 		if ( open $LOGFILE, '>'.$logFile ) {
-			print "logfile open\n";
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			print $LOGFILE "$timestamp start logging\n";
