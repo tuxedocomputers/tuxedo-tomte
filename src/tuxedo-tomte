@@ -363,7 +363,6 @@ my %configuredModules;
 sub initLogging {
 	my %options;
 	@options{"list", "configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
-	print "initlogging\n";
 	# do not log if not necessary (logging requires root)
 	if (@ARGV == 0) {
 		print "argv == 0";
@@ -376,17 +375,14 @@ sub initLogging {
 	my $timestamp;
 	# create logDir if it does not exist
 	unless ( -d $logDir ) {
-		print "no logdir\n";
 		mkdir($logDir, 0755);
 		unless ( -d $logDir ) {
-			print "still none\n";
 			$noLogFile = 1;
 			print "Could not create $logDir\n";
 			exit (0);
 		}
 	}
 	if ( -f $logFile ) {
-		print "logfile exists\n";
 		# append if logFile exists
 		if ( open $LOGFILE, '>>'.$logFile )
 		{
@@ -401,7 +397,6 @@ sub initLogging {
 			exit (0);
 		}
 	} else {
-		print "create new logfile\n";
 		# create a new logFile
 		if ( open $LOGFILE, '>'.$logFile ) {
 			$noLogFile = 0;
@@ -433,7 +428,6 @@ sub getLoggingTime {
 #
 sub printLog {
 	my $message = shift;
-	print "nologfile: $noLogFile\n";
 	if (! $noLogFile) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
@@ -777,7 +771,6 @@ sub listStatus {
 #
 sub transferConfigValues {
 	my $name;
-	print "before\n";
 	foreach $name (sort keys %localConfModules) {
 		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
 	}
