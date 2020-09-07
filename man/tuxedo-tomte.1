@@ -1,0 +1,40 @@
+.TH tuxedo-tomte 1
+.SH "NAME"
+tuxedo-tomte \- Manages fixes for TUXEDO notebooks
+.SH "SYNOPSIS"
+\fBtuxedo-tomte\fR COMMAND [NAME...]
+.SH "DESCRIPTION"
+.PP
+\fBtuxedo-tomte\fR
+is a little brownie that provides services, updates and fixes for
+TUXEDO devices in the background\&. It does not send any information, telemetry
+data or similar stuff out!
+.P
+The program has to be startet with administrator privileges\&.
+.SH "COMMANDS"
+.PP
+The following commands are understood:
+.PP 
+\fBlist\fR
+Lists all available fixes with name, version and whether it is active,
+blacklisted and required for this system\&.
+.RE
+.PP
+\fBdescription \fR\fIMODULE\fR
+.RS 4
+Shows a small description about the fix\&.
+.RE
+.PP
+\fBconfigure \fIMODULE\fR|\fIALL\fR
+.RS 4
+Configures the specified module or fix if possible\&. That means, it is not
+already installed, blacklisted and designed to fix something on this system\&.
+If ALL is used then all possible fixes will be installed\&.
+.RE
+.PP
+\fBreconfigure \fIMODULE\fR|\fIALL\fR
+.RS 4
+Configures the specified module or fix even if it is already installed\&.
+It will not do anything if it is blacklisted or not designed to work
+on this system\&.
+If \fBALL\fR is used then all possible fixes will be reconfigured\&.
