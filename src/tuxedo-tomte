@@ -52,9 +52,10 @@ my %postConfProgram = (
 # - writeConfigFile()
 
 ###############################################################################
-# initial definition of all origConfModules/packages
+# initial definition for all origConfModules/packages
 # defined by a 'short name' which is the name without '-'
 # e.g. no-boot-on-battery = nobootonbattery
+#
 #   name			name of package or name of solution,
 #   				is 'short name' without '-'
 #   version			the package or solution version
@@ -502,6 +503,7 @@ sub validConfigLine {
 sub writeConfigFile {
 	my $FH;
 	if ( open $FH, '>', $configFile ) {
+		print $FH "# name version installed blacklisted required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			print $FH "$origConfModules{$name}{name} ".
@@ -749,17 +751,16 @@ sub listStatus {
 			 	"$localConfModules{$module}{installed}",
 			 	"$localConfModules{$module}{blacklisted}"]);
 		}
-		if (! $none) {
-			for my $row (@arr) {
-				format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
-				@$row
-.
-				write;
-			}
-		}
 	}
-	if ($none) {
+	if (! $none) {
+		for my $row (@arr) {
+			format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
+			@$row
+.
+			write;
+		}
+	} else {
 		print "No fixes available for this system\n";
 	}
 }
