@@ -738,24 +738,60 @@ sub checkRequirements {
 # uses the data from the local configuration file if available
 # else it checks the hardware
 #
+# used pattern:
+# installed and new module version equal (no update)
+# installed	req. old	req. new	notes
+# no		no			no			ign
+# yes		no			no			installed but not required!
+# no		yes			no			ign
+# yes		yes			no			ign
+# no		no			yes			ign
+# yes		no			yes			ign
+# no		yes			yes			not inst. but required
+# yes		yes			yes			inst. and req.
+#
+# installed and new module version not equal (update?)
+# to be done in next version
+#
 sub listStatus {
-	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted'] );
+	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted', 'Required'] );
 	my $module;
 	my $none = 1;
 
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
-			# only show required modules
-			if ($localConfModules{$module}{required} eq 'yes') {
-				$none = 0;
-				push(@arr,
-					["$localConfModules{$module}{name}",
-			 		"$localConfModules{$module}{version}",
-			 		"$localConfModules{$module}{installed}",
-			 		"$localConfModules{$module}{blacklisted}"]);
+			# check version numbers
+			if ($localConfModules{$module}{version} eq $origConfModules{$module}{version}) {
+				# same version module
+				if (($localConfModules{$module}{installed} eq 'yes') &&
+				($localConfModules{$module}{required} eq 'no') &&
+				($origConfModules{$module}{required} eq 'no')) {
+					# module is installed but should not be
+					push(@arr,
+						["$localConfModules{$module}{name}",
+						"$localConfModules{$module}{version}",
+						"$localConfModules{$module}{installed}",
+						"$localConfModules{$module}{blacklisted}",
+						"$localConfModules{$module}{required}"]);
+				}
+				if (($localConfModules{$module}{required} eq 'yes') &&
+				($origConfModules{$module}{required} eq 'yes')) {
+					$none = 0;
+					push(@arr,
+						["$localConfModules{$module}{name}",
+						"$localConfModules{$module}{version}",
+						"$localConfModules{$module}{installed}",
+						"$localConfModules{$module}{blacklisted}",
+						"$localConfModules{$module}{required}"]);
+				}
+			} else {
+				# different version number, is this an update?
+				# TODO: to be implemented in the next version
+				print "something went wrong, update is not implemented yet\n";
 			}
 		}
 	} else {
+		# no readable configfile
 		print "trying to get a list from the hardware configuration ...\n";
 		checkRequirements();
 		foreach $module (sort keys %origConfModules) {
@@ -766,7 +802,8 @@ sub listStatus {
 					["$origConfModules{$module}{name}",
 					"$origConfModules{$module}{version}",
 					"unknown",
-					"unknown"]);
+					"unknown",
+					"$origConfModules{$module}{required}"]);
 			}
 		}
 	}
@@ -774,7 +811,7 @@ sub listStatus {
 		print "Only showing fixes that are available for this hardware\n";
 		for my $row (@arr) {
 			format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
+@<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<
 			@$row
 .
 			write;
