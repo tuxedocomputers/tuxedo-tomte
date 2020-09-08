@@ -464,11 +464,13 @@ sub readConfigFile {
 			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
-				$shortname = $name;
-				$shortname =~ s/[^a-zA-Z0-9]//g;
-				# @comp values have to be same as in writeConfigFile
-				@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
-				$localConfModules{$shortname} = { %comp };
+				if (validModuleName($name)) {
+					$shortname = $name;
+					$shortname =~ s/[^a-zA-Z0-9]//g;
+					# @comp values have to be same as in writeConfigFile
+					@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
+					$localConfModules{$shortname} = { %comp };
+				}
 			} else {
 				printLog("invalid line in $configFile\n");
 			}
@@ -762,6 +764,7 @@ sub listStatus {
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
 			# check version numbers
+			# TODO: test undefined values
 			if ($localConfModules{$module}{version} eq $origConfModules{$module}{version}) {
 				# same version module
 				if (($localConfModules{$module}{installed} eq 'yes') &&
@@ -983,6 +986,22 @@ sub getSubName {
 	# return empty string if module is not found
 	return "";
 }
+
+
+###############################################################################
+# returns '1' if the name is a valid module name
+# returns '0' if not
+#
+sub validModuleName {
+	my $module = shift;
+	foreach $module ( keys %origConfModules ) {
+		if (defined $origConfModules{$module}{name}) {
+			return (1);
+		}
+	}
+	return (0);
+}
+
 
 
 ###############################################################################
