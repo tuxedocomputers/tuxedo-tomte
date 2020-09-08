@@ -324,7 +324,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -444,7 +444,7 @@ sub printLog {
 ###############################################################################
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
-# exits program if configfile can not be read
+# returns '0' if configfile can not be read, else returns '1'
 #
 sub readConfigFile {
 	my %comp;
@@ -477,8 +477,9 @@ sub readConfigFile {
 	} else {
 		printLog("could not open configFile: $configFile $!");
 		print "Could not open configfile $configFile\n";
-		exit (0);
+		return (0);
 	}
+	return (1);
 }
 
 
@@ -679,10 +680,10 @@ sub checkRequirements {
 
 	# check values for each module
 	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-		$origConfModules{i8042fix}{required} = 1;
+		$origConfModules{i8042fix}{required} = 'yes';
 	}
 	if ($boardname =~ m/(PF5PU1G)/) {
-		$origConfModules{nobootonbattery}{required} = 1;
+		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
 
 	#	my @edid = getEDIDData();
@@ -734,26 +735,43 @@ sub checkRequirements {
 ###############################################################################
 # print status from all packages
 # in a nice formated output
-# uses the data from the local configuration file
+# uses the data from the local configuration file if available
+# else it checks the hardware
 #
 sub listStatus {
 	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted'] );
 	my $module;
 	my $none = 1;
 
-	readConfigFile();
-	foreach $module (sort keys %localConfModules) {
-		# only show required modules
-		if ($localConfModules{$module}{required} eq 'yes') {
-			$none = 0;
-			push(@arr,
-				["$localConfModules{$module}{name}",
-			 	"$localConfModules{$module}{version}",
-			 	"$localConfModules{$module}{installed}",
-			 	"$localConfModules{$module}{blacklisted}"]);
+	if (readConfigFile()) {
+		foreach $module (sort keys %localConfModules) {
+			# only show required modules
+			if ($localConfModules{$module}{required} eq 'yes') {
+				$none = 0;
+				push(@arr,
+					["$localConfModules{$module}{name}",
+			 		"$localConfModules{$module}{version}",
+			 		"$localConfModules{$module}{installed}",
+			 		"$localConfModules{$module}{blacklisted}"]);
+			}
+		}
+	} else {
+		print "trying to get a list from the hardware configuration ...\n";
+		checkRequirements();
+		foreach $module (sort keys %origConfModules) {
+			# only show required modules
+			if ($origConfModules{$module}{required} eq 'yes') {
+				$none = 0;
+				push(@arr,
+					["$origConfModules{$module}{name}",
+					"$origConfModules{$module}{version}",
+					"unknown",
+					"unknown"]);
+			}
 		}
 	}
 	if (! $none) {
+		print "Only showing fixes that are available for this hardware\n";
 		for my $row (@arr) {
 			format STDOUT =
 @<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<  @<<<<<<<<<<<<
