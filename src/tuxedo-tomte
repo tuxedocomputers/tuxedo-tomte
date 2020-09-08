@@ -1152,7 +1152,7 @@ sub moduleDescription() {
 # text to print for help
 #
 my $USAGE =<<USAGE;
-tuxedo-tomte {COMMAND}
+tuxedo-tomte [COMMAND]
   list                        List all installable modules with detailed status
   description MODULE          Shows the module description
   configure MODULE ...|all    Configure an unconfigured module
