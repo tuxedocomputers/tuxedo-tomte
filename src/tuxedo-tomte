@@ -318,12 +318,13 @@ my %origConfModules = (
 	#		description => '',
 	#	},
 
+# TODO modify required
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -1266,7 +1267,6 @@ if (@ARGV != 0) {
 		help();
 	}
 } else {
-	print "No arguments\n\n";
 	help();
 }
 
