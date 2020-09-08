@@ -324,7 +324,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -756,7 +756,8 @@ sub checkRequirements {
 sub listStatus {
 	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted', 'Required'] );
 	my $module;
-	my $none = 1;
+	my $noneRequired = 1;
+	my $printIt = 0;
 
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
@@ -767,6 +768,7 @@ sub listStatus {
 				($localConfModules{$module}{required} eq 'no') &&
 				($origConfModules{$module}{required} eq 'no')) {
 					# module is installed but should not be
+					$printIt = 1;
 					push(@arr,
 						["$localConfModules{$module}{name}",
 						"$localConfModules{$module}{version}",
@@ -776,7 +778,8 @@ sub listStatus {
 				}
 				if (($localConfModules{$module}{required} eq 'yes') &&
 				($origConfModules{$module}{required} eq 'yes')) {
-					$none = 0;
+					$noneRequired = 0;
+					$printIt =1;
 					push(@arr,
 						["$localConfModules{$module}{name}",
 						"$localConfModules{$module}{version}",
@@ -797,7 +800,8 @@ sub listStatus {
 		foreach $module (sort keys %origConfModules) {
 			# only show required modules
 			if ($origConfModules{$module}{required} eq 'yes') {
-				$none = 0;
+				$noneRequired = 0;
+				$printIt = 1;
 				push(@arr,
 					["$origConfModules{$module}{name}",
 					"$origConfModules{$module}{version}",
@@ -807,7 +811,7 @@ sub listStatus {
 			}
 		}
 	}
-	if (! $none) {
+	if ($printIt) {
 		print "Only showing fixes that are available for this hardware\n";
 		for my $row (@arr) {
 			format STDOUT =
@@ -816,7 +820,8 @@ sub listStatus {
 .
 			write;
 		}
-	} else {
+	}
+	if ($noneRequired) {
 		print "No fixes available for this system\n";
 	}
 }
