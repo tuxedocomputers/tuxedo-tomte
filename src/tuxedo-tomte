@@ -765,6 +765,12 @@ sub listStatus {
 		foreach $module (sort keys %localConfModules) {
 			# check version numbers
 			# TODO: test undefined values
+			print "$origConfModules{$module}{version}\n";
+			print Dumper( %origConfModules );
+			print Dumper( %localConfModules );
+			if (undef $origConfModules{$module}{version}) {
+				print "$origConfModules{$module}{version}, undef\n";
+			}
 			if ($localConfModules{$module}{version} eq $origConfModules{$module}{version}) {
 				# same version module
 				if (($localConfModules{$module}{installed} eq 'yes') &&
@@ -782,7 +788,7 @@ sub listStatus {
 				if (($localConfModules{$module}{required} eq 'yes') &&
 				($origConfModules{$module}{required} eq 'yes')) {
 					$noneRequired = 0;
-					$printIt =1;
+					$printIt = 1;
 					push(@arr,
 						["$localConfModules{$module}{name}",
 						"$localConfModules{$module}{version}",
