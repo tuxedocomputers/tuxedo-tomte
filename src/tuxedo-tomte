@@ -321,7 +321,7 @@ my %origConfModules = (
 # TODO modify required
 	i8042fix => {
 		name => 'i8042-fix',
-		version => 1,
+		version => '1',
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
@@ -333,7 +333,7 @@ my %origConfModules = (
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
-		version => 1,
+		version => '1',
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
@@ -765,13 +765,11 @@ sub listStatus {
 		foreach $module (sort keys %localConfModules) {
 			# check version numbers
 			# TODO: test undefined values
-			print "$origConfModules{$module}{version}\n";
+			print "orig\n";
 			print Dumper( %origConfModules );
+			print "local\n";
 			print Dumper( %localConfModules );
-			if (undef $origConfModules{$module}{version}) {
-				print "$origConfModules{$module}{version}, undef\n";
-			}
-			if ($localConfModules{$module}{version} eq $origConfModules{$module}{version}) {
+			if (int($localConfModules{$module}{version}) == int($origConfModules{$module}{version})) {
 				# same version module
 				if (($localConfModules{$module}{installed} eq 'yes') &&
 				($localConfModules{$module}{required} eq 'no') &&
