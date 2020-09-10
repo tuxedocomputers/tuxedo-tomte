@@ -475,13 +475,14 @@ sub readConfigFile {
 			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
+				# TODO: check if module name exists in orig
 				if (validModuleName($name)) {
 					$shortname = $name;
 					$shortname =~ s/[^a-zA-Z0-9]//g;
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
 					$localConfModules{$shortname} = { %comp };
-					# convert to number
+					# convert to numbers
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
 					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
 				}
@@ -781,8 +782,8 @@ sub listStatus {
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
 			# check version numbers
-			# TODO: test undefined values
 			if (defined $origConfModules{$module}{version}) {
+				# TODO: convert into sub
 				if($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
 					# same version module
 					if (($localConfModules{$module}{installed} eq 'yes') &&
