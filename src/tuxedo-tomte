@@ -24,7 +24,6 @@ use Data::Dumper qw(Dumper);
 #use Parse::EDID qw(parse_edid);
 
 
-
 ###############################################################################
 # initial definition of post configuration modules
 #   command		the command to be executed on the system
@@ -57,20 +56,20 @@ my %postConfProgram = (
 # e.g. no-boot-on-battery = nobootonbattery
 #
 #   name			name of package or name of solution,
-#   				is 'short name' without '-'
+#				is 'short name' without '-'
 #   version			the package or solution version
 #   installed		'no' not installed / 'yes' installed / 'failed' failed to install
-#   				'undef' if unknown
+#				'undef' if unknown
 #   blacklisted		'yes' or 'no' will not be configured on upgrade, install or deinstall
-#   				'undef' if unknown
+#				'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
-#   				'undef' if unknown
+#				'undef' if unknown
 #   hwid			the environment (HW or SW) are in a certain defined state
 #   package			package name or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module, empty if none
-#   				the command of the module is defined in	$postConfModule{$postconf}{command}
+#				the command of the module is defined in	$postConfModule{$postconf}{command}
 #
 my %origConfModules = (
 	#	tuxedokeyboard => {
@@ -384,7 +383,7 @@ sub initLogging {
 	}
 	if (! (defined $ARGV[0] and exists $options{$ARGV[0]})) {
 		print "false argv: $ARGV[0]\[\n";
-	   	return;
+		return;
 	}
 	my $timestamp;
 	# create logDir if it does not exist
@@ -961,32 +960,32 @@ sub insertGrub {
 	my $inserted = 0;
 
     if ( open $grubFH, "<", $grubFile) {
-        while (<$grubFH>) {
-            push (@grub_lines, $_);
-        }
-        close $grubFH;
+	while (<$grubFH>) {
+	    push (@grub_lines, $_);
+	}
+	close $grubFH;
     } else {
-        printLog("no $grubFile present or unable to open the file for reading\n");
+	printLog("no $grubFile present or unable to open the file for reading\n");
 		return (0);
     }
 
     foreach( @grub_lines ) {
 	# find the correct line
-        if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+	if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
 		foreach $parameter ( @{$parameters} ) {
 			if (insertGrubParameter(\$_, \$parameter)) {
 				++$inserted;
 			}
 		}
-        }
+	}
     }
 
 	# write the changes into grub config
     if ( open $grubFH, ">", $grubFile ) {
-        print $grubFH @grub_lines;
-        close ($grubFH);
+	print $grubFH @grub_lines;
+	close ($grubFH);
     } else {
-        printLog("no $grubFile present or unable to open the file for writing\n");
+	printLog("no $grubFile present or unable to open the file for writing\n");
 		return (0);
     }
     return $inserted;
@@ -1056,7 +1055,7 @@ sub configureAllModules {
 	checkRequirements();
 	foreach $module (keys %origConfModules) {
 		if ( $origConfModules{$module}{installed} eq 'no' &&
-   			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			configureModule($module);
 		}
@@ -1079,7 +1078,7 @@ sub configureSingleModule {
 	}
 	checkRequirements();
 	if ( $localConfModules{$module}{installed} eq 'no' &&
-   		$localConfModules{$module}{blacklisted} eq 'no' &&
+		$localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
 		configureModule($module);
 	} else {
@@ -1259,7 +1258,7 @@ sub moduleDescription() {
 	if ($ARGV[1]) {
 		$key = getSubName();
 		if ( $key ne "" ) {
-            print "$origConfModules{$key}{description}\n";
+	    print "$origConfModules{$key}{description}\n";
 		} else {
 			print "module: $ARGV[1] is not in the modules list\n";
 		}
@@ -1274,11 +1273,11 @@ sub moduleDescription() {
 #
 my $USAGE =<<USAGE;
 tuxedo-tomte [COMMAND]
-  list                        List all installable modules with detailed status
-  description MODULE          Shows the module description
+  list			      List all installable modules with detailed status
+  description MODULE	      Shows the module description
   configure MODULE ...|all    Configure an unconfigured module
   reconfigure MODULE...|all   Reconfigure a configured module
-  help                        Prints this message
+  help			      Prints this message
 USAGE
 
 
