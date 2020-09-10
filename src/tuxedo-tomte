@@ -348,7 +348,7 @@ my %origConfModules = (
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
-		hwid => '1',
+		hwid => 1,
 		package => 'no',
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
@@ -779,9 +779,10 @@ sub listStatus {
 		foreach $module (sort keys %localConfModules) {
 			# check version numbers
 			# TODO: test undefined values
-			print "orig\n";
+			print "#### Module: $module\n";
+			print "#### orig\n";
 			print Dumper( %origConfModules );
-			print "local\n";
+			print "#### local\n";
 			print Dumper( %localConfModules );
 			if (int($localConfModules{$module}{version}) == int($origConfModules{$module}{version})) {
 				# same version module
