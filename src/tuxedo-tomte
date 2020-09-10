@@ -481,6 +481,9 @@ sub readConfigFile {
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
 					$localConfModules{$shortname} = { %comp };
+					# convert to number
+					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
+					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
 				}
 			} else {
 				printLog("invalid line in $configFile\n");
