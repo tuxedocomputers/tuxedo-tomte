@@ -343,6 +343,18 @@ my %origConfModules = (
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
     },
+	amdxhcihcdusbquirksuspendfix => {
+		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
+		version => '1',
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
+		hwid => '1',
+		package => 'no',
+		fainame => '',
+		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
+		postconf => 'updateGrub',
+	},
 );
 
 
@@ -687,6 +699,9 @@ sub checkRequirements {
 	if ($boardname =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
+	if (($boardname =~ m/(Polaris15A01)/) || ($boardname =~ m/(Polaris17A01)/)) {
+		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+	}
 
 	#	my @edid = getEDIDData();
 	#	foreach ( @edid ) {
@@ -883,6 +898,29 @@ sub nobootonbattery() {
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
 	printLog("applying nobootonbattery\n");
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "ok");
+	}
+}
+
+
+###############################################################################
+# Fix for some AMD devices where the xhci_hcd driver causes a jump out of
+# suspend immediately on entering suspend
+# affects Polaris15A01 and Polaris17A01
+# returns 0 if failed, 1 if success
+#
+sub amdxhcihcdusbquirksuspendfix() {
+	my $module = shift;
+	my @kernel_parameters = ("xhci_hcd.quirks=35433480192");
+	my $retval;
+	printLog("applying amdxhcihcdusbquirksuspendfix\n");
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
