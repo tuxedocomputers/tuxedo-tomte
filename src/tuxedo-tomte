@@ -320,7 +320,7 @@ my %origConfModules = (
 # TODO modify required
 	i8042fix => {
 		name => 'i8042-fix',
-		version => '1',
+		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
@@ -332,7 +332,7 @@ my %origConfModules = (
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
-		version => '1',
+		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
@@ -344,7 +344,7 @@ my %origConfModules = (
     },
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
-		version => '1',
+		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
@@ -784,7 +784,7 @@ sub listStatus {
 			print Dumper( %origConfModules );
 			print "#### local\n";
 			print Dumper( %localConfModules );
-			if (int($localConfModules{$module}{version}) == int($origConfModules{$module}{version})) {
+			if ($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
 				# same version module
 				if (($localConfModules{$module}{installed} eq 'yes') &&
 				($localConfModules{$module}{required} eq 'no') &&
