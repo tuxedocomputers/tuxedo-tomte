@@ -1038,15 +1038,14 @@ sub getSubName {
 # returns '1' if the name is a valid module name
 # returns '0' if not
 #
-# TODO: must be done with undef
 sub validModuleName {
 	my $moduleName = shift;
 	my $module;
-	print "module: $moduleName\n";
 	foreach $module ( keys %origConfModules ) {
-		if ($origConfModules{$module}{name} eq $moduleName) {
-			print "exists\n";
-			return (1);
+		if (defined $origConfModules{$module}{name}) {
+			if ($origConfModules{$module}{name} eq $moduleName) {
+				return (1);
+			}
 		}
 	}
 	return (0);
