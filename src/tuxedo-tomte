@@ -385,6 +385,7 @@ sub initLogging {
 		return;
 	}
 
+	# check if root permissions available
 	if (! isRoot()) {
 		return;
 	}
@@ -399,6 +400,7 @@ sub initLogging {
 			return;
 		}
 	}
+	# check for logfile
 	if ( -f $logFile ) {
 		# append if logFile exists
 		if ( open $LOGFILE, '>>'.$logFile )
@@ -441,7 +443,7 @@ sub getLoggingTime {
 
 
 ###############################################################################
-# to print into logFile
+# prints into logFile
 #
 sub printLog {
 	my $message = shift;
@@ -490,10 +492,10 @@ sub readConfigFile {
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
 					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
 				} else {
-					printLog("module: $name does not exist\n");
+					printLog("module: $name does not exist");
 				}
 			} else {
-				printLog("invalid line in $configFile\n");
+				printLog("invalid line in $configFile");
 			}
 		}
 		close $FH;
@@ -515,7 +517,7 @@ sub validConfigLine {
 	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
-		printLog("found invalid configuration line in $configFile:\n$line\n");
+		printLog("found invalid configuration line in $configFile:\n$line");
 		return (0);
 	}
 }
@@ -558,7 +560,7 @@ sub initConfigFile {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir\n");
+			printLog("could not create $configDir");
 			print "Could not create $configDir\n";
 			exit (0);
 		}
@@ -570,7 +572,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# create a new configFile
-		printLog("no configfile present ... creating one\n");
+		printLog("no configfile present ... creating one");
 		writeConfigFile();
 		return;
 	}
@@ -587,7 +589,7 @@ sub findActiveEDIDs {
 	my @edidfile;
 
 	if ( !opendir ($dir_handle, $cards_dir)) {
-		printLog("unable to open $cards_dir: $!\n");
+		printLog("unable to open $cards_dir: $!");
 		return @edidfile;
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
@@ -878,7 +880,7 @@ sub i8042fix() {
 	my $module = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
-	printLog("applying i8042fix\n");
+	printLog("applying i8042fix");
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
@@ -900,7 +902,7 @@ sub nobootonbattery() {
 	my $module = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
-	printLog("applying nobootonbattery\n");
+	printLog("applying nobootonbattery");
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
@@ -923,7 +925,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my @kernel_parameters = ("xhci_hcd.quirks=35433480192");
 	my $retval;
-	printLog("applying amdxhcihcdusbquirksuspendfix\n");
+	printLog("applying amdxhcihcdusbquirksuspendfix");
 	$retval = insertGrub($module, \@kernel_parameters);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
@@ -969,7 +971,7 @@ sub insertGrub {
 		}
 		close $grubFH;
     } else {
-		printLog("no $grubFile present or unable to open the file for reading\n");
+		printLog("no $grubFile present or unable to open the file for reading");
 		return (0);
     }
 
@@ -989,7 +991,7 @@ sub insertGrub {
 		print $grubFH @grub_lines;
 		close ($grubFH);
     } else {
-		printLog("no $grubFile present or unable to open the file for writing\n");
+		printLog("no $grubFile present or unable to open the file for writing");
 		return (0);
     }
     return $inserted;
@@ -1009,10 +1011,10 @@ sub insertGrubParameter {
 	}
 	if ($$line =~ m/""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted $$parameter into grub line\n");
+		printLog("inserted $$parameter into grub line");
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted $$parameter into grub line\n");
+		printLog("inserted $$parameter into grub line");
 	}
 	return (1);
 }
@@ -1079,7 +1081,7 @@ sub configureSingleModule {
 	my $moduleName = $ARGV[1];
 	$module = getSubName();
 	if ($module eq "") {
-		printLog("wrong module name\n");
+		printLog("wrong module name");
 		print "wrong module name\n";
 		return;
 	}
@@ -1128,7 +1130,7 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName();
 	if ($module eq "") {
-		printLog("wrong module name\n");
+		printLog("wrong module name");
 		print "wrong module name\n";
 		return;
 	}
