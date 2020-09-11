@@ -784,39 +784,36 @@ sub listStatus {
 
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
-			# check version numbers
-			if (defined $origConfModules{$module}{version}) {
-				# TODO: convert into sub
-				if($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
-					# same version module
-					if (($localConfModules{$module}{installed} eq 'yes') &&
-					($localConfModules{$module}{required} eq 'no') &&
-					($origConfModules{$module}{required} eq 'no')) {
-						# module is installed but should not be
-						$printIt = 1;
-						push(@arr,
-							["$localConfModules{$module}{name}",
-							"$localConfModules{$module}{version}",
-							"$localConfModules{$module}{installed}",
-							"$localConfModules{$module}{blacklisted}",
-							"$localConfModules{$module}{required}"]);
-					}
-					if (($localConfModules{$module}{required} eq 'yes') &&
-					($origConfModules{$module}{required} eq 'yes')) {
-						$noneRequired = 0;
-						$printIt = 1;
-						push(@arr,
-							["$localConfModules{$module}{name}",
-							"$localConfModules{$module}{version}",
-							"$localConfModules{$module}{installed}",
-							"$localConfModules{$module}{blacklisted}",
-							"$localConfModules{$module}{required}"]);
-					}
-				} else {
-					# different version number, is this an update?
-					# TODO: to be implemented in the next version
-					print "something went wrong, update is not implemented yet\n";
+			# TODO: convert into sub
+			if($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
+				# same version module
+				if (($localConfModules{$module}{installed} eq 'yes') &&
+				($localConfModules{$module}{required} eq 'no') &&
+				($origConfModules{$module}{required} eq 'no')) {
+					# module is installed but should not be
+					$printIt = 1;
+					push(@arr,
+						["$localConfModules{$module}{name}",
+						"$localConfModules{$module}{version}",
+						"$localConfModules{$module}{installed}",
+						"$localConfModules{$module}{blacklisted}",
+						"$localConfModules{$module}{required}"]);
 				}
+				if (($localConfModules{$module}{required} eq 'yes') &&
+				($origConfModules{$module}{required} eq 'yes')) {
+					$noneRequired = 0;
+					$printIt = 1;
+					push(@arr,
+						["$localConfModules{$module}{name}",
+						"$localConfModules{$module}{version}",
+						"$localConfModules{$module}{installed}",
+						"$localConfModules{$module}{blacklisted}",
+						"$localConfModules{$module}{required}"]);
+				}
+			} else {
+				# different version number, is this an update?
+				# TODO: to be implemented in the next version
+				print "something went wrong, update is not implemented yet\n";
 			}
 		}
 	} else {
