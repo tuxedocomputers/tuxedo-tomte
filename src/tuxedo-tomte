@@ -485,6 +485,9 @@ sub readConfigFile {
 					# convert to numbers
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
 					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
+				} else {
+					printLog("module: $name does not exist\n");
+					print "no";
 				}
 			} else {
 				printLog("invalid line in $configFile\n");
@@ -1035,10 +1038,14 @@ sub getSubName {
 # returns '1' if the name is a valid module name
 # returns '0' if not
 #
+# TODO: must be done with undef
 sub validModuleName {
-	my $module = shift;
+	my $moduleName = shift;
+	my $module;
+	print "module: $moduleName\n";
 	foreach $module ( keys %origConfModules ) {
-		if (defined $origConfModules{$module}{name}) {
+		if ($origConfModules{$module}{name} eq $moduleName) {
+			print "exists\n";
 			return (1);
 		}
 	}
