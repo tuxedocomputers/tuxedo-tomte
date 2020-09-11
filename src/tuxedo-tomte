@@ -475,7 +475,7 @@ sub readConfigFile {
 			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
-				# TODO: check if module name exists in orig
+				# check if module name exists in orig
 				if (validModuleName($name)) {
 					$shortname = $name;
 					$shortname =~ s/[^a-zA-Z0-9]//g;
@@ -487,7 +487,6 @@ sub readConfigFile {
 					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
 				} else {
 					printLog("module: $name does not exist\n");
-					print "no";
 				}
 			} else {
 				printLog("invalid line in $configFile\n");
@@ -784,7 +783,6 @@ sub listStatus {
 
 	if (readConfigFile()) {
 		foreach $module (sort keys %localConfModules) {
-			# TODO: convert into sub
 			if($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
 				# same version module
 				if (($localConfModules{$module}{installed} eq 'yes') &&
@@ -962,32 +960,32 @@ sub insertGrub {
 	my $inserted = 0;
 
     if ( open $grubFH, "<", $grubFile) {
-	while (<$grubFH>) {
-	    push (@grub_lines, $_);
-	}
-	close $grubFH;
+		while (<$grubFH>) {
+	    	push (@grub_lines, $_);
+		}
+		close $grubFH;
     } else {
-	printLog("no $grubFile present or unable to open the file for reading\n");
+		printLog("no $grubFile present or unable to open the file for reading\n");
 		return (0);
     }
 
     foreach( @grub_lines ) {
-	# find the correct line
-	if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
-		foreach $parameter ( @{$parameters} ) {
-			if (insertGrubParameter(\$_, \$parameter)) {
-				++$inserted;
+		# find the correct line
+		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+			foreach $parameter ( @{$parameters} ) {
+				if (insertGrubParameter(\$_, \$parameter)) {
+					++$inserted;
+				}
 			}
 		}
-	}
     }
 
 	# write the changes into grub config
     if ( open $grubFH, ">", $grubFile ) {
-	print $grubFH @grub_lines;
-	close ($grubFH);
+		print $grubFH @grub_lines;
+		close ($grubFH);
     } else {
-	printLog("no $grubFile present or unable to open the file for writing\n");
+		printLog("no $grubFile present or unable to open the file for writing\n");
 		return (0);
     }
     return $inserted;
