@@ -364,7 +364,7 @@ my %localConfModules = %origConfModules;
 
 # empty hash, will be filled with successfully installed modules
 # as hashes: {modulename}{status}
-# where status should be "ok" or "failed"
+# where status should be "success" or "failed"
 #
 my %configuredModules;
 
@@ -887,7 +887,7 @@ sub i8042fix() {
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "ok");
+		addToConfiguredModules($module, "success");
 	}
 }
 
@@ -909,7 +909,7 @@ sub nobootonbattery() {
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "ok");
+		addToConfiguredModules($module, "success");
 	}
 }
 
@@ -932,7 +932,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "ok");
+		addToConfiguredModules($module, "success");
 	}
 }
 
@@ -943,10 +943,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
-	my %configuredTmpModule = (
-		$module => $status,
-	);
-	@configuredModules{keys %configuredTmpModule} = values %configuredTmpModule;
+	$configuredModules{$module} = $status;
 }
 
 
@@ -1175,12 +1172,11 @@ sub postConfigure {
 	my $exitStatus;
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
-			print "# command: $postConfProgram{$sysProgram}{command}\n";
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
-				postSetModulesState($sysProgram, "failed");
-			} else {
 				postSetModulesState($sysProgram, "success");
+			} else {
+				postSetModulesState($sysProgram, "failed");
 			}
 		}
 	}
@@ -1194,10 +1190,8 @@ sub postSetModulesState {
 	my $sysProgram = shift;
 	my $status = shift;
 	my $module;
-	print "# sysProgram: $sysProgram\n";
-	print "# status: $status\n";
+	$postConfProgram{$sysProgram}{state} = $status;
 	foreach $module (keys %configuredModules) {
-		$postConfProgram{$sysProgram}{state} = $status;
 		$configuredModules{$module}{status} = $status;
 	}
 }
@@ -1217,19 +1211,15 @@ sub listSuccess {
 
 	foreach $confProgram (keys %postConfProgram) {
 		if ($postConfProgram{$confProgram}{state} eq "failed") {
-			print "# state program failed: $postConfProgram{$confProgram}{state}\n";
 			$successOrFailed = 1;
 			push(@failedPrograms, $postConfProgram{$confProgram}{command});
 		}
 	}
 	foreach $confModule (keys %configuredModules) {
-		if ($configuredModules{$confModule}{state} eq "failed") {
-			print "# state module failed: $configuredModules{$confModule}{state}\n";
+		if ($configuredModules{$confModule} eq "failed") {
 			$successOrFailed = 1;
 			push(@failedModules, $confModule);
-		}
-		if ($configuredModules{$confModule}{state} eq "success") {
-			print "# state modules success: $configuredModules{$confModule}{state}\n";
+		} elsif ($configuredModules{$confModule} eq "success") {
 			$successOrFailed = 1;
 			push(@successModules, $confModule);
 		}
@@ -1246,7 +1236,7 @@ sub listSuccess {
 		print "The following post installation programs have failed:\n";
 		printNameDescriptionPrograms(@failedPrograms);
 	}
-	if ($successOrFailed) {
+	if (! $successOrFailed) {
 		print "Nothing has been configured\n";
 	}
 }
@@ -1258,7 +1248,7 @@ sub listSuccess {
 sub printNameDescriptionModules {
 	my @elements = @_;
 	foreach (@elements) {
-		print "$_: $origConfModules{$_}{description}\n";
+		print "$origConfModules{$_}{name}: $origConfModules{$_}{description}\n";
 	}
 }
 
