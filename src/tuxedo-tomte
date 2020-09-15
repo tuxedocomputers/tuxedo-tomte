@@ -1177,8 +1177,9 @@ sub postConfigure {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
-				$postConfProgram{$sysProgram}{state} = "failed";
-				postSetModulesFailed($sysProgram);
+				postSetModulesState($sysProgram, "failed");
+			} else {
+				postSetModulesState($sysProgram, "success");
 			}
 		}
 	}
@@ -1188,11 +1189,13 @@ sub postConfigure {
 ###############################################################################
 # sets all modules dependant of some system program to work to status failed
 #
-sub postSetModulesFailed {
+sub postSetModulesState {
 	my $sysProgram = shift;
+	my $status = shift;
 	my $module;
 	foreach $module (keys %configuredModules) {
-		$configuredModules{$module}{status} = "failed";
+		$postConfProgram{$sysProgram}{state} = $status;
+		$configuredModules{$module}{status} = $status;
 	}
 }
 
@@ -1207,17 +1210,21 @@ sub listSuccess {
 	my @failedPrograms;
 	my @failedModules;
 	my @successModules;
+	my $successOrFailed = 0;
 
 	foreach $confProgram (keys %postConfProgram) {
 		if ($postConfProgram{$confProgram}{state} eq "failed") {
+			$successOrFailed = 1;
 			push(@failedPrograms, $postConfProgram{$confProgram}{command});
 		}
 	}
 	foreach $confModule (keys %configuredModules) {
 		if ($configuredModules{$confModule}{state} eq "failed") {
+			$successOrFailed = 1;
 			push(@failedModules, $confModule);
 		}
-		if ($configuredModules{$confModule}{state} eq "ok") {
+		if ($configuredModules{$confModule}{state} eq "success") {
+			$successOrFailed = 1;
 			push(@successModules, $confModule);
 		}
 	}
@@ -1232,6 +1239,9 @@ sub listSuccess {
 	if (@failedPrograms) {
 		print "The following post installation programs have failed:\n";
 		printNameDescriptionPrograms(@failedPrograms);
+	}
+	if ($successOrFailed) {
+		print "Nothing has been configured\n";
 	}
 }
 
@@ -1350,10 +1360,14 @@ if (@ARGV != 0) {
 				initConfigFile();
 				configureAllModules();
 				transferConfigValues();
+				postConfigure();
+				listSuccess();
 				writeConfigFile();
 			} else {
 				initConfigFile();
 				configureSingleModule();
+				postConfigure();
+				listSuccess();
 				transferConfigValues();
 				writeConfigFile();
 			}
