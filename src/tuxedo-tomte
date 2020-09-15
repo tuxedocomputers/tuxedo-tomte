@@ -1175,6 +1175,7 @@ sub postConfigure {
 	my $exitStatus;
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
+			print "# command: $postConfProgram{$sysProgram}{command}\n";
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
 				postSetModulesState($sysProgram, "failed");
@@ -1193,6 +1194,8 @@ sub postSetModulesState {
 	my $sysProgram = shift;
 	my $status = shift;
 	my $module;
+	print "# sysProgram: $sysProgram\n";
+	print "# status: $status\n";
 	foreach $module (keys %configuredModules) {
 		$postConfProgram{$sysProgram}{state} = $status;
 		$configuredModules{$module}{status} = $status;
@@ -1214,16 +1217,19 @@ sub listSuccess {
 
 	foreach $confProgram (keys %postConfProgram) {
 		if ($postConfProgram{$confProgram}{state} eq "failed") {
+			print "# state program failed: $postConfProgram{$confProgram}{state}\n";
 			$successOrFailed = 1;
 			push(@failedPrograms, $postConfProgram{$confProgram}{command});
 		}
 	}
 	foreach $confModule (keys %configuredModules) {
 		if ($configuredModules{$confModule}{state} eq "failed") {
+			print "# state module failed: $configuredModules{$confModule}{state}\n";
 			$successOrFailed = 1;
 			push(@failedModules, $confModule);
 		}
 		if ($configuredModules{$confModule}{state} eq "success") {
+			print "# state modules success: $configuredModules{$confModule}{state}\n";
 			$successOrFailed = 1;
 			push(@successModules, $confModule);
 		}
