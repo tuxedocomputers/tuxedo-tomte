@@ -56,20 +56,21 @@ my %postConfProgram = (
 # e.g. no-boot-on-battery = nobootonbattery
 #
 #   name			name of package or name of solution,
-#				is 'short name' without '-'
+#					is 'short name' without '-'
 #   version			the package or solution version
 #   installed		'no' not installed / 'yes' installed / 'failed' failed to install
-#				'undef' if unknown
+#					'undef' if unknown
 #   blacklisted		'yes' or 'no' will not be configured on upgrade, install or deinstall
-#				'undef' if unknown
+#					'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
-#				'undef' if unknown
+#					'undef' if unknown
 #   hwid			the environment (HW or SW) are in a certain defined state
 #   package			package name or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module, empty if none
-#				the command of the module is defined in	$postConfModule{$postconf}{command}
+#					the command of the module is defined in
+#					$postConfModule{$postconf}{command}
 #
 my %origConfModules = (
 	#	tuxedokeyboard => {
@@ -335,7 +336,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -407,7 +408,6 @@ sub initLogging {
 		{
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
-			print $LOGFILE "$timestamp start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
@@ -420,7 +420,6 @@ sub initLogging {
 		if ( open $LOGFILE, '>'.$logFile ) {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
-			print $LOGFILE "$timestamp start logging\n";
 			close $LOGFILE;
 			return;
 		} else {
@@ -517,7 +516,7 @@ sub validConfigLine {
 	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
-		printLog("found invalid configuration line in $configFile:\n$line");
+		printLog("Found invalid configuration line in $configFile:\n$line");
 		return (0);
 	}
 }
@@ -572,7 +571,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# create a new configFile
-		printLog("no configfile present ... creating one");
+		printLog("No configfile present ... creating one");
 		writeConfigFile();
 		return;
 	}
@@ -817,12 +816,12 @@ sub listStatus {
 			} else {
 				# different version number, is this an update?
 				# TODO: to be implemented in the next version
-				print "something went wrong, update is not implemented yet\n";
+				print "Something went wrong, update is not implemented yet\n";
 			}
 		}
 	} else {
 		# no readable configfile
-		print "trying to get a list from the hardware configuration ...\n";
+		print "Trying to get a list from the hardware configuration ...\n";
 		checkRequirements();
 		foreach $module (sort keys %origConfModules) {
 			# only show required modules
@@ -1081,8 +1080,8 @@ sub configureSingleModule {
 	my $moduleName = $ARGV[1];
 	$module = getSubName();
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "wrong module name\n";
+		printLog("Wrong module name");
+		print "Wrong module name\n";
 		return;
 	}
 	checkRequirements();
@@ -1130,8 +1129,8 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName();
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "wrong module name\n";
+		printLog("Wrong module name");
+		print "Wrong module name\n";
 		return;
 	}
 	checkRequirements();
@@ -1272,7 +1271,7 @@ sub moduleDescription() {
 			print "module: $ARGV[1] is not in the modules list\n";
 		}
     } else {
-		print "missing module name\n";
+		print "Missing module name\n";
 	}
 }
 
@@ -1282,11 +1281,11 @@ sub moduleDescription() {
 #
 my $USAGE =<<USAGE;
 tuxedo-tomte [COMMAND]
-  list			      List all installable modules with detailed status
-  description MODULE	      Shows the module description
+  list                        List all installable modules with detailed status
+  description MODULE          Shows the module description
   configure MODULE ...|all    Configure an unconfigured module
   reconfigure MODULE...|all   Reconfigure a configured module
-  help			      Prints this message
+  help                        Prints this message
 USAGE
 
 
@@ -1326,14 +1325,25 @@ sub isRoot {
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
 if (@ARGV != 0) {
+	my %options;
+	@options{"configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
+	if (exists $options{$ARGV[0]} && (! isRoot() )) {
+		print "You must have root access to use this option\n";
+		exit (0);
+	}
 	if ($ARGV[0] eq "list") {
 		initLogging();
 		listStatus();
+	} elsif ($ARGV[0] eq "description") {
+		moduleDescription();
+	} elsif ($ARGV[0] eq "help") {
+		help();
 	} elsif ($ARGV[0] eq "FAI") {
 		print "Starting tuxedo-tomte in FAI modus\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 	} elsif ($ARGV[0] eq "configure") {
+		# check if there is a second argument
 		if (defined $ARGV[1]) {
 			initLogging();
 			if ($ARGV[1] eq "all") {
@@ -1348,7 +1358,7 @@ if (@ARGV != 0) {
 				writeConfigFile();
 			}
 		} else {
-			print "module name or \"all\" missing\n";
+			print "Module name or \"all\" missing\n";
 		}
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
@@ -1366,7 +1376,7 @@ if (@ARGV != 0) {
 			writeConfigFile();
 		}
 	} elsif ($ARGV[0] eq "update\n") {
-		print "does nothing yet\n";
+		print "update does nothing yet\n";
 		initLogging();
 		initConfigFile();
 		updateAllModules();
@@ -1376,10 +1386,6 @@ if (@ARGV != 0) {
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
 		print "unblacklist, does nothing yet\n";
-	} elsif ($ARGV[0] eq "description") {
-		moduleDescription();
-	} elsif ($ARGV[0] eq "help") {
-		help();
 	} else {
 		print "Unknown command: $ARGV[0]\n";
 		help();
