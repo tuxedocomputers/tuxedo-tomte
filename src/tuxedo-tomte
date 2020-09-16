@@ -1080,7 +1080,7 @@ sub configureSingleModule {
 	my $moduleName = $ARGV[1];
 	$module = getSubName($moduleName);
 	if ($module eq "") {
-		printLog("Wrong module name");
+		printLog("wrong module name");
 		print "Wrong module name\n";
 		return;
 	}
