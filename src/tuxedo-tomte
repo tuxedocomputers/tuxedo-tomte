@@ -1159,12 +1159,40 @@ sub reconfigureSingleModule {
 sub blacklist() {
 	my $moduleName = $ARGV[1];
 	my $module = getSubName($moduleName);
+	if ($module eq '') {
+		print "Module $moduleName does not exist\n";
+		return;
+	}
+	if ($localConfModules{$module}{blacklisted} eq 'yes') {
+		print "Module $moduleName is already blacklisted\n";
+		return;
+	}
+	if ($localConfModules{$module}{blacklisted} eq 'no') {
+		print "Blacklisting module $moduleName\n";
+		$localConfModules{$module}{blacklisted} = 'yes';
+		return;
+	}
 }
 
 ###############################################################################
 # unblacklists a module
 #
 sub unblacklist() {
+	my $moduleName = $ARGV[1];
+	my $module = getSubName($moduleName);
+	if ($module eq '') {
+		print "Module $moduleName does not exist\n";
+		return;
+	}
+	if ($localConfModules{$module}{blacklisted} eq 'no') {
+		print "Module $moduleName is not blacklisted\n";
+		return;
+	}
+	if ($localConfModules{$module}{blacklisted} eq 'yes') {
+		print "Unblacklisting module $moduleName\n";
+		$localConfModules{$module}{blacklisted} = 'no';
+		return;
+	}
 }
 
 ###############################################################################
