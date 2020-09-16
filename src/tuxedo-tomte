@@ -1463,17 +1463,17 @@ if (@ARGV != 0) {
 			initLogging();
 			initConfigFile();
 			blacklist();
+			transferConfigValues();
 			writeConfigFile();
 		}
-		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
 		if (defined $ARGV[1]) {
 			initLogging();
 			initConfigFile();
 			unblacklist();
+			transferConfigValues();
 			writeConfigFile();
 		}
-		print "unblacklist, does nothing yet\n";
 	} else {
 		print "Unknown command: $ARGV[0]\n";
 		help();
