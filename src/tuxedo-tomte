@@ -348,7 +348,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -1082,6 +1082,7 @@ sub configureSingleModule {
 		return;
 	}
 	checkRequirements();
+
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
@@ -1124,16 +1125,26 @@ sub reconfigureAllModules {
 #
 sub reconfigureSingleModule {
 	my $module;
+	my $moduleName = $ARGV[1];
 	$module = getSubName();
 	if ($module eq "") {
-		printLog("Wrong module name");
+		printLog("wrong module name");
 		print "Wrong module name\n";
 		return;
 	}
 	checkRequirements();
+
 	if ( $localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
 		configureModule($module);
+	} else {
+		print "Module: $moduleName cannot be installed because:\n";
+	}
+	if ( $localConfModules{$module}{blacklisted} eq 'yes' ) {
+		print "- it is blacklisted (maybe use 'unblacklist')\n";
+	}
+	if ( $origConfModules{$module}{required} eq 'no' ) {
+		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
 
@@ -1373,17 +1384,25 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "remove") {
 		print "remove, does nothing yet\n";
 	} elsif ($ARGV[0] eq "reconfigure") {
-		initLogging();
-		if ($ARGV[1] eq "all") {
-			initConfigFile();
-			reconfigureAllModules();
-			transferConfigValues();
-			writeConfigFile();
-		} else {	
-			initConfigFile();
-			reconfigureSingleModule();
-			transferConfigValues();
-			writeConfigFile();
+		if (defined $ARGV[1]) {
+			initLogging();
+			if ($ARGV[1] eq "all") {
+				initConfigFile();
+				reconfigureAllModules();
+				postConfigure();
+				listSuccess();
+				transferConfigValues();
+				writeConfigFile();
+			} else {	
+				initConfigFile();
+				reconfigureSingleModule();
+				postConfigure();
+				listSuccess();
+				transferConfigValues();
+				writeConfigFile();
+			}
+		} else {
+			print "Module name or \"all\" missing\n";
 		}
 	} elsif ($ARGV[0] eq "update\n") {
 		print "update does nothing yet\n";
