@@ -1018,11 +1018,14 @@ sub insertGrubParameter {
 
 ###############################################################################
 # parses sub name from %origConfModules list from given module parameter name
+# returns the name of the module vector of found
+# returns an empty string if not found
 #
 sub getSubName {
+	my $moduleName = shift;
 	my $module;
 	foreach $module ( keys %origConfModules ) {
-		if ( $ARGV[1] eq $origConfModules{$module}{name} ) {
+		if ( $moduleName eq $origConfModules{$module}{name} ) {
 			return $module;
 		}
 	}
@@ -1075,7 +1078,7 @@ sub configureAllModules {
 sub configureSingleModule {
 	my $module;
 	my $moduleName = $ARGV[1];
-	$module = getSubName();
+	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("Wrong module name");
 		print "Wrong module name\n";
@@ -1126,7 +1129,7 @@ sub reconfigureAllModules {
 sub reconfigureSingleModule {
 	my $module;
 	my $moduleName = $ARGV[1];
-	$module = getSubName();
+	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name");
 		print "Wrong module name\n";
@@ -1148,6 +1151,21 @@ sub reconfigureSingleModule {
 	}
 }
 
+
+
+###############################################################################
+# blacklists a module
+#
+sub blacklist() {
+	my $moduleName = $ARGV[1];
+	my $module = getSubName($moduleName);
+}
+
+###############################################################################
+# unblacklists a module
+#
+sub unblacklist() {
+}
 
 ###############################################################################
 # TODO in next version
@@ -1279,13 +1297,14 @@ sub printNameDescriptionPrograms {
 # show description of module
 #
 sub moduleDescription() {
-	my $key;
-	if ($ARGV[1]) {
-		$key = getSubName();
-		if ( $key ne "" ) {
-	    print "$origConfModules{$key}{description}\n";
+	my $moduleName = $ARGV[1];
+	my $module;
+	if ($moduleName) {
+		$module = getSubName($moduleName);
+		if ( $module ne "" ) {
+	    print "$origConfModules{$module}{description}\n";
 		} else {
-			print "module: $ARGV[1] is not in the modules list\n";
+			print "module: $moduleName is not in the modules list\n";
 		}
     } else {
 		print "Missing module name\n";
@@ -1412,8 +1431,20 @@ if (@ARGV != 0) {
 		transferConfigValues();
 		writeConfigFile();
 	} elsif ($ARGV[0] eq "blacklist") {
+		if (defined $ARGV[1]) {
+			initLogging();
+			initConfigFile();
+			blacklist();
+			writeConfigFile();
+		}
 		print "blacklist, does nothing yet\n";
 	} elsif ($ARGV[0] eq "unblacklist") {
+		if (defined $ARGV[1]) {
+			initLogging();
+			initConfigFile();
+			unblacklist();
+			writeConfigFile();
+		}
 		print "unblacklist, does nothing yet\n";
 	} else {
 		print "Unknown command: $ARGV[0]\n";
