@@ -3,8 +3,8 @@ use strict qw(vars subs);
 use warnings;
 
 # TODO remove testing stuff
-my $grubFile = '/etc/default/grub';
-#my $grubFile = '/home/pablo/grub';
+#my $grubFile = '/etc/default/grub';
+my $grubFile = '/home/pablo/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -820,8 +820,10 @@ sub listStatus {
 		}
 	} else {
 		# no readable configfile
-		print "Trying to get a list from the hardware configuration ...\n";
-		checkRequirements();
+		if (isRoot()) {
+			print "Writing configfile\n";
+			writeConfigFile();
+		}
 		foreach $module (sort keys %origConfModules) {
 			# only show required modules
 			if ($origConfModules{$module}{required} eq 'yes') {
@@ -1396,6 +1398,7 @@ if (@ARGV != 0) {
 	}
 	if ($ARGV[0] eq "list") {
 		initLogging();
+		checkRequirements();
 		listStatus();
 	} elsif ($ARGV[0] eq "description") {
 		moduleDescription();
