@@ -15,4 +15,30 @@ my %firstHash = (
 	},
 );
 
+my $module;
+
+foreach $module (sort keys %firstHash) {
+	print "#### Module: $module\n";
+	print Dumper( %firstHash );
+	if (int($firstHash{$module}{aString}) == int($firstHash{$module}{aNumber})) {
+		print "is equal\n";
+	} else {
+		print "is NOT equal\n";
+	}
+}
+
+print "second run\n";
+
+foreach $module (sort keys %firstHash) {
+	print "#### Module: $module\n";
+	print Dumper( %firstHash );
+	if (int($firstHash{$module}{aString}) == int($firstHash{$module}{aNumber})) {
+		print "is equal\n";
+	} else {
+		print "is NOT equal\n";
+	}
+}
+
+
+
 

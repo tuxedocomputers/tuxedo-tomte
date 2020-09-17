@@ -3,8 +3,8 @@ use strict qw(vars subs);
 use warnings;
 
 # TODO remove testing stuff
-#my $grubFile = '/etc/default/grub';
-my $grubFile = '/home/pablo/grub';
+my $grubFile = '/etc/default/grub';
+#my $grubFile = '/home/pablo/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -348,7 +348,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
