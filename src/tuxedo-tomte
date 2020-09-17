@@ -659,7 +659,7 @@ sub checkRequirements {
 	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
 	my $boardvendor;
 
-	# these will be installed on all notebooks, always
+	# TODO: these will be installed on all notebooks, always
 	#	$origConfModules{tuxedokeyboard}{required} = 1;
 	#	$origConfModules{tuxedoccwmi}{required} =1 ;
 	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
@@ -802,8 +802,7 @@ sub listStatus {
 						"$localConfModules{$module}{blacklisted}",
 						"$localConfModules{$module}{required}"]);
 				}
-				if (($localConfModules{$module}{required} eq 'yes') &&
-				($origConfModules{$module}{required} eq 'yes')) {
+				if ($localConfModules{$module}{required} eq 'yes') {
 					$noneRequired = 0;
 					$printIt = 1;
 					push(@arr,
@@ -1465,6 +1464,8 @@ if (@ARGV != 0) {
 			blacklist();
 			transferConfigValues();
 			writeConfigFile();
+		} else {
+			print "Module name missing\n";
 		}
 	} elsif ($ARGV[0] eq "unblacklist") {
 		if (defined $ARGV[1]) {
@@ -1473,6 +1474,8 @@ if (@ARGV != 0) {
 			unblacklist();
 			transferConfigValues();
 			writeConfigFile();
+		} else {
+			print "Module name missing\n";
 		}
 	} else {
 		print "Unknown command: $ARGV[0]\n";
