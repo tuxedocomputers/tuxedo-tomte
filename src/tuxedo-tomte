@@ -35,7 +35,7 @@ my %postConfProgram = (
 		command => 'update-grub',
 		trigger => 0,
 		status => 'undef',
-		description => "builds grub configuration from grub file",
+		description => 'reconfigures grub according to grub file',
 	},
 );
 
@@ -58,19 +58,23 @@ my %postConfProgram = (
 #   name			name of package or name of solution,
 #					is 'short name' without '-'
 #   version			the package or solution version
-#   installed		'no' not installed / 'yes' installed / 'failed' failed to install
-#					'undef' if unknown
-#   blacklisted		'yes' or 'no' will not be configured on upgrade, install or deinstall
-#					'undef' if unknown
+#   installed		'no' not installed / 'yes' installed / 'failed' failed to
+#					install, 'undef' if unknown
+#   blacklisted		'yes' or 'no' will not be configured on upgrade, install
+#					or deinstall, 'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
 #   hwid			the environment (HW or SW) are in a certain defined state
-#   package			package name or 'no', there is a deb or rpm package as a solution
+#   package			package name or 'no', there is a deb or rpm package as a
+#					solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
-#   postconf		command module to execute after installation of module, empty if none
-#					the command of the module is defined in
+#   postconf		command module to execute after installation of module,
+#					empty if none, the command of the module is defined in
 #					$postConfModule{$postconf}{command}
+#	upgrade			if the system determines this is an upgrade then 'yes'
+#					else 'no'
+#	upgraded		if module was upgraded 'yes', else 'no'
 #
 my %origConfModules = (
 	#	tuxedokeyboard => {
@@ -330,6 +334,8 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		postconf => 'updateGrub',
+		upgrade => 'no',
+		upgraded => 'no',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -342,6 +348,8 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
+		upgrade => 'no',
+		upgraded => 'no',
     },
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -354,6 +362,8 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
 		postconf => 'updateGrub',
+		upgrade => 'no',
+		upgraded => 'no',
 	},
 );
 
