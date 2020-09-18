@@ -818,56 +818,35 @@ sub listStatus {
 	my $noneRequired = 1;
 	my $printIt = 0;
 
-	if (readConfigFile()) {
-		foreach $module (sort keys %localConfModules) {
-			if($localConfModules{$module}{version} == $origConfModules{$module}{version}) {
-				# same version module
-				if (($localConfModules{$module}{installed} eq 'yes') &&
-				($localConfModules{$module}{required} eq 'no') &&
-				($origConfModules{$module}{required} eq 'no')) {
-					# module is installed but should not be
-					$printIt = 1;
-					push(@arr,
-						["$localConfModules{$module}{name}",
-						"$localConfModules{$module}{version}",
-						"$localConfModules{$module}{installed}",
-						"$localConfModules{$module}{blacklisted}",
-						"$localConfModules{$module}{required}"]);
-				}
-				if ($localConfModules{$module}{required} eq 'yes') {
-					$noneRequired = 0;
-					$printIt = 1;
-					push(@arr,
-						["$localConfModules{$module}{name}",
-						"$localConfModules{$module}{version}",
-						"$localConfModules{$module}{installed}",
-						"$localConfModules{$module}{blacklisted}",
-						"$localConfModules{$module}{required}"]);
-				}
-			} else {
-				# different version number, is this an update?
-				# TODO: to be implemented in the next version
-				print "Something went wrong, update is not implemented yet\n";
+	foreach $module (sort keys %localConfModules) {
+		if($origConfModules{$module}{upgrade} eq 'no') {
+			# same version module
+			if (($localConfModules{$module}{installed} eq 'yes') &&
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
+				# module is installed but should not be
+				$printIt = 1;
+				push(@arr,
+					["$localConfModules{$module}{name}",
+					"$localConfModules{$module}{version}",
+					"$localConfModules{$module}{installed}",
+					"$localConfModules{$module}{blacklisted}",
+					"$localConfModules{$module}{required}"]);
 			}
-		}
-	} else {
-		# no readable configfile
-		if (isRoot()) {
-			print "Writing configfile\n";
-			writeConfigFile();
-		}
-		foreach $module (sort keys %origConfModules) {
-			# only show required modules
-			if ($origConfModules{$module}{required} eq 'yes') {
+			if ($localConfModules{$module}{required} eq 'yes') {
 				$noneRequired = 0;
 				$printIt = 1;
 				push(@arr,
-					["$origConfModules{$module}{name}",
-					"$origConfModules{$module}{version}",
-					"unknown",
-					"unknown",
-					"$origConfModules{$module}{required}"]);
+					["$localConfModules{$module}{name}",
+					"$localConfModules{$module}{version}",
+					"$localConfModules{$module}{installed}",
+					"$localConfModules{$module}{blacklisted}",
+					"$localConfModules{$module}{required}"]);
 			}
+		} else {
+			# different version number, is this an update?
+			# TODO: to be implemented in the next version
+			print "Something went wrong, update is not implemented yet\n";
 		}
 	}
 	if ($printIt) {
@@ -880,8 +859,8 @@ sub listStatus {
 			write;
 		}
 	}
-if ($noneRequired) {
-print "No fixes available for this system\n";
+	if ($noneRequired) {
+		print "No fixes available for this system\n";
 	}
 }
 
@@ -901,6 +880,8 @@ sub transferConfigValues {
 			$origConfModules{$name}{upgraded} = 'no';
 		} else {
 			$origConfModules{$name}{installed} = $localConfModules{$name}{installed};
+			$origConfModules{$name}{upgrade} = 'no';
+			$origConfModules{$name}{upgraded} = 'no';
 		}
 	}
 }
