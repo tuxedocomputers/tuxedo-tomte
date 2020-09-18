@@ -533,22 +533,44 @@ sub validConfigLine {
 }
 
 
+
 ###############################################################################
 # overwrites $configFile with data from $origConfModules if it does not exist
-# exits program if configfile can not be written
 #
-sub writeConfigFileAbsent {
+sub writeConfigFile {
 	my $FH;
+	my $installed;
+	my $version;
+	my $hwid;
 	if ( open $FH, '>', $configFile ) {
 		print $FH "# name version installed blacklisted required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
+			if ($origConfModules{$name}{upgrade} eq 'yes') {
+				# upgrade available
+				if ($origConfModules{$name}{upgraded} eq 'yes') {
+					# upgrade was executed
+					$version = $origConfModules{$name}{version};
+					$hwid = $origConfModules{$name}{hwid};
+					$installed = $origConfModules{$name}{installed};
+				} else {
+					# upgrade was not executed
+					$version = $localConfModules{$name}{version};
+					$hwid = $localConfModules{$name}{hwid};
+					$installed = $localConfModules{$name}{installed};
+				}
+			} else {
+				# no upgrade available
+				$version = $origConfModules{$name}{version};
+				$hwid = $origConfModules{$name}{hwid};
+				$installed = $origConfModules{$name}{installed};
+			}
 			print $FH "$origConfModules{$name}{name} ".
-					"$origConfModules{$name}{version} ".
-					"$origConfModules{$name}{installed} ".
+					"$version ".
+					"$installed ".
 					"$origConfModules{$name}{blacklisted} ".
 					"$origConfModules{$name}{required} ".
-					"$origConfModules{$name}{hwid}\n";
+					"$hwid\n";
 		}
 		close $FH;
 	} else {
@@ -556,15 +578,6 @@ sub writeConfigFileAbsent {
 		print "Can't write to configfile: $configFile\n";
 		exit (0);
 	}
-}
-
-
-
-###############################################################################
-# overwrites $configFile with data from $origConfModules if it does not exist
-#
-sub writeFinalConfigFile {
-	
 }
 
 
@@ -592,7 +605,7 @@ sub initConfigFile {
 	} else {
 		# create a new configFile
 		printLog("No configfile present ... creating one");
-		writeConfigFileAbsent();
+		writeConfigFile();
 		return;
 	}
 }
@@ -841,7 +854,7 @@ sub listStatus {
 		# no readable configfile
 		if (isRoot()) {
 			print "Writing configfile\n";
-			writeConfigFileAbsent();
+			writeConfigFile();
 		}
 		foreach $module (sort keys %origConfModules) {
 			# only show required modules
