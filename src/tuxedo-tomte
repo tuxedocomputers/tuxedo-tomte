@@ -534,10 +534,10 @@ sub validConfigLine {
 
 
 ###############################################################################
-# overwrites $configFile with data from $origConfModules
+# overwrites $configFile with data from $origConfModules if it does not exist
 # exits program if configfile can not be written
 #
-sub writeConfigFile {
+sub writeConfigFileAbsent {
 	my $FH;
 	if ( open $FH, '>', $configFile ) {
 		print $FH "# name version installed blacklisted required hwid\n";
@@ -556,6 +556,15 @@ sub writeConfigFile {
 		print "Can't write to configfile: $configFile\n";
 		exit (0);
 	}
+}
+
+
+
+###############################################################################
+# overwrites $configFile with data from $origConfModules if it does not exist
+#
+sub writeFinalConfigFile {
+
 }
 
 
@@ -583,7 +592,7 @@ sub initConfigFile {
 	} else {
 		# create a new configFile
 		printLog("No configfile present ... creating one");
-		writeConfigFile();
+		writeConfigFileAbsent();
 		return;
 	}
 }
@@ -832,7 +841,7 @@ sub listStatus {
 		# no readable configfile
 		if (isRoot()) {
 			print "Writing configfile\n";
-			writeConfigFile();
+			writeConfigFileAbsent();
 		}
 		foreach $module (sort keys %origConfModules) {
 			# only show required modules
