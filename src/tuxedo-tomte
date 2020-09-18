@@ -28,13 +28,13 @@ use Data::Dumper qw(Dumper);
 # initial definition of post configuration modules
 #   command		the command to be executed on the system
 #   trigger		'1' / 'undef' wether the command should be executed
-#   state		'undef' / 'failed' wether the command execution failed
+#   status		'undef' / 'failed' wether the command execution failed
 #
 my %postConfProgram = (
 	updateGrub => {
 		command => 'update-grub',
 		trigger => 0,
-		state => 'undef',
+		status => 'undef',
 		description => "builds grub configuration from grub file",
 	},
 );
@@ -760,8 +760,7 @@ sub checkRequirements {
 
 
 ###############################################################################
-# print status from all packages
-# in a nice formated output
+# print status from all modules in a nice formated output
 # uses the data from the local configuration file if available
 # else it checks the hardware
 #
@@ -1248,7 +1247,7 @@ sub postSetModulesState {
 	my $sysProgram = shift;
 	my $status = shift;
 	my $module;
-	$postConfProgram{$sysProgram}{state} = $status;
+	$postConfProgram{$sysProgram}{status} = $status;
 	foreach $module (keys %configuredModules) {
 		$configuredModules{$module}{status} = $status;
 	}
@@ -1268,7 +1267,7 @@ sub listSuccess {
 	my $successOrFailed = 0;
 
 	foreach $confProgram (keys %postConfProgram) {
-		if ($postConfProgram{$confProgram}{state} eq "failed") {
+		if ($postConfProgram{$confProgram}{status} eq "failed") {
 			$successOrFailed = 1;
 			push(@failedPrograms, $postConfProgram{$confProgram}{command});
 		}
