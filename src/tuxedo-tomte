@@ -1187,7 +1187,7 @@ sub blacklist() {
 	}
 	if ($localConfModules{$module}{blacklisted} eq 'no') {
 		print "Blacklisting module $moduleName\n";
-		$localConfModules{$module}{blacklisted} = 'yes';
+		$origConfModules{$module}{blacklisted} = 'yes';
 		return;
 	}
 }
@@ -1208,7 +1208,7 @@ sub unblacklist() {
 	}
 	if ($localConfModules{$module}{blacklisted} eq 'yes') {
 		print "Unblacklisting module $moduleName\n";
-		$localConfModules{$module}{blacklisted} = 'no';
+		$origConfModules{$module}{blacklisted} = 'no';
 		return;
 	}
 }
