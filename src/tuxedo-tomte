@@ -334,8 +334,8 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		postconf => 'updateGrub',
-		upgrade => 'no',
-		upgraded => 'no',
+		upgrade => '',
+		upgraded => '',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -348,8 +348,8 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
-		upgrade => 'no',
-		upgraded => 'no',
+		upgrade => '',
+		upgraded => '',
     },
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -362,13 +362,14 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
 		postconf => 'updateGrub',
-		upgrade => 'no',
-		upgraded => 'no',
+		upgrade => '',
+		upgraded => '',
 	},
 );
 
 
 # hash to load the configfile
+# is a copy from origConfModules to evade undefined values
 my %localConfModules = %origConfModules;
 
 
@@ -483,7 +484,7 @@ sub readConfigFile {
 			if ($line =~ m/^#/) {
 				next;
 			}
-			# ignore empty files
+			# ignore empty lines
 			if ($line =~ m/^(\s)*$/) {
 				next;
 			}
@@ -857,8 +858,8 @@ sub listStatus {
 			write;
 		}
 	}
-	if ($noneRequired) {
-		print "No fixes available for this system\n";
+if ($noneRequired) {
+print "No fixes available for this system\n";
 	}
 }
 
@@ -867,10 +868,18 @@ sub listStatus {
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
 #
-sub transferConfigValues {
+transferConfigValues {
 	my $name;
 	foreach $name (sort keys %localConfModules) {
+		# always copy blacklist status
 		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
+		if (($localConfModules{$name}{version} != $origConfModules{$name}{version}) or ($localConfModules{$name}{hwid} != $origConfModules{$name}{hwid})) {
+			# version missmatch => upgrade necessary
+			$origConfModules{$name}{upgrade} = 'yes';
+			$origConfModules{$name}{upgraded} = 'no';
+		} else {
+			$origConfModules{$name}{installed} = $localConfModules{$name}{installed};
+		}
 	}
 }
 
