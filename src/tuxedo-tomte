@@ -1079,7 +1079,6 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
-	checkRequirements();
 	foreach $module (keys %origConfModules) {
 		if ( $origConfModules{$module}{installed} eq 'no' &&
 			$localConfModules{$module}{blacklisted} eq 'no' &&
@@ -1103,7 +1102,6 @@ sub configureSingleModule {
 		print "Wrong module name\n";
 		return;
 	}
-	checkRequirements();
 
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blacklisted} eq 'no' &&
@@ -1131,7 +1129,6 @@ sub configureSingleModule {
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
-	checkRequirements();
 	foreach $module (keys %origConfModules) {
 		if ( $localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
@@ -1154,7 +1151,6 @@ sub reconfigureSingleModule {
 		print "Wrong module name\n";
 		return;
 	}
-	checkRequirements();
 
 	if ( $localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
@@ -1402,6 +1398,14 @@ sub isRoot {
 
 
 ###############################################################################
+# checks system requirements, loads configfile
+#
+sub prepareValues {
+	checkRequirements();
+}
+
+
+###############################################################################
 ###############################################################################
 # MAIN PROGRAM
 
@@ -1416,7 +1420,7 @@ if (@ARGV != 0) {
 	}
 	if ($ARGV[0] eq "list") {
 		initLogging();
-		checkRequirements();
+		prepareValues();
 		listStatus();
 	} elsif ($ARGV[0] eq "description") {
 		moduleDescription();
@@ -1430,6 +1434,7 @@ if (@ARGV != 0) {
 		# check if there is a second argument
 		if (defined $ARGV[1]) {
 			initLogging();
+			prepareValues();
 			if ($ARGV[1] eq "all") {
 				initConfigFile();
 				configureAllModules();
@@ -1453,6 +1458,7 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "reconfigure") {
 		if (defined $ARGV[1]) {
 			initLogging();
+			prepareValues();
 			if ($ARGV[1] eq "all") {
 				initConfigFile();
 				reconfigureAllModules();
@@ -1474,6 +1480,7 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "update\n") {
 		print "update does nothing yet\n";
 		initLogging();
+		prepareValues();
 		initConfigFile();
 		updateAllModules();
 		transferConfigValues();
@@ -1481,6 +1488,7 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "blacklist") {
 		if (defined $ARGV[1]) {
 			initLogging();
+			prepareValues();
 			initConfigFile();
 			blacklist();
 			transferConfigValues();
@@ -1491,6 +1499,7 @@ if (@ARGV != 0) {
 	} elsif ($ARGV[0] eq "unblacklist") {
 		if (defined $ARGV[1]) {
 			initLogging();
+			prepareValues();
 			initConfigFile();
 			unblacklist();
 			transferConfigValues();
