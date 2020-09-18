@@ -1402,6 +1402,8 @@ sub isRoot {
 #
 sub prepareValues {
 	checkRequirements();
+	initConfigFile();
+	transferConfigValues();
 }
 
 
@@ -1436,18 +1438,14 @@ if (@ARGV != 0) {
 			initLogging();
 			prepareValues();
 			if ($ARGV[1] eq "all") {
-				initConfigFile();
 				configureAllModules();
-				transferConfigValues();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
 			} else {
-				initConfigFile();
 				configureSingleModule();
 				postConfigure();
 				listSuccess();
-				transferConfigValues();
 				writeConfigFile();
 			}
 		} else {
@@ -1460,18 +1458,14 @@ if (@ARGV != 0) {
 			initLogging();
 			prepareValues();
 			if ($ARGV[1] eq "all") {
-				initConfigFile();
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
-				transferConfigValues();
 				writeConfigFile();
 			} else {	
-				initConfigFile();
 				reconfigureSingleModule();
 				postConfigure();
 				listSuccess();
-				transferConfigValues();
 				writeConfigFile();
 			}
 		} else {
@@ -1481,17 +1475,13 @@ if (@ARGV != 0) {
 		print "update does nothing yet\n";
 		initLogging();
 		prepareValues();
-		initConfigFile();
 		updateAllModules();
-		transferConfigValues();
 		writeConfigFile();
 	} elsif ($ARGV[0] eq "blacklist") {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			initConfigFile();
 			blacklist();
-			transferConfigValues();
 			writeConfigFile();
 		} else {
 			print "Module name missing\n";
@@ -1500,9 +1490,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			initConfigFile();
 			unblacklist();
-			transferConfigValues();
 			writeConfigFile();
 		} else {
 			print "Module name missing\n";
