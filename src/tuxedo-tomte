@@ -564,7 +564,7 @@ sub writeConfigFileAbsent {
 # overwrites $configFile with data from $origConfModules if it does not exist
 #
 sub writeFinalConfigFile {
-
+	
 }
 
 
@@ -877,7 +877,7 @@ print "No fixes available for this system\n";
 # copies values from local configuration module into new configuration module
 # copies always 'blacklisted'
 #
-transferConfigValues {
+sub transferConfigValues {
 	my $name;
 	foreach $name (sort keys %localConfModules) {
 		# always copy blacklist status
