@@ -604,7 +604,8 @@ sub initConfigFile {
 		return;
 	} else {
 		# create a new configFile
-		printLog("No configfile present ... creating one");
+		printLog("no configfile present ... creating one");
+		print "No configfile present ... creating one\n";
 		writeConfigFile();
 		return;
 	}
