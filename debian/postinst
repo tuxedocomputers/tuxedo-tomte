@@ -3,6 +3,8 @@
 #
 # see: dh_installdeb(1)
 
+#DEBHELPER#
+
 set -e
 
 case "$1" in
