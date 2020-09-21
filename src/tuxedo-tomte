@@ -3,8 +3,7 @@ use strict qw(vars subs);
 use warnings;
 
 # TODO remove testing stuff
-#my $grubFile = '/etc/default/grub';
-my $grubFile = '/home/pablo/grub';
+my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -322,7 +321,6 @@ my %origConfModules = (
 	#		description => '',
 	#	},
 
-# TODO modify required
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
@@ -378,6 +376,257 @@ my %localConfModules = %origConfModules;
 # where status should be "success" or "failed"
 #
 my %configuredModules;
+
+
+###############################################################################
+# check whether the module is required for the system
+# checks only for hardware
+#
+sub checkRequirements {
+	my $FH;
+	my $boardname_filename = "/sys/class/dmi/id/board_name";
+	my $boardname;
+	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
+	my $boardvendor;
+
+	# TODO: these will be installed on all notebooks, always
+	#	$origConfModules{tuxedokeyboard}{required} = 1;
+	#	$origConfModules{tuxedoccwmi}{required} =1 ;
+	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
+	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
+
+	# load required data into variables
+	if ( open $FH, "<", $boardvendor_filename ) {
+		$boardvendor = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardname_filename $!");
+	}
+	if ( open $FH, "<", $boardname_filename ) {
+		$boardname = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardvendor_filename $!");
+	}
+		#		if ( $boardvendor =~ m/TUXEDO/ ) {
+		#			$origConfModules{tuxedo}{required} = 1;
+			### close the program if it is not TUXEDO???
+			#		}
+			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
+			#			$origConfModules{tuxedoucsiccg}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
+			#	$origConfModules{kfocus}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
+			#	$origConfModules{manjaro}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
+			#	$origConfModules{aistation}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
+			#	$origConfModules{barebonegrub}{required} = 1;
+			#	$origConfModules{barebonegrub}{fainame} = '02GRUB';
+			#}
+			#if ($boardname =~ m/(P95)/) {
+			#	$origConfModules{audiofix}{required} = 1;
+			#}
+
+	# check values for each module
+	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+		$origConfModules{i8042fix}{required} = 'yes';
+	}
+	if ($boardname =~ m/(PF5PU1G)/) {
+		$origConfModules{nobootonbattery}{required} = 'yes';
+	}
+	if (($boardname =~ m/(Polaris15A01)/) || ($boardname =~ m/(Polaris17A01)/)) {
+		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+	}
+
+	#	my @edid = getEDIDData();
+	#	foreach ( @edid ) {
+	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
+	#			$origConfModules{tuxedooledbrt}{required} = 1;
+	#		}
+	#	}
+	#
+	#	# by default DESKTOP
+	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
+	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
+	#	if ( open $fh, "<", $chassis_type_fn ) {
+	#		my $chassis_type = <fh>;
+	#		close $fh;
+	#		if ( $chassis_type =~ m/(9|10)/ ) {
+	#			$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#		} else {
+	#			my $battery_folder = '/proc/acpi/battery';
+	#			if ( opendir $fh, $battery_folder ) {
+	#				while (my $file = readdir($fh)) {
+	#					next unless (-d "$battery_folder/$file");
+	#					unless ( $file =~ m/(\.|\.\.)/ ) {
+	#						#print "folder: $file\n";
+	#						$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#					}
+	#				}
+	#			}
+	#		}
+	#		unless ( $origConfModules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+	#			my $acpi_string = 'ACPI: Battery Slot';
+	#			my $dmesg_output = `dmesg`;
+	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
+	#				$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#			}
+	#		}
+	#	}
+	#
+	#	my @lsusb_output = `lsusb`;
+	#	chomp @output;
+	#	foreach my $line ( @output )
+	#	{
+	#		
+	#	}
+}
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+# each configure one module from %confModules
+# they set 'installed' status and $postConfModule trigger
+#
+# for keyboard not present on boot
+# for XC1711 on all distributions
+# returns 0 if failed, 1 if success
+#
+sub i8042fix() {
+	my $module = shift;
+	my @kernel_parameters = ("i8042.nopnp");
+	my $retval;
+	printLog("applying i8042fix");
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "success");
+	}
+}
+
+
+###############################################################################
+# for not being able to boot if system is on battery
+# affects BA15
+# returns 0 if failed, 1 if success
+#
+sub nobootonbattery() {
+	my $module = shift;
+	my @kernel_parameters = ("iommu=soft");
+	my $retval;
+	printLog("applying nobootonbattery");
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "success");
+	}
+}
+
+
+###############################################################################
+# Fix for some AMD devices where the xhci_hcd driver causes a jump out of
+# suspend immediately on entering suspend
+# affects Polaris15A01 and Polaris17A01
+# returns 0 if failed, 1 if success
+#
+sub amdxhcihcdusbquirksuspendfix() {
+	my $module = shift;
+	my @kernel_parameters = ("xhci_hcd.quirks=35433480192");
+	my $retval;
+	printLog("applying amdxhcihcdusbquirksuspendfix");
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "success");
+	}
+}
+
+
+###############################################################################
+# inserts array values as kernel parameters if not present
+# example: my $retval = insertGrub(\@kernel_parameters);
+# returns number of inserted parameters
+# return value of 0 means it failed
+#
+sub insertGrub {
+    my $grubFH;
+    my @grub_lines;
+	my $module = shift;
+    my $parameters = shift;
+    my $parameter;
+	my $inserted = 0;
+
+    if ( open $grubFH, "<", $grubFile) {
+		while (<$grubFH>) {
+	    	push (@grub_lines, $_);
+		}
+		close $grubFH;
+    } else {
+		printLog("no $grubFile present or unable to open the file for reading");
+		return (0);
+    }
+
+    foreach( @grub_lines ) {
+		# find the correct line
+		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+			foreach $parameter ( @{$parameters} ) {
+				if (insertGrubParameter(\$_, \$parameter)) {
+					++$inserted;
+				}
+			}
+		}
+    }
+
+	# write the changes into grub config
+    if ( open $grubFH, ">", $grubFile ) {
+		print $grubFH @grub_lines;
+		close ($grubFH);
+    } else {
+		printLog("no $grubFile present or unable to open the file for writing");
+		return (0);
+    }
+    return $inserted;
+}
+
+
+###############################################################################
+# inserts a parameter into a grub line
+# if the parameter is not present yet
+# returns 1 if inserted or already present
+#
+sub insertGrubParameter {
+	my ($line, $parameter) = @_;
+
+	if ($$line =~ m/$$parameter/) {
+		return (1);
+	}
+	if ($$line =~ m/""/) {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
+		printLog("inserted $$parameter into grub line");
+	} else {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+		printLog("inserted $$parameter into grub line");
+	}
+	return (1);
+}
 
 
 ###############################################################################
@@ -465,7 +714,6 @@ sub printLog {
 		}
 	}
 }
-
 
 
 ###############################################################################
@@ -667,7 +915,7 @@ sub getEDIDData {
 			close $fh;
 			push @edid_refs, parse_edid($file_content);
 		} else {
-			printLog("Could not open file $_ $!");
+			printLog("could not open file $_ $!");
 		}
 	}
 
@@ -681,115 +929,6 @@ sub getEDIDData {
 	return @edid_refs;
 }
 
-
-###############################################################################
-# check whether the module is required for the system
-# checks only for hardware
-#
-sub checkRequirements {
-	my $FH;
-	my $boardname_filename = "/sys/class/dmi/id/board_name";
-	my $boardname;
-	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
-	my $boardvendor;
-
-	# TODO: these will be installed on all notebooks, always
-	#	$origConfModules{tuxedokeyboard}{required} = 1;
-	#	$origConfModules{tuxedoccwmi}{required} =1 ;
-	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
-	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
-
-	# load required data into variables
-	if ( open $FH, "<", $boardvendor_filename ) {
-		$boardvendor = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardname_filename $!");
-	}
-	if ( open $FH, "<", $boardname_filename ) {
-		$boardname = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardvendor_filename $!");
-	}
-		#		if ( $boardvendor =~ m/TUXEDO/ ) {
-		#			$origConfModules{tuxedo}{required} = 1;
-			### close the program if it is not TUXEDO???
-			#		}
-			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
-			#			$origConfModules{tuxedoucsiccg}{required} = 1;
-			#}
-			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
-			#	$origConfModules{kfocus}{required} = 1;
-			#}
-			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
-			#	$origConfModules{manjaro}{required} = 1;
-			#}
-			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
-			#	$origConfModules{aistation}{required} = 1;
-			#}
-			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
-			#	$origConfModules{barebonegrub}{required} = 1;
-			#	$origConfModules{barebonegrub}{fainame} = '02GRUB';
-			#}
-			#if ($boardname =~ m/(P95)/) {
-			#	$origConfModules{audiofix}{required} = 1;
-			#}
-
-	# check values for each module
-	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
-		$origConfModules{i8042fix}{required} = 'yes';
-	}
-	if ($boardname =~ m/(PF5PU1G)/) {
-		$origConfModules{nobootonbattery}{required} = 'yes';
-	}
-	if (($boardname =~ m/(Polaris15A01)/) || ($boardname =~ m/(Polaris17A01)/)) {
-		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
-	}
-
-	#	my @edid = getEDIDData();
-	#	foreach ( @edid ) {
-	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
-	#			$origConfModules{tuxedooledbrt}{required} = 1;
-	#		}
-	#	}
-	#
-	#	# by default DESKTOP
-	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
-	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
-	#	if ( open $fh, "<", $chassis_type_fn ) {
-	#		my $chassis_type = <fh>;
-	#		close $fh;
-	#		if ( $chassis_type =~ m/(9|10)/ ) {
-	#			$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#		} else {
-	#			my $battery_folder = '/proc/acpi/battery';
-	#			if ( opendir $fh, $battery_folder ) {
-	#				while (my $file = readdir($fh)) {
-	#					next unless (-d "$battery_folder/$file");
-	#					unless ( $file =~ m/(\.|\.\.)/ ) {
-	#						#print "folder: $file\n";
-	#						$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#					}
-	#				}
-	#			}
-	#		}
-	#		unless ( $origConfModules{chassistype}{fainame} =~ m/LAPTOP/ ) {
-	#			my $acpi_string = 'ACPI: Battery Slot';
-	#			my $dmesg_output = `dmesg`;
-	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
-	#				$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#			}
-	#		}
-	#	}
-	#
-	#	my @lsusb_output = `lsusb`;
-	#	chomp @output;
-	#	foreach my $line ( @output )
-	#	{
-	#		
-	#	}
-}
 
 
 
@@ -888,77 +1027,6 @@ sub transferConfigValues {
 }
 
 
-###############################################################################
-###############################################################################
-###############################################################################
-# each configure one module from %confModules
-# they set 'installed' status and $postConfModule trigger
-#
-# for keyboard not present on boot
-# for XC1711 on all distributions
-# returns 0 if failed, 1 if success
-#
-sub i8042fix() {
-	my $module = shift;
-	my @kernel_parameters = ("i8042.nopnp");
-	my $retval;
-	printLog("applying i8042fix");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
-	}
-}
-
-
-###############################################################################
-# for not being able to boot if system is on battery
-# affects BA15
-# returns 0 if failed, 1 if success
-#
-sub nobootonbattery() {
-	my $module = shift;
-	my @kernel_parameters = ("iommu=soft");
-	my $retval;
-	printLog("applying nobootonbattery");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
-	}
-}
-
-
-###############################################################################
-# Fix for some AMD devices where the xhci_hcd driver causes a jump out of
-# suspend immediately on entering suspend
-# affects Polaris15A01 and Polaris17A01
-# returns 0 if failed, 1 if success
-#
-sub amdxhcihcdusbquirksuspendfix() {
-	my $module = shift;
-	my @kernel_parameters = ("xhci_hcd.quirks=35433480192");
-	my $retval;
-	printLog("applying amdxhcihcdusbquirksuspendfix");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
-	}
-}
-
 
 ###############################################################################
 # adds module hash to list of configured modules with status
@@ -969,74 +1037,6 @@ sub addToConfiguredModules {
 	$configuredModules{$module} = $status;
 }
 
-
-###############################################################################
-# inserts array values as kernel parameters if not present
-# example: my $retval = insertGrub(\@kernel_parameters);
-# returns number of inserted parameters
-# return value of 0 means it failed
-#
-sub insertGrub {
-    my $grubFH;
-    my @grub_lines;
-	my $module = shift;
-    my $parameters = shift;
-    my $parameter;
-	my $inserted = 0;
-
-    if ( open $grubFH, "<", $grubFile) {
-		while (<$grubFH>) {
-	    	push (@grub_lines, $_);
-		}
-		close $grubFH;
-    } else {
-		printLog("no $grubFile present or unable to open the file for reading");
-		return (0);
-    }
-
-    foreach( @grub_lines ) {
-		# find the correct line
-		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
-			foreach $parameter ( @{$parameters} ) {
-				if (insertGrubParameter(\$_, \$parameter)) {
-					++$inserted;
-				}
-			}
-		}
-    }
-
-	# write the changes into grub config
-    if ( open $grubFH, ">", $grubFile ) {
-		print $grubFH @grub_lines;
-		close ($grubFH);
-    } else {
-		printLog("no $grubFile present or unable to open the file for writing");
-		return (0);
-    }
-    return $inserted;
-}
-
-
-###############################################################################
-# inserts a parameter into a grub line
-# if the parameter is not present yet
-# returns 1 if inserted or already present
-#
-sub insertGrubParameter {
-	my ($line, $parameter) = @_;
-
-	if ($$line =~ m/$$parameter/) {
-		return (1);
-	}
-	if ($$line =~ m/""/) {
-		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted $$parameter into grub line");
-	} else {
-		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted $$parameter into grub line");
-	}
-	return (1);
-}
 
 
 ###############################################################################
@@ -1417,6 +1417,7 @@ sub prepareValues {
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
+
 if (@ARGV != 0) {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
