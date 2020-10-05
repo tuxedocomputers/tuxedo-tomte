@@ -363,6 +363,7 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+
 );
 
 
@@ -439,7 +440,12 @@ sub checkRequirements {
 	if ($boardname =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname =~ m/(Polaris15A01)/) || ($boardname =~ m/(Polaris17A01)/)) {
+	if (($boardname =~ m/(POLARIS1501A1650TI)/) ||
+	   ($boardname =~ m/(POLARIS1501A2060)/) ||
+	   ($boardname =~ m/(POLARIS1701A1650TI)/) ||
+	   ($boardname =~ m/(POLARIS1701A2060)/) ||
+	   ($boardname =~ m/(PULSE1401)/) ||
+   	   ($boardname =~ m/(PULSE1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
 
@@ -545,7 +551,7 @@ sub nobootonbattery() {
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
-	my @kernel_parameters = ("xhci_hcd.quirks=35433480192");
+	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
 	printLog("applying amdxhcihcdusbquirksuspendfix");
 	$retval = insertGrub($module, \@kernel_parameters);
