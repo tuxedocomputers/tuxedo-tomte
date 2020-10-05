@@ -363,7 +363,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
-
+	amdgpuwithnvidiafix => {
+		name => 'amd-gpu-with-nvidia-fix',
+		version => 1,
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between the two with prime-select',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -447,6 +460,12 @@ sub checkRequirements {
 	   ($boardname =~ m/(PULSE1401)/) ||
    	   ($boardname =~ m/(PULSE1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+	}
+	if (($boardname =~ m/POLARIS1701A1650TI/) ||
+		($boardname =~ m/POLARIS1701A2060/) ||
+		($boardname =~ m/POLARIS1501A1650TI/) ||
+		($boardname =~ m/POLARIS1501A2060/) ) {
+		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
 
 	#	my @edid = getEDIDData();
@@ -546,7 +565,12 @@ sub nobootonbattery() {
 ###############################################################################
 # Fix for some AMD devices where the xhci_hcd driver causes a jump out of
 # suspend immediately on entering suspend
-# affects Polaris15A01 and Polaris17A01
+# - POLARIS1501A1650TI
+# - POLARIS1501A2060
+# - POLARIS1701A1650TI
+# - POLARIS1701A2060
+# - PULSE1401
+# - PULSE1501
 # returns 0 if failed, 1 if success
 #
 sub amdxhcihcdusbquirksuspendfix() {
@@ -563,6 +587,39 @@ sub amdxhcihcdusbquirksuspendfix() {
 		$postConfProgram{updateGrub}{trigger} = 1;
 		addToConfiguredModules($module, "success");
 	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+# affects:
+# - POLARIS1701A1650TI
+# - POLARIS1701A2060
+# - POLARIS1501A1650TI
+# - POLARIS1501A2060
+# returns 0 if failed, 1 if success
+#
+sub amdgpuwithnvidiafix() {
+	my $module = shift;
+	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
+	my $retval;
+	printLog("applying amdgpuwithnvidiafix");
+	createFile();
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "success");
+	}
+}
+
+
+sub createFile {
+	return;
 }
 
 
