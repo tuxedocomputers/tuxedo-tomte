@@ -521,6 +521,7 @@ sub checkRequirements {
 #
 # for keyboard not present on boot
 # for XC1711 on all distributions
+# - PB50_70DFx,DDx
 # returns 0 if failed, 1 if success
 #
 sub i8042fix() {
@@ -543,6 +544,7 @@ sub i8042fix() {
 ###############################################################################
 # for not being able to boot if system is on battery
 # affects BA15
+# - PF5PU1G
 # returns 0 if failed, 1 if success
 #
 sub nobootonbattery() {
@@ -602,24 +604,66 @@ sub amdxhcihcdusbquirksuspendfix() {
 #
 sub amdgpuwithnvidiafix() {
 	my $module = shift;
-	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
+	#my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
+	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
+	my $fileText = "Section \"OutputClass\"\n".
+		"\tIdentifier \"nvidia\"\n".
+    	"\tMatchDriver \"nvidia-drm\"\n".
+    	"\tDriver \"nvidia\"\n".
+    	"\tOption \"AllowEmptyInitialConfiguration\"\n".
+    	"\tModulePath \"/usr/lib/x86_64-linux-gnu/nvidia/xorg\"\n".
+    	"\tOption \"PrimaryGPU\" \"Yes\"\n".
+		"EndSection\n";
 	printLog("applying amdgpuwithnvidiafix");
-	createFile();
-	$retval = insertGrub($module, \@kernel_parameters);
+	$retval = createFile($fileName, $fileText);
 	if ($retval == 0) {
 		$origConfModules{$module}{installed} = "failed";
 		addToConfiguredModules($module, "failed");
 	} else {
 		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
 		addToConfiguredModules($module, "success");
 	}
 }
 
 
+###############################################################################
+# creates file with content
+# 
 sub createFile {
-	return;
+	my $fileName = shift;
+	my $fileText = shift;
+	my $FH;
+	if (-e $fileName) {
+		if (backupFile($fileName)) {
+			return 0;
+		}
+	}
+	if (open $FH, ">",$fileName) {
+		print "$fileText";
+		close $FH;
+		return 1;
+	} else {
+		printLog("can't open $fileName for writing");
+		print "Can't open $fileName for writing\n";
+	}
+}
+
+
+###############################################################################
+# backups file with timestamp
+# 
+sub backupFile {
+	my $fileName = shift;
+	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
+	if (move($fileName, $backupFile)) {
+		print "created backup for $fileName\n";
+		exit 1;
+	} else {
+		printLog("can't create backup file for $fileName");
+		print "Can't create backup for $fileName\n";
+		exit 0;
+	}
 }
 
 
@@ -754,6 +798,7 @@ sub initLogging {
 }
 
 
+
 ###############################################################################
 #
 sub getLoggingTime {
@@ -762,6 +807,18 @@ sub getLoggingTime {
 									$year+1900,$mon+1,$mday,$hour,$min,$sec);
 	return $nice_timestamp;
 }
+
+
+
+###############################################################################
+#
+sub getBackupFileTime {
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+	my $nice_timestamp = sprintf ( "%04d%02d%02d%02d%02d%02d",
+									$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	return $nice_timestamp;
+}
+
 
 
 ###############################################################################
