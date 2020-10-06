@@ -623,6 +623,7 @@ sub amdgpuwithnvidiafix() {
 	} else {
 		$origConfModules{$module}{installed} = "yes";
 		addToConfiguredModules($module, "success");
+		print "Please restart your system\n";
 	}
 }
 
@@ -646,6 +647,7 @@ sub createFile {
 	} else {
 		printLog("can't open $fileName for writing");
 		print "Can't open $fileName for writing\n";
+		return 0;
 	}
 }
 
