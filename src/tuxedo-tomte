@@ -2,6 +2,8 @@
 use strict qw(vars subs);
 use warnings;
 
+use File::Copy;
+
 # TODO remove testing stuff
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
@@ -368,7 +370,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -636,12 +638,10 @@ sub createFile {
 	my $fileText = shift;
 	my $FH;
 	if (-e $fileName) {
-		if (backupFile($fileName)) {
-			return 0;
-		}
+		backupFile($fileName);
 	}
 	if (open $FH, ">",$fileName) {
-		print "$fileText";
+		print $FH "$fileText";
 		close $FH;
 		return 1;
 	} else {
