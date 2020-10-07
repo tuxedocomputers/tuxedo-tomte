@@ -609,7 +609,9 @@ sub amdgpuwithnvidiafix() {
 	#my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
 	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
-	my $fileText = "Section \"OutputClass\"\n".
+	my $niceTime = getBackupFileTime();
+	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
+		"Section \"OutputClass\"\n".
 		"\tIdentifier \"nvidia\"\n".
     	"\tMatchDriver \"nvidia-drm\"\n".
     	"\tDriver \"nvidia\"\n".
@@ -660,11 +662,11 @@ sub backupFile {
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (move($fileName, $backupFile)) {
 		print "created backup for $fileName\n";
-		exit 1;
+		return 1;
 	} else {
 		printLog("can't create backup file for $fileName");
 		print "Can't create backup for $fileName\n";
-		exit 0;
+		return 0;
 	}
 }
 
