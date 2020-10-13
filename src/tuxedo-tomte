@@ -78,30 +78,8 @@ my %postConfProgram = (
 #	upgraded		if module was upgraded 'yes', else 'no'
 #
 my %origConfModules = (
-	#	tuxedokeyboard => {
-	#		name => 'tuxedo-keyboard',
-	#		version => 1,
-	#		installed => 0,
-	#		blacklisted => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => 'a',
-	#		description => '',
-	#	},
 	#	tuxedoccwmi => {
 	#		name => 'tuxedo-cc-wmi',
-	#		version => 1,
-	#		installed => 0,
-	#		blacklisted => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => '',
-	#		description => '',
-	#	},
-	#	tuxedocontrolcenter => {
-	#		name => 'tuxedo-control-center',
 	#		version => 1,
 	#		installed => 0,
 	#		blacklisted => 0,
@@ -379,6 +357,34 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedocontrolcenter => {
+		name => 'tuxedo-control-center',
+		version => 1,
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'TUXEDO Control Center Application',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedokeyboard => {
+		name => 'tuxedo-keyboard',
+		version => 1,
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Keyboard & keyboard backlight driver for TUXEDO notebooks',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -606,7 +612,6 @@ sub amdxhcihcdusbquirksuspendfix() {
 #
 sub amdgpuwithnvidiafix() {
 	my $module = shift;
-	#my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
 	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
 	my $niceTime = getBackupFileTime();
@@ -629,6 +634,48 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 		print "Please restart your system\n";
 	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+sub tuxedocontrolcenter() {
+	my $module = shift;
+	my $retval;
+	$retval = installPackage($origConfModules{$module}{name});
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "yes";
+	} else {
+		$origConfModules{$module}{installed} = "failed";
+		printLog("could'nt install $origConfModules{$module}{name}");
+	}
+}
+
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+sub tuxedokeyboard() {
+	my $module = shift;
+	my $retval;
+	$retval = installPackage($origConfModules{$module}{name});
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "yes";
+	} else {
+		$origConfModules{$module}{installed} = "failed";
+		printLog("couldn't install $origConfModules{$module}{name}");
+	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+sub installPackage {
+	my $packageName = shift;
+	my $retval = system("pkconf install $packageName");
+	return $retval;
 }
 
 
