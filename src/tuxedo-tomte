@@ -675,6 +675,7 @@ sub tuxedokeyboard() {
 sub installPackage {
 	my $packageName = shift;
 	my $retval = system("pkconf install $packageName");
+	printLog("pkconf returns: $retval, while installing $packageName");
 	return $retval;
 }
 
