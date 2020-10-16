@@ -385,6 +385,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	nokeyboardaftersuspendfix => {
+		name => 'no-kbd-suspend-fix',
+		version => 1,
+		installed => 'no',
+		blacklisted => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes no keyboard after suspend problem',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -475,6 +489,9 @@ sub checkRequirements {
 		($boardname =~ m/POLARIS1501A2060/) ) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
+	if ($boardname =~ m/(X170SM)/) {
+		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+	}
 
 	#	my @edid = getEDIDData();
 	#	foreach ( @edid ) {
@@ -530,7 +547,6 @@ sub checkRequirements {
 # for keyboard not present on boot
 # for XC1711 on all distributions
 # - PB50_70DFx,DDx
-# returns 0 if failed, 1 if success
 #
 sub i8042fix() {
 	my $module = shift;
@@ -553,7 +569,6 @@ sub i8042fix() {
 # for not being able to boot if system is on battery
 # affects BA15
 # - PF5PU1G
-# returns 0 if failed, 1 if success
 #
 sub nobootonbattery() {
 	my $module = shift;
@@ -581,7 +596,6 @@ sub nobootonbattery() {
 # - POLARIS1701A2060
 # - PULSE1401
 # - PULSE1501
-# returns 0 if failed, 1 if success
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
@@ -608,7 +622,6 @@ sub amdxhcihcdusbquirksuspendfix() {
 # - POLARIS1701A2060
 # - POLARIS1501A1650TI
 # - POLARIS1501A2060
-# returns 0 if failed, 1 if success
 #
 sub amdgpuwithnvidiafix() {
 	my $module = shift;
@@ -666,6 +679,28 @@ sub tuxedokeyboard() {
 	} else {
 		$origConfModules{$module}{installed} = "failed";
 		printLog("couldn't install $origConfModules{$module}{name}");
+	}
+}
+
+
+
+###############################################################################
+# Fix for Tuxedo Notebooks with boardname: X170SM
+# fixes no keyboard present after suspend
+#
+sub nokeyboardaftersuspendfix() {
+	my $module = shift;
+	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
+	my $retval;
+	printLog("applying nokeyboardaftersuspendfix");
+	$retval = insertGrub($module, \@kernel_parameters);
+	if ($retval == 0) {
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+	} else {
+		$origConfModules{$module}{installed} = "yes";
+		$postConfProgram{updateGrub}{trigger} = 1;
+		addToConfiguredModules($module, "success");
 	}
 }
 
