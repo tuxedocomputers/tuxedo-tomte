@@ -394,7 +394,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem',
+		description => 'Fixes no keyboard after suspend problem on XC1711 and XUX711',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -489,7 +489,8 @@ sub checkRequirements {
 		($boardname =~ m/POLARIS1501A2060/) ) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if ($boardname =~ m/(X170SM)/) {
+	if (($boardname =~ m/(X170SM)/) ||
+		($boardname =~ m/(PB50_70DFx,DDx)/) ) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
@@ -685,8 +686,9 @@ sub tuxedokeyboard() {
 
 
 ###############################################################################
-# Fix for Tuxedo Notebooks with boardname: X170SM
-# fixes no keyboard present after suspend
+# Fix for Tuxedo Notebooks, fixes no keyboard present after suspend on
+# - XC1711
+# - XUX711
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
