@@ -390,7 +390,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -1288,6 +1288,45 @@ sub validModuleName {
 # configures all modules
 # if not blacklisted, required and not installed
 #
+# u=upgrade
+# c=configure
+# r=remove
+# x=nothing
+#
+# installed blacklisted required	newversion	newhwid
+# yes		yes			yes			yes			yes		x
+# yes		yes			yes			yes			no		x
+# yes		yes			yes			no			yes		x
+# yes		yes			yes			no			no		x
+# yes		yes			no			yes			yes		x
+# yes		yes			no			yes			no		x
+# yes		yes			no			no			yes		x
+# yes		yes			no			no			no		x
+# yes		no			yes			yes			yes		u
+# yes		no			yes			yes			no		u
+# yes		no			yes			no			yes		u
+# yes		no			yes			no			no		C
+# yes		no			no			yes			yes		R
+# yes		no			no			yes			no		R
+# yes		no			no			no			yes		R
+# yes		no			no			no			no		R
+# no		yes			yes			yes			yes		x
+# no		yes			yes			yes			no		x
+# mo		yes			yes			no			yes		x
+# no		yes			yes			no			no		x
+# no		yes			no			yes			yes		x
+# no		yes			no			yes			no		x
+# no		yes			no			no			yes		x
+# no		yes			no			no			no		x
+# no		no			yes			yes			yes		C
+# no		no			yes			yes			no		C
+# no		no			yes			no			yes		C
+# no		no			yes			no			no		C
+# no		no			no			yes			yes		x
+# no		no			no			yes			no		x
+# no		no			no			no			yes		x
+# no		no			no			no			no		x
+
 sub configureAllModules {
 	my $module;
 	my $exit_status;
@@ -1684,12 +1723,12 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-	} elsif ($ARGV[0] eq "update\n") {
-		print "update does nothing yet\n";
-		initLogging();
-		prepareValues();
-		updateAllModules();
-		writeConfigFile();
+		#	} elsif ($ARGV[0] eq "update\n") {
+		#		print "update does nothing yet\n";
+		#		initLogging();
+		#		prepareValues();
+		#		updateAllModules();
+		#		writeConfigFile();
 	} elsif ($ARGV[0] eq "blacklist") {
 		if (defined $ARGV[1]) {
 			initLogging();
