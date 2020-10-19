@@ -386,11 +386,11 @@ my %origConfModules = (
 		upgraded => '',
 	},
 	nokeyboardaftersuspendfix => {
-		name => 'no-kbd-suspend-fix',
+		name => 'no-keyboard-after-suspend-fix',
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
