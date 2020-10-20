@@ -390,8 +390,8 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
-		hwid => 1,
+		required => 'yes',
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem on XC1711 and XUX711',
@@ -551,17 +551,25 @@ sub checkRequirements {
 #
 sub i8042fix() {
 	my $module = shift;
+	my $action = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
-	printLog("applying i8042fix");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
+	if ($action eq 'install')
+	{
+		printLog("applying i8042fix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -573,17 +581,25 @@ sub i8042fix() {
 #
 sub nobootonbattery() {
 	my $module = shift;
+	my $action = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
-	printLog("applying nobootonbattery");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
+	if ($action eq 'install')
+	{
+		printLog("applying nobootonbattery");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -600,17 +616,25 @@ sub nobootonbattery() {
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
+	my $action = shift;
 	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
-	printLog("applying amdxhcihcdusbquirksuspendfix");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
+	if ($action eq 'install')
+	{
+		printLog("applying amdxhcihcdusbquirksuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -626,6 +650,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 #
 sub amdgpuwithnvidiafix() {
 	my $module = shift;
+	my $action = shift;
 	my $retval;
 	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
 	my $niceTime = getBackupFileTime();
@@ -638,15 +663,22 @@ sub amdgpuwithnvidiafix() {
     	"\tModulePath \"/usr/lib/x86_64-linux-gnu/nvidia/xorg\"\n".
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
-	printLog("applying amdgpuwithnvidiafix");
-	$retval = createFile($fileName, $fileText);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		addToConfiguredModules($module, "success");
-		print "Please restart your system\n";
+	if ($action eq 'install')
+	{
+		printLog("applying amdgpuwithnvidiafix");
+		$retval = createFile($fileName, $fileText);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -656,13 +688,21 @@ sub amdgpuwithnvidiafix() {
 # graphics. Also enables switching between the two with prime-select
 sub tuxedocontrolcenter() {
 	my $module = shift;
+	my $action = shift;
 	my $retval;
-	$retval = installPackage($origConfModules{$module}{name});
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "yes";
-	} else {
-		$origConfModules{$module}{installed} = "failed";
-		printLog("could'nt install $origConfModules{$module}{name}");
+	if ($action eq 'install')
+	{
+		$retval = installPackage($origConfModules{$module}{name});
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			printLog("could'nt install $origConfModules{$module}{name}");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -673,13 +713,21 @@ sub tuxedocontrolcenter() {
 # graphics. Also enables switching between the two with prime-select
 sub tuxedokeyboard() {
 	my $module = shift;
+	my $action = shift;
 	my $retval;
-	$retval = installPackage($origConfModules{$module}{name});
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "yes";
-	} else {
-		$origConfModules{$module}{installed} = "failed";
-		printLog("couldn't install $origConfModules{$module}{name}");
+	if ($action eq 'install')
+	{
+		$retval = installPackage($origConfModules{$module}{name});
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			printLog("couldn't install $origConfModules{$module}{name}");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -692,17 +740,39 @@ sub tuxedokeyboard() {
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
+	my $action = shift;
 	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
-	printLog("applying nokeyboardaftersuspendfix");
-	$retval = insertGrub($module, \@kernel_parameters);
-	if ($retval == 0) {
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-	} else {
-		$origConfModules{$module}{installed} = "yes";
-		$postConfProgram{updateGrub}{trigger} = 1;
-		addToConfiguredModules($module, "success");
+	if ($action eq 'install')
+	{
+		printLog("applying nokeyboardaftersuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading nokeyboardaftersuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
 	}
 }
 
@@ -999,6 +1069,7 @@ sub writeConfigFile {
 	my $version;
 	my $hwid;
 	if ( open $FH, '>', $configFile ) {
+		printLog("writing configfile");
 		print $FH "# name version installed blacklisted required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
@@ -1222,8 +1293,8 @@ sub transferConfigValues {
 	foreach $name (sort keys %localConfModules) {
 		# always copy blacklist status
 		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
-		if (($localConfModules{$name}{version} != $origConfModules{$name}{version}) or ($localConfModules{$name}{hwid} != $origConfModules{$name}{hwid})) {
-			# version missmatch => upgrade necessary
+		if (newVersion($name) or newHwid($name)) {
+			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
 		} else {
@@ -1306,7 +1377,7 @@ sub validModuleName {
 # yes		no			yes			yes			yes		u
 # yes		no			yes			yes			no		u
 # yes		no			yes			no			yes		u
-# yes		no			yes			no			no		u
+# yes		no			yes			no			no		.
 # yes		no			no			yes			yes		R
 # yes		no			no			yes			no		R
 # yes		no			no			no			yes		R
@@ -1331,12 +1402,56 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
+	print "# in configureall\n";
 	foreach $module (keys %origConfModules) {
+		# configure if not installed, not blacklisted and required
 		if ( $origConfModules{$module}{installed} eq 'no' &&
 			$localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
+			printLog("configure module: $module");
 			configureModule($module);
 		}
+		# upgrade if new version or hwid
+		if ( $origConfModules{$module}{installed} eq 'yes' &&
+			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' &&
+   			$origConfModules{$module}{upgrade} eq 'yes' ) {
+			printLog("upgrade module: $module");
+			upgradeModule($module);
+		}
+		# remove if not required any more
+		if ( $origConfModules{$module}{installed} eq 'yes' &&
+			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$origConfModules{$module}{required} eq 'no' ) {
+			printLog("remove module: $module");
+			removeModule($module);
+		}
+	}
+}
+
+
+###############################################################################
+# returns 0 if no new version
+# returns 1 if new version
+sub newVersion {
+	my $module = shift;
+	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
+###############################################################################
+# returns 0 if no new hwid
+# returns 1 if new hwid
+sub newHwid {
+	my $module = shift;
+	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
@@ -1358,6 +1473,7 @@ sub configureSingleModule {
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
+		printLog("configure module: $module");
 		configureModule($module);
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
@@ -1384,6 +1500,7 @@ sub reconfigureAllModules {
 	foreach $module (keys %origConfModules) {
 		if ( $localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
+			printLog("reconfigure module: $module");
 			configureModule($module);
 		}
 	}
@@ -1406,6 +1523,7 @@ sub reconfigureSingleModule {
 
 	if ( $localConfModules{$module}{blacklisted} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
+		printLog("configure module: $module");
 		configureModule($module);
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
@@ -1462,30 +1580,34 @@ sub unblacklist() {
 	}
 }
 
-###############################################################################
-# TODO in next version
-#
-sub updateAllModules {
-}
-
 
 ###############################################################################
 # configures a module, does no checks
 #
 sub configureModule {
 	my $module = shift;
-	$module->($module);
+	$module->($module, 'install');
 }
 
 
 ###############################################################################
-# TODO in next version
-# updates all modules wich are not blacklisted, are required
-# and have a new hwid or version
-# and additionally configures all new modules
+# remove a module, does no checks
 #
-sub configureUpdate {
+sub removeModule {
+	my $module = shift;
+	$module->($module, 'remove');
 }
+
+
+
+###############################################################################
+# configures a module, does no checks
+#
+sub upgradeModule {
+	my $module = shift;
+	$module->($module, 'upgrade');
+}
+
 
 
 ###############################################################################
