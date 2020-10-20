@@ -59,6 +59,7 @@ my %postConfProgram = (
 #   name			name of package or name of solution,
 #					is 'short name' without '-'
 #   version			the package or solution version
+#					rises if the solution changes
 #   installed		'no' not installed / 'yes' installed / 'failed' failed to
 #					install, 'undef' if unknown
 #   blacklisted		'yes' or 'no' will not be configured on upgrade, install
@@ -66,6 +67,7 @@ my %postConfProgram = (
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
 #   hwid			the environment (HW or SW) are in a certain defined state
+#					rises if additional HW gets support
 #   package			package name or 'no', there is a deb or rpm package as a
 #					solution
 #   fainame			the name to give to FAI to install a certain package
@@ -335,7 +337,7 @@ my %origConfModules = (
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
@@ -349,7 +351,7 @@ my %origConfModules = (
 		installed => 'no',
 		blacklisted => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between the two with prime-select',
