@@ -1,12 +1,11 @@
-
-
-echo "!modify version number before using this!"
+all:
+	@echo "!modify version number before using this!"
 
 pre:
 	DEBFULLNAME="E. Mohr"
 	DEBEMAIL="tux@tuxedocomputers.com"
 	PACKAGE=tuxedo-tomte
-	VERSION=2.0.4
+	VERSION=2.0.5
 	PREFIX=${PACKAGE}_${VERSION}
 	cd debian
 	debchange -v ${VERSION}
