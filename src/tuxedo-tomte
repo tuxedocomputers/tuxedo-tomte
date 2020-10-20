@@ -567,6 +567,20 @@ sub i8042fix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading i8042fix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
 	if ($action eq 'remove')
 	{
 		# not implemented yet
@@ -593,6 +607,20 @@ sub nobootonbattery() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading nobootonbattery");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
@@ -628,6 +656,20 @@ sub amdxhcihcdusbquirksuspendfix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading amdxhcihcdusbquirksuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
@@ -676,6 +718,20 @@ sub amdgpuwithnvidiafix() {
 			print "Please restart your system\n";
 		}
 	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading amdgpuwithnvidiafix");
+		$retval = createFile($fileName, $fileText);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
 	if ($action eq 'remove')
 	{
 		# not implemented yet
@@ -699,6 +755,10 @@ sub tuxedocontrolcenter() {
 			$origConfModules{$module}{installed} = "failed";
 			printLog("could'nt install $origConfModules{$module}{name}");
 		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove')
 	{
@@ -724,6 +784,10 @@ sub tuxedokeyboard() {
 			$origConfModules{$module}{installed} = "failed";
 			printLog("couldn't install $origConfModules{$module}{name}");
 		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove')
 	{
@@ -1402,7 +1466,6 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
-	print "# in configureall\n";
 	foreach $module (keys %origConfModules) {
 		# configure if not installed, not blacklisted and required
 		if ( $origConfModules{$module}{installed} eq 'no' &&
