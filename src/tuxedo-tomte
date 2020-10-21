@@ -392,7 +392,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 2,
 		package => 'no',
 		fainame => '',
@@ -1470,24 +1470,23 @@ sub configureAllModules {
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
 		# configure if not installed, not blacklisted and required
+		# must be 'elsif' or else the options could get mixed up
 		if ( $origConfModules{$module}{installed} eq 'no' &&
 			$localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			printLog("configure module: $module");
 			configureModule($module);
-		}
-		# upgrade if new version or hwid
-		if ( $origConfModules{$module}{installed} eq 'yes' &&
+		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
 			$localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' &&
    			$origConfModules{$module}{upgrade} eq 'yes' ) {
+			# upgrade if new version or hwid
 			printLog("upgrade module: $module");
 			upgradeModule($module);
-		}
-		# remove if not required any more
-		if ( $origConfModules{$module}{installed} eq 'yes' &&
+		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
 			$localConfModules{$module}{blacklisted} eq 'no' &&
 			$origConfModules{$module}{required} eq 'no' ) {
+			# remove if not required any more
 			printLog("remove module: $module");
 			removeModule($module);
 		}
