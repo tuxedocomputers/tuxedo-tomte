@@ -392,7 +392,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blacklisted => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 2,
 		package => 'no',
 		fainame => '',
@@ -565,6 +565,7 @@ sub i8042fix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
@@ -609,6 +610,7 @@ sub nobootonbattery() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
@@ -658,6 +660,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
@@ -716,6 +719,7 @@ sub amdgpuwithnvidiafix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			print "Please restart your system\n";
 		}
@@ -753,6 +757,7 @@ sub tuxedocontrolcenter() {
 		$retval = installPackage($origConfModules{$module}{name});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		} else {
 			$origConfModules{$module}{installed} = "failed";
 			printLog("could'nt install $origConfModules{$module}{name}");
@@ -782,6 +787,7 @@ sub tuxedokeyboard() {
 		$retval = installPackage($origConfModules{$module}{name});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		} else {
 			$origConfModules{$module}{installed} = "failed";
 			printLog("couldn't install $origConfModules{$module}{name}");
@@ -1148,9 +1154,15 @@ sub writeConfigFile {
 					$installed = $origConfModules{$name}{installed};
 				} else {
 					# upgrade was not executed
-					$version = $localConfModules{$name}{version};
-					$hwid = $localConfModules{$name}{hwid};
-					$installed = $localConfModules{$name}{installed};
+					if ( $origConfModules{$name}{installed} eq 'yes' ) {
+						$version = $localConfModules{$name}{version};
+						$hwid = $localConfModules{$name}{hwid};
+						$installed = $localConfModules{$name}{installed};
+					} else {
+						$version = $origConfModules{$name}{version};
+						$hwid = $origConfModules{$name}{hwid};
+						$installed = $localConfModules{$name}{installed};
+					}
 				}
 			} else {
 				# no upgrade available
@@ -1302,43 +1314,40 @@ sub listStatus {
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
+	my $upgradeAvailable = '';
 
 	foreach $module (sort keys %localConfModules) {
-		if($origConfModules{$module}{upgrade} eq 'no') {
-			# same version module
-			if (($localConfModules{$module}{installed} eq 'yes') &&
-			($localConfModules{$module}{required} eq 'no') &&
-			($origConfModules{$module}{required} eq 'no')) {
-				# module is installed but should not be
-				$printIt = 1;
-				push(@arr,
-					["$localConfModules{$module}{name}",
-					"$localConfModules{$module}{version}",
-					"$localConfModules{$module}{installed}",
-					"$localConfModules{$module}{blacklisted}",
-					"$localConfModules{$module}{required}"]);
-			}
-			if ($localConfModules{$module}{required} eq 'yes') {
-				$noneRequired = 0;
-				$printIt = 1;
-				push(@arr,
-					["$localConfModules{$module}{name}",
-					"$localConfModules{$module}{version}",
-					"$localConfModules{$module}{installed}",
-					"$localConfModules{$module}{blacklisted}",
-					"$localConfModules{$module}{required}"]);
-			}
-		} else {
-			# different version number, is this an update?
-			# TODO: to be implemented in the next version
-			print "Something went wrong, update is not implemented yet\n";
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		}
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+		($localConfModules{$module}{required} eq 'no') &&
+		($origConfModules{$module}{required} eq 'no')) {
+			# module is installed but should not be
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blacklisted}",
+				"$localConfModules{$module}{required}"]);
+		}
+		if ($localConfModules{$module}{required} eq 'yes') {
+			$noneRequired = 0;
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blacklisted}",
+				"$localConfModules{$module}{required}$upgradeAvailable"]);
 		}
 	}
 	if ($printIt) {
 		print "Only showing fixes that are available for this hardware\n";
 		for my $row (@arr) {
 			format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
 			write;
@@ -1368,6 +1377,34 @@ sub transferConfigValues {
 			$origConfModules{$name}{upgrade} = 'no';
 			$origConfModules{$name}{upgraded} = 'no';
 		}
+	}
+}
+
+
+
+###############################################################################
+# returns 0 if no new version
+# returns 1 if new version
+sub newVersion {
+	my $module = shift;
+	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
+		print "#version: $localConfModules{$module}{version} $origConfModules{$module}{version}\n";
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
+###############################################################################
+# returns 0 if no new hwid
+# returns 1 if new hwid
+sub newHwid {
+	my $module = shift;
+	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
@@ -1494,30 +1531,6 @@ sub configureAllModules {
 }
 
 
-###############################################################################
-# returns 0 if no new version
-# returns 1 if new version
-sub newVersion {
-	my $module = shift;
-	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-
-###############################################################################
-# returns 0 if no new hwid
-# returns 1 if new hwid
-sub newHwid {
-	my $module = shift;
-	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
 
 
 ###############################################################################
