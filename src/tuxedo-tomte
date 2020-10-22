@@ -4,6 +4,11 @@ use warnings;
 
 use File::Copy;
 
+# make sure this is the only running instance
+use Fcntl qw(:flock);
+open our $file, '<', $0 or die $!;
+flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
+
 # TODO remove testing stuff
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
