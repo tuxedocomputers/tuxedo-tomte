@@ -5,12 +5,13 @@ use warnings;
 use Data::Dumper qw(Dumper);
 
 
-my $pkconf = 'pkcon';
-my $install = 'install';
-my $remove = 'remove';
-my $package = 'tree';
+my $pkcon = 'pkcon';
+my $silent = '-y';
+my $plain = '-p';
+my $action = shift;
+my $package = shift;
 
-my $status = system($pkconf, ,$remove, $package);
+my $status = system($pkcon, $silent, $plain ,$action, $package);
 
 print 'status: '.$status."\n";
 
