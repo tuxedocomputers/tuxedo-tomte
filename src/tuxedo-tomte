@@ -401,7 +401,7 @@ my %origConfModules = (
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem on XC1711 and XUX711',
+		description => 'Fixes no keyboard after suspend problem on XC1711, XUX711 and XMG Fusion',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -497,7 +497,9 @@ sub checkRequirements {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
 	if (($boardname =~ m/(X170SM)/) ||
-		($boardname =~ m/(PB50_70DFx,DDx)/) ) {
+		($boardname =~ m/(PB50_70DFx,DDx)/) ||
+   		($boardname =~ m/LAPQC71A/) ||
+		($boardname =~ m/LAPQC71B/)	) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
