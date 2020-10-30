@@ -17,7 +17,7 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-Summary:        Little brownie that provides services, updates and fixes for TUXEDO devices
+Summary:        Little helper that provides services, updates and fixes for TUXEDO devices
 Name:           %{module}
 Version:        1.0.0
 Release:        1
@@ -28,12 +28,12 @@ Url:            https://www.tuxedocomputers.com
 BuildRoot:      %{_tmppath}
 
 %description
-TUXEDO Tomte is a little brownie that provides services, updates and fixes for
+TUXEDO Tomte is a little helper that provides services, updates and fixes for
 TUXEDO devices in the background. It does not send any information, telemetry
 data or similar stuff out!
 This is a meta package and it is safe to remove if you don't want to get useful
 or necessary packages delivered to your TUXEDO device automatically.
-TUXEDO Tomte ist ein kleines Heinzelmaennchen, das Dienste, Updates und Fixes
+TUXEDO Tomte ist ein kleiner Helfer, der Dienste, Updates und Fixes
 für TUXEDO-Geräte im Hintergrund bereitstellt. Es sendet keine Informationen,
 Telemetriedaten oder ähnliches zurück!
 Dies ist ein Meta-Paket und kann ohne Gefahr entfernt werden falls eine
