@@ -3,10 +3,11 @@
 echo "New version number?:"
 read VERSION
 
-DEBFULLNAME="E. Mohr"
-DEBEMAIL="tux@tuxedocomputers.com"
-PACKAGE=tuxedo-tomte
-PREFIX=${PACKAGE}_${VERSION}
+export VERSION
+export DEBFULLNAME="E. Mohr"
+export DEBEMAIL="tux@tuxedocomputers.com"
+export PACKAGE=tuxedo-tomte
+export PREFIX=${PACKAGE}_${VERSION}
 cd debian
 debchange -v ${VERSION}
 cd ..
