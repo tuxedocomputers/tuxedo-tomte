@@ -67,7 +67,7 @@ my %postConfProgram = (
 #					rises if the solution changes
 #   installed		'no' not installed / 'yes' installed / 'failed' failed to
 #					install, 'undef' if unknown
-#   blacklisted		'yes' or 'no' will not be configured on upgrade, install
+#   blocked			'yes' or 'no' will not be configured on upgrade, install
 #					or deinstall, 'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
@@ -89,7 +89,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-cc-wmi',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
@@ -100,7 +100,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
@@ -111,7 +111,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-restore-audio-fix',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
@@ -122,7 +122,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-ucsi_ccg',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
@@ -133,7 +133,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-oled-brt',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 1,
@@ -144,7 +144,7 @@ my %origConfModules = (
 	#		name => 'chassis-type',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -155,7 +155,7 @@ my %origConfModules = (
 	#		name => 'kfocus',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -166,7 +166,7 @@ my %origConfModules = (
 	#		name => 'tuxedo',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -177,7 +177,7 @@ my %origConfModules = (
 	#		name => 'manjaro',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -188,7 +188,7 @@ my %origConfModules = (
 	#		name => 'aistation',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -201,7 +201,7 @@ my %origConfModules = (
 	#		installed => 0,
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -212,7 +212,7 @@ my %origConfModules = (
 	#		name => 'barebone-grub',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -223,7 +223,7 @@ my %origConfModules = (
 	#		name => 'audiofix',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -234,7 +234,7 @@ my %origConfModules = (
 	#		name => 'fingerprint',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -245,7 +245,7 @@ my %origConfModules = (
 	#		name => 'threeg',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -256,7 +256,7 @@ my %origConfModules = (
 	#		name => 'hybrid',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -267,7 +267,7 @@ my %origConfModules = (
 	#		name => 'nvidia-driver',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -278,7 +278,7 @@ my %origConfModules = (
 	#		name => 'bluetooth',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -289,7 +289,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-wallpapers',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -300,7 +300,7 @@ my %origConfModules = (
 	#		name => 'tuxedo-plymouth-one',
 	#		version => 1,
 	#		installed => 0,
-	#		blacklisted => 0,
+	#		blocked => 0,
 	#		required => 0,
 	#		hwid => 1,
 	#		package => 0,
@@ -312,7 +312,7 @@ my %origConfModules = (
 		name => 'i8042-fix',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -326,7 +326,7 @@ my %origConfModules = (
 		name => 'no-boot-on-battery',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -340,7 +340,7 @@ my %origConfModules = (
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -354,7 +354,7 @@ my %origConfModules = (
 		name => 'amd-gpu-with-nvidia-fix',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -368,7 +368,7 @@ my %origConfModules = (
 		name => 'tuxedo-control-center',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -382,7 +382,7 @@ my %origConfModules = (
 		name => 'tuxedo-keyboard',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -396,12 +396,12 @@ my %origConfModules = (
 		name => 'no-keyboard-after-suspend-fix',
 		version => 1,
 		installed => 'no',
-		blacklisted => 'no',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem on XC1711, XUX711 and XMG Fusion',
+		description => 'Fixes no keyboard after suspend problem on XC1711, XUX711, InfinityBook Pro 14 v5 and XMG Fusion',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -499,7 +499,8 @@ sub checkRequirements {
 	if (($boardname =~ m/(X170SM)/) ||
 		($boardname =~ m/(PB50_70DFx,DDx)/) ||
    		($boardname =~ m/LAPQC71A/) ||
-		($boardname =~ m/LAPQC71B/)	) {
+		($boardname =~ m/LAPQC71B/) ||
+		($boardname =~ m/N141CU/)	) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
@@ -981,7 +982,7 @@ sub insertGrubParameter {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 	# do not log if no arguments
 	if (@ARGV == 0) {
 		return;
@@ -1101,7 +1102,7 @@ sub readConfigFile {
 				$shortname = validModuleName($name);
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
-					@comp{qw(name version installed blacklisted required hwid)} = ($name, @cols);
+					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
@@ -1149,7 +1150,7 @@ sub writeConfigFile {
 	my $hwid;
 	if ( open $FH, '>', $configFile ) {
 		printLog("writing configfile");
-		print $FH "# name version installed blacklisted required hwid\n";
+		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{upgrade} eq 'yes') {
@@ -1180,7 +1181,7 @@ sub writeConfigFile {
 			print $FH "$origConfModules{$name}{name} ".
 					"$version ".
 					"$installed ".
-					"$origConfModules{$name}{blacklisted} ".
+					"$origConfModules{$name}{blocked} ".
 					"$origConfModules{$name}{required} ".
 					"$hwid\n";
 		}
@@ -1317,7 +1318,7 @@ sub getEDIDData {
 # to be done in next version
 #
 sub listStatus {
-	my @arr = ( ['Name', 'Version', 'Installed', 'Blacklisted', 'Required'] );
+	my @arr = ( ['Name', 'Version', 'Installed', 'Blocked', 'Required'] );
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
@@ -1336,7 +1337,7 @@ sub listStatus {
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blacklisted}",
+				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
 		if ($localConfModules{$module}{required} eq 'yes') {
@@ -1346,7 +1347,7 @@ sub listStatus {
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blacklisted}",
+				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}$upgradeAvailable"]);
 		}
 	}
@@ -1368,13 +1369,13 @@ sub listStatus {
 
 ###############################################################################
 # copies values from local configuration module into new configuration module
-# copies always 'blacklisted'
+# copies always 'blocked'
 #
 sub transferConfigValues {
 	my $name;
 	foreach $name (sort keys %localConfModules) {
-		# always copy blacklist status
-		$origConfModules{$name}{blacklisted} = $localConfModules{$name}{blacklisted};
+		# always copy blocked status
+		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
 		if (newVersion($name) or newHwid($name)) {
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
@@ -1467,14 +1468,14 @@ sub validModuleName {
 
 ###############################################################################
 # configures all modules
-# if not blacklisted, required and not installed
+# if not blocked, required and not installed
 #
 # u=upgrade
 # c=configure
 # R=remove
 # .=nothing
 #
-# installed blacklisted required	newversion	newhwid
+# installed blocked required	newversion	newhwid
 # tomte.cfg	tomte.cfg	check		origConfig	origConfig
 # yes		yes			yes			yes			yes		.
 # yes		yes			yes			yes			no		.
@@ -1513,22 +1514,22 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		# configure if not installed, not blacklisted and required
+		# configure if not installed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
 		if ( $origConfModules{$module}{installed} eq 'no' &&
-			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			printLog("configure module: $module");
 			configureModule($module);
 		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
-			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' &&
    			$origConfModules{$module}{upgrade} eq 'yes' ) {
 			# upgrade if new version or hwid
 			printLog("upgrade module: $module");
 			upgradeModule($module);
 		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
-			$localConfModules{$module}{blacklisted} eq 'no' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'no' ) {
 			# remove if not required any more
 			printLog("remove module: $module");
@@ -1542,7 +1543,7 @@ sub configureAllModules {
 
 ###############################################################################
 # configures a single module named by $ARGV[1]
-# if not blacklisted, required and not installed
+# if not blocked, required and not installed
 #
 sub configureSingleModule {
 	my $module;
@@ -1555,7 +1556,7 @@ sub configureSingleModule {
 	}
 
 	if ( $localConfModules{$module}{installed} eq 'no' &&
-		$localConfModules{$module}{blacklisted} eq 'no' &&
+		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
 		printLog("configure module: $module");
 		configureModule($module);
@@ -1564,8 +1565,8 @@ sub configureSingleModule {
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
 			print "- it is already installed (maybe use 'reconfigure')\n";
 		}
-		if ( $localConfModules{$module}{blacklisted} eq 'yes' ) {
-			print "- it is blacklisted (maybe use 'unblacklist')\n";
+		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+			print "- it is blocked (maybe use 'unblock')\n";
 		}
 		if ( $origConfModules{$module}{required} eq 'no' ) {
 			print "- it is not required by this system (this is the main reason)\n";
@@ -1575,14 +1576,14 @@ sub configureSingleModule {
 
 
 ###############################################################################
-# reconfigures all modules if not blacklisted and if required even if it is
+# reconfigures all modules if not blocked and if required even if it is
 # already installed
 #
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ( $localConfModules{$module}{blacklisted} eq 'no' &&
+		if ( $localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			printLog("reconfigure module: $module");
 			configureModule($module);
@@ -1592,7 +1593,7 @@ sub reconfigureAllModules {
 
 
 ###############################################################################
-# reconfigures a single module if not blacklisted and if required even if it is
+# reconfigures a single module if not blocked and if required even if it is
 # already installed
 #
 sub reconfigureSingleModule {
@@ -1605,15 +1606,15 @@ sub reconfigureSingleModule {
 		return;
 	}
 
-	if ( $localConfModules{$module}{blacklisted} eq 'no' &&
+	if ( $localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' ) {
 		printLog("configure module: $module");
 		configureModule($module);
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
-	if ( $localConfModules{$module}{blacklisted} eq 'yes' ) {
-		print "- it is blacklisted (maybe use 'unblacklist')\n";
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "- it is blocked (maybe use 'unblock')\n";
 	}
 	if ( $origConfModules{$module}{required} eq 'no' ) {
 		print "- it is not required by this system (this is the main reason)\n";
@@ -1623,43 +1624,43 @@ sub reconfigureSingleModule {
 
 
 ###############################################################################
-# blacklists a module
+# blocks a module
 #
-sub blacklist() {
+sub block() {
 	my $moduleName = $ARGV[1];
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
 	}
-	if ($localConfModules{$module}{blacklisted} eq 'yes') {
-		print "Module $moduleName is already blacklisted\n";
+	if ($localConfModules{$module}{blocked} eq 'yes') {
+		print "Module $moduleName is already blocked\n";
 		return;
 	}
-	if ($localConfModules{$module}{blacklisted} eq 'no') {
-		print "Blacklisting module $moduleName\n";
-		$origConfModules{$module}{blacklisted} = 'yes';
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		print "Blocking module $moduleName\n";
+		$origConfModules{$module}{blocked} = 'yes';
 		return;
 	}
 }
 
 ###############################################################################
-# unblacklists a module
+# unblocks a module
 #
-sub unblacklist() {
+sub unblock() {
 	my $moduleName = $ARGV[1];
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
 	}
-	if ($localConfModules{$module}{blacklisted} eq 'no') {
-		print "Module $moduleName is not blacklisted\n";
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		print "Module $moduleName is not blocked\n";
 		return;
 	}
-	if ($localConfModules{$module}{blacklisted} eq 'yes') {
-		print "Unblacklisting module $moduleName\n";
-		$origConfModules{$module}{blacklisted} = 'no';
+	if ($localConfModules{$module}{blocked} eq 'yes') {
+		print "Unblocking module $moduleName\n";
+		$origConfModules{$module}{blocked} = 'no';
 		return;
 	}
 }
@@ -1829,8 +1830,8 @@ USAGE
 ###############################################################################
 # TODO to be implemented in the very near future
 #  remove MODULE...|ALL        Remove a configured module
-#  blacklist MODULE ...        Blacklist a module
-#  unblacklist MODULE ...      Unblacklist a module
+#  block MODULE ...            Block a module
+#  unblock MODULE ...          Unblock a module
 
 
 
@@ -1874,7 +1875,7 @@ sub prepareValues {
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "blacklist", "unblacklist", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 	if (exists $options{$ARGV[0]} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
 		exit (0);
@@ -1936,20 +1937,20 @@ if (@ARGV != 0) {
 		#		prepareValues();
 		#		updateAllModules();
 		#		writeConfigFile();
-	} elsif ($ARGV[0] eq "blacklist") {
+	} elsif ($ARGV[0] eq "block") {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			blacklist();
+			block();
 			writeConfigFile();
 		} else {
 			print "Module name missing\n";
 		}
-	} elsif ($ARGV[0] eq "unblacklist") {
+	} elsif ($ARGV[0] eq "unblock") {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			unblacklist();
+			unblock();
 			writeConfigFile();
 		} else {
 			print "Module name missing\n";
