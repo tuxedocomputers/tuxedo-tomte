@@ -1,11 +1,11 @@
-!#/bin/sh
+!#/usr/bin/sh
 
-echo "!modify version number before using this!"
+echo "New version number?:"
+read VERSION
 
 DEBFULLNAME="E. Mohr"
 DEBEMAIL="tux@tuxedocomputers.com"
 PACKAGE=tuxedo-tomte
-VERSION=2.0.6
 PREFIX=${PACKAGE}_${VERSION}
 cd debian
 debchange -v ${VERSION}
