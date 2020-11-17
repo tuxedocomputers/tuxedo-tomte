@@ -406,6 +406,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	backlightfix => {
+		name => 'backlight-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight issues for DX1708 with AUO Model 12701 displays',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -504,13 +518,23 @@ sub checkRequirements {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
-	#	my @edid = getEDIDData();
-	#	foreach ( @edid ) {
-	#		if ( $_ =~ m/SDC Model a029 Serial Number 0/ ) {
-	#			$origConfModules{tuxedooledbrt}{required} = 1;
-	#		}
-	#	}
-	#
+	#my @edids;
+	#my $edid;
+	if ($boardname =~ m/(N8xEJEK)/) {
+		my @edids = getEDIDData();
+		my $edid;
+		foreach $edid ( @edids ) {
+			#TODO
+			print "EDID: $edid\n";
+			#if ( $edid =~ m/SDC Model a029 Serial Number 0/ ) {
+			#	$origConfModules{tuxedooledbrt}{required} = 1;
+			#}
+			if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
+				$origConfModules{backlightfix}{required} = 1;
+			}
+		}
+	}
+
 	#	# by default DESKTOP
 	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
 	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
