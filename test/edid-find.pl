@@ -11,20 +11,7 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper qw(Dumper);
 
 
-my @edids = getEDIDData();
-my $edid;
-foreach $edid ( @edids ) {
-	foreach $edid ( @edids ) {
-		my $edidDecoded = $$edid{manufacturer_name}." Model ".$$edid{product_code}." Serial Number ".$$edid{serial_number};
-		print "decoded: $edidDecoded\n";
-		if ( $edidDecoded =~ m/AUO Model 12701 Serial Number 585803690/ ) {
-			print "AUO Model 12701 found!\n";
-		}
-		if ( $edidDecoded =~ m/LPL/ ) {
-			print "LPL found!\n";
-		}
-	}
-}
+print "present? ".isDisplayPresent("LPL")."\n";
 
 
 
@@ -75,27 +62,41 @@ sub findActiveEDIDs {
 # gets valid edid files
 # converts edid data into an array of hash references to origConfModules
 #
+###############################################################################
+# gets valid edid files
+# converts edid data into an array of hash references to origConfModules
+#
 sub getEDIDData {
-	my @edidfiles = findActiveEDIDs();
-	my @edid_refs;
-	my $fh;
-	my $file_content;
-	foreach ( @edidfiles ) {
-		if ( open $fh, '<', $_ ) {
-			$file_content = do { local $/; <$fh> };
-			close $fh;
-			push @edid_refs, parse_edid($file_content);
-		} else {
-			printLog("could not open file $_ $!");
-		}
-	}
-
-	# open $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
-	#my $file_content = do { local $/; <$fh> };
-	#close $fh;
-	# returns hashref to module
-	#return parse_edid($file_content);
-
-	# returns array of hash references to module
-	return @edid_refs;
+    my @edidFiles = findActiveEDIDs();
+    my @edidRefs;
+    my @edidInfo;
+    my $fh;
+    my $fileContent;
+    foreach ( @edidFiles ) {
+        if ( open $fh, '<', $_ ) {
+            $fileContent = do { local $/; <$fh> };
+            close $fh;
+            push @edidRefs, parse_edid($fileContent);
+        } else {
+            printLog("could not open file $_ $!");
+        }
+    }
+    # returns array of hash references to module
+    return @edidInfo;
 }
+
+
+sub isDisplayPresent {
+    my $edidSearchString = shift;
+    my @edidRefs = getEDIDData();
+    my $edidInfo;
+    foreach my $edidData (@edidRefs) {
+        $edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
+        if ($edidInfo =~ m/$edidSearchString/) {
+            return (1);
+        }
+    }
+    return (0);
+}
+
+
