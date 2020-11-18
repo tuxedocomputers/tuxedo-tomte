@@ -15,18 +15,20 @@ my @edids = getEDIDData();
 my $edid;
 foreach $edid ( @edids ) {
 	foreach $edid ( @edids ) {
-	print Dumper($edid);
-            #TODO
-            #if ( $edid =~ m/SDC Model a029 Serial Number 0/ ) {
-            #   $origConfModules{tuxedooledbrt}{required} = 1;
-            #}
-            if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
-                print "AUO Model 12701 found!\n";
-            }
-			if ( $edid =~ m/LPL/ ) {
-                print "LPL found!\n";
-            }
-        }
+		print Dumper($edid);
+		my $edidDecoded = $$edid{manufacturer_name}." Model ".$$edid{product_code}." Serial Number ".$$edid{serial_number};
+		print "decoded: $edidDecoded\n";
+    #TODO
+    #if ( $edid =~ m/SDC Model a029 Serial Number 0/ ) {
+    #   $origConfModules{tuxedooledbrt}{required} = 1;
+    #}
+		if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
+			print "AUO Model 12701 found!\n";
+		}
+		if ( $edid =~ m/LPL/ ) {
+			print "LPL found!\n";
+		}
+	}
 }
 
 
