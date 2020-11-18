@@ -6,6 +6,11 @@ use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
 
+
+# TODO just for debug, delete afterwards
+use Data::Dumper qw(Dumper);
+
+
 my @edids = getEDIDData();
 my $edid;
 foreach $edid ( @edids ) {
@@ -31,10 +36,12 @@ sub findActiveEDIDs {
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
 		if ( -d $path ) {
+			print "path: $path\n";
 			my $enabledfile = "$path/enabled";
 			if ( -e $enabledfile ) {
 				open(FILE, $enabledfile);
 				$_ = <FILE>;
+				print "enabled: $_\n";
 				close(FILE);
 				if ($_ =~ /enabled/) {
 					#print "enabled found under $path\n";
@@ -42,6 +49,7 @@ sub findActiveEDIDs {
 					if ( -e $statusfile ) {
 						open(FILE2, $statusfile);
 						$_ = <FILE2>;
+						print "status: $_\n";
 						if ($_ =~ /connected/) {
 							push @edidfile, "$path/edid";
 						}
