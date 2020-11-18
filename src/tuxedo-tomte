@@ -518,8 +518,6 @@ sub checkRequirements {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
-	#my @edids;
-	#my $edid;
 	if ($boardname =~ m/(N8xEJEK)/) {
 		my @edids = getEDIDData();
 		my $edid;
