@@ -25,9 +25,9 @@ use Data::Dumper qw(Dumper);
 
 # TODO for EDID, comming in next version
 # for OLED backlight and edid decrypt
-#use FindBin qw($Bin);
-#use lib "$Bin/.";
-#use Parse::EDID qw(parse_edid);
+use FindBin qw($Bin);
+use lib "$Bin/.";
+use Parse::EDID qw(parse_edid);
 
 
 ###############################################################################
@@ -871,6 +871,50 @@ sub nokeyboardaftersuspendfix() {
 
 
 ###############################################################################
+# Fixes backlight issue with AUO Model 12701 displays on
+# - DX1708 
+#
+sub backlightfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying backlightfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading backlightfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
 # Enables activation of discrete NVIDIA graphics on devices with built-in AMD
 sub installPackage {
 	my $packageName = shift;
@@ -1298,7 +1342,7 @@ sub getEDIDData {
 		}
 	}
 	# returns array of hash references to module
-	return @edidInfo;
+	return @edidRefs;
 }
 
 
