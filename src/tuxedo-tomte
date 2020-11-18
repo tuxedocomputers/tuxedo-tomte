@@ -519,17 +519,8 @@ sub checkRequirements {
 	}
 
 	if ($boardname =~ m/(N8xEJEK)/) {
-		my @edids = getEDIDData();
-		my $edid;
-		foreach $edid ( @edids ) {
-			#TODO
-			print "EDID: $edid\n";
-			#if ( $edid =~ m/SDC Model a029 Serial Number 0/ ) {
-			#	$origConfModules{tuxedooledbrt}{required} = 1;
-			#}
-			if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
-				$origConfModules{backlightfix}{required} = 1;
-			}
+		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
+			$origConfModules{backlightfix}{required} = 1;
 		}
 	}
 
@@ -1292,30 +1283,46 @@ sub findActiveEDIDs {
 # converts edid data into an array of hash references to origConfModules
 #
 sub getEDIDData {
-	my @edidfiles = findActiveEDIDs();
-	my @edid_refs;
+	my @edidFiles = findActiveEDIDs();
+	my @edidRefs;
+	my @edidInfo;
 	my $fh;
-	my $file_content;
-	foreach ( @edidfiles ) {
+	my $fileContent;
+	foreach ( @edidFiles ) {
 		if ( open $fh, '<', $_ ) {
-			$file_content = do { local $/; <$fh> };
+			$fileContent = do { local $/; <$fh> };
 			close $fh;
-			push @edid_refs, parse_edid($file_content);
+			push @edidRefs, parse_edid($fileContent);
 		} else {
 			printLog("could not open file $_ $!");
 		}
 	}
-
-	# open $fh, '<', '/sys/class/drm/card0-HDMI-A-2/edid' or die "Can't open file $!\n";
-	#my $file_content = do { local $/; <$fh> };
-	#close $fh;
-	# returns hashref to module
-	#return parse_edid($file_content);
-
 	# returns array of hash references to module
-	return @edid_refs;
+	return @edidInfo;
 }
 
+
+
+###############################################################################
+# returns 1 if the display described by a string is connected, otherwise 0
+# the requesting string is build by appending the following data as returned by
+# edid-decode
+# manufacturer_name Model product_code Serial Number serial_number
+# the values from manufacturer_name, product_code and serial_number are
+# extracted by Parse::EDID
+#
+sub isDisplayPresent {
+	my $edidSearchString = shift;
+	my @edidRefs = getEDIDData();
+	my $edidInfo;
+	foreach my $edidData (@edidRefs) {
+		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
+		if ($edidInfo =~ m/$edidSearchString/) {
+			return (1);
+		}
+	}
+	return (0);
+}
 
 
 
