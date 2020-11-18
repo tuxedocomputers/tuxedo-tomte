@@ -25,6 +25,9 @@ foreach $edid ( @edids ) {
             if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
                 print "AUO Model 12701 found!\n";
             }
+			if ( $edid =~ m/LPL/ ) {
+                print "LPL found!\n";
+            }
         }
 }
 
