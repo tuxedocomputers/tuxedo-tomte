@@ -520,7 +520,7 @@ sub checkRequirements {
 
 	if ($boardname =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
-			$origConfModules{backlightfix}{required} = 1;
+			$origConfModules{backlightfix}{required} = 'yes';
 		}
 	}
 
