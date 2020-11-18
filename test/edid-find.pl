@@ -15,6 +15,7 @@ my @edids = getEDIDData();
 my $edid;
 foreach $edid ( @edids ) {
 	print "EDID found: $edid\n";
+	print Dumper(@edids);
 }
 
 
