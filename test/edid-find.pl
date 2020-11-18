@@ -16,6 +16,16 @@ my $edid;
 foreach $edid ( @edids ) {
 	print "EDID found: $edid\n";
 	print Dumper(@edids);
+	foreach $edid ( @edids ) {
+            #TODO
+            print "EDID: $edid\n";
+            #if ( $edid =~ m/SDC Model a029 Serial Number 0/ ) {
+            #   $origConfModules{tuxedooledbrt}{required} = 1;
+            #}
+            if ( $edid =~ m/AUO Model 12701 Serial Number 585803690/ ) {
+                print "AUO Model 12701 found!\n";
+            }
+        }
 }
 
 
