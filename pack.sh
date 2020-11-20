@@ -9,9 +9,7 @@ export DEBEMAIL="tux@tuxedocomputers.com"
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
-echo "new entry in changelog? y/n"
-read ANSWER
-read -n1 -p "Do that? [y,n]" doit
+read -n1 -p "new entry in changelog? [y,n]" doit
 case $doit in
   y|Y) debchange -v ${VERSION} ;;
   n|N) echo "not changing changelog" ;;
