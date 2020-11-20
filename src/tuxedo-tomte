@@ -1291,6 +1291,8 @@ sub findActiveEDIDs {
 	my $dir_handle;
 	my @edidfile;
 
+	my $edidTrigger = 0;
+
 	if ( !opendir ($dir_handle, $cards_dir)) {
 		printLog("unable to open $cards_dir: $!");
 		return @edidfile;
@@ -1312,11 +1314,15 @@ sub findActiveEDIDs {
 						$_ = <FILE2>;
 						if ($_ =~ /connected/) {
 							push @edidfile, "$path/edid";
+							$edidTrigger = 1;
 						}
 					}
 				}
 			}
 		}
+	}
+	if (! $edidTrigger ) {
+		printLog('no enabled and active edid files found!');
 	}
 	return @edidfile;
 }
