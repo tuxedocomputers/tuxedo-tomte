@@ -8,9 +8,16 @@ export DEBFULLNAME="E. Mohr"
 export DEBEMAIL="tux@tuxedocomputers.com"
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
-cd debian
-debchange -v ${VERSION}
-cd ..
+
+echo "new entry in changelog? y/n"
+read ANSWER
+read -n1 -p "Do that? [y,n]" doit
+case $doit in
+  y|Y) debchange -v ${VERSION} ;;
+  n|N) echo "not changing changelog" ;;
+  *) echo dont know ;;
+esac
+
 echo "build tarball"
 git archive --format=tar --prefix=${PREFIX}/ HEAD | gzip -c > ../${PREFIX}.orig.tar.gz
 echo "check what is inside tarball"
@@ -19,6 +26,7 @@ echo "commit"
 git add .
 git commit -m 'building package'
 git push
+
 git checkout --orphan debian-upstream
 git rm --cached -r .
 git clean -xfd
@@ -27,12 +35,15 @@ git checkout -b debian-debian
 git checkout preliminary -- debian/
 git add .
 git commit -m 'packing'
+
 touch debian/gbp.conf
 echo "[DEFAULT]" >> debian/gbp.conf
 echo "upstream-branch=debian-upstream" >> debian/gbp.conf
 echo "debian-branch=debian-debian" >> debian/gbp.conf
 git add .
 git commit -m 'packing'
+
 gbp import-orig --no-interactive ../${PACKAGE}_${VERSION}.orig.tar.gz
+
 gbp buildpackage -us -uc
 
