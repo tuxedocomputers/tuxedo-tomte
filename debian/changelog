@@ -1,3 +1,27 @@
+tuxedo-tomte (2.0.13ubuntu1~1.gbp6cb4ef) UNRELEASED; urgency=medium
+
+  ** SNAPSHOT build @6cb4ef3f4f7ee455fc158418e98b82a7af2f5ff4 **
+
+  [ Eckhart Mohr ]
+  * Add README.md
+  * Add new file
+  * Update README.md
+
+  [ Vinzenz Vietzke ]
+  * Update README.md
+  * Switch description to make it more obvious what Tomte is and does
+
+  [ E. Mohr ]
+  * changed packing script
+  * log message if no edids found
+  * changed packer script
+  * added debug stuff to packager
+  * changes in packer
+  * copied changelog
+  * testing edid
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 23 Nov 2020 16:30:59 +0100
+
 tuxedo-tomte (2.0.13) focal; urgency=medium
 
   * modified dependency to pre-dependency
