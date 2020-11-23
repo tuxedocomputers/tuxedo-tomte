@@ -1,0 +1,2048 @@
+#!/usr/bin/perl -w
+use strict qw(vars subs);
+use warnings;
+
+use File::Copy;
+
+# make sure this is the only running instance
+use Fcntl qw(:flock);
+open our $file, '<', $0 or die $!;
+flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
+
+# TODO remove testing stuff
+my $grubFile = '/etc/default/grub';
+my $logDir = '/var/log/tomte/';
+my $logFile = $logDir.'tomte.log';
+my $LOGFILE;
+my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
+my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
+my $configDir = '/etc/tomte/';
+my $configFile = $configDir.'tomte.cfg';
+
+
+# TODO just for debug, delete afterwards
+use Data::Dumper qw(Dumper);
+
+# TODO for EDID, comming in next version
+# for OLED backlight and edid decrypt
+use FindBin qw($Bin);
+use lib "$Bin/.";
+use Parse::EDID qw(parse_edid);
+
+
+###############################################################################
+# initial definition of post configuration modules
+#   command		the command to be executed on the system
+#   trigger		'1' / 'undef' wether the command should be executed
+#   status		'undef' / 'failed' wether the command execution failed
+#
+my %postConfProgram = (
+	updateGrub => {
+		command => 'update-grub',
+		trigger => 0,
+		status => 'undef',
+		description => 'reconfigures grub according to grub file',
+	},
+);
+
+
+###############################################################################
+#
+# For each new module add an entry into:
+# - %origConfModules
+# - checkRequirements()
+# - the section with all the modules subroutines
+
+# For changes in %origConfModules make the modifications also in:
+# - writeConfigFile()
+
+###############################################################################
+# initial definition for all origConfModules/packages
+# defined by a 'short name' which is the name without '-'
+# e.g. no-boot-on-battery = nobootonbattery
+#
+#   name			name of package or name of solution,
+#					is 'short name' without '-'
+#   version			the package or solution version
+#					rises if the solution changes
+#   installed		'no' not installed / 'yes' installed / 'failed' failed to
+#					install, 'undef' if unknown
+#   blocked			'yes' or 'no' will not be configured on upgrade, install
+#					or deinstall, 'undef' if unknown
+#   required		'yes' or 'no' the system requirements are met
+#					'undef' if unknown
+#   hwid			the environment (HW or SW) are in a certain defined state
+#					rises if additional HW gets support
+#   package			package name or 'no', there is a deb or rpm package as a
+#					solution
+#   fainame			the name to give to FAI to install a certain package
+#   description		A description about the module for the user
+#   postconf		command module to execute after installation of module,
+#					empty if none, the command of the module is defined in
+#					$postConfModule{$postconf}{command}
+#	upgrade			if the system determines this is an upgrade then 'yes'
+#					else 'no'
+#	upgraded		if module was upgraded 'yes', else 'no'
+#
+my %origConfModules = (
+	#	tuxedoccwmi => {
+	#		name => 'tuxedo-cc-wmi',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => '',
+	#		description => '',
+	#	},
+	#	tuxedoxpxcairplanemodefix => {
+	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'AIRPLANEFIX NOGRUB',
+	#		description => '',
+	#	},
+	#	tuxedorestoreaudiofix => {
+	#		name => 'tuxedo-restore-audio-fix',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'AUDIORESTOREFIX',
+	#		description => '',
+	#	},
+	#	tuxedoucsiccg => {
+	#		name => 'tuxedo-ucsi_ccg',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'TUXUCIFIX',
+	#		description => '',
+	#	},
+	#	tuxedooledbrt => {
+	#		name => 'tuxedo-oled-brt',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 1,
+	#		fainame => 'TUXOLED',
+	#		description => '',
+	#	},
+	#	chassistype => {
+	#		name => 'chassis-type',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#		description => '',
+	#	},
+	#	kfocus => {
+	#		name => 'kfocus',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOKFOCUS',
+	#		description => '',
+	#	},
+	#	tuxedo => {
+	#		name => 'tuxedo',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOTUXEDO',
+	#		description => '',
+	#	},
+	#	manjaro => {
+	#		name => 'manjaro',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOMANJARO',
+	#		description => '',
+	#	},
+	#	aistation => {
+	#		name => 'aistation',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOAISTATION',
+	#		description => '',
+	#	},
+	#	bareboneclass => {
+	#		name => 'barebone-class',
+	#		version => 1,
+	#		installed => 0,
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
+	#		description => '',
+	#	},
+	#	barebonegrub => {
+	#		name => 'barebone-grub',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NOGRUB 02GRUB',
+	#		description => '',
+	#	},
+	#	audiofix => {
+	#		name => 'audiofix',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'AUDIOFIX',
+	#		description => '',
+	#	},
+	#	fingerprint => {
+	#		name => 'fingerprint',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'FINGERPRINT',
+	#		description => '',
+	#	},
+	#	threeg => {
+	#		name => 'threeg',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'THREEG',
+	#		description => '',
+	#	},
+	#	hybrid => {
+	#		name => 'hybrid',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'DISCRETE HYBRID',
+	#		description => '',
+	#	},
+	#	nvidiadriver => {
+	#		name => 'nvidia-driver',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'NVIDIATUX NVIDIANOR',
+	#		description => '',
+	#	},
+	#	bluetooth => {
+	#		name => 'bluetooth',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => 'BLUETOOTH',
+	#		description => '',
+	#	},
+	#	tuxedowallpapers => {
+	#		name => 'tuxedo-wallpapers',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#		description => '',
+	#	},
+	#	tuxedoplymouthone => {
+	#		name => 'tuxedo-plymouth-one',
+	#		version => 1,
+	#		installed => 0,
+	#		blocked => 0,
+	#		required => 0,
+	#		hwid => 1,
+	#		package => 0,
+	#		fainame => '',
+	#		description => '',
+	#	},
+
+	i8042fix => {
+		name => 'i8042-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fix for no-keyboard-present after boot on XC1711',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
+	nobootonbattery => {
+		name => 'no-boot-on-battery',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fix for no-boot-on-battery on BA15',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+    },
+	amdxhcihcdusbquirksuspendfix => {
+		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		fainame => '',
+		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
+	amdgpuwithnvidiafix => {
+		name => 'amd-gpu-with-nvidia-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		fainame => '',
+		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between the two with prime-select',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedocontrolcenter => {
+		name => 'tuxedo-control-center',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'TUXEDO Control Center Application',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedokeyboard => {
+		name => 'tuxedo-keyboard',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Keyboard & keyboard backlight driver for TUXEDO notebooks',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	nokeyboardaftersuspendfix => {
+		name => 'no-keyboard-after-suspend-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes no keyboard after suspend problem on XC1711, XUX711, InfinityBook Pro 14 v5 and XMG Fusion',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
+	backlightfix => {
+		name => 'backlight-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight issues for DX1708 with AUO Model 12701 displays',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+);
+
+
+# hash to load the configfile
+# is a copy from origConfModules to evade undefined values
+my %localConfModules = %origConfModules;
+
+
+# empty hash, will be filled with successfully installed modules
+# as hashes: {modulename}{status}
+# where status should be "success" or "failed"
+#
+my %configuredModules;
+
+
+###############################################################################
+# check whether the module is required for the system
+# checks only for hardware
+#
+sub checkRequirements {
+	my $FH;
+	my $boardname_filename = "/sys/class/dmi/id/board_name";
+	my $boardname;
+	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
+	my $boardvendor;
+
+	# TODO: these will be installed on all notebooks, always
+	#	$origConfModules{tuxedokeyboard}{required} = 1;
+	#	$origConfModules{tuxedoccwmi}{required} =1 ;
+	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
+	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
+
+	# load required data into variables
+	if ( open $FH, "<", $boardvendor_filename ) {
+		$boardvendor = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardname_filename $!");
+	}
+	if ( open $FH, "<", $boardname_filename ) {
+		$boardname = <$FH>;
+		close $FH;
+	} else {
+		printLog("could not open $boardvendor_filename $!");
+	}
+		#		if ( $boardvendor =~ m/TUXEDO/ ) {
+		#			$origConfModules{tuxedo}{required} = 1;
+			### close the program if it is not TUXEDO???
+			#		}
+			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
+			#			$origConfModules{tuxedoucsiccg}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
+			#	$origConfModules{kfocus}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
+			#	$origConfModules{manjaro}{required} = 1;
+			#}
+			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
+			#	$origConfModules{aistation}{required} = 1;
+			#}
+			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
+			#	$origConfModules{barebonegrub}{required} = 1;
+			#	$origConfModules{barebonegrub}{fainame} = '02GRUB';
+			#}
+			#if ($boardname =~ m/(P95)/) {
+			#	$origConfModules{audiofix}{required} = 1;
+			#}
+
+	# check values for each module
+	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+		$origConfModules{i8042fix}{required} = 'yes';
+	}
+	if ($boardname =~ m/(PF5PU1G)/) {
+		$origConfModules{nobootonbattery}{required} = 'yes';
+	}
+	if (($boardname =~ m/(POLARIS1501A1650TI)/) ||
+	   ($boardname =~ m/(POLARIS1501A2060)/) ||
+	   ($boardname =~ m/(POLARIS1701A1650TI)/) ||
+	   ($boardname =~ m/(POLARIS1701A2060)/) ||
+	   ($boardname =~ m/(PULSE1401)/) ||
+   	   ($boardname =~ m/(PULSE1501)/)) {
+		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+	}
+	if (($boardname =~ m/POLARIS1701A1650TI/) ||
+		($boardname =~ m/POLARIS1701A2060/) ||
+		($boardname =~ m/POLARIS1501A1650TI/) ||
+		($boardname =~ m/POLARIS1501A2060/) ) {
+		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
+	}
+	if (($boardname =~ m/(X170SM)/) ||
+		($boardname =~ m/(PB50_70DFx,DDx)/) ||
+   		($boardname =~ m/LAPQC71A/) ||
+		($boardname =~ m/LAPQC71B/) ||
+		($boardname =~ m/N141CU/)	) {
+		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+	}
+
+	if ($boardname =~ m/(N8xEJEK)/) {
+		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+		}
+	}
+
+	#	# by default DESKTOP
+	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
+	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
+	#	if ( open $fh, "<", $chassis_type_fn ) {
+	#		my $chassis_type = <fh>;
+	#		close $fh;
+	#		if ( $chassis_type =~ m/(9|10)/ ) {
+	#			$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#		} else {
+	#			my $battery_folder = '/proc/acpi/battery';
+	#			if ( opendir $fh, $battery_folder ) {
+	#				while (my $file = readdir($fh)) {
+	#					next unless (-d "$battery_folder/$file");
+	#					unless ( $file =~ m/(\.|\.\.)/ ) {
+	#						#print "folder: $file\n";
+	#						$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#					}
+	#				}
+	#			}
+	#		}
+	#		unless ( $origConfModules{chassistype}{fainame} =~ m/LAPTOP/ ) {
+	#			my $acpi_string = 'ACPI: Battery Slot';
+	#			my $dmesg_output = `dmesg`;
+	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
+	#				$origConfModules{chassistype}{fainame} = 'LAPTOP';
+	#			}
+	#		}
+	#	}
+	#
+	#	my @lsusb_output = `lsusb`;
+	#	chomp @output;
+	#	foreach my $line ( @output )
+	#	{
+	#		
+	#	}
+}
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+# each configure one module from %confModules
+# they set 'installed' status and $postConfModule trigger
+#
+# for keyboard not present on boot
+# for XC1711 on all distributions
+# - PB50_70DFx,DDx
+#
+sub i8042fix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i8042.nopnp");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying i8042fix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading i8042fix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# for not being able to boot if system is on battery
+# affects BA15
+# - PF5PU1G
+#
+sub nobootonbattery() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("iommu=soft");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying nobootonbattery");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading nobootonbattery");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Fix for some AMD devices where the xhci_hcd driver causes a jump out of
+# suspend immediately on entering suspend
+# - POLARIS1501A1650TI
+# - POLARIS1501A2060
+# - POLARIS1701A1650TI
+# - POLARIS1701A2060
+# - PULSE1401
+# - PULSE1501
+#
+sub amdxhcihcdusbquirksuspendfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying amdxhcihcdusbquirksuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading amdxhcihcdusbquirksuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+# affects:
+# - POLARIS1701A1650TI
+# - POLARIS1701A2060
+# - POLARIS1501A1650TI
+# - POLARIS1501A2060
+#
+sub amdgpuwithnvidiafix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
+	my $niceTime = getBackupFileTime();
+	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
+		"Section \"OutputClass\"\n".
+		"\tIdentifier \"nvidia\"\n".
+    	"\tMatchDriver \"nvidia-drm\"\n".
+    	"\tDriver \"nvidia\"\n".
+    	"\tOption \"AllowEmptyInitialConfiguration\"\n".
+    	"\tModulePath \"/usr/lib/x86_64-linux-gnu/nvidia/xorg\"\n".
+    	"\tOption \"PrimaryGPU\" \"Yes\"\n".
+		"EndSection\n";
+	if ($action eq 'install')
+	{
+		printLog("applying amdgpuwithnvidiafix");
+		$retval = createFile($fileName, $fileText);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading amdgpuwithnvidiafix");
+		$retval = createFile($fileName, $fileText);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+sub tuxedocontrolcenter() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install')
+	{
+		$retval = installPackage($origConfModules{$module}{name});
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			printLog("could'nt install $origConfModules{$module}{name}");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# graphics. Also enables switching between the two with prime-select
+sub tuxedokeyboard() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install')
+	{
+		$retval = installPackage($origConfModules{$module}{name});
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			printLog("couldn't install $origConfModules{$module}{name}");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Fix for Tuxedo Notebooks, fixes no keyboard present after suspend on
+# - XC1711
+# - XUX711
+#
+sub nokeyboardaftersuspendfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying nokeyboardaftersuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading nokeyboardaftersuspendfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Fixes backlight issue with AUO Model 12701 displays on
+# - DX1708 
+#
+sub backlightfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
+	my $retval;
+	if ($action eq 'install')
+	{
+		printLog("applying backlightfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		printLog("upgrading backlightfix");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateGrub}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+sub installPackage {
+	my $packageName = shift;
+	my $retval = system("pkconf install $packageName");
+	printLog("pkconf returns: $retval, while installing $packageName");
+	return $retval;
+}
+
+
+###############################################################################
+# creates file with content
+# 
+sub createFile {
+	my $fileName = shift;
+	my $fileText = shift;
+	my $FH;
+	if (-e $fileName) {
+		backupFile($fileName);
+	}
+	if (open $FH, ">",$fileName) {
+		print $FH "$fileText";
+		close $FH;
+		return 1;
+	} else {
+		printLog("can't open $fileName for writing");
+		print "Can't open $fileName for writing\n";
+		return 0;
+	}
+}
+
+
+###############################################################################
+# backups file with timestamp
+# 
+sub backupFile {
+	my $fileName = shift;
+	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
+	if (move($fileName, $backupFile)) {
+		print "created backup for $fileName\n";
+		return 1;
+	} else {
+		printLog("can't create backup file for $fileName");
+		print "Can't create backup for $fileName\n";
+		return 0;
+	}
+}
+
+
+###############################################################################
+# inserts array values as kernel parameters if not present
+# example: my $retval = insertGrub(\@kernel_parameters);
+# returns number of inserted parameters
+# return value of 0 means it failed
+#
+sub insertGrub {
+    my $grubFH;
+    my @grub_lines;
+	my $module = shift;
+    my $parameters = shift;
+    my $parameter;
+	my $inserted = 0;
+
+    if ( open $grubFH, "<", $grubFile) {
+		while (<$grubFH>) {
+	    	push (@grub_lines, $_);
+		}
+		close $grubFH;
+    } else {
+		printLog("no $grubFile present or unable to open the file for reading");
+		return (0);
+    }
+
+    foreach( @grub_lines ) {
+		# find the correct line
+		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+			foreach $parameter ( @{$parameters} ) {
+				if (insertGrubParameter(\$_, \$parameter)) {
+					++$inserted;
+				}
+			}
+		}
+    }
+
+	# write the changes into grub config
+    if ( open $grubFH, ">", $grubFile ) {
+		print $grubFH @grub_lines;
+		close ($grubFH);
+    } else {
+		printLog("no $grubFile present or unable to open the file for writing");
+		return (0);
+    }
+    return $inserted;
+}
+
+
+###############################################################################
+# inserts a parameter into a grub line
+# if the parameter is not present yet
+# returns 1 if inserted or already present
+#
+sub insertGrubParameter {
+	my ($line, $parameter) = @_;
+
+	if ($$line =~ m/$$parameter/) {
+		return (1);
+	}
+	if ($$line =~ m/""/) {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
+		printLog("inserted $$parameter into grub line");
+	} else {
+		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+		printLog("inserted $$parameter into grub line");
+	}
+	return (1);
+}
+
+
+###############################################################################
+# initialize logFile
+# create one if not existing already
+# exits program if logfile can not be created
+#
+sub initLogging {
+	my %options;
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	# do not log if no arguments
+	if (@ARGV == 0) {
+		return;
+	}
+	# do not log if false arguments
+	if (! (defined $ARGV[0] and exists $options{$ARGV[0]})) {
+		return;
+	}
+
+	# check if root permissions available
+	if (! isRoot()) {
+		return;
+	}
+
+	my $timestamp;
+	# create logDir if it does not exist
+	unless ( -d $logDir ) {
+		mkdir($logDir, 0755);
+		unless ( -d $logDir ) {
+			$noLogFile = 1;
+			print "Could not create $logDir\n";
+			return;
+		}
+	}
+	# check for logfile
+	if ( -f $logFile ) {
+		# append if logFile exists
+		if ( open $LOGFILE, '>>'.$logFile )
+		{
+			$noLogFile = 0;
+			$timestamp = getLoggingTime();
+			close $LOGFILE;
+			return;
+		} else {
+			$noLogFile =1;
+			print "Could not open logFile $logFile\n$!\n";
+			exit (0);
+		}
+	} else {
+		# create a new logFile
+		if ( open $LOGFILE, '>'.$logFile ) {
+			$noLogFile = 0;
+			$timestamp = getLoggingTime();
+			close $LOGFILE;
+			return;
+		} else {
+			$noLogFile =1;
+			print "Could not create logFile $logFile\n";
+			exit (0);
+		}
+	}
+}
+
+
+
+###############################################################################
+#
+sub getLoggingTime {
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+	my $nice_timestamp = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
+									$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	return $nice_timestamp;
+}
+
+
+
+###############################################################################
+#
+sub getBackupFileTime {
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+	my $nice_timestamp = sprintf ( "%04d%02d%02d%02d%02d%02d",
+									$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	return $nice_timestamp;
+}
+
+
+
+###############################################################################
+# prints into logFile
+#
+sub printLog {
+	my $message = shift;
+	if (! $noLogFile) {
+		if (open $LOGFILE, '>>'.$logFile) {
+			my $timestamp = getLoggingTime();
+			print $LOGFILE "$timestamp $message\n";
+			close $LOGFILE;
+		}
+	}
+}
+
+
+###############################################################################
+# fills global variable %localConfModules with data from $configFile
+# if there is no configFile then it is left empty
+# returns '0' if configfile can not be read, else returns '1'
+#
+sub readConfigFile {
+	my %comp;
+	my $FH;
+	my $shortname;
+	if ( open $FH, '<', $configFile ) {
+		while ( my $line=<$FH> ) {
+			chomp $line;
+			# ignore comments
+			if ($line =~ m/^#/) {
+				next;
+			}
+			# ignore empty lines
+			if ($line =~ m/^(\s)*$/) {
+				next;
+			}
+			# check data format
+			if (validConfigLine($line)) {
+				my ($name, @cols) = split /\s+/, $line;
+				# check if module name exists in orig and return shortname
+				$shortname = validModuleName($name);
+				if ($shortname ne '') {
+					# @comp values have to be same as in writeConfigFile
+					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
+					$localConfModules{$shortname} = { %comp };
+					# convert to numbers
+					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
+					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
+				} else {
+					printLog("module: $name does not exist");
+				}
+			} else {
+				printLog("invalid line in $configFile");
+			}
+		}
+		close $FH;
+	} else {
+		printLog("could not open configFile: $configFile $!");
+		print "Could not open configfile $configFile\n";
+		return (0);
+	}
+	return (1);
+}
+
+
+###############################################################################
+# checks if the line has valid values
+# return 0 if invalid, 1 if valid
+#
+sub validConfigLine {
+	my $line = shift;
+	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
+		return (1);
+	} else {
+		printLog("Found invalid configuration line in $configFile:\n$line");
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# overwrites $configFile with data from $origConfModules if it does not exist
+#
+sub writeConfigFile {
+	my $FH;
+	my $installed;
+	my $version;
+	my $hwid;
+	if ( open $FH, '>', $configFile ) {
+		printLog("writing configfile");
+		print $FH "# name version installed blocked required hwid\n";
+		foreach my $name (sort keys %origConfModules) {
+			# values have to be same as in readConfigFile
+			if ($origConfModules{$name}{upgrade} eq 'yes') {
+				# upgrade available
+				if ($origConfModules{$name}{upgraded} eq 'yes') {
+					# upgrade was executed
+					$version = $origConfModules{$name}{version};
+					$hwid = $origConfModules{$name}{hwid};
+					$installed = $origConfModules{$name}{installed};
+				} else {
+					# upgrade was not executed
+					if ( $origConfModules{$name}{installed} eq 'yes' ) {
+						$version = $localConfModules{$name}{version};
+						$hwid = $localConfModules{$name}{hwid};
+						$installed = $localConfModules{$name}{installed};
+					} else {
+						$version = $origConfModules{$name}{version};
+						$hwid = $origConfModules{$name}{hwid};
+						$installed = $localConfModules{$name}{installed};
+					}
+				}
+			} else {
+				# no upgrade available
+				$version = $origConfModules{$name}{version};
+				$hwid = $origConfModules{$name}{hwid};
+				$installed = $origConfModules{$name}{installed};
+			}
+			print $FH "$origConfModules{$name}{name} ".
+					"$version ".
+					"$installed ".
+					"$origConfModules{$name}{blocked} ".
+					"$origConfModules{$name}{required} ".
+					"$hwid\n";
+		}
+		close $FH;
+	} else {
+		printLog("can't write to $configFile $!");
+		print "Can't write to configfile: $configFile\n";
+		exit (0);
+	}
+}
+
+
+###############################################################################
+# check if config file and directory exists
+# loads the config or if non existent
+# creates a new directory and configfile
+#
+sub initConfigFile {
+	# create configDir if it does not exist
+	unless ( -d $configDir ) {
+		mkdir($configDir, 0755);
+		unless ( -d $configDir ) {
+			$noConfigFile = 1;
+			printLog("could not create $configDir");
+			print "Could not create $configDir\n";
+			exit (0);
+		}
+	}
+	# read config file
+	if ( -f $configFile ) {
+		$noConfigFile = 0;
+		readConfigFile();
+		return;
+	} else {
+		# create a new configFile
+		printLog("no configfile present ... creating one");
+		print "No configfile present ... creating one\n";
+		writeConfigFile();
+		return;
+	}
+}
+
+
+###############################################################################
+# searches the sysfs subdirectory for active monitor entries
+# and returns them as an array
+#
+sub findActiveEDIDs {
+	my $cards_dir = '/sys/class/drm';
+	my $dir_handle;
+	my @edidfile;
+	my $enabledContent;
+	my $statusContent;
+
+	my $edidTrigger = 0;
+
+	if ( !opendir ($dir_handle, $cards_dir)) {
+		printLog("unable to open $cards_dir: $!");
+		return @edidfile;
+	}
+	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
+	foreach my $file (@FILES) {
+		my $path = "$cards_dir/$file";
+		if ( -d $path ) {
+			my $enabledfile = "$path/enabled";
+			if ( -e $enabledfile ) {
+				open(FILE, $enabledfile);
+				$enabledContent = <FILE>;
+				close(FILE);
+				if ($enabledContent =~ /enabled/) {
+					print "enabled found under $path\n";
+					my $statusfile = "$path/status";
+					if ( -e $statusfile ) {
+						open(FILE2, $statusfile);
+						$statusContent = <FILE2>;
+						if ($statusContent =~ /connected/) {
+							print "connected found\n";
+							push @edidfile, "$path/edid";
+							$edidTrigger = 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (! $edidTrigger ) {
+		printLog('no enabled and active edid files found!');
+	}
+	return @edidfile;
+}
+
+
+###############################################################################
+# gets valid edid files
+# converts edid data into an array of hash references to origConfModules
+#
+sub getEDIDData {
+	my @edidFiles = findActiveEDIDs();
+	my @edidRefs;
+	my @edidInfo;
+	my $fh;
+	my $fileContent;
+	foreach ( @edidFiles ) {
+		if ( open $fh, '<', $_ ) {
+			$fileContent = do { local $/; <$fh> };
+			close $fh;
+			push @edidRefs, parse_edid($fileContent);
+		} else {
+			printLog("could not open file $_ $!");
+		}
+	}
+	# returns array of hash references to module
+	return @edidRefs;
+}
+
+
+
+###############################################################################
+# returns 1 if the display described by a string is connected, otherwise 0
+# the requesting string is build by appending the following data as returned by
+# edid-decode
+# manufacturer_name Model product_code Serial Number serial_number
+# the values from manufacturer_name, product_code and serial_number are
+# extracted by Parse::EDID
+#
+sub isDisplayPresent {
+	my $edidSearchString = shift;
+	my @edidRefs = getEDIDData();
+	my $edidInfo;
+	foreach my $edidData (@edidRefs) {
+		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
+		if ($edidInfo =~ m/$edidSearchString/) {
+			return (1);
+		}
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# print status from all modules in a nice formated output
+# uses the data from the local configuration file if available
+# else it checks the hardware
+#
+# used pattern:
+# installed and new module version equal (no update)
+# installed	req. old	req. new	notes
+# no		no			no			ign
+# yes		no			no			installed but not required!
+# no		yes			no			ign
+# yes		yes			no			ign
+# no		no			yes			ign
+# yes		no			yes			ign
+# no		yes			yes			not inst. but required
+# yes		yes			yes			inst. and req.
+#
+# installed and new module version not equal (update?)
+# to be done in next version
+#
+sub listStatus {
+	my @arr = ( ['Name', 'Version', 'Installed', 'Blocked', 'Required'] );
+	my $module;
+	my $noneRequired = 1;
+	my $printIt = 0;
+	my $upgradeAvailable = '';
+
+	foreach $module (sort keys %localConfModules) {
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		}
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+		($localConfModules{$module}{required} eq 'no') &&
+		($origConfModules{$module}{required} eq 'no')) {
+			# module is installed but should not be
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}"]);
+		}
+		if ($localConfModules{$module}{required} eq 'yes') {
+			$noneRequired = 0;
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}$upgradeAvailable"]);
+		}
+	}
+	if ($printIt) {
+		print "Only showing fixes that are available for this hardware\n";
+		for my $row (@arr) {
+			format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
+			@$row
+.
+			write;
+		}
+	}
+	if ($noneRequired) {
+		print "No fixes available for this system\n";
+	}
+}
+
+
+###############################################################################
+# copies values from local configuration module into new configuration module
+# copies always 'blocked'
+#
+sub transferConfigValues {
+	my $name;
+	foreach $name (sort keys %localConfModules) {
+		# always copy blocked status
+		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
+		if (newVersion($name) or newHwid($name)) {
+			# new version or new hwid => upgrade necessary
+			$origConfModules{$name}{upgrade} = 'yes';
+			$origConfModules{$name}{upgraded} = 'no';
+		} else {
+			$origConfModules{$name}{installed} = $localConfModules{$name}{installed};
+			$origConfModules{$name}{upgrade} = 'no';
+			$origConfModules{$name}{upgraded} = 'no';
+		}
+	}
+}
+
+
+
+###############################################################################
+# returns 0 if no new version
+# returns 1 if new version
+sub newVersion {
+	my $module = shift;
+	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
+		print "#version: $localConfModules{$module}{version} $origConfModules{$module}{version}\n";
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
+###############################################################################
+# returns 0 if no new hwid
+# returns 1 if new hwid
+sub newHwid {
+	my $module = shift;
+	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
+
+###############################################################################
+# adds module hash to list of configured modules with status
+#
+sub addToConfiguredModules {
+	my $module = shift;
+	my $status = shift;
+	$configuredModules{$module} = $status;
+}
+
+
+
+###############################################################################
+# parses sub name from %origConfModules list from given module parameter name
+# returns the name of the module vector of found
+# returns an empty string if not found
+#
+sub getSubName {
+	my $moduleName = shift;
+	my $module;
+	foreach $module ( keys %origConfModules ) {
+		if ( $moduleName eq $origConfModules{$module}{name} ) {
+			return $module;
+		}
+	}
+	# return empty string if module is not found
+	return "";
+}
+
+
+###############################################################################
+# returns the shortname of module if the name is a valid module name
+# returns '' if not
+#
+sub validModuleName {
+	my $moduleName = shift;
+	my $module;
+	foreach $module ( keys %origConfModules ) {
+		if (defined $origConfModules{$module}{name}) {
+			if ($origConfModules{$module}{name} eq $moduleName) {
+				return $module;
+			}
+		}
+	}
+	return '';
+}
+
+
+
+###############################################################################
+# configures all modules
+# if not blocked, required and not installed
+#
+# u=upgrade
+# c=configure
+# R=remove
+# .=nothing
+#
+# installed blocked required	newversion	newhwid
+# tomte.cfg	tomte.cfg	check		origConfig	origConfig
+# yes		yes			yes			yes			yes		.
+# yes		yes			yes			yes			no		.
+# yes		yes			yes			no			yes		.
+# yes		yes			yes			no			no		.
+# yes		yes			no			yes			yes		.
+# yes		yes			no			yes			no		.
+# yes		yes			no			no			yes		.
+# yes		yes			no			no			no		.
+# yes		no			yes			yes			yes		u
+# yes		no			yes			yes			no		u
+# yes		no			yes			no			yes		u
+# yes		no			yes			no			no		.
+# yes		no			no			yes			yes		R
+# yes		no			no			yes			no		R
+# yes		no			no			no			yes		R
+# yes		no			no			no			no		R
+# no		yes			yes			yes			yes		.
+# no		yes			yes			yes			no		.
+# mo		yes			yes			no			yes		.
+# no		yes			yes			no			no		.
+# no		yes			no			yes			yes		.
+# no		yes			no			yes			no		.
+# no		yes			no			no			yes		.
+# no		yes			no			no			no		.
+# no		no			yes			yes			yes		C
+# no		no			yes			yes			no		C
+# no		no			yes			no			yes		C
+# no		no			yes			no			no		C
+# no		no			no			yes			yes		.
+# no		no			no			yes			no		.
+# no		no			no			no			yes		.
+# no		no			no			no			no		.
+
+sub configureAllModules {
+	my $module;
+	my $exit_status;
+	foreach $module (keys %origConfModules) {
+		# configure if not installed, not blocked and required
+		# must be 'elsif' or else the options could get mixed up
+		if ( $origConfModules{$module}{installed} eq 'no' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' ) {
+			printLog("configure module: $module");
+			configureModule($module);
+		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' &&
+   			$origConfModules{$module}{upgrade} eq 'yes' ) {
+			# upgrade if new version or hwid
+			printLog("upgrade module: $module");
+			upgradeModule($module);
+		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
+			$origConfModules{$module}{required} eq 'no' ) {
+			# remove if not required any more
+			printLog("remove module: $module");
+			removeModule($module);
+		}
+	}
+}
+
+
+
+
+###############################################################################
+# configures a single module named by $ARGV[1]
+# if not blocked, required and not installed
+#
+sub configureSingleModule {
+	my $module;
+	my $moduleName = $ARGV[1];
+	$module = getSubName($moduleName);
+	if ($module eq "") {
+		printLog("wrong module name");
+		print "Wrong module name\n";
+		return;
+	}
+
+	if ( $localConfModules{$module}{installed} eq 'no' &&
+		$localConfModules{$module}{blocked} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes' ) {
+		printLog("configure module: $module");
+		configureModule($module);
+	} else {
+		print "Module: $moduleName cannot be installed because:\n";
+		if ( $localConfModules{$module}{installed} eq 'yes' ) {
+			print "- it is already installed (maybe use 'reconfigure')\n";
+		}
+		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+			print "- it is blocked (maybe use 'unblock')\n";
+		}
+		if ( $origConfModules{$module}{required} eq 'no' ) {
+			print "- it is not required by this system (this is the main reason)\n";
+		}
+	}
+}
+
+
+###############################################################################
+# reconfigures all modules if not blocked and if required even if it is
+# already installed
+#
+sub reconfigureAllModules {
+	my $module;
+	my $exit_status;
+	foreach $module (keys %origConfModules) {
+		if ( $localConfModules{$module}{blocked} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes' ) {
+			printLog("reconfigure module: $module");
+			configureModule($module);
+		}
+	}
+}
+
+
+###############################################################################
+# reconfigures a single module if not blocked and if required even if it is
+# already installed
+#
+sub reconfigureSingleModule {
+	my $module;
+	my $moduleName = $ARGV[1];
+	$module = getSubName($moduleName);
+	if ($module eq "") {
+		printLog("wrong module name");
+		print "Wrong module name\n";
+		return;
+	}
+
+	if ( $localConfModules{$module}{blocked} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes' ) {
+		printLog("configure module: $module");
+		configureModule($module);
+	} else {
+		print "Module: $moduleName cannot be installed because:\n";
+	}
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "- it is blocked (maybe use 'unblock')\n";
+	}
+	if ( $origConfModules{$module}{required} eq 'no' ) {
+		print "- it is not required by this system (this is the main reason)\n";
+	}
+}
+
+
+
+###############################################################################
+# blocks a module
+#
+sub block() {
+	my $moduleName = $ARGV[1];
+	my $module = getSubName($moduleName);
+	if ($module eq '') {
+		print "Module $moduleName does not exist\n";
+		return;
+	}
+	if ($localConfModules{$module}{blocked} eq 'yes') {
+		print "Module $moduleName is already blocked\n";
+		return;
+	}
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		print "Blocking module $moduleName\n";
+		$origConfModules{$module}{blocked} = 'yes';
+		return;
+	}
+}
+
+###############################################################################
+# unblocks a module
+#
+sub unblock() {
+	my $moduleName = $ARGV[1];
+	my $module = getSubName($moduleName);
+	if ($module eq '') {
+		print "Module $moduleName does not exist\n";
+		return;
+	}
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		print "Module $moduleName is not blocked\n";
+		return;
+	}
+	if ($localConfModules{$module}{blocked} eq 'yes') {
+		print "Unblocking module $moduleName\n";
+		$origConfModules{$module}{blocked} = 'no';
+		return;
+	}
+}
+
+
+###############################################################################
+# configures a module, does no checks
+#
+sub configureModule {
+	my $module = shift;
+	$module->($module, 'install');
+}
+
+
+###############################################################################
+# remove a module, does no checks
+#
+sub removeModule {
+	my $module = shift;
+	$module->($module, 'remove');
+}
+
+
+
+###############################################################################
+# configures a module, does no checks
+#
+sub upgradeModule {
+	my $module = shift;
+	$module->($module, 'upgrade');
+}
+
+
+
+###############################################################################
+# starts system programs (if necessary) to activate the module changes
+#
+sub postConfigure {
+	my $sysProgram;
+	my $exitStatus;
+	foreach $sysProgram (keys %postConfProgram) {
+		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
+			$exitStatus = system($postConfProgram{$sysProgram}{command});
+			if ($exitStatus == 0) {
+				postSetModulesState($sysProgram, "success");
+			} else {
+				postSetModulesState($sysProgram, "failed");
+			}
+		}
+	}
+}
+
+
+###############################################################################
+# sets all modules dependant of some system program to work to status failed
+#
+sub postSetModulesState {
+	my $sysProgram = shift;
+	my $status = shift;
+	my $module;
+	$postConfProgram{$sysProgram}{status} = $status;
+	foreach $module (keys %configuredModules) {
+		$configuredModules{$module}{status} = $status;
+	}
+}
+
+
+###############################################################################
+# lists which modules and system programs where installed, configured
+# or executed correctly and which not
+#
+sub listSuccess {
+	my $confProgram;
+	my $confModule;
+	my @failedPrograms;
+	my @failedModules;
+	my @successModules;
+	my $successOrFailed = 0;
+
+	foreach $confProgram (keys %postConfProgram) {
+		if ($postConfProgram{$confProgram}{status} eq "failed") {
+			$successOrFailed = 1;
+			push(@failedPrograms, $postConfProgram{$confProgram}{command});
+		}
+	}
+	foreach $confModule (keys %configuredModules) {
+		if ($configuredModules{$confModule} eq "failed") {
+			$successOrFailed = 1;
+			push(@failedModules, $confModule);
+		} elsif ($configuredModules{$confModule} eq "success") {
+			$successOrFailed = 1;
+			push(@successModules, $confModule);
+		}
+	}
+	if (@successModules) {
+		print "The following modules have been installed successfully:\n";
+		printNameDescriptionModules(@successModules);
+	}
+	if (@failedModules) {
+		print "The following modules have failed to be installed:\n";
+		printNameDescriptionModules(@failedModules);
+	}
+	if (@failedPrograms) {
+		print "The following post installation programs have failed:\n";
+		printNameDescriptionPrograms(@failedPrograms);
+	}
+	if (! $successOrFailed) {
+		print "Nothing has been configured\n";
+	}
+}
+
+
+###############################################################################
+# print name and description from modules given as array
+#
+sub printNameDescriptionModules {
+	my @elements = @_;
+	foreach (@elements) {
+		print "$origConfModules{$_}{name}: $origConfModules{$_}{description}\n";
+	}
+}
+
+
+###############################################################################
+# print name and description for programs given as array
+#
+sub printNameDescriptionPrograms {
+	my @elements = @_;
+	foreach (@elements) {
+		print "$_: $postConfProgram{$_}{description}\n";
+	}
+}
+
+
+###############################################################################
+# show description of module
+#
+sub moduleDescription() {
+	my $moduleName = $ARGV[1];
+	my $module;
+	if ($moduleName) {
+		$module = getSubName($moduleName);
+		if ( $module ne "" ) {
+	    print "$origConfModules{$module}{description}\n";
+		} else {
+			print "module: $moduleName is not in the modules list\n";
+		}
+    } else {
+		print "Missing module name\n";
+	}
+}
+
+
+###############################################################################
+# text to print for help
+#
+my $USAGE =<<USAGE;
+tuxedo-tomte [COMMAND]
+  list                        List all installable modules with detailed status
+  description MODULE          Shows the module description
+  configure MODULE ...|all    Configure an unconfigured module
+  reconfigure MODULE...|all   Reconfigure a configured module
+  help                        Prints this message
+USAGE
+
+
+###############################################################################
+# TODO to be implemented in the very near future
+#  remove MODULE...|ALL        Remove a configured module
+#  block MODULE ...            Block a module
+#  unblock MODULE ...          Unblock a module
+
+
+
+###############################################################################
+# prints help
+#
+sub help {
+	print "$USAGE\n";
+	exit 0;
+}
+
+
+###############################################################################
+# checks if root and returns 1 if yes, otherwise 0
+#
+sub isRoot {
+	# check if root
+	if( $> != 0 ) {
+		return (0);
+	}
+	return (1);
+}
+
+
+###############################################################################
+# checks system requirements, loads configfile
+#
+sub prepareValues {
+	checkRequirements();
+	initConfigFile();
+	transferConfigValues();
+}
+
+
+###############################################################################
+###############################################################################
+# MAIN PROGRAM
+
+# define for each argvalues procedures
+# modify $USAGE if any modifications here
+
+if (@ARGV != 0) {
+	my %options;
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	if (exists $options{$ARGV[0]} && (! isRoot() )) {
+		print "You must have root access to use this option\n";
+		exit (0);
+	}
+	if ($ARGV[0] eq "list") {
+		initLogging();
+		prepareValues();
+		listStatus();
+	} elsif ($ARGV[0] eq "description") {
+		moduleDescription();
+	} elsif ($ARGV[0] eq "help") {
+		help();
+	} elsif ($ARGV[0] eq "FAI") {
+		print "Starting tuxedo-tomte in FAI modus\n".
+				"This should not be used in a normal situation\n".
+				"only when installing a new system with FAI\n";
+	} elsif ($ARGV[0] eq "configure") {
+		# check if there is a second argument
+		if (defined $ARGV[1]) {
+			initLogging();
+			prepareValues();
+			if ($ARGV[1] eq "all") {
+				configureAllModules();
+				postConfigure();
+				listSuccess();
+				writeConfigFile();
+			} else {
+				configureSingleModule();
+				postConfigure();
+				listSuccess();
+				writeConfigFile();
+			}
+		} else {
+			print "Module name or \"all\" missing\n";
+		}
+	} elsif ($ARGV[0] eq "remove") {
+		print "remove, does nothing yet\n";
+	} elsif ($ARGV[0] eq "reconfigure") {
+		if (defined $ARGV[1]) {
+			initLogging();
+			prepareValues();
+			if ($ARGV[1] eq "all") {
+				reconfigureAllModules();
+				postConfigure();
+				listSuccess();
+				writeConfigFile();
+			} else {	
+				reconfigureSingleModule();
+				postConfigure();
+				listSuccess();
+				writeConfigFile();
+			}
+		} else {
+			print "Module name or \"all\" missing\n";
+		}
+		#	} elsif ($ARGV[0] eq "update\n") {
+		#		print "update does nothing yet\n";
+		#		initLogging();
+		#		prepareValues();
+		#		updateAllModules();
+		#		writeConfigFile();
+	} elsif ($ARGV[0] eq "block") {
+		if (defined $ARGV[1]) {
+			initLogging();
+			prepareValues();
+			block();
+			writeConfigFile();
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($ARGV[0] eq "unblock") {
+		if (defined $ARGV[1]) {
+			initLogging();
+			prepareValues();
+			unblock();
+			writeConfigFile();
+		} else {
+			print "Module name missing\n";
+		}
+	} else {
+		print "Unknown command: $ARGV[0]\n";
+		help();
+	}
+} else {
+	help();
+}
+
+
