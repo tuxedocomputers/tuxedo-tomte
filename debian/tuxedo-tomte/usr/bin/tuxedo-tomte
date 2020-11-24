@@ -519,6 +519,7 @@ sub checkRequirements {
 	}
 
 	if ($boardname =~ m/(N8xEJEK)/) {
+		printLog("found mainboard N8xEJEK");
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
@@ -1290,8 +1291,8 @@ sub findActiveEDIDs {
 	my $cards_dir = '/sys/class/drm';
 	my $dir_handle;
 	my @edidfile;
-	my $enabledContent;
-	my $statusContent;
+	my $enabledFileContent;
+	my $statusFileContent;
 
 	my $edidTrigger = 0;
 
@@ -1302,21 +1303,23 @@ sub findActiveEDIDs {
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
+		printLog("path: $path");
 		if ( -d $path ) {
-			my $enabledfile = "$path/enabled";
-			if ( -e $enabledfile ) {
-				open(FILE, $enabledfile);
-				$enabledContent = <FILE>;
+			my $enabledFile = "$path/enabled";
+			printLog("enabledfile: $enabledFile");
+			if ( -e $enabledFile ) {
+				open(FILE, $enabledFile);
+				$enabledFileContent = <FILE>;
 				close(FILE);
-				if ($enabledContent =~ /enabled/) {
-					print "enabled found under $path\n";
-					my $statusfile = "$path/status";
-					if ( -e $statusfile ) {
-						open(FILE2, $statusfile);
-						$statusContent = <FILE2>;
-						if ($statusContent =~ /connected/) {
-							print "connected found\n";
+				if ($enabledFileContent =~ /enabled/) {
+					printLog("enabled found under $path");
+					my $statusFile = "$path/status";
+					if ( -e $statusFile ) {
+						open(FILE2, $statusFile);
+						$statusFileContent = <FILE2>;
+						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
+							printLog("found edid!");
 							$edidTrigger = 1;
 						}
 					}
@@ -1336,6 +1339,7 @@ sub findActiveEDIDs {
 # converts edid data into an array of hash references to origConfModules
 #
 sub getEDIDData {
+	printLog("in getEDIDData");
 	my @edidFiles = findActiveEDIDs();
 	my @edidRefs;
 	my @edidInfo;
@@ -1366,14 +1370,17 @@ sub getEDIDData {
 #
 sub isDisplayPresent {
 	my $edidSearchString = shift;
+	printLog("in isDisplayPresent");
 	my @edidRefs = getEDIDData();
 	my $edidInfo;
 	foreach my $edidData (@edidRefs) {
 		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
 		if ($edidInfo =~ m/$edidSearchString/) {
+			printLog("edid string found");
 			return (1);
 		}
 	}
+	printLog("edid string not found");
 	return (0);
 }
 
