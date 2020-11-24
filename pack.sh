@@ -59,5 +59,5 @@ gbp import-orig --no-interactive ../${PACKAGE}_${VERSION}.orig.tar.gz
 
 echo "##########################################"
 echo "#gbp buildpackage -us -uc"
-gbp buildpackage -us -uc
+gbp buildpackage -us -uc --git-color=on
 
