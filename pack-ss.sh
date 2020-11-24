@@ -1,4 +1,4 @@
-!#/usr/bin/sh
+#!/usr/bin/sh
 
 echo "New version number?:"
 read VERSION
@@ -9,7 +9,7 @@ export VERSION
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
-gbp dch -S --verbose --debian-branch preliminary debian/
+gbp dch --verbose --debian-branch preliminary --new-version=${VERSION}
 vim debian/changelog
 cp debian/changelog .
 

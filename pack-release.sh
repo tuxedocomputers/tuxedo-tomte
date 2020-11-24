@@ -1,4 +1,4 @@
-!#/usr/bin/sh
+#!/usr/bin/sh
 
 echo "New version number?:"
 read VERSION
