@@ -10,7 +10,12 @@ export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
 gbp dch -S --verbose --debian-branch preliminary debian/
+vim debian/changelog
 cp debian/changelog .
+
+git add .
+git commit -m 'modified changelog'
+git push
 
 #read -n1 -p "new entry in changelog? [y,n]" doit
 #case $doit in
