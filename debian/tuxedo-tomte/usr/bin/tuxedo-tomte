@@ -1290,6 +1290,8 @@ sub findActiveEDIDs {
 	my $cards_dir = '/sys/class/drm';
 	my $dir_handle;
 	my @edidfile;
+	my $enabledContent;
+	my $statusContent;
 
 	my $edidTrigger = 0;
 
@@ -1304,15 +1306,16 @@ sub findActiveEDIDs {
 			my $enabledfile = "$path/enabled";
 			if ( -e $enabledfile ) {
 				open(FILE, $enabledfile);
-				$_ = <FILE>;
+				$enabledContent = <FILE>;
 				close(FILE);
-				if ($_ =~ /enabled/) {
-					#print "enabled found under $path\n";
+				if ($enabledContent =~ /enabled/) {
+					print "enabled found under $path\n";
 					my $statusfile = "$path/status";
 					if ( -e $statusfile ) {
 						open(FILE2, $statusfile);
-						$_ = <FILE2>;
-						if ($_ =~ /connected/) {
+						$statusContent = <FILE2>;
+						if ($statusContent =~ /connected/) {
+							print "connected found\n";
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
 						}
