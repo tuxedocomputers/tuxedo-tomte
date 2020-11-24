@@ -4,17 +4,17 @@ echo "New version number?:"
 read VERSION
 
 export VERSION
-export DEBFULLNAME="E. Mohr"
-export DEBEMAIL="tux@tuxedocomputers.com"
+#export DEBFULLNAME="E. Mohr"
+#export DEBEMAIL="tux@tuxedocomputers.com"
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
-read -n1 -p "new entry in changelog? [y,n]" doit
-case $doit in
-  y|Y) debchange -v ${VERSION} ;;
-  n|N) echo "not changing changelog" ;;
-  *) echo dont know ;;
-esac
+#read -n1 -p "new entry in changelog? [y,n]" doit
+#case $doit in
+#  y|Y) debchange -v ${VERSION} ;;
+#  n|N) echo "not changing changelog" ;;
+#  *) echo dont know ;;
+#esac
 
 echo "##########################################"
 echo "#build tarball (git archive)"
