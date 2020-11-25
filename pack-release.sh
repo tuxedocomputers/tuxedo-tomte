@@ -9,6 +9,9 @@ export VERSION
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
+export BRANCH=$(git symbolic-ref --short HEAD)
+echo "on branch: ${BRANCH}"
+
 gbp dch --verbose --new-version=${VERSION}
 vim debian/changelog
 cp debian/changelog .
@@ -39,7 +42,7 @@ git commit --allow-empty -m 'Start of debian branches.'
 echo "# git checkout -b debian-debian"
 git checkout -b debian-debian
 echo "# git checkout preliminary -- debian/"
-git checkout preliminary -- debian/
+git checkout ${BRANCH} -- debian/
 echo "# commit"
 git add .
 git commit -m 'packing'
