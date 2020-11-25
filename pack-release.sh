@@ -9,7 +9,7 @@ export VERSION
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
-gbp dch --verbose --debian-branch preliminary
+gbp dch --verbose --debian-branch preliminary --new-version=${VERSION}
 vim debian/changelog
 cp debian/changelog .
 
