@@ -4,8 +4,6 @@ echo "New version number?:"
 read VERSION
 
 export VERSION
-#export DEBFULLNAME="E. Mohr"
-#export DEBEMAIL="tux@tuxedocomputers.com"
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
