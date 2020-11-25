@@ -9,7 +9,6 @@ set -e
 
 case "$1" in
     configure)
-		tuxedo-tomte configure all
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
