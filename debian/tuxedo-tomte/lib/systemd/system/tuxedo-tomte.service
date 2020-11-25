@@ -1,0 +1,11 @@
+[Unit]
+Description = Tomte-daemon, finishes tasks that could not be accomplished
+After = network.target auditd.target
+
+
+[Service]
+ExecStart = /usr/bin/tuxedo-tomte configure all
+Restart = no
+
+[Install]
+WantedBy = multi-user.target
