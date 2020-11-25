@@ -9,7 +9,6 @@ use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
 flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
 
-# TODO remove testing stuff
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -20,10 +19,6 @@ my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
 
-# TODO just for debug, delete afterwards
-use Data::Dumper qw(Dumper);
-
-# TODO for EDID, comming in next version
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
 use lib "$Bin/.";
@@ -519,7 +514,6 @@ sub checkRequirements {
 	}
 
 	if ($boardname =~ m/(N8xEJEK)/) {
-		printLog("found mainboard N8xEJEK");
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
@@ -1303,23 +1297,19 @@ sub findActiveEDIDs {
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
-		printLog("path: $path");
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
-			printLog("enabledfile: $enabledFile");
 			if ( -e $enabledFile ) {
 				open(FILE, $enabledFile);
 				$enabledFileContent = <FILE>;
 				close(FILE);
 				if ($enabledFileContent =~ /enabled/) {
-					printLog("enabled found under $path");
 					my $statusFile = "$path/status";
 					if ( -e $statusFile ) {
 						open(FILE2, $statusFile);
 						$statusFileContent = <FILE2>;
 						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
-							printLog("found edid!");
 							$edidTrigger = 1;
 						}
 					}
@@ -1339,7 +1329,6 @@ sub findActiveEDIDs {
 # converts edid data into an array of hash references to origConfModules
 #
 sub getEDIDData {
-	printLog("in getEDIDData");
 	my @edidFiles = findActiveEDIDs();
 	my @edidRefs;
 	my @edidInfo;
@@ -1370,13 +1359,11 @@ sub getEDIDData {
 #
 sub isDisplayPresent {
 	my $edidSearchString = shift;
-	printLog("in isDisplayPresent");
 	my @edidRefs = getEDIDData();
 	my $edidInfo;
 	foreach my $edidData (@edidRefs) {
 		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
 		if ($edidInfo =~ m/$edidSearchString/) {
-			printLog("edid string found");
 			return (1);
 		}
 	}
