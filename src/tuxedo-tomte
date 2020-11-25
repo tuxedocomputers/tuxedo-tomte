@@ -9,7 +9,6 @@ use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
 flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
 
-# TODO remove testing stuff
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -20,10 +19,6 @@ my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 
 
-# TODO just for debug, delete afterwards
-use Data::Dumper qw(Dumper);
-
-# TODO for EDID, comming in next version
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
 use lib "$Bin/.";
@@ -85,229 +80,6 @@ my %postConfProgram = (
 #	upgraded		if module was upgraded 'yes', else 'no'
 #
 my %origConfModules = (
-	#	tuxedoccwmi => {
-	#		name => 'tuxedo-cc-wmi',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => '',
-	#		description => '',
-	#	},
-	#	tuxedoxpxcairplanemodefix => {
-	#		name => 'tuxedo-xp-xc-airplane-mode-fix',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => 'AIRPLANEFIX NOGRUB',
-	#		description => '',
-	#	},
-	#	tuxedorestoreaudiofix => {
-	#		name => 'tuxedo-restore-audio-fix',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => 'AUDIORESTOREFIX',
-	#		description => '',
-	#	},
-	#	tuxedoucsiccg => {
-	#		name => 'tuxedo-ucsi_ccg',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => 'TUXUCIFIX',
-	#		description => '',
-	#	},
-	#	tuxedooledbrt => {
-	#		name => 'tuxedo-oled-brt',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 1,
-	#		fainame => 'TUXOLED',
-	#		description => '',
-	#	},
-	#	chassistype => {
-	#		name => 'chassis-type',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => '',
-	#		description => '',
-	#	},
-	#	kfocus => {
-	#		name => 'kfocus',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NOKFOCUS',
-	#		description => '',
-	#	},
-	#	tuxedo => {
-	#		name => 'tuxedo',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NOTUXEDO',
-	#		description => '',
-	#	},
-	#	manjaro => {
-	#		name => 'manjaro',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NOMANJARO',
-	#		description => '',
-	#	},
-	#	aistation => {
-	#		name => 'aistation',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NOAISTATION',
-	#		description => '',
-	#	},
-	#	bareboneclass => {
-	#		name => 'barebone-class',
-	#		version => 1,
-	#		installed => 0,
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'HASHWELL BROADWELL SKYLAKE KABYLAKE COFFEELAKE',
-	#		description => '',
-	#	},
-	#	barebonegrub => {
-	#		name => 'barebone-grub',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NOGRUB 02GRUB',
-	#		description => '',
-	#	},
-	#	audiofix => {
-	#		name => 'audiofix',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'AUDIOFIX',
-	#		description => '',
-	#	},
-	#	fingerprint => {
-	#		name => 'fingerprint',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'FINGERPRINT',
-	#		description => '',
-	#	},
-	#	threeg => {
-	#		name => 'threeg',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'THREEG',
-	#		description => '',
-	#	},
-	#	hybrid => {
-	#		name => 'hybrid',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'DISCRETE HYBRID',
-	#		description => '',
-	#	},
-	#	nvidiadriver => {
-	#		name => 'nvidia-driver',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'NVIDIATUX NVIDIANOR',
-	#		description => '',
-	#	},
-	#	bluetooth => {
-	#		name => 'bluetooth',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => 'BLUETOOTH',
-	#		description => '',
-	#	},
-	#	tuxedowallpapers => {
-	#		name => 'tuxedo-wallpapers',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => '',
-	#		description => '',
-	#	},
-	#	tuxedoplymouthone => {
-	#		name => 'tuxedo-plymouth-one',
-	#		version => 1,
-	#		installed => 0,
-	#		blocked => 0,
-	#		required => 0,
-	#		hwid => 1,
-	#		package => 0,
-	#		fainame => '',
-	#		description => '',
-	#	},
-
 	i8042fix => {
 		name => 'i8042-fix',
 		version => 1,
@@ -465,29 +237,6 @@ sub checkRequirements {
 	} else {
 		printLog("could not open $boardvendor_filename $!");
 	}
-		#		if ( $boardvendor =~ m/TUXEDO/ ) {
-		#			$origConfModules{tuxedo}{required} = 1;
-			### close the program if it is not TUXEDO???
-			#		}
-			#		if ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70RF_RD_RC|P9XXRC)/) {
-			#			$origConfModules{tuxedoucsiccg}{required} = 1;
-			#}
-			#if ($boardname =~ m/(P95_96_97Ex_Rx|P9XXRC)/) {
-			#	$origConfModules{kfocus}{required} = 1;
-			#}
-			#unless ($boardname =~ m/(N150ZU|N151ZU|N150CU|N151CU)/) {
-			#	$origConfModules{manjaro}{required} = 1;
-			#}
-			#unless ($boardname =~ m/(P95_96_97Ex_Rx|PB50_70EF_ED_EC|PB50_70RF_RD_RC|P9XXRC|P7xxTM)/) {
-			#	$origConfModules{aistation}{required} = 1;
-			#}
-			#if ($boardname =~ m/(P65_67RS|P65_67RP|P65xRP|P67xRP|P65xH|P65_P67H)/) {
-			#	$origConfModules{barebonegrub}{required} = 1;
-			#	$origConfModules{barebonegrub}{fainame} = '02GRUB';
-			#}
-			#if ($boardname =~ m/(P95)/) {
-			#	$origConfModules{audiofix}{required} = 1;
-			#}
 
 	# check values for each module
 	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
@@ -523,42 +272,6 @@ sub checkRequirements {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
 	}
-
-	#	# by default DESKTOP
-	#	$origConfModules{chassistype}{fainame} = 'DESKTOP';
-	#	my $chassis_type_fn = '/sys/devices/virtual/dmi/id/chassis_type';
-	#	if ( open $fh, "<", $chassis_type_fn ) {
-	#		my $chassis_type = <fh>;
-	#		close $fh;
-	#		if ( $chassis_type =~ m/(9|10)/ ) {
-	#			$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#		} else {
-	#			my $battery_folder = '/proc/acpi/battery';
-	#			if ( opendir $fh, $battery_folder ) {
-	#				while (my $file = readdir($fh)) {
-	#					next unless (-d "$battery_folder/$file");
-	#					unless ( $file =~ m/(\.|\.\.)/ ) {
-	#						#print "folder: $file\n";
-	#						$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#					}
-	#				}
-	#			}
-	#		}
-	#		unless ( $origConfModules{chassistype}{fainame} =~ m/LAPTOP/ ) {
-	#			my $acpi_string = 'ACPI: Battery Slot';
-	#			my $dmesg_output = `dmesg`;
-	#			if ( $dmesg_output =~ m/$acpi_string/ ) {
-	#				$origConfModules{chassistype}{fainame} = 'LAPTOP';
-	#			}
-	#		}
-	#	}
-	#
-	#	my @lsusb_output = `lsusb`;
-	#	chomp @output;
-	#	foreach my $line ( @output )
-	#	{
-	#		
-	#	}
 }
 
 
@@ -1290,8 +1003,8 @@ sub findActiveEDIDs {
 	my $cards_dir = '/sys/class/drm';
 	my $dir_handle;
 	my @edidfile;
-	my $enabledContent;
-	my $statusContent;
+	my $enabledFileContent;
+	my $statusFileContent;
 
 	my $edidTrigger = 0;
 
@@ -1303,19 +1016,17 @@ sub findActiveEDIDs {
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
 		if ( -d $path ) {
-			my $enabledfile = "$path/enabled";
-			if ( -e $enabledfile ) {
-				open(FILE, $enabledfile);
-				$enabledContent = <FILE>;
+			my $enabledFile = "$path/enabled";
+			if ( -e $enabledFile ) {
+				open(FILE, $enabledFile);
+				$enabledFileContent = <FILE>;
 				close(FILE);
-				if ($enabledContent =~ /enabled/) {
-					print "enabled found under $path\n";
-					my $statusfile = "$path/status";
-					if ( -e $statusfile ) {
-						open(FILE2, $statusfile);
-						$statusContent = <FILE2>;
-						if ($statusContent =~ /connected/) {
-							print "connected found\n";
+				if ($enabledFileContent =~ /enabled/) {
+					my $statusFile = "$path/status";
+					if ( -e $statusFile ) {
+						open(FILE2, $statusFile);
+						$statusFileContent = <FILE2>;
+						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
 						}
@@ -1374,6 +1085,7 @@ sub isDisplayPresent {
 			return (1);
 		}
 	}
+	printLog("edid string not found");
 	return (0);
 }
 

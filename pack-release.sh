@@ -1,20 +1,21 @@
-!#/usr/bin/sh
+#!/usr/bin/sh
 
 echo "New version number?:"
 read VERSION
 
 export VERSION
-export DEBFULLNAME="E. Mohr"
-export DEBEMAIL="tux@tuxedocomputers.com"
+#export DEBFULLNAME="E. Mohr"
+#export DEBEMAIL="tux@tuxedocomputers.com"
 export PACKAGE=tuxedo-tomte
 export PREFIX=${PACKAGE}_${VERSION}
 
-#read -n1 -p "new entry in changelog? [y,n]" doit
-#case $doit in
-#  y|Y) debchange -v ${VERSION} ;;
-#  n|N) echo "not changing changelog" ;;
-#  *) echo dont know ;;
-#esac
+gbp dch --verbose --new-version=${VERSION}
+vim debian/changelog
+cp debian/changelog .
+
+git add .
+git commit -m 'added changelog'
+git push
 
 echo "##########################################"
 echo "#build tarball (git archive)"
