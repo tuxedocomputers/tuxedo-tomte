@@ -17,7 +17,8 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
-
+my $distribution;
+my $distributionVersion;
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -205,6 +206,34 @@ my %localConfModules = %origConfModules;
 # where status should be "success" or "failed"
 #
 my %configuredModules;
+
+
+sub readOSData {
+	my $osReleaseFile = '/etc/os-release';
+	my $osReleaseFH;
+	my @osReleaseLines;
+	if ( open $osReleaseFH, "<", $osReleaseFile ) {
+		while (<$osReleaseFH>) {
+			push (@osReleaseLines, $_);
+		}
+		close $osReleaseFH;
+	} else {
+		printLog("no $osReleaseFile present or unable to open the file for reading");
+		return (0);
+	}
+	foreach ( @osReleaseLines ) {
+		if ( $_ =~ m/openSUSE/ ) {
+			$distribution = 'openSUSE';
+		}
+		if ( $_ =~ m/Ubuntu/ ) {
+			$distribution = 'Ubuntu';
+		}
+		if ( $_ =~ m/VERSION_ID/ ) {
+			$distributionVersion = $_;
+			$distributionVersion =~ /\".*\"/;
+		}
+	}
+}
 
 
 ###############################################################################
