@@ -10,7 +10,7 @@ export PREFIX=${PACKAGE}_${VERSION}
 export BRANCH=$(git symbolic-ref --short HEAD)
 echo "on branch: ${BRANCH}"
 
-gbp dch --verbose --new-version=${VERSION}
+gbp dch --verbose --debian-branch ${BRANCH} --new-version=${VERSION}
 vim debian/changelog
 cp debian/changelog .
 
