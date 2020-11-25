@@ -1,0 +1,109 @@
+tuxedo-tomte (2.0.13-4) UNRELEASED; urgency=medium
+
+  * release script
+  * debug
+  * deleted debugs
+  * prep systemd
+  * removed postinst first run
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 25 Nov 2020 11:00:48 +0100
+
+tuxedo-tomte (2.0.13) focal; urgency=medium
+
+  * modified dependency to pre-dependency
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 20 Nov 2020 12:15:52 +0100
+
+tuxedo-tomte (2.0.12) focal; urgency=medium
+
+  * remodified display recognition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 19 Nov 2020 18:28:44 +0100
+
+tuxedo-tomte (2.0.11) focal; urgency=medium
+
+  * modified display recognition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 19 Nov 2020 16:11:19 +0100
+
+tuxedo-tomte (2.0.10) focal; urgency=medium
+
+  * added fix for backlight for DX1708
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 18 Nov 2020 15:44:46 +0100
+
+tuxedo-tomte (2.0.9) focal; urgency=medium
+
+  * changed blacklist to blocklist
+  * changed blacklisted to blocked
+  * added fix for InfinityBook Pro 14 v5
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 13:38:37 +0100
+
+tuxedo-tomte (2.0.8) focal; urgency=medium
+
+  * added some packages
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 09:24:56 +0100
+
+tuxedo-tomte (2.0.7) focal; urgency=medium
+
+  * added fix for XMG Fusion
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 09:17:57 +0100
+
+tuxedo-tomte (2.0.6) focal; urgency=medium
+
+  * fixed package config problem
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Oct 2020 14:57:49 +0200
+
+tuxedo-tomte (2.0.5) focal; urgency=medium
+
+  * added modules upgrade
+  * added package install code
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 20 Oct 2020 16:51:30 +0200
+
+tuxedo-tomte (2.0.4) focal; urgency=medium
+
+  * added board_name PB50_70DFx,DDx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Oct 2020 18:35:11 +0200
+
+tuxedo-tomte (2.0.3) focal; urgency=medium
+
+  * added no-keyboard-after-suspend-fix 
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Oct 2020 16:37:20 +0200
+
+tuxedo-tomte (2.0.2) focal; urgency=medium
+
+  * modified amd-xhci-hcd-usb-quirk-suspend-fix
+  * added some barebones to amd-xhci-hcd-usb-quirk-suspend-fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Oct 2020 14:32:50 +0200
+
+tuxedo-tomte (2.0.1) focal; urgency=medium
+
+  * configuration for amd-xhci-hcd-usb-quirk-suspend-fix
+  * added blacklisting, unblacklisting, reconfigure
+  * check always requirements
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Sep 2020 16:05:18 +0200
+
+tuxedo-tomte (2.0.0) bionic; urgency=medium
+  
+  * configuration for i8042-fix.
+  * configuration for no-boot-on-battery-fix.
+  * grub writer module.
+  * configuration check module.
+  * man page.
+
+ -- E Mohr <tux@tuxedocomputers.com>  Thu, 04 Aug 2020 17:00:00 +0200
+
+tuxedo-tomte (1.0.0) bionic; urgency=medium
+
+  * Initial release.
+
+ -- E Mohr <tux@tuxedocomputers.com>  Fri, 28 Feb 2020 17:00:00 +0100
