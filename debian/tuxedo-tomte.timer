@@ -5,5 +5,5 @@ Description = Starts tuxedo-tomte after waiting for predefined time
 WantedBy = timers.target
 
 [Timer]
-OnActiveSec = 5min
+OnActiveSec = 1min
 Unit = tuxedo-tomte.service
