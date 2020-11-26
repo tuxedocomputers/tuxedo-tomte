@@ -48,6 +48,68 @@ my %postConfProgram = (
 my %supportedOS = (
 	Ubuntu => {
 		versions => ['18.04','20.04'],
+		repos => {
+			bionic => ['deb http://deb.tuxedocomputers.com/ubuntu bionic main',
+			'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main'],
+		},
+	},
+);
+
+
+my %testSupportedOS = (
+	Ubuntu => {
+		versions => {
+			18.04 => {
+				name => 'bionic',
+				repos => {
+					deb => {
+						filename => '',
+						content => '',
+					},
+					oibaf => {
+						filename => '',
+						content => '',
+					},
+					graphics => {
+						filename => '',
+						content => '',
+					},
+					kernel => {
+						filename => '',
+						content => '',
+					},
+					nvidia => {
+						filename => '',
+						content => '',
+					},
+				},
+			},
+			20.04 => {
+				name => 'focal',
+				repos => {
+					deb => {
+						filename => '',
+						content => '',
+					},
+					oibaf => {
+						filename => '',
+						content => '',
+					},
+					graphics => {
+						filename => '',
+						content => '',
+					},
+					kernel => {
+						filename => '',
+						content => '',
+					},
+					nvidia => {
+						filename => '',
+						content => '',
+					},
+				},
+			},
+		},
 	},
 );
 
@@ -203,6 +265,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedorepos => {
+		name => 'tuxedo-repos',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Adds the Tuxedo repositories',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -239,8 +315,7 @@ sub readOSData {
 	foreach ( @osReleaseLines ) {
 		if ( $_ =~ m/^NAME=/ ) {
 			$_ =~ /NAME=\"(.*)\"/;
-			$distribution = $1;
-		}
+			$distribution = $1;		}
 		if ( $_ =~ m/^VERSION_ID=/ ) {
 			$_ =~ /VERSION_ID=\"(.*)\"/;
 			$distributionVersion = $1;
@@ -267,6 +342,9 @@ sub isOSSupported {
 }
 
 
+
+
+
 ###############################################################################
 # check whether the module is required for the system
 # checks only for hardware
@@ -290,7 +368,7 @@ sub checkRequirements {
 		close $FH;
 	} else {
 		printLog("could not open $boardname_filename $!");
-	}
+}
 	if ( open $FH, "<", $boardname_filename ) {
 		$boardname = <$FH>;
 		close $FH;
@@ -684,6 +762,49 @@ sub backlightfix() {
 	{
 		# not implemented yet
 	}
+}
+
+
+###############################################################################
+# Adds the Tuxedo repos to the system
+#
+sub tuxedorepos() {
+	my $module = shift;
+	my $action = shift;
+	#	my $retval;
+
+	#	if ($action eq 'install')
+	#{
+	#	printLog("applying backlightfix");
+	#	$retval = insertGrub($module, \@kernel_parameters);
+	#	if ($retval == 0) {
+	#		$origConfModules{$module}{installed} = "failed";
+	#		addToConfiguredModules($module, "failed");
+	#	} else {
+	#		$origConfModules{$module}{installed} = "yes";
+	#		$origConfModules{$module}{upgraded} = "yes";
+	#		$postConfProgram{updateGrub}{trigger} = 1;
+	#		addToConfiguredModules($module, "success");
+	#	}
+	#}
+	#if ($action eq 'upgrade')
+	#{
+	#	printLog("upgrading backlightfix");
+	#	$retval = insertGrub($module, \@kernel_parameters);
+	#	if ($retval == 0) {
+	#		$origConfModules{$module}{installed} = "failed";
+	#		addToConfiguredModules($module, "failed");
+	#	} else {
+	#		$origConfModules{$module}{installed} = "yes";
+	#		$origConfModules{$module}{upgraded} = "yes";
+	#		$postConfProgram{updateGrub}{trigger} = 1;
+	#		addToConfiguredModules($module, "success");
+	#	}
+	#}
+	#if ($action eq 'remove')
+	#{
+		# not implemented yet
+	#}
 }
 
 
