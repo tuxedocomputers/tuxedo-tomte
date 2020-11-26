@@ -4,6 +4,11 @@ use warnings;
 
 use File::Copy;
 
+# for OLED backlight and edid decrypt
+use FindBin qw($Bin);
+use lib "$Bin/.";
+use Parse::EDID qw(parse_edid);
+
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
@@ -20,11 +25,6 @@ my $configFile = $configDir.'tomte.cfg';
 my $distribution;
 my $distributionVersion;
 
-# for OLED backlight and edid decrypt
-use FindBin qw($Bin);
-use lib "$Bin/.";
-use Parse::EDID qw(parse_edid);
-
 
 ###############################################################################
 # initial definition of post configuration modules
@@ -38,6 +38,16 @@ my %postConfProgram = (
 		trigger => 0,
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
+	},
+);
+
+
+###############################################################################
+# list of supported OS versions
+#
+my %supportedOS = (
+	Ubuntu => {
+		versions => ['18.04','20.04'],
 	},
 );
 
@@ -208,6 +218,10 @@ my %localConfModules = %origConfModules;
 my %configuredModules;
 
 
+###############################################################################
+# find OS name and version and put them into $distribution and
+# $distributionVersion
+#
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
 	my $osReleaseFH;
@@ -219,20 +233,37 @@ sub readOSData {
 		close $osReleaseFH;
 	} else {
 		printLog("no $osReleaseFile present or unable to open the file for reading");
-		return (0);
+		print "no $osReleaseFile present or unable to open the file for reading\n";
+		exit (0);
 	}
 	foreach ( @osReleaseLines ) {
-		if ( $_ =~ m/openSUSE/ ) {
-			$distribution = 'openSUSE';
+		if ( $_ =~ m/^NAME=/ ) {
+			$_ =~ /NAME=\"(.*)\"/;
+			$distribution = $1;
 		}
-		if ( $_ =~ m/Ubuntu/ ) {
-			$distribution = 'Ubuntu';
-		}
-		if ( $_ =~ m/VERSION_ID/ ) {
-			$distributionVersion = $_;
-			$distributionVersion =~ /\".*\"/;
+		if ( $_ =~ m/^VERSION_ID=/ ) {
+			$_ =~ /VERSION_ID=\"(.*)\"/;
+			$distributionVersion = $1;
 		}
 	}
+}
+
+
+
+###############################################################################
+# checks the list of supported distributions and versions and returns
+# 1 if supported
+# 0 if not
+#
+sub isOSSupported {
+	if ($supportedOS{$distribution}) {
+		foreach (@{$supportedOS{$distribution}{versions}}) {
+			if ($distributionVersion eq $_) {
+				return (1);
+			}
+		}
+	}
+	return (0);
 }
 
 
@@ -1693,8 +1724,17 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
+readOSData();
+
+if (!isOSSupported()) {
+	printLog('OS is not supported');
+	print "This OS is not supported\n";
+	exit (0);
+}
+
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
+
 
 if (@ARGV != 0) {
 	my %options;
