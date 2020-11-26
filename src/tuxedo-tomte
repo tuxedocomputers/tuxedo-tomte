@@ -44,71 +44,77 @@ my %postConfProgram = (
 
 ###############################################################################
 # list of supported OS versions
+# with repective repo entries
 #
 my %supportedOS = (
 	Ubuntu => {
-		versions => ['18.04','20.04'],
-		repos => {
-			bionic => ['deb http://deb.tuxedocomputers.com/ubuntu bionic main',
-			'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main'],
+		versions => {
+			18.04 => {
+				name => 'bionic',
+			},
+			20.04 => {
+				name => 'focal',
+			},
 		},
 	},
 );
 
 
-my %testSupportedOS = (
-	Ubuntu => {
-		versions => {
-			18.04 => {
-				name => 'bionic',
-				repos => {
-					deb => {
-						filename => '',
-						content => '',
-					},
-					oibaf => {
-						filename => '',
-						content => '',
-					},
-					graphics => {
-						filename => '',
-						content => '',
-					},
-					kernel => {
-						filename => '',
-						content => '',
-					},
-					nvidia => {
-						filename => '',
-						content => '',
-					},
-				},
-			},
-			20.04 => {
-				name => 'focal',
-				repos => {
-					deb => {
-						filename => '',
-						content => '',
-					},
-					oibaf => {
-						filename => '',
-						content => '',
-					},
-					graphics => {
-						filename => '',
-						content => '',
-					},
-					kernel => {
-						filename => '',
-						content => '',
-					},
-					nvidia => {
-						filename => '',
-						content => '',
-					},
-				},
-			},
+my %repos = (
+	Ubuntu1804 => {
+		deb => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'tuxedo-computers.list',
+			content => 'deb http://deb.tuxedocomputers.com/ubuntu bionic main',
+		},
+		oibaf => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'oibaf-tuxedo.list',
+			content => 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main',
+		},
+		graphics => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'graphics-tuxedo.list',
+			content => 'deb http://graphics.tuxedocomputers.com/ubuntu focal main',
+		},
+		mirrors => {
+			directory => '/etc/apt/',
+			filename => 'sources.list',
+			content => 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse'.
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse'.
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse',
+		},
+		pubKey => 'pub   4096R/54840598 2016-05-12'.
+'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598'.
+'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)'.
+'sub 4096R/A5842AD4 2016-05-12',
+	},
+	Ubuntu2004 => {
+		deb => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'deb http://deb.tuxedocomputers.com/ubuntu focal main',
+			content => '',
+		},
+		oibaf => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main',
+			content => '',
+		},
+		graphics => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'graphics-tuxedo.list',
+			content => 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main',
+		},
+		mirrors => {
+			directory => '/etc/apt/',
+			filename => 'sources.list',
+			content => 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse'.
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse'.
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse',
+			pubKey => 'pub   4096R/54840598 2016-05-12'.
+'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598'.
+'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)'.
+'sub 4096R/A5842AD4 2016-05-12',
 		},
 	},
 );
@@ -331,12 +337,8 @@ sub readOSData {
 # 0 if not
 #
 sub isOSSupported {
-	if ($supportedOS{$distribution}) {
-		foreach (@{$supportedOS{$distribution}{versions}}) {
-			if ($distributionVersion eq $_) {
-				return (1);
-			}
-		}
+	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
+		return (1);
 	}
 	return (0);
 }
