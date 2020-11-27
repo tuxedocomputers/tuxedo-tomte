@@ -9,6 +9,9 @@ use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
 
+# for debugging
+use Data::Dumper;
+
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
@@ -301,21 +304,39 @@ my %configuredModules;
 
 
 ###############################################################################
+# reads a file and returns an array with the lines
+# returns undef if file can't be opened
+#
+sub readFileReturnLines {
+	my $file = shift;
+	my $FH;
+	my @lines;
+	if ( open $FH, "<", $file ) {
+		while (<$FH>) {
+			push (@lines, $_);
+		}
+		close $FH;
+	} else {
+		printLog("no $file present or unable to open the file for reading");
+		return undef;
+	}
+	return @lines;
+}
+
+
+
+###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
 #
 sub readOSData {
-	my $osReleaseFile = '/etc/os-release';
-	my $osReleaseFH;
+	my $osReleaseFile = '/etc/ois-release';
 	my @osReleaseLines;
-	if ( open $osReleaseFH, "<", $osReleaseFile ) {
-		while (<$osReleaseFH>) {
-			push (@osReleaseLines, $_);
-		}
-		close $osReleaseFH;
-	} else {
-		printLog("no $osReleaseFile present or unable to open the file for reading");
-		print "no $osReleaseFile present or unable to open the file for reading\n";
+
+	@osReleaseLines = readFileReturnLines($osReleaseFile);
+
+	if ( @osReleaseLines = undef ) {
+		print "Can't determine the operating system\n";
 		exit (0);
 	}
 	foreach ( @osReleaseLines ) {
