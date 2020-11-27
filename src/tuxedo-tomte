@@ -316,9 +316,10 @@ sub readFileReturnLines {
 			push (@lines, $_);
 		}
 		close $FH;
+		
 	} else {
 		printLog("no $file present or unable to open the file for reading");
-		return undef;
+		return;
 	}
 	return @lines;
 }
@@ -330,12 +331,12 @@ sub readFileReturnLines {
 # $distributionVersion
 #
 sub readOSData {
-	my $osReleaseFile = '/etc/ois-release';
+	my $osReleaseFile = '/etc/os-release';
 	my @osReleaseLines;
 
 	@osReleaseLines = readFileReturnLines($osReleaseFile);
 
-	if ( @osReleaseLines = undef ) {
+	if ( !@osReleaseLines ) {
 		print "Can't determine the operating system\n";
 		exit (0);
 	}
@@ -366,18 +367,16 @@ sub isOSSupported {
 
 
 
-
-
 ###############################################################################
 # check whether the module is required for the system
 # checks only for hardware
 #
 sub checkRequirements {
 	my $FH;
-	my $boardname_filename = "/sys/class/dmi/id/board_name";
-	my $boardname;
-	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
-	my $boardvendor;
+	my $boardnameFilename = "/sys/class/dmi/id/board_name";
+	my @boardname;
+	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
+	my @boardvendor;
 
 	# TODO: these will be installed on all notebooks, always
 	#	$origConfModules{tuxedokeyboard}{required} = 1;
@@ -386,49 +385,45 @@ sub checkRequirements {
 	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
 
 	# load required data into variables
-	if ( open $FH, "<", $boardvendor_filename ) {
-		$boardvendor = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardname_filename $!");
-}
-	if ( open $FH, "<", $boardname_filename ) {
-		$boardname = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardvendor_filename $!");
+	@boardname = readFileReturnLines($boardnameFilename);
+	@boardvendor = readFileReturnLines($boardvendorFilename);
+	if ( !@boardname ) {
+		printLog("could not open $boardnameFilename $!");
+	}
+	if ( !@boardvendor ) {
+		printLog("could not open $boardvendorFilename $!");
 	}
 
 	# check values for each module
-	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 	}
-	if ($boardname =~ m/(PF5PU1G)/) {
+	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname =~ m/(POLARIS1501A1650TI)/) ||
-	   ($boardname =~ m/(POLARIS1501A2060)/) ||
-	   ($boardname =~ m/(POLARIS1701A1650TI)/) ||
-	   ($boardname =~ m/(POLARIS1701A2060)/) ||
-	   ($boardname =~ m/(PULSE1401)/) ||
-   	   ($boardname =~ m/(PULSE1501)/)) {
+	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
+	   ($boardname[0] =~ m/(POLARIS1501A2060)/) ||
+	   ($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
+	   ($boardname[0] =~ m/(POLARIS1701A2060)/) ||
+	   ($boardname[0] =~ m/(PULSE1401)/) ||
+   	   ($boardname[0] =~ m/(PULSE1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
-	if (($boardname =~ m/POLARIS1701A1650TI/) ||
-		($boardname =~ m/POLARIS1701A2060/) ||
-		($boardname =~ m/POLARIS1501A1650TI/) ||
-		($boardname =~ m/POLARIS1501A2060/) ) {
+	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/) ) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if (($boardname =~ m/(X170SM)/) ||
-		($boardname =~ m/(PB50_70DFx,DDx)/) ||
-   		($boardname =~ m/LAPQC71A/) ||
-		($boardname =~ m/LAPQC71B/) ||
-		($boardname =~ m/N141CU/)	) {
+	if (($boardname[0] =~ m/(X170SM)/) ||
+		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
+   		($boardname[0] =~ m/LAPQC71A/) ||
+		($boardname[0] =~ m/LAPQC71B/) ||
+		($boardname[0] =~ m/N141CU/)	) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
-	if ($boardname =~ m/(N8xEJEK)/) {
+	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
