@@ -196,7 +196,6 @@ foreach $key (keys %{ $repos{$compDistVer} }) {
 	foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 		if (!isLinePresent($_)) {
 			# make file + line
-			print "### build file\n";
 			if (! -e $repos{$compDistVer}{$key}{filename}) {
 				createFile($repos{$compDistVer}{$key}{filename}, "$_");
 			} else {
@@ -209,14 +208,16 @@ foreach $key (keys %{ $repos{$compDistVer} }) {
 # comment out anything else on sources.list which has deb http://.*.ubuntu.com/ubuntu/
 my $FHsource;
 my @sourcelines;
-if (open $FHsources, "<", "sources.list") {
+if (open $FHsource, "<", "sources.list") {
 	@sourcelines = <$FHsource>;
 	close $FHsource;
-	if (open $FHsources, ">", "sources.list") {
+	if (open $FHsource, ">", "sources.list") {
 		foreach (@sourcelines) {
-			$_ =~ s/^deb/;
-			print $_ $FHsources;
+			print "found line: $_\n";
+			print "#### commented out by Tomte\n"."#$_"
+				if $_ =~ /^deb.*\.ubuntu\.com\/ubuntu\/.*$/;
 		}
+		close $FHsource;
 	}
 } else { 
 	#error message
