@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict qw(vars subs);
 use warnings;
+use File::Copy;
 
 # for debugging
 use Data::Dumper;
@@ -86,6 +87,74 @@ sub readFileReturnLines {
     return @lines;
 }
 
+sub createFile {
+    my $fileName = shift;
+    my $fileText = shift;
+    my $FH;
+    if (-e $fileName) {
+        backupFile($fileName);
+    }
+    if (open $FH, ">",$fileName) {
+        print $FH "$fileText";
+        close $FH;
+        return 1;
+    } else {
+        printLog("can't open $fileName for writing");
+        print "Can't open $fileName for writing\n";
+        return 0;
+    }
+}
+
+sub backupFile {
+    my $fileName = shift;
+    my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
+    if (move($fileName, $backupFile)) {
+        print "created backup for $fileName\n";
+        return 1;
+    } else {
+        printLog("can't create backup file for $fileName");
+        print "Can't create backup for $fileName\n";
+        return 0;
+    }
+}
+
+sub getLoggingTime {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    my $nice_timestamp = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
+                                    $year+1900,$mon+1,$mday,$hour,$min,$sec);
+    return $nice_timestamp;
+}
+
+###############################################################################
+#
+sub getBackupFileTime {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    my $nice_timestamp = sprintf ( "%04d%02d%02d%02d%02d%02d",
+                                    $year+1900,$mon+1,$mday,$hour,$min,$sec);
+    return $nice_timestamp;
+}
+
+sub appendFile {
+    my $fileName = shift;
+    my $fileText = shift;
+    my $FH;
+    if (-e $fileName) {
+        backupFile($fileName);
+    }
+    if (open $FH, ">>",$fileName) {
+        print $FH "$fileText";
+        close $FH;
+        return 1;
+    } else {
+        printLog("can't open $fileName for writing");
+        print "Can't open $fileName for writing\n";
+        return 0;
+    }
+}
+
+
+
+
 
 sub isLinePresent {
 	my $line = shift;
@@ -128,8 +197,27 @@ foreach $key (keys %{ $repos{$compDistVer} }) {
 		if (!isLinePresent($_)) {
 			# make file + line
 			print "### build file\n";
+			if (! -e $repos{$compDistVer}{$key}{filename}) {
+				createFile($repos{$compDistVer}{$key}{filename}, "$_");
+			} else {
+				appendFile($repos{$compDistVer}{$key}{filename}, "$_");
+			}
 		}
 	}
 }
 
-
+# comment out anything else on sources.list which has deb http://.*.ubuntu.com/ubuntu/
+my $FHsource;
+my @sourcelines;
+if (open $FHsources, "<", "sources.list") {
+	@sourcelines = <$FHsource>;
+	close $FHsource;
+	if (open $FHsources, ">", "sources.list") {
+		foreach (@sourcelines) {
+			$_ =~ s/^deb/;
+			print $_ $FHsources;
+		}
+	}
+} else { 
+	#error message
+}
