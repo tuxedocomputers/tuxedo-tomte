@@ -52,10 +52,10 @@ my %postConfProgram = (
 my %supportedOS = (
 	Ubuntu => {
 		versions => {
-			18.04 => {
+			"18.04" => {
 				name => 'bionic',
 			},
-			20.04 => {
+			"20.04" => {
 				name => 'focal',
 			},
 		},
@@ -64,7 +64,7 @@ my %supportedOS = (
 
 
 my %repos = (
-	Ubuntu1804 => {
+	"Ubuntu 18.04" => {
 		deb => {
 			directory => '/etc/apt/sources.list.d/',
 			filename => 'tuxedo-computers.list',
@@ -92,7 +92,7 @@ my %repos = (
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
 'sub 4096R/A5842AD4 2016-05-12'],
 	},
-	Ubuntu2004 => {
+	"Ubuntu 20.04" => {
 		deb => {
 			directory => '/etc/apt/sources.list.d/',
 			filename => 'tuxedo-computers.list',

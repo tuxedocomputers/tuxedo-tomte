@@ -8,6 +8,68 @@ use Data::Dumper;
 my $sourcesListDir = '/etc/apt/sources.list.d/';
 my %dirHash;
 my $DH;
+my $distribution = 'Ubuntu';
+my $distributionVersion = '20.04';
+
+my %repos = (
+    "Ubuntu 18.04" => {
+        deb => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'tuxedo-computers.list',
+            content => ['deb http://deb.tuxedocomputers.com/ubuntu bionic main'],
+        },
+        oibaf => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'oibaf-tuxedo.list',
+            content => ['deb http://oibaf.tuxedocomputers.com/ubuntu bionic main'],
+        },
+        graphics => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'graphics-tuxedo.list',
+            content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
+        },
+        mirrors => {
+            directory => '/etc/apt/',
+            filename => 'sources.list',
+            content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
+        },
+        pubKey => ['pub   4096R/54840598 2016-05-12',
+'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
+'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
+'sub 4096R/A5842AD4 2016-05-12'],
+    },
+    "Ubuntu 20.04" => {
+        deb => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'tuxedo-computers.list',
+            content => ['deb http://deb.tuxedocomputers.com/ubuntu focal main'],
+        },
+        oibaf => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'oibaf-tuxedo.list',
+            content => ['deb http://oibaf.tuxedocomputers.com/ubuntu focal main'],
+        },
+        graphics => {
+            directory => '/etc/apt/sources.list.d/',
+            filename => 'graphics-tuxedo.list',
+            content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
+        },
+        mirrors => {
+            directory => '/etc/apt/',
+            filename => 'sources.list',
+            content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+            pubKey => ['pub   4096R/54840598 2016-05-12',
+'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
+'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
+'sub 4096R/A5842AD4 2016-05-12'],
+        },
+    },
+);
+
 
 
 sub readFileReturnLines {
@@ -25,6 +87,19 @@ sub readFileReturnLines {
 }
 
 
+sub isLinePresent {
+	my $line = shift;
+	my $filenameKey;
+	foreach $filenameKey (keys %dirHash) {
+		foreach (@{ $dirHash{$filenameKey} }) {
+			if ($line =~ m/$_/) {
+				print "found\n";
+				return (1);
+			}
+		}
+	}
+	return (0);
+}
 
 
 my $fileName = '/etc/apt/sources.list';
@@ -40,7 +115,21 @@ if (opendir($DH,$sourcesListDir)) {
 }
 closedir($DH);
 
-print Dumper(%dirHash);
+#print Dumper(%dirHash);
 
+my $compDistVer = $distribution.' '.$distributionVersion;
+my $key;
+
+# each file
+foreach $key (keys %{ $repos{$compDistVer} }) {
+	print "$repos{$compDistVer}{$key}{filename}\n";
+	# each line
+	foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+		if (!isLinePresent($_)) {
+			# make file + line
+			print "### build file\n";
+		}
+	}
+}
 
 
