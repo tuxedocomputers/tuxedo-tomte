@@ -55,12 +55,12 @@ my %repos = (
             content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			name => 'focal',
-            pubKey => ['pub   4096R/54840598 2016-05-12',
+        },
+		name => 'focal',
+        pubKey => ['pub   4096R/54840598 2016-05-12',
 'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
 'sub 4096R/A5842AD4 2016-05-12'],
-        },
     },
 );
 
@@ -71,7 +71,7 @@ sub readFileReturnLines {
     my $FH;
     my @lines;
     if ( open $FH, "<", $file ) {
-        @lines = <$FH>;
+        chomp(@lines = <$FH>);
         close $FH;
     } else {
 		#printLog("no $file present or unable to open the file for reading");
@@ -131,9 +131,6 @@ sub appendFile {
     my $fileName = shift;
     my $fileText = shift;
     my $FH;
-    if (-e $fileName) {
-        backupFile($fileName);
-    }
     if (open $FH, ">>",$fileName) {
         print $FH "$fileText";
         close $FH;
@@ -151,11 +148,12 @@ sub appendFile {
 
 sub isLinePresent {
 	my $line = shift;
+	print "searching: [$line]\n";
 	my $filenameKey;
 	foreach $filenameKey (keys %dirHash) {
 		foreach (@{ $dirHash{$filenameKey} }) {
 			if ($line =~ m/$_/) {
-				print "found\n";
+				print "comp to: [$_]\n";
 				return (1);
 			}
 		}
@@ -173,15 +171,11 @@ if (-e $fileName) {
 	$dirHash{$fileName} = [readFileReturnLines($fileName)];
 }
 
-print "sources: $fileName\n";
-
-
 if (opendir($DH,$sourcesListDirD)) {
 	while (readdir $DH) {
 		if ($_ eq '.' or $_ eq '..') { next; }
 		$fileName = $sourcesListDirD.$_;
 		$dirHash{$fileName} = [readFileReturnLines($fileName)];
-		print "filename: $fileName\n";
 	}
 	closedir($DH);
 } else {
@@ -194,38 +188,52 @@ my $compDistVer = $distribution.' '.$distributionVersion;
 my $key;
 
 # each file
+my $trigger = 0;
+my $nochange = 1;
 foreach $key (keys %{ $repos{$compDistVer} }) {
-	print "$repos{$compDistVer}{$key}{filename}\n";
 	# each line
-	foreach (@{ $repos{$compDistVer}{$key}{content} }) {
-		if (!isLinePresent($_)) {
-			# make file + line
-			if (! -e $repos{$compDistVer}{$key}{filename}) {
-				createFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
-			} else {
-				appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+	print "key: $key\n";
+	if ($key ne 'pubKey') {
+		foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+			if (!isLinePresent($_)) {
+				print "line present\n";
+    			if ( (-e $repos{$compDistVer}{$key}{filename}) && ($trigger == 0) ) {
+        			backupFile($repos{$compDistVer}{$key}{filename});
+					$trigger++;
+    			}
+				# make file + line
+				if (! -e $repos{$compDistVer}{$key}{filename}) {
+					createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+					$nochange = 0;
+				} else {
+					appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+					$nochange = 0;
+				}
 			}
 		}
 	}
 }
 
-exit (0);
-
 # comment out anything else on sources.list which has deb http://.*.ubuntu.com/ubuntu/
-my $FHsource;
-my @sourcelines;
-if (open $FHsource, "<", "sources.list") {
-	@sourcelines = <$FHsource>;
-	close $FHsource;
-	if (open $FHsource, ">", "sources.list") {
-		foreach (@sourcelines) {
-			print "found line: $_";
-			my $regEx = '^deb.*\.ubuntu\.com\/ubuntu\/ '.$repos{$compDistVer}{'name'}.'.*$';
-			print "#### commented out by Tomte\n"."# $_"
-				if $_ =~ /$regEx/;
-		}
+# and not tuxedocomputers
+if (! $nochange) {
+	my $FHsource;
+	my @sourcelines;
+	if (open $FHsource, "<", $sourcesListDir."sources.list") {
+		@sourcelines = <$FHsource>;
 		close $FHsource;
+		if (open $FHsource, ">", $sourcesListDir."sources.list") {
+			foreach (@sourcelines) {
+				my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
+				} else {
+					print $FHsource "$_\n";
+				}
+			}
+			close $FHsource;
+		}
+	} else { 
+		#error message
 	}
-} else { 
-	#error message
 }
