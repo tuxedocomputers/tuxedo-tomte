@@ -6,7 +6,6 @@ use File::Copy;
 # for debugging
 use Data::Dumper;
 
-my $sourcesListDir = '/etc/apt/sources.list.d/';
 my %dirHash;
 my $DH;
 my $distribution = 'Ubuntu';
@@ -15,27 +14,24 @@ my $distributionVersion = '20.04';
 my %repos = (
     "Ubuntu 18.04" => {
         deb => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'tuxedo-computers.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/tuxedo-computers.list',
             content => ['deb http://deb.tuxedocomputers.com/ubuntu bionic main'],
         },
         oibaf => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'oibaf-tuxedo.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/oibaf-tuxedo.list',
             content => ['deb http://oibaf.tuxedocomputers.com/ubuntu bionic main'],
         },
         graphics => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'graphics-tuxedo.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/graphics-tuxedo.list',
             content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
         },
         mirrors => {
-            directory => '/etc/apt/',
-            filename => 'sources.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list',
             content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
         },
+		name => 'bionic',
         pubKey => ['pub   4096R/54840598 2016-05-12',
 'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
@@ -43,26 +39,23 @@ my %repos = (
     },
     "Ubuntu 20.04" => {
         deb => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'tuxedo-computers.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/tuxedo-computers.list',
             content => ['deb http://deb.tuxedocomputers.com/ubuntu focal main'],
         },
         oibaf => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'oibaf-tuxedo.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/oibaf-tuxedo.list',
             content => ['deb http://oibaf.tuxedocomputers.com/ubuntu focal main'],
         },
         graphics => {
-            directory => '/etc/apt/sources.list.d/',
-            filename => 'graphics-tuxedo.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/graphics-tuxedo.list',
             content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
         },
         mirrors => {
-            directory => '/etc/apt/',
-            filename => 'sources.list',
+            filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list',
             content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+			name => 'focal',
             pubKey => ['pub   4096R/54840598 2016-05-12',
 'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
@@ -81,7 +74,7 @@ sub readFileReturnLines {
         @lines = <$FH>;
         close $FH;
     } else {
-        printLog("no $file present or unable to open the file for reading");
+		#printLog("no $file present or unable to open the file for reading");
         return;
     }
     return @lines;
@@ -108,7 +101,7 @@ sub createFile {
 sub backupFile {
     my $fileName = shift;
     my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
-    if (move($fileName, $backupFile)) {
+    if (copy($fileName, $backupFile)) {
         print "created backup for $fileName\n";
         return 1;
     } else {
@@ -171,18 +164,29 @@ sub isLinePresent {
 }
 
 
-my $fileName = '/etc/apt/sources.list';
+my $sourcesListDir = '/home/pablo/tuxedo-tomte/test/etc/apt/';
+#my $sourcesListDir = '/etc/apt/';
+my $sourcesListDirD = '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/';
+#my $sourcesListDirD = '/etc/apt/sources.list.d/';
+my $fileName = $sourcesListDir.'sources.list';
+if (-e $fileName) {
+	$dirHash{$fileName} = [readFileReturnLines($fileName)];
+}
 
-$dirHash{'/etc/apt/sources.list'} = [readFileReturnLines($fileName)];
+print "sources: $fileName\n";
 
-if (opendir($DH,$sourcesListDir)) {
+
+if (opendir($DH,$sourcesListDirD)) {
 	while (readdir $DH) {
 		if ($_ eq '.' or $_ eq '..') { next; }
-		$fileName = $sourcesListDir.$_;
+		$fileName = $sourcesListDirD.$_;
 		$dirHash{$fileName} = [readFileReturnLines($fileName)];
+		print "filename: $fileName\n";
 	}
+	closedir($DH);
+} else {
+	# print error messages
 }
-closedir($DH);
 
 #print Dumper(%dirHash);
 
@@ -197,13 +201,15 @@ foreach $key (keys %{ $repos{$compDistVer} }) {
 		if (!isLinePresent($_)) {
 			# make file + line
 			if (! -e $repos{$compDistVer}{$key}{filename}) {
-				createFile($repos{$compDistVer}{$key}{filename}, "$_");
+				createFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 			} else {
-				appendFile($repos{$compDistVer}{$key}{filename}, "$_");
+				appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 			}
 		}
 	}
 }
+
+exit (0);
 
 # comment out anything else on sources.list which has deb http://.*.ubuntu.com/ubuntu/
 my $FHsource;
@@ -213,9 +219,10 @@ if (open $FHsource, "<", "sources.list") {
 	close $FHsource;
 	if (open $FHsource, ">", "sources.list") {
 		foreach (@sourcelines) {
-			print "found line: $_\n";
-			print "#### commented out by Tomte\n"."#$_"
-				if $_ =~ /^deb.*\.ubuntu\.com\/ubuntu\/.*$/;
+			print "found line: $_";
+			my $regEx = '^deb.*\.ubuntu\.com\/ubuntu\/ '.$repos{$compDistVer}{'name'}.'.*$';
+			print "#### commented out by Tomte\n"."# $_"
+				if $_ =~ /$regEx/;
 		}
 		close $FHsource;
 	}
