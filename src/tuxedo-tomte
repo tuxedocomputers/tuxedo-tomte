@@ -29,10 +29,6 @@ my $distribution;
 my $distributionVersion;
 
 
-###############################################################################
-# hash used for reading the content of configuration files for repos
-#
-my %repoHash;
 
 ###############################################################################
 # initial definition of post configuration modules
@@ -805,6 +801,7 @@ sub tuxedorepos() {
 	if ($action eq 'install')
 	{
 		printLog("applying tuxedorepos");
+		createRepos();
 	#	$retval = insertGrub($module, \@kernel_parameters);
 	#	if ($retval == 0) {
 	#		$origConfModules{$module}{installed} = "failed";
@@ -818,7 +815,7 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'upgrade')
 	{
-		printLog("upgrading tuxedorepos");
+		# not implemented yet
 	#	$retval = insertGrub($module, \@kernel_parameters);
 	#	if ($retval == 0) {
 	#		$origConfModules{$module}{installed} = "failed";
@@ -835,6 +832,82 @@ sub tuxedorepos() {
 		# not implemented yet
 	}
 }
+
+
+
+sub createRepos {
+	my %repoHash;
+	my $compDistVer = $distribution.' '.$distributionVersion;
+	my $key;
+	my $DH;
+	#TODO: change debug
+	my $sourcesListDir = '/home/pablo/tuxedo-tomte/test/etc/apt/';
+	#my $sourcesListDir = '/etc/apt/';
+	my $sourcesListDirD = '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/';
+	#my $sourcesListDirD = '/etc/apt/sources.list.d/';
+	my $fileName = $sourcesListDir.'sources.list';
+	if (-e $fileName) {
+		$repoHash{$fileName} = [readFileReturnLines($fileName)];
+	}
+
+	# read content from all files *.list into hash
+	if (!-d $sourcesListDirD) {
+		mkdir($sourcesListDirD);
+	}
+	if (opendir($DH,$sourcesListDirD)) {
+		while (readdir $DH) {
+			if ( $_ =~ /.*\.list$/ ) {
+				$fileName = $sourcesListDirD.$_;
+				$repoHash{$fileName} = [readFileReturnLines($fileName)];
+			}
+		}
+		closedir($DH);
+	}
+
+	my $noSourceFile = 1;
+	foreach $key (keys %{ $repos{$compDistVer} }) {
+		# each line
+		if (($key ne 'pubKey') && ($key ne 'name')) {
+			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+				if (!isLinePresent($_, %repoHash)) {
+					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
+						backupFile($repos{$compDistVer}{$key}{filename});
+						$noSourceFile = 0;
+					}
+					# make file + line
+					if (! -e $repos{$compDistVer}{$key}{filename}) {
+						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						$noSourceFile = 0;
+					} else {
+						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+					}
+				}
+			}
+		}
+	}
+
+	# comment out anything else on sources.list which has
+	# deb http://.*.ubuntu.com/ubuntu/ codename
+	# and not tuxedocomputers
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+	my $FHsource;
+	my @sourcelines;
+	if (open $FHsource, "<", $sourcesListDir."sources.list") {
+		chomp(@sourcelines = <$FHsource>);
+		close $FHsource;
+		if (open $FHsource, ">", $sourcesListDir."sources.list") {
+			foreach (@sourcelines) {
+				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
+				} else {
+					print $FHsource "$_\n";
+				}
+			}
+			close $FHsource;
+		}
+	}
+}
+
 
 
 ###############################################################################
@@ -913,9 +986,10 @@ sub backupFile {
 # 
 sub isLinePresent {
 	my $line = shift;
+	my (%hash) = @_;
 	my $filenameKey;
-	foreach $filenameKey (keys %repoHash) {
-		foreach (@{ $dirHash{$filenameKey} }) {
+	foreach $filenameKey (keys %hash) {
+		foreach (@{ $hash{$filenameKey} }) {
 			if ($line eq $_) {
 				return (1);
 			}
@@ -952,7 +1026,7 @@ sub insertGrub {
 
     foreach( @grub_lines ) {
 		# find the correct line
-		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
 			foreach $parameter ( @{$parameters} ) {
 				if (insertGrubParameter(\$_, \$parameter)) {
 					++$inserted;
@@ -981,10 +1055,10 @@ sub insertGrub {
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 
-	if ($$line =~ m/$$parameter/) {
+	if ($$line =~ /$$parameter/) {
 		return (1);
 	}
-	if ($$line =~ m/""/) {
+	if ($$line =~ /""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
 		printLog("inserted $$parameter into grub line");
 	} else {
@@ -993,6 +1067,7 @@ sub insertGrubParameter {
 	}
 	return (1);
 }
+
 
 
 ###############################################################################
@@ -1108,11 +1183,11 @@ sub readConfigFile {
 		while ( my $line=<$FH> ) {
 			chomp $line;
 			# ignore comments
-			if ($line =~ m/^#/) {
+			if ($line =~ /^#/) {
 				next;
 			}
 			# ignore empty lines
-			if ($line =~ m/^(\s)*$/) {
+			if ($line =~ /^(\s)*$/) {
 				next;
 			}
 			# check data format
@@ -1150,7 +1225,7 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("Found invalid configuration line in $configFile:\n$line");
@@ -1331,7 +1406,7 @@ sub isDisplayPresent {
 	my $edidInfo;
 	foreach my $edidData (@edidRefs) {
 		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
-		if ($edidInfo =~ m/$edidSearchString/) {
+		if ($edidInfo =~ /$edidSearchString/) {
 			return (1);
 		}
 	}
