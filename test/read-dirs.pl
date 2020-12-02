@@ -148,12 +148,10 @@ sub appendFile {
 
 sub isLinePresent {
 	my $line = shift;
-	print "searching: [$line]\n";
 	my $filenameKey;
 	foreach $filenameKey (keys %dirHash) {
 		foreach (@{ $dirHash{$filenameKey} }) {
-			if ($line =~ m/$_/) {
-				print "comp to: [$_]\n";
+			if ($line eq $_) {
 				return (1);
 			}
 		}
@@ -171,11 +169,13 @@ if (-e $fileName) {
 	$dirHash{$fileName} = [readFileReturnLines($fileName)];
 }
 
+# read all files *.list into hash
 if (opendir($DH,$sourcesListDirD)) {
 	while (readdir $DH) {
-		if ($_ eq '.' or $_ eq '..') { next; }
-		$fileName = $sourcesListDirD.$_;
-		$dirHash{$fileName} = [readFileReturnLines($fileName)];
+		if ( $_ =~ /.*\.list$/ ) {
+			$fileName = $sourcesListDirD.$_;
+			$dirHash{$fileName} = [readFileReturnLines($fileName)];
+		}
 	}
 	closedir($DH);
 } else {
@@ -184,30 +184,27 @@ if (opendir($DH,$sourcesListDirD)) {
 
 #print Dumper(%dirHash);
 
+
 my $compDistVer = $distribution.' '.$distributionVersion;
 my $key;
 
 # each file
-my $trigger = 0;
-my $nochange = 1;
+my $noSourceFile = 1;
 foreach $key (keys %{ $repos{$compDistVer} }) {
 	# each line
-	print "key: $key\n";
-	if ($key ne 'pubKey') {
+	if (($key ne 'pubKey') && ($key ne 'name')) {
 		foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 			if (!isLinePresent($_)) {
-				print "line present\n";
-    			if ( (-e $repos{$compDistVer}{$key}{filename}) && ($trigger == 0) ) {
+    			if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
         			backupFile($repos{$compDistVer}{$key}{filename});
-					$trigger++;
+					$noSourceFile = 0;
     			}
 				# make file + line
 				if (! -e $repos{$compDistVer}{$key}{filename}) {
 					createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
-					$nochange = 0;
+					$noSourceFile = 0;
 				} else {
 					appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
-					$nochange = 0;
 				}
 			}
 		}
@@ -216,24 +213,23 @@ foreach $key (keys %{ $repos{$compDistVer} }) {
 
 # comment out anything else on sources.list which has deb http://.*.ubuntu.com/ubuntu/
 # and not tuxedocomputers
-if (! $nochange) {
-	my $FHsource;
-	my @sourcelines;
-	if (open $FHsource, "<", $sourcesListDir."sources.list") {
-		@sourcelines = <$FHsource>;
-		close $FHsource;
-		if (open $FHsource, ">", $sourcesListDir."sources.list") {
-			foreach (@sourcelines) {
-				my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
-				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
-					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
-				} else {
-					print $FHsource "$_\n";
-				}
+my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+my $FHsource;
+my @sourcelines;
+if (open $FHsource, "<", $sourcesListDir."sources.list") {
+	chomp(@sourcelines = <$FHsource>);
+	close $FHsource;
+	if (open $FHsource, ">", $sourcesListDir."sources.list") {
+		foreach (@sourcelines) {
+			if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+				print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
+			} else {
+				print $FHsource "$_\n";
 			}
-			close $FHsource;
 		}
-	} else { 
-		#error message
+		close $FHsource;
 	}
+} else { 
+	#error message
 }
+
