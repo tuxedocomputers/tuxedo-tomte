@@ -64,6 +64,7 @@ my %supportedOS = (
 );
 
 
+#TODO: change directory paths
 my %repos = (
 	"Ubuntu 18.04" => {
 		deb => {
@@ -89,39 +90,31 @@ my %repos = (
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
 		},
 		name => 'bionic',
-		pubKey => ['pub   4096R/54840598 2016-05-12',
-'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
-'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
-'sub 4096R/A5842AD4 2016-05-12'],
 	},
 	"Ubuntu 20.04" => {
 		deb => {
 			directory => '/etc/apt/sources.list.d/',
-			filename => 'tuxedo-computers.list',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb http://deb.tuxedocomputers.com/ubuntu focal main'],
 		},
 		oibaf => {
 			directory => '/etc/apt/sources.list.d/',
-			filename => 'oibaf-tuxedo.list',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb http://oibaf.tuxedocomputers.com/ubuntu focal main'],
 		},
 		graphics => {
 			directory => '/etc/apt/sources.list.d/',
-			filename => 'graphics-tuxedo.list',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
 		},
 		mirrors => {
 			directory => '/etc/apt/',
-			filename => 'sources.list',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list',
 			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
-		pubKey => ['pub   4096R/54840598 2016-05-12',
-'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
-'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
-'sub 4096R/A5842AD4 2016-05-12'],
 	},
 );
 
@@ -801,31 +794,19 @@ sub tuxedorepos() {
 	if ($action eq 'install')
 	{
 		printLog("applying tuxedorepos");
-		createRepos();
-	#	$retval = insertGrub($module, \@kernel_parameters);
-	#	if ($retval == 0) {
-	#		$origConfModules{$module}{installed} = "failed";
-	#		addToConfiguredModules($module, "failed");
-	#	} else {
-	#		$origConfModules{$module}{installed} = "yes";
-	#		$origConfModules{$module}{upgraded} = "yes";
-	#		$postConfProgram{updateGrub}{trigger} = 1;
-	#		addToConfiguredModules($module, "success");
-	#	}
+		$retval = createRepos();
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+		}
 	}
 	if ($action eq 'upgrade')
 	{
 		# not implemented yet
-	#	$retval = insertGrub($module, \@kernel_parameters);
-	#	if ($retval == 0) {
-	#		$origConfModules{$module}{installed} = "failed";
-	#		addToConfiguredModules($module, "failed");
-	#	} else {
-	#		$origConfModules{$module}{installed} = "yes";
-	#		$origConfModules{$module}{upgraded} = "yes";
-	#		$postConfProgram{updateGrub}{trigger} = 1;
-	#		addToConfiguredModules($module, "success");
-	#	}
 	}
 	if ($action eq 'remove')
 	{
@@ -835,25 +816,38 @@ sub tuxedorepos() {
 
 
 
+###############################################################################
+# Adds the Tuxedo repos to the system with public key
+# returns 1 if successful
+# returns 0 if failed
+#
 sub createRepos {
 	my %repoHash;
 	my $compDistVer = $distribution.' '.$distributionVersion;
 	my $key;
 	my $DH;
+	my $retval;
 	#TODO: change debug
-	my $sourcesListDir = '/home/pablo/tuxedo-tomte/test/etc/apt/';
-	#my $sourcesListDir = '/etc/apt/';
-	my $sourcesListDirD = '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/';
-	#my $sourcesListDirD = '/etc/apt/sources.list.d/';
+	my $sourcesListDir = '/etc/apt/';
+	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
+	if (!-d $sourcesListDir) {
+		printLog("no $sourcesListDir found (something's really bad)");
+		print "No $sourcesListDir found, something's really bad ...\n";
+		# no apt directory, somethings fishy
+		return (0);
+	}
+	if (!-d $sourcesListDirD) {
+		printLog("no $sourcesListDirD found, creating one");
+		print "No $sourcesListDirD found, creating one\n";
+		mkdir($sourcesListDirD);
+	}
+
 	if (-e $fileName) {
 		$repoHash{$fileName} = [readFileReturnLines($fileName)];
 	}
 
 	# read content from all files *.list into hash
-	if (!-d $sourcesListDirD) {
-		mkdir($sourcesListDirD);
-	}
 	if (opendir($DH,$sourcesListDirD)) {
 		while (readdir $DH) {
 			if ( $_ =~ /.*\.list$/ ) {
@@ -867,7 +861,7 @@ sub createRepos {
 	my $noSourceFile = 1;
 	foreach $key (keys %{ $repos{$compDistVer} }) {
 		# each line
-		if (($key ne 'pubKey') && ($key ne 'name')) {
+		if ($key ne 'name') {
 			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
@@ -887,8 +881,7 @@ sub createRepos {
 	}
 
 	# comment out anything else on sources.list which has
-	# deb http://.*.ubuntu.com/ubuntu/ codename
-	# and not tuxedocomputers
+	# deb http://.*.ubuntu.com/ubuntu/ codename and not tuxedocomputers
 	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
 	my $FHsource;
 	my @sourcelines;
@@ -906,6 +899,11 @@ sub createRepos {
 			close $FHsource;
 		}
 	}
+
+	# add repo key
+	$retval = system('wget -O - http://deb.tuxedocomputers.com/0x54840598.pub.asc | apt-key add -');
+	if ($retval == 0) { return (1); }
+	return (0);
 }
 
 
