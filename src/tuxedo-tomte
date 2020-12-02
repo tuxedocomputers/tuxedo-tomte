@@ -30,6 +30,11 @@ my $distributionVersion;
 
 
 ###############################################################################
+# hash used for reading the content of configuration files for repos
+#
+my %repoHash;
+
+###############################################################################
 # initial definition of post configuration modules
 #   command		the command to be executed on the system
 #   trigger		'1' / 'undef' wether the command should be executed
@@ -87,6 +92,7 @@ my %repos = (
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
 		},
+		name => 'bionic',
 		pubKey => ['pub   4096R/54840598 2016-05-12',
 'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
@@ -114,11 +120,12 @@ my %repos = (
 			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			pubKey => ['pub   4096R/54840598 2016-05-12',
+		},
+		name => 'focal',
+		pubKey => ['pub   4096R/54840598 2016-05-12',
 'Key fingerprint = E5D0 C320 BBCE 8D21 CDF6  0DD5 120E D28D 5484 0598',
 'uid TUXEDO Computers GmbH (www.tuxedocomputers.com)',
 'sub 4096R/A5842AD4 2016-05-12'],
-		},
 	},
 );
 
@@ -305,6 +312,7 @@ my %configuredModules;
 
 ###############################################################################
 # reads a file and returns an array with the lines
+# chomps the linefeed
 # returns undef if file can't be opened
 #
 sub readFileReturnLines {
@@ -312,53 +320,13 @@ sub readFileReturnLines {
 	my $FH;
 	my @lines;
 	if ( open $FH, "<", $file ) {
-		@lines = <$FH>;
+		chomp(@lines = <$FH>);
 		close $FH;
 	} else {
 		printLog("no $file present or unable to open the file for reading");
 		return;
 	}
 	return @lines;
-}
-
-
-
-###############################################################################
-# takes a filename and an array of text and adds the lines into the file
-# checks for duplicates and omits them
-# 1 if lines could be written or exist already
-# 0 if the lines could not be written
-#
-sub textIntoFilesNoDups {
-	my ($file, @lines) = @_;
-	my @origLines = readFileReturnLines($file);
-	if ( @origLines ) {
-
-	} else {
-		printLog("can't read from file $file");
-		print "Can't read from file $file\n";
-		return (0);
-	}
-}
-
-
-
-
-###############################################################################
-# comments out old known and common repos
-#
-sub commentOutOldRepos {
-	#TODO
-}
-
-
-
-###############################################################################
-# takes a string and an array and checks for duplicates
-# 1 if the line is already in the string
-# 0 if not
-sub isStringInArray {
-	my ($line, @lines) = @_
 }
 
 
@@ -378,10 +346,11 @@ sub readOSData {
 		exit (0);
 	}
 	foreach ( @osReleaseLines ) {
-		if ( $_ =~ m/^NAME=/ ) {
+		if ( $_ =~ /^NAME=/ ) {
 			$_ =~ /NAME=\"(.*)\"/;
-			$distribution = $1;		}
-		if ( $_ =~ m/^VERSION_ID=/ ) {
+			$distribution = $1;
+		}
+		if ( $_ =~ /^VERSION_ID=/ ) {
 			$_ =~ /VERSION_ID=\"(.*)\"/;
 			$distributionVersion = $1;
 		}
@@ -423,44 +392,44 @@ sub checkRequirements {
 
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
-	@boardvendor = readFileReturnLines($boardvendorFilename);
 	if ( !@boardname ) {
 		printLog("could not open $boardnameFilename $!");
 	}
+	@boardvendor = readFileReturnLines($boardvendorFilename);
 	if ( !@boardvendor ) {
 		printLog("could not open $boardvendorFilename $!");
 	}
 
 	# check values for each module
-	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
+	if ($boardname[0] =~ /(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ m/(PF5PU1G)/) {
+	if ($boardname[0] =~ /(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
-	   ($boardname[0] =~ m/(POLARIS1501A2060)/) ||
-	   ($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
-	   ($boardname[0] =~ m/(POLARIS1701A2060)/) ||
-	   ($boardname[0] =~ m/(PULSE1401)/) ||
-   	   ($boardname[0] =~ m/(PULSE1501)/)) {
+	if (($boardname[0] =~ /(POLARIS1501A1650TI)/) ||
+	   ($boardname[0] =~ /(POLARIS1501A2060)/) ||
+	   ($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
+	   ($boardname[0] =~ /(POLARIS1701A2060)/) ||
+	   ($boardname[0] =~ /(PULSE1401)/) ||
+   	   ($boardname[0] =~ /(PULSE1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1701A2060/) ||
-		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1501A2060/) ) {
+	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
+		($boardname[0] =~ /POLARIS1701A2060/) ||
+		($boardname[0] =~ /POLARIS1501A1650TI/) ||
+		($boardname[0] =~ /POLARIS1501A2060/) ) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ m/(X170SM)/) ||
-		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
-   		($boardname[0] =~ m/LAPQC71A/) ||
-		($boardname[0] =~ m/LAPQC71B/) ||
-		($boardname[0] =~ m/N141CU/)	) {
+	if (($boardname[0] =~ /(X170SM)/) ||
+		($boardname[0] =~ /(PB50_70DFx,DDx)/) ||
+   		($boardname[0] =~ /LAPQC71A/) ||
+		($boardname[0] =~ /LAPQC71B/) ||
+		($boardname[0] =~ /N141CU/)	) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
-	if ($boardname[0] =~ m/(N8xEJEK)/) {
+	if ($boardname[0] =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
@@ -836,24 +805,6 @@ sub tuxedorepos() {
 	if ($action eq 'install')
 	{
 		printLog("applying tuxedorepos");
-		# build list of all files inside /etc/apt
-		$repoFile = $repos{$compDistVers}{deb}{directory}.
-			$repos{$compDistVers}{deb}{filename};
-		if (-e $repoFile) {
-			if (!textIntoFilesNoDups($repoFile, @repos{$compDistVers}{deb}{content})) {
-				addToConfiguredModules($module, 'failed');
-				printLog("installation of tuxedo repos failed");
-				print "Tuxedo repos can't be installed\n";
-			}
-		} else {
-			if (createFile($repoFile, @repos{$compDistVers}{deb}{content})) {
-				commentOutOldRepos();
-			} else {
-				addToConfiguredModules($module, 'failed');
-				printLog("installation of tuxedo repos failed");
-				print "Tuxedo repos can't be installed\n";
-			}
-		}
 	#	$retval = insertGrub($module, \@kernel_parameters);
 	#	if ($retval == 0) {
 	#		$origConfModules{$module}{installed} = "failed";
@@ -918,13 +869,34 @@ sub createFile {
 }
 
 
+
+###############################################################################
+# appends text to the file
+# 
+sub appendFile {
+	my $fileName = shift;
+	my $fileText = shift;
+	my $FH;
+	if (open $FH, ">>",$fileName) {
+		print $FH "$fileText";
+		close $FH;
+		return 1;
+	} else {
+		printLog("can't open $fileName for writing");
+		print "Can't open $fileName for writing\n";
+		return 0;
+	}
+}
+
+
+
 ###############################################################################
 # backups file with timestamp
 # 
 sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
-	if (move($fileName, $backupFile)) {
+	if (copy($fileName, $backupFile)) {
 		print "created backup for $fileName\n";
 		return 1;
 	} else {
@@ -933,6 +905,25 @@ sub backupFile {
 		return 0;
 	}
 }
+
+
+
+###############################################################################
+# checks if the line exists in the file
+# 
+sub isLinePresent {
+	my $line = shift;
+	my $filenameKey;
+	foreach $filenameKey (keys %repoHash) {
+		foreach (@{ $dirHash{$filenameKey} }) {
+			if ($line eq $_) {
+				return (1);
+			}
+		}
+	}
+	return (0);
+}
+
 
 
 ###############################################################################

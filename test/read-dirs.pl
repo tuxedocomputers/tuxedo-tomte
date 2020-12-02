@@ -6,7 +6,7 @@ use File::Copy;
 # for debugging
 use Data::Dumper;
 
-my %dirHash;
+my %repoHash;
 my $DH;
 my $distribution = 'Ubuntu';
 my $distributionVersion = '20.04';
@@ -149,7 +149,7 @@ sub appendFile {
 sub isLinePresent {
 	my $line = shift;
 	my $filenameKey;
-	foreach $filenameKey (keys %dirHash) {
+	foreach $filenameKey (keys %repoHash) {
 		foreach (@{ $dirHash{$filenameKey} }) {
 			if ($line eq $_) {
 				return (1);
@@ -182,7 +182,7 @@ if (opendir($DH,$sourcesListDirD)) {
 	# print error messages
 }
 
-#print Dumper(%dirHash);
+#print Dumper(%repoHash);
 
 
 my $compDistVer = $distribution.' '.$distributionVersion;
