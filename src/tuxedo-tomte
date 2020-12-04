@@ -47,7 +47,7 @@ my %postConfProgram = (
 		command => 'apt update',
 		trigger => 0,
 		status => 'undef',
-		description => 'update repositories',
+		description => 'updates repositories',
 	},
 );
 
