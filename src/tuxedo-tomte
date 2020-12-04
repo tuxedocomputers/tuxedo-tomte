@@ -848,21 +848,23 @@ sub createRepos {
 		closedir($DH);
 	}
 
-	my $noSourceFile = 1;
+	my $firstEntry;
 	foreach $key (keys %{ $repos{$compDistVer} }) {
 		# each line
 		if ($key ne 'name') {
-			$noSourceFile = 1;
+			$firstEntry = 1;
 			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
-					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
+					# make backup if file exists and is first entry into file
+					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
 						backupFile($repos{$compDistVer}{$key}{filename});
-						$noSourceFile = 0;
+						$firstEntry = 0;
 					}
-					# make file + line
+					# create file + line
 					if (! -e $repos{$compDistVer}{$key}{filename}) {
 						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
-						$noSourceFile = 0;
+						$firstEntry = 0;
+					# or append line
 					} else {
 						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 					}
