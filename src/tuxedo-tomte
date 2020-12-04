@@ -76,7 +76,7 @@ my %repos = (
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
+			content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
 		},
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -97,7 +97,7 @@ my %repos = (
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
+			content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
 		mirrors => {
 			filename => '/etc/apt/sources.list',
