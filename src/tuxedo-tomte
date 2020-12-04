@@ -852,6 +852,7 @@ sub createRepos {
 	foreach $key (keys %{ $repos{$compDistVer} }) {
 		# each line
 		if ($key ne 'name') {
+			$noSourceFile = 1;
 			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
