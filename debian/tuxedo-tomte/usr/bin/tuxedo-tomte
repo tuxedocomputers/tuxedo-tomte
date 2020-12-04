@@ -4,6 +4,14 @@ use warnings;
 
 use File::Copy;
 
+# for OLED backlight and edid decrypt
+use FindBin qw($Bin);
+use lib "$Bin/.";
+use Parse::EDID qw(parse_edid);
+
+# for debugging
+use Data::Dumper;
+
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
@@ -17,12 +25,9 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
+my $distribution;
+my $distributionVersion;
 
-
-# for OLED backlight and edid decrypt
-use FindBin qw($Bin);
-use lib "$Bin/.";
-use Parse::EDID qw(parse_edid);
 
 
 ###############################################################################
@@ -37,6 +42,79 @@ my %postConfProgram = (
 		trigger => 0,
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
+	},
+);
+
+
+###############################################################################
+# list of supported OS versions
+# with repective repo entries
+#
+my %supportedOS = (
+	Ubuntu => {
+		versions => {
+			"18.04" => {
+				name => 'bionic',
+			},
+			"20.04" => {
+				name => 'focal',
+			},
+		},
+	},
+);
+
+
+#TODO: change directory paths
+my %repos = (
+	"Ubuntu 18.04" => {
+		deb => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'tuxedo-computers.list',
+			content => ['deb http://deb.tuxedocomputers.com/ubuntu bionic main'],
+		},
+		oibaf => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'oibaf-tuxedo.list',
+			content => ['deb http://oibaf.tuxedocomputers.com/ubuntu bionic main'],
+		},
+		graphics => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => 'graphics-tuxedo.list',
+			content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		mirrors => {
+			directory => '/etc/apt/',
+			filename => 'sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
+		},
+		name => 'bionic',
+	},
+	"Ubuntu 20.04" => {
+		deb => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb http://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb http://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			directory => '/etc/apt/sources.list.d/',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
+		},
+		mirrors => {
+			directory => '/etc/apt/',
+			filename => '/home/pablo/tuxedo-tomte/test/etc/apt/sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
 	},
 );
 
@@ -192,6 +270,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedorepos => {
+		name => 'tuxedo-repos',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Adds the Tuxedo repositories',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -208,15 +300,78 @@ my %configuredModules;
 
 
 ###############################################################################
+# reads a file and returns an array with the lines
+# chomps the linefeed
+# returns undef if file can't be opened
+#
+sub readFileReturnLines {
+	my $file = shift;
+	my $FH;
+	my @lines;
+	if ( open $FH, "<", $file ) {
+		chomp(@lines = <$FH>);
+		close $FH;
+	} else {
+		printLog("no $file present or unable to open the file for reading");
+		return;
+	}
+	return @lines;
+}
+
+
+
+###############################################################################
+# find OS name and version and put them into $distribution and
+# $distributionVersion
+#
+sub readOSData {
+	my $osReleaseFile = '/etc/os-release';
+	my @osReleaseLines;
+
+	@osReleaseLines = readFileReturnLines($osReleaseFile);
+
+	if ( !@osReleaseLines ) {
+		print "Can't determine the operating system\n";
+		exit (0);
+	}
+	foreach ( @osReleaseLines ) {
+		if ( $_ =~ /^NAME=/ ) {
+			$_ =~ /NAME=\"(.*)\"/;
+			$distribution = $1;
+		}
+		if ( $_ =~ /^VERSION_ID=/ ) {
+			$_ =~ /VERSION_ID=\"(.*)\"/;
+			$distributionVersion = $1;
+		}
+	}
+}
+
+
+
+###############################################################################
+# checks the list of supported distributions and versions and returns
+# 1 if supported
+# 0 if not
+#
+sub isOSSupported {
+	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
+		return (1);
+	}
+	return (0);
+}
+
+
+
+###############################################################################
 # check whether the module is required for the system
 # checks only for hardware
 #
 sub checkRequirements {
 	my $FH;
-	my $boardname_filename = "/sys/class/dmi/id/board_name";
-	my $boardname;
-	my $boardvendor_filename = "/sys/class/dmi/id/board_vendor";
-	my $boardvendor;
+	my $boardnameFilename = "/sys/class/dmi/id/board_name";
+	my @boardname;
+	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
+	my @boardvendor;
 
 	# TODO: these will be installed on all notebooks, always
 	#	$origConfModules{tuxedokeyboard}{required} = 1;
@@ -225,49 +380,45 @@ sub checkRequirements {
 	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
 
 	# load required data into variables
-	if ( open $FH, "<", $boardvendor_filename ) {
-		$boardvendor = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardname_filename $!");
+	@boardname = readFileReturnLines($boardnameFilename);
+	if ( !@boardname ) {
+		printLog("could not open $boardnameFilename $!");
 	}
-	if ( open $FH, "<", $boardname_filename ) {
-		$boardname = <$FH>;
-		close $FH;
-	} else {
-		printLog("could not open $boardvendor_filename $!");
+	@boardvendor = readFileReturnLines($boardvendorFilename);
+	if ( !@boardvendor ) {
+		printLog("could not open $boardvendorFilename $!");
 	}
 
 	# check values for each module
-	if ($boardname =~ m/(PB50_70DFx,DDx)/) {
+	if ($boardname[0] =~ /(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 	}
-	if ($boardname =~ m/(PF5PU1G)/) {
+	if ($boardname[0] =~ /(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname =~ m/(POLARIS1501A1650TI)/) ||
-	   ($boardname =~ m/(POLARIS1501A2060)/) ||
-	   ($boardname =~ m/(POLARIS1701A1650TI)/) ||
-	   ($boardname =~ m/(POLARIS1701A2060)/) ||
-	   ($boardname =~ m/(PULSE1401)/) ||
-   	   ($boardname =~ m/(PULSE1501)/)) {
+	if (($boardname[0] =~ /(POLARIS1501A1650TI)/) ||
+	   ($boardname[0] =~ /(POLARIS1501A2060)/) ||
+	   ($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
+	   ($boardname[0] =~ /(POLARIS1701A2060)/) ||
+	   ($boardname[0] =~ /(PULSE1401)/) ||
+   	   ($boardname[0] =~ /(PULSE1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
-	if (($boardname =~ m/POLARIS1701A1650TI/) ||
-		($boardname =~ m/POLARIS1701A2060/) ||
-		($boardname =~ m/POLARIS1501A1650TI/) ||
-		($boardname =~ m/POLARIS1501A2060/) ) {
+	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
+		($boardname[0] =~ /POLARIS1701A2060/) ||
+		($boardname[0] =~ /POLARIS1501A1650TI/) ||
+		($boardname[0] =~ /POLARIS1501A2060/) ) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if (($boardname =~ m/(X170SM)/) ||
-		($boardname =~ m/(PB50_70DFx,DDx)/) ||
-   		($boardname =~ m/LAPQC71A/) ||
-		($boardname =~ m/LAPQC71B/) ||
-		($boardname =~ m/N141CU/)	) {
+	if (($boardname[0] =~ /(X170SM)/) ||
+		($boardname[0] =~ /(PB50_70DFx,DDx)/) ||
+   		($boardname[0] =~ /LAPQC71A/) ||
+		($boardname[0] =~ /LAPQC71B/) ||
+		($boardname[0] =~ /N141CU/)	) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
-	if ($boardname =~ m/(N8xEJEK)/) {
+	if ($boardname[0] =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
@@ -628,6 +779,136 @@ sub backlightfix() {
 
 
 ###############################################################################
+# Adds the Tuxedo repos to the system
+#
+sub tuxedorepos() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+
+	my $repoFile;
+	my $shortDistrVers = $distributionVersion;
+	$shortDistrVers =~ tr/\.//d;
+	my $compDistVers = "$distribution"."$shortDistrVers";
+
+	if ($action eq 'install')
+	{
+		printLog("applying tuxedorepos");
+		$retval = createRepos();
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade')
+	{
+		# not implemented yet
+	}
+	if ($action eq 'remove')
+	{
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Adds the Tuxedo repos to the system with public key
+# returns 1 if successful
+# returns 0 if failed
+#
+sub createRepos {
+	my %repoHash;
+	my $compDistVer = $distribution.' '.$distributionVersion;
+	my $key;
+	my $DH;
+	my $retval;
+	#TODO: change debug
+	my $sourcesListDir = '/etc/apt/';
+	my $sourcesListDirD = '/etc/apt/sources.list.d/';
+	my $fileName = $sourcesListDir.'sources.list';
+	if (!-d $sourcesListDir) {
+		printLog("no $sourcesListDir found (something's really bad)");
+		print "No $sourcesListDir found, something's really bad ...\n";
+		# no apt directory, somethings fishy
+		return (0);
+	}
+	if (!-d $sourcesListDirD) {
+		printLog("no $sourcesListDirD found, creating one");
+		print "No $sourcesListDirD found, creating one\n";
+		mkdir($sourcesListDirD);
+	}
+
+	if (-e $fileName) {
+		$repoHash{$fileName} = [readFileReturnLines($fileName)];
+	}
+
+	# read content from all files *.list into hash
+	if (opendir($DH,$sourcesListDirD)) {
+		while (readdir $DH) {
+			if ( $_ =~ /.*\.list$/ ) {
+				$fileName = $sourcesListDirD.$_;
+				$repoHash{$fileName} = [readFileReturnLines($fileName)];
+			}
+		}
+		closedir($DH);
+	}
+
+	my $noSourceFile = 1;
+	foreach $key (keys %{ $repos{$compDistVer} }) {
+		# each line
+		if ($key ne 'name') {
+			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+				if (!isLinePresent($_, %repoHash)) {
+					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($noSourceFile == 1) ) {
+						backupFile($repos{$compDistVer}{$key}{filename});
+						$noSourceFile = 0;
+					}
+					# make file + line
+					if (! -e $repos{$compDistVer}{$key}{filename}) {
+						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						$noSourceFile = 0;
+					} else {
+						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+					}
+				}
+			}
+		}
+	}
+
+	# comment out anything else on sources.list which has
+	# deb http://.*.ubuntu.com/ubuntu/ codename and not tuxedocomputers
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+	my $FHsource;
+	my @sourcelines;
+	if (open $FHsource, "<", $sourcesListDir."sources.list") {
+		chomp(@sourcelines = <$FHsource>);
+		close $FHsource;
+		if (open $FHsource, ">", $sourcesListDir."sources.list") {
+			foreach (@sourcelines) {
+				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
+				} else {
+					print $FHsource "$_\n";
+				}
+			}
+			close $FHsource;
+		}
+	}
+
+	# add repo key
+	$retval = system('wget -O - http://deb.tuxedocomputers.com/0x54840598.pub.asc | apt-key add -');
+	if ($retval == 0) { return (1); }
+	return (0);
+}
+
+
+
+###############################################################################
 # Enables activation of discrete NVIDIA graphics on devices with built-in AMD
 sub installPackage {
 	my $packageName = shift;
@@ -659,13 +940,34 @@ sub createFile {
 }
 
 
+
+###############################################################################
+# appends text to the file
+# 
+sub appendFile {
+	my $fileName = shift;
+	my $fileText = shift;
+	my $FH;
+	if (open $FH, ">>",$fileName) {
+		print $FH "$fileText";
+		close $FH;
+		return 1;
+	} else {
+		printLog("can't open $fileName for writing");
+		print "Can't open $fileName for writing\n";
+		return 0;
+	}
+}
+
+
+
 ###############################################################################
 # backups file with timestamp
 # 
 sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
-	if (move($fileName, $backupFile)) {
+	if (copy($fileName, $backupFile)) {
 		print "created backup for $fileName\n";
 		return 1;
 	} else {
@@ -674,6 +976,26 @@ sub backupFile {
 		return 0;
 	}
 }
+
+
+
+###############################################################################
+# checks if the line exists in the file
+# 
+sub isLinePresent {
+	my $line = shift;
+	my (%hash) = @_;
+	my $filenameKey;
+	foreach $filenameKey (keys %hash) {
+		foreach (@{ $hash{$filenameKey} }) {
+			if ($line eq $_) {
+				return (1);
+			}
+		}
+	}
+	return (0);
+}
+
 
 
 ###############################################################################
@@ -702,7 +1024,7 @@ sub insertGrub {
 
     foreach( @grub_lines ) {
 		# find the correct line
-		if ( $_ =~ m/^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
+		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
 			foreach $parameter ( @{$parameters} ) {
 				if (insertGrubParameter(\$_, \$parameter)) {
 					++$inserted;
@@ -731,10 +1053,10 @@ sub insertGrub {
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 
-	if ($$line =~ m/$$parameter/) {
+	if ($$line =~ /$$parameter/) {
 		return (1);
 	}
-	if ($$line =~ m/""/) {
+	if ($$line =~ /""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
 		printLog("inserted $$parameter into grub line");
 	} else {
@@ -743,6 +1065,7 @@ sub insertGrubParameter {
 	}
 	return (1);
 }
+
 
 
 ###############################################################################
@@ -858,11 +1181,11 @@ sub readConfigFile {
 		while ( my $line=<$FH> ) {
 			chomp $line;
 			# ignore comments
-			if ($line =~ m/^#/) {
+			if ($line =~ /^#/) {
 				next;
 			}
 			# ignore empty lines
-			if ($line =~ m/^(\s)*$/) {
+			if ($line =~ /^(\s)*$/) {
 				next;
 			}
 			# check data format
@@ -900,7 +1223,7 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ m/^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("Found invalid configuration line in $configFile:\n$line");
@@ -1081,7 +1404,7 @@ sub isDisplayPresent {
 	my $edidInfo;
 	foreach my $edidData (@edidRefs) {
 		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
-		if ($edidInfo =~ m/$edidSearchString/) {
+		if ($edidInfo =~ /$edidSearchString/) {
 			return (1);
 		}
 	}
@@ -1664,8 +1987,17 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
+readOSData();
+
+if (!isOSSupported()) {
+	printLog('OS is not supported');
+	print "This OS is not supported\n";
+	exit (0);
+}
+
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
+
 
 if (@ARGV != 0) {
 	my %options;
