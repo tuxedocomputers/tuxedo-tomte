@@ -43,6 +43,12 @@ my %postConfProgram = (
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
 	},
+	updateApt => {
+		command => 'apt update',
+		trigger => 0,
+		status => 'undef',
+		description => 'update repositories',
+	},
 );
 
 
@@ -792,6 +798,7 @@ sub tuxedorepos() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateApt}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
 	}
