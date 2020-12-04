@@ -1,6 +1,8 @@
 #!/usr/bin/sh
 
-echo "New version number?:"
+echo "last version number: "
+head -n 1 changelog
+echo "new version number?:"
 read VERSION
 
 export VERSION
