@@ -43,6 +43,12 @@ my %postConfProgram = (
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
 	},
+	updateApt => {
+		command => 'apt update',
+		trigger => 0,
+		status => 'undef',
+		description => 'updates repositories',
+	},
 );
 
 
@@ -792,6 +798,7 @@ sub tuxedorepos() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateApt}{trigger} = 1;
 			addToConfiguredModules($module, "success");
 		}
 	}
@@ -849,6 +856,7 @@ sub createRepos {
 	}
 
 	my $firstEntry;
+	my $sourcesListBackedup = 0;
 	foreach $key (keys %{ $repos{$compDistVer} }) {
 		# each line
 		if ($key ne 'name') {
@@ -859,6 +867,9 @@ sub createRepos {
 					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
 						backupFile($repos{$compDistVer}{$key}{filename});
 						$firstEntry = 0;
+						if ($repos{$compDistVer}{$key}{filename} eq '/etc/apt/sources.list' ) {
+							$sourcesListBackedup = 1;
+						}
 					}
 					# create file + line
 					if (! -e $repos{$compDistVer}{$key}{filename}) {
@@ -884,6 +895,10 @@ sub createRepos {
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach (@sourcelines) {
 				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+					if ($sourcesListBackedup == 0) {
+						backupFile('/etc/apt/sources.list');
+						$sourcesListBackedup = 1;
+					}
 					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
 				} else {
 					print $FHsource "$_\n";
