@@ -25,6 +25,8 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
+#TODO: modify reposList
+my $reposList = '../misc/reposlist.txt';
 my $distribution;
 my $distributionVersion;
 
@@ -886,7 +888,6 @@ sub createRepos {
 
 	# comment out anything else on sources.list which has
 	# deb http://.*.ubuntu.com/ubuntu/ codename and not tuxedocomputers
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
 	my $FHsource;
 	my @sourcelines;
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
@@ -894,6 +895,7 @@ sub createRepos {
 		close $FHsource;
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach (@sourcelines) {
+				setComment($_);
 				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
 					if ($sourcesListBackedup == 0) {
 						backupFile('/etc/apt/sources.list');
@@ -917,7 +919,26 @@ sub createRepos {
 
 
 ###############################################################################
+# decides whether the line has to be commented out or not
+# returns 0 if nothing changed
+# returns 1 if commented out
+# modifies the string given to the subroutine
+#
+sub setComment {
+	my $FH;
+	my @repos;
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+	open( $FH, '<', $reposList ) {
+		chomp(@repos = <$FH>);
+		close $FH;
+	}
+	
+	
+}
+
+###############################################################################
 # Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+#
 sub installPackage {
 	my $packageName = shift;
 	my $retval = system("pkconf install $packageName");
