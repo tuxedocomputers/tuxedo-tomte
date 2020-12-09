@@ -1381,12 +1381,12 @@ sub getEDIDData {
 	my @edidFiles = findActiveEDIDs();
 	my @edidRefs;
 	my @edidInfo;
-	my $fh;
+	my $FH;
 	my $fileContent;
 	foreach ( @edidFiles ) {
-		if ( open $fh, '<', $_ ) {
-			$fileContent = do { local $/; <$fh> };
-			close $fh;
+		if ( open $FH, '<', $_ ) {
+			$fileContent = do { local $/; <$FH> };
+			close $FH;
 			push @edidRefs, parse_edid($fileContent);
 		} else {
 			printLog("could not open file $_ $!");
