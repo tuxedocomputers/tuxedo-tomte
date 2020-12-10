@@ -785,11 +785,6 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 
-	my $repoFile;
-	my $shortDistrVers = $distributionVersion;
-	$shortDistrVers =~ tr/\.//d;
-	my $compDistVers = "$distribution"."$shortDistrVers";
-
 	if ($action eq 'install')
 	{
 		printLog("applying tuxedorepos");
@@ -827,6 +822,7 @@ sub createRepos {
 	my $key;
 	my $DH;
 	my $retval;
+	my $sourceline;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
@@ -894,17 +890,14 @@ sub createRepos {
 		chomp(@sourcelines = <$FHsource>);
 		close $FHsource;
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
-			foreach (@sourcelines) {
-				setComment($_);
-				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+			foreach $sourceline (@sourcelines) {
+				if (setComment(\$sourceline)) {
 					if ($sourcesListBackedup == 0) {
 						backupFile('/etc/apt/sources.list');
 						$sourcesListBackedup = 1;
 					}
-					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
-				} else {
-					print $FHsource "$_\n";
 				}
+				print $FHsource "$sourceline";
 			}
 			close $FHsource;
 		}
@@ -925,15 +918,37 @@ sub createRepos {
 # modifies the string given to the subroutine
 #
 sub setComment {
+	my $repoline = shift;
+	my $tmpline = $$repoline;
 	my $FH;
 	my @repos;
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
-	open( $FH, '<', $reposList ) {
+	my $compDistVers = "$distribution $distributionVersion";
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVers}{name}.'.*$';
+	if (open $FH, '<', $reposList ) {
 		chomp(@repos = <$FH>);
 		close $FH;
+	} else {
+		printLog("could not open repository mirrors list at $reposList");
+		print "Could not open repository mirrors list at $reposList\n";
+		exit (0);
 	}
-	
-	
+	if ( $$repoline =~ /^deb .*/ ) {
+		# this is a repo line
+		if (($$repoline =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+			$$repoline = "#### commented out by TUXEDO Tomte\n"."# $$repoline}\n";
+			return (1);
+		}
+		foreach (@repos) {
+			if ( $$repoline =~ /$_/ ) {
+				# repo matches
+				$$repoline = "#### commented out by TUXEDO Tomte\n"."# $$repoline\n";
+				return (1);
+			}
+		}
+	} else {
+		# nothing has to be done
+		return (0);
+	}
 }
 
 ###############################################################################
