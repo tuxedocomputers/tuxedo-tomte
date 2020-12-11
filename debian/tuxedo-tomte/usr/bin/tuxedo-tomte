@@ -25,6 +25,7 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
+my $reposList = '/usr/share/tuxedo-tomte/repolist.txt';
 my $distribution;
 my $distributionVersion;
 
@@ -783,11 +784,6 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 
-	my $repoFile;
-	my $shortDistrVers = $distributionVersion;
-	$shortDistrVers =~ tr/\.//d;
-	my $compDistVers = "$distribution"."$shortDistrVers";
-
 	if ($action eq 'install')
 	{
 		printLog("applying tuxedorepos");
@@ -825,6 +821,7 @@ sub createRepos {
 	my $key;
 	my $DH;
 	my $retval;
+	my $sourceline;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
@@ -885,24 +882,23 @@ sub createRepos {
 	}
 
 	# comment out anything else on sources.list which has
-	# deb http://.*.ubuntu.com/ubuntu/ codename and not tuxedocomputers
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVer}{name}.'.*$';
+	# deb mirrorurl and not tuxedocomputers
 	my $FHsource;
 	my @sourcelines;
+	# read all the lines
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
 		chomp(@sourcelines = <$FHsource>);
 		close $FHsource;
+		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
-			foreach (@sourcelines) {
-				if (($_ =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
+			foreach $sourceline (@sourcelines) {
+				if (setComment(\$sourceline)) {
 					if ($sourcesListBackedup == 0) {
 						backupFile('/etc/apt/sources.list');
 						$sourcesListBackedup = 1;
 					}
-					print $FHsource "#### commented out by TUXEDO Tomte\n"."# $_\n"
-				} else {
-					print $FHsource "$_\n";
 				}
+				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
 		}
@@ -917,7 +913,50 @@ sub createRepos {
 
 
 ###############################################################################
+# decides whether the line has to be commented out or not
+# returns 0 if nothing changed
+# returns 1 if commented out
+# modifies the string given to the subroutine
+#
+sub setComment {
+	my $repoline = shift;
+	my $tmpline = $$repoline;
+	my $FH;
+	my @repos;
+	my $compDistVers = "$distribution $distributionVersion";
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVers}{name}.'.*$';
+	if (open $FH, '<', $reposList ) {
+		chomp(@repos = <$FH>);
+		close $FH;
+	} else {
+		printLog("could not open repository mirrors list at $reposList");
+		print "Could not open repository mirrors list at $reposList\n";
+		return (0);
+	}
+	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
+		# this is a repo line
+		# if line matches some official debian country mirror & not tuxedo
+		if (($$repoline =~ /$regEx/) && !($$repoline =~ /tuxedocomputers/)) {
+			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+			return (1);
+		}
+		# check for repos in comprehensive mirror list
+		foreach (@repos) {
+			if ( $$repoline =~ /$_/ ) {
+				# repo matches
+				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+				return (1);
+			}
+		}
+	} else {
+		# nothing has to be done
+		return (0);
+	}
+}
+
+###############################################################################
 # Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+#
 sub installPackage {
 	my $packageName = shift;
 	my $retval = system("pkconf install $packageName");
@@ -1381,12 +1420,12 @@ sub getEDIDData {
 	my @edidFiles = findActiveEDIDs();
 	my @edidRefs;
 	my @edidInfo;
-	my $fh;
+	my $FH;
 	my $fileContent;
 	foreach ( @edidFiles ) {
-		if ( open $fh, '<', $_ ) {
-			$fileContent = do { local $/; <$fh> };
-			close $fh;
+		if ( open $FH, '<', $_ ) {
+			$fileContent = do { local $/; <$FH> };
+			close $FH;
 			push @edidRefs, parse_edid($fileContent);
 		} else {
 			printLog("could not open file $_ $!");

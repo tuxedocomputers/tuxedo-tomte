@@ -1,9 +1,0 @@
-[Unit]
-Description = Starts tuxedo-tomte after waiting for predefined time
-
-[Install]
-WantedBy = timers.target
-
-[Timer]
-OnActiveSec = 1min
-Unit = tuxedo-tomte.service
