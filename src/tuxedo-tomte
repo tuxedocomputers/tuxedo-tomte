@@ -25,8 +25,7 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
-#TODO: modify reposList
-my $reposList = '../misc/reposlist.txt';
+my $reposList = '/usr/share/tuxedo-tomte/repolist.txt';
 my $distribution;
 my $distributionVersion;
 
@@ -883,12 +882,14 @@ sub createRepos {
 	}
 
 	# comment out anything else on sources.list which has
-	# deb http://.*.ubuntu.com/ubuntu/ codename and not tuxedocomputers
+	# deb mirrorurl and not tuxedocomputers
 	my $FHsource;
 	my @sourcelines;
+	# read all the lines
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
 		chomp(@sourcelines = <$FHsource>);
 		close $FHsource;
+		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach $sourceline (@sourcelines) {
 				if (setComment(\$sourceline)) {
@@ -897,7 +898,7 @@ sub createRepos {
 						$sourcesListBackedup = 1;
 					}
 				}
-				print $FHsource "$sourceline";
+				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
 		}
@@ -930,18 +931,20 @@ sub setComment {
 	} else {
 		printLog("could not open repository mirrors list at $reposList");
 		print "Could not open repository mirrors list at $reposList\n";
-		exit (0);
+		return (0);
 	}
-	if ( $$repoline =~ /^deb .*/ ) {
+	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
 		# this is a repo line
-		if (($$repoline =~ /$regEx/) && !($_ =~ /tuxedocomputers/)) {
-			$$repoline = "#### commented out by TUXEDO Tomte\n"."# $$repoline}\n";
+		# if line matches some official debian country mirror & not tuxedo
+		if (($$repoline =~ /$regEx/) && !($$repoline =~ /tuxedocomputers/)) {
+			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			return (1);
 		}
+		# check for repos in comprehensive mirror list
 		foreach (@repos) {
 			if ( $$repoline =~ /$_/ ) {
 				# repo matches
-				$$repoline = "#### commented out by TUXEDO Tomte\n"."# $$repoline\n";
+				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 				return (1);
 			}
 		}
