@@ -249,7 +249,7 @@ my %origConfModules = (
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem on XC1711, XUX711, InfinityBook Pro 14 v5 and XMG Fusion',
+		description => 'Fixes no keyboard after suspend problem on XC1511, XC1711, XUX711, InfinityBook Pro 14 v5, AURA 15 gen 1, XA15 gen 10 and XMG Fusion',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -399,21 +399,24 @@ sub checkRequirements {
 		($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
 		($boardname[0] =~ /(POLARIS1701A2060)/) ||
 		($boardname[0] =~ /(PULSE1401)/) ||
-		($boardname[0] =~ /(PULSE1501)/)) ||
+		($boardname[0] =~ /(PULSE1501)/) ||
   		($boardname[0] =~ /(AURA1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
 	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
 		($boardname[0] =~ /POLARIS1701A2060/) ||
 		($boardname[0] =~ /POLARIS1501A1650TI/) ||
-		($boardname[0] =~ /POLARIS1501A2060/) ) {
+		($boardname[0] =~ /POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
 	if (($boardname[0] =~ /(X170SM)/) ||
 		($boardname[0] =~ /(PB50_70DFx,DDx)/) ||
    		($boardname[0] =~ /LAPQC71A/) ||
 		($boardname[0] =~ /LAPQC71B/) ||
-		($boardname[0] =~ /N141CU/)	) {
+		($boardname[0] =~ /N141CU/) ||
+   		($boardname[0] =~ /NH5xAx/) ||
+		($boardname[0] =~ /AURA1501/) ||
+		($boardname[0] =~ /PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
 
@@ -694,6 +697,9 @@ sub tuxedokeyboard() {
 # Fix for Tuxedo Notebooks, fixes no keyboard present after suspend on
 # - XC1711
 # - XUX711
+# - NH5xAx
+# - AURA1501
+# - PB50_70DFx,DDx
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
