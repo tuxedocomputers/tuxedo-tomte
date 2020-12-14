@@ -395,11 +395,12 @@ sub checkRequirements {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
 	if (($boardname[0] =~ /(POLARIS1501A1650TI)/) ||
-	   ($boardname[0] =~ /(POLARIS1501A2060)/) ||
-	   ($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
-	   ($boardname[0] =~ /(POLARIS1701A2060)/) ||
-	   ($boardname[0] =~ /(PULSE1401)/) ||
-   	   ($boardname[0] =~ /(PULSE1501)/)) {
+		($boardname[0] =~ /(POLARIS1501A2060)/) ||
+		($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
+		($boardname[0] =~ /(POLARIS1701A2060)/) ||
+		($boardname[0] =~ /(PULSE1401)/) ||
+		($boardname[0] =~ /(PULSE1501)/)) ||
+  		($boardname[0] =~ /(AURA1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
 	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
@@ -528,6 +529,7 @@ sub nobootonbattery() {
 # - POLARIS1701A2060
 # - PULSE1401
 # - PULSE1501
+# - AURA1501
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
