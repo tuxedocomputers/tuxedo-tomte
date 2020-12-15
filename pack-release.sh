@@ -25,10 +25,6 @@ echo "# build tarball (git archive)"
 git archive --format=tar --prefix=${PREFIX}/ HEAD | gzip -c > ../${PREFIX}.orig.tar.gz
 echo "# check what is inside tarball"
 tar tvf ../${PREFIX}.orig.tar.gz
-#echo "# commit"
-#git add .
-#git commit -m 'building package'
-#git push
 
 git branch -D debian-debian
 git branch -D debian-upstream
