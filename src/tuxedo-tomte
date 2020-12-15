@@ -25,10 +25,15 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
-my $reposList = '/usr/share/tuxedo-tomte/repolist.txt';
+my $shareDir = '/usr/share/tuxedo-tomte/';
+my $reposList = $shareDir.'repolist.txt';
+my $amlFile;
 my $distribution;
 my $distributionVersion;
-
+my $biosVersion;
+my $amlFileDir = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
+my $amlHookScript = $shareDir.'tuxedo-corefix-clevo-nh5xax';
+my $amlHookDir = '/etc/initramfs-tools/hooks/';
 
 
 ###############################################################################
@@ -49,6 +54,12 @@ my %postConfProgram = (
 		trigger => 0,
 		status => 'undef',
 		description => 'updates repositories',
+	},
+	updateInitramfs => {
+		command => 'update-initramfs -u -k all',
+		trigger => 0,
+		status => 'undef',
+		description => 'updates initramfs',
 	},
 );
 
@@ -282,6 +293,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	corefix => {
+		name => 'core-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'ACPI mod to recognize all installed cores correctly',
+		postconf => 'updateInitramfs',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -370,6 +395,7 @@ sub checkRequirements {
 	my @boardname;
 	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
 	my @boardvendor;
+	my $biosVersion;
 
 	# TODO: these will be installed on all notebooks, always
 	#	$origConfModules{tuxedokeyboard}{required} = 1;
@@ -419,11 +445,16 @@ sub checkRequirements {
 		($boardname[0] =~ /PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
-
 	if ($boardname[0] =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
+	}
+	# get the BIOS version
+	$biosVersion = `dmidecode -s bios-version`;
+	if (($boardname[0] =~ /NH5xAx)/) && ($biosVersion =~ /1\.07\.04NBC/)) {
+		$amlFile = $shareDir.'tuxedo-'.$biosVersion.'-nh5xax.aml';
+		$origConfModules{corefix}{required} = 'yes';
 	}
 }
 
@@ -443,8 +474,7 @@ sub i8042fix() {
 	my $action = shift;
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -457,8 +487,7 @@ sub i8042fix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -471,8 +500,7 @@ sub i8042fix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -488,8 +516,7 @@ sub nobootonbattery() {
 	my $action = shift;
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -502,8 +529,7 @@ sub nobootonbattery() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -516,8 +542,7 @@ sub nobootonbattery() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -539,8 +564,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	my $action = shift;
 	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -553,8 +577,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -567,8 +590,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -598,8 +620,7 @@ sub amdgpuwithnvidiafix() {
     	"\tModulePath \"/usr/lib/x86_64-linux-gnu/nvidia/xorg\"\n".
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying amdgpuwithnvidiafix");
 		$retval = createFile($fileName, $fileText);
 		if ($retval == 0) {
@@ -612,8 +633,7 @@ sub amdgpuwithnvidiafix() {
 			print "Please restart your system\n";
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading amdgpuwithnvidiafix");
 		$retval = createFile($fileName, $fileText);
 		if ($retval == 0) {
@@ -626,8 +646,7 @@ sub amdgpuwithnvidiafix() {
 			print "Please restart your system\n";
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -640,8 +659,7 @@ sub tuxedocontrolcenter() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		$retval = installPackage($origConfModules{$module}{name});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "yes";
@@ -651,12 +669,10 @@ sub tuxedocontrolcenter() {
 			printLog("could'nt install $origConfModules{$module}{name}");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -670,8 +686,7 @@ sub tuxedokeyboard() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		$retval = installPackage($origConfModules{$module}{name});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "yes";
@@ -681,12 +696,10 @@ sub tuxedokeyboard() {
 			printLog("couldn't install $origConfModules{$module}{name}");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -706,8 +719,7 @@ sub nokeyboardaftersuspendfix() {
 	my $action = shift;
 	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -719,8 +731,7 @@ sub nokeyboardaftersuspendfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -733,8 +744,7 @@ sub nokeyboardaftersuspendfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -749,8 +759,7 @@ sub backlightfix() {
 	my $action = shift;
 	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
 	my $retval;
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -763,8 +772,7 @@ sub backlightfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		printLog("upgrading backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval == 0) {
@@ -777,8 +785,7 @@ sub backlightfix() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
@@ -792,8 +799,7 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 
-	if ($action eq 'install')
-	{
+	if ($action eq 'install') {
 		printLog("applying tuxedorepos");
 		$retval = createRepos();
 		if ($retval == 0) {
@@ -806,14 +812,49 @@ sub tuxedorepos() {
 			addToConfiguredModules($module, "success");
 		}
 	}
-	if ($action eq 'upgrade')
-	{
+	if ($action eq 'upgrade') {
 		# not implemented yet
 	}
-	if ($action eq 'remove')
-	{
+	if ($action eq 'remove') {
 		# not implemented yet
 	}
+}
+
+
+
+###############################################################################
+# Adds the Tuxedo repos to the system
+#
+sub corefix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+
+	if ($action eq 'install') {
+		printLog("applying corefix");
+		if (-x $amlFile) {
+			mkdir($amlFileDir, 644) unless(-d $amlFolder);
+			copy($amlFile, $amlFileDir);
+		}
+
+		$retval = createRepos();
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			$postConfProgram{updateApt}{trigger} = 1;
+			addToConfiguredModules($module, "success");
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+	
 }
 
 
