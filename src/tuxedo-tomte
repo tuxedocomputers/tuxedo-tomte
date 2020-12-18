@@ -833,6 +833,7 @@ sub corefix() {
 	my %amlFile = (
 		'1.07.04NBC' => 'nh5xax-1.aml',
 	);
+	printLog("biosversion: $biosVersion aml: $amlFile{$biosVersion}\n");
 	my $amlFileOrig = $shareDir.$amlFile{$biosVersion};
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
 	$amlFile{$biosVersion} =~ s/-\d*//;
@@ -840,10 +841,10 @@ sub corefix() {
 
 	if ($action eq 'install') {
 		printLog("applying corefix");
-		mkdir($amlFileDirDest, 644) unless(-d $amlFileDirDest);
+		mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
 		copy($amlFileOrig, $amlFileDest);
 		printLog("copy $amlFileOrig to $amlFileDest\n");
-		mkdir($amlHookDirDest, 644) unless(-d $amlHookDirDest);
+		mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
 		copy($amlHookScriptOrig, $amlHookScriptDest);
 		printLog("copy $amlHookScriptOrig to $amlHookScriptDest\n");
 
