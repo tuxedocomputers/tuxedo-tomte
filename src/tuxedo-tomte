@@ -450,7 +450,7 @@ sub checkRequirements {
 	$biosVersion = `dmidecode -s bios-version`;
 	$biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
-		if ($biosVersion =~ /1\.07\.04NBC/)) {
+		if ($biosVersion =~ /1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
