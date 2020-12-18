@@ -826,6 +826,12 @@ sub tuxedorepos() {
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
+	if ($main::biosVersion =~ //) {
+		printLog("BIOS version empty");
+		$origConfModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+		return(0);
+	}
 	my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
 	my $amlHookScriptOrig = $shareDir.$amlHookScript;
 	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
@@ -1927,8 +1933,10 @@ sub postConfigure {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
+				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 			} else {
+				printLog("failed: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
