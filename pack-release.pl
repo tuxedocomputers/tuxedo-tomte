@@ -23,7 +23,7 @@ print "Old version:\n";
 open (CL, $changelog) || die "could not open $changelog\n";
 print scalar <CL>;
 close CL;
-print "New version number? (x.x.x)\n";
+print "New version number? (x.x.x) or test-release (x.x.x-x)\n";
 $version = <>;
 chomp($version);
 $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
