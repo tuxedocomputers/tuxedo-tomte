@@ -451,6 +451,7 @@ sub checkRequirements {
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
 		if ($main::biosVersion =~ /1\.07\.04NBC/) {
+			printLog("bios1: $main::biosVersion");
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
@@ -826,7 +827,7 @@ sub tuxedorepos() {
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($main::biosVersion =~ //) {
+	if ($main::biosVersion eq "") {
 		printLog("BIOS version empty");
 		$origConfModules{$module}{installed} = "failed";
 		addToConfiguredModules($module, "failed");
@@ -842,16 +843,16 @@ sub corefix() {
 	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
 	$amlFile{$main::biosVersion} =~ s/-\d*//;
+	printLog("bios3 $main::biosVersion");
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
 		printLog("applying corefix");
 		mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
 		copy($amlFileOrig, $amlFileDest);
-		printLog("copy $amlFileOrig to $amlFileDest\n");
 		mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
 		copy($amlHookScriptOrig, $amlHookScriptDest);
-		printLog("copy $amlHookScriptOrig to $amlHookScriptDest\n");
+		chmod 0700, $amlHookScriptDest;
 
 		if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
 			$origConfModules{$module}{installed} = "yes";
