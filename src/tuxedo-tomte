@@ -448,6 +448,7 @@ sub checkRequirements {
 	}
 	# get the BIOS version
 	$biosVersion = `dmidecode -s bios-version`;
+	$biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
 		if ($biosVersion =~ /1\.07\.04NBC/)) {
 			$origConfModules{corefix}{required} = 'yes';
@@ -829,13 +830,13 @@ sub corefix() {
 	my $amlHookScriptOrig = $shareDir.$amlHookScript;
 	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
 	my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
-	my %amlFile = {
+	my %amlFile = (
 		'1.07.04NBC' => 'nh5xax-1.aml',
-	}
+	);
 	my $amlFileOrig = $shareDir.$amlFile{$biosVersion};
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
 	$amlFile{$biosVersion} =~ s/-\d*//;
-	my $amlFileDest = $amlFileDir.$amlFile{$biosVersion};
+	my $amlFileDest = $amlFileDirDest.$amlFile{$biosVersion};
 
 	if ($action eq 'install') {
 		printLog("applying corefix");
