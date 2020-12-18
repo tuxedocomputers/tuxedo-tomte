@@ -27,13 +27,9 @@ my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
-my $amlFile;
 my $distribution;
 my $distributionVersion;
 my $biosVersion;
-my $amlFileDir = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-my $amlHookScript = $shareDir.'tuxedo-corefix-clevo-nh5xax';
-my $amlHookDir = '/etc/initramfs-tools/hooks/';
 
 
 ###############################################################################
@@ -452,9 +448,10 @@ sub checkRequirements {
 	}
 	# get the BIOS version
 	$biosVersion = `dmidecode -s bios-version`;
-	if (($boardname[0] =~ /NH5xAx)/) && ($biosVersion =~ /1\.07\.04NBC/)) {
-		$amlFile = $shareDir.'tuxedo-'.$biosVersion.'-nh5xax.aml';
-		$origConfModules{corefix}{required} = 'yes';
+	if ($boardname[0] =~ /NH5xAx/) {
+		if ($biosVersion =~ /1\.07\.04NBC/)) {
+			$origConfModules{corefix}{required} = 'yes';
+		}
 	}
 }
 
@@ -823,29 +820,38 @@ sub tuxedorepos() {
 
 
 ###############################################################################
-# Adds the Tuxedo repos to the system
+# Adds the core-fix for certain BIOS versions on certain mainboards
 #
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
+	my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
+	my $amlHookScriptOrig = $shareDir.$amlHookScript;
+	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
+	my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
+	my %amlFile = {
+		'1.07.04NBC' => 'nh5xax-1.aml',
+	}
+	my $amlFileOrig = $shareDir.$amlFile{$biosVersion};
+	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
+	$amlFile{$biosVersion} =~ s/-\d*//;
+	my $amlFileDest = $amlFileDir.$amlFile{$biosVersion};
 
 	if ($action eq 'install') {
 		printLog("applying corefix");
-		if (-x $amlFile) {
-			mkdir($amlFileDir, 644) unless(-d $amlFolder);
-			copy($amlFile, $amlFileDir);
-		}
+		mkdir($amlFileDirDest, 644) unless(-d $amlFileDirDest);
+		move($amlFileOrig, $amlFileDest);
+		mkdir($amlHookDirDest, 644) unless(-d $amlHookDirDest);
+		move($amlHookScriptOrig, $amlHookScriptDest);
 
-		$retval = createRepos();
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
+		if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateApt}{trigger} = 1;
+			$postConfProgram{updateInitramfs}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
 		}
 	}
 	if ($action eq 'upgrade') {
