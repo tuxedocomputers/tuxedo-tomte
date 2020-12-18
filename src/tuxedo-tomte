@@ -29,7 +29,7 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
-my $biosVersion;
+our $biosVersion;
 
 
 ###############################################################################
@@ -447,10 +447,10 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
-	$biosVersion = `dmidecode -s bios-version`;
-	$biosVersion =~ s/\s//g;
+	$main::biosVersion = `dmidecode -s bios-version`;
+	$main::biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
-		if ($biosVersion =~ /1\.07\.04NBC/) {
+		if ($main::biosVersion =~ /1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
@@ -833,11 +833,10 @@ sub corefix() {
 	my %amlFile = (
 		'1.07.04NBC' => 'nh5xax-1.aml',
 	);
-	printLog("biosversion: $biosVersion aml: $amlFile{$biosVersion}\n");
-	my $amlFileOrig = $shareDir.$amlFile{$biosVersion};
+	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-	$amlFile{$biosVersion} =~ s/-\d*//;
-	my $amlFileDest = $amlFileDirDest.$amlFile{$biosVersion};
+	$amlFile{$main::biosVersion} =~ s/-\d*//;
+	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
 		printLog("applying corefix");
