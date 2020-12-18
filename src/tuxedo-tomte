@@ -841,9 +841,11 @@ sub corefix() {
 	if ($action eq 'install') {
 		printLog("applying corefix");
 		mkdir($amlFileDirDest, 644) unless(-d $amlFileDirDest);
-		move($amlFileOrig, $amlFileDest);
+		copy($amlFileOrig, $amlFileDest);
+		printLog("copy $amlFileOrig to $amlFileDest\n");
 		mkdir($amlHookDirDest, 644) unless(-d $amlHookDirDest);
-		move($amlHookScriptOrig, $amlHookScriptDest);
+		copy($amlHookScriptOrig, $amlHookScriptDest);
+		printLog("copy $amlHookScriptOrig to $amlHookScriptDest\n");
 
 		if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
 			$origConfModules{$module}{installed} = "yes";
