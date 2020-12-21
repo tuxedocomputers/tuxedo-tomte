@@ -451,7 +451,6 @@ sub checkRequirements {
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
 		if ($main::biosVersion =~ /1\.07\.04NBC/) {
-			printLog("bios1: $main::biosVersion");
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
@@ -843,7 +842,6 @@ sub corefix() {
 	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
 	$amlFile{$main::biosVersion} =~ s/-\d*//;
-	printLog("bios3 $main::biosVersion");
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
@@ -936,10 +934,14 @@ sub createRepos {
 					# create file + line
 					if (! -e $repos{$compDistVer}{$key}{filename}) {
 						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						printLog("new file: $repos{$compDistVer}{$key}{filename}");
+						printLog("added: $_");
 						$firstEntry = 0;
 					# or append line
 					} else {
 						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+						printLog("append file: $repos{$compDistVer}{$key}{filename}");
+						printLog("added: $_");
 					}
 				}
 			}
@@ -1003,6 +1005,7 @@ sub setComment {
 		# if line matches some official debian country mirror & not tuxedo
 		if (($$repoline =~ /$regEx/) && !($$repoline =~ /tuxedocomputers/)) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+			printLog("commented out: $$repoline");
 			return (1);
 		}
 		# check for repos in comprehensive mirror list
@@ -1010,6 +1013,7 @@ sub setComment {
 			if ( $$repoline =~ /$_/ ) {
 				# repo matches
 				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+				printLog("commented out: $$repoline");
 				return (1);
 			}
 		}
