@@ -331,6 +331,7 @@ sub readFileReturnLines {
 		chomp(@lines = <$FH>);
 		close $FH;
 	} else {
+		printLog("Err: $!");
 		printLog("no $file present or unable to open the file for reading");
 		return;
 	}
@@ -973,7 +974,10 @@ sub createRepos {
 
 	# add repo key
 	$retval = system('wget -O - http://deb.tuxedocomputers.com/0x54840598.pub.asc | apt-key add -');
-	if ($retval == 0) { return (1); }
+	if ($retval == 0) { 
+		printLog("could not add pub key for TUXEDO repo");
+		return (1);
+	}
 	return (0);
 }
 
@@ -996,6 +1000,7 @@ sub setComment {
 		chomp(@repos = <$FH>);
 		close $FH;
 	} else {
+		printLog("Err: $!");
 		printLog("could not open repository mirrors list at $reposList");
 		print "Could not open repository mirrors list at $reposList\n";
 		return (0);
@@ -1049,6 +1054,7 @@ sub createFile {
 		close $FH;
 		return 1;
 	} else {
+		printLog("Err: $!");
 		printLog("can't open $fileName for writing");
 		print "Can't open $fileName for writing\n";
 		return 0;
@@ -1069,6 +1075,7 @@ sub appendFile {
 		close $FH;
 		return 1;
 	} else {
+		printLog("Err: $!");
 		printLog("can't open $fileName for writing");
 		print "Can't open $fileName for writing\n";
 		return 0;
@@ -1087,6 +1094,7 @@ sub backupFile {
 		print "created backup for $fileName\n";
 		return 1;
 	} else {
+		printLog("Err: $!");
 		printLog("can't create backup file for $fileName");
 		print "Can't create backup for $fileName\n";
 		return 0;
@@ -1134,6 +1142,7 @@ sub insertGrub {
 		}
 		close $grubFH;
     } else {
+		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for reading");
 		return (0);
     }
@@ -1154,6 +1163,7 @@ sub insertGrub {
 		print $grubFH @grub_lines;
 		close ($grubFH);
     } else {
+		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for writing");
 		return (0);
     }
@@ -1226,6 +1236,7 @@ sub initLogging {
 			close $LOGFILE;
 			return;
 		} else {
+			printLog("Err: $!");
 			$noLogFile =1;
 			print "Could not open logFile $logFile\n$!\n";
 			exit (0);
@@ -1238,6 +1249,7 @@ sub initLogging {
 			close $LOGFILE;
 			return;
 		} else {
+			printLog("Err: $!");
 			$noLogFile =1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
@@ -1325,6 +1337,7 @@ sub readConfigFile {
 		}
 		close $FH;
 	} else {
+		printLog("Err: $!");
 		printLog("could not open configFile: $configFile $!");
 		print "Could not open configfile $configFile\n";
 		return (0);
@@ -1396,6 +1409,7 @@ sub writeConfigFile {
 		}
 		close $FH;
 	} else {
+		printLog("Err: $!");
 		printLog("can't write to $configFile $!");
 		print "Can't write to configfile: $configFile\n";
 		exit (0);
@@ -1448,6 +1462,7 @@ sub findActiveEDIDs {
 	my $edidTrigger = 0;
 
 	if ( !opendir ($dir_handle, $cards_dir)) {
+		printLog("Err: $!");
 		printLog("unable to open $cards_dir: $!");
 		return @edidfile;
 	}
@@ -1497,6 +1512,7 @@ sub getEDIDData {
 			close $FH;
 			push @edidRefs, parse_edid($fileContent);
 		} else {
+			printLog("Err: $!");
 			printLog("could not open file $_ $!");
 		}
 	}
@@ -1942,6 +1958,7 @@ sub postConfigure {
 				postSetModulesState($sysProgram, "success");
 			} else {
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
+				printLog("returned error code: $exitStatus");
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
