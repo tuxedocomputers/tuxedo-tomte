@@ -1950,6 +1950,7 @@ sub upgradeModule {
 sub postConfigure {
 	my $sysProgram;
 	my $exitStatus;
+	my $postConfTrigger = 0;
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
@@ -1957,13 +1958,31 @@ sub postConfigure {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 			} else {
+				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
 				printLog("returned error code: $exitStatus");
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
 	}
+	if ($postConfTrigger == 1) {
+		startTomteService();
+	}
 }
+
+
+
+
+###############################################################################
+# starts the tuxedo-tomte service for delayed configuration
+#
+sub startTomteService {
+	my $retVal;
+	$retVal = system("systemctl start tuxedo-tomte.service");
+	printLog("starting systemd tuxedo-tomte.service for delayed configuration");
+	printLog("ret value: $retVal");
+}
+
 
 
 ###############################################################################
