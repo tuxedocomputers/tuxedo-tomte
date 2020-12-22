@@ -6,14 +6,14 @@ fi
 # Automatically added by dh_systemd_enable/13ubuntu1~oibaf~f
 if [ "$1" = "remove" ]; then
 	if [ -x "/usr/bin/deb-systemd-helper" ]; then
-		deb-systemd-helper mask 'tuxedo-tomte.service' 'tuxedo-tomte.timer' >/dev/null || true
+		deb-systemd-helper mask 'tuxedo-tomte.timer' >/dev/null || true
 	fi
 fi
 
 if [ "$1" = "purge" ]; then
 	if [ -x "/usr/bin/deb-systemd-helper" ]; then
-		deb-systemd-helper purge 'tuxedo-tomte.service' 'tuxedo-tomte.timer' >/dev/null || true
-		deb-systemd-helper unmask 'tuxedo-tomte.service' 'tuxedo-tomte.timer' >/dev/null || true
+		deb-systemd-helper purge 'tuxedo-tomte.timer' >/dev/null || true
+		deb-systemd-helper unmask 'tuxedo-tomte.timer' >/dev/null || true
 	fi
 fi
 # End automatically added section
