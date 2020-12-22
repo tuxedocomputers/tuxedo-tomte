@@ -4,6 +4,6 @@ use warnings;
 
 use Data::Dumper qw(Dumper);
 
-my $err = system("dmidecode -s bios-version");
+#my $err = system("dmidecode -s bios-version");
+open(FH, '<', 'textdatei.txt');
 print "!: $!\n";
-print "err: $err\n";
