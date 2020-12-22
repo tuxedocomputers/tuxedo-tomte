@@ -1942,6 +1942,7 @@ sub postConfigure {
 				postSetModulesState($sysProgram, "success");
 			} else {
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
+				printLog("returned error code: $exitStatus");
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
