@@ -4,6 +4,10 @@ use warnings;
 
 use Data::Dumper qw(Dumper);
 
-#my $err = system("dmidecode -s bios-version");
-open(FH, '<', 'textdatei.txt');
-print "!: $!\n";
+my $output = `dpkg-query -W mc`;
+my $ret = $?;
+$ret = $ret >> 8;
+
+print "$output\n";
+
+print "$ret\n";
