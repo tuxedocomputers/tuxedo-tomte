@@ -974,7 +974,8 @@ sub createRepos {
 
 	# add repo key
 	$retval = system('wget -O - http://deb.tuxedocomputers.com/0x54840598.pub.asc | apt-key add -');
-	if ($retval == 0) { 
+	if ($retval != 0) {
+		printLog("Error when apt-key add: $retval");
 		printLog("could not add pub key for TUXEDO repo");
 		return (1);
 	}
