@@ -1966,7 +1966,7 @@ sub postConfigure {
 		}
 	}
 	if ($postConfTrigger == 1) {
-		startTomteService();
+		startTomteDelayed();
 	}
 }
 
@@ -1976,10 +1976,10 @@ sub postConfigure {
 ###############################################################################
 # starts the tuxedo-tomte service for delayed configuration
 #
-sub startTomteService {
+sub startTomteDelayed {
 	my $retVal;
-	$retVal = system("systemctl start tuxedo-tomte.service");
-	printLog("starting systemd tuxedo-tomte.service for delayed configuration");
+	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
+	printLog("starting systemd-run tuxedo-tomte configure all for delayed configuration");
 	printLog("ret value: $retVal");
 }
 
