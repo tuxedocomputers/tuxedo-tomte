@@ -922,8 +922,8 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really bad)");
-		print "No $sourcesListDir found, something's really bad ...\n";
+		printLog("no $sourcesListDir found (something's really wrong)");
+		print "No $sourcesListDir found, something's really wrong ...\n";
 		# no apt directory, somethings fishy
 		return (0);
 	}
@@ -1009,9 +1009,9 @@ sub createRepos {
 	if ($retval != 0) {
 		printLog("Error when apt-key add: $retval");
 		printLog("could not add pub key for TUXEDO repo");
-		return (1);
+		return (0);
 	}
-	return (0);
+	return (1);
 }
 
 
