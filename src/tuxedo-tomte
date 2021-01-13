@@ -657,13 +657,19 @@ sub tuxedocontrolcenter() {
 	my $action = shift;
 	my $retval;
 	if ($action eq 'install') {
-# TODO: check before if the package is already installed
-		$retval = installPackage($origConfModules{$module}{name});
-		if ($retval == 0) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-		} else {
-			$origConfModules{$module}{installed} = "failed";
 		}
 	}
 	if ($action eq 'upgrade') {
