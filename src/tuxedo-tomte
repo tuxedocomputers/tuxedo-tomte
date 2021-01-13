@@ -395,8 +395,8 @@ sub checkRequirements {
 	my $biosVersion;
 
 	# these will be installed on all notebooks, always
-	$origConfModules{tuxedokeyboard}{required} = 1;
-	$origConfModules{tuxedocontrolcenter}{required} = 1;
+	$origConfModules{tuxedokeyboard}{required} = 'yes';
+	$origConfModules{tuxedocontrolcenter}{required} = 'yes';
 
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
@@ -1069,7 +1069,7 @@ sub installPackage {
 	my $packageName = shift;
 	my $retval = system("pkcon -y install $packageName");
 	printLog("pkcon returns: $retval, while installing $packageName");
-	if ($retVal != 0) {
+	if ($retval != 0) {
 		printLog("failed to install $packageName by pkcon");
 		printLog("will try again later");
 		startTomteDelayed();
@@ -2065,6 +2065,7 @@ sub listSuccess {
 			push(@successModules, $confModule);
 		}
 	}
+	print "\n\n";
 	if (@successModules) {
 		print "The following modules have been installed successfully:\n";
 		printNameDescriptionModules(@successModules);
