@@ -394,7 +394,7 @@ sub checkRequirements {
 	my @boardvendor;
 	my $biosVersion;
 
-	# these will be installed on all notebooks, always
+	# these will be installed on all systems, always
 	$origConfModules{tuxedokeyboard}{required} = 'yes';
 	$origConfModules{tuxedocontrolcenter}{required} = 'yes';
 
@@ -726,9 +726,11 @@ sub isPackageInstalled {
 	my $retString = `dpkg-query -W $package`;
 	my $retValue = $?;
 	if ($retValue != 0) {
+		printLog("package $package is not installed");
 		return 0;
 	} else {
 		if ($retString =~ /$package/) {
+			printLog("package $package is installed");
 			return 1;
 		}
 	}
@@ -1067,6 +1069,7 @@ sub setComment {
 #
 sub installPackage {
 	my $packageName = shift;
+	printLog("install package $packageName");
 	my $retval = system("pkcon -y install $packageName");
 	printLog("pkcon returns: $retval, while installing $packageName");
 	if ($retval != 0) {

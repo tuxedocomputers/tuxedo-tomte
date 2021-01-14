@@ -1,4 +1,4 @@
-tuxedo-tomte (2.0.16-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.0.16-5) UNRELEASED; urgency=medium
 
   * added services delayed installer
   * reconfigured systemd timer, added transient timer
@@ -8,8 +8,9 @@ tuxedo-tomte (2.0.16-4) UNRELEASED; urgency=medium
   * check before install package
   * debug tcc install
   * repaired wrong return value on createrepos
+  * some changes
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 13 Jan 2021 17:10:46 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 14 Jan 2021 15:52:18 +0100
 
 tuxedo-tomte (2.0.16) focal; urgency=medium
 
