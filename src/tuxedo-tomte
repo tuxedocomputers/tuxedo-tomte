@@ -45,12 +45,6 @@ my %postConfProgram = (
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
 	},
-	updateApt => {
-		command => 'apt update',
-		trigger => 0,
-		status => 'undef',
-		description => 'updates repositories',
-	},
 	updateInitramfs => {
 		command => 'update-initramfs -u -k all',
 		trigger => 0,
@@ -380,6 +374,19 @@ sub isOSSupported {
 	return (0);
 }
 
+
+###############################################################################
+# check basic requirements the system should fullfill and
+# install missing parts
+#
+sub prerequisites {
+	# tuxedorepos
+	if ( $origConfModules{'tuxedorepos'}{installed} eq 'no' &&
+		$localConfModules{'tuxedorepos'}{blocked} eq 'no' &&
+		$origConfModules{'tuxedorepos'}{required} eq 'yes' ) {
+		tuxedorepos->('tuxedorepos','install');
+	}
+}
 
 
 ###############################################################################
@@ -831,6 +838,7 @@ sub tuxedorepos() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
+	my $exitStatus;
 
 	if ($action eq 'install') {
 		printLog("applying tuxedorepos");
@@ -841,7 +849,15 @@ sub tuxedorepos() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateApt}{trigger} = 1;
+			# update of repos has to be immediate for possible later package
+			# installation
+			$exitStatus = system('apt update');
+			if ($exitStatus == 0) {
+				printLog("success: apt update");
+			} else {
+				printLog("failed: apt update");
+				printLog("returned error code: $exitStatus");
+			}
 			addToConfiguredModules($module, "success");
 		}
 	}
@@ -1076,6 +1092,8 @@ sub installPackage {
 		printLog("failed to install $packageName by pkcon");
 		printLog("will try again later");
 		startTomteDelayed();
+	} else {
+		printLog("0 is good");
 	}
 	return $retval;
 }
@@ -1807,6 +1825,8 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# configure if not installed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
+		#TODO debug
+		printLog("$module: $origConfModules{$module}{installed} $localConfModules{$module}{blocked} $origConfModules{$module}{required}");
 		if ( $origConfModules{$module}{installed} eq 'no' &&
 			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
@@ -2220,6 +2240,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
+			prerequisites();
 			if ($ARGV[1] eq "all") {
 				configureAllModules();
 				postConfigure();
@@ -2240,6 +2261,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
+			prerequisites();
 			if ($ARGV[1] eq "all") {
 				reconfigureAllModules();
 				postConfigure();
