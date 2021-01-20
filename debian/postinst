@@ -9,7 +9,7 @@ set -e
 
 case "$1" in
     configure)
-		systemd-run tuxedo-tomte configure all
+		systemd-run tuxedo-tomte configure all || true
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
