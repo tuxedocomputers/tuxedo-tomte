@@ -1317,6 +1317,7 @@ sub initLogging {
 			exit (0);
 		}
 	}
+	printLog('starting Tomte');
 }
 
 
@@ -2204,7 +2205,6 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
-printLog('starting Tomte');
 
 readOSData();
 

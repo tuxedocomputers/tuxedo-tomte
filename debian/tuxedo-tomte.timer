@@ -5,5 +5,5 @@ Description = Starts tuxedo-tomte after system start
 WantedBy = timers.target
 
 [Timer]
-OnBootSec = 1min
+OnBootSec = 3
 Unit = tuxedo-tomte.service
