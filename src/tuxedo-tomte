@@ -453,11 +453,13 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
-	$main::biosVersion = `dmidecode -s bios-version`;
-	$main::biosVersion =~ s/\s//g;
-	if ($boardname[0] =~ /NH5xAx/) {
-		if ($main::biosVersion =~ /1\.07\.04NBC/) {
-			$origConfModules{corefix}{required} = 'yes';
+	if (isRoot()) {
+		$main::biosVersion = `dmidecode -s bios-version`;
+		$main::biosVersion =~ s/\s//g;
+		if ($boardname[0] =~ /NH5xAx/) {
+			if ($main::biosVersion =~ /1\.07\.04NBC/) {
+				$origConfModules{corefix}{required} = 'yes';
+			}
 		}
 	}
 }
@@ -1825,8 +1827,6 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# configure if not installed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
-		#TODO debug
-		printLog("$module: $origConfModules{$module}{installed} $localConfModules{$module}{blocked} $origConfModules{$module}{required}");
 		if ( $origConfModules{$module}{installed} eq 'no' &&
 			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
@@ -2204,6 +2204,8 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
+printLog('starting Tomte');
+
 readOSData();
 
 if (!isOSSupported()) {
@@ -2214,7 +2216,6 @@ if (!isOSSupported()) {
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
-
 
 if (@ARGV != 0) {
 	my %options;
