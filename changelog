@@ -1,4 +1,4 @@
-tuxedo-tomte (2.0.16-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.0.16-9) UNRELEASED; urgency=medium
 
   * added services delayed installer
   * reconfigured systemd timer, added transient timer
@@ -12,8 +12,9 @@ tuxedo-tomte (2.0.16-8) UNRELEASED; urgency=medium
   * UNRELEASED
   * UNRELEASED
   * UNRELEASED
+  * check if systemd active
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Jan 2021 11:07:29 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Jan 2021 11:57:57 +0100
 
 tuxedo-tomte (2.0.16) focal; urgency=medium
 
