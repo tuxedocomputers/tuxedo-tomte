@@ -452,8 +452,14 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
+	# dectivated but could be usefull if version changes in the future
+	# $main::biosVersion = `dmidecode -s bios-version`;
+	$main::biosVersion = '1.07.04NBC';
+	$main::biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
-		$origConfModules{corefix}{required} = 'yes';
+		if ($main::biosVersion =~ /1\.07\.04NBC/) {
+			$origConfModules{corefix}{required} = 'yes';
+		}
 	}
 }
 
