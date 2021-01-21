@@ -1826,9 +1826,10 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		# configure if not installed, not blocked and required
+		# configure if not installed or failed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
-		if ( $origConfModules{$module}{installed} eq 'no' &&
+		if ( (($origConfModules{$module}{installed} eq 'no') ||
+		   ($origConfModules{$module}{installed} eq 'failed'))	&&
 			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			printLog("configure module: $module");
