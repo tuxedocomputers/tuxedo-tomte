@@ -453,14 +453,8 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
-	if (isRoot()) {
-		$main::biosVersion = `dmidecode -s bios-version`;
-		$main::biosVersion =~ s/\s//g;
-		if ($boardname[0] =~ /NH5xAx/) {
-			if ($main::biosVersion =~ /1\.07\.04NBC/) {
-				$origConfModules{corefix}{required} = 'yes';
-			}
-		}
+	if ($boardname[0] =~ /NH5xAx/) {
+		$origConfModules{corefix}{required} = 'yes';
 	}
 }
 
