@@ -29,7 +29,6 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
-our $biosVersion;
 
 
 ###############################################################################
@@ -1291,6 +1290,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog('starting Tomte');
 			return;
 		} else {
 			printLog("Err: $!");
@@ -1304,6 +1304,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog('starting Tomte');
 			return;
 		} else {
 			printLog("Err: $!");
@@ -1312,7 +1313,6 @@ sub initLogging {
 			exit (0);
 		}
 	}
-	printLog('starting Tomte');
 }
 
 
