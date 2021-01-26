@@ -29,7 +29,6 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
-our $biosVersion;
 
 
 ###############################################################################
@@ -44,12 +43,6 @@ my %postConfProgram = (
 		trigger => 0,
 		status => 'undef',
 		description => 'reconfigures grub according to grub file',
-	},
-	updateApt => {
-		command => 'apt update',
-		trigger => 0,
-		status => 'undef',
-		description => 'updates repositories',
 	},
 	updateInitramfs => {
 		command => 'update-initramfs -u -k all',
@@ -224,7 +217,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'yes',
 		fainame => '',
@@ -238,7 +231,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
-		required => 'no',
+		required => 'yes',
 		hwid => 1,
 		package => 'yes',
 		fainame => '',
@@ -381,6 +374,19 @@ sub isOSSupported {
 }
 
 
+###############################################################################
+# check basic requirements the system should fullfill and
+# install missing parts
+#
+sub prerequisites {
+	# tuxedorepos
+	if ( $origConfModules{'tuxedorepos'}{installed} eq 'no' &&
+		$localConfModules{'tuxedorepos'}{blocked} eq 'no' &&
+		$origConfModules{'tuxedorepos'}{required} eq 'yes' ) {
+		tuxedorepos->('tuxedorepos','install');
+	}
+}
+
 
 ###############################################################################
 # check whether the module is required for the system
@@ -394,11 +400,9 @@ sub checkRequirements {
 	my @boardvendor;
 	my $biosVersion;
 
-	# TODO: these will be installed on all notebooks, always
-	#	$origConfModules{tuxedokeyboard}{required} = 1;
-	#	$origConfModules{tuxedoccwmi}{required} =1 ;
-	#	$origConfModules{tuxedocontrolcenter}{required} = 1;
-	#	$origConfModules{tuxedotouchpadfix}{required} = 1;
+	# these will be installed on all systems, always
+	$origConfModules{tuxedokeyboard}{required} = 'yes';
+	$origConfModules{tuxedocontrolcenter}{required} = 'yes';
 
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
@@ -448,7 +452,9 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
-	$main::biosVersion = `dmidecode -s bios-version`;
+	# dectivated but could be usefull if version changes in the future
+	# $main::biosVersion = `dmidecode -s bios-version`;
+	$main::biosVersion = '1.07.04NBC';
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname[0] =~ /NH5xAx/) {
 		if ($main::biosVersion =~ /1\.07\.04NBC/) {
@@ -652,20 +658,26 @@ sub amdgpuwithnvidiafix() {
 
 
 ###############################################################################
-# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
-# graphics. Also enables switching between the two with prime-select
+# TUXEDO Control Center application
+#
 sub tuxedocontrolcenter() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
 	if ($action eq 'install') {
-		$retval = installPackage($origConfModules{$module}{name});
-		if ($retval == 0) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-		} else {
-			$origConfModules{$module}{installed} = "failed";
-			printLog("could'nt install $origConfModules{$module}{name}");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -679,20 +691,26 @@ sub tuxedocontrolcenter() {
 
 
 ###############################################################################
-# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
-# graphics. Also enables switching between the two with prime-select
+# Keyboard & keyboard backlight driver for TUXEDO notebooks
+#
 sub tuxedokeyboard() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
 	if ($action eq 'install') {
-		$retval = installPackage($origConfModules{$module}{name});
-		if ($retval == 0) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-		} else {
-			$origConfModules{$module}{installed} = "failed";
-			printLog("couldn't install $origConfModules{$module}{name}");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -702,6 +720,30 @@ sub tuxedokeyboard() {
 		# not implemented yet
 	}
 }
+
+
+
+
+###############################################################################
+# Checks if the package is installed on the system
+# return 1 if yes
+# return 0 if no
+#
+sub isPackageInstalled {
+	my $package = shift;
+	my $retString = `dpkg-query -W $package`;
+	my $retValue = $?;
+	if ($retValue != 0) {
+		printLog("package $package is not installed");
+		return 0;
+	} else {
+		if ($retString =~ /$package/) {
+			printLog("package $package is installed");
+			return 1;
+		}
+	}
+}
+
 
 
 
@@ -797,6 +839,7 @@ sub tuxedorepos() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
+	my $exitStatus;
 
 	if ($action eq 'install') {
 		printLog("applying tuxedorepos");
@@ -807,7 +850,15 @@ sub tuxedorepos() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateApt}{trigger} = 1;
+			# update of repos has to be immediate for possible later package
+			# installation
+			$exitStatus = system('apt update');
+			if ($exitStatus == 0) {
+				printLog("success: apt update");
+			} else {
+				printLog("failed: apt update");
+				printLog("returned error code: $exitStatus");
+			}
 			addToConfiguredModules($module, "success");
 		}
 	}
@@ -890,8 +941,8 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really bad)");
-		print "No $sourcesListDir found, something's really bad ...\n";
+		printLog("no $sourcesListDir found (something's really wrong)");
+		print "No $sourcesListDir found, something's really wrong ...\n";
 		# no apt directory, somethings fishy
 		return (0);
 	}
@@ -973,12 +1024,14 @@ sub createRepos {
 	}
 
 	# add repo key
-	$retval = system('wget -O - http://deb.tuxedocomputers.com/0x54840598.pub.asc | apt-key add -');
-	if ($retval == 0) { 
+	$retval = system('apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc');
+	if ($retval != 0) {
+		printLog("Error when apt-key add: $retval");
+		printLog("$?");
 		printLog("could not add pub key for TUXEDO repo");
-		return (1);
+		return (0);
 	}
-	return (0);
+	return (1);
 }
 
 
@@ -1029,12 +1082,21 @@ sub setComment {
 }
 
 ###############################################################################
-# Enables activation of discrete NVIDIA graphics on devices with built-in AMD
+# installs a package by pkcon
+# returns the exit code from pkcon
 #
 sub installPackage {
 	my $packageName = shift;
-	my $retval = system("pkconf install $packageName");
-	printLog("pkconf returns: $retval, while installing $packageName");
+	printLog("install package $packageName");
+	my $retval = system("pkcon -y install $packageName");
+	printLog("pkcon returns: $retval, while installing $packageName");
+	if ($retval != 0) {
+		printLog("failed to install $packageName by pkcon");
+		printLog("will try again later");
+		startTomteDelayed();
+	} else {
+		printLog("0 is good");
+	}
 	return $retval;
 }
 
@@ -1234,6 +1296,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog('starting Tomte');
 			return;
 		} else {
 			printLog("Err: $!");
@@ -1247,6 +1310,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog('starting Tomte');
 			return;
 		} else {
 			printLog("Err: $!");
@@ -1763,9 +1827,10 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		# configure if not installed, not blocked and required
+		# configure if not installed or failed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
-		if ( $origConfModules{$module}{installed} eq 'no' &&
+		if ( (($origConfModules{$module}{installed} eq 'no') ||
+		   ($origConfModules{$module}{installed} eq 'failed'))	&&
 			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' ) {
 			printLog("configure module: $module");
@@ -1950,6 +2015,7 @@ sub upgradeModule {
 sub postConfigure {
 	my $sysProgram;
 	my $exitStatus;
+	my $postConfTrigger = 0;
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
@@ -1957,13 +2023,31 @@ sub postConfigure {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 			} else {
+				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
 				printLog("returned error code: $exitStatus");
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
 	}
+	if ($postConfTrigger == 1) {
+		startTomteDelayed();
+	}
 }
+
+
+
+
+###############################################################################
+# starts the tuxedo-tomte service for delayed configuration
+#
+sub startTomteDelayed {
+	my $retVal;
+	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
+	printLog("starting systemd-run tuxedo-tomte configure all for delayed configuration");
+	printLog("ret value: $retVal");
+}
+
 
 
 ###############################################################################
@@ -2007,6 +2091,7 @@ sub listSuccess {
 			push(@successModules, $confModule);
 		}
 	}
+	print "\n\n";
 	if (@successModules) {
 		print "The following modules have been installed successfully:\n";
 		printNameDescriptionModules(@successModules);
@@ -2122,6 +2207,7 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
+
 readOSData();
 
 if (!isOSSupported()) {
@@ -2132,7 +2218,6 @@ if (!isOSSupported()) {
 
 # define for each argvalues procedures
 # modify $USAGE if any modifications here
-
 
 if (@ARGV != 0) {
 	my %options;
@@ -2158,6 +2243,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
+			prerequisites();
 			if ($ARGV[1] eq "all") {
 				configureAllModules();
 				postConfigure();
@@ -2178,6 +2264,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
+			prerequisites();
 			if ($ARGV[1] eq "all") {
 				reconfigureAllModules();
 				postConfigure();
