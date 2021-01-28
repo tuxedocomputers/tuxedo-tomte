@@ -296,6 +296,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	elantechtouchpadfix => {
+		name => 'elantech-touchpad-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes non working Elantech touchpad',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -445,6 +459,9 @@ sub checkRequirements {
 		($boardname[0] =~ /AURA1501/) ||
 		($boardname[0] =~ /PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+	}
+	if ($boardname[0] =~ /X35R/) {
+		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 	}
 	if ($boardname[0] =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
@@ -1032,6 +1049,48 @@ sub createRepos {
 		return (0);
 	}
 	return (1);
+}
+
+
+###############################################################################
+# Fixes problem with Elantech touchpad
+# affects InfinityBook 14 v2
+# - X35R
+#
+sub elantechtouchpadfix() {
+my $module = shift;
+my $action = shift;
+my @kernel_parameters = ("psmouse.elantech_smbus=0");
+my $retval;
+if ($action eq 'install') {
+printLog("applying elantechtouchpadfix");
+$retval = insertGrub($module, \@kernel_parameters);
+        if ($retval == 0) {
+            $origConfModules{$module}{installed} = "failed";
+            addToConfiguredModules($module, "failed");
+        } else {
+            $origConfModules{$module}{installed} = "yes";
+            $origConfModules{$module}{upgraded} = "yes";
+            $postConfProgram{updateGrub}{trigger} = 1;
+            addToConfiguredModules($module, "success");
+        }
+    }
+    if ($action eq 'upgrade') {
+        printLog("upgrading elantechtouchpadfix");
+        $retval = insertGrub($module, \@kernel_parameters);
+        if ($retval == 0) {
+            $origConfModules{$module}{installed} = "failed";
+            addToConfiguredModules($module, "failed");
+        } else {
+            $origConfModules{$module}{installed} = "yes";
+            $origConfModules{$module}{upgraded} = "yes";
+            $postConfProgram{updateGrub}{trigger} = 1;
+            addToConfiguredModules($module, "success");
+        }
+    }
+    if ($action eq 'remove') {
+        # not implemented yet
+    }
 }
 
 
