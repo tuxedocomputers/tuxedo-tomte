@@ -469,7 +469,7 @@ sub checkRequirements {
 		}
 	}
 	# get the BIOS version
-	# dectivated but could be usefull if version changes in the future
+	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
 	$main::biosVersion = '1.07.04NBC';
 	$main::biosVersion =~ s/\s//g;
@@ -880,7 +880,28 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog('uprading repos');
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog('uprading repos');
+			backupFile('/etc/apt/sources.list');
+			$retVal = updateTuxedoRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				$exitStatus = system('apt update');
+				if ($exitStatus == 0) {
+					printLog("success: apt update");
+				} else {
+					printLog("failed: apt update");
+					printLog("returned error code: $exitStatus");
+				}
+				addToConfiguredModules($module, "success");
+			}
+		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
