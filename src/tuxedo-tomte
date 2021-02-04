@@ -270,7 +270,7 @@ my %origConfModules = (
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
@@ -880,7 +880,7 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		# not implemented yet
+		printLog('uprading repos');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
