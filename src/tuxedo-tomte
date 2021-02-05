@@ -883,7 +883,8 @@ sub tuxedorepos() {
 		if ( $localConfModules{$module}{version} == 1 ) {
 			printLog('uprading repos');
 			backupFile('/etc/apt/sources.list');
-			$retVal = updateTuxedoRepos();
+			$retval = removeTuxedoReposVerOne();
+			$retval = createRepos();
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -1070,6 +1071,39 @@ sub createRepos {
 		return (0);
 	}
 	return (1);
+}
+
+
+
+###############################################################################
+# Updates the Tuxedo repos to the system with public key
+#
+sub removeTuxedoReposVerOne {
+	my $sourcesListDir = '/etc/apt/';
+	my $fileName = $sourcesListDir.'sources.list';
+	my $sourcesFH;
+	my @repoLinesOrig;
+	my @repoLinesRes;
+	my $repoLine;
+	if (-e $fileName) {
+		@repoLinesOrig = [readFileReturnLines($fileName)];
+	}
+
+	if ( open $sourcesFH, "<", $fileName ) {
+		foreach $repoLine (@repoLinesOrig) {
+			if ((!$repoLine =~ /^# Added by TUXEDO Tomte/) &&
+				(!$repoLine =~ /^http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
+				push (@repoLinesRes, $repoLine);
+			}
+		}
+	}
+	close($sourcesFH);
+	if ( open $sourcesFH, ">", $fileName ) {
+		foreach $repoLine (@repoLinesRes) {
+			print $sourcesFH $repoLine;
+		}
+	}
+	close $sourcesFH;
 }
 
 
