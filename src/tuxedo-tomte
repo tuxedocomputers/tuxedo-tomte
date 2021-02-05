@@ -1092,7 +1092,7 @@ sub removeTuxedoReposVerOne {
 	if ( open $sourcesFH, "<", $fileName ) {
 		foreach $repoLine (@repoLinesOrig) {
 			if ((!$repoLine =~ /^# Added by TUXEDO Tomte/) &&
-				(!$repoLine =~ /^http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
+				(!$repoLine =~ /^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
 				push (@repoLinesRes, $repoLine);
 			}
 		}
