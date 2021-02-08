@@ -1107,7 +1107,7 @@ sub removeTuxedoReposVerOne {
 		printLog("printing lines");
 		foreach $repoLine (@repoLinesRes) {
 			printLog("line: ##$repoLine##");
-			print $sourcesFH $repoLine;
+			print $sourcesFH "$repoLine\n";
 		}
 	}
 	close $sourcesFH;
@@ -1182,7 +1182,7 @@ sub setComment {
 	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
-		if (($$repoline =~ /$regEx/) && !($$repoline =~ /tuxedocomputers/)) {
+		if (($$repoline =~ /$regEx/) && !($$repoline =~ m/tuxedocomputers/)) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
