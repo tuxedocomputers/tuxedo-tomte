@@ -273,7 +273,7 @@ my %origConfModules = (
 		version => 2,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -394,11 +394,9 @@ sub isOSSupported {
 #
 sub prerequisites {
 	# tuxedorepos
-	if ( $origConfModules{'tuxedorepos'}{installed} eq 'no' &&
-		$localConfModules{'tuxedorepos'}{blocked} eq 'no' &&
-		$origConfModules{'tuxedorepos'}{required} eq 'yes' ) {
-		tuxedorepos->('tuxedorepos','install');
-	}
+	configureSingleModule(tuxedorepos);
+
+	#TODO: ALL grubentries should always be checked in case something brakes them
 }
 
 
@@ -1092,13 +1090,14 @@ sub removeTuxedoReposVerOne {
 	#TODO: debugs
 	if ( open $sourcesFH, "<", $fileName ) {
 		foreach $repoLine (@repoLinesOrig) {
-			printLog("origline: ##$repoLine##\n");
+			printLog("origline: ##$repoLine##");
 			if (($repoLine !~ m/^# Added by TUXEDO Tomte/) &&
-				($repoLine !~ m/^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
+				($repoLine !~ m/^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/) &&
+				($repoLine !~ m/^\s*$/)) {
 				push (@repoLinesRes, $repoLine);
-				printLog("line added'\n");
+				printLog("line added");
 			} else {
-				printLog("line rejected\n");
+				printLog("line rejected");
 			}
 		}
 	}
@@ -1978,12 +1977,12 @@ sub configureAllModules {
 
 
 ###############################################################################
-# configures a single module named by $ARGV[1]
+# configures a single module
 # if not blocked, required and not installed
 #
 sub configureSingleModule {
+	my $moduleName = shift;
 	my $module;
-	my $moduleName = $ARGV[1];
 	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name");
@@ -1996,6 +1995,14 @@ sub configureSingleModule {
 		$origConfModules{$module}{required} eq 'yes' ) {
 		printLog("configure module: $module");
 		configureModule($module);
+	} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+		$localConfModules{$module}{blocked} eq 'no' &&
+		($origConfModules{$module}{required} eq 'yes' ||
+		$origConfModules{$module}{required} eq 'prerequisite') &&
+		$origConfModules{$module}{upgrade} eq 'yes' ) {
+		# upgrade if new version or hwid
+		printLog("upgrade module: $module");
+		upgradeModule($module);
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
@@ -2372,7 +2379,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
-				configureSingleModule();
+				configureSingleModule(ARGV[1]);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
