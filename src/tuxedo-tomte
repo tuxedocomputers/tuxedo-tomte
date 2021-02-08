@@ -429,41 +429,41 @@ sub checkRequirements {
 	}
 
 	# check values for each module
-	if ($boardname[0] =~ /(PB50_70DFx,DDx)/) {
+	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ /(PF5PU1G)/) {
+	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /(POLARIS1501A1650TI)/) ||
-		($boardname[0] =~ /(POLARIS1501A2060)/) ||
-		($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
-		($boardname[0] =~ /(POLARIS1701A2060)/) ||
-		($boardname[0] =~ /(PULSE1401)/) ||
-		($boardname[0] =~ /(PULSE1501)/) ||
-  		($boardname[0] =~ /(AURA1501)/)) {
+	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
+		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
+		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
+		($boardname[0] =~ m/(POLARIS1701A2060)/) ||
+		($boardname[0] =~ m/(PULSE1401)/) ||
+		($boardname[0] =~ m/(PULSE1501)/) ||
+  		($boardname[0] =~ m/(AURA1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
-		($boardname[0] =~ /POLARIS1701A2060/) ||
-		($boardname[0] =~ /POLARIS1501A1650TI/) ||
-		($boardname[0] =~ /POLARIS1501A2060/)) {
+	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /(X170SM)/) ||
-		($boardname[0] =~ /(PB50_70DFx,DDx)/) ||
-   		($boardname[0] =~ /LAPQC71A/) ||
-		($boardname[0] =~ /LAPQC71B/) ||
-		($boardname[0] =~ /N141CU/) ||
-   		($boardname[0] =~ /NH5xAx/) ||
-		($boardname[0] =~ /AURA1501/) ||
-		($boardname[0] =~ /PB50_70DFx,DDx/)) {
+	if (($boardname[0] =~ m/(X170SM)/) ||
+		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
+   		($boardname[0] =~ m/LAPQC71A/) ||
+		($boardname[0] =~ m/LAPQC71B/) ||
+		($boardname[0] =~ m/N141CU/) ||
+   		($boardname[0] =~ m/NH5xAx/) ||
+		($boardname[0] =~ m/AURA1501/) ||
+		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ /X35R/) {
+	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ /(N8xEJEK)/) {
+	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
@@ -473,8 +473,8 @@ sub checkRequirements {
 	# $main::biosVersion = `dmidecode -s bios-version`;
 	$main::biosVersion = '1.07.04NBC';
 	$main::biosVersion =~ s/\s//g;
-	if ($boardname[0] =~ /NH5xAx/) {
-		if ($main::biosVersion =~ /1\.07\.04NBC/) {
+	if ($boardname[0] =~ m/NH5xAx/) {
+		if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
@@ -1086,15 +1086,15 @@ sub removeTuxedoReposVerOne {
 	my @repoLinesRes;
 	my $repoLine;
 	if (-e $fileName) {
-		@repoLinesOrig = [readFileReturnLines($fileName)];
+		@repoLinesOrig = readFileReturnLines($fileName);
 	}
 
 	#TODO: debugs
 	if ( open $sourcesFH, "<", $fileName ) {
 		foreach $repoLine (@repoLinesOrig) {
 			printLog("origline: ##$repoLine##\n");
-			if ((!$repoLine =~ /^# Added by TUXEDO Tomte/) &&
-				(!$repoLine =~ /^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
+			if (($repoLine !~ m/^# Added by TUXEDO Tomte/) &&
+				($repoLine !~ m/^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
 				push (@repoLinesRes, $repoLine);
 				printLog("line added'\n");
 			} else {
