@@ -1076,7 +1076,7 @@ sub createRepos {
 
 
 ###############################################################################
-# Updates the Tuxedo repos to the system with public key
+# Delete old Tuxedo mirror repositories
 #
 sub removeTuxedoReposVerOne {
 	my $sourcesListDir = '/etc/apt/';
@@ -1089,17 +1089,24 @@ sub removeTuxedoReposVerOne {
 		@repoLinesOrig = [readFileReturnLines($fileName)];
 	}
 
+	#TODO: debugs
 	if ( open $sourcesFH, "<", $fileName ) {
 		foreach $repoLine (@repoLinesOrig) {
+			printLog("origline: ##$repoLine##\n");
 			if ((!$repoLine =~ /^# Added by TUXEDO Tomte/) &&
 				(!$repoLine =~ /^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/)) {
 				push (@repoLinesRes, $repoLine);
+				printLog("line added'\n");
+			} else {
+				printLog("line rejected\n");
 			}
 		}
 	}
 	close($sourcesFH);
 	if ( open $sourcesFH, ">", $fileName ) {
+		printLog("printing lines");
 		foreach $repoLine (@repoLinesRes) {
+			printLog("line: ##$repoLine##");
 			print $sourcesFH $repoLine;
 		}
 	}
@@ -1267,6 +1274,7 @@ sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
+		printLog("created backup for $fileName");
 		print "created backup for $fileName\n";
 		return 1;
 	} else {
