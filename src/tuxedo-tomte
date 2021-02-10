@@ -2006,6 +2006,8 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
 		upgradeModule($module);
+	} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
+		# do nothing
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
