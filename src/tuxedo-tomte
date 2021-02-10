@@ -883,7 +883,6 @@ sub tuxedorepos() {
 		if ( $localConfModules{$module}{version} == 1 ) {
 			printLog('uprading repos');
 			backupFile('/etc/apt/sources.list');
-			$retval = removeTuxedoReposVerOne();
 			$retval = createRepos();
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
@@ -1076,46 +1075,6 @@ sub createRepos {
 
 
 ###############################################################################
-# Delete old Tuxedo mirror repositories
-#
-sub removeTuxedoReposVerOne {
-	my $sourcesListDir = '/etc/apt/';
-	my $fileName = $sourcesListDir.'sources.list';
-	my $sourcesFH;
-	my @repoLinesOrig;
-	my @repoLinesRes;
-	my $repoLine;
-	if (-e $fileName) {
-		@repoLinesOrig = readFileReturnLines($fileName);
-	}
-
-	#TODO: debugs
-	if ( open $sourcesFH, "<", $fileName ) {
-		foreach $repoLine (@repoLinesOrig) {
-			printLog("origline: ##$repoLine##");
-			if (($repoLine !~ m/^# Added by TUXEDO Tomte/) &&
-				($repoLine !~ m/^deb http:\/\/mirrors.tuxedocomputers.com\/ubuntu/) &&
-				($repoLine !~ m/^\s*$/)) {
-				push (@repoLinesRes, $repoLine);
-				printLog("line added");
-			} else {
-				printLog("line rejected");
-			}
-		}
-	}
-	close($sourcesFH);
-	if ( open $sourcesFH, ">", $fileName ) {
-		printLog("printing lines");
-		foreach $repoLine (@repoLinesRes) {
-			printLog("line: ##$repoLine##");
-			print $sourcesFH "$repoLine\n";
-		}
-	}
-	close $sourcesFH;
-}
-
-
-###############################################################################
 # Fixes problem with Elantech touchpad
 # affects InfinityBook 14 v2
 # - X35R
@@ -1183,7 +1142,8 @@ sub setComment {
 	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
-		if (($$repoline =~ /$regEx/) && !($$repoline =~ m/tuxedocomputers/)) {
+		# delete old mirrors.tuxedocomputers.com urls
+		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/tuxedocomputers/)) || $$repoline =~ m/^deb http:\/mirrors.tuxedocomputers.com\// ) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
