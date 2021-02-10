@@ -396,7 +396,7 @@ sub isOSSupported {
 #
 sub prerequisites {
 	# tuxedorepos
-	configureSingleModule('tuxedorepos');
+	configureSingleModule('tuxedo-repos');
 
 	#TODO: ALL grubentries should always be checked in case something brakes them
 }
