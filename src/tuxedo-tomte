@@ -1967,6 +1967,7 @@ sub configureSingleModule {
 		printLog("upgrade module: $module");
 		upgradeModule($module);
 	} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
+		configureModule($module);
 		# do nothing
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
