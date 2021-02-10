@@ -142,6 +142,8 @@ my %repos = (
 #					or deinstall, 'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
+#					'prerequisite' if essentially needed to be present before
+#					anything else
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			package name or 'no', there is a deb or rpm package as a
@@ -394,7 +396,7 @@ sub isOSSupported {
 #
 sub prerequisites {
 	# tuxedorepos
-	configureSingleModule(tuxedorepos);
+	configureSingleModule('tuxedorepos');
 
 	#TODO: ALL grubentries should always be checked in case something brakes them
 }
@@ -1992,12 +1994,13 @@ sub configureSingleModule {
 
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		$origConfModules{$module}{required} eq 'yes' ) {
+		( $origConfModules{$module}{required} eq 'yes' ||
+	   	$origConfModules{$module}{required} eq 'prerequisite')) {
 		printLog("configure module: $module");
 		configureModule($module);
 	} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		($origConfModules{$module}{required} eq 'yes' ||
+		( $origConfModules{$module}{required} eq 'yes' ||
 		$origConfModules{$module}{required} eq 'prerequisite') &&
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
@@ -2379,7 +2382,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
-				configureSingleModule(ARGV[1]);
+				configureSingleModule($ARGV[1]);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
