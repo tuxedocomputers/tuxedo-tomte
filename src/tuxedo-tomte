@@ -1737,7 +1737,8 @@ sub listStatus {
 				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
-		if ($localConfModules{$module}{required} eq 'yes') {
+		if (($localConfModules{$module}{required} eq 'yes') ||
+			($localConfModules{$module}{required} eq 'prerequisite')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
