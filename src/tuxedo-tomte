@@ -1125,7 +1125,6 @@ $retval = insertGrub($module, \@kernel_parameters);
 #
 sub setComment {
 	#TODO: debug stuff
-	printLog('setComment');
 	my $repoline = shift;
 	my $tmpline = $$repoline;
 	my $FH;
@@ -1145,8 +1144,7 @@ sub setComment {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
-		printLog("repoline: $$repoline");
-		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/tuxedocomputers/)) || $$repoline =~ m/^deb http:\/mirrors.tuxedocomputers.com\// ) {
+		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/tuxedocomputers/)) || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\// ) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
