@@ -17,7 +17,7 @@ The following commands are understood:
 .PP 
 \fBlist\fR
 Lists all available fixes with name, version and whether it is active,
-blacklisted and required for this system\&.
+blocked and required for this system\&.
 .RE
 .PP
 \fBdescription \fR\fIMODULE\fR
@@ -25,16 +25,27 @@ blacklisted and required for this system\&.
 Shows a small description about the fix\&.
 .RE
 .PP
-\fBconfigure \fIMODULE\fR|\fIALL\fR
+\fBconfigure \fIMODULE\fR|\fIall\fR
 .RS 4
 Configures the specified module or fix if possible\&. That means, it is not
-already installed, blacklisted and designed to fix something on this system\&.
-If ALL is used then all possible fixes will be installed\&.
+already installed, blocked and designed to fix something on this system\&.
+If \fBall\fR is used then all possible fixes will be installed\&.
 .RE
 .PP
-\fBreconfigure \fIMODULE\fR|\fIALL\fR
+\fBreconfigure \fIMODULE\fR|\fIall\fR
 .RS 4
 Configures the specified module or fix even if it is already installed\&.
-It will not do anything if it is blacklisted or not designed to work
-on this system\&.
-If \fBALL\fR is used then all possible fixes will be reconfigured\&.
+It will not do anything if it is blocked or not designed to work on this
+system\&.
+If \fBall\fR is used then all possible fixes will be reconfigured\&.
+.RE
+.PP
+\fBblock \fIMODULE\fR
+.RS 4
+Prevents the module from being installed\&.
+Already installed modules will not be upgraded\&.
+.RE
+.PP
+\fBunblock \fIMODULE\fR
+.RS 4
+Allows the module to be installed or upgraded if it is required by this system\&.
