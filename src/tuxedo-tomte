@@ -1014,7 +1014,7 @@ sub createRepos {
 			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					# make backup if file exists and is first entry into file
-					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
+					if ( (-s $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
 						backupFile($repos{$compDistVer}{$key}{filename});
 						$firstEntry = 0;
 						if ($repos{$compDistVer}{$key}{filename} eq '/etc/apt/sources.list' ) {
@@ -1049,12 +1049,8 @@ sub createRepos {
 		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach $sourceline (@sourcelines) {
-				if (setComment(\$sourceline)) {
-					if ($sourcesListBackedup == 0) {
-						backupFile('/etc/apt/sources.list');
-						$sourcesListBackedup = 1;
-					}
-				}
+				setComment(\$sourceline);
+				# no backup for the file as it only comments out lines
 				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
@@ -1124,7 +1120,6 @@ $retval = insertGrub($module, \@kernel_parameters);
 # modifies the string given to the subroutine
 #
 sub setComment {
-	#TODO: debug stuff
 	my $repoline = shift;
 	my $tmpline = $$repoline;
 	my $FH;
