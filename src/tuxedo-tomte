@@ -1193,7 +1193,7 @@ sub threegfix() {
 	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15bb\n".
 	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
-		"\ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
+		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
 		printLog("applying threegfix");
 		$retval1 = createFile($fileName1, $fileText1);
