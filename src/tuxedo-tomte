@@ -87,9 +87,9 @@ my %repos = (
 		},
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
+			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
 		},
 		name => 'bionic',
 	},
@@ -108,9 +108,9 @@ my %repos = (
 		},
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
 	},
@@ -142,6 +142,8 @@ my %repos = (
 #					or deinstall, 'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
+#					'prerequisite' if essentially needed to be present before
+#					anything else
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			package name or 'no', there is a deb or rpm package as a
@@ -270,10 +272,10 @@ my %origConfModules = (
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -307,6 +309,20 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Configuration needed to operate Huawei-ME936',
 		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	elantechtouchpadfix => {
+		name => 'elantech-touchpad-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes non working Elantech touchpad',
+		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
 	},
@@ -394,11 +410,9 @@ sub isOSSupported {
 #
 sub prerequisites {
 	# tuxedorepos
-	if ( $origConfModules{'tuxedorepos'}{installed} eq 'no' &&
-		$localConfModules{'tuxedorepos'}{blocked} eq 'no' &&
-		$origConfModules{'tuxedorepos'}{required} eq 'yes' ) {
-		tuxedorepos->('tuxedorepos','install');
-	}
+	configureSingleModule('tuxedo-repos');
+
+	#TODO: ALL grubentries should always be checked in case something brakes them
 }
 
 
@@ -429,49 +443,52 @@ sub checkRequirements {
 	}
 
 	# check values for each module
-	if ($boardname[0] =~ /(PB50_70DFx,DDx)/) {
+	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ /(PF5PU1G)/) {
+	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /(POLARIS1501A1650TI)/) ||
-		($boardname[0] =~ /(POLARIS1501A2060)/) ||
-		($boardname[0] =~ /(POLARIS1701A1650TI)/) ||
-		($boardname[0] =~ /(POLARIS1701A2060)/) ||
-		($boardname[0] =~ /(PULSE1401)/) ||
-		($boardname[0] =~ /(PULSE1501)/) ||
-  		($boardname[0] =~ /(AURA1501)/)) {
+	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
+		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
+		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
+		($boardname[0] =~ m/(POLARIS1701A2060)/) ||
+		($boardname[0] =~ m/(PULSE1401)/) ||
+		($boardname[0] =~ m/(PULSE1501)/) ||
+  		($boardname[0] =~ m/(AURA1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /POLARIS1701A1650TI/) ||
-		($boardname[0] =~ /POLARIS1701A2060/) ||
-		($boardname[0] =~ /POLARIS1501A1650TI/) ||
-		($boardname[0] =~ /POLARIS1501A2060/)) {
+	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 	}
-	if (($boardname[0] =~ /(X170SM)/) ||
-		($boardname[0] =~ /(PB50_70DFx,DDx)/) ||
-   		($boardname[0] =~ /LAPQC71A/) ||
-		($boardname[0] =~ /LAPQC71B/) ||
-		($boardname[0] =~ /N141CU/) ||
-   		($boardname[0] =~ /NH5xAx/) ||
-		($boardname[0] =~ /AURA1501/) ||
-		($boardname[0] =~ /PB50_70DFx,DDx/)) {
+	if (($boardname[0] =~ m/(X170SM)/) ||
+		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
+   		($boardname[0] =~ m/LAPQC71A/) ||
+		($boardname[0] =~ m/LAPQC71B/) ||
+		($boardname[0] =~ m/N141CU/) ||
+   		($boardname[0] =~ m/NH5xAx/) ||
+		($boardname[0] =~ m/AURA1501/) ||
+		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 	}
-	if ($boardname[0] =~ /(N8xEJEK)/) {
+	if ($boardname[0] =~ m/X35R/) {
+		$origConfModules{elantechtouchpadfix}{required} = 'yes';
+	}
+	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 		}
 	}
 	# get the BIOS version
-	# dectivated but could be usefull if version changes in the future
+	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
 	$main::biosVersion = '1.07.04NBC';
 	$main::biosVersion =~ s/\s//g;
-	if ($boardname[0] =~ /NH5xAx/) {
-		if ($main::biosVersion =~ /1\.07\.04NBC/) {
+	if ($boardname[0] =~ m/NH5xAx/) {
+		if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
 		}
 	}
@@ -880,7 +897,28 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		# not implemented yet
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog('uprading repos');
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				$exitStatus = system('apt update');
+				if ($exitStatus == 0) {
+					printLog("success: apt update");
+				} else {
+					printLog("failed: apt update");
+					printLog("returned error code: $exitStatus");
+				}
+				addToConfiguredModules($module, "success");
+			}
+		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -993,7 +1031,7 @@ sub createRepos {
 			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					# make backup if file exists and is first entry into file
-					if ( (-e $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
+					if ( (-s $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
 						backupFile($repos{$compDistVer}{$key}{filename});
 						$firstEntry = 0;
 						if ($repos{$compDistVer}{$key}{filename} eq '/etc/apt/sources.list' ) {
@@ -1028,12 +1066,8 @@ sub createRepos {
 		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach $sourceline (@sourcelines) {
-				if (setComment(\$sourceline)) {
-					if ($sourcesListBackedup == 0) {
-						backupFile('/etc/apt/sources.list');
-						$sourcesListBackedup = 1;
-					}
-				}
+				setComment(\$sourceline);
+				# no backup for the file as it only comments out lines
 				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
@@ -1049,6 +1083,49 @@ sub createRepos {
 		return (0);
 	}
 	return (1);
+}
+
+
+
+###############################################################################
+# Fixes problem with Elantech touchpad
+# affects InfinityBook 14 v2
+# - X35R
+#
+sub elantechtouchpadfix() {
+my $module = shift;
+my $action = shift;
+my @kernel_parameters = ("psmouse.elantech_smbus=0");
+my $retval;
+if ($action eq 'install') {
+printLog("applying elantechtouchpadfix");
+$retval = insertGrub($module, \@kernel_parameters);
+        if ($retval == 0) {
+            $origConfModules{$module}{installed} = "failed";
+            addToConfiguredModules($module, "failed");
+        } else {
+            $origConfModules{$module}{installed} = "yes";
+            $origConfModules{$module}{upgraded} = "yes";
+            $postConfProgram{updateGrub}{trigger} = 1;
+            addToConfiguredModules($module, "success");
+        }
+    }
+    if ($action eq 'upgrade') {
+        printLog("upgrading elantechtouchpadfix");
+        $retval = insertGrub($module, \@kernel_parameters);
+        if ($retval == 0) {
+            $origConfModules{$module}{installed} = "failed";
+            addToConfiguredModules($module, "failed");
+        } else {
+            $origConfModules{$module}{installed} = "yes";
+            $origConfModules{$module}{upgraded} = "yes";
+            $postConfProgram{updateGrub}{trigger} = 1;
+            addToConfiguredModules($module, "success");
+        }
+    }
+    if ($action eq 'remove') {
+        # not implemented yet
+    }
 }
 
 
@@ -1078,7 +1155,8 @@ sub setComment {
 	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
-		if (($$repoline =~ /$regEx/) && !($$repoline =~ /tuxedocomputers/)) {
+		# delete old mirrors.tuxedocomputers.com urls
+		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/tuxedocomputers/)) || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\// ) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
@@ -1222,6 +1300,7 @@ sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
+		printLog("created backup for $fileName");
 		print "created backup for $fileName\n";
 		return 1;
 	} else {
@@ -1485,10 +1564,10 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
-		printLog("Found invalid configuration line in $configFile:\n$line");
+		printLog("found invalid configuration line in $configFile:\n$line");
 		return (0);
 	}
 }
@@ -1722,7 +1801,8 @@ sub listStatus {
 				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
-		if ($localConfModules{$module}{required} eq 'yes') {
+		if (($localConfModules{$module}{required} eq 'yes') ||
+			($localConfModules{$module}{required} eq 'prerequisite')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
@@ -1925,12 +2005,12 @@ sub configureAllModules {
 
 
 ###############################################################################
-# configures a single module named by $ARGV[1]
+# configures a single module
 # if not blocked, required and not installed
 #
 sub configureSingleModule {
+	my $moduleName = shift;
 	my $module;
-	my $moduleName = $ARGV[1];
 	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name");
@@ -1940,9 +2020,21 @@ sub configureSingleModule {
 
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		$origConfModules{$module}{required} eq 'yes' ) {
+		( $origConfModules{$module}{required} eq 'yes' ||
+	   	$origConfModules{$module}{required} eq 'prerequisite')) {
 		printLog("configure module: $module");
 		configureModule($module);
+	} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+		$localConfModules{$module}{blocked} eq 'no' &&
+		( $origConfModules{$module}{required} eq 'yes' ||
+		$origConfModules{$module}{required} eq 'prerequisite') &&
+		$origConfModules{$module}{upgrade} eq 'yes' ) {
+		# upgrade if new version or hwid
+		printLog("upgrade module: $module");
+		upgradeModule($module);
+	} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
+		configureModule($module);
+		# do nothing
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
@@ -2319,7 +2411,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
-				configureSingleModule();
+				configureSingleModule($ARGV[1]);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
@@ -2348,12 +2440,6 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		#	} elsif ($ARGV[0] eq "update\n") {
-		#		print "update does nothing yet\n";
-		#		initLogging();
-		#		prepareValues();
-		#		updateAllModules();
-		#		writeConfigFile();
 	} elsif ($ARGV[0] eq "block") {
 		if (defined $ARGV[1]) {
 			initLogging();
