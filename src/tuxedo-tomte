@@ -326,6 +326,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	uniwilltouchpadledfix => {
+		name => 'uniwill-touchpad-led-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Fixes hardware enable/disable for Tongfang touchpads and disabled LED',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -1226,6 +1240,40 @@ sub threegfix() {
 		# not implemented yet
 	}
 }
+
+
+###############################################################################
+# Uniwill touchpad LED fix
+#
+sub uniwilltouchpadledfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 ###############################################################################
