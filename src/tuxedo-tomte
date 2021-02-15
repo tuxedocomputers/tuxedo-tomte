@@ -298,6 +298,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	threegfix => {
+		name => 'threeg-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Configuration needed to operate Huawei-ME936',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 	elantechtouchpadfix => {
 		name => 'elantech-touchpad-fix',
 		version => 1,
@@ -477,6 +491,9 @@ sub checkRequirements {
 		if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
 		}
+	}
+	if (system('lsusb -d 12d1:15bb') == 0) {
+		$origConfModules{threegfix}{required} = 'yes';
 	}
 }
 
@@ -1158,6 +1175,58 @@ sub setComment {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# Creates a configuration to use Huawei-ME936
+# - if USB device 12d1:15bb detected
+#
+sub threegfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $retval2;
+	my $fileName1 = '/etc/modprobe.d/huawei-me936.conf';
+	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"options usbserial vendor=0x12d1 product=0x15bb\n".
+	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
+	if ($action eq 'install') {
+		printLog("applying threegfix");
+		$retval1 = createFile($fileName1, $fileText1);
+		$retval2 = createFile($fileName2, $fileText2);
+		if ($retval1 == 0 && $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading threegfix");
+		$retval1 = createFile($fileName1, $fileText1);
+		$retval2 = createFile($fileName2, $fileText2);
+		if ($retval1 == 0 && $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 ###############################################################################
 # installs a package by pkcon
@@ -2371,12 +2440,6 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		#	} elsif ($ARGV[0] eq "update\n") {
-		#		print "update does nothing yet\n";
-		#		initLogging();
-		#		prepareValues();
-		#		updateAllModules();
-		#		writeConfigFile();
 	} elsif ($ARGV[0] eq "block") {
 		if (defined $ARGV[1]) {
 			initLogging();
