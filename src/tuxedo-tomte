@@ -491,6 +491,21 @@ sub checkRequirements {
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 	}
+	if (($boardname[0] =~ m/LAPQC71A/) ||
+		($boardname[0] =~ m/LAPQC71B/) ||
+		($boardname[0] =~ m/PF5PU1G/) ||
+		($boardname[0] =~ m/PF5PU1G/) ||
+		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/POLARIS1701I1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701I2060/) ||
+		($boardname[0] =~ m/PULSE1401/) ||
+		($boardname[0] =~ m/PULSE1501/) ||
+		($boardname[0] =~ m/TRINITY1501I/) ||
+		($boardname[0] =~ m/TRINITY1701I/))
+	{
+		$origConfModules{uniwilltouchpadledfix}{required} = 'yes';
+	}
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
