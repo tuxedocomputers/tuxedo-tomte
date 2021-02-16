@@ -495,6 +495,10 @@ sub checkRequirements {
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/PF5PU1G/) ||
 		($boardname[0] =~ m/PF5PU1G/) ||
+		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/) ||
+		($boardname[0] =~ m/POLARIS1501I1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501I2060/) ||
 		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1701A2060/) ||
 		($boardname[0] =~ m/POLARIS1701I1650TI/) ||
