@@ -146,8 +146,7 @@ my %repos = (
 #					anything else
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
-#   package			package name or 'no', there is a deb or rpm package as a
-#					solution
+#   package			'yes' or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module,
@@ -326,8 +325,8 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
-	uniwilltouchpadledfix => {
-		name => 'uniwill-touchpad-led-fix',
+	tuxedotouchpadswitch => {
+		name => 'tuxedo-touchpad-switch',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -508,7 +507,7 @@ sub checkRequirements {
 		($boardname[0] =~ m/TRINITY1501I/) ||
 		($boardname[0] =~ m/TRINITY1701I/))
 	{
-		$origConfModules{uniwilltouchpadledfix}{required} = 'yes';
+		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 	}
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
@@ -1264,7 +1263,7 @@ sub threegfix() {
 ###############################################################################
 # Uniwill touchpad LED fix
 #
-sub uniwilltouchpadledfix() {
+sub tuxedotouchpadswitch() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
