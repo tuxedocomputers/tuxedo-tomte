@@ -1309,6 +1309,7 @@ sub installPackage {
 		startTomteDelayed();
 	} else {
 		printLog("0 is good");
+		isPackageInstalled($packageName);
 	}
 	return $retval;
 }
