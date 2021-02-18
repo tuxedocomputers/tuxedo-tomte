@@ -6,15 +6,16 @@ use Data::Dumper qw(Dumper);
 
 
 my $package = 'tree';
-my $retString = `dpkg-query -W $package`;
+my $cmd = 'dpkg -s '.$package.' >/dev/null 2>&1';
+my $cmd2 = 'dpkg-query -W -f=\'${status}\' '.$package;
+my $retString = `$cmd2`;
 my $retValue = $?;
 print 'retValue: '.$retValue."\n";
-if ($retValue != 0) {
-    print "package $package is not installed (return 0)\n";
+print "retString: $retString\n";
+if ($retString =~ m/install ok installed/) {
+    print "package $package is installed (return 0)\n";
 } else {
-    if ($retString =~ /$package/) {
-        print "package $package is installed (return 1)\n";
-    }
+    print "package $package is not installed (return 1)\n";
 }
 
 

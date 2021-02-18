@@ -797,16 +797,15 @@ sub tuxedokeyboard() {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $retString = `dpkg-query -W $package`;
+	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
+	my $retString = `$cmd`;
 	my $retValue = $?;
-	if ($retValue != 0) {
+	if ($retString =~ m/install ok installed/) {
+		printLog("package $package is installed");
+		return 1;
+	} else {
 		printLog("package $package is not installed");
 		return 0;
-	} else {
-		if ($retString =~ /$package/) {
-			printLog("package $package is installed");
-			return 1;
-		}
 	}
 }
 
