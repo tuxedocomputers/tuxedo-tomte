@@ -146,8 +146,7 @@ my %repos = (
 #					anything else
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
-#   package			package name or 'no', there is a deb or rpm package as a
-#					solution
+#   package			'yes' or 'no', there is a deb or rpm package as a solution
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module,
@@ -293,7 +292,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'ACPI mod to recognize all installed cores correctly',
+		description => 'ACPI mod for accurate cores recognition',
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
@@ -323,6 +322,20 @@ my %origConfModules = (
 		fainame => '',
 		description => 'Fixes non working Elantech touchpad',
 		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedotouchpadswitch => {
+		name => 'tuxedo-touchpad-switch',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks',
+		postconf => '',
 		upgrade => '',
 		upgraded => '',
 	},
@@ -476,6 +489,25 @@ sub checkRequirements {
 	}
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
+	}
+	if (($boardname[0] =~ m/LAPQC71A/) ||
+		($boardname[0] =~ m/LAPQC71B/) ||
+		($boardname[0] =~ m/PF5PU1G/) ||
+		($boardname[0] =~ m/PF5PU1G/) ||
+		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/) ||
+		($boardname[0] =~ m/POLARIS1501I1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501I2060/) ||
+		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/POLARIS1701I1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701I2060/) ||
+		($boardname[0] =~ m/PULSE1401/) ||
+		($boardname[0] =~ m/PULSE1501/) ||
+		($boardname[0] =~ m/TRINITY1501I/) ||
+		($boardname[0] =~ m/TRINITY1701I/))
+	{
+		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 	}
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
@@ -765,16 +797,15 @@ sub tuxedokeyboard() {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $retString = `dpkg-query -W $package`;
+	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
+	my $retString = `$cmd`;
 	my $retValue = $?;
-	if ($retValue != 0) {
+	if ($retString =~ m/install ok installed/) {
+		printLog("package $package is installed");
+		return 1;
+	} else {
 		printLog("package $package is not installed");
 		return 0;
-	} else {
-		if ($retString =~ /$package/) {
-			printLog("package $package is installed");
-			return 1;
-		}
 	}
 }
 
@@ -1229,6 +1260,40 @@ sub threegfix() {
 
 
 ###############################################################################
+# Uniwill touchpad LED fix
+#
+sub tuxedotouchpadswitch() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
 # installs a package by pkcon
 # returns the exit code from pkcon
 #
@@ -1243,6 +1308,7 @@ sub installPackage {
 		startTomteDelayed();
 	} else {
 		printLog("0 is good");
+		isPackageInstalled($packageName);
 	}
 	return $retval;
 }
