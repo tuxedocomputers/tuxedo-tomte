@@ -1344,14 +1344,6 @@ sub tuxedonvmefix() {
 
 
 
-
-###############################################################################
-# installs a package by pkcon
-# returns the exit code from pkcon
-#
-sub installPackage {
-	my $packageName = shift;
-
 ###############################################################################
 # installs a package by pkcon
 # returns the exit code from pkcon
