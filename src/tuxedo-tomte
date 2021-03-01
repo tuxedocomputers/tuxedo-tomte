@@ -491,7 +491,7 @@ sub checkRequirements {
 		($boardname[0] =~ m/AURA1501/) ||
 		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-		printLog('discovered nokeyboard-after-suspend-fix problem');
+		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
