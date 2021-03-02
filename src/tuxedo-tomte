@@ -147,6 +147,7 @@ my %repos = (
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
+#   				if there are seceral packages to be installed then 'no'
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module,
@@ -353,6 +354,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	fingerprintreader => {
+		name => 'fingerprint-reader',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Packages needed for fingerprinreader to work on certain TUXEDO notebooks',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -555,6 +570,13 @@ sub checkRequirements {
 	if ($boardname[0] =~ m/X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
+	}
+	if ((system('lsusb -d 0483:') == 0) ||
+		(system('lsusb -d 147e:') == 0) ||
+		(system('lsusb -d 12d1:') == 0) ||
+		(system('lsusb -d 1c7a:0603') == 0) ) {
+		$origConfModules{fingerprintreader}{required} = 'yes';
+		printLog('discovered fingerprint reader problem');
 	}
 }
 
@@ -1355,6 +1377,48 @@ sub tuxedokeyboardite() {
 
 
 
+###############################################################################
+# fingerprint-reader
+#
+sub fingerprintreader() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packagelibfprint;
+	my $packagelibpam;
+	my $packagefprintdemo;
+	if ($action eq 'install') {
+		# check if the package is already installed
+		if( ! isPackageInstalled("libfprint0") ) {
+			$wasInstalled = 0;
+			$packagelibfprint = installPackage("libfprint0");
+		}
+		if( ! isPackageInstalled("libpam-fprintd") ) {
+			$wasInstalled = 0;
+			$packagelibpam = installPackage("libpam-fprintd");
+		}
+		if( ! isPackageInstalled("fprint-demo") ) {
+			$wasInstalled = 0;
+			$packagefprintdemo = installPackage("fprint-demo");
+		}
+
+		if( $packagelibfprint && $packagelibpam && $packagefprintdemo ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed");
+			}
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 ###############################################################################
 # installs a package by pkcon
 # returns the exit code from pkcon
@@ -2333,7 +2397,7 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
-	printLog("starting systemd-run tuxedo-tomte configure all for delayed configuration");
+	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 	printLog("ret value: $retVal");
 }
 
