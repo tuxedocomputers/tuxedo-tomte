@@ -250,7 +250,7 @@ my %origConfModules = (
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem on XC1511, XC1711, XUX711, InfinityBook Pro 14 v5, AURA 15 gen 1, XA15 gen 10 and XMG Fusion',
+		description => 'Fixes no keyboard after suspend problem on XC1511, XC1711, XUX711, InfinityBook Pro 14 v5 and 15 v5, AURA 15 gen 1, XA15 gen 10 and XMG Fusion',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -349,6 +349,20 @@ my %origConfModules = (
 		package => 'yes',
 		fainame => '',
 		description => 'Removes sleep bug on Kingston A2000 NVME devices',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedokeyboardite => {
+		name => 'tuxedo-keyboard-ite',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Keyboard back-light driver for ITE devices',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -472,9 +486,11 @@ sub checkRequirements {
 	# check values for each module
 	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
 		$origConfModules{i8042fix}{required} = 'yes';
+		printLog('discovered i8042-fix problem');
 	}
 	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
+		printLog('discovered no-boot-on-battery problem');
 	}
 	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
 		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
@@ -484,25 +500,30 @@ sub checkRequirements {
 		($boardname[0] =~ m/(PULSE1501)/) ||
   		($boardname[0] =~ m/(AURA1501)/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
 	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1701A2060/) ||
 		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
+		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
 	if (($boardname[0] =~ m/(X170SM)/) ||
 		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/N141CU/) ||
+		($boardname[0] =~ m/N150CU/) ||
    		($boardname[0] =~ m/NH5xAx/) ||
 		($boardname[0] =~ m/AURA1501/) ||
 		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
+		printLog('discovered elantech-touchpad-fix problem');
 	}
 	if (($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
@@ -522,10 +543,12 @@ sub checkRequirements {
 		($boardname[0] =~ m/TRINITY1701I/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
+		printLog('discovered tuxedo-touchpad-switch problem');
 	}
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('discovered backlight-fix problem');
 		}
 	}
 	# get the BIOS version
@@ -536,11 +559,17 @@ sub checkRequirements {
 	if ($boardname[0] =~ m/NH5xAx/) {
 		if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 			$origConfModules{corefix}{required} = 'yes';
+			printLog('discovered core-fix problem');
 		}
 	}
 	# if Threeg Huawei ME936 device found
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
+		printLog('discovered threeg-fix problem');
+	}
+	if ($boardname[0] =~ m/X170SM/) {
+		$origConfModules{tuxedokeyboardite}{required} = 'yes';
+		printLog('discovered tuxedo-keyboard-ite problem');
 	}
 	# if Kingston A2000 NVME device found
 	if (system('lsusb -d 2646:2263') == 0) {
@@ -838,6 +867,7 @@ sub isPackageInstalled {
 # - NH5xAx
 # - AURA1501
 # - PB50_70DFx,DDx
+# - N150CU
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
@@ -1315,6 +1345,40 @@ sub tuxedotouchpadswitch() {
 # Kingston A2000 NVME drives freezing after deep APST sleep fix
 #
 sub tuxedonvmefix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# tuxedo-keyboard-ite
+#
+sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
