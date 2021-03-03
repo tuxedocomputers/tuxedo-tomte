@@ -1409,10 +1409,14 @@ sub fingerprintreader() {
 		if( ! isPackageInstalled("fprintd") ) {
 			$wasInstalled = 0;
 			$packagefprintd = installPackage("fprintd");
+		} else {
+			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled("libpam-fprintd") ) {
 			$wasInstalled = 0;
 			$packagelibpam = installPackage("libpam-fprintd");
+		} else {
+			$packagelibpam = 1;
 		}
 
 		if( $packagefprintd && $packagelibpam ) {
