@@ -489,10 +489,12 @@ sub checkRequirements {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('discovered i8042-fix problem');
 	}
+
 	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 		printLog('discovered no-boot-on-battery problem');
 	}
+
 	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
 		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
 		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
@@ -503,6 +505,7 @@ sub checkRequirements {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
+
 	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1701A2060/) ||
 		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
@@ -510,6 +513,7 @@ sub checkRequirements {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
+
 	if (($boardname[0] =~ m/(X170SM)/) ||
 		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
@@ -522,10 +526,12 @@ sub checkRequirements {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 		printLog('discovered elantech-touchpad-fix problem');
 	}
+
 	if (($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/PF5PU1G/) ||
@@ -546,12 +552,14 @@ sub checkRequirements {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('discovered tuxedo-touchpad-switch problem');
 	}
+
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('discovered backlight-fix problem');
 		}
 	}
+
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
@@ -563,21 +571,31 @@ sub checkRequirements {
 			printLog('discovered core-fix problem');
 		}
 	}
+
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('discovered threeg-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
-	if ((system('lsusb -d 0483:') == 0) ||
-		(system('lsusb -d 147e:') == 0) ||
-		(system('lsusb -d 12d1:') == 0) ||
-		(system('lsusb -d 1c7a:0603') == 0) ) {
+
+	my $fingerprintLsUsb = `lsusb`;
+	my @fingerprintRegExp = (
+		qr/147e:100[0123]/,
+		qr/147e:20(15|16|20)/,
+		qr/147e:300[01]/,
+		qr/147e:500[23]/,
+		qr/0483:201[56]/,
+		qr/1c7a:0603/);
+	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog('discovered fingerprint reader problem');
+		printLog("discovered fingerprint-reader problem");
+		last;
 	}
+	
 }
 
 
@@ -1384,25 +1402,20 @@ sub fingerprintreader() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packagelibfprint;
+	my $packagefprintd;
 	my $packagelibpam;
-	my $packagefprintdemo;
 	if ($action eq 'install') {
 		# check if the package is already installed
-		if( ! isPackageInstalled("libfprint0") ) {
+		if( ! isPackageInstalled("fprintd") ) {
 			$wasInstalled = 0;
-			$packagelibfprint = installPackage("libfprint0");
+			$packagefprintd = installPackage("fprintd");
 		}
 		if( ! isPackageInstalled("libpam-fprintd") ) {
 			$wasInstalled = 0;
 			$packagelibpam = installPackage("libpam-fprintd");
 		}
-		if( ! isPackageInstalled("fprint-demo") ) {
-			$wasInstalled = 0;
-			$packagefprintdemo = installPackage("fprint-demo");
-		}
 
-		if( $packagelibfprint && $packagelibpam && $packagefprintdemo ) {
+		if( $packagefprintd && $packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
 			}
@@ -1419,6 +1432,9 @@ sub fingerprintreader() {
 		# not implemented yet
 	}
 }
+
+
+
 ###############################################################################
 # installs a package by pkcon
 # returns the exit code from pkcon
