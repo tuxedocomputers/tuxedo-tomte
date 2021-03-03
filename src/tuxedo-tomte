@@ -382,6 +382,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	mesautils => {
+		name => 'mesa-utils',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'The Mesa 3D Graphics Library',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -1509,6 +1523,43 @@ sub tuxedomicfix1() {
 		# not implemented yet
 	}
 }
+
+
+
+
+###############################################################################
+# Mesa-utils
+#
+sub mesautils() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
