@@ -147,6 +147,7 @@ my %repos = (
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
+#   				if there are seceral packages to be installed then 'no'
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module,
@@ -353,6 +354,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	fingerprintreader => {
+		name => 'fingerprint-reader',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Packages needed for fingerprinreader to work on certain TUXEDO notebooks',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -474,10 +489,12 @@ sub checkRequirements {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('discovered i8042-fix problem');
 	}
+
 	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 		printLog('discovered no-boot-on-battery problem');
 	}
+
 	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
 		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
 		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
@@ -488,6 +505,7 @@ sub checkRequirements {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
+
 	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1701A2060/) ||
 		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
@@ -495,6 +513,7 @@ sub checkRequirements {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
+
 	if (($boardname[0] =~ m/(X170SM)/) ||
 		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
@@ -507,10 +526,12 @@ sub checkRequirements {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 		printLog('discovered elantech-touchpad-fix problem');
 	}
+
 	if (($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/PF5PU1G/) ||
@@ -531,12 +552,14 @@ sub checkRequirements {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('discovered tuxedo-touchpad-switch problem');
 	}
+
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('discovered backlight-fix problem');
 		}
 	}
+
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
@@ -548,14 +571,31 @@ sub checkRequirements {
 			printLog('discovered core-fix problem');
 		}
 	}
+
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('discovered threeg-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
+
+	my $fingerprintLsUsb = `lsusb`;
+	my @fingerprintRegExp = (
+		qr/147e:100[0123]/,
+		qr/147e:20(15|16|20)/,
+		qr/147e:300[01]/,
+		qr/147e:500[23]/,
+		qr/0483:201[56]/,
+		qr/1c7a:0603/);
+	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
+		$origConfModules{fingerprintreader}{required} = 'yes';
+		printLog('discovered fingerprint-reader problem');
+		last;
+	}
+	
 }
 
 
@@ -766,8 +806,10 @@ sub tuxedocontrolcenter() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -799,8 +841,10 @@ sub tuxedokeyboard() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1303,8 +1347,10 @@ sub tuxedotouchpadswitch() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1336,13 +1382,61 @@ sub tuxedokeyboardite() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# fingerprint-reader
+#
+sub fingerprintreader() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packagefprintd;
+	my $packagelibpam;
+	if ($action eq 'install') {
+		# check if the package is already installed
+		if( ! isPackageInstalled("fprintd") ) {
+			$wasInstalled = 0;
+			$packagefprintd = installPackage("fprintd");
+		} else {
+			$packagefprintd = 0;
+		}
+		if( ! isPackageInstalled("libpam-fprintd") ) {
+			$wasInstalled = 0;
+			$packagelibpam = installPackage("libpam-fprintd");
+		} else {
+			$packagelibpam = 0;
+		}
+
+		if( !$packagefprintd && !$packagelibpam ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed");
+			} else {
+				addToConfiguredModules($module, "success");
+			}
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		} else {
+			$origConfModules{$module}{installed} = "failed";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2333,7 +2427,7 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
-	printLog("starting systemd-run tuxedo-tomte configure all for delayed configuration");
+	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 	printLog("ret value: $retVal");
 }
 
