@@ -592,7 +592,7 @@ sub checkRequirements {
 		qr/1c7a:0603/);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog("discovered fingerprint-reader problem");
+		printLog('discovered fingerprint-reader problem');
 		last;
 	}
 	
@@ -806,8 +806,10 @@ sub tuxedocontrolcenter() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -839,8 +841,10 @@ sub tuxedokeyboard() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1352,7 +1356,6 @@ sub tuxedotouchpadswitch() {
 			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1388,7 +1391,6 @@ sub tuxedokeyboardite() {
 			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1428,13 +1430,13 @@ sub fingerprintreader() {
 		if( !$packagefprintd && !$packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
+			} else {
+				addToConfiguredModules($module, "success");
 			}
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 		} else {
 			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
 		}
 	}
 	if ($action eq 'upgrade') {
