@@ -1343,13 +1343,16 @@ sub tuxedotouchpadswitch() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1376,13 +1379,16 @@ sub tuxedokeyboardite() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1425,8 +1431,10 @@ sub fingerprintreader() {
 			}
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
 		} else {
 			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
 		}
 	}
 	if ($action eq 'upgrade') {
