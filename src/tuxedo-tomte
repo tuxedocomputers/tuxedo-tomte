@@ -1416,16 +1416,16 @@ sub fingerprintreader() {
 			$wasInstalled = 0;
 			$packagefprintd = installPackage("fprintd");
 		} else {
-			$packagefprintd = 1;
+			$packagefprintd = 0;
 		}
 		if( ! isPackageInstalled("libpam-fprintd") ) {
 			$wasInstalled = 0;
 			$packagelibpam = installPackage("libpam-fprintd");
 		} else {
-			$packagelibpam = 1;
+			$packagelibpam = 0;
 		}
 
-		if( $packagefprintd && $packagelibpam ) {
+		if( !$packagefprintd && !$packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
 			}
