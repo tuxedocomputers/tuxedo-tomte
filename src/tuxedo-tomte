@@ -368,6 +368,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedomicfix1 => {
+		name => 'tuxedo-micfix1',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Kernel audio module which fixes different issues with audio output',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -596,6 +610,19 @@ sub checkRequirements {
 		last;
 	}
 	
+	if (($boardname[0] =~ m/NHxxRZQ/) ||
+		($boardname[0] =~ m/NHxxRZ/) ||
+   		($boardname[0] =~ m/L140CU/) ||
+		($boardname[0] =~ m/NL40_50GU/) ||
+		($boardname[0] =~ m/NH5xAx/) ||
+		($boardname[0] =~ m/NJ50_NJ70CU/) ||
+   		($boardname[0] =~ m/PB50_70D/) ||
+   		($boardname[0] =~ m/AURA1501/) ||
+		($boardname[0] =~ m/N150CU/) ||
+		($boardname[0] =~ m/L14xMU/)) {
+		$origConfModules{tuxedomicfix1}{required} = 'yes';
+		printLog('discovered tuxedo-micfix1 problem');
+	}
 }
 
 
@@ -1437,6 +1464,41 @@ sub fingerprintreader() {
 			$origConfModules{$module}{upgraded} = "yes";
 		} else {
 			$origConfModules{$module}{installed} = "failed";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# tuxedo-micfix1
+#
+sub tuxedomicfix1() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'upgrade') {
