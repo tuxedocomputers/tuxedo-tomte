@@ -1365,7 +1365,7 @@ sub threegfix() {
 		printLog("applying threegfix");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
-		if ($retval1 == 0 && $retval2 == 0) {
+		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -1379,7 +1379,7 @@ sub threegfix() {
 		printLog("upgrading threegfix");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
-		if ($retval1 == 0 && $retval2 == 0) {
+		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -1612,7 +1612,10 @@ sub tuxedorestoreaudiofix() {
 		printLog("applying tuxedorestoreaudiofix");
 		$retval1 = createFile($fileName, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
-		if ($retval1 == 0 && $retval2 == 0) {
+		if ($retval1 == 0 || $retval2 == 0) {
+			if ($retval2 == 0) {
+				printLog('systemd could not initialize restore-audiocards.service');
+			}
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
