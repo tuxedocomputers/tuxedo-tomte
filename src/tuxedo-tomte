@@ -396,6 +396,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedorestoreaudiofix => {
+		name => 'tuxedo-restore-audio-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Systemd service which rescans for missing audio devices',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -638,6 +652,12 @@ sub checkRequirements {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
 		printLog('discovered tuxedo-micfix1 problem');
 	}
+
+	if ($boardname[0] =~ m/N350TW/) {
+		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
+		printLog('discovered tuxedo-restore-audio-fix problem');
+	}
+
 }
 
 
@@ -1554,6 +1574,56 @@ sub mesautils() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Rescans the pci bus to reactivate missing audio device
+# - N350TW
+#
+sub tuxedorestoreaudiofix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $retval2;
+	my $fileName = '/lib/systemd/system/restore-audiocards.service';
+	my $fileText = "# added by tuxedo-tomte \n".
+		"[Unit]\n".
+		"Description=Rescan the PCI-Bus for missed audio cards\n".
+		"After=alsa-restore.service\n".
+		"\n".
+		"[Service]\n".
+		"Type=oneshot\n".
+		"RemainAfterExit=false\n".
+		"ExecStart=/usr/bin/bash -c 'echo auto >> /sys/devices/pci0000:00/0000:00:1f.3/power/control'\n".
+		"ExecStart=/usr/bin/sleep 1\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/devices/pci0000:00/0000:00:1f.3/remove'\n".
+		"ExecStart=/usr/bin/sleep 1\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/bus/pci/rescan'\n".
+		"\n".
+		"[Install]\n".
+		"WantedBy=multi-user.target\n";
+	if ($action eq 'install') {
+		printLog("applying tuxedorestoreaudiofix");
+		$retval1 = createFile($fileName, $fileText);
+		$retval2 = system('systemctl --now enable restore-audiocards.service');
+		if ($retval1 == 0 && $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("no upgrade available yet for tuxedo-restore-audio-fix");
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
