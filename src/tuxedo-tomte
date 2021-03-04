@@ -1589,7 +1589,8 @@ sub mesautils() {
 sub tuxedorestoreaudiofix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
+	my $retval1;
+	my $retval2;
 	my $fileName = '/lib/systemd/system/restore-audiocards.service';
 	my $fileText = "# added by tuxedo-tomte \n".
 		"[Unit]\n".
@@ -1597,20 +1598,21 @@ sub tuxedorestoreaudiofix() {
 		"After=alsa-restore.service\n".
 		"\n".
 		"[Service]\n".
-		"Type=simple\n".
+		"Type=oneshot\n".
 		"RemainAfterExit=false\n".
-		"ExecStart=/usr/bin/echo auto >> '/sys/devices/pci0000:00/0000:00:1f.3/power/control'\n".
+		"ExecStart=/usr/bin/bash -c 'echo auto >> /sys/devices/pci0000:00/0000:00:1f.3/power/control'\n".
 		"ExecStart=/usr/bin/sleep 1\n".
-		"ExecStart=/usr/bin/echo 1 >> '/sys/devices/pci0000:00/0000:00:1f.3/remove'\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/devices/pci0000:00/0000:00:1f.3/remove'\n".
 		"ExecStart=/usr/bin/sleep 1\n".
-		"ExecStart=/usr/bin/echo 1 >> /sys/bus/pci/rescan\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/bus/pci/rescan'\n".
 		"\n".
 		"[Install]\n".
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying tuxedorestoreaudiofix");
-		$retval = createFile($fileName, $fileText);
-		if ($retval == 0) {
+		$retval1 = createFile($fileName, $fileText);
+		$retval2 = system('systemctl --now enable restore-audiocards.service');
+		if ($retval1 == 0 && $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
