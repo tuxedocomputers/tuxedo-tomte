@@ -410,6 +410,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	kernel => {
+		name => 'kernel',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel versions',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -511,10 +525,6 @@ sub checkRequirements {
 	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
 	my @boardvendor;
 	my $biosVersion;
-
-	# these will be installed on all systems, always
-	$origConfModules{tuxedokeyboard}{required} = 'yes';
-	$origConfModules{tuxedocontrolcenter}{required} = 'yes';
 
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
@@ -922,27 +932,6 @@ sub tuxedokeyboard() {
 	}
 }
 
-
-
-
-###############################################################################
-# Checks if the package is installed on the system
-# return 1 if yes
-# return 0 if no
-#
-sub isPackageInstalled {
-	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
-	my $retString = `$cmd`;
-	my $retValue = $?;
-	if ($retString =~ m/install ok installed/) {
-		printLog("package $package is installed");
-		return 1;
-	} else {
-		printLog("package $package is not installed");
-		return 0;
-	}
-}
 
 
 
@@ -1476,15 +1465,15 @@ sub fingerprintreader() {
 	my $packagelibpam;
 	if ($action eq 'install') {
 		# check if the package is already installed
-		if( ! isPackageInstalled("fprintd") ) {
+		if( ! isPackageInstalled('fprintd') ) {
 			$wasInstalled = 0;
-			$packagefprintd = installPackage("fprintd");
+			$packagefprintd = installPackage('fprintd');
 		} else {
 			$packagefprintd = 0;
 		}
-		if( ! isPackageInstalled("libpam-fprintd") ) {
+		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
-			$packagelibpam = installPackage("libpam-fprintd");
+			$packagelibpam = installPackage('libpam-fprintd');
 		} else {
 			$packagelibpam = 0;
 		}
@@ -1493,16 +1482,16 @@ sub fingerprintreader() {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
 			} else {
-				addToConfiguredModules($module, "success");
+				addToConfiguredModules($module, 'success');
 			}
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
-			$origConfModules{$module}{installed} = "failed";
+			$origConfModules{$module}{installed} = 'failed';
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+		printLog('upgrade not necessary for packages');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -1523,21 +1512,21 @@ sub tuxedomicfix1() {
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			$retval = installPackage($origConfModules{$module}{name});
 			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
 			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = 'failed';
+				addToConfiguredModules($module, 'failed');
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+		printLog('upgrade not necessary for packages');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -1633,6 +1622,127 @@ sub tuxedorestoreaudiofix() {
 	}
 }
 
+
+
+
+###############################################################################
+# kernel
+#
+sub kernel() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageLinuxGenericHwe1804;
+	my $packageLinuxImageGenericHwe1804;
+	my $packageLinuxHeadersGenericHwe1804;
+	my $packageLinuxSignedGenericHwe1804;
+	my $packageLinuxOem2004;
+	my $packageLinuxFirmware;
+	my $packageIntelMicrocode;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /18.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
+			} else {
+				$packageLinuxGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
+			} else {
+				$packageLinuxImageGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
+			} else {
+				$packageLinuxHeadersGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
+			} else {
+				$packageLinuxSignedGenericHwe1804 = 0;
+			}
+	
+			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		
+		}
+		if ($distributionVersion =~ /20.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-oem-20.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-oem-20.04');
+			} else {
+				$packageLinuxOem2004 = 0;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 0;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 0;
+			}
+	
+			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# Checks if the package is installed on the system
+# return 1 if yes
+# return 0 if no
+#
+sub isPackageInstalled {
+	my $package = shift;
+	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
+	my $retString = `$cmd`;
+	my $retValue = $?;
+	if ($retString =~ m/install ok installed/) {
+		printLog("package $package is installed");
+		return 1;
+	} else {
+		printLog("package $package is not installed");
+		return 0;
+	}
+}
 
 
 
