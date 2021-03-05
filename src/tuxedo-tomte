@@ -424,6 +424,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	nvidiadriver => {
+		name => 'nvidia-driver',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required Nvidia drivers',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
