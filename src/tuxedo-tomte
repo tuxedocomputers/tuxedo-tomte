@@ -682,6 +682,11 @@ sub checkRequirements {
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
 
+	my $nvidiaDevice = `lspci -nd 11de:`;
+	if ($nvidiaDevice =~ /030[02]:/) {
+		$origConfModules{nvidiadriver}{required} = 'yes';
+	}
+
 }
 
 
@@ -1735,6 +1740,119 @@ sub kernel() {
 		# not implemented yet
 	}
 }
+
+
+
+
+###############################################################################
+# nvidiadriver
+#
+sub nvidiadriver() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageNvidiaDriver440;
+	my $packageMesaUtils;
+	my $packageNvidiaPrime;
+	my $packagePythonAppindicator;
+	my $packagePythonCairo;
+	my $packagePythonGtk2;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /18.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('nvidia-driver-440') ) {
+				$wasInstalled = 0;
+				$packageNvidiaDriver440 = installPackage('nvidia-driver-440');
+			} else {
+				$packageNvidiaDriver440 = 0;
+			}
+			if( ! isPackageInstalled('mesa-utils') ) {
+				$wasInstalled = 0;
+				$packageMesaUtils = installPackage('mesa-utils');
+			} else {
+				$packageMesaUtils = 0;
+			}
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 0;
+			}
+			if( ! isPackageInstalled('python-appindicator') ) {
+				$wasInstalled = 0;
+				$packagePythonAppindicator = installPackage('python-appindicator');
+			} else {
+				$packagePythonAppindicator = 0;
+			}
+			if( ! isPackageInstalled('python-cairo') ) {
+				$wasInstalled = 0;
+				$packagePythonCairo = installPackage('python-cairo');
+			} else {
+				$packagePythonCairo = 0;
+			}
+			if( ! isPackageInstalled('python-gtk2') ) {
+				$wasInstalled = 0;
+				$packagePythonGtk2 = installPackage('python-gtk2');
+			} else {
+				$packagePythonGtk2 = 0;
+			}
+	
+			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		
+		}
+		if ($distributionVersion =~ /20.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('nvidia-driver-440') ) {
+				$wasInstalled = 0;
+				$packageNvidiaDriver440 = installPackage('nvidia-driver-440');
+			} else {
+				$packageNvidiaDriver440 = 0;
+			}
+			if( ! isPackageInstalled('mesa-utils') ) {
+				$wasInstalled = 0;
+				$packageMesaUtils = installPackage('mesa-utils');
+			} else {
+				$packageMesaUtils = 0;
+			}
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 0;
+			}
+	
+			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 
