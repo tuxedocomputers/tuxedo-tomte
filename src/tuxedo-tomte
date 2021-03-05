@@ -429,7 +429,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -1689,9 +1689,8 @@ sub kernel() {
 			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1723,9 +1722,8 @@ sub kernel() {
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1800,9 +1798,8 @@ sub nvidiadriver() {
 			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1834,9 +1831,8 @@ sub nvidiadriver() {
 			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
