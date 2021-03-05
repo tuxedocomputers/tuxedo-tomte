@@ -571,8 +571,7 @@ sub checkRequirements {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
-	# if Kingston A2000 NVME device found
-	if (system('lsusb -d 2646:2263') == 0) {
+	if (`lspci -d 2646:2263` =~ /Kingston/) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
 	}
 }
