@@ -1,5 +1,6 @@
-tuxedo-tomte (2.2.3-2) UNRELEASED; urgency=medium
+tuxedo-tomte (2.2.3-5) UNRELEASED; urgency=medium
 
+  [ E. Mohr ]
   * added support for ITE Keyboard devices
   * added support for fingerprintreader
   * added tuxedo-micfix1
@@ -7,8 +8,13 @@ tuxedo-tomte (2.2.3-2) UNRELEASED; urgency=medium
   * added restore-audio-fix
   * added kernel installation
   * added nvidia drivers
+  * UNRELEASED
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 05 Mar 2021 18:33:57 +0100
+  [ emohrtuxedo ]
+  * huawei module char error
+  * restoreaudiofix changed return value systemd
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 08 Mar 2021 11:48:02 +0100
 
 tuxedo-tomte (2.2.2) focal; urgency=medium
 
