@@ -1860,9 +1860,9 @@ sub nvidiadriver() {
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
 # second parameter
-# returns 0 if the search for the packages failed or if the deinstallation was
+# returns 1 if the search for the packages failed or if the deinstallation was
 # unsuccessful
-# returns 1 if everything was ok
+# returns 0 if everything was ok
 #
 sub deinstExcept {
 	my $deinst = shift;
@@ -1871,7 +1871,7 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
-		return 0;
+		return 1;
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
@@ -1888,14 +1888,14 @@ sub deinstExcept {
 		printLog("deinstalling: $pkconDeinst\n");
 		if (system($pkconDeinst)) {
 			printLog('failed to deinstall packages');
-			return 0;
+			return 1;
 		} else {
 			printLog('deinstallation of packages successful');
-			return 1;
+			return 0;
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 1;
+		return 0;
 	}
 }
 
