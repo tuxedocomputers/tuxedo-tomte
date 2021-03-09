@@ -1758,9 +1758,9 @@ sub nvidiadriver() {
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /18.04/) {
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-440') ) {
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				$wasInstalled = 0;
-				$packageNvidiaDriver440 = installPackage('nvidia-driver-440');
+				$packageNvidiaDriver440 = installPackage('nvidia-driver-460');
 			} else {
 				$packageNvidiaDriver440 = 0;
 			}
@@ -1809,9 +1809,9 @@ sub nvidiadriver() {
 		}
 		if ($distributionVersion =~ /20.04/) {
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-440') ) {
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				$wasInstalled = 0;
-				$packageNvidiaDriver440 = installPackage('nvidia-driver-440');
+				$packageNvidiaDriver440 = installPackage('nvidia-driver-460');
 			} else {
 				$packageNvidiaDriver440 = 0;
 			}
@@ -1849,7 +1849,47 @@ sub nvidiadriver() {
 }
 
 
+###############################################################################
+# Deinstalls all packages beginning with a given string except the one given as
+# second parameter
+# returns 0 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 1 if everything was ok
+#
+sub deinstExcept {
+	my $deinst = shift;
+	my $except = shift;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $retString = `$searchCmd`;
+	my $retValue = $?;
+	if ($retValue != 0) {
+		return 0;
+	}
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
+	my $pkconDeinst = 'pkcon remove';
+	my $deinstCounter = 0;
+
+	foreach my $deinstKey (keys %retHash) {
+		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+			$deinstCounter++;
+			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+		}
+	}
+	if ($deinstCounter != 0) {
+		printLog("deinstalling: $pkconDeinst\n");
+		if (system($pkconDeinst)) {
+			printLog('failed to deinstall packages');
+			return 0;
+		} else {
+			printLog('deinstallation of packages successful');
+			return 1;
+		}
+	} else {
+		printLog('nothing to deinstall');
+		return 1;
+	}
+}
 
 
 
