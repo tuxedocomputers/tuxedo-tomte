@@ -1744,25 +1744,30 @@ sub kernel() {
 
 ###############################################################################
 # nvidiadriver
+# installs TUXEDO approved nvidia drivers and removes all the other ones
 #
 sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver440;
+	my $packageNvidiaDriver460;
 	my $packageMesaUtils;
 	my $packageNvidiaPrime;
 	my $packagePythonAppindicator;
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
+	my $oldDriversRemoved;
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /18.04/) {
+			# deinstall other nvidia drivers
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+
 			# check if the package is already installed
 			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				$wasInstalled = 0;
-				$packageNvidiaDriver440 = installPackage('nvidia-driver-460');
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver440 = 0;
+				$packageNvidiaDriver460 = 0;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
@@ -1795,7 +1800,7 @@ sub nvidiadriver() {
 				$packagePythonGtk2 = 0;
 			}
 	
-			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
+			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 				}
@@ -1808,12 +1813,15 @@ sub nvidiadriver() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
+			# deinstall other nvidia drivers
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+
 			# check if the package is already installed
 			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				$wasInstalled = 0;
-				$packageNvidiaDriver440 = installPackage('nvidia-driver-460');
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver440 = 0;
+				$packageNvidiaDriver460 = 0;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
@@ -1828,7 +1836,7 @@ sub nvidiadriver() {
 				$packageNvidiaPrime = 0;
 			}
 	
-			if( !$packageNvidiaDriver440 && !$packageMesaUtils && !$packageNvidiaPrime ) {
+			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 				}
