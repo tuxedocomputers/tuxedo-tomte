@@ -682,7 +682,7 @@ sub checkRequirements {
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
 
-	my $nvidiaDevice = `lspci -nd 11de:`;
+	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 	}
