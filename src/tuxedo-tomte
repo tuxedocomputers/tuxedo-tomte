@@ -1900,7 +1900,7 @@ sub deinstExcept {
 		#TODO: debug
 		printLog("search string was: $deinst*");
 		printLog("retValue: $retValue retString: $retString");
-		if ($retString =~ /no packages found matching/) {
+		if ($retValue == 256) {
 			printLog('no packages found matching search string to deinstall packages');
 			return 0;
 		}
