@@ -580,8 +580,8 @@ sub checkRequirements {
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
 
-	if (($boardname[0] =~ m/(X170SM)/) ||
-		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
+	if (($boardname[0] =~ m/X170SM/) ||
+		($boardname[0] =~ m/PB50_70DFx,DDx/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/N141CU/) ||
@@ -708,27 +708,31 @@ sub i8042fix() {
 	if ($action eq 'install') {
 		printLog("applying i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -750,27 +754,31 @@ sub nobootonbattery() {
 	if ($action eq 'install') {
 		printLog("applying nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -798,27 +806,31 @@ sub amdxhcihcdusbquirksuspendfix() {
 	if ($action eq 'install') {
 		printLog("applying amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -963,6 +975,8 @@ sub tuxedokeyboard() {
 # - AURA1501
 # - PB50_70DFx,DDx
 # - N150CU
+# - N141CU
+# - XC15 
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
@@ -972,26 +986,30 @@ sub nokeyboardaftersuspendfix() {
 	if ($action eq 'install') {
 		printLog("applying nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -1012,27 +1030,31 @@ sub backlightfix() {
 	if ($action eq 'install') {
 		printLog("applying backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+	
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -1275,27 +1297,31 @@ my $retval;
 if ($action eq 'install') {
 printLog("applying elantechtouchpadfix");
 $retval = insertGrub($module, \@kernel_parameters);
-        if ($retval == 0) {
+        if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            $postConfProgram{updateGrub}{trigger} = 1;
             addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+            	$postConfProgram{updateGrub}{trigger} = 1;
+			}
         }
     }
     if ($action eq 'upgrade') {
         printLog("upgrading elantechtouchpadfix");
         $retval = insertGrub($module, \@kernel_parameters);
-        if ($retval == 0) {
+        if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            $postConfProgram{updateGrub}{trigger} = 1;
             addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+            	$postConfProgram{updateGrub}{trigger} = 1;
+			}
         }
     }
     if ($action eq 'remove') {
@@ -2031,7 +2057,7 @@ sub isLinePresent {
 # inserts array values as kernel parameters if not present
 # example: my $retval = insertGrub(\@kernel_parameters);
 # returns number of inserted parameters
-# return value of 0 means it failed
+# return value of -1 means it failed
 #
 sub insertGrub {
     my $grubFH;
@@ -2049,7 +2075,7 @@ sub insertGrub {
     } else {
 		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for reading");
-		return (0);
+		return (-1);
     }
 
     foreach( @grub_lines ) {
@@ -2070,7 +2096,7 @@ sub insertGrub {
     } else {
 		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for writing");
-		return (0);
+		return (-1);
     }
     return $inserted;
 }
