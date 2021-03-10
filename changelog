@@ -1,4 +1,4 @@
-tuxedo-tomte (2.2.3-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.2.3-10) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * added support for ITE Keyboard devices
@@ -25,8 +25,9 @@ tuxedo-tomte (2.2.3-9) UNRELEASED; urgency=medium
   * modified insertGrub, updateGrub only if did modifications
   * insertGrubParameters changed return parameters
   * deinstall packages modified return values and added some log info
+  * print retValue
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 Mar 2021 15:59:05 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 Mar 2021 16:20:56 +0100
 
 tuxedo-tomte (2.2.2) focal; urgency=medium
 
