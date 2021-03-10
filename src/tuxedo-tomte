@@ -1888,7 +1888,7 @@ sub nvidiadriver() {
 # second parameter
 # returns 1 if the search for the packages failed or if the deinstallation was
 # unsuccessful
-# returns 0 if everything was ok
+# returns 0 if everything was ok, even if no packages were found
 #
 sub deinstExcept {
 	my $deinst = shift;
@@ -1897,6 +1897,12 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
+		printLog("search string was: $deinst");
+		if ($retString =~ /no packages found matching/) {
+			printLog('no packages matching search string found to deinstall');
+			return 0;
+		}
+		printLog('something went wrong while searching for packages');
 		return 1;
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
