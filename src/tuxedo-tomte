@@ -1897,9 +1897,10 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
-		printLog("search string was: $deinst");
+		printLog("search string was: $deinst*");
+		printLog("return: $retValue");
 		if ($retString =~ /no packages found matching/) {
-			printLog('no packages matching search string found to deinstall');
+			printLog('no packages found matching search string to deinstall packages');
 			return 0;
 		}
 		printLog('something went wrong while searching for packages');
