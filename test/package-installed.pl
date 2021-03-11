@@ -4,18 +4,38 @@ use warnings;
 
 use Data::Dumper qw(Dumper);
 
+sub deinstExcept {
+	my $deinst = shift;
+	my $except = shift;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $retString = `$searchCmd`;
+	my $retValue = $?;
+	if ($retValue != 0) {
+		return 0;
+	}
+	print 'retValue: '.$retValue."\n";
+	print "retString: $retString\n";
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-my $package = 'tree';
-my $cmd = 'dpkg -s '.$package.' >/dev/null 2>&1';
-my $cmd2 = 'dpkg-query -W -f=\'${status}\' '.$package;
-my $retString = `$cmd2`;
-my $retValue = $?;
-print 'retValue: '.$retValue."\n";
-print "retString: $retString\n";
-if ($retString =~ m/install ok installed/) {
-    print "package $package is installed (return 0)\n";
-} else {
-    print "package $package is not installed (return 1)\n";
+	my $pkconDeinst = 'pkcon remove';
+	my $deinstCounter = 0;
+
+	foreach my $deinstKey (keys %retHash) {
+		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+			print "key: $deinstKey value: $retHash{$deinstKey}\n";
+			$deinstCounter++;
+			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+		}
+	}
+	print "hashsize: $deinstCounter\n";
+	if ($deinstCounter != 0) {
+		print "deinst string: $pkconDeinst\n";
+		# deinstall return result
+	} else {
+		print "nothing to deinstall";
+	}
 }
+
+deinstExcept('linux', 'linux-image');
 
 

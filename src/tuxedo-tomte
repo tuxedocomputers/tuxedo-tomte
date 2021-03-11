@@ -438,6 +438,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	nvidiadriver => {
+		name => 'nvidia-driver',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required Nvidia drivers',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -580,8 +594,8 @@ sub checkRequirements {
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
 
-	if (($boardname[0] =~ m/(X170SM)/) ||
-		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
+	if (($boardname[0] =~ m/X170SM/) ||
+		($boardname[0] =~ m/PB50_70DFx,DDx/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/N141CU/) ||
@@ -686,6 +700,11 @@ sub checkRequirements {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
+
+	my $nvidiaDevice = `lspci -nd 10de:`;
+	if ($nvidiaDevice =~ /030[02]:/) {
+		$origConfModules{nvidiadriver}{required} = 'yes';
+	}
 }
 
 
@@ -707,27 +726,31 @@ sub i8042fix() {
 	if ($action eq 'install') {
 		printLog("applying i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading i8042fix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -749,27 +772,31 @@ sub nobootonbattery() {
 	if ($action eq 'install') {
 		printLog("applying nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading nobootonbattery");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -797,27 +824,31 @@ sub amdxhcihcdusbquirksuspendfix() {
 	if ($action eq 'install') {
 		printLog("applying amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading amdxhcihcdusbquirksuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -962,6 +993,8 @@ sub tuxedokeyboard() {
 # - AURA1501
 # - PB50_70DFx,DDx
 # - N150CU
+# - N141CU
+# - XC15 
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
@@ -971,26 +1004,30 @@ sub nokeyboardaftersuspendfix() {
 	if ($action eq 'install') {
 		printLog("applying nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading nokeyboardaftersuspendfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -1011,27 +1048,31 @@ sub backlightfix() {
 	if ($action eq 'install') {
 		printLog("applying backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+	
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading backlightfix");
 		$retval = insertGrub($module, \@kernel_parameters);
-		if ($retval == 0) {
+		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateGrub}{trigger} = 1;
 			addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+			}
 		}
 	}
 	if ($action eq 'remove') {
@@ -1274,27 +1315,31 @@ my $retval;
 if ($action eq 'install') {
 printLog("applying elantechtouchpadfix");
 $retval = insertGrub($module, \@kernel_parameters);
-        if ($retval == 0) {
+        if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            $postConfProgram{updateGrub}{trigger} = 1;
             addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+            	$postConfProgram{updateGrub}{trigger} = 1;
+			}
         }
     }
     if ($action eq 'upgrade') {
         printLog("upgrading elantechtouchpadfix");
         $retval = insertGrub($module, \@kernel_parameters);
-        if ($retval == 0) {
+        if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            $postConfProgram{updateGrub}{trigger} = 1;
             addToConfiguredModules($module, "success");
+			if ($retval > 0) {
+            	$postConfProgram{updateGrub}{trigger} = 1;
+			}
         }
     }
     if ($action eq 'remove') {
@@ -1365,7 +1410,7 @@ sub threegfix() {
 	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
-		"options usbserial vendor=0x12d1 product=0x15bb\n".
+		"options usbserial vendor=0x12d1 product=0x15bb\n";
 	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
@@ -1653,8 +1698,8 @@ sub tuxedorestoreaudiofix() {
 		printLog("applying tuxedorestoreaudiofix");
 		$retval1 = createFile($fileName, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
-		if ($retval1 == 0 || $retval2 == 0) {
-			if ($retval2 == 0) {
+		if ($retval1 == 0 || $retval2 != 0) {
+			if ($retval2 != 0) {
 				printLog('systemd could not initialize restore-audiocards.service');
 			}
 			$origConfModules{$module}{installed} = "failed";
@@ -1722,9 +1767,8 @@ sub kernel() {
 			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1756,9 +1800,8 @@ sub kernel() {
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
-				} else {
-					addToConfiguredModules($module, "success");
 				}
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1774,6 +1817,171 @@ sub kernel() {
 	}
 }
 
+
+
+
+###############################################################################
+# nvidiadriver
+# installs TUXEDO approved nvidia drivers and removes all the other ones
+#
+sub nvidiadriver() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageNvidiaDriver460;
+	my $packageMesaUtils;
+	my $packageNvidiaPrime;
+	my $packagePythonAppindicator;
+	my $packagePythonCairo;
+	my $packagePythonGtk2;
+	my $oldDriversRemoved;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /18.04/) {
+			# deinstall other nvidia drivers
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+
+			# check if the package is already installed
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
+				$wasInstalled = 0;
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
+			} else {
+				$packageNvidiaDriver460 = 0;
+			}
+			if( ! isPackageInstalled('mesa-utils') ) {
+				$wasInstalled = 0;
+				$packageMesaUtils = installPackage('mesa-utils');
+			} else {
+				$packageMesaUtils = 0;
+			}
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 0;
+			}
+			if( ! isPackageInstalled('python-appindicator') ) {
+				$wasInstalled = 0;
+				$packagePythonAppindicator = installPackage('python-appindicator');
+			} else {
+				$packagePythonAppindicator = 0;
+			}
+			if( ! isPackageInstalled('python-cairo') ) {
+				$wasInstalled = 0;
+				$packagePythonCairo = installPackage('python-cairo');
+			} else {
+				$packagePythonCairo = 0;
+			}
+			if( ! isPackageInstalled('python-gtk2') ) {
+				$wasInstalled = 0;
+				$packagePythonGtk2 = installPackage('python-gtk2');
+			} else {
+				$packagePythonGtk2 = 0;
+			}
+	
+			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				}
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		
+		}
+		if ($distributionVersion =~ /20.04/) {
+			# deinstall other nvidia drivers
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+
+			# check if the package is already installed
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
+				$wasInstalled = 0;
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
+			} else {
+				$packageNvidiaDriver460 = 0;
+			}
+			if( ! isPackageInstalled('mesa-utils') ) {
+				$wasInstalled = 0;
+				$packageMesaUtils = installPackage('mesa-utils');
+			} else {
+				$packageMesaUtils = 0;
+			}
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 0;
+			}
+	
+			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				}
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+###############################################################################
+# Deinstalls all packages beginning with a given string except the one given as
+# second parameter
+# returns 1 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 0 if everything was ok, even if no packages were found
+#
+sub deinstExcept {
+	my $deinst = shift;
+	my $except = shift;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $retString = `$searchCmd`;
+	my $retValue = $?;
+	if ($retValue != 0) {
+		printLog("search string was: $deinst*");
+		if ($retValue == 256) {
+			printLog('no packages found matching search string to deinstall packages');
+			return 0;
+		}
+		printLog('something went wrong while searching for packages');
+		return 1;
+	}
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
+
+	my $pkconDeinst = 'pkcon -y remove';
+	my $deinstCounter = 0;
+
+	foreach my $deinstKey (keys %retHash) {
+		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+			$deinstCounter++;
+			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+		}
+	}
+	if ($deinstCounter != 0) {
+		printLog("deinstalling: $pkconDeinst\n");
+		if (system($pkconDeinst)) {
+			printLog('failed to deinstall packages');
+			return 1;
+		} else {
+			printLog('deinstallation of packages successful');
+			return 0;
+		}
+	} else {
+		printLog('nothing to deinstall');
+		return 0;
+	}
+}
 
 
 
@@ -1907,7 +2115,7 @@ sub isLinePresent {
 # inserts array values as kernel parameters if not present
 # example: my $retval = insertGrub(\@kernel_parameters);
 # returns number of inserted parameters
-# return value of 0 means it failed
+# return value of -1 means it failed
 #
 sub insertGrub {
     my $grubFH;
@@ -1925,7 +2133,7 @@ sub insertGrub {
     } else {
 		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for reading");
-		return (0);
+		return (-1);
     }
 
     foreach( @grub_lines ) {
@@ -1946,7 +2154,7 @@ sub insertGrub {
     } else {
 		printLog("Err: $!");
 		printLog("no $grubFile present or unable to open the file for writing");
-		return (0);
+		return (-1);
     }
     return $inserted;
 }
@@ -1955,22 +2163,24 @@ sub insertGrub {
 ###############################################################################
 # inserts a parameter into a grub line
 # if the parameter is not present yet
-# returns 1 if inserted or already present
+# returns 1 if parameter inserted
+# returns 0 if parameter already present
 #
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 
 	if ($$line =~ /$$parameter/) {
-		return (1);
+		return (0);
 	}
 	if ($$line =~ /""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted $$parameter into grub line");
+		printLog("inserted '$$parameter' into grub line");
+		return (1);
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted $$parameter into grub line");
+		printLog("inserted '$$parameter' into grub line");
+		return (1);
 	}
-	return (1);
 }
 
 
