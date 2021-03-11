@@ -147,6 +147,7 @@ my %repos = (
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
+#   				if there are seceral packages to be installed then 'no'
 #   fainame			the name to give to FAI to install a certain package
 #   description		A description about the module for the user
 #   postconf		command module to execute after installation of module,
@@ -367,6 +368,76 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	fingerprintreader => {
+		name => 'fingerprint-reader',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Packages needed for fingerprinreader to work on certain TUXEDO notebooks',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedomicfix1 => {
+		name => 'tuxedo-micfix1',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Kernel audio module which fixes different issues with audio output',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	mesautils => {
+		name => 'mesa-utils',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'The Mesa 3D Graphics Library',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedorestoreaudiofix => {
+		name => 'tuxedo-restore-audio-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Systemd service which rescans for missing audio devices',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	kernel => {
+		name => 'kernel',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel versions',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 );
 
 
@@ -469,10 +540,6 @@ sub checkRequirements {
 	my @boardvendor;
 	my $biosVersion;
 
-	# these will be installed on all systems, always
-	$origConfModules{tuxedokeyboard}{required} = 'yes';
-	$origConfModules{tuxedocontrolcenter}{required} = 'yes';
-
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
 	if ( !@boardname ) {
@@ -488,10 +555,12 @@ sub checkRequirements {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('discovered i8042-fix problem');
 	}
+
 	if ($boardname[0] =~ m/(PF5PU1G)/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 		printLog('discovered no-boot-on-battery problem');
 	}
+
 	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
 		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
 		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
@@ -502,6 +571,7 @@ sub checkRequirements {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
+
 	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
 		($boardname[0] =~ m/POLARIS1701A2060/) ||
 		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
@@ -509,6 +579,7 @@ sub checkRequirements {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
+
 	if (($boardname[0] =~ m/(X170SM)/) ||
 		($boardname[0] =~ m/(PB50_70DFx,DDx)/) ||
    		($boardname[0] =~ m/LAPQC71A/) ||
@@ -521,10 +592,12 @@ sub checkRequirements {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 		printLog('discovered elantech-touchpad-fix problem');
 	}
+
 	if (($boardname[0] =~ m/LAPQC71A/) ||
 		($boardname[0] =~ m/LAPQC71B/) ||
 		($boardname[0] =~ m/PF5PU1G/) ||
@@ -545,12 +618,14 @@ sub checkRequirements {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('discovered tuxedo-touchpad-switch problem');
 	}
+
 	if ($boardname[0] =~ m/(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('discovered backlight-fix problem');
 		}
 	}
+
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
@@ -562,17 +637,54 @@ sub checkRequirements {
 			printLog('discovered core-fix problem');
 		}
 	}
+
 	# if Threeg Huawei ME936 device found
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('discovered threeg-fix problem');
 	}
+
 	if ($boardname[0] =~ m/X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
+
 	if (`lspci -d 2646:2263` =~ /Kingston/) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
+	}
+
+	my $fingerprintLsUsb = `lsusb`;
+	my @fingerprintRegExp = (
+		qr/147e:100[0123]/,
+		qr/147e:20(15|16|20)/,
+		qr/147e:300[01]/,
+		qr/147e:500[23]/,
+		qr/0483:201[56]/,
+		qr/1c7a:0603/);
+	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
+		$origConfModules{fingerprintreader}{required} = 'yes';
+		printLog('discovered fingerprint-reader problem');
+		last;
+	}
+	
+	if (($boardname[0] =~ m/NHxxRZQ/) ||
+		($boardname[0] =~ m/NHxxRZ/) ||
+   		($boardname[0] =~ m/L140CU/) ||
+		($boardname[0] =~ m/NL40_50GU/) ||
+		($boardname[0] =~ m/NH5xAx/) ||
+		($boardname[0] =~ m/NJ50_NJ70CU/) ||
+   		($boardname[0] =~ m/PB50_70D/) ||
+   		($boardname[0] =~ m/AURA1501/) ||
+		($boardname[0] =~ m/N150CU/) ||
+		($boardname[0] =~ m/NV4XM/) ||
+		($boardname[0] =~ m/L14xMU/)) {
+		$origConfModules{tuxedomicfix1}{required} = 'yes';
+		printLog('discovered tuxedo-micfix1 problem');
+	}
+
+	if ($boardname[0] =~ m/N350TW/) {
+		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
+		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
 }
 
@@ -784,8 +896,10 @@ sub tuxedocontrolcenter() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -817,8 +931,10 @@ sub tuxedokeyboard() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -834,27 +950,6 @@ sub tuxedokeyboard() {
 	}
 }
 
-
-
-
-###############################################################################
-# Checks if the package is installed on the system
-# return 1 if yes
-# return 0 if no
-#
-sub isPackageInstalled {
-	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
-	my $retString = `$cmd`;
-	my $retValue = $?;
-	if ($retString =~ m/install ok installed/) {
-		printLog("package $package is installed");
-		return 1;
-	} else {
-		printLog("package $package is not installed");
-		return 0;
-	}
-}
 
 
 
@@ -1277,7 +1372,7 @@ sub threegfix() {
 		printLog("applying threegfix");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
-		if ($retval1 == 0 && $retval2 == 0) {
+		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -1291,7 +1386,7 @@ sub threegfix() {
 		printLog("upgrading threegfix");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
-		if ($retval1 == 0 && $retval2 == 0) {
+		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -1321,8 +1416,10 @@ sub tuxedotouchpadswitch() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1388,8 +1485,10 @@ sub tuxedokeyboardite() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1402,6 +1501,298 @@ sub tuxedokeyboardite() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# fingerprint-reader
+#
+sub fingerprintreader() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packagefprintd;
+	my $packagelibpam;
+	if ($action eq 'install') {
+		# check if the package is already installed
+		if( ! isPackageInstalled('fprintd') ) {
+			$wasInstalled = 0;
+			$packagefprintd = installPackage('fprintd');
+		} else {
+			$packagefprintd = 0;
+		}
+		if( ! isPackageInstalled('libpam-fprintd') ) {
+			$wasInstalled = 0;
+			$packagelibpam = installPackage('libpam-fprintd');
+		} else {
+			$packagelibpam = 0;
+		}
+
+		if( !$packagefprintd && !$packagelibpam ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed");
+			} else {
+				addToConfiguredModules($module, 'success');
+			}
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
+		} else {
+			$origConfModules{$module}{installed} = 'failed';
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog('upgrade not necessary for packages');
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# tuxedo-micfix1
+#
+sub tuxedomicfix1() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = 'failed';
+				addToConfiguredModules($module, 'failed');
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog('upgrade not necessary for packages');
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# Mesa-utils
+#
+sub mesautils() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Rescans the pci bus to reactivate missing audio device
+# - N350TW
+#
+sub tuxedorestoreaudiofix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $retval2;
+	my $fileName = '/lib/systemd/system/restore-audiocards.service';
+	my $fileText = "# added by tuxedo-tomte \n".
+		"[Unit]\n".
+		"Description=Rescan the PCI-Bus for missed audio cards\n".
+		"After=alsa-restore.service\n".
+		"\n".
+		"[Service]\n".
+		"Type=oneshot\n".
+		"RemainAfterExit=false\n".
+		"ExecStart=/usr/bin/bash -c 'echo auto >> /sys/devices/pci0000:00/0000:00:1f.3/power/control'\n".
+		"ExecStart=/usr/bin/sleep 1\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/devices/pci0000:00/0000:00:1f.3/remove'\n".
+		"ExecStart=/usr/bin/sleep 1\n".
+		"ExecStart=/usr/bin/bash -c 'echo 1 >> /sys/bus/pci/rescan'\n".
+		"\n".
+		"[Install]\n".
+		"WantedBy=multi-user.target\n";
+	if ($action eq 'install') {
+		printLog("applying tuxedorestoreaudiofix");
+		$retval1 = createFile($fileName, $fileText);
+		$retval2 = system('systemctl --now enable restore-audiocards.service');
+		if ($retval1 == 0 || $retval2 == 0) {
+			if ($retval2 == 0) {
+				printLog('systemd could not initialize restore-audiocards.service');
+			}
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			print "Please restart your system\n";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("no upgrade available yet for tuxedo-restore-audio-fix");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# kernel
+#
+sub kernel() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageLinuxGenericHwe1804;
+	my $packageLinuxImageGenericHwe1804;
+	my $packageLinuxHeadersGenericHwe1804;
+	my $packageLinuxSignedGenericHwe1804;
+	my $packageLinuxOem2004;
+	my $packageLinuxFirmware;
+	my $packageIntelMicrocode;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /18.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
+			} else {
+				$packageLinuxGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
+			} else {
+				$packageLinuxImageGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
+			} else {
+				$packageLinuxHeadersGenericHwe1804 = 0;
+			}
+			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
+			} else {
+				$packageLinuxSignedGenericHwe1804 = 0;
+			}
+	
+			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		
+		}
+		if ($distributionVersion =~ /20.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-oem-20.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-oem-20.04');
+			} else {
+				$packageLinuxOem2004 = 0;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 0;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 0;
+			}
+	
+			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# Checks if the package is installed on the system
+# return 1 if yes
+# return 0 if no
+#
+sub isPackageInstalled {
+	my $package = shift;
+	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
+	my $retString = `$cmd`;
+	my $retValue = $?;
+	if ($retString =~ m/install ok installed/) {
+		printLog("package $package is installed");
+		return 1;
+	} else {
+		printLog("package $package is not installed");
+		return 0;
 	}
 }
 
@@ -2385,7 +2776,7 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
-	printLog("starting systemd-run tuxedo-tomte configure all for delayed configuration");
+	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 	printLog("ret value: $retVal");
 }
 
