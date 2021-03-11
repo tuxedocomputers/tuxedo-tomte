@@ -2045,7 +2045,9 @@ sub block() {
 	}
 	if ($localConfModules{$module}{blocked} eq 'no') {
 		print "Blocking module $moduleName\n";
+		print "$moduleName will not be upgraded or reinstalled if removed\n";
 		$origConfModules{$module}{blocked} = 'yes';
+		printLog("blocking module $moduleName");
 		return;
 	}
 }
@@ -2066,7 +2068,10 @@ sub unblock() {
 	}
 	if ($localConfModules{$module}{blocked} eq 'yes') {
 		print "Unblocking module $moduleName\n";
+		print "$moduleName will be upgraded or installed after restart or".
+			"next tuxedo-tomte configure or reconfigure\n";
 		$origConfModules{$module}{blocked} = 'no';
+		printLog("unblocking module $moduleName");
 		return;
 	}
 }
@@ -2252,6 +2257,8 @@ tuxedo-tomte [COMMAND]
   description MODULE          Shows the module description
   configure MODULE ...|all    Configure an unconfigured module
   reconfigure MODULE...|all   Reconfigure a configured module
+  block MODULE ...            Block a module
+  unblock MODULE ...          Unblock a module
   help                        Prints this message
 USAGE
 
@@ -2259,8 +2266,6 @@ USAGE
 ###############################################################################
 # TODO to be implemented in the very near future
 #  remove MODULE...|ALL        Remove a configured module
-#  block MODULE ...            Block a module
-#  unblock MODULE ...          Unblock a module
 
 
 
@@ -2371,12 +2376,6 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		#	} elsif ($ARGV[0] eq "update\n") {
-		#		print "update does nothing yet\n";
-		#		initLogging();
-		#		prepareValues();
-		#		updateAllModules();
-		#		writeConfigFile();
 	} elsif ($ARGV[0] eq "block") {
 		if (defined $ARGV[1]) {
 			initLogging();

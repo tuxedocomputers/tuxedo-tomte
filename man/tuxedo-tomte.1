@@ -6,7 +6,7 @@ tuxedo-tomte \- Manages fixes for TUXEDO notebooks
 .SH "DESCRIPTION"
 .PP
 \fBtuxedo-tomte\fR
-is a little brownie that provides services, updates and fixes for
+is a little helper that provides services, updates and fixes for
 TUXEDO devices in the background\&. It does not send any information, telemetry
 data or similar stuff out!
 .P
@@ -43,7 +43,8 @@ If \fBall\fR is used then all possible fixes will be reconfigured\&.
 \fBblock \fIMODULE\fR
 .RS 4
 Prevents the module from being installed\&.
-Already installed modules will not be upgraded\&.
+Already installed modules will not be upgraded except for packages which are
+managed by the systems package manager\&.
 .RE
 .PP
 \fBunblock \fIMODULE\fR
