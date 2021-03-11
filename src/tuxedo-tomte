@@ -340,6 +340,20 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 	},
+	tuxedonvmefix => {
+		name => 'tuxedo-nvme-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Removes sleep bug on Kingston A2000 NVME devices',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
 		version => 1,
@@ -624,6 +638,7 @@ sub checkRequirements {
 		}
 	}
 
+	# if Threeg Huawei ME936 device found
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('discovered threeg-fix problem');
@@ -632,6 +647,10 @@ sub checkRequirements {
 	if ($boardname[0] =~ m/X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
+	}
+
+	if (`lspci -d 2646:2263` =~ /Kingston/) {
+		$origConfModules{tuxedonvmefix}{required} = 'yes';
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -667,7 +686,6 @@ sub checkRequirements {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
-
 }
 
 
@@ -1416,6 +1434,40 @@ sub tuxedotouchpadswitch() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Kingston A2000 NVME drives freezing after deep APST sleep fix
+#
+sub tuxedonvmefix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
