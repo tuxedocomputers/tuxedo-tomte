@@ -1778,9 +1778,9 @@ sub kernel() {
 		}
 		if ($distributionVersion =~ /20.04/) {
 			# check if the package is already installed
-			if( ! isPackageInstalled('linux-oem-20.04') ) {
+			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
 				$wasInstalled = 0;
-				$packageLinuxOem2004 = installPackage('linux-oem-20.04');
+				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
 			} else {
 				$packageLinuxOem2004 = 0;
 			}
