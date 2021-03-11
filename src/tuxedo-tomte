@@ -690,7 +690,7 @@ sub checkRequirements {
    		($boardname[0] =~ m/PB50_70D/) ||
    		($boardname[0] =~ m/AURA1501/) ||
 		($boardname[0] =~ m/N150CU/) ||
-		($boardname[0] =~ m/NV4XM/) ||
+		($boardname[0] =~ m/NV4.M/) ||
 		($boardname[0] =~ m/L14xMU/)) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
 		printLog('discovered tuxedo-micfix1 problem');
