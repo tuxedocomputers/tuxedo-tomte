@@ -881,8 +881,8 @@ sub amdxhcihcdusbquirksuspendfix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
@@ -1047,8 +1047,8 @@ sub nokeyboardaftersuspendfix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
@@ -1064,8 +1064,8 @@ sub nokeyboardaftersuspendfix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
