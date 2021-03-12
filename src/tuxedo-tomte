@@ -542,6 +542,7 @@ sub prerequisites {
 }
 
 
+
 ###############################################################################
 # check whether the module is required for the system
 # checks only for hardware
@@ -553,6 +554,8 @@ sub checkRequirements {
 	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
 	my @boardvendor;
 	my $biosVersion;
+
+	my $lspciOutput = `lspci -vn`;
 
 	# load required data into variables
 	@boardname = readFileReturnLines($boardnameFilename);
@@ -663,7 +666,10 @@ sub checkRequirements {
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
 
-	if (`lspci -d 2646:2263` =~ /Kingston/) {
+	# get vendor text from vendor ID:device ID
+	my @tuxedonvmefixDevices = (
+		'2646:2263');
+	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
 	}
 
@@ -680,18 +686,20 @@ sub checkRequirements {
 		printLog('discovered fingerprint-reader problem');
 		last;
 	}
-	
-	if (($boardname[0] =~ m/NHxxRZQ/) ||
-		($boardname[0] =~ m/NHxxRZ/) ||
-   		($boardname[0] =~ m/L140CU/) ||
-		($boardname[0] =~ m/NL40_50GU/) ||
-		($boardname[0] =~ m/NH5xAx/) ||
-		($boardname[0] =~ m/NJ50_NJ70CU/) ||
-   		($boardname[0] =~ m/PB50_70D/) ||
-   		($boardname[0] =~ m/AURA1501/) ||
-		($boardname[0] =~ m/N150CU/) ||
-		($boardname[0] =~ m/NV4.M/) ||
-		($boardname[0] =~ m/L14xMU/)) {
+
+	my @tuxedomicfix1Devices = (
+		'1558:67e1', 
+		'1558:8562', 
+		'1558:1401', 
+		'1558:1404', 
+		'1558:14a1', 
+		'1558:40a1', 
+		'1558:50f0', 
+		'1558:8686', 
+		'1558:4018', 
+		'1558:a500', 
+		'1558:51a1');
+	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
 		printLog('discovered tuxedo-micfix1 problem');
 	}
@@ -701,10 +709,28 @@ sub checkRequirements {
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
 
+	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 	}
+}
+
+
+
+###############################################################################
+# returns true if the PCI device or subdevice was found
+# parameter is an array of PCI devices (RegExp are allowed)
+#
+sub findPciDevice {
+	my ($lspciList, @pciDevices) = @_;
+	my $pciDevice;
+	foreach $pciDevice (@pciDevices) {
+		if ($lspciList =~ /$pciDevice/) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 
@@ -2536,6 +2562,7 @@ sub isDisplayPresent {
 	printLog("edid string not found");
 	return (0);
 }
+
 
 
 
