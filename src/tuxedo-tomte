@@ -763,6 +763,7 @@ sub i8042fix() {
 				addToConfiguredModules($module, "success");
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -780,6 +781,7 @@ sub i8042fix() {
 				addToConfiguredModules($module, "success");
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -813,6 +815,7 @@ sub nobootonbattery() {
 				addToConfiguredModules($module, "success");
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -830,6 +833,7 @@ sub nobootonbattery() {
 				addToConfiguredModules($module, "success");
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -869,6 +873,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 				addToConfiguredModules($module, "success");
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -886,6 +891,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -972,6 +978,7 @@ sub tuxedocontrolcenter() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1007,6 +1014,7 @@ sub tuxedokeyboard() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1052,6 +1060,7 @@ sub nokeyboardaftersuspendfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -1069,6 +1078,7 @@ sub nokeyboardaftersuspendfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -1100,6 +1110,7 @@ sub backlightfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;	
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -1117,6 +1128,7 @@ sub backlightfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
@@ -1371,6 +1383,7 @@ my $retval;
             	$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
         }
     }
@@ -1388,6 +1401,7 @@ my $retval;
             	$postConfProgram{updateGrub}{trigger} = 1;
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
         }
     }
@@ -1517,6 +1531,7 @@ sub tuxedotouchpadswitch() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1552,6 +1567,7 @@ sub tuxedonvmefix() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1588,6 +1604,7 @@ sub tuxedokeyboardite() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1629,6 +1646,7 @@ sub fingerprintreader() {
 		if( !$packagefprintd && !$packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
 			} else {
 				addToConfiguredModules($module, 'success');
 			}
@@ -1636,6 +1654,7 @@ sub fingerprintreader() {
 			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
 			$origConfModules{$module}{installed} = 'failed';
+			addToConfiguredModules($module, 'failed');
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1669,6 +1688,7 @@ sub tuxedomicfix1() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'yes';
 		}
@@ -1705,6 +1725,7 @@ sub mesautils() {
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
@@ -1818,6 +1839,7 @@ sub kernel() {
 			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
 				}
@@ -1825,6 +1847,7 @@ sub kernel() {
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		
 		}
@@ -1852,6 +1875,7 @@ sub kernel() {
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
 				}
@@ -1859,6 +1883,7 @@ sub kernel() {
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		}
 	}
@@ -1934,6 +1959,7 @@ sub nvidiadriver() {
 			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
 				}
@@ -1941,6 +1967,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		
 		}
@@ -1971,6 +1998,7 @@ sub nvidiadriver() {
 			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
 				}
@@ -1978,6 +2006,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		}
 	}
@@ -3076,6 +3105,7 @@ sub listSuccess {
 	my @failedPrograms;
 	my @failedModules;
 	my @successModules;
+	my @nothingToDoModules;
 	my $successOrFailed = 0;
 
 	foreach $confProgram (keys %postConfProgram) {
@@ -3091,6 +3121,8 @@ sub listSuccess {
 		} elsif ($configuredModules{$confModule} eq "success") {
 			$successOrFailed = 1;
 			push(@successModules, $confModule);
+		} elsif ($configuredModules{$confModule} eq "nothingToDo") {
+			push(@nothingToDoModules, $confModule);
 		}
 	}
 	print "\n\n";
@@ -3101,6 +3133,10 @@ sub listSuccess {
 	if (@failedModules) {
 		print "The following modules have failed to be installed:\n";
 		printNameDescriptionModules(@failedModules);
+	}
+	if (@nothingToDoModules) {
+		print "The following modules were already installed\n";
+		printNameDescriptionModules(@nothingToDoModules);
 	}
 	if (@failedPrograms) {
 		print "The following post installation programs have failed:\n";
