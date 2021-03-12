@@ -758,9 +758,11 @@ sub i8042fix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -773,9 +775,11 @@ sub i8042fix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -804,9 +808,11 @@ sub nobootonbattery() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -819,9 +825,11 @@ sub nobootonbattery() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -856,9 +864,11 @@ sub amdxhcihcdusbquirksuspendfix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -874,6 +884,8 @@ sub amdxhcihcdusbquirksuspendfix() {
 			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -1038,6 +1050,8 @@ sub nokeyboardaftersuspendfix() {
 			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -1053,6 +1067,8 @@ sub nokeyboardaftersuspendfix() {
 			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -1079,10 +1095,11 @@ sub backlightfix() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			$origConfModules{$module}{installed} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
-				$postConfProgram{updateGrub}{trigger} = 1;
-	
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -1095,9 +1112,11 @@ sub backlightfix() {
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
 				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
 		}
 	}
@@ -1338,18 +1357,20 @@ my $module = shift;
 my $action = shift;
 my @kernel_parameters = ("psmouse.elantech_smbus=0");
 my $retval;
-if ($action eq 'install') {
-printLog("applying elantechtouchpadfix");
-$retval = insertGrub($module, \@kernel_parameters);
+	if ($action eq 'install') {
+		printLog("applying elantechtouchpadfix");
+		$retval = insertGrub($module, \@kernel_parameters);
         if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+            	addToConfiguredModules($module, "success");
             	$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
         }
     }
@@ -1362,9 +1383,11 @@ $retval = insertGrub($module, \@kernel_parameters);
         } else {
             $origConfModules{$module}{installed} = "yes";
             $origConfModules{$module}{upgraded} = "yes";
-            addToConfiguredModules($module, "success");
 			if ($retval > 0) {
+            	addToConfiguredModules($module, "success");
             	$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
 			}
         }
     }
@@ -1522,8 +1545,10 @@ sub tuxedonvmefix() {
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
 			} else {
 				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} was already installed");
@@ -1793,8 +1818,9 @@ sub kernel() {
 			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
 				}
-				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1826,8 +1852,9 @@ sub kernel() {
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
 				}
-				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1907,8 +1934,9 @@ sub nvidiadriver() {
 			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
 				}
-				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1943,8 +1971,9 @@ sub nvidiadriver() {
 			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
+				} else {
+					addToConfiguredModules($module, "success");
 				}
-				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1975,7 +2004,6 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
-		printLog("search string was: $deinst*");
 		if ($retValue == 256) {
 			printLog('no packages found matching search string to deinstall packages');
 			return 0;
