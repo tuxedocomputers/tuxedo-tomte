@@ -551,8 +551,6 @@ sub checkRequirements {
 	my $FH;
 	my $boardnameFilename = "/sys/class/dmi/id/board_name";
 	my @boardname;
-	my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
-	my @boardvendor;
 	my $biosVersion;
 
 	my $lspciOutput = `lspci -vn`;
@@ -561,10 +559,6 @@ sub checkRequirements {
 	@boardname = readFileReturnLines($boardnameFilename);
 	if ( !@boardname ) {
 		printLog("could not open $boardnameFilename $!");
-	}
-	@boardvendor = readFileReturnLines($boardvendorFilename);
-	if ( !@boardvendor ) {
-		printLog("could not open $boardvendorFilename $!");
 	}
 
 	# check values for each module
@@ -3247,6 +3241,17 @@ sub prepareValues {
 ###############################################################################
 # MAIN PROGRAM
 
+my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
+my @boardvendor;
+@boardvendor = readFileReturnLines($boardvendorFilename);
+if ( !@boardvendor ) {
+	printLog("could not open $boardvendorFilename $!");
+	exit (0);
+}
+if ( !@boardvendor =~ /TUXEDO/ ) {
+	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake';
+	exit (0);
+}
 
 readOSData();
 
