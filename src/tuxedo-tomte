@@ -3125,25 +3125,25 @@ sub listSuccess {
 			push(@nothingToDoModules, $confModule);
 		}
 	}
-	print "\n\n";
+	print "\n";
 	if (@successModules) {
-		print "The following modules have been installed successfully:\n";
+		print "\nThe following modules have been installed successfully:\n";
 		printNameDescriptionModules(@successModules);
 	}
 	if (@failedModules) {
-		print "The following modules have failed to be installed:\n";
+		print "\nThe following modules have failed to be installed:\n";
 		printNameDescriptionModules(@failedModules);
 	}
 	if (@nothingToDoModules) {
-		print "The following modules were already installed\n";
+		print "\nThe following modules were already installed\n";
 		printNameDescriptionModules(@nothingToDoModules);
 	}
 	if (@failedPrograms) {
-		print "The following post installation programs have failed:\n";
+		print "\nThe following post installation programs have failed:\n";
 		printNameDescriptionPrograms(@failedPrograms);
 	}
 	if (! $successOrFailed) {
-		print "Nothing has been configured\n";
+		print "\nNothing has been configured\n";
 	}
 }
 
@@ -3153,8 +3153,9 @@ sub listSuccess {
 #
 sub printNameDescriptionModules {
 	my @elements = @_;
-	foreach (@elements) {
-		print "$origConfModules{$_}{name}: $origConfModules{$_}{description}\n";
+	my $element;
+	foreach $element (@elements) {
+		print "- $origConfModules{$element}{name}: $origConfModules{$element}{description}\n";
 	}
 }
 
@@ -3164,8 +3165,9 @@ sub printNameDescriptionModules {
 #
 sub printNameDescriptionPrograms {
 	my @elements = @_;
-	foreach (@elements) {
-		print "$_: $postConfProgram{$_}{description}\n";
+	my $element;
+	foreach $element (@elements) {
+		print "- $element: $postConfProgram{$element}{description}\n";
 	}
 }
 
