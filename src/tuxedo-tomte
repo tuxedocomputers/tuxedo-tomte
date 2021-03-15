@@ -209,7 +209,7 @@ my %origConfModules = (
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between the two with prime-select',
+		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -251,7 +251,7 @@ my %origConfModules = (
 		hwid => 2,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem on XC1511, XC1711, XUX711, InfinityBook Pro 14 v5 and 15 v5, AURA 15 gen 1, XA15 gen 10 and XMG Fusion',
+		description => 'Fixes no keyboard after suspend problem',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -578,13 +578,14 @@ sub checkRequirements {
 		printLog('discovered no-boot-on-battery problem');
 	}
 
-	if (($boardname[0] =~ m/(POLARIS1501A1650TI)/) ||
-		($boardname[0] =~ m/(POLARIS1501A2060)/) ||
-		($boardname[0] =~ m/(POLARIS1701A1650TI)/) ||
-		($boardname[0] =~ m/(POLARIS1701A2060)/) ||
-		($boardname[0] =~ m/(PULSE1401)/) ||
-		($boardname[0] =~ m/(PULSE1501)/) ||
-  		($boardname[0] =~ m/(AURA1501)/)) {
+	if (($boardname[0] =~ m/POLARIS1501A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1501A2060/) ||
+		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
+		($boardname[0] =~ m/POLARIS1701A2060/) ||
+		($boardname[0] =~ m/PULSE1401/) ||
+		($boardname[0] =~ m/PULSE1501/) ||
+		($boardname[0] =~ m/NL5xRU/) ||
+  		($boardname[0] =~ m/AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
@@ -604,6 +605,7 @@ sub checkRequirements {
 		($boardname[0] =~ m/N141CU/) ||
 		($boardname[0] =~ m/N150CU/) ||
    		($boardname[0] =~ m/NH5xAx/) ||
+   		($boardname[0] =~ m/NL5xRU/) ||
 		($boardname[0] =~ m/AURA1501/) ||
 		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
@@ -852,7 +854,7 @@ sub nobootonbattery() {
 # - POLARIS1701A2060
 # - PULSE1401
 # - PULSE1501
-# - AURA1501
+# - AURA1501/NL5xRU
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
@@ -1036,7 +1038,7 @@ sub tuxedokeyboard() {
 # - XC1711
 # - XUX711
 # - NH5xAx
-# - AURA1501
+# - AURA1501/NL5xRU
 # - PB50_70DFx,DDx
 # - N150CU
 # - N141CU
@@ -2900,7 +2902,7 @@ sub configureSingleModule {
 	#} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
 	#	configureModule($module);
 	} else {
-		print "Module: $moduleName cannot be installed because:\n";
+		print "Module $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
 			print "- it is already installed (maybe use 'reconfigure')\n";
 		}
@@ -3124,7 +3126,6 @@ sub listSuccess {
 			push(@nothingToDoModules, $confModule);
 		}
 	}
-	print "\n";
 	if (@successModules) {
 		print "\nThe following modules have been installed successfully:\n";
 		printNameDescriptionModules(@successModules);
