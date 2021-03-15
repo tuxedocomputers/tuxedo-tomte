@@ -3300,6 +3300,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			}
+			printLog('Tomte finished');
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
@@ -3321,6 +3322,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			}
+			printLog('Tomte finished');
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
@@ -3330,6 +3332,7 @@ if (@ARGV != 0) {
 			prepareValues();
 			block();
 			writeConfigFile();
+			printLog('Tomte finished');
 		} else {
 			print "Module name missing\n";
 		}
@@ -3339,6 +3342,7 @@ if (@ARGV != 0) {
 			prepareValues();
 			unblock();
 			writeConfigFile();
+			printLog('Tomte finished');
 		} else {
 			print "Module name missing\n";
 		}
