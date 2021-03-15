@@ -746,7 +746,7 @@ sub i8042fix() {
 	my @kernel_parameters = ("i8042.nopnp");
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying i8042fix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -764,7 +764,7 @@ sub i8042fix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading i8042fix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -798,7 +798,7 @@ sub nobootonbattery() {
 	my @kernel_parameters = ("iommu=soft");
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying nobootonbattery");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -816,7 +816,7 @@ sub nobootonbattery() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading nobootonbattery");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -856,7 +856,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying amdxhcihcdusbquirksuspendfix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -874,7 +874,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading amdxhcihcdusbquirksuspendfix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -922,7 +922,7 @@ sub amdgpuwithnvidiafix() {
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
 	if ($action eq 'install') {
-		printLog("applying amdgpuwithnvidiafix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = createFile($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -935,7 +935,7 @@ sub amdgpuwithnvidiafix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading amdgpuwithnvidiafix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = createFile($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1044,7 +1044,7 @@ sub nokeyboardaftersuspendfix() {
 	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying nokeyboardaftersuspendfix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1061,7 +1061,7 @@ sub nokeyboardaftersuspendfix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading nokeyboardaftersuspendfix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1094,7 +1094,7 @@ sub backlightfix() {
 	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying backlightfix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1111,7 +1111,7 @@ sub backlightfix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading backlightfix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1144,7 +1144,7 @@ sub tuxedorepos() {
 	my $exitStatus;
 
 	if ($action eq 'install') {
-		printLog("applying tuxedorepos");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = createRepos();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1166,7 +1166,7 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'upgrade') {
 		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog('uprading repos');
+			printLog("uprading $origConfModules{$module}{name}");
 			backupFile('/etc/apt/sources.list');
 			$retval = createRepos();
 			if ($retval == 0) {
@@ -1220,7 +1220,7 @@ sub corefix() {
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
-		printLog("applying corefix");
+		printLog("applying $origConfModules{$module}{name}");
 		mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
 		copy($amlFileOrig, $amlFileDest);
 		mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
@@ -1366,7 +1366,7 @@ my $action = shift;
 my @kernel_parameters = ("psmouse.elantech_smbus=0");
 my $retval;
 	if ($action eq 'install') {
-		printLog("applying elantechtouchpadfix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
         if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
@@ -1384,7 +1384,7 @@ my $retval;
         }
     }
     if ($action eq 'upgrade') {
-        printLog("upgrading elantechtouchpadfix");
+        printLog("upgrading $origConfModules{$module}{name}");
         $retval = insertGrub($module, \@kernel_parameters);
         if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
@@ -1473,7 +1473,7 @@ sub threegfix() {
 	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
-		printLog("applying threegfix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
@@ -1487,7 +1487,7 @@ sub threegfix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading threegfix");
+		printLog("upgrading $origConfModules{$module}{name}");
 		$retval1 = createFile($fileName1, $fileText1);
 		$retval2 = createFile($fileName2, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
@@ -1763,7 +1763,7 @@ sub tuxedorestoreaudiofix() {
 		"[Install]\n".
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
-		printLog("applying tuxedorestoreaudiofix");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval1 = createFile($fileName, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
@@ -3042,7 +3042,9 @@ sub postConfigure {
 	my $sysProgram;
 	my $exitStatus;
 	my $postConfTrigger = 0;
+	printLog("initializing post-configuration");
 	foreach $sysProgram (keys %postConfProgram) {
+		printLog("starting $sysProgram");
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
