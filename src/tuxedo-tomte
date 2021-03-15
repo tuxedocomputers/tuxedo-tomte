@@ -2897,9 +2897,8 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
 		upgradeModule($module);
-	} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
-		configureModule($module);
-		# do nothing
+	#} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
+	#	configureModule($module);
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
@@ -3135,7 +3134,7 @@ sub listSuccess {
 		printNameDescriptionModules(@failedModules);
 	}
 	if (@nothingToDoModules) {
-		print "\nThe following modules were already installed\n";
+		print "\nThe following modules were already installed:\n";
 		printNameDescriptionModules(@nothingToDoModules);
 	}
 	if (@failedPrograms) {
