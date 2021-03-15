@@ -3044,8 +3044,8 @@ sub postConfigure {
 	my $postConfTrigger = 0;
 	printLog("initializing post-configuration");
 	foreach $sysProgram (keys %postConfProgram) {
-		printLog("starting $sysProgram");
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
+			printLog("starting $sysProgram");
 			$exitStatus = system($postConfProgram{$sysProgram}{command});
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
