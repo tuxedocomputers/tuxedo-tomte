@@ -2989,7 +2989,7 @@ sub reconfigureSingleModule {
 ###############################################################################
 # blocks a module
 #
-sub block() {
+sub block {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
@@ -3012,7 +3012,7 @@ sub block() {
 ###############################################################################
 # unblocks a module
 #
-sub unblock() {
+sub unblock {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
