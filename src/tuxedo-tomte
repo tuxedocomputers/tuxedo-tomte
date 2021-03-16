@@ -3274,15 +3274,13 @@ sub tuxedoDevice {
 	if ($boardname =~ /P65_P67RGRERA/) {
 		return (1);
 	}
-	my @type2board = ('8086:24f3');
-	if (($boardvendor =~ /Type2___Board_Vendor_Name1/) &&
-		(findPciDevice($lspciOutput, @type2board))) {
-		return (0);
-	}
 	if ($boardvendor =~ /TUXEDO/) {
 		return (1);
 	}
 	if ($sysvendor =~ /TUXEDO/) {
+		return (1);
+	}
+	if ($boardname =~ /LAPQC71A/) {
 		return (1);
 	}
 	return (0);
