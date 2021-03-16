@@ -586,6 +586,7 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
+	my $biosVersion;
 
 	# check values for each module
 	if ($boardname =~ /PB50_70DFx,DDx/) {
@@ -665,9 +666,16 @@ sub checkRequirements {
 		}
 	}
 
+	# get the BIOS version
+	# deactivated but could be useful if version changes in the future
+	# $main::biosVersion = `dmidecode -s bios-version`;
+	$main::biosVersion = '1.07.04NBC';
+	$main::biosVersion =~ s/\s//g;
 	if ($boardname =~ /NH5xAx/) {
+		# if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 		$origConfModules{corefix}{required} = 'yes';
 		printLog('discovered core-fix problem');
+		#}
 	}
 
 	# if Threeg Huawei ME936 device found
