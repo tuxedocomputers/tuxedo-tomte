@@ -573,7 +573,7 @@ sub isOSSupported {
 #
 sub prerequisites {
 	# tuxedorepos
-	configureSingleModule('tuxedo-repos');
+	reconfigureSingleModule('tuxedo-repos');
 
 	#TODO: ALL grubentries should always be checked in case something brakes them
 }
@@ -2960,8 +2960,8 @@ sub reconfigureAllModules {
 # already installed
 #
 sub reconfigureSingleModule {
+	my $moduleName = shift;
 	my $module;
-	my $moduleName = $ARGV[1];
 	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name");
@@ -2990,7 +2990,7 @@ sub reconfigureSingleModule {
 # blocks a module
 #
 sub block() {
-	my $moduleName = $ARGV[1];
+	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
@@ -3013,7 +3013,7 @@ sub block() {
 # unblocks a module
 #
 sub unblock() {
-	my $moduleName = $ARGV[1];
+	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
@@ -3362,7 +3362,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {	
-				reconfigureSingleModule();
+				reconfigureSingleModule($ARGV[1]);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
@@ -3375,7 +3375,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			block();
+			block($ARGV[1]);
 			writeConfigFile();
 			printLog('Tomte finished');
 		} else {
@@ -3385,7 +3385,7 @@ if (@ARGV != 0) {
 		if (defined $ARGV[1]) {
 			initLogging();
 			prepareValues();
-			unblock();
+			unblock($ARGV[1]);
 			writeConfigFile();
 			printLog('Tomte finished');
 		} else {
