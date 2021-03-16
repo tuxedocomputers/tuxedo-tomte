@@ -30,6 +30,20 @@ my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
 
+my $lspciOutput = `lspci -vn`;
+my $boardnameFilename = "/sys/class/dmi/id/board_name";
+my $boardname;
+$boardname = readFileReturnLine($boardnameFilename);
+
+my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
+my $boardvendor;
+$boardvendor = readFileReturnLine($boardvendorFilename);
+
+my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
+my $sysvendor;
+$sysvendor = readFileReturnLine($sysvendorFilename);
+
+
 
 ###############################################################################
 # initial definition of post configuration modules
@@ -490,6 +504,29 @@ sub readFileReturnLines {
 
 
 ###############################################################################
+# reads a file and returns a line
+# chomps the line
+# returns undef if file can't be opened
+#
+sub readFileReturnLine {
+	my $file = shift;
+	my $FH;
+	my $line;
+	if ( open $FH, "<", $file ) {
+		chomp($line = <$FH>);
+		close $FH;
+	} else {
+		printLog("Err: $!");
+		printLog("no $file present or unable to open the file for reading");
+		return;
+	}
+	return $line;
+}
+
+
+
+
+###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
 #
@@ -549,106 +586,88 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
-	my $boardnameFilename = "/sys/class/dmi/id/board_name";
-	my @boardname;
-	my $biosVersion;
-
-	my $lspciOutput = `lspci -vn`;
-
-	# load required data into variables
-	@boardname = readFileReturnLines($boardnameFilename);
-	if ( !@boardname ) {
-		printLog("could not open $boardnameFilename $!");
-	}
 
 	# check values for each module
-	if ($boardname[0] =~ m/(PB50_70DFx,DDx)/) {
+	if ($boardname =~ /PB50_70DFx,DDx/) {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('discovered i8042-fix problem');
 	}
 
-	if ($boardname[0] =~ m/(PF5PU1G)/) {
+	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 		printLog('discovered no-boot-on-battery problem');
 	}
 
-	if (($boardname[0] =~ m/POLARIS1501A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1501A2060/) ||
-		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1701A2060/) ||
-		($boardname[0] =~ m/PULSE1401/) ||
-		($boardname[0] =~ m/PULSE1501/) ||
-		($boardname[0] =~ m/NL5xRU/) ||
-  		($boardname[0] =~ m/AURA1501/)) {
+	if (($boardname =~ /POLARIS1501A1650TI/) ||
+		($boardname =~ /POLARIS1501A2060/) ||
+		($boardname =~ /POLARIS1701A1650TI/) ||
+		($boardname =~ /POLARIS1701A2060/) ||
+		($boardname =~ /PULSE1401/) ||
+		($boardname =~ /PULSE1501/) ||
+		($boardname =~ /NL5xRU/) ||
+  		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
 	}
 
-	if (($boardname[0] =~ m/POLARIS1701A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1701A2060/) ||
-		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1501A2060/)) {
+	if (($boardname =~ /POLARIS1701A1650TI/) ||
+		($boardname =~ /POLARIS1701A2060/) ||
+		($boardname =~ /POLARIS1501A1650TI/) ||
+		($boardname =~ /POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 		printLog('discovered amd-gpu-with-nvidia-fix problem');
 	}
 
-	if (($boardname[0] =~ m/X170SM/) ||
-		($boardname[0] =~ m/PB50_70DFx,DDx/) ||
-   		($boardname[0] =~ m/LAPQC71A/) ||
-		($boardname[0] =~ m/LAPQC71B/) ||
-		($boardname[0] =~ m/N141CU/) ||
-		($boardname[0] =~ m/N150CU/) ||
-   		($boardname[0] =~ m/NH5xAx/) ||
-   		($boardname[0] =~ m/NL5xRU/) ||
-		($boardname[0] =~ m/AURA1501/) ||
-		($boardname[0] =~ m/PB50_70DFx,DDx/)) {
+	if (($boardname =~ /X170SM/) ||
+		($boardname =~ /PB50_70DFx,DDx/) ||
+   		($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /LAPQC71B/) ||
+		($boardname =~ /N141CU/) ||
+		($boardname =~ /N150CU/) ||
+   		($boardname =~ /NH5xAx/) ||
+   		($boardname =~ /NL5xRU/) ||
+		($boardname =~ /AURA1501/) ||
+		($boardname =~ /PB50_70DFx,DDx/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
 
-	if ($boardname[0] =~ m/X35R/) {
+	if ($boardname =~ /X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
 		printLog('discovered elantech-touchpad-fix problem');
 	}
 
-	if (($boardname[0] =~ m/LAPQC71A/) ||
-		($boardname[0] =~ m/LAPQC71B/) ||
-		($boardname[0] =~ m/PF5PU1G/) ||
-		($boardname[0] =~ m/PF5PU1G/) ||
-		($boardname[0] =~ m/POLARIS1501A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1501A2060/) ||
-		($boardname[0] =~ m/POLARIS1501I1650TI/) ||
-		($boardname[0] =~ m/POLARIS1501I2060/) ||
-		($boardname[0] =~ m/POLARIS1701A1650TI/) ||
-		($boardname[0] =~ m/POLARIS1701A2060/) ||
-		($boardname[0] =~ m/POLARIS1701I1650TI/) ||
-		($boardname[0] =~ m/POLARIS1701I2060/) ||
-		($boardname[0] =~ m/PULSE1401/) ||
-		($boardname[0] =~ m/PULSE1501/) ||
-		($boardname[0] =~ m/TRINITY1501I/) ||
-		($boardname[0] =~ m/TRINITY1701I/))
+	if (($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /LAPQC71B/) ||
+		($boardname =~ /PF5PU1G/) ||
+		($boardname =~ /PF5PU1G/) ||
+		($boardname =~ /POLARIS1501A1650TI/) ||
+		($boardname =~ /POLARIS1501A2060/) ||
+		($boardname =~ /POLARIS1501I1650TI/) ||
+		($boardname =~ /POLARIS1501I2060/) ||
+		($boardname =~ /POLARIS1701A1650TI/) ||
+		($boardname =~ /POLARIS1701A2060/) ||
+		($boardname =~ /POLARIS1701I1650TI/) ||
+		($boardname =~ /POLARIS1701I2060/) ||
+		($boardname =~ /PULSE1401/) ||
+		($boardname =~ /PULSE1501/) ||
+		($boardname =~ /TRINITY1501I/) ||
+		($boardname =~ /TRINITY1701I/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('discovered tuxedo-touchpad-switch problem');
 	}
 
-	if ($boardname[0] =~ m/(N8xEJEK)/) {
+	if ($boardname =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('discovered backlight-fix problem');
 		}
 	}
 
-	# get the BIOS version
-	# deactivated but could be useful if version changes in the future
-	# $main::biosVersion = `dmidecode -s bios-version`;
-	$main::biosVersion = '1.07.04NBC';
-	$main::biosVersion =~ s/\s//g;
-	if ($boardname[0] =~ m/NH5xAx/) {
-		if ($main::biosVersion =~ m/1\.07\.04NBC/) {
-			$origConfModules{corefix}{required} = 'yes';
-			printLog('discovered core-fix problem');
-		}
+	if ($boardname =~ /NH5xAx/) {
+		$origConfModules{corefix}{required} = 'yes';
+		printLog('discovered core-fix problem');
 	}
 
 	# if Threeg Huawei ME936 device found
@@ -657,16 +676,16 @@ sub checkRequirements {
 		printLog('discovered threeg-fix problem');
 	}
 
-	if ($boardname[0] =~ m/X170SM/) {
+	if ($boardname =~ /X170SM/) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
 
 	# get vendor text from vendor ID:device ID
-	my @tuxedonvmefixDevices = (
-		'2646:2263');
+	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
+		printLog('discovered tuxedo-nvme-fix problem');
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -700,7 +719,7 @@ sub checkRequirements {
 		printLog('discovered tuxedo-micfix1 problem');
 	}
 
-	if ($boardname[0] =~ m/N350TW/) {
+	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
 		printLog('discovered tuxedo-restore-audio-fix problem');
 	}
@@ -709,6 +728,7 @@ sub checkRequirements {
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
+		printLog('discovered nvidia-driver problem');
 	}
 }
 
@@ -3240,17 +3260,34 @@ sub prepareValues {
 
 
 ###############################################################################
+# checks if this is a TUXEDO device
+#
+sub tuxedoDevice {
+	if ($boardname =~ /P65_P67RGRERA/) {
+		return (1);
+	}
+	my @type2board = ('8086:24f3');
+	if (($boardvendor =~ /Type2___Board_Vendor_Name1/) &&
+		(findPciDevice($lspciOutput, @type2board))) {
+		return (0);
+	}
+	if ($boardvendor =~ /TUXEDO/) {
+		return (1);
+	}
+	if ($sysvendor =~ /TUXEDO/) {
+		return (1);
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
 ###############################################################################
 # MAIN PROGRAM
 
-my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
-my @boardvendor;
-@boardvendor = readFileReturnLines($boardvendorFilename);
-if ( !@boardvendor ) {
-	printLog("could not open $boardvendorFilename $!");
-	exit (0);
-}
-if ( !@boardvendor =~ /TUXEDO/ ) {
+if (!tuxedoDevice()) {
 	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake';
 	exit (0);
 }
