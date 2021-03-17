@@ -293,7 +293,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Adds the Tuxedo repositories',
+		description => 'Adds the TUXEDO repositories',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1056,7 +1056,7 @@ sub tuxedokeyboard() {
 
 
 ###############################################################################
-# Fix for Tuxedo Notebooks, fixes no keyboard present after suspend on
+# Fix for TUXEDO Notebooks, fixes no keyboard present after suspend on
 # - XC1711
 # - XUX711
 # - NH5xAx
@@ -1163,7 +1163,7 @@ sub backlightfix() {
 
 
 ###############################################################################
-# Adds the Tuxedo repos to the system
+# Adds the TUXEDO repos to the system
 #
 sub tuxedorepos() {
 	my $module = shift;
@@ -1288,7 +1288,7 @@ sub corefix() {
 
 
 ###############################################################################
-# Adds the Tuxedo repos to the system with public key
+# Adds the TUXEDO repos to the system with public key
 # returns 1 if successful
 # returns 0 if failed
 #
@@ -3296,7 +3296,7 @@ sub tuxedoDevice {
 	if ($sysvendor =~ /TUXEDO/) {
 		return (1);
 	}
-	if ($boardname =~ /LAPQC71A/) {
+	if ($boardname =~ /LAPQC71[AB]/) {
 		return (1);
 	}
 	return (0);
