@@ -1170,6 +1170,7 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $exitStatus;
+	my $output;
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
@@ -1182,10 +1183,14 @@ sub tuxedorepos() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$exitStatus = system('pkcon refresh');
+			$output = `pkcon refresh`;
+			$exitStatus = $?;
 			if ($exitStatus != 0) {
 				printLog('failed: pkcon refresh');
 				printLog("returned error code: $exitStatus");
+				if ($exitStatus == 7) {
+					printLog('possible network problems');
+				}
 				addToConfiguredModules($module, "failed");
 			} else {
 				printLog("success: pkcon refresh");
@@ -1206,10 +1211,14 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$exitStatus = system('pkcon refresh');
+				$output = `pkcon refresh`;
+				$exitStatus = $?;
 				if ($exitStatus != 0) {
 					printLog('failed: pkcon refresh');
 					printLog("returned error code: $exitStatus");
+					if ($exitStatus == 7) {
+						printLog('possible network problems');
+					}
 					addToConfiguredModules($module, "failed");
 				} else {
 					printLog('success: pkcon refresh');
