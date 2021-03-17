@@ -2909,14 +2909,12 @@ sub configureSingleModule {
 
 	if ( $localConfModules{$module}{installed} eq 'no' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		( $origConfModules{$module}{required} eq 'yes' ||
-	   	$origConfModules{$module}{required} eq 'prerequisite')) {
+		$origConfModules{$module}{required} eq 'yes') {
 		printLog("configure module: $module");
 		configureModule($module);
 	} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		( $origConfModules{$module}{required} eq 'yes' ||
-		$origConfModules{$module}{required} eq 'prerequisite') &&
+		$origConfModules{$module}{required} eq 'yes' &&
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
@@ -2956,8 +2954,8 @@ sub reconfigureAllModules {
 
 
 ###############################################################################
-# reconfigures a single module if not blocked and if required even if it is
-# already installed
+# reconfigures a single module if not blocked and if required or prerequisite
+# even if it is already installed
 #
 sub reconfigureSingleModule {
 	my $moduleName = shift;
@@ -2970,7 +2968,8 @@ sub reconfigureSingleModule {
 	}
 
 	if ( $localConfModules{$module}{blocked} eq 'no' &&
-		$origConfModules{$module}{required} eq 'yes' ) {
+		($origConfModules{$module}{required} eq 'yes' ||
+		$origConfModules{$module}{required} eq 'prerequisite')) {
 		printLog("configure module: $module");
 		configureModule($module);
 	} else {
