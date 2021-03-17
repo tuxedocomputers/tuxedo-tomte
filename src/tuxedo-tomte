@@ -3082,11 +3082,15 @@ sub postConfigure {
 	my $sysProgram;
 	my $exitStatus;
 	my $postConfTrigger = 0;
+	my $output;
+	my $command;
 	printLog("initializing post-configuration");
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram");
-			$exitStatus = system($postConfProgram{$sysProgram}{command});
+			$command = $postConfProgram{$sysProgram}{command}.' 2>&1';
+			$output = `$command`;
+			$exitStatus = $?;
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
