@@ -1299,6 +1299,7 @@ sub createRepos {
 	my $DH;
 	my $retval;
 	my $sourceline;
+	my $output;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $fileName = $sourcesListDir.'sources.list';
@@ -1382,11 +1383,12 @@ sub createRepos {
 	}
 
 	# add repo key
-	$retval = system('apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc');
+	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc`;
+	$retval = $?;
 	if ($retval != 0) {
-		printLog("Error when apt-key add: $retval");
-		printLog("$?");
-		printLog("could not add pub key for TUXEDO repo");
+		printLog("error when apt-key adv");
+		printLog("return value: $retval");
+		printLog("could not add pub key for TUXEDO repos");
 		return (0);
 	}
 	return (1);
