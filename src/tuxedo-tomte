@@ -1170,7 +1170,6 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $exitStatus;
-	my $aptOutput;
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
@@ -1183,17 +1182,13 @@ sub tuxedorepos() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$aptOutput = `apt update`;
-			$exitStatus = $?;
+			$exitStatus = system('pkcon refresh');
 			if ($exitStatus != 0) {
-				printLog("failed: apt update");
+				printLog('failed: pkcon refresh');
 				printLog("returned error code: $exitStatus");
 				addToConfiguredModules($module, "failed");
-			} elsif ($aptOutput =~ /W: Failed to fetch http:\/\/packages\.tuxedocomputers/) {
-				printLog("Failed to fetch TUXEDO repos, ... network problems?");
-				addToConfiguredModules($module, "failed");
 			} else {
-				printLog("success: apt update");
+				printLog("success: pkcon refresh");
 				addToConfiguredModules($module, "success");
 			}
 		}
@@ -1211,17 +1206,13 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$aptOutput = `apt update`;
-				$exitStatus = $?;
+				$exitStatus = system('pkcon refresh');
 				if ($exitStatus != 0) {
-					printLog("failed: apt update");
+					printLog('failed: pkcon refresh');
 					printLog("returned error code: $exitStatus");
 					addToConfiguredModules($module, "failed");
-				} elsif ($aptOutput =~ /W: Failed to fetch http:\/\/packages\.tuxedocomputers/) {
-					printLog("Failed to fetch TUXEDO repos, ... network problems?");
-					addToConfiguredModules($module, "failed");
 				} else {
-					printLog("success: apt update");
+					printLog('success: pkcon refresh');
 					addToConfiguredModules($module, "success");
 				}
 			}
