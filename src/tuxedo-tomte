@@ -1170,6 +1170,7 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $exitStatus;
+	my $aptOutput;
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
@@ -1182,14 +1183,19 @@ sub tuxedorepos() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$exitStatus = system('apt update');
-			if ($exitStatus == 0) {
-				printLog("success: apt update");
-			} else {
+			$aptOutput = `apt update`;
+			$exitStatus = $?;
+			if ($exitStatus != 0) {
 				printLog("failed: apt update");
 				printLog("returned error code: $exitStatus");
+				addToConfiguredModules($module, "failed");
+			} elsif ($aptOutput =~ /W: Failed to fetch http:\/\/packages\.tuxedocomputers/) {
+				printLog("Failed to fetch TUXEDO repos, ... network problems?");
+				addToConfiguredModules($module, "failed");
+			} else {
+				printLog("success: apt update");
+				addToConfiguredModules($module, "success");
 			}
-			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1205,14 +1211,19 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$exitStatus = system('apt update');
-				if ($exitStatus == 0) {
-					printLog("success: apt update");
-				} else {
+				$aptOutput = `apt update`;
+				$exitStatus = $?;
+				if ($exitStatus != 0) {
 					printLog("failed: apt update");
 					printLog("returned error code: $exitStatus");
+					addToConfiguredModules($module, "failed");
+				} elsif ($aptOutput =~ /W: Failed to fetch http:\/\/packages\.tuxedocomputers/) {
+					printLog("Failed to fetch TUXEDO repos, ... network problems?");
+					addToConfiguredModules($module, "failed");
+				} else {
+					printLog("success: apt update");
+					addToConfiguredModules($module, "success");
 				}
-				addToConfiguredModules($module, "success");
 			}
 		}
 	}
