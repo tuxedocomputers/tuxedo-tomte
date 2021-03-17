@@ -1184,7 +1184,7 @@ sub tuxedorepos() {
 			# update of repos has to be immediate for possible later package
 			# installation
 			$output = `pkcon refresh`;
-			$exitStatus = $?;
+			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
 				printLog('failed: pkcon refresh');
 				printLog("returned error code: $exitStatus");
@@ -1212,7 +1212,7 @@ sub tuxedorepos() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				$output = `pkcon refresh`;
-				$exitStatus = $?;
+				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
 					printLog('failed: pkcon refresh');
 					printLog("returned error code: $exitStatus");
