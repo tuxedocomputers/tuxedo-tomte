@@ -2900,7 +2900,9 @@ sub configureAllModules {
 		#	printLog("remove module: $module");
 		#	removeModule($module);
 		#}
-		configureSingleModule($origConfModules{$module}{name});
+		if ($origConfModules{$module}{required} eq 'yes') {
+			configureSingleModule($origConfModules{$module}{name});
+		}
 	}
 }
 
@@ -2963,7 +2965,9 @@ sub reconfigureAllModules {
 		#	printLog("reconfigure module: $module");
 		#	configureModule($module);
 		#}
-		reconfigureSingleModule($origConfModules{$module}{name});
+		if ($origConfModules{$module}{required} eq 'yes') {
+			reconfigureSingleModule($origConfModules{$module}{name});
+		}
 	}
 }
 
