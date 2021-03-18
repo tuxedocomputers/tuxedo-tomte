@@ -2900,7 +2900,7 @@ sub configureAllModules {
 		#	printLog("remove module: $module");
 		#	removeModule($module);
 		#}
-		configureSingleModule($module);
+		configureSingleModule($origConfModules{$module}{name});
 	}
 }
 
@@ -2963,7 +2963,7 @@ sub reconfigureAllModules {
 		#	printLog("reconfigure module: $module");
 		#	configureModule($module);
 		#}
-		reconfigureSingleModule($module);
+		reconfigureSingleModule($origConfModules{$module}{name});
 	}
 }
 
