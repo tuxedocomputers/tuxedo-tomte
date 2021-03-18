@@ -1,3 +1,14 @@
+tuxedo-tomte (2.3.0-5) UNRELEASED; urgency=medium
+
+  * small change in return value
+  * changed single all subs
+  * override installinit
+  * add debhelper tag
+  * module name
+  * ommit non necessary modules from being configured in configuremor reconfigure all
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 18 Mar 2021 12:21:00 +0100
+
 tuxedo-tomte (2.3.0) focal; urgency=medium
 
   * added description in manpage for block and unblock
