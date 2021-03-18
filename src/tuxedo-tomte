@@ -2880,26 +2880,27 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# configure if not installed or failed, not blocked and required
 		# must be 'elsif' or else the options could get mixed up
-		if ( (($origConfModules{$module}{installed} eq 'no') ||
-		   ($origConfModules{$module}{installed} eq 'failed'))	&&
-			$localConfModules{$module}{blocked} eq 'no' &&
-			$origConfModules{$module}{required} eq 'yes' ) {
-			printLog("configure module: $module");
-			configureModule($module);
-		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
-			$localConfModules{$module}{blocked} eq 'no' &&
-			$origConfModules{$module}{required} eq 'yes' &&
-   			$origConfModules{$module}{upgrade} eq 'yes' ) {
-			# upgrade if new version or hwid
-			printLog("upgrade module: $module");
-			upgradeModule($module);
-		} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
-			$localConfModules{$module}{blocked} eq 'no' &&
-			$origConfModules{$module}{required} eq 'no' ) {
-			# remove if not required any more
-			printLog("remove module: $module");
-			removeModule($module);
-		}
+		#if ( (($origConfModules{$module}{installed} eq 'no') ||
+		#   ($origConfModules{$module}{installed} eq 'failed'))	&&
+		#	$localConfModules{$module}{blocked} eq 'no' &&
+		#	$origConfModules{$module}{required} eq 'yes' ) {
+		#	printLog("configure module: $module");
+		#	configureModule($module);
+		#} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+		#	$localConfModules{$module}{blocked} eq 'no' &&
+		#	$origConfModules{$module}{required} eq 'yes' &&
+		#	$origConfModules{$module}{upgrade} eq 'yes' ) {
+		#	# upgrade if new version or hwid
+		#	printLog("upgrade module: $module");
+		#	upgradeModule($module);
+		#} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+		#	$localConfModules{$module}{blocked} eq 'no' &&
+		#	$origConfModules{$module}{required} eq 'no' ) {
+		#	# remove if not required any more
+		#	printLog("remove module: $module");
+		#	removeModule($module);
+		#}
+		configureSingleModule($module);
 	}
 }
 
@@ -2957,11 +2958,12 @@ sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ( $localConfModules{$module}{blocked} eq 'no' &&
-			$origConfModules{$module}{required} eq 'yes' ) {
-			printLog("reconfigure module: $module");
-			configureModule($module);
-		}
+		#if ( $localConfModules{$module}{blocked} eq 'no' &&
+		#	$origConfModules{$module}{required} eq 'yes' ) {
+		#	printLog("reconfigure module: $module");
+		#	configureModule($module);
+		#}
+		reconfigureSingleModule($module);
 	}
 }
 
