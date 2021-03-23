@@ -57,5 +57,16 @@ sub initrdChanged {
 	print "result: $noChange\n";
 }
 
+
+# returns 1 if no change
+# returns 0 if changed
+#
+sub sameMD5sums {
+	@files = @_;
+	my $md5Store = $configDir.'md5sums';
+	my %savedFileHashes;
+	my %systemFileHashes;
+}
+
 initrdChanged();
 
