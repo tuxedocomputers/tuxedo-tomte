@@ -5,57 +5,57 @@ use warnings;
 use Data::Dumper qw(Dumper);
 use Digest::MD5 qw(md5_hex);
 
-my $files;
-my $file;
-my $md5sum;
-my $md5Store = '/home/pablo/tuxedo-tomte/test/md5sums';
-my $line;
-my $noChange = 1;
+my $configDir = '/home/pablo/tuxedo-tomte/test/';
 
-my %initrdHashFiles;
-my %initrdHashSaved;
+sub initrdChanged {
+	my $initrdFile;
+	my $md5sum;
+	my $md5Store = $configDir.'md5sums';
+	my $md5Line;
+	my $noChange = 1;
 
-if (opendir(BOOTDIR, '/boot')) {
-	while (readdir BOOTDIR) {
-		if ($_ =~ /initrd\.img/) {
-			local $/ = undef;
-			print ("file: $_ ");
-			if (open( INITRDFILE, "/boot/$_" ) ) {
-				binmode(INITRDFILE);
-				my $initrdData = <INITRDFILE>;
-				close INITRDFILE;
-				$md5sum = md5_hex($initrdData);
-				$initrdHashFiles{$_} = $md5sum;
-				print "hash: $md5sum\n";
-				close(INITRDFILE);
+	my %initrdHashFiles;
+	my %initrdHashSaved;
+	my $FH;
+	my $initrdData;
+	if (opendir(BOOTDIR, '/boot')) {
+		while (readdir BOOTDIR) {
+			if ($_ =~ /initrd\.img/) {
+				local $/ = undef;
+				if (open( INITRDFILE, "/boot/$_" ) ) {
+					binmode(INITRDFILE);
+					$initrdData = <INITRDFILE>;
+					$md5sum = md5_hex($initrdData);
+					$initrdHashFiles{$_} = $md5sum;
+					close(INITRDFILE);
+				}
+			}
+		}
+		close(BOOTDIR);
+		if (open(FH, ">", $md5Store)) {
+			foreach $initrdFile (keys %initrdHashFiles) {
+				print FH "$initrdFile:$initrdHashFiles{$initrdFile}\n";
+			}
+			close(FH);
+		}
+		if (open(FH, "<", $md5Store)) {
+			while ($md5Line = <FH>) {
+				chop($md5Line);
+				($initrdFile, $md5sum) = split /:/, $md5Line;
+				print "file: $initrdFile md5: $md5sum\n";
+				$initrdHashSaved{$initrdFile} = $md5sum;
+			}
+			close FH;
+		}
+		foreach $initrdFile (keys %initrdHashFiles) {
+			if ($initrdHashFiles{$initrdFile} ne $initrdHashSaved{$initrdFile}) {
+				$noChange = 0;
+				last;
 			}
 		}
 	}
-	close(BOOTDIR);
-	my $FH;
-	if (open($FH, ">", $md5Store)) {
-		foreach $file (keys %initrdHashFiles) {
-			print "$file:$initrdHashFiles{$file}\n";
-			print $FH "$file: $initrdHashFiles{$file}\n";
-		}
-		close($FH);
-	}
-	if (open($FH, "<", $md5Store)) {
-		while ($line = <$FH>) {
-			chop($line);
-			($file, $md5sum) = split /:/, $line;
-			print "file: $file md5: $md5sum\n";
-			$initrdHashSaved{$file} = $md5sum;
-		}
-	}
-	foreach $file (keys %initrdHashFiles) {
-		if ($initrdHashFiles{$file} ne $initrdHashSaved{$file}) {
-			$noChange = 0;
-			last;
-		}
-	}
+	print "result: $noChange\n";
 }
 
-print "result: $noChange\n";
-
+initrdChanged();
 
