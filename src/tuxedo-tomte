@@ -588,8 +588,6 @@ sub isOSSupported {
 sub prerequisites {
 	# tuxedorepos
 	reconfigureSingleModule('tuxedo-repos');
-
-	#TODO: ALL grubentries should always be checked in case something brakes them
 }
 
 
@@ -2948,7 +2946,10 @@ sub configureSingleModule {
 		return;
 	}
 
-	if ( $localConfModules{$module}{installed} eq 'no' &&
+	# grub file should always be checked for correct entries if there
+	# is a fix available for this system
+	if ( (($localConfModules{$module}{installed} eq 'no') ||
+	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
 		printLog("configure module: $module");
@@ -2960,12 +2961,10 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
 		upgradeModule($module);
-	#} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
-	#	configureModule($module);
 	} else {
 		print "Module $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
-			print "- it is already installed (maybe use 'reconfigure')\n";
+			print "- it is declared as installed in the configuration (maybe use 'reconfigure')\n";
 		}
 		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 			print "- it is blocked (maybe use 'unblock')\n";
