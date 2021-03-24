@@ -2946,6 +2946,8 @@ sub configureSingleModule {
 		return;
 	}
 
+	# grub file should always be checked for correct entries if there
+	# is a fix available for this system
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
 	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
@@ -2962,7 +2964,7 @@ sub configureSingleModule {
 	} else {
 		print "Module $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
-			print "- it is already installed (maybe use 'reconfigure')\n";
+			print "- it is declared as installed in the configuration (maybe use 'reconfigure')\n";
 		}
 		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 			print "- it is blocked (maybe use 'unblock')\n";
