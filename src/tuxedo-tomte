@@ -85,7 +85,7 @@ my %supportedOS = (
 );
 
 
-my %repos = (
+my %tuxedo_repos = (
 	"Ubuntu 18.04" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
@@ -98,12 +98,6 @@ my %repos = (
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb http://graphics.tuxedocomputers.com/ubuntu bionic main'],
-		},
-		mirrors => {
-			filename => '/etc/apt/sources.list',
-			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
 		},
 		name => 'bionic',
 	},
@@ -120,6 +114,23 @@ my %repos = (
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb http://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
+		name => 'focal',
+	},
+);
+
+
+
+my %tuxedo_mirrors = (
+	"Ubuntu 18.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
+'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
+		},
+		name => 'bionic',
+	},
+	"Ubuntu 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
@@ -129,6 +140,7 @@ my %repos = (
 		name => 'focal',
 	},
 );
+
 
 
 ###############################################################################
@@ -294,6 +306,20 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Adds the TUXEDO repositories',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+	},
+	tuxedomirrors => {
+		name => 'tuxedo-mirrors',
+		version => 2,
+		installed => 'no',
+		blocked => 'no',
+		required => 'prerequisite',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Adds TUXEDO maintained Ubuntu repositories',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -588,8 +614,7 @@ sub isOSSupported {
 sub prerequisites {
 	# tuxedorepos
 	reconfigureSingleModule('tuxedo-repos');
-
-	#TODO: ALL grubentries should always be checked in case something brakes them
+	reconfigureSingleModule('tuxedo-mirrors');
 }
 
 
@@ -1183,13 +1208,15 @@ sub tuxedorepos() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
+	my $retval2;
 	my $exitStatus;
 	my $output;
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval = createRepos();
-		if ($retval == 0) {
+		$retval = createRepos(\%tuxedo_repos);
+		$retval2 = addRepoKey();
+		if (($retval == 0) && ($retval2 == 0)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -1246,6 +1273,79 @@ sub tuxedorepos() {
 	}
 }
 
+
+###############################################################################
+# Adds the TUXEDO mirrors to the system
+#
+sub tuxedomirrors() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $retval2;
+	my $exitStatus;
+	my $output;
+
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = createRepos(\%tuxedo_mirrors);
+		cleanSourcesList();
+		$retval2 = addRepoKey();
+		if (($retval == 0) && ($retval2 == 0)) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			# update of repos has to be immediate for possible later package
+			# installation
+			$output = `pkcon refresh`;
+			$exitStatus = $?/256;
+			if ($exitStatus != 0) {
+				printLog('failed: pkcon refresh');
+				printLog("returned error code: $exitStatus");
+				if ($exitStatus == 7) {
+					printLog('possible network problems');
+				}
+				addToConfiguredModules($module, "failed");
+			} else {
+				printLog("success: pkcon refresh");
+				addToConfiguredModules($module, "success");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog("uprading $origConfModules{$module}{name}");
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				$output = `pkcon refresh`;
+				$exitStatus = $?/256;
+				if ($exitStatus != 0) {
+					printLog('failed: pkcon refresh');
+					printLog("returned error code: $exitStatus");
+					if ($exitStatus == 7) {
+						printLog('possible network problems');
+					}
+					addToConfiguredModules($module, "failed");
+				} else {
+					printLog('success: pkcon refresh');
+					addToConfiguredModules($module, "success");
+				}
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 ###############################################################################
@@ -1307,16 +1407,15 @@ sub corefix() {
 # returns 0 if failed
 #
 sub createRepos {
+	my %repos = %{$_[0]};
 	my %repoHash;
 	my $compDistVer = $distribution.' '.$distributionVersion;
 	my $key;
 	my $DH;
-	my $retval;
 	my $sourceline;
-	my $output;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
-	my $fileName = $sourcesListDir.'sources.list';
+	my $sourcesFileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
 		printLog("no $sourcesListDir found (something's really wrong)");
 		print "No $sourcesListDir found, something's really wrong ...\n";
@@ -1329,16 +1428,16 @@ sub createRepos {
 		mkdir($sourcesListDirD);
 	}
 
-	if (-e $fileName) {
-		$repoHash{$fileName} = [readFileReturnLines($fileName)];
+	if (-e $sourcesFileName) {
+		$repoHash{$sourcesFileName} = [readFileReturnLines($sourcesFileName)];
 	}
 
 	# read content from all files *.list into hash
 	if (opendir($DH,$sourcesListDirD)) {
 		while (readdir $DH) {
 			if ( $_ =~ /.*\.list$/ ) {
-				$fileName = $sourcesListDirD.$_;
-				$repoHash{$fileName} = [readFileReturnLines($fileName)];
+				$sourcesFileName = $sourcesListDirD.$_;
+				$repoHash{$sourcesFileName} = [readFileReturnLines($sourcesFileName)];
 			}
 		}
 		closedir($DH);
@@ -1377,10 +1476,40 @@ sub createRepos {
 		}
 	}
 
-	# comment out anything else on sources.list which has
-	# deb mirrorurl and not tuxedocomputers
+}
+
+
+
+
+###############################################################################
+# add the repo key for TUXEDO repos
+#
+sub addRepoKey {
+	my $output;
+	my $retval;
+	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
+	$retval = $?;
+	if ($retval != 0) {
+		printLog("error when apt-key adv");
+		printLog("return value: $retval");
+		printLog("could not add pub key for TUXEDO repos");
+		return (0);
+	}
+	return (1);
+}
+
+
+
+
+###############################################################################
+# comment out anything else on sources.list which has
+# deb mirrorurl and not tuxedocomputers
+#
+sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
+	my $sourceline;
+	my $sourcesListDir = '/etc/apt/';
 	# read all the lines
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
 		chomp(@sourcelines = <$FHsource>);
@@ -1396,16 +1525,6 @@ sub createRepos {
 		}
 	}
 
-	# add repo key
-	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
-	$retval = $?;
-	if ($retval != 0) {
-		printLog("error when apt-key adv");
-		printLog("return value: $retval");
-		printLog("could not add pub key for TUXEDO repos");
-		return (0);
-	}
-	return (1);
 }
 
 
@@ -1473,11 +1592,11 @@ sub setComment {
 	my $repoline = shift;
 	my $tmpline = $$repoline;
 	my $FH;
-	my @repos;
+	my @repolines;
 	my $compDistVers = "$distribution $distributionVersion";
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$repos{$compDistVers}{name}.'.*$';
+	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$compDistVers}{name}.'.*$';
 	if (open $FH, '<', $reposList ) {
-		chomp(@repos = <$FH>);
+		chomp(@repolines = <$FH>);
 		close $FH;
 	} else {
 		printLog("Err: $!");
@@ -1485,7 +1604,7 @@ sub setComment {
 		print "Could not open repository mirrors list at $reposList\n";
 		return (0);
 	}
-	if ( $$repoline =~ /^deb .*$repos{$compDistVers}{name}.*/ ) {
+	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
@@ -1495,7 +1614,7 @@ sub setComment {
 			return (1);
 		}
 		# check for repos in comprehensive mirror list
-		foreach (@repos) {
+		foreach (@repolines) {
 			if ( $$repoline =~ /$_/ ) {
 				# repo matches
 				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
@@ -2948,7 +3067,10 @@ sub configureSingleModule {
 		return;
 	}
 
-	if ( $localConfModules{$module}{installed} eq 'no' &&
+	# grub file should always be checked for correct entries if there
+	# is a fix available for this system
+	if ( (($localConfModules{$module}{installed} eq 'no') ||
+	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
 		printLog("configure module: $module");
@@ -2960,12 +3082,10 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
 		upgradeModule($module);
-	#} elsif ( $origConfModules{$module}{required} eq 'prerequisite' ) {
-	#	configureModule($module);
 	} else {
 		print "Module $moduleName cannot be installed because:\n";
 		if ( $localConfModules{$module}{installed} eq 'yes' ) {
-			print "- it is already installed (maybe use 'reconfigure')\n";
+			print "- it is declared as installed in the configuration (maybe use 'reconfigure')\n";
 		}
 		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 			print "- it is blocked (maybe use 'unblock')\n";
