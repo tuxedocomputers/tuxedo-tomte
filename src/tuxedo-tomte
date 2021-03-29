@@ -2042,7 +2042,27 @@ sub kernel() {
 			} else {
 				$packageIntelMicrocode = 0;
 			}
-	
+
+			if( isPackageInstalled('linux-oem-20.04-edge') ||
+					isPackageInstalled('linux-oem-20.04b')) {
+				deinstallPackage('linux-meta-oem-5.10');
+				deinstallPackage('linux-headers-oem-20.04-edge');
+				deinstallPackage('linux-headers-oem-20.04b');
+				deinstallPackage('linux-image-oem-20.04-edge');
+				deinstallPackage('linux-image-oem-20.04b');
+				deinstallPackage('linux-oem-20.04-edge');
+				deinstallPackage('linux-oem-20.04b');
+				deinstallPackage('linux-tools-oem-20.04-edge');
+				deinstallPackage('linux-tools-oem-20.04b');
+				deinstallPackage('linux-headers-5.10');
+				deinstallPackage('linux-oem-5.10-headers-5.10');
+				deinstallPackage('linux-image-5.10');
+				deinstallPackage('linux-modules-5.10');
+				deinstallPackage('linux-tools-5.10');
+				deinstallPackage('linux-oem-5.10-tools-5.10');
+				deinstallPackage('linux-image-unsigned-5.10');
+			}
+
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
