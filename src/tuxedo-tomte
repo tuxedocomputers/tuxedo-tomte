@@ -181,6 +181,8 @@ my %tuxedo_mirrors = (
 #					$postConfModule{$postconf}{command}
 #	upgrade			if the system determines this is an upgrade then 'yes'
 #					else 'no'
+#					don't set the value yourself, it will be determined by
+#					Tomte
 #	upgraded		if module was upgraded 'yes', else 'no'
 #
 my %origConfModules = (
@@ -466,7 +468,7 @@ my %origConfModules = (
 	},
 	kernel => {
 		name => 'kernel',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
@@ -612,7 +614,6 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	# tuxedorepos
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 }
@@ -2058,7 +2059,62 @@ sub kernel() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+		if ($distributionVersion =~ /20.04/) {
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
+			} else {
+				$packageLinuxOem2004 = 0;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 0;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 0;
+			}
+	
+			if( isPackageInstalled('linux-oem-20.04-edge') ||
+					isPackageInstalled('linux-oem-20.04b')) {
+				deinstallPackage('linux-meta-oem-5.10');
+				deinstallPackage('linux-headers-oem-20.04-edge');
+				deinstallPackage('linux-headers-oem-20.04b');
+				deinstallPackage('linux-image-oem-20.04-edge');
+				deinstallPackage('linux-image-oem-20.04b');
+				deinstallPackage('linux-oem-20.04-edge');
+				deinstallPackage('linux-oem-20.04b');
+				deinstallPackage('linux-tools-oem-20.04-edge');
+				deinstallPackage('linux-tools-oem-20.04b');
+				deinstallPackage('linux-headers-5.10');
+				deinstallPackage('linux-oem-5.10-headers-5.10');
+				deinstallPackage('linux-image-5.10');
+				deinstallPackage('linux-modules-5.10');
+				deinstallPackage('linux-tools-5.10');
+				deinstallPackage('linux-oem-5.10-tools-5.10');
+				deinstallPackage('linux-image-unsigned-5.10');
+			}
+
+			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					addToConfiguredModules($module, "success");
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+
+		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -2250,6 +2306,54 @@ sub deinstExcept {
 
 	foreach my $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+			$deinstCounter++;
+			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+		}
+	}
+	if ($deinstCounter != 0) {
+		printLog("deinstalling: $pkconDeinst\n");
+		if (system($pkconDeinst)) {
+			printLog('failed to deinstall packages');
+			return 1;
+		} else {
+			printLog('deinstallation of packages successful');
+			return 0;
+		}
+	} else {
+		printLog('nothing to deinstall');
+		return 0;
+	}
+}
+
+
+
+###############################################################################
+# Deinstalls all packages beginning with a given string
+# uses '*' at end of package name to be searched
+# returns 1 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 0 if everything was ok, even if no packages were found
+#
+sub deinstallPackage {
+	my $deinst = shift;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $retString = `$searchCmd`;
+	my $retValue = $?;
+	if ($retValue != 0) {
+		if ($retValue == 256) {
+			printLog('no packages found matching search string to deinstall packages');
+			return 0;
+		}
+		printLog('something went wrong while searching for packages');
+		return 1;
+	}
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
+
+	my $pkconDeinst = 'pkcon -y remove';
+	my $deinstCounter = 0;
+
+	foreach my $deinstKey (keys %retHash) {
+		if ($retHash{$deinstKey} =~ /i./) {
 			$deinstCounter++;
 			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
 		}
@@ -2926,7 +3030,6 @@ sub transferConfigValues {
 sub newVersion {
 	my $module = shift;
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
-		print "#version: $localConfModules{$module}{version} $origConfModules{$module}{version}\n";
 		return 1;
 	} else {
 		return 0;
