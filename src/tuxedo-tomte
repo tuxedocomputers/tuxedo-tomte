@@ -2023,26 +2023,6 @@ sub kernel() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
-			# check if the package is already installed
-			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
-			} else {
-				$packageLinuxOem2004 = 0;
-			}
-			if( ! isPackageInstalled('linux-firmware') ) {
-				$wasInstalled = 0;
-				$packageLinuxFirmware = installPackage('linux-firmware');
-			} else {
-				$packageLinuxFirmware = 0;
-			}
-			if( ! isPackageInstalled('intel-microcode') ) {
-				$wasInstalled = 0;
-				$packageIntelMicrocode = installPackage('intel-microcode');
-			} else {
-				$packageIntelMicrocode = 0;
-			}
-
 			if( isPackageInstalled('linux-oem-20.04-edge') ||
 					isPackageInstalled('linux-oem-20.04b')) {
 				deinstallPackage('linux-meta-oem-5.10');
@@ -2063,6 +2043,26 @@ sub kernel() {
 				deinstallPackage('linux-image-unsigned-5.10');
 			}
 
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
+			} else {
+				$packageLinuxOem2004 = 0;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 0;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 0;
+			}
+
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
@@ -2080,6 +2080,26 @@ sub kernel() {
 	}
 	if ($action eq 'upgrade') {
 		if ($distributionVersion =~ /20.04/) {
+			if( isPackageInstalled('linux-oem-20.04-edge') ||
+					isPackageInstalled('linux-oem-20.04b')) {
+				deinstallPackage('linux-meta-oem-5.10');
+				deinstallPackage('linux-headers-oem-20.04-edge');
+				deinstallPackage('linux-headers-oem-20.04b');
+				deinstallPackage('linux-image-oem-20.04-edge');
+				deinstallPackage('linux-image-oem-20.04b');
+				deinstallPackage('linux-oem-20.04-edge');
+				deinstallPackage('linux-oem-20.04b');
+				deinstallPackage('linux-tools-oem-20.04-edge');
+				deinstallPackage('linux-tools-oem-20.04b');
+				deinstallPackage('linux-headers-5.10');
+				deinstallPackage('linux-oem-5.10-headers-5.10');
+				deinstallPackage('linux-image-5.10');
+				deinstallPackage('linux-modules-5.10');
+				deinstallPackage('linux-tools-5.10');
+				deinstallPackage('linux-oem-5.10-tools-5.10');
+				deinstallPackage('linux-image-unsigned-5.10');
+			}
+
 			# check if the package is already installed
 			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
 				$wasInstalled = 0;
@@ -2100,25 +2120,6 @@ sub kernel() {
 				$packageIntelMicrocode = 0;
 			}
 	
-			if( isPackageInstalled('linux-oem-20.04-edge') ||
-					isPackageInstalled('linux-oem-20.04b')) {
-				deinstallPackage('linux-meta-oem-5.10');
-				deinstallPackage('linux-headers-oem-20.04-edge');
-				deinstallPackage('linux-headers-oem-20.04b');
-				deinstallPackage('linux-image-oem-20.04-edge');
-				deinstallPackage('linux-image-oem-20.04b');
-				deinstallPackage('linux-oem-20.04-edge');
-				deinstallPackage('linux-oem-20.04b');
-				deinstallPackage('linux-tools-oem-20.04-edge');
-				deinstallPackage('linux-tools-oem-20.04b');
-				deinstallPackage('linux-headers-5.10');
-				deinstallPackage('linux-oem-5.10-headers-5.10');
-				deinstallPackage('linux-image-5.10');
-				deinstallPackage('linux-modules-5.10');
-				deinstallPackage('linux-tools-5.10');
-				deinstallPackage('linux-oem-5.10-tools-5.10');
-				deinstallPackage('linux-image-unsigned-5.10');
-			}
 
 			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
 				if ($wasInstalled) {
@@ -2313,7 +2314,7 @@ sub deinstExcept {
 	my $retValue = $?;
 	if ($retValue != 0) {
 		if ($retValue == 256) {
-			printLog('no packages found matching search string to deinstall packages');
+			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
 			return 0;
 		}
 		printLog('something went wrong while searching for packages');
@@ -2361,7 +2362,7 @@ sub deinstallPackage {
 	my $retValue = $?;
 	if ($retValue != 0) {
 		if ($retValue == 256) {
-			printLog('no packages found matching search string to deinstall packages');
+			printLog("no packages found matching search string to deinstall packages: $deinst");
 			return 0;
 		}
 		printLog('something went wrong while searching for packages');
