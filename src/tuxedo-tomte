@@ -2023,8 +2023,10 @@ sub kernel() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
+			my $deinstallIncompatibleKernel = 0;
 			if( isPackageInstalled('linux-oem-20.04-edge') ||
 					isPackageInstalled('linux-oem-20.04b')) {
+				$deinstallIncompatibleKernel = 1;
 				deinstallPackage('linux-meta-oem-5.10');
 				deinstallPackage('linux-headers-oem-20.04-edge');
 				deinstallPackage('linux-headers-oem-20.04b');
@@ -2063,8 +2065,8 @@ sub kernel() {
 				$packageIntelMicrocode = 0;
 			}
 
-			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
-				if ($wasInstalled) {
+			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
+				if ($wasInstalled || !$deinstallIncompatibleKernel) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
@@ -2080,8 +2082,10 @@ sub kernel() {
 	}
 	if ($action eq 'upgrade') {
 		if ($distributionVersion =~ /20.04/) {
+			my $deinstallIncompatibleKernel = 0;
 			if( isPackageInstalled('linux-oem-20.04-edge') ||
 					isPackageInstalled('linux-oem-20.04b')) {
+				$deinstallIncompatibleKernel = 1;
 				deinstallPackage('linux-meta-oem-5.10');
 				deinstallPackage('linux-headers-oem-20.04-edge');
 				deinstallPackage('linux-headers-oem-20.04b');
@@ -2121,8 +2125,8 @@ sub kernel() {
 			}
 	
 
-			if( !$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode ) {
-				if ($wasInstalled) {
+			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
+				if ($wasInstalled || !$deinstallIncompatibleKernel) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
@@ -2365,7 +2369,7 @@ sub deinstallPackage {
 			printLog("no packages found matching search string to deinstall packages: $deinst");
 			return 0;
 		}
-		printLog('something went wrong while searching for packages');
+		printLog("something went wrong while searching for packages: $deinst");
 		return 1;
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
