@@ -1,4 +1,4 @@
-tuxedo-tomte (2.3.3-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.3.3-6) UNRELEASED; urgency=medium
 
   * separated repos into tuxedo-repos tuxedo-mirrors
   * delete incompatible 5.10 kernel and dependecies
@@ -6,8 +6,9 @@ tuxedo-tomte (2.3.3-5) UNRELEASED; urgency=medium
   * kernel remove causes unbootable system
   * added proper response kernel deinst
   * hide answer from package search
+  * hide pkcon output
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 29 Mar 2021 12:04:51 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 29 Mar 2021 14:12:51 +0200
 
 tuxedo-tomte (2.3.3) focal; urgency=medium
 
