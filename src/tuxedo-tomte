@@ -2326,7 +2326,7 @@ sub deinstExcept {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -y remove';
+	my $pkconDeinst = 'pkcon -yp remove';
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
@@ -2338,7 +2338,7 @@ sub deinstExcept {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $pkconDeinst\n");
 		print "executing: $pkconDeinst\n";
-		$pkconDeinst = $pkconDeinst.' 2>&1';
+		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			printLog('failed to deinstall packages');
 			return 1;
@@ -2376,7 +2376,7 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -y remove';
+	my $pkconDeinst = 'pkcon -yp remove';
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
@@ -2388,7 +2388,7 @@ sub deinstallPackage {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $pkconDeinst\n");
 		print "executing: $pkconDeinst\n";
-		$pkconDeinst = $pkconDeinst.' 2>&1';
+		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			printLog('failed to deinstall packages');
 			return 1;
@@ -2433,7 +2433,7 @@ sub installPackage {
 	my $packageName = shift;
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
-	my $retval = system("pkcon -y install $packageName 2>&1");
+	my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
 	printLog("pkcon returns: $retval, while installing $packageName");
 	if ($retval != 0) {
 		printLog("failed to install $packageName by pkcon");
