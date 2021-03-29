@@ -2025,8 +2025,10 @@ sub kernel() {
 		if ($distributionVersion =~ /20.04/) {
 			my $deinstallIncompatibleKernel = 0;
 			if( isPackageInstalled('linux-oem-20.04-edge') ||
-					isPackageInstalled('linux-oem-20.04b')) {
+					isPackageInstalled('linux-oem-20.04b') ||
+					isPackageInstalled('linux-oem-20.04')) {
 				$deinstallIncompatibleKernel = 1;
+				deinstallPackage('linux-oem-20.04');
 				deinstallPackage('linux-meta-oem-5.10');
 				deinstallPackage('linux-headers-oem-20.04-edge');
 				deinstallPackage('linux-headers-oem-20.04b');
@@ -2084,8 +2086,10 @@ sub kernel() {
 		if ($distributionVersion =~ /20.04/) {
 			my $deinstallIncompatibleKernel = 0;
 			if( isPackageInstalled('linux-oem-20.04-edge') ||
-					isPackageInstalled('linux-oem-20.04b')) {
+					isPackageInstalled('linux-oem-20.04b') ||
+					isPackageInstalled('linux-oem-20.04') ) {
 				$deinstallIncompatibleKernel = 1;
+				deinstallPackage('linux-oem-20.04');
 				deinstallPackage('linux-meta-oem-5.10');
 				deinstallPackage('linux-headers-oem-20.04-edge');
 				deinstallPackage('linux-headers-oem-20.04b');
@@ -3208,7 +3212,7 @@ sub configureSingleModule {
 		$origConfModules{$module}{required} eq 'yes') {
 		printLog("configure module: $module");
 		configureModule($module);
-	} elsif ( $origConfModules{$module}{installed} eq 'yes' &&
+	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' &&
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
