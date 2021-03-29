@@ -2313,7 +2313,7 @@ sub cracklibruntime() {
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
@@ -2361,7 +2361,7 @@ sub deinstExcept {
 #
 sub deinstallPackage {
 	my $deinst = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*";
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?;
 	if ($retValue != 0) {
@@ -2407,7 +2407,7 @@ sub deinstallPackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package;
+	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?;
 	if ($retString =~ m/install ok installed/) {
