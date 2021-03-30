@@ -1,4 +1,4 @@
-tuxedo-tomte (2.3.3-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.3.3-9) UNRELEASED; urgency=medium
 
   * separated repos into tuxedo-repos tuxedo-mirrors
   * delete incompatible 5.10 kernel and dependecies
@@ -9,8 +9,9 @@ tuxedo-tomte (2.3.3-8) UNRELEASED; urgency=medium
   * hide pkcon output
   * refinig output pkcon
   * delete linux-oem-20.04
+  * reversed kernel deinstall
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 29 Mar 2021 16:20:21 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 30 Mar 2021 12:23:45 +0200
 
 tuxedo-tomte (2.3.3) focal; urgency=medium
 
