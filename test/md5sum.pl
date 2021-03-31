@@ -68,11 +68,10 @@ sub writeMD5Store {
 }
 
 # returns 1 if found non equal or missing value
+# returns 0 if all values are the same
 sub newInitrdFiles {
-	foreach my $key (%initrdHashFiles) {
+	foreach my $key (keys %initrdHashFiles) {
 		if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
-			print "problem: $key\n";
-			print "$initrdHashSaved{$key} $initrdHashFiles{$key} $initrdHashSaved{$key}\n";
 			return (1);
 		}
 	}
