@@ -3276,11 +3276,10 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module");
 		upgradeModule($module);
+	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
+		$configuredModules{$module} = 'nothingToDo';
 	} else {
 		print "Module $moduleName cannot be installed because:\n";
-		if ( $localConfModules{$module}{installed} eq 'yes' ) {
-			print "- it is declared as installed in the configuration (maybe use 'reconfigure')\n";
-		}
 		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 			print "- it is blocked (maybe use 'unblock')\n";
 		}
