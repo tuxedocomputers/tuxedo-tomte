@@ -55,36 +55,20 @@ sub readInitrdMD5Files {
 	print Dumper(%initrdHashFiles);
 }
 
-sub writeMD5Store {
-	print Dumper(%initrdHashFiles);
-	if (open(FH, ">", $md5Store)) {
-		foreach my $key (keys %initrdHashFiles ) {
-			print FH "$key:$initrdHashFiles{$key}\n";
-		}
-		close(FH);
-	} else {
-		print "could not open $md5Store\n";
-	}
-}
-
-# returns 1 if found non equal or missing value
-# returns 0 if all values are the same
-sub newInitrdFiles {
-	foreach my $key (keys %initrdHashFiles) {
-		if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
-			return (1);
-		}
-	}
-	return (0);
-}
+#initrdChanged();
 
 
 
 loadMD5Store();
 readInitrdMD5Files();
-if( newInitrdFiles() ) {
-	print "non equal or missing value found\n";
-} else {
-	print "everything is the same\n";
+
+print "initrdHashSaved:\n";
+print Dumper(%initrdHashSaved);
+print "initrdHashFiles:\n";
+print Dumper(%initrdHashFiles);
+
+print "foreach:\n";
+foreach my $key ( keys %initrdHashFiles) {
+	print "$key $initrdHashFiles{$key}";
 }
-writeMD5Store();
+
