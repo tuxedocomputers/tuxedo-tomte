@@ -1387,47 +1387,49 @@ sub tuxedomirrors() {
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($main::biosVersion eq "") {
-		printLog("BIOS version empty");
-		$origConfModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-		return(0);
-	}
-	my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
-	my $amlHookScriptOrig = $shareDir.$amlHookScript;
-	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
-	my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
-	my %amlFile = (
-		'1.07.04NBC' => 'nh5xax-1.aml',
-	);
-	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
-	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-	$amlFile{$main::biosVersion} =~ s/-\d*//;
-	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
-
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}");
-		mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
-		copy($amlFileOrig, $amlFileDest);
-		mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
-		copy($amlHookScriptOrig, $amlHookScriptDest);
-		chmod 0700, $amlHookScriptDest;
-
-		if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateInitramfs}{trigger} = 1;
-			addToConfiguredModules($module, "success");
-		} else {
+	if (!newInitrdFiles()) {
+		if ($main::biosVersion eq "") {
+			printLog("BIOS version empty");
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
+			return(0);
 		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
+		my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
+		my $amlHookScriptOrig = $shareDir.$amlHookScript;
+		my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
+		my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
+		my %amlFile = (
+			'1.07.04NBC' => 'nh5xax-1.aml',
+		);
+		my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
+		my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
+		$amlFile{$main::biosVersion} =~ s/-\d*//;
+		my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
+
+		if ($action eq 'install') {
+			printLog("applying $origConfModules{$module}{name}");
+			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
+			copy($amlFileOrig, $amlFileDest);
+			mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
+			copy($amlHookScriptOrig, $amlHookScriptDest);
+			chmod 0700, $amlHookScriptDest;
+
+			if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$postConfProgram{updateInitramfs}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		}
+		if ($action eq 'upgrade') {
+			# not implemented yet
+		}
+		if ($action eq 'remove') {
+			# not implemented yet
+		}
 	}
 }
 
@@ -2195,9 +2197,12 @@ sub writeMD5Store {
 	}
 }
 
-# returns 1 if found non equal or missing value
+# returns 1 if found non equal or missing value between value in files and
+# saved values
 # returns 0 if all values are the same
 sub newInitrdFiles {
+	loadMD5Store();
+	readInstrdMD5Files();
 	foreach my $key (keys %initrdHashFiles) {
 		if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
 			return (1);
@@ -3464,6 +3469,10 @@ sub postConfigure {
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
+				if ($postConfProgram{updateInitramfs}) {
+					print "writeMD5Store\n";
+					writeMD5Store();
+				}
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
