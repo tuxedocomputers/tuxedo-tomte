@@ -674,7 +674,8 @@ sub checkRequirements {
    		($boardname =~ /NH5xAx/) ||
    		($boardname =~ /NL5xRU/) ||
 		($boardname =~ /AURA1501/) ||
-		($boardname =~ /PB50_70DFx,DDx/)) {
+		($boardname =~ /PB50_70DFx,DDx/) ||
+		($boardname =~ /NS50MU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('discovered no-keyboard-after-suspend-fix problem');
 	}
@@ -1111,6 +1112,7 @@ sub tuxedokeyboard() {
 # - N150CU
 # - N141CU
 # - XC15 
+# - IBS15v6
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
