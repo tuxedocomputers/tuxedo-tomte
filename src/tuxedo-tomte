@@ -1406,21 +1406,23 @@ sub corefix() {
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}");
-		mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
-		copy($amlFileOrig, $amlFileDest);
-		mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
-		copy($amlHookScriptOrig, $amlHookScriptDest);
-		chmod 0700, $amlHookScriptDest;
+		if (newInitrdFiles() || ) {
+			printLog("applying $origConfModules{$module}{name}");
+			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
+			copy($amlFileOrig, $amlFileDest);
+			mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
+			copy($amlHookScriptOrig, $amlHookScriptDest);
+			chmod 0700, $amlHookScriptDest;
 
-		if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			$postConfProgram{updateInitramfs}{trigger} = 1;
-			addToConfiguredModules($module, "success");
-		} else {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+			if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$postConfProgram{updateInitramfs}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2184,24 +2186,29 @@ sub readInitrdMD5Files {
 }
 
 sub writeMD5Store {
-	print Dumper(%initrdHashFiles);
 	if (open(FH, ">", $md5Store)) {
 		foreach my $key (keys %initrdHashFiles ) {
 			print FH "$key:$initrdHashFiles{$key}\n";
 		}
 		close(FH);
 	} else {
-	printLog("could not open $md5Store");
+		printLog("could not open $md5Store");
 	}
 }
 
-# returns 1 if found non equal or missing value
+# returns 1 if found non equal or missing value between value in files and
+# saved values
 # returns 0 if all values are the same
 sub newInitrdFiles {
-	foreach my $key (keys %initrdHashFiles) {
-		if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
-			return (1);
+	if (loadMD5Store()) {
+		readInitrdMD5Files();
+		foreach my $key (keys %initrdHashFiles) {
+			if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
+				return (1);
+			}
 		}
+	} else {
+		return (1);
 	}
 	return (0);
 }
@@ -3464,6 +3471,11 @@ sub postConfigure {
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
+				if ($postConfProgram{updateInitramfs}) {
+					readInitrdMD5Files();
+					writeMD5Store();
+					printLog('wrote new md5store');
+				}
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
