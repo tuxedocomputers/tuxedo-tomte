@@ -1424,7 +1424,6 @@ sub corefix() {
 				addToConfiguredModules($module, "failed");
 			}
 		}
-		writeMD5Store();
 	}
 	if ($action eq 'upgrade') {
 		# not implemented yet
@@ -2186,9 +2185,7 @@ sub readInitrdMD5Files {
 	}
 }
 
-#TODO debug
 sub writeMD5Store {
-	print Dumper(%initrdHashFiles);
 	if (open(FH, ">", $md5Store)) {
 		foreach my $key (keys %initrdHashFiles ) {
 			print FH "$key:$initrdHashFiles{$key}\n";
@@ -3475,8 +3472,9 @@ sub postConfigure {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 				if ($postConfProgram{updateInitramfs}) {
-					print "writeMD5Store\n";
+					readInitrdMD5Files();
 					writeMD5Store();
+					printLog('wrote new md5store');
 				}
 			} else {
 				$postConfTrigger = 1;
