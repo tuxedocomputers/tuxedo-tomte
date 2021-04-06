@@ -51,6 +51,18 @@ my $md5ConfigDir = '/etc/tomte/';
 my $md5Store = $md5ConfigDir.'md5sums';
 
 
+
+###############################################################################
+# Argument values given to script
+#
+my %argValue = (
+	command => '',
+	module => '',
+);
+
+
+
+
 ###############################################################################
 # initial definition of post configuration modules
 #   command		the command to be executed on the system
@@ -1406,7 +1418,7 @@ sub corefix() {
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
-		if (newInitrdFiles() || ) {
+		if (newInitrdFiles() || ($argValue{command} eq 'reconfigure') ) {
 			printLog("applying $origConfModules{$module}{name}");
 			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
 			copy($amlFileOrig, $amlFileDest);
@@ -1423,6 +1435,9 @@ sub corefix() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2708,11 +2723,11 @@ sub initLogging {
 	my %options;
 	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 	# do not log if no arguments
-	if (@ARGV == 0) {
+	if ($argValue{command} eq '') {
 		return;
 	}
 	# do not log if false arguments
-	if (! (defined $ARGV[0] and exists $options{$ARGV[0]})) {
+	if (! (exists $options{$argValue{command}})) {
 		return;
 	}
 
@@ -3316,16 +3331,17 @@ sub configureSingleModule {
 		upgradeModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
-	} else {
+	}
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 		print "Module $moduleName cannot be installed because:\n";
-		if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-			print "- it is blocked (maybe use 'unblock')\n";
-		}
-		if ( $origConfModules{$module}{required} eq 'no' ) {
-			print "- it is not required by this system (this is the main reason)\n";
-		}
+		print "- it is blocked (maybe use 'unblock')\n";
+	}
+	if ( $origConfModules{$module}{required} eq 'no' ) {
+		print "Module $moduleName cannot be installed because:\n";
+		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
+
 
 
 ###############################################################################
@@ -3341,6 +3357,7 @@ sub reconfigureAllModules {
 		}
 	}
 }
+
 
 
 ###############################################################################
@@ -3598,7 +3615,7 @@ sub printNameDescriptionPrograms {
 # show description of module
 #
 sub moduleDescription() {
-	my $moduleName = $ARGV[1];
+	my $moduleName = $argValue{command};
 	my $module;
 	if ($moduleName) {
 		$module = getSubName($moduleName);
@@ -3710,35 +3727,38 @@ if (!isOSSupported()) {
 if (@ARGV != 0) {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
-	if (exists $options{$ARGV[0]} && (! isRoot() )) {
+	if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+	if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
+
+	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
 		exit (0);
 	}
-	if ($ARGV[0] eq "list") {
+	if ($argValue{command} eq "list") {
 		initLogging();
 		prepareValues();
 		listStatus();
-	} elsif ($ARGV[0] eq "description") {
+	} elsif ($argValue{command} eq "description") {
 		moduleDescription();
-	} elsif ($ARGV[0] eq "help") {
+	} elsif ($argValue{command} eq "help") {
 		help();
-	} elsif ($ARGV[0] eq "FAI") {
+	} elsif ($argValue{command} eq "FAI") {
 		print "Starting tuxedo-tomte in FAI modus\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
-	} elsif ($ARGV[0] eq "configure") {
+	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
-		if (defined $ARGV[1]) {
+		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
 			prerequisites();
-			if ($ARGV[1] eq "all") {
+			if ($argValue{module} eq "all") {
 				configureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
 			} else {
-				configureSingleModule($ARGV[1]);
+				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
@@ -3747,14 +3767,14 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-	} elsif ($ARGV[0] eq "remove") {
+	} elsif ($argValue{command} eq "remove") {
 		print "remove, does nothing yet\n";
-	} elsif ($ARGV[0] eq "reconfigure") {
-		if (defined $ARGV[1]) {
+	} elsif ($argValue{command} eq "reconfigure") {
+		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
 			prerequisites();
-			if ($ARGV[1] eq "all") {
+			if ($argValue{module} eq "all") {
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
@@ -3769,28 +3789,28 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-	} elsif ($ARGV[0] eq "block") {
-		if (defined $ARGV[1]) {
+	} elsif ($argValue{command} eq "block") {
+		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
-			block($ARGV[1]);
+			block($argValue{module});
 			writeConfigFile();
 			printLog('Tomte finished');
 		} else {
 			print "Module name missing\n";
 		}
-	} elsif ($ARGV[0] eq "unblock") {
-		if (defined $ARGV[1]) {
+	} elsif ($argValue{command} eq "unblock") {
+		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
-			unblock($ARGV[1]);
+			unblock($argValue{module});
 			writeConfigFile();
 			printLog('Tomte finished');
 		} else {
 			print "Module name missing\n";
 		}
 	} else {
-		print "Unknown command: $ARGV[0]\n";
+		print "Unknown command: $argValue{command}\n";
 		help();
 	}
 } else {
