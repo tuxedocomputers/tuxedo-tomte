@@ -33,6 +33,8 @@ $dbus_address = $1;
 print "name: $username pid: $pid\n";
 print "dbus: $dbus_address\n";
 
-my $cmd = "sudo -u $username DISPLAY=:0 $dbus_address notify-send \"text\"";
-`$cmd`;
+#my $cmd = "sudo -u $username DISPLAY=:0 $dbus_address notify-send \"text\"";
 
+my $cmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"\" 0 \"\" 'Hello world!' 'This is an example notification.' '[]' '{\"urgency\": <1>}' 5000";
+
+`$cmd`;
