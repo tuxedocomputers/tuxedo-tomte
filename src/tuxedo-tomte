@@ -2714,6 +2714,56 @@ sub insertGrubParameter {
 
 
 
+
+###############################################################################
+# send message to desktop
+# returns 1 if message was sent
+# returns 0 if message could not be delivered for any reason
+#
+sub messageDesktop {
+	my $title = shift;
+	my $message = shift;
+	my $mUsername - '';
+	my $mPid = '';
+	my $mLine;
+	my @whoLines = `who -u`;
+
+	foreach $mLine (@whoLines) {
+		if ($mLine =~ /\(:0\)/) {
+			$mLine =~ /^(\w*).*\s(\d*)\s.*/;
+			$mUsername = $1;
+			$mPid = $2;
+		}
+	}
+	if (($mUsername eq '') || ($mPid eq '')) {
+		return (0);
+	}
+
+	my $dbusAddress;
+
+	if ( open(FH, "<", "/proc/$mPid/environ") ) {
+		$dbusAddress = do { local $/; <FH> };
+		close FH;
+	} else {
+		return (0);
+	}
+	
+	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
+	$dbusAddress = $1;
+
+	my $mCmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"\" 0 \"\" '$title' '$message' '[]' '{\"urgency\": <1>}' 5000";
+
+	`$mCmd`;
+
+	if ($? != 0) {
+		return (0);
+	}
+}
+
+
+
+
+
 ###############################################################################
 # initialize logFile
 # create one if not existing already
