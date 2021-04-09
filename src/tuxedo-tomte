@@ -2719,14 +2719,22 @@ sub insertGrubParameter {
 # send message to desktop
 # returns 1 if message was sent
 # returns 0 if message could not be delivered for any reason
+# icon:
+# 	dialog-warning
+# 	dialog-error
+# 	dialog-information
+# 	freedesktop.org
 # urgency:
 # 	0 : Low
 # 	1 : Normal
 # 	2 : Critical
 #
 sub messageDesktop {
-	my $title = shift;
-	my $message = shift;
+	my $summary = shift;
+	my $body = shift;
+	my $urgency -shift;
+	my $icon = shift;
+
 	my $mUsername - '';
 	my $mPid = '';
 	my $mLine;
@@ -2740,6 +2748,7 @@ sub messageDesktop {
 		}
 	}
 	if (($mUsername eq '') || ($mPid eq '')) {
+		printLog('No display for message output found');
 		return (0);
 	}
 
@@ -2749,22 +2758,26 @@ sub messageDesktop {
 		$dbusAddress = do { local $/; <FH> };
 		close FH;
 	} else {
+		printLog('No display for message output found');
 		return (0);
 	}
 	
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
+		printLog('No display for message output found');
 		return (0);
 	}
 
-	my $mCmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" 0 \"\" '$title' '$message' '[]' '{\"urgency\": <1>}' 5000";
+	my $mCmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" 746530 \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 
 	if ($? != 0) {
+		printLog('No display for message output found');
 		return (0);
 	}
+	return (1);
 }
 
 
