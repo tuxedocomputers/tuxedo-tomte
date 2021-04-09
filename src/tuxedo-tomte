@@ -3393,6 +3393,7 @@ sub configureSingleModule {
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
+		($localConfModules{$module}{installed} eq 'failed') ||
 	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
