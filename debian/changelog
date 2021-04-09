@@ -1,4 +1,4 @@
-tuxedo-tomte (2.3.5-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.3.5-6) UNRELEASED; urgency=medium
 
   * added no-keyboard-after-suspend-fix for IBS15v6
   * added md5store check
@@ -6,8 +6,16 @@ tuxedo-tomte (2.3.5-5) UNRELEASED; urgency=medium
   * debug md5store
   * before merge
   * added hash instead argv
+  * before merge with master
+  * added libnotify example
+  * several experiments with notify and dbus
+  * final solution for messages in test script
+  * included messaging in main script
+  * finished testing message capability
+  * messaging sub in main prog done
+  * finished message system
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Apr 2021 16:31:18 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 Apr 2021 11:39:26 +0200
 
 tuxedo-tomte (2.3.4) focal; urgency=medium
 
