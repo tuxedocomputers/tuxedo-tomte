@@ -2199,28 +2199,40 @@ sub cracklibruntime() {
 sub amdgpudkms() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
+	my $wasInstalled = 1;
+	my $packageamdgpu_dkms_firmware;
+	my $packageamdgpu_dkms;
 	if ($action eq 'install') {
-		# check before if the package is already installed
-		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
+		# check if the package is already installed
+		if( ! isPackageInstalled('amdgpu-dkms-firmware') ) {
+			$wasInstalled = 0;
+			$packageamdgpu_dkms_firmware = installPackage('amdgpu-dkms-firmware');
 		} else {
-			printLog("$origConfModules{$module}{name} was already installed");
-			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$packageamdgpu_dkms_firmware = 0;
+		}
+		if( ! isPackageInstalled('amdgpu-dkms') ) {
+			$wasInstalled = 0;
+			$packageamdgpu_dkms = installPackage('amdgpu-dkms');
+		} else {
+			$packageamdgpu_dkms = 0;
+		}
+
+		if( !$packageamdgpu_dkms_firmware && !$packageamdgpu_dkms ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			} else {
+				addToConfiguredModules($module, 'success');
+			}
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
+		} else {
+			$origConfModules{$module}{installed} = 'failed';
+			addToConfiguredModules($module, 'failed');
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+		printLog('upgrade not necessary for packages');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -2234,7 +2246,6 @@ sub amdgpudkms() {
 ###############################################################################
 # subs for corefix md5 tests
 #
-
 
 ###############################################################################
 # returns 1 if md5 file loaded correctly
