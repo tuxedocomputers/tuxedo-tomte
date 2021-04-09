@@ -2719,6 +2719,10 @@ sub insertGrubParameter {
 # send message to desktop
 # returns 1 if message was sent
 # returns 0 if message could not be delivered for any reason
+# urgency:
+# 	0 : Low
+# 	1 : Normal
+# 	2 : Critical
 #
 sub messageDesktop {
 	my $title = shift;
@@ -2750,8 +2754,11 @@ sub messageDesktop {
 	
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
+	if ($dbusAddress eq '') {
+		return (0);
+	}
 
-	my $mCmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"\" 0 \"\" '$title' '$message' '[]' '{\"urgency\": <1>}' 5000";
+	my $mCmd = "sudo -u $username $dbus_address gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" 0 \"\" '$title' '$message' '[]' '{\"urgency\": <1>}' 5000";
 
 	`$mCmd`;
 
