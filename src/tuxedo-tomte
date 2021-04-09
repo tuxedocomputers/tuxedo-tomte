@@ -550,6 +550,21 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 	},
+	amdgpudkms => {
+		name => 'amdgpu-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Enables AMD GPU and display to share configuration information',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+	},
 );
 
 
@@ -634,6 +649,24 @@ sub readOSData {
 			$distributionVersion = $1;
 		}
 	}
+}
+
+
+
+
+###############################################################################
+# returns the brnad of the CPU (AMD or Intel)
+sub cpuBrand {
+	my $infos;
+	if ( open(FH, '<', '/proc/cpuinfo') ) {
+		local $/;
+		$infos = <FH>;
+		close FH;
+		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
+			return ('AMD');
+		}
+	}
+	return ('Intel');
 }
 
 
@@ -820,6 +853,11 @@ sub checkRequirements {
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 		printLog('discovered nvidia-driver problem');
+	}
+
+	if (cpuBrand() eq 'AMD') {
+		$origConfModules{amdgpudkms}{required} = 'yes';
+		printLog('discovered amd-gpu problem');
 	}
 }
 
@@ -2155,6 +2193,44 @@ sub cracklibruntime() {
 
 
 
+###############################################################################
+# Fixes AMD GPU frequency communication with display
+#
+sub amdgpudkms() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			$retval = installPackage($origConfModules{$module}{name});
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
 ###############################################################################
 # subs for corefix md5 tests
 #
