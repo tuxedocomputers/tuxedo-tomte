@@ -1,11 +1,12 @@
-tuxedo-tomte (2.3.5-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.3.5-10) UNRELEASED; urgency=medium
 
   * added amdgpu-dkms
   * added no-keyboard-after-suspend-fix for IBS15v6
   * configure also failed modules
   * modified package installer amdgpu
+  * debug pkcon
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 Apr 2021 16:19:24 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 13 Apr 2021 12:22:27 +0200
 
 tuxedo-tomte (2.3.4) focal; urgency=medium
 
