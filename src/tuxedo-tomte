@@ -2629,7 +2629,9 @@ sub installPackage {
 	my $packageName = shift;
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
-	my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
+	my $retval = system("pkcon -yp install $packageName");
+	#my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
+	$retval = $retval/256;
 	printLog("pkcon returns: $retval, while installing $packageName");
 	if ($retval != 0) {
 		printLog("failed to install $packageName by pkcon");
