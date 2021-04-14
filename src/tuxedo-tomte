@@ -2427,9 +2427,9 @@ sub deinstExcept {
 	my $except = shift;
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
-	my $retValue = $?;
+	my $retValue = $?/256;
 	if ($retValue != 0) {
-		if ($retValue == 256) {
+		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
 			return 0;
 		}
@@ -2452,7 +2452,8 @@ sub deinstExcept {
 		print "executing: $pkconDeinst\n";
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
-			printLog('failed to deinstall packages');
+			$retValue = $?/256;
+			printLog("failed to deinstall packages, retvalue: $retValue");
 			return 1;
 		} else {
 			printLog('deinstallation of packages successful');
@@ -2477,9 +2478,9 @@ sub deinstallPackage {
 	my $deinst = shift;
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
-	my $retValue = $?;
+	my $retValue = $?/256;
 	if ($retValue != 0) {
-		if ($retValue == 256) {
+		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst");
 			return 0;
 		}
@@ -2502,7 +2503,8 @@ sub deinstallPackage {
 		print "executing: $pkconDeinst\n";
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
-			printLog('failed to deinstall packages');
+			$retValue = $?/256;
+			printLog("failed to deinstall packages, retvalue: $retValue");
 			return 1;
 		} else {
 			printLog('deinstallation of packages successful');
@@ -2525,7 +2527,7 @@ sub isPackageInstalled {
 	my $package = shift;
 	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
-	my $retValue = $?;
+	my $retValue = $?/256;
 	if ($retString =~ m/install ok installed/) {
 		printLog("package $package is installed");
 		return 1;
@@ -2546,6 +2548,7 @@ sub installPackage {
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
 	my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
+	$retval = $retval/256;
 	printLog("pkcon returns: $retval, while installing $packageName");
 	if ($retval != 0) {
 		printLog("failed to install $packageName by pkcon");
@@ -3320,6 +3323,7 @@ sub configureSingleModule {
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
+		($localConfModules{$module}{installed} eq 'failed') ||
 	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
