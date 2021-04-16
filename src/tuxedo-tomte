@@ -767,7 +767,8 @@ sub checkRequirements {
 		printLog('discovered threeg-fix problem');
 	}
 
-	if ($boardname =~ /X170SM/) {
+	if (($boardname =~ /X170SM/) ||
+		($boardname =~ /PCx0Dx_GN20/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('discovered tuxedo-keyboard-ite problem');
 	}
