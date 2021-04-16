@@ -1,5 +1,0 @@
-# Automatically added by dh_systemd_start/13ubuntu1~oibaf~f
-if [ -d /run/systemd/system ] && [ "$1" = remove ]; then
-	deb-systemd-invoke stop 'tuxedo-tomte.service' 'tuxedo-tomte.timer' >/dev/null || true
-fi
-# End automatically added section
