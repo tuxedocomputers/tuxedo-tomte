@@ -670,12 +670,6 @@ sub checkRequirements {
 	my $FH;
 	my $biosVersion;
 
-	#TODO debug
-	printLog("lspciOutput:\n$lspciOutput");
-	my $lsModules = `ls -al /lib/modules`;
-	printLog("/lib/modules:\n$lsModules");
-	listStatus();
-
 	# check values for each module
 	if ($boardname =~ /PB50_70DFx,DDx/) {
 		$origConfModules{i8042fix}{required} = 'yes';
@@ -3748,6 +3742,15 @@ if (@ARGV != 0) {
 		print "You must have root access to use this option\n";
 		exit (0);
 	}
+
+	#TODO debug
+	initLogging();
+	prepareValues();
+	printLog("lspciOutput:\n$lspciOutput");
+	my $lsModules = `ls -al /lib/modules`;
+	printLog("/lib/modules:\n$lsModules");
+	listStatus();
+
 	if ($argValue{command} eq "list") {
 		initLogging();
 		prepareValues();
