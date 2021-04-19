@@ -670,6 +670,12 @@ sub checkRequirements {
 	my $FH;
 	my $biosVersion;
 
+	#TODO debug
+	printLog("lspciOutput:\n$lspciOutput");
+	my $lsModules = `ls -al /lib/modules`;
+	printLog("/lib/modules:\n$lsModules");
+	listStatus();
+
 	# check values for each module
 	if ($boardname =~ /PB50_70DFx,DDx/) {
 		$origConfModules{i8042fix}{required} = 'yes';
