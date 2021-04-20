@@ -3749,6 +3749,7 @@ if (@ARGV != 0) {
 	printLog("lspciOutput:\n$lspciOutput");
 	my $lsModules = `ls -al /lib/modules`;
 	printLog("/lib/modules:\n$lsModules");
+	system('cat /etc/tomte/tomte.cfg >> /var/log/tomte/tomte.log');
 	listStatus();
 
 	if ($argValue{command} eq "list") {
