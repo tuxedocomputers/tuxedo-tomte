@@ -1728,11 +1728,12 @@ sub tuxedomicfix1() {
 
 #TODO: debugs
 
-			if (isPackageInstalled($origConfModules{$module}{name})) {
+			if (! isPackageInstalled($origConfModules{$module}{name})) {
 				print "micfix1 not installed\n";
 				printLog('micfix1 not installed');
-				system('dpkg -l tuxedo-*');
 			}
+			print 'dpkg -l tuxedo-*';
+			system('dpkg -l tuxedo-*');
 
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = 'yes';
