@@ -3710,7 +3710,7 @@ sub listSuccess {
 		messageDesktop('Restart required', 'Please restart the system for changes to take effect.', 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
 	} else {
-		messageDesktop('Tomte ready', 'Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 	}
 }
 
