@@ -1075,12 +1075,10 @@ sub amdgpuwithnvidiafix() {
 sub tuxedocontrolcenter() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1111,12 +1109,10 @@ sub tuxedocontrolcenter() {
 sub tuxedokeyboard() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1564,12 +1560,10 @@ sub threegfix() {
 sub tuxedotouchpadswitch() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1600,12 +1594,10 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1637,12 +1629,10 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1682,16 +1672,16 @@ sub fingerprintreader() {
 			$wasInstalled = 0;
 			$packagefprintd = installPackage('fprintd');
 		} else {
-			$packagefprintd = 0;
+			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
 			$packagelibpam = installPackage('libpam-fprintd');
 		} else {
-			$packagelibpam = 0;
+			$packagelibpam = 1;
 		}
 
-		if( !$packagefprintd && !$packagelibpam ) {
+		if( $packagefprintd && $packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
 				addToConfiguredModules($module, "nothingToDo");
@@ -1721,22 +1711,10 @@ sub fingerprintreader() {
 sub tuxedomicfix1() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-
-#TODO: debugs
-
-			if (! isPackageInstalled($origConfModules{$module}{name})) {
-				print "micfix1 not installed\n";
-				printLog('micfix1 not installed');
-			}
-			print 'dpkg -l tuxedo-*';
-			system('dpkg -l tuxedo-*');
-
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
@@ -1768,12 +1746,10 @@ sub tuxedomicfix1() {
 sub mesautils() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1873,28 +1849,28 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
 			} else {
-				$packageLinuxGenericHwe1804 = 0;
+				$packageLinuxGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
 			} else {
-				$packageLinuxImageGenericHwe1804 = 0;
+				$packageLinuxImageGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
 			} else {
-				$packageLinuxHeadersGenericHwe1804 = 0;
+				$packageLinuxHeadersGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
 			} else {
-				$packageLinuxSignedGenericHwe1804 = 0;
+				$packageLinuxSignedGenericHwe1804 = 1;
 			}
 	
-			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
+			if( $packageLinuxGenericHwe1804 && $packageLinuxImageGenericHwe1804 && $packageLinuxHeadersGenericHwe1804 && $packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -1910,13 +1886,17 @@ sub kernel() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
-			my $deinstallIncompatibleKernel = 0;
-			if( isPackageInstalled('linux-image-oem-20.04') ||
-					isPackageInstalled('linux-headers-oem-20.04') ||
-					isPackageInstalled('linux-oem-20.04') ) {
-				$deinstallIncompatibleKernel = 1;
+			my $noIncompatibleKernel = 1;
+			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-image-oem-20.04'); 
+			}
+			if( isPackageInstalled('linux-headers-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-oem-20.04');
-				deinstallPackage('linux-image-oem-20.04');
+			}
+			if( isPackageInstalled('linux-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-headers-oem-20.04');
 			}
 
@@ -1925,28 +1905,28 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
 			} else {
-				$packageLinuxOem2004 = 0;
+				$packageLinuxOem2004 = 1;
 			}
 			if( ! isPackageInstalled('linux-firmware') ) {
 				$wasInstalled = 0;
 				$packageLinuxFirmware = installPackage('linux-firmware');
 			} else {
-				$packageLinuxFirmware = 0;
+				$packageLinuxFirmware = 1;
 			}
 			if( ! isPackageInstalled('intel-microcode') ) {
 				$wasInstalled = 0;
 				$packageIntelMicrocode = installPackage('intel-microcode');
 			} else {
-				$packageIntelMicrocode = 0;
+				$packageIntelMicrocode = 1;
 			}
 
-			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
-				if ($wasInstalled || !$deinstallIncompatibleKernel) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-				}
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1957,13 +1937,17 @@ sub kernel() {
 	}
 	if ($action eq 'upgrade') {
 		if ($distributionVersion =~ /20.04/) {
-			my $deinstallIncompatibleKernel = 0;
-			if( isPackageInstalled('linux-image-oem-20.04') ||
-					isPackageInstalled('linux-headers-oem-20.04') ||
-					isPackageInstalled('linux-oem-20.04') ) {
-				$deinstallIncompatibleKernel = 1;
+			my $noIncompatibleKernel = 1;
+			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-image-oem-20.04'); 
+			}
+			if( isPackageInstalled('linux-headers-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-oem-20.04');
-				deinstallPackage('linux-image-oem-20.04');
+			}
+			if( isPackageInstalled('linux-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-headers-oem-20.04');
 			}
 
@@ -1972,36 +1956,34 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
 			} else {
-				$packageLinuxOem2004 = 0;
+				$packageLinuxOem2004 = 1;
 			}
 			if( ! isPackageInstalled('linux-firmware') ) {
 				$wasInstalled = 0;
 				$packageLinuxFirmware = installPackage('linux-firmware');
 			} else {
-				$packageLinuxFirmware = 0;
+				$packageLinuxFirmware = 1;
 			}
 			if( ! isPackageInstalled('intel-microcode') ) {
 				$wasInstalled = 0;
 				$packageIntelMicrocode = installPackage('intel-microcode');
 			} else {
-				$packageIntelMicrocode = 0;
+				$packageIntelMicrocode = 1;
 			}
-	
 
-			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
-				if ($wasInstalled || !$deinstallIncompatibleKernel) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-				}
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-
 		}
 	}
 	if ($action eq 'remove') {
@@ -2037,40 +2019,40 @@ sub nvidiadriver() {
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver460 = 0;
+				$packageNvidiaDriver460 = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
 			} else {
-				$packageMesaUtils = 0;
+				$packageMesaUtils = 1;
 			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
-				$packageNvidiaPrime = 0;
+				$packageNvidiaPrime = 1;
 			}
 			if( ! isPackageInstalled('python-appindicator') ) {
 				$wasInstalled = 0;
 				$packagePythonAppindicator = installPackage('python-appindicator');
 			} else {
-				$packagePythonAppindicator = 0;
+				$packagePythonAppindicator = 1;
 			}
 			if( ! isPackageInstalled('python-cairo') ) {
 				$wasInstalled = 0;
 				$packagePythonCairo = installPackage('python-cairo');
 			} else {
-				$packagePythonCairo = 0;
+				$packagePythonCairo = 1;
 			}
 			if( ! isPackageInstalled('python-gtk2') ) {
 				$wasInstalled = 0;
 				$packagePythonGtk2 = installPackage('python-gtk2');
 			} else {
-				$packagePythonGtk2 = 0;
+				$packagePythonGtk2 = 1;
 			}
 	
-			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -2094,22 +2076,22 @@ sub nvidiadriver() {
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver460 = 0;
+				$packageNvidiaDriver460 = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
 			} else {
-				$packageMesaUtils = 0;
+				$packageMesaUtils = 1;
 			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
-				$packageNvidiaPrime = 0;
+				$packageNvidiaPrime = 1;
 			}
 	
-			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -2140,12 +2122,10 @@ sub nvidiadriver() {
 sub cracklibruntime() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -2553,7 +2533,8 @@ sub isPackageInstalled {
 
 ###############################################################################
 # installs a package by pkcon or apt-get
-# returns the exit code
+# returns 1 if successful
+# returns 0 if package was not installed
 #
 sub installPackage {
 	my $packageName = shift;
@@ -2561,19 +2542,16 @@ sub installPackage {
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
 	if ($FAI) {
-		$retval = system("apt-get -qy install $packageName >/dev/null 2>&1");
+		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		$retval = isPackageInstalled($packageName);
 	} else {
-		$retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
-	}
-	$retval = $retval/256;
-	printLog("installer returns: $retval, while installing $packageName");
-	if ($retval != 0) {
-		printLog("failed to install $packageName");
-		printLog("will try again later");
-		startTomteDelayed();
-	} else {
-		printLog("0 is good");
-		isPackageInstalled($packageName);
+		system("pkcon -yp install $packageName >/dev/null 2>&1");
+		$retval = isPackageInstalled($packageName);
+		if ($retval == 0) {
+			printLog("failed to install $packageName");
+			printLog("will try again later");
+			startTomteDelayed();
+		}
 	}
 	return $retval;
 }
