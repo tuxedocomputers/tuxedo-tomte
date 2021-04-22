@@ -29,6 +29,7 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
+my $FAI =0;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -2551,18 +2552,23 @@ sub isPackageInstalled {
 
 
 ###############################################################################
-# installs a package by pkcon
-# returns the exit code from pkcon
+# installs a package by pkcon or apt-get
+# returns the exit code
 #
 sub installPackage {
 	my $packageName = shift;
+	my $retval;
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
-	my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
+	if ($FAI) {
+		$retval = system("apt-get -qy install $packageName >/dev/null 2>&1");
+	} else {
+		$retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
+	}
 	$retval = $retval/256;
-	printLog("pkcon returns: $retval, while installing $packageName");
+	printLog("installer returns: $retval, while installing $packageName");
 	if ($retval != 0) {
-		printLog("failed to install $packageName by pkcon");
+		printLog("failed to install $packageName");
 		printLog("will try again later");
 		startTomteDelayed();
 	} else {
@@ -3774,6 +3780,14 @@ if (@ARGV != 0) {
 		print "Starting tuxedo-tomte in FAI modus\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
+		$FAI = 1;
+		initLogging();
+		prepareValues();
+		prerequisites();
+		configureAllModules();
+		postConfigure();
+		listSuccess();
+		writeConfigFile();
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
