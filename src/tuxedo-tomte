@@ -1270,17 +1270,21 @@ sub tuxedorepos() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$output = `pkcon refresh`;
+			if ($FAI) {
+				$output = `apt-get update`;
+			} else {
+				$output = `pkcon refresh`;
+			}
 			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
-				printLog('failed: pkcon refresh');
+				printLog('failed: update packages');
 				printLog("returned error code: $exitStatus");
 				if ($exitStatus == 7) {
 					printLog('possible network problems');
 				}
 				addToConfiguredModules($module, "failed");
 			} else {
-				printLog("success: pkcon refresh");
+				printLog("success: update packages");
 				addToConfiguredModules($module, "success");
 			}
 		}
@@ -1298,17 +1302,21 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$output = `pkcon refresh`;
+				if ($FAI) {
+					$output = `apt-get update`;
+				} else {
+					$output = `pkcon refresh`;
+				}
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: pkcon refresh');
+					printLog('failed: update packages');
 					printLog("returned error code: $exitStatus");
 					if ($exitStatus == 7) {
 						printLog('possible network problems');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: pkcon refresh');
+					printLog('success: update packages');
 					addToConfiguredModules($module, "success");
 				}
 			}
@@ -1344,17 +1352,21 @@ sub tuxedomirrors() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$output = `pkcon refresh`;
+			if ($FAI) {
+				$output = `apt-get update`;
+			} else {
+				$output = `pkcon refresh`;
+			}
 			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
-				printLog('failed: pkcon refresh');
+				printLog('failed: update packages');
 				printLog("returned error code: $exitStatus");
 				if ($exitStatus == 7) {
 					printLog('possible network problems');
 				}
 				addToConfiguredModules($module, "failed");
 			} else {
-				printLog("success: pkcon refresh");
+				printLog("success: update packages");
 				addToConfiguredModules($module, "success");
 			}
 		}
@@ -1372,17 +1384,21 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$output = `pkcon refresh`;
+				if ($FAI) {
+					$output = `apt-get update`;
+				} else {
+					$output = `pkcon refresh`;
+				}
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: pkcon refresh');
+					printLog('failed: update packages');
 					printLog("returned error code: $exitStatus");
 					if ($exitStatus == 7) {
 						printLog('possible network problems');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: pkcon refresh');
+					printLog('success: update packages');
 					addToConfiguredModules($module, "success");
 				}
 			}
