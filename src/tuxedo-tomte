@@ -2410,9 +2410,9 @@ sub setComment {
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
 # second parameter
-# returns 1 if the search for the packages failed or if the deinstallation was
+# returns 0 if the search for the packages failed or if the deinstallation was
 # unsuccessful
-# returns 0 if everything was ok, even if no packages were found
+# returns 1 if everything was ok, even if no packages were found
 #
 sub deinstExcept {
 	my $deinst = shift;
@@ -2420,40 +2420,45 @@ sub deinstExcept {
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
+	my $deinstCmd;
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
-			return 0;
+			return 1;
 		}
 		printLog('something went wrong while searching for packages');
-		return 1;
+		return 0;
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -yp remove';
+	if ($FAI) {
+		$deinstCmd = 'apt-get -yq remove';
+	} else {
+		$deinstCmd = 'pkcon -yp remove';
+	}
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
-			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+			$deinstCmd = $deinstCmd.' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst\n");
-		print "executing: $pkconDeinst\n";
-		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
-		if (system($pkconDeinst)) {
+		printLog("deinstalling: $deinstCmd\n");
+		print "executing: $deinstCmd\n";
+		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		if (system($deinstCmd)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 1;
+			return 0;
 		} else {
 			printLog('deinstallation of packages successful');
-			return 0;
+			return 1;
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 0;
+		return 1;
 	}
 }
 
