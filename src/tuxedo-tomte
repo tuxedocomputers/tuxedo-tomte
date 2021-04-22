@@ -1271,6 +1271,11 @@ sub tuxedorepos() {
 			# update of repos has to be immediate for possible later package
 			# installation
 			if ($FAI) {
+				#TODO: debug
+				print "env from Tomte system\n";
+				system('env');
+				print "env from Tomte backticks\n";
+				`env`;
 				$output = `apt-get update`;
 			} else {
 				$output = `pkcon refresh`;
