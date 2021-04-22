@@ -1,4 +1,4 @@
-tuxedo-tomte (2.3.9-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.3.9-7) UNRELEASED; urgency=medium
 
   * added debug info
   * more debug
@@ -7,8 +7,9 @@ tuxedo-tomte (2.3.9-6) UNRELEASED; urgency=medium
   * vor checkout
   * added FAI stage and apt-get instead pkcon
   * rework and adapt of installPackage to FAI conditions
+  * adapted remove packages to FAI conditions
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 22 Apr 2021 11:39:51 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 22 Apr 2021 12:37:47 +0200
 
 tuxedo-tomte (2.3.9) focal; urgency=medium
 
