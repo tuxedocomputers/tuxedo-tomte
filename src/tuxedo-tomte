@@ -825,6 +825,8 @@ sub checkRequirements {
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 		printLog('discovered nvidia-driver problem');
+		#TODO debug
+		print "detected nvidia device\n";
 	}
 }
 
@@ -2022,12 +2024,16 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	if ($action eq 'install') {
+		#TODO: debug
+		print "nvidiadriver install\n";
 		if ($distributionVersion =~ /18.04/) {
+			print "distribution: 18.04\n";
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
 			# check if the package is already installed
 			if( ! isPackageInstalled('nvidia-driver-460') ) {
+				print "driver 460 is not installed\n";
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
@@ -2458,7 +2464,6 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstCmd\n");
-		print "executing: $deinstCmd\n";
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
@@ -2509,6 +2514,7 @@ sub deinstallPackage {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $pkconDeinst\n");
+		#TODO: debug
 		print "executing: $pkconDeinst\n";
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
@@ -2826,6 +2832,7 @@ sub getBackupFileTime {
 #
 sub printLog {
 	my $message = shift;
+	print "$message\n" if $FAI;
 	if (! $noLogFile) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
