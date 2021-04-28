@@ -674,12 +674,12 @@ sub checkRequirements {
 	# check values for each module
 	if ($boardname =~ /PB50_70DFx,DDx/) {
 		$origConfModules{i8042fix}{required} = 'yes';
-		printLog('discovered i8042-fix problem');
+		printLog('detected i8042-fix issue');
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
-		printLog('discovered no-boot-on-battery problem');
+		printLog('detected no-boot-on-battery issue');
 	}
 
 	if (($boardname =~ /POLARIS1501A1650TI/) ||
@@ -691,7 +691,7 @@ sub checkRequirements {
 		($boardname =~ /NL5xRU/) ||
   		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
-		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
+		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue');
 	}
 
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
@@ -699,7 +699,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-		printLog('discovered amd-gpu-with-nvidia-fix problem');
+		printLog('detected amd-gpu-with-nvidia-fix issue');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -714,12 +714,12 @@ sub checkRequirements {
 		($boardname =~ /PB50_70DFx,DDx/) ||
 		($boardname =~ /NS50MU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-		printLog('discovered no-keyboard-after-suspend-fix problem');
+		printLog('detected no-keyboard-after-suspend-fix issue');
 	}
 
 	if ($boardname =~ /X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
-		printLog('discovered elantech-touchpad-fix problem');
+		printLog('detected elantech-touchpad-fix issue');
 	}
 
 	if (($boardname =~ /LAPQC71A/) ||
@@ -740,13 +740,13 @@ sub checkRequirements {
 		($boardname =~ /TRINITY1701I/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog('discovered tuxedo-touchpad-switch problem');
+		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
 	if ($boardname =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('discovered backlight-fix problem');
+			printLog('detected backlight-fix issue');
 		}
 	}
 
@@ -758,27 +758,27 @@ sub checkRequirements {
 	if ($boardname =~ /NH5xAx/) {
 		# if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 		$origConfModules{corefix}{required} = 'yes';
-		printLog('discovered core-fix problem');
+		printLog('detected core-fix issue');
 		#}
 	}
 
 	# if Threeg Huawei ME936 device found
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
-		printLog('discovered threeg-fix problem');
+		printLog('detected threeg-fix issue');
 	}
 
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /PCx0Dx_GN20/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
-		printLog('discovered tuxedo-keyboard-ite problem');
+		printLog('detected tuxedo-keyboard-ite issue');
 	}
 
 	# get vendor text from vendor ID:device ID
 	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
-		printLog('discovered tuxedo-nvme-fix problem');
+		printLog('detected tuxedo-nvme-fix issue');
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -791,7 +791,7 @@ sub checkRequirements {
 		qr/1c7a:0603/);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog('discovered fingerprint-reader problem');
+		printLog('detected fingerprint-reader issue');
 		last;
 	}
 
@@ -812,21 +812,19 @@ sub checkRequirements {
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog('discovered tuxedo-micfix1 problem');
+		printLog('detected tuxedo-micfix1 issue');
 	}
 
 	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
-		printLog('discovered tuxedo-restore-audio-fix problem');
+		printLog('detected tuxedo-restore-audio-fix issue');
 	}
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
-		printLog('discovered nvidia-driver problem');
-		#TODO debug
-		print "detected nvidia device\n";
+		printLog('discovered nvidia-driver issue');
 	}
 }
 
@@ -2024,16 +2022,12 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	if ($action eq 'install') {
-		#TODO: debug
-		print "nvidiadriver install\n";
 		if ($distributionVersion =~ /18.04/) {
-			print "distribution: 18.04\n";
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
 			# check if the package is already installed
 			if( ! isPackageInstalled('nvidia-driver-460') ) {
-				print "driver 460 is not installed\n";
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
@@ -2514,8 +2508,6 @@ sub deinstallPackage {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $pkconDeinst\n");
-		#TODO: debug
-		print "executing: $pkconDeinst\n";
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
