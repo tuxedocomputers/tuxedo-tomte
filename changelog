@@ -1,12 +1,22 @@
-tuxedo-tomte (2.3.5-10) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.0) focal; urgency=medium
 
   * added amdgpu-dkms
-  * added no-keyboard-after-suspend-fix for IBS15v6
-  * configure also failed modules
-  * modified package installer amdgpu
-  * debug pkcon
+  * added FAI stage and apt-get instead pkcon
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 13 Apr 2021 12:22:27 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 09:15:45 +0200
+
+tuxedo-tomte (2.3.9) focal; urgency=medium
+
+  * added tuxedo-keyboard-ite for XP1512/XP1712
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Apr 2021 11:40:50 +0200
+
+tuxedo-tomte (2.3.7) focal; urgency=medium
+
+  * added no-keyboard-after-suspend-fix for IBS15v6
+  * added micfix1 for XP1512 and XP1712
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 Apr 2021 13:53:47 +0200
 
 tuxedo-tomte (2.3.4) focal; urgency=medium
 
