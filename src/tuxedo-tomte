@@ -796,7 +796,8 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME936 device found
-	if (system('lsusb -d 12d1:15bb') == 0) {
+	my $lsusb = `lsusb -d 12d1:15bb`;
+	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue');
 	}
