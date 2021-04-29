@@ -824,7 +824,7 @@ sub checkRequirements {
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
-		printLog('discovered nvidia-driver issue');
+		printLog('detected nvidia-driver issue');
 	}
 }
 
@@ -2221,6 +2221,8 @@ sub writeMD5Store {
 # returns 1 if found non equal or missing value between value in files and
 # saved values
 # returns 0 if all values are the same
+# returns 1 if something is different
+#
 sub newInitrdFiles {
 	if (loadMD5Store()) {
 		readInitrdMD5Files();
