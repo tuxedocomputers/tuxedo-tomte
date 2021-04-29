@@ -29,6 +29,7 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
+my $FAI = 0;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -673,12 +674,12 @@ sub checkRequirements {
 	# check values for each module
 	if ($boardname =~ /PB50_70DFx,DDx/) {
 		$origConfModules{i8042fix}{required} = 'yes';
-		printLog('discovered i8042-fix problem');
+		printLog('detected i8042-fix issue');
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
-		printLog('discovered no-boot-on-battery problem');
+		printLog('detected no-boot-on-battery issue');
 	}
 
 	if (($boardname =~ /POLARIS1501A1650TI/) ||
@@ -690,7 +691,7 @@ sub checkRequirements {
 		($boardname =~ /NL5xRU/) ||
   		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
-		printLog('discovered amd-xhci-hcd-usb-quirk-suspend-fix problem');
+		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue');
 	}
 
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
@@ -698,7 +699,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
 		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-		printLog('discovered amd-gpu-with-nvidia-fix problem');
+		printLog('detected amd-gpu-with-nvidia-fix issue');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -713,12 +714,12 @@ sub checkRequirements {
 		($boardname =~ /PB50_70DFx,DDx/) ||
 		($boardname =~ /NS50MU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-		printLog('discovered no-keyboard-after-suspend-fix problem');
+		printLog('detected no-keyboard-after-suspend-fix issue');
 	}
 
 	if ($boardname =~ /X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
-		printLog('discovered elantech-touchpad-fix problem');
+		printLog('detected elantech-touchpad-fix issue');
 	}
 
 	if (($boardname =~ /LAPQC71A/) ||
@@ -739,13 +740,13 @@ sub checkRequirements {
 		($boardname =~ /TRINITY1701I/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog('discovered tuxedo-touchpad-switch problem');
+		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
 	if ($boardname =~ /(N8xEJEK)/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('discovered backlight-fix problem');
+			printLog('detected backlight-fix issue');
 		}
 	}
 
@@ -757,27 +758,27 @@ sub checkRequirements {
 	if ($boardname =~ /NH5xAx/) {
 		# if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 		$origConfModules{corefix}{required} = 'yes';
-		printLog('discovered core-fix problem');
+		printLog('detected core-fix issue');
 		#}
 	}
 
 	# if Threeg Huawei ME936 device found
 	if (system('lsusb -d 12d1:15bb') == 0) {
 		$origConfModules{threegfix}{required} = 'yes';
-		printLog('discovered threeg-fix problem');
+		printLog('detected threeg-fix issue');
 	}
 
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /PCx0Dx_GN20/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
-		printLog('discovered tuxedo-keyboard-ite problem');
+		printLog('detected tuxedo-keyboard-ite issue');
 	}
 
 	# get vendor text from vendor ID:device ID
 	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
-		printLog('discovered tuxedo-nvme-fix problem');
+		printLog('detected tuxedo-nvme-fix issue');
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -790,7 +791,7 @@ sub checkRequirements {
 		qr/1c7a:0603/);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog('discovered fingerprint-reader problem');
+		printLog('detected fingerprint-reader issue');
 		last;
 	}
 
@@ -811,19 +812,19 @@ sub checkRequirements {
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog('discovered tuxedo-micfix1 problem');
+		printLog('detected tuxedo-micfix1 issue');
 	}
 
 	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
-		printLog('discovered tuxedo-restore-audio-fix problem');
+		printLog('detected tuxedo-restore-audio-fix issue');
 	}
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
-		printLog('discovered nvidia-driver problem');
+		printLog('detected nvidia-driver issue');
 	}
 }
 
@@ -1046,7 +1047,6 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1059,7 +1059,6 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'remove') {
@@ -1074,12 +1073,10 @@ sub amdgpuwithnvidiafix() {
 sub tuxedocontrolcenter() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1110,12 +1107,10 @@ sub tuxedocontrolcenter() {
 sub tuxedokeyboard() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1273,17 +1268,21 @@ sub tuxedorepos() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$output = `pkcon refresh`;
+			if ($FAI) {
+				$output = `apt-get update`;
+			} else {
+				$output = `pkcon refresh`;
+			}
 			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
-				printLog('failed: pkcon refresh');
+				printLog('failed: update packages');
 				printLog("returned error code: $exitStatus");
 				if ($exitStatus == 7) {
 					printLog('possible network problems');
 				}
 				addToConfiguredModules($module, "failed");
 			} else {
-				printLog("success: pkcon refresh");
+				printLog("success: update packages");
 				addToConfiguredModules($module, "success");
 			}
 		}
@@ -1301,17 +1300,21 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$output = `pkcon refresh`;
+				if ($FAI) {
+					$output = `apt-get update`;
+				} else {
+					$output = `pkcon refresh`;
+				}
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: pkcon refresh');
+					printLog('failed: update packages');
 					printLog("returned error code: $exitStatus");
 					if ($exitStatus == 7) {
 						printLog('possible network problems');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: pkcon refresh');
+					printLog('success: update packages');
 					addToConfiguredModules($module, "success");
 				}
 			}
@@ -1347,17 +1350,21 @@ sub tuxedomirrors() {
 			$origConfModules{$module}{upgraded} = "yes";
 			# update of repos has to be immediate for possible later package
 			# installation
-			$output = `pkcon refresh`;
+			if ($FAI) {
+				$output = `apt-get update`;
+			} else {
+				$output = `pkcon refresh`;
+			}
 			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
-				printLog('failed: pkcon refresh');
+				printLog('failed: update packages');
 				printLog("returned error code: $exitStatus");
 				if ($exitStatus == 7) {
 					printLog('possible network problems');
 				}
 				addToConfiguredModules($module, "failed");
 			} else {
-				printLog("success: pkcon refresh");
+				printLog("success: update packages");
 				addToConfiguredModules($module, "success");
 			}
 		}
@@ -1375,17 +1382,21 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				$output = `pkcon refresh`;
+				if ($FAI) {
+					$output = `apt-get update`;
+				} else {
+					$output = `pkcon refresh`;
+				}
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: pkcon refresh');
+					printLog('failed: update packages');
 					printLog("returned error code: $exitStatus");
 					if ($exitStatus == 7) {
 						printLog('possible network problems');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: pkcon refresh');
+					printLog('success: update packages');
 					addToConfiguredModules($module, "success");
 				}
 			}
@@ -1534,7 +1545,6 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1548,7 +1558,6 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'remove') {
@@ -1563,12 +1572,10 @@ sub threegfix() {
 sub tuxedotouchpadswitch() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1599,12 +1606,10 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1636,12 +1641,10 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1681,16 +1684,16 @@ sub fingerprintreader() {
 			$wasInstalled = 0;
 			$packagefprintd = installPackage('fprintd');
 		} else {
-			$packagefprintd = 0;
+			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
 			$packagelibpam = installPackage('libpam-fprintd');
 		} else {
-			$packagelibpam = 0;
+			$packagelibpam = 1;
 		}
 
-		if( !$packagefprintd && !$packagelibpam ) {
+		if( $packagefprintd && $packagelibpam ) {
 			if ($wasInstalled) {
 				printLog("$origConfModules{$module}{name} was already installed");
 				addToConfiguredModules($module, "nothingToDo");
@@ -1720,12 +1723,10 @@ sub fingerprintreader() {
 sub tuxedomicfix1() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
@@ -1757,12 +1758,10 @@ sub tuxedomicfix1() {
 sub mesautils() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -1862,28 +1861,28 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
 			} else {
-				$packageLinuxGenericHwe1804 = 0;
+				$packageLinuxGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
 			} else {
-				$packageLinuxImageGenericHwe1804 = 0;
+				$packageLinuxImageGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
 			} else {
-				$packageLinuxHeadersGenericHwe1804 = 0;
+				$packageLinuxHeadersGenericHwe1804 = 1;
 			}
 			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
 				$wasInstalled = 0;
 				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
 			} else {
-				$packageLinuxSignedGenericHwe1804 = 0;
+				$packageLinuxSignedGenericHwe1804 = 1;
 			}
 	
-			if( !$packageLinuxGenericHwe1804 && !$packageLinuxImageGenericHwe1804 && !$packageLinuxHeadersGenericHwe1804 && !$packageLinuxSignedGenericHwe1804 ) {
+			if( $packageLinuxGenericHwe1804 && $packageLinuxImageGenericHwe1804 && $packageLinuxHeadersGenericHwe1804 && $packageLinuxSignedGenericHwe1804 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -1899,13 +1898,17 @@ sub kernel() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
-			my $deinstallIncompatibleKernel = 0;
-			if( isPackageInstalled('linux-image-oem-20.04') ||
-					isPackageInstalled('linux-headers-oem-20.04') ||
-					isPackageInstalled('linux-oem-20.04') ) {
-				$deinstallIncompatibleKernel = 1;
+			my $noIncompatibleKernel = 1;
+			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-image-oem-20.04'); 
+			}
+			if( isPackageInstalled('linux-headers-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-oem-20.04');
-				deinstallPackage('linux-image-oem-20.04');
+			}
+			if( isPackageInstalled('linux-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-headers-oem-20.04');
 			}
 
@@ -1914,28 +1917,28 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
 			} else {
-				$packageLinuxOem2004 = 0;
+				$packageLinuxOem2004 = 1;
 			}
 			if( ! isPackageInstalled('linux-firmware') ) {
 				$wasInstalled = 0;
 				$packageLinuxFirmware = installPackage('linux-firmware');
 			} else {
-				$packageLinuxFirmware = 0;
+				$packageLinuxFirmware = 1;
 			}
 			if( ! isPackageInstalled('intel-microcode') ) {
 				$wasInstalled = 0;
 				$packageIntelMicrocode = installPackage('intel-microcode');
 			} else {
-				$packageIntelMicrocode = 0;
+				$packageIntelMicrocode = 1;
 			}
 
-			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
-				if ($wasInstalled || !$deinstallIncompatibleKernel) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-				}
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -1946,13 +1949,17 @@ sub kernel() {
 	}
 	if ($action eq 'upgrade') {
 		if ($distributionVersion =~ /20.04/) {
-			my $deinstallIncompatibleKernel = 0;
-			if( isPackageInstalled('linux-image-oem-20.04') ||
-					isPackageInstalled('linux-headers-oem-20.04') ||
-					isPackageInstalled('linux-oem-20.04') ) {
-				$deinstallIncompatibleKernel = 1;
+			my $noIncompatibleKernel = 1;
+			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-image-oem-20.04'); 
+			}
+			if( isPackageInstalled('linux-headers-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-oem-20.04');
-				deinstallPackage('linux-image-oem-20.04');
+			}
+			if( isPackageInstalled('linux-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-headers-oem-20.04');
 			}
 
@@ -1961,36 +1968,34 @@ sub kernel() {
 				$wasInstalled = 0;
 				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
 			} else {
-				$packageLinuxOem2004 = 0;
+				$packageLinuxOem2004 = 1;
 			}
 			if( ! isPackageInstalled('linux-firmware') ) {
 				$wasInstalled = 0;
 				$packageLinuxFirmware = installPackage('linux-firmware');
 			} else {
-				$packageLinuxFirmware = 0;
+				$packageLinuxFirmware = 1;
 			}
 			if( ! isPackageInstalled('intel-microcode') ) {
 				$wasInstalled = 0;
 				$packageIntelMicrocode = installPackage('intel-microcode');
 			} else {
-				$packageIntelMicrocode = 0;
+				$packageIntelMicrocode = 1;
 			}
-	
 
-			if( (!$packageLinuxOem2004 && !$packageLinuxFirmware && !$packageIntelMicrocode) || $deinstallIncompatibleKernel ) {
-				if ($wasInstalled || !$deinstallIncompatibleKernel) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-				}
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-
 		}
 	}
 	if ($action eq 'remove') {
@@ -2026,40 +2031,40 @@ sub nvidiadriver() {
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver460 = 0;
+				$packageNvidiaDriver460 = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
 			} else {
-				$packageMesaUtils = 0;
+				$packageMesaUtils = 1;
 			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
-				$packageNvidiaPrime = 0;
+				$packageNvidiaPrime = 1;
 			}
 			if( ! isPackageInstalled('python-appindicator') ) {
 				$wasInstalled = 0;
 				$packagePythonAppindicator = installPackage('python-appindicator');
 			} else {
-				$packagePythonAppindicator = 0;
+				$packagePythonAppindicator = 1;
 			}
 			if( ! isPackageInstalled('python-cairo') ) {
 				$wasInstalled = 0;
 				$packagePythonCairo = installPackage('python-cairo');
 			} else {
-				$packagePythonCairo = 0;
+				$packagePythonCairo = 1;
 			}
 			if( ! isPackageInstalled('python-gtk2') ) {
 				$wasInstalled = 0;
 				$packagePythonGtk2 = installPackage('python-gtk2');
 			} else {
-				$packagePythonGtk2 = 0;
+				$packagePythonGtk2 = 1;
 			}
 	
-			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime && !$packagePythonAppindicator && !$packagePythonCairo && !$packagePythonGtk2 ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -2083,22 +2088,22 @@ sub nvidiadriver() {
 				$wasInstalled = 0;
 				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
-				$packageNvidiaDriver460 = 0;
+				$packageNvidiaDriver460 = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
 			} else {
-				$packageMesaUtils = 0;
+				$packageMesaUtils = 1;
 			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
-				$packageNvidiaPrime = 0;
+				$packageNvidiaPrime = 1;
 			}
 	
-			if( !$oldDriversRemoved && !$packageNvidiaDriver460 && !$packageMesaUtils && !$packageNvidiaPrime ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed");
 					addToConfiguredModules($module, "nothingToDo");
@@ -2129,12 +2134,10 @@ sub nvidiadriver() {
 sub cracklibruntime() {
 	my $module = shift;
 	my $action = shift;
-	my $retval;
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			$retval = installPackage($origConfModules{$module}{name});
-			if ($retval == 0) {
+			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -2218,6 +2221,8 @@ sub writeMD5Store {
 # returns 1 if found non equal or missing value between value in files and
 # saved values
 # returns 0 if all values are the same
+# returns 1 if something is different
+#
 sub newInitrdFiles {
 	if (loadMD5Store()) {
 		readInitrdMD5Files();
@@ -2419,9 +2424,9 @@ sub setComment {
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
 # second parameter
-# returns 1 if the search for the packages failed or if the deinstallation was
+# returns 0 if the search for the packages failed or if the deinstallation was
 # unsuccessful
-# returns 0 if everything was ok, even if no packages were found
+# returns 1 if everything was ok, even if no packages were found
 #
 sub deinstExcept {
 	my $deinst = shift;
@@ -2429,40 +2434,44 @@ sub deinstExcept {
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
+	my $deinstCmd;
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
-			return 0;
+			return 1;
 		}
 		printLog('something went wrong while searching for packages');
-		return 1;
+		return 0;
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -yp remove';
+	if ($FAI) {
+		$deinstCmd = 'apt-get -yq remove';
+	} else {
+		$deinstCmd = 'pkcon -yp remove';
+	}
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
-			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+			$deinstCmd = $deinstCmd.' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst\n");
-		print "executing: $pkconDeinst\n";
-		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
-		if (system($pkconDeinst)) {
+		printLog("deinstalling: $deinstCmd\n");
+		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		if (system($deinstCmd)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 1;
+			return 0;
 		} else {
 			printLog('deinstallation of packages successful');
-			return 0;
+			return 1;
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 0;
+		return 1;
 	}
 }
 
@@ -2501,7 +2510,6 @@ sub deinstallPackage {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $pkconDeinst\n");
-		print "executing: $pkconDeinst\n";
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
@@ -2541,23 +2549,26 @@ sub isPackageInstalled {
 
 
 ###############################################################################
-# installs a package by pkcon
-# returns the exit code from pkcon
+# installs a package by pkcon or apt-get
+# returns 1 if successful
+# returns 0 if package was not installed
 #
 sub installPackage {
 	my $packageName = shift;
+	my $retval;
 	printLog("install package $packageName");
 	print "installing: $packageName\n";
-	my $retval = system("pkcon -yp install $packageName >/dev/null 2>&1");
-	$retval = $retval/256;
-	printLog("pkcon returns: $retval, while installing $packageName");
-	if ($retval != 0) {
-		printLog("failed to install $packageName by pkcon");
-		printLog("will try again later");
-		startTomteDelayed();
+	if ($FAI) {
+		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		$retval = isPackageInstalled($packageName);
 	} else {
-		printLog("0 is good");
-		isPackageInstalled($packageName);
+		system("pkcon -yp install $packageName >/dev/null 2>&1");
+		$retval = isPackageInstalled($packageName);
+		if ($retval == 0) {
+			printLog("failed to install $packageName");
+			printLog("will try again later");
+			startTomteDelayed();
+		}
 	}
 	return $retval;
 }
@@ -2815,6 +2826,7 @@ sub getBackupFileTime {
 #
 sub printLog {
 	my $message = shift;
+	print "$message\n" if $FAI;
 	if (! $noLogFile) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
@@ -3742,6 +3754,7 @@ if (@ARGV != 0) {
 		print "You must have root access to use this option\n";
 		exit (0);
 	}
+
 	if ($argValue{command} eq "list") {
 		initLogging();
 		prepareValues();
@@ -3754,6 +3767,14 @@ if (@ARGV != 0) {
 		print "Starting tuxedo-tomte in FAI modus\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
+		$FAI = 1;
+		initLogging();
+		prepareValues();
+		prerequisites();
+		configureAllModules();
+		postConfigure();
+		listSuccess();
+		writeConfigFile();
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
