@@ -656,17 +656,21 @@ sub readOSData {
 
 
 ###############################################################################
-# returns the brnad of the CPU (AMD or Intel)
+# returns the brand of the CPU (AMD or Intel)
 sub cpuBrand {
 	my $infos;
 	if ( open(FH, '<', '/proc/cpuinfo') ) {
 		local $/;
 		$infos = <FH>;
+		#TODO: debug
+		print "cpuinfo:\n$infos\n";
 		close FH;
 		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
+			print 'result: AMD\n';
 			return ('AMD');
 		}
 	}
+	print 'result: Intel\n';
 	return ('Intel');
 }
 
