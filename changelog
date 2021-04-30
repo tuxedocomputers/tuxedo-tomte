@@ -1,5 +1,14 @@
+tuxedo-tomte (2.4.0-3) UNRELEASED; urgency=medium
+
+  * changed lsusb for ME936
+  * refined cpuinfo
+  * changed case for successful installation
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 16:24:30 +0200
+
 tuxedo-tomte (2.4.0) focal; urgency=medium
 
+  * added amdgpu-dkms
   * added FAI stage and apt-get instead pkcon
 
  -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 09:15:45 +0200
