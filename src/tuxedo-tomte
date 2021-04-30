@@ -551,6 +551,21 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 	},
+	amdgpudkms => {
+		name => 'amdgpu-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Enables AMD GPU and display to share configuration information',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+	},
 );
 
 
@@ -635,6 +650,24 @@ sub readOSData {
 			$distributionVersion = $1;
 		}
 	}
+}
+
+
+
+
+###############################################################################
+# returns the brand of the CPU (AMD or Intel)
+sub cpuBrand {
+	my $infos;
+	if ( open(FH, '<', '/proc/cpuinfo') ) {
+		local $/;
+		$infos = <FH>;
+		close FH;
+		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
+			return ('AMD');
+		}
+	}
+	return ('Intel');
 }
 
 
@@ -763,7 +796,8 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME936 device found
-	if (system('lsusb -d 12d1:15bb') == 0) {
+	my $lsusb = `lsusb -d 12d1:15bb`;
+	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue');
 	}
@@ -825,6 +859,11 @@ sub checkRequirements {
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 		printLog('detected nvidia-driver issue');
+	}
+
+	if (cpuBrand() eq 'AMD') {
+		$origConfModules{amdgpudkms}{required} = 'yes';
+		printLog('discovered amd-gpu problem');
 	}
 }
 
@@ -2163,9 +2202,58 @@ sub cracklibruntime() {
 
 
 ###############################################################################
+# Fixes AMD GPU frequency communication with display
+#
+sub amdgpudkms() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageamdgpu_dkms_firmware;
+	my $packageamdgpu_dkms;
+	if ($action eq 'install') {
+		# check if the package is already installed
+		if( ! isPackageInstalled('amdgpu-dkms-firmware') ) {
+			$wasInstalled = 0;
+			$packageamdgpu_dkms_firmware = installPackage('amdgpu-dkms-firmware');
+		} else {
+			$packageamdgpu_dkms_firmware = 1;
+		}
+		if( ! isPackageInstalled('amdgpu-dkms') ) {
+			$wasInstalled = 0;
+			$packageamdgpu_dkms = installPackage('amdgpu-dkms');
+		} else {
+			$packageamdgpu_dkms = 1;
+		}
+
+		if( $packageamdgpu_dkms_firmware && $packageamdgpu_dkms ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			} else {
+				addToConfiguredModules($module, 'success');
+			}
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
+		} else {
+			$origConfModules{$module}{installed} = 'failed';
+			addToConfiguredModules($module, 'failed');
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog('upgrade not necessary for packages');
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+###############################################################################
 # subs for corefix md5 tests
 #
-
 
 ###############################################################################
 # returns 1 if md5 file loaded correctly
