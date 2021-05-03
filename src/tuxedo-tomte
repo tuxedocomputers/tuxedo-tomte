@@ -772,7 +772,12 @@ sub checkRequirements {
 		($boardname =~ /PULSE1401/) ||
 		($boardname =~ /PULSE1501/) ||
 		($boardname =~ /TRINITY1501I/) ||
-		($boardname =~ /TRINITY1701I/))
+		($boardname =~ /TRINITY1501I/) ||
+		($boardname =~ /PHxTxX1/) ||
+		($boardname =~ /PH4TQx1/) ||
+		($boardname =~ /GMxNGxx/) ||
+		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxMGxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('detected tuxedo-touchpad-switch issue');
