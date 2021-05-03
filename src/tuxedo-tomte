@@ -722,6 +722,7 @@ sub checkRequirements {
 		($boardname =~ /PULSE1401/) ||
 		($boardname =~ /PULSE1501/) ||
 		($boardname =~ /NL5xRU/) ||
+		($boardname =~ /EDUBOOK1502/) ||
   		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue');
@@ -744,6 +745,7 @@ sub checkRequirements {
    		($boardname =~ /NH5xAx/) ||
    		($boardname =~ /NL5xRU/) ||
 		($boardname =~ /AURA1501/) ||
+		($boardname =~ /EDUBOOK1502/) ||
 		($boardname =~ /PB50_70DFx,DDx/) ||
 		($boardname =~ /NS50MU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
@@ -1004,6 +1006,7 @@ sub nobootonbattery() {
 # - PULSE1401
 # - PULSE1501
 # - AURA1501/NL5xRU
+# - EDUBOOK1502
 #
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
@@ -1187,6 +1190,7 @@ sub tuxedokeyboard() {
 # - N141CU
 # - XC15 
 # - IBS15v6
+# - EDUBOOK1502
 #
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
