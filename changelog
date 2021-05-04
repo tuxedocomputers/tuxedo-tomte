@@ -1,11 +1,12 @@
-tuxedo-tomte (2.4.2-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.2-6) UNRELEASED; urgency=medium
 
   * added EDUBOOK1502 for amd-xhci-hcd-usb-quirk-suspend-fix
   * added EDUBOOK1502 for no-keyboard-after-suspend-fix
   * added desktop messages
   * added tuxedo-touchpad-switch for PHxTxX1, PH4TQx1, GMxNGxx, GMxZGxx, GMxMGxx
+  * include displays other then 0 as well
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 04 May 2021 10:55:22 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 04 May 2021 13:57:50 +0200
 
 tuxedo-tomte (2.4.2) focal; urgency=medium
 
