@@ -1,21 +1,33 @@
-tuxedo-tomte (2.3.5-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.2-1) UNRELEASED; urgency=medium
+
+  * added EDUBOOK1502
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 03 May 2021 12:43:57 +0200
+
+tuxedo-tomte (2.4.2) focal; urgency=medium
+
+  * added FAI stage
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 16:24:30 +0200
+
+tuxedo-tomte (2.4.0) focal; urgency=medium
+
+  * added amdgpu-dkms
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 09:15:45 +0200
+
+tuxedo-tomte (2.3.9) focal; urgency=medium
+
+  * added tuxedo-keyboard-ite for XP1512/XP1712
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Apr 2021 11:40:50 +0200
+
+tuxedo-tomte (2.3.7) focal; urgency=medium
 
   * added no-keyboard-after-suspend-fix for IBS15v6
-  * added md5store check
-  * m5sum ready
-  * debug md5store
-  * before merge
-  * added hash instead argv
-  * before merge with master
-  * added libnotify example
-  * several experiments with notify and dbus
-  * final solution for messages in test script
-  * included messaging in main script
-  * finished testing message capability
-  * messaging sub in main prog done
-  * finished message system
+  * added micfix1 for XP1512 and XP1712
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 Apr 2021 11:39:26 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 Apr 2021 13:53:47 +0200
 
 tuxedo-tomte (2.3.4) focal; urgency=medium
 
