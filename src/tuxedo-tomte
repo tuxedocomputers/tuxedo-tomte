@@ -51,6 +51,10 @@ my %initrdHashFiles;
 my $md5ConfigDir = '/etc/tomte/';
 my $md5Store = $md5ConfigDir.'md5sums';
 
+# for desktop messages
+my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
+$sessionID =~ /(.{7})/;
+$sessionID = hex($1);
 my $longInstall = 0;
 my $restartSystem = 0;
 
@@ -1120,7 +1124,6 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			$restartSystem = 1;
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1134,7 +1137,6 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			$restartSystem = 1;
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'remove') {
@@ -1187,10 +1189,12 @@ sub tuxedokeyboard() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -1625,7 +1629,6 @@ sub threegfix() {
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			$restartSystem = 1;
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1640,7 +1643,6 @@ sub threegfix() {
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			$restartSystem = 1;
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'remove') {
@@ -1658,10 +1660,12 @@ sub tuxedotouchpadswitch() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -1692,6 +1696,7 @@ sub tuxedonvmefix() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1728,10 +1733,12 @@ sub tuxedokeyboardite() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -1766,12 +1773,14 @@ sub fingerprintreader() {
 		# check if the package is already installed
 		if( ! isPackageInstalled('fprintd') ) {
 			$wasInstalled = 0;
+			messageLongInstall();
 			$packagefprintd = installPackage('fprintd');
 		} else {
 			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
+			messageLongInstall();
 			$packagelibpam = installPackage('libpam-fprintd');
 		} else {
 			$packagelibpam = 1;
@@ -1810,6 +1819,7 @@ sub tuxedomicfix1() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
@@ -1846,6 +1856,7 @@ sub mesautils() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1912,7 +1923,6 @@ sub tuxedorestoreaudiofix() {
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
 			$restartSystem = 1;
-			print "Please restart your system\n";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -1975,6 +1985,7 @@ sub kernel() {
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
+					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2028,6 +2039,7 @@ sub kernel() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -2080,6 +2092,7 @@ sub kernel() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -2159,10 +2172,10 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
+					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -2200,10 +2213,10 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
+					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -2229,6 +2242,7 @@ sub cracklibruntime() {
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
 			if (installPackage($origConfModules{$module}{name})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2266,12 +2280,14 @@ sub amdgpudkms() {
 	if ($action eq 'install') {
 		# check if the package is already installed
 		if( ! isPackageInstalled('amdgpu-dkms-firmware') ) {
+			messageLongInstall();
 			$wasInstalled = 0;
 			$packageamdgpu_dkms_firmware = installPackage('amdgpu-dkms-firmware');
 		} else {
 			$packageamdgpu_dkms_firmware = 1;
 		}
 		if( ! isPackageInstalled('amdgpu-dkms') ) {
+			messageLongInstall();
 			$wasInstalled = 0;
 			$packageamdgpu_dkms = installPackage('amdgpu-dkms');
 		} else {
@@ -2928,7 +2944,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	my $mCmd = "sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" 746530 \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
+	my $mCmd = "sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 
@@ -3828,7 +3844,7 @@ sub listSuccess {
 		print "\nNothing has been configured\n";
 	}
 	if ($restartSystem == 1) {
-		messageDesktop('Restart required', 'Please restart the system for changes to take effect.', 2, 'dialog-warning');
+		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
 	} else {
 		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
