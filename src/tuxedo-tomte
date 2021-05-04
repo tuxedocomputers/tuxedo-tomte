@@ -2900,7 +2900,7 @@ sub messageDesktop {
 	my @whoLines = `who -u`;
 
 	foreach $mLine (@whoLines) {
-		if ($mLine =~ /\(:0\)/) {
+		if ($mLine =~ /\(:\d+\)/) {
 			$mLine =~ /^(\w*).*\s(\d*)\s.*/;
 			$mUsername = $1;
 			$mPid = $2;
