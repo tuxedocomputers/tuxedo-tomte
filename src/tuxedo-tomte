@@ -2944,7 +2944,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	my $mCmd = "sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
+	my $mCmd = "sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 
@@ -2963,7 +2963,7 @@ sub messageDesktop {
 #
 sub messageLongInstall {
 	if ($longInstall == 0) {
-		if (messageDesktop('Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
+		if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
 			$longInstall = 1;
 		}
 	}
