@@ -899,7 +899,7 @@ sub checkRequirements {
 
 	if (cpuBrand() eq 'AMD') {
 		$origConfModules{amdgpudkms}{required} = 'yes';
-		printLog('discovered amd-gpu problem');
+		printLog('detected amd-gpu issue');
 	}
 }
 
