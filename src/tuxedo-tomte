@@ -595,6 +595,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	r8168dkms => {
+		name => 'r8168-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Linux device driver for several Realtek Ethernet controllers',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
 );
 
 
@@ -901,6 +917,11 @@ sub checkRequirements {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
+	if ($boardname =~ m/NHxxRZQ/) {
+		$origConfModules{r8168dkms}{required} = 'yes';
+		printLog('detected r8168-dkms issue');
+	}
+
 }
 
 
@@ -2315,6 +2336,45 @@ sub amdgpudkms() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Installs Linux device driver for several Realtek Ethernet controllers
+#
+sub r8168dkms() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
 
 
 
