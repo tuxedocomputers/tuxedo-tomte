@@ -1722,6 +1722,9 @@ sub tuxedonvmefix() {
 			printLog('tuxedo-nvme-fix was successfully removed');
 		} else {
 			printLog('could not remove tuxedo-nvme-fix, will try again next time');
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+			return (0);
 		}
 	}
 	if (($action eq 'install') || ($action eq 'upgrade')) {
