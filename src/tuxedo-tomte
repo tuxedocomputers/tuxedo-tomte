@@ -437,7 +437,7 @@ my %origConfModules = (
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1714,11 +1714,12 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
+	my $nvmeList;
 	if ($action eq 'install') {
 		# check before if the package is already installed
-		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			messageLongInstall();
-			if (installPackage($origConfModules{$module}{name})) {
+		if (! isPackageInstalled('nvme-cli')) {
+			if (installPackage('nvme-cli')) {
+				$nvmeList = `nvme list`;
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
