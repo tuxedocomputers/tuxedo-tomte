@@ -1714,29 +1714,57 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
-	my $nvmeList;
-	if ($action eq 'install') {
-		# check before if the package is already installed
-		if (! isPackageInstalled('nvme-cli')) {
-			if (installPackage('nvme-cli')) {
-				$nvmeList = `nvme list`;
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
-			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
+	my %nvmeDevice;
+	my $nvmeKey;
+	my $nvmeDir;
+	if (isPackageInstalled('tuxedo-nvme-fix')) {
+		if (deinstallPackage('tuxedo-nvme-fix')) {
+			printLog('tuxedo-nvme-fix was successfully removed');
 		} else {
-			printLog("$origConfModules{$module}{name} was already installed");
-			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			printLog('could not remove tuxedo-nvme-fix, will try again next time');
 		}
 	}
-	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
+			$nvmeDevice{$nvmeDir}{'model'} = readFileReturnLine("$nvmeDir/model");
+			$nvmeDevice{$nvmeDir}{'subdevice'} = readFileReturnLine("$nvmeDir/device/subsystem_device");
+			$nvmeDevice{$nvmeDir}{'subvendor'} = readFileReturnLine("$nvmeDir/device/subsystem_vendor");
+			$nvmeDevice{$nvmeDir}{'firmware'} = readFileReturnLine("$nvmeDir/firmware_rev");
+		}
+		foreach $nvmeKey ( keys %nvmeDevice ) {
+			if (($nvmeDevice{$nvmeKey}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
+				($nvmeDevice{$nvmeKey}{subdevice} =~ /0x2263/) &&
+				($nvmeDevice{$nvmeKey}{subvendor} =~ /0x2646/)) {
+				if ($nvmeDevice{$nvmeKey}{firmware} lt 'S5Z42109') {
+					# firmware upgrade is required
+					if (! isPackageInstalled('nvme-cli')) {
+						if (! installPackage('nvme-cli')) {
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
+					}
+					if (installPackage('a2000-s5z42109')) {
+						#TODO replace comment
+						# make upgrade
+						deinstallPackage('a2000-s5z42109');
+						$restartSystem = 1;
+						$origConfModules{$module}{installed} = "yes";
+						$origConfModules{$module}{upgraded} = "yes";
+						addToConfiguredModules($module, "success");
+					} else {
+						$origConfModules{$module}{installed} = "failed";
+						addToConfiguredModules($module, "failed");
+						return (0);
+					}
+				} else {
+					printLog("$origConfModules{$module}{name} was already installed");
+					addToConfiguredModules($module, "nothingToDo");
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+				}
+			}
+		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
