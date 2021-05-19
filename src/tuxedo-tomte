@@ -1715,8 +1715,9 @@ sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
 	my %nvmeDevice;
-	my $nvmeKey;
 	my $nvmeDir;
+	my $output;
+	my $fwVersion = 'S5Z42109';
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
 		if (deinstallPackage('tuxedo-nvme-fix')) {
 			printLog('tuxedo-nvme-fix was successfully removed');
@@ -1729,16 +1730,19 @@ sub tuxedonvmefix() {
 	}
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
+			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
+			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/;
+			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
 			$nvmeDevice{$nvmeDir}{'model'} = readFileReturnLine("$nvmeDir/model");
 			$nvmeDevice{$nvmeDir}{'subdevice'} = readFileReturnLine("$nvmeDir/device/subsystem_device");
 			$nvmeDevice{$nvmeDir}{'subvendor'} = readFileReturnLine("$nvmeDir/device/subsystem_vendor");
 			$nvmeDevice{$nvmeDir}{'firmware'} = readFileReturnLine("$nvmeDir/firmware_rev");
 		}
-		foreach $nvmeKey ( keys %nvmeDevice ) {
-			if (($nvmeDevice{$nvmeKey}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
-				($nvmeDevice{$nvmeKey}{subdevice} =~ /0x2263/) &&
-				($nvmeDevice{$nvmeKey}{subvendor} =~ /0x2646/)) {
-				if ($nvmeDevice{$nvmeKey}{firmware} lt 'S5Z42109') {
+		foreach $nvmeDir ( keys %nvmeDevice ) {
+			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
+				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/) &&
+				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
+				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
 						if (! installPackage('nvme-cli')) {
@@ -1750,10 +1754,27 @@ sub tuxedonvmefix() {
 					if (installPackage('a2000-s5z42109')) {
 						#TODO replace comment
 						# make upgrade
+						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
+						if ($? != 0) {
+							printLog('firmware could not be uploaded');
+							printLog($output);
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
+						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
+						if ($? != 0) {
+							printLog('firmware could not be activated');
+							printLog($output);
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
 						deinstallPackage('a2000-s5z42109');
 						$restartSystem = 1;
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
+						printLog('nvme firmware was successfully updated');
 						addToConfiguredModules($module, "success");
 					} else {
 						$origConfModules{$module}{installed} = "failed";

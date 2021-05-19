@@ -6,13 +6,21 @@ use Data::Dumper qw(Dumper);
 
 my %nvmeDevice;
 my $key;
+my $dir;
 
-while ( defined (my $dir = glob '/sys/class/nvme/*' )) {
+while ( defined ($dir = glob '/sys/class/nvme/*' )) {
 	$nvmeDevice{$dir}{'model'} = readFileReturnLine("$dir/model");
 	$nvmeDevice{$dir}{'subdevice'} = readFileReturnLine("$dir/device/subsystem_device");
 	$nvmeDevice{$dir}{'subvendor'} = readFileReturnLine("$dir/device/subsystem_vendor");
 	$nvmeDevice{$dir}{'firmware'} = readFileReturnLine("$dir/firmware_rev");
+
+	$nvmeDevice{$dir}{'device'} = $dir;
+	$nvmeDevice{$dir}{'device'} =~ /.*(nvme.*)/;
+	$nvmeDevice{$dir}{'device'} = '/dev/'.$1;
+	print "device: $nvmeDevice{$dir}{'device'}\n";
 }
+
+
 print Dumper(%nvmeDevice);
 
 foreach $key ( keys %nvmeDevice ) {
