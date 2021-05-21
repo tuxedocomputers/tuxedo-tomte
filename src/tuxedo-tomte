@@ -1719,7 +1719,7 @@ sub tuxedonvmefix() {
 	my $output;
 	my $fwVersion = 'S5Z42109';
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
-		if (deinstallPackage('tuxedo-nvme-fix')) {
+		if (! deinstallPackage('tuxedo-nvme-fix')) {
 			printLog('tuxedo-nvme-fix was successfully removed');
 		} else {
 			printLog('could not remove tuxedo-nvme-fix, will try again next time');
@@ -2728,7 +2728,7 @@ sub deinstExcept {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstCmd\n");
+		printLog("deinstalling: $deinstCmd");
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
@@ -2778,7 +2778,7 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst\n");
+		printLog("deinstalling: $pkconDeinst");
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
