@@ -1753,6 +1753,7 @@ sub tuxedonvmefix() {
 					}
 					if (installPackage('a2000-s5z42109')) {
 						#TODO replace comment
+						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}");
 						#$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						if ($? != 0) {
 							printLog('firmware could not be uploaded');
@@ -1761,6 +1762,7 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
+						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}");
 						#$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
 						if ($? != 0) {
 							printLog('firmware could not be activated');
@@ -1769,7 +1771,6 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						deinstallPackage('a2000-s5z42109');
 						$restartSystem = 1;
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
@@ -1788,6 +1789,7 @@ sub tuxedonvmefix() {
 				}
 			}
 		}
+		deinstallPackage('a2000-s5z42109');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
