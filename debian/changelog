@@ -1,3 +1,17 @@
+tuxedo-tomte (2.4.5-1) UNRELEASED; urgency=medium
+
+  * added r8168-dkms driver
+  * packing
+  * before merge
+  * before pull
+  * add testcase for nvme in FAI
+  * added nvme fw install
+  * added error log when nvme fix installation failed
+  * added fwupdate commands
+  * outcomment nvme update commands
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 21 May 2021 12:18:21 +0200
+
 tuxedo-tomte (2.4.5) focal; urgency=medium
 
   * added r8168-dkms installation for NHxxRZQ
