@@ -1718,6 +1718,7 @@ sub tuxedonvmefix() {
 	my $nvmeDir;
 	my $output;
 	my $fwVersion = 'S5Z42109';
+	my $nvmeUpdateSuccess = 0;
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
 		if (! deinstallPackage('tuxedo-nvme-fix')) {
 			printLog('tuxedo-nvme-fix was successfully removed');
@@ -1742,7 +1743,9 @@ sub tuxedonvmefix() {
 			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
 				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/) &&
 				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
+				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}");
 				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
+					printLog("firmware upgrade required");
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
 						if (! installPackage('nvme-cli')) {
@@ -1775,19 +1778,23 @@ sub tuxedonvmefix() {
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
 						printLog('nvme firmware was successfully updated');
-						addToConfiguredModules($module, "success");
+						$nvmeUpdateSuccess = 1;
 					} else {
 						$origConfModules{$module}{installed} = "failed";
 						addToConfiguredModules($module, "failed");
 						return (0);
 					}
 				} else {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
+					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'} was already installed");
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 				}
 			}
+		}
+		if ($nvmeUpdateSuccess) {
+			addToConfiguredModules($module, "success");
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
 		}
 		deinstallPackage('a2000-s5z42109');
 	}
