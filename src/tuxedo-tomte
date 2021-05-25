@@ -1765,7 +1765,7 @@ sub tuxedonvmefix() {
 							return (0);
 						}
 						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}");
-						#$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
+						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
 						if ($? != 0) {
 							printLog('firmware could not be activated');
 							printLog($output);
