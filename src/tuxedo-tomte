@@ -2834,7 +2834,6 @@ sub installPackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("install package $packageName");
-	print "installing: $packageName\n";
 	if ($FAI) {
 		system("apt-get -qy install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
