@@ -1755,9 +1755,8 @@ sub tuxedonvmefix() {
 						}
 					}
 					if (installPackage('a2000-s5z42109')) {
-						#TODO replace comment
 						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}");
-						#$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
+						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						if ($? != 0) {
 							printLog('firmware could not be uploaded');
 							printLog($output);
@@ -1785,7 +1784,7 @@ sub tuxedonvmefix() {
 						return (0);
 					}
 				} else {
-					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'} was already installed");
+					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'}");
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 				}
