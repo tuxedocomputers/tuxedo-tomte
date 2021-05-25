@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.5-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.5-4) UNRELEASED; urgency=medium
 
   * added r8168-dkms driver
   * packing
@@ -11,8 +11,10 @@ tuxedo-tomte (2.4.5-3) UNRELEASED; urgency=medium
   * outcomment nvme update commands
   * UNRELEASED
   * some debug for install nvme and deinstall at last possibillity
+  * small things
+  * module report configure for more then one nvme device
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 21 May 2021 16:09:30 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 25 May 2021 08:42:38 +0200
 
 tuxedo-tomte (2.4.5) focal; urgency=medium
 
