@@ -1,20 +1,8 @@
-tuxedo-tomte (2.4.5-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.5-5) UNRELEASED; urgency=medium
 
-  * added r8168-dkms driver
-  * packing
-  * before merge
-  * before pull
-  * add testcase for nvme in FAI
-  * added nvme fw install
-  * added error log when nvme fix installation failed
-  * added fwupdate commands
-  * outcomment nvme update commands
-  * UNRELEASED
-  * some debug for install nvme and deinstall at last possibillity
-  * small things
-  * module report configure for more then one nvme device
+  * added nvme firmware upgrade to s5z42109
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 25 May 2021 08:42:38 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 25 May 2021 15:13:33 +0200
 
 tuxedo-tomte (2.4.5) focal; urgency=medium
 
