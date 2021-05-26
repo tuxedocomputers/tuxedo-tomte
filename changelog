@@ -1,3 +1,11 @@
+tuxedo-tomte (2.4.5-7) UNRELEASED; urgency=medium
+
+  * added nvme firmware upgrade to s5z42109
+  * delete some log for installing
+  * keep FW if was installed before
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 May 2021 09:42:23 +0200
+
 tuxedo-tomte (2.4.5) focal; urgency=medium
 
   * added r8168-dkms installation for NHxxRZQ

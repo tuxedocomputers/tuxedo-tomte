@@ -437,14 +437,14 @@ my %origConfModules = (
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
 		fainame => '',
-		description => 'Removes sleep bug on Kingston A2000 NVME devices',
+		description => 'Removes sleep bug on Kingston A2000 NVME devices by updating the firmware',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1714,28 +1714,94 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
-		# check before if the package is already installed
-		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			messageLongInstall();
-			if (installPackage($origConfModules{$module}{name})) {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
-			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
+	my %nvmeDevice;
+	my $nvmeDir;
+	my $output;
+	my $fwVersion = 'S5Z42109';
+	my $nvmeUpdateSuccess = 0;
+	my $nvmeFWPackageWasInstalled = 0;
+	if (isPackageInstalled('tuxedo-nvme-fix')) {
+		if (! deinstallPackage('tuxedo-nvme-fix')) {
+			printLog('obsolete package tuxedo-nvme-fix was successfully removed');
 		} else {
-			printLog("$origConfModules{$module}{name} was already installed");
-			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time');
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+			return (0);
 		}
 	}
-	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
+			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
+			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/;
+			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
+			$nvmeDevice{$nvmeDir}{'model'} = readFileReturnLine("$nvmeDir/model");
+			$nvmeDevice{$nvmeDir}{'subdevice'} = readFileReturnLine("$nvmeDir/device/subsystem_device");
+			$nvmeDevice{$nvmeDir}{'subvendor'} = readFileReturnLine("$nvmeDir/device/subsystem_vendor");
+			$nvmeDevice{$nvmeDir}{'firmware'} = readFileReturnLine("$nvmeDir/firmware_rev");
+		}
+		foreach $nvmeDir ( keys %nvmeDevice ) {
+			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
+				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/) &&
+				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
+				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}");
+				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
+					printLog("firmware upgrade required");
+					# firmware upgrade is required
+					if (! isPackageInstalled('nvme-cli')) {
+						if (! installPackage('nvme-cli')) {
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
+					}
+					if (isPackageInstalled('a2000-s5z42109')) {
+						$nvmeFWPackageWasInstalled = 1;
+					}
+					if (installPackage('a2000-s5z42109')) {
+						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}");
+						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
+						if ($? != 0) {
+							printLog('firmware could not be uploaded');
+							printLog($output);
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
+						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}");
+						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
+						if ($? != 0) {
+							printLog('firmware could not be activated');
+							printLog($output);
+							$origConfModules{$module}{installed} = "failed";
+							addToConfiguredModules($module, "failed");
+							return (0);
+						}
+						$restartSystem = 1;
+						$origConfModules{$module}{installed} = "yes";
+						$origConfModules{$module}{upgraded} = "yes";
+						printLog('nvme firmware was successfully updated');
+						$nvmeUpdateSuccess = 1;
+					} else {
+						$origConfModules{$module}{installed} = "failed";
+						addToConfiguredModules($module, "failed");
+						return (0);
+					}
+				} else {
+					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'}");
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+				}
+			}
+		}
+		if ($nvmeUpdateSuccess) {
+			addToConfiguredModules($module, "success");
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+		}
+		if (! $nvmeFWPackageWasInstalled) {
+			deinstallPackage('a2000-s5z42109');
+		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -2676,7 +2742,7 @@ sub deinstExcept {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstCmd\n");
+		printLog("deinstalling: $deinstCmd");
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
@@ -2726,7 +2792,7 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst\n");
+		printLog("deinstalling: $pkconDeinst");
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
@@ -2774,7 +2840,6 @@ sub installPackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("install package $packageName");
-	print "installing: $packageName\n";
 	if ($FAI) {
 		system("apt-get -qy install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
