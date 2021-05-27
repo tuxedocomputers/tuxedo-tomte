@@ -2519,6 +2519,7 @@ sub apportfix() {
 		if ($retval == 1) {
 			# line was changed, assuming apport is active
 			`service apport stop`;
+			`systemctl disable apport.service`;
 		}
 
 		if ($retval < 0) {
