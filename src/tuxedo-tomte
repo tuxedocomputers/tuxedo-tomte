@@ -845,9 +845,11 @@ sub checkRequirements {
 		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
-	if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
-		$origConfModules{backlightfix}{required} = 'yes';
-		printLog('detected backlight-fix issue');
+	if ($boardname =~ /(N8xEJEK)/) {
+		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('detected backlight-fix issue');
+		}
 	}
 
 	# get the BIOS version
