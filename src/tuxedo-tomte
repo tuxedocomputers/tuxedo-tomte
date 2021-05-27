@@ -4062,7 +4062,7 @@ sub printNameDescriptionPrograms {
 # show description of module
 #
 sub moduleDescription() {
-	my $moduleName = $argValue{command};
+	my $moduleName = $argValue{module};
 	my $module;
 	if ($moduleName) {
 		$module = getSubName($moduleName);
