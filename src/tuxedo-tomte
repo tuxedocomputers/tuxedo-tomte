@@ -942,10 +942,9 @@ sub checkRequirements {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
 		printLog('detected tuxedo-oled-brt issue');
 	}
-	if (isLineInFile('/etc/default/apport', 'enabled=1')) {
-		$origConfModules{apportfix}{required} = 'yes';
-		printLog('detected apport-fix issue');
-	}
+	# apportfix will always be installed as a workaround
+	$origConfModules{apportfix}{required} = 'yes';
+	printLog('detected apport-fix issue');
 }
 
 
@@ -2517,26 +2516,20 @@ sub apportfix() {
 
 		$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
 		if ($retval == 1) {
-			# line was changed, assuming apport is active
-			`service apport stop`;
-			`systemctl disable apport.service`;
+			printLog('apport was disabled in /etc/default/apport');
 		}
 
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
+			`service apport stop`;
+			printLog("service apport stop returned: $?");
+			`systemctl disable apport.service`;
+			printLog("systemctl disable apport.service returned: $?");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			if ($retval > 0) {
-				# means apport was successfully deactivated
-				$postConfProgram{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
-			} else {
-				# means apport was already inactive
-				printLog("$origConfModules{$module}{name} was already installed");
-				addToConfiguredModules($module, "nothingToDo");
-			}
+			addToConfiguredModules($module, "success");
 		}
 	}
 	if ($action eq 'upgrade') {
