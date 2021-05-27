@@ -611,6 +611,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	tuxedooledbrt => {
+		name => 'tuxedo-oled-brt',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Workaround to control OLED display brightness using dbus and xrandr',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
+
 );
 
 
@@ -828,11 +845,9 @@ sub checkRequirements {
 		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
-	if ($boardname =~ /(N8xEJEK)/) {
-		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
-			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('detected backlight-fix issue');
-		}
+	if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
+		$origConfModules{backlightfix}{required} = 'yes';
+		printLog('detected backlight-fix issue');
 	}
 
 	# get the BIOS version
@@ -920,6 +935,10 @@ sub checkRequirements {
 	if ($boardname =~ m/NHxxRZQ/) {
 		$origConfModules{r8168dkms}{required} = 'yes';
 		printLog('detected r8168-dkms issue');
+	}
+	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
+		$origConfModules{tuxedooledbrt}{required} = 'yes';
+		printLog('detected tuxedo-oled-brt issue');
 	}
 
 }
@@ -2409,6 +2428,44 @@ sub amdgpudkms() {
 # Installs Linux device driver for several Realtek Ethernet controllers
 #
 sub r8168dkms() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+###############################################################################
+# Installs package tuxedo-oled-brt to control the brightness of OLED displays
+# using xrandr and dbus
+# The original program is from System76 https://github.com/pop-os/system76-oled
+#
+sub tuxedooledbrt() {
 	my $module = shift;
 	my $action = shift;
 	if ($action eq 'install') {
