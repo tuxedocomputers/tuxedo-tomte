@@ -939,8 +939,8 @@ sub checkRequirements {
 		printLog('detected r8168-dkms issue');
 	}
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
-		$origConfModules{backlightfix}{required} = 'yes';
-		printLog('detected backlight-fix issue');
+		$origConfModules{tuxedooledbrt}{required} = 'yes';
+		printLog('detected tuxedo-oled-brt issue');
 	}
 
 }
