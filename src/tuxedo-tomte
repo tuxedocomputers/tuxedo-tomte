@@ -942,7 +942,10 @@ sub checkRequirements {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
 		printLog('detected tuxedo-oled-brt issue');
 	}
-
+	if (isLineInFile('/etc/default/apport', 'enabled=1')) {
+		$origConfModules{apportfix}{required} = 'yes';
+		printLog('detected apport-fix issue');
+	}
 }
 
 
@@ -2500,6 +2503,49 @@ sub tuxedooledbrt() {
 
 
 
+###############################################################################
+# deactivates apport
+#
+sub apportfix() {
+	my $module = shift;
+	my $action = shift;
+	my $oldApportLine = 'default=1';
+	my $newApportLine = 'default=0';
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+
+		$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
+		if ($retval == 1) {
+			# line was changed, assuming apport is active
+			`service apport stop`;
+		}
+
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				# means apport was successfully deactivated
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				# means apport was already inactive
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not neccessary
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
@@ -2560,6 +2606,7 @@ sub writeMD5Store {
 	}
 }
 
+###############################################################################
 # returns 1 if found non equal or missing value between value in files and
 # saved values
 # returns 0 if all values are the same
@@ -2993,6 +3040,74 @@ sub isLinePresent {
 				return (1);
 			}
 		}
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# substituteFileInLine('filename', 'string1', 'string2')
+# substitutes a line in 'file' as 'string1' with 'string2
+# returns 0 if line is already there
+# returns 1 if successful (line was modified)
+# returns -1 if something went wrong
+# 
+sub substituteLineInFile {
+	my $filename = shift;
+	my $origLine = shift;
+	my $substLine = shift;
+	my @fileLines;
+	my $FH;
+
+	if ( open $FH, "<", $filename) {
+		while (<$FH>) {
+	    	push (@fileLines, $_);
+		}
+		close $FH;
+	} else {
+		printLog("Err: $!");
+		printLog("no $filename present or unable to open the file for reading");
+		return (-1);
+	}
+
+	foreach( @fileLines ) {
+		if ( $_ =~ /^$origLine$/ ) {
+			$_ = "$substLine\n";
+			return (1);
+		}
+	}
+
+	if ( open $FH, ">", $filename ) {
+		print $FH @fileLines;
+		close ($FH);
+    } else {
+		printLog("Err: $!");
+		printLog("no $filename present or unable to open the file for writing");
+		return (-1);
+    }
+	return (0);
+}
+
+
+
+###############################################################################
+# isLineInFile('/filename', 'string')
+# matches a line with the 'string' and returns
+# 1 if found
+# 0 if not found or failed to open file
+#
+sub isLineInFile {
+	my $filename = shift;
+	my $match = shift;
+	if ( open FH, '<', $filename ) {
+		while( <FH> ) {
+			if ( $_ =~ /^$match$/) {
+				return (1);
+			}
+		}
+	} else {
+		printLog("can't open file $filename");
 	}
 	return (0);
 }
