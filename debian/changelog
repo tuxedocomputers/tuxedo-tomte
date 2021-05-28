@@ -1,3 +1,12 @@
+tuxedo-tomte (2.4.7-4) UNRELEASED; urgency=medium
+
+  * added apport-fix
+  * disable apport in systemctl as well
+  * apport stop now always active
+  * added apportfix into hash
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 May 2021 09:17:01 +0200
+
 tuxedo-tomte (2.4.7) focal; urgency=medium
 
   * added support for OLED brightness control for SDC Model 41001 Serial Number 0
