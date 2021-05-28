@@ -2536,15 +2536,21 @@ sub apportfix() {
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
 			$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
-		}
-		if ($retval == 1) {
-			printLog('apport was disabled in /etc/default/apport');
-		}
-
-		if ($retval < 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
+			if ($retval == 1) {
+				printLog('apport was disabled in /etc/default/apport');
+				#`service apport stop`;
+				#printLog("service apport stop returned: $?");
+				#`systemctl disable apport.service`;
+				#printLog("systemctl disable apport.service returned: $?");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} elsif (isLineInFile('/etc/default/apport', 'enabled=0')) {
+			printLog('apport was already disabled in /etc/default/apport');
 			#`service apport stop`;
 			#printLog("service apport stop returned: $?");
 			#`systemctl disable apport.service`;
@@ -2552,6 +2558,9 @@ sub apportfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
 		}
 	}
 	if ($action eq 'upgrade') {
