@@ -767,6 +767,14 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
+	#TODO test
+	if ( ! $FAI ) {
+		if (waitForNetwork(10, 10)) {
+			printLog('found network !');
+		} else {
+			printLog('no network found !!');
+		}
+	}
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 }
@@ -3160,10 +3168,15 @@ sub waitForNetwork {
 	my $wait = shift;
 	for ( my $i=0; $i<$tries; $i++ ) {
 		if (networkStatus()) { return (1); }
+		#TODO debug
+		printLog('waiting for network');
 		sleep ($wait);
 	}
 	return (0);
 }
+
+
+
 
 ###############################################################################
 # inserts array values as kernel parameters if not present
