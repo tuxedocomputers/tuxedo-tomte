@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.7-7) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.7-8) UNRELEASED; urgency=medium
 
   * added apport-fix
   * disable apport in systemctl as well
@@ -11,8 +11,10 @@ tuxedo-tomte (2.4.7-7) UNRELEASED; urgency=medium
   * network status test script
   * added polling subroutine
   * test scenario for network wait
+  * network search only when required by fix
+  * delete unnecessary checknetwork info on modules
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 May 2021 14:32:58 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 May 2021 16:27:39 +0200
 
 tuxedo-tomte (2.4.7) focal; urgency=medium
 
