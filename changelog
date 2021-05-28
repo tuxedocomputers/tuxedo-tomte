@@ -1,11 +1,21 @@
-tuxedo-tomte (2.4.7-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.7-9) UNRELEASED; urgency=medium
 
   * added apport-fix
   * disable apport in systemctl as well
   * apport stop now always active
   * added apportfix into hash
+  * commented out disable apport service
+  * debugs for EDID
+  * added tree
+  * deleted all debug from EDID
+  * network status test script
+  * added polling subroutine
+  * test scenario for network wait
+  * network search only when required by fix
+  * delete unnecessary checknetwork info on modules
+  * modified check and return handling for apport
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 May 2021 09:17:01 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 May 2021 18:17:14 +0200
 
 tuxedo-tomte (2.4.7) focal; urgency=medium
 

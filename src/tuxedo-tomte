@@ -30,6 +30,7 @@ my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
 my $FAI = 0;
+my $networkSearchDone = 0;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -1412,6 +1413,7 @@ sub tuxedorepos() {
 			if ($FAI) {
 				$output = `apt-get update`;
 			} else {
+				checkNetwork();
 				$output = `pkcon refresh`;
 			}
 			$exitStatus = $?/256;
@@ -1444,6 +1446,7 @@ sub tuxedorepos() {
 				if ($FAI) {
 					$output = `apt-get update`;
 				} else {
+					checkNetwork();
 					$output = `pkcon refresh`;
 				}
 				$exitStatus = $?/256;
@@ -1494,6 +1497,7 @@ sub tuxedomirrors() {
 			if ($FAI) {
 				$output = `apt-get update`;
 			} else {
+				checkNetwork();
 				$output = `pkcon refresh`;
 			}
 			$exitStatus = $?/256;
@@ -1526,6 +1530,7 @@ sub tuxedomirrors() {
 				if ($FAI) {
 					$output = `apt-get update`;
 				} else {
+					checkNetwork();
 					$output = `pkcon refresh`;
 				}
 				$exitStatus = $?/256;
@@ -2518,7 +2523,7 @@ sub tuxedooledbrt() {
 
 
 ###############################################################################
-# deactivates apport
+# deactivates apport reporting
 #
 sub apportfix() {
 	my $module = shift;
@@ -2531,15 +2536,21 @@ sub apportfix() {
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
 			$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
-		}
-		if ($retval == 1) {
-			printLog('apport was disabled in /etc/default/apport');
-		}
-
-		if ($retval < 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
+			if ($retval == 1) {
+				printLog('apport was disabled in /etc/default/apport');
+				#`service apport stop`;
+				#printLog("service apport stop returned: $?");
+				#`systemctl disable apport.service`;
+				#printLog("systemctl disable apport.service returned: $?");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} elsif (isLineInFile('/etc/default/apport', 'enabled=0')) {
+			printLog('apport was already disabled in /etc/default/apport');
 			#`service apport stop`;
 			#printLog("service apport stop returned: $?");
 			#`systemctl disable apport.service`;
@@ -2547,6 +2558,9 @@ sub apportfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
+		} else {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2729,6 +2743,7 @@ sub createRepos {
 sub addRepoKey {
 	my $output;
 	my $retval;
+	checkNetwork();
 	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
 	$retval = $?;
 	if ($retval != 0) {
@@ -2961,6 +2976,7 @@ sub installPackage {
 		system("apt-get -qy install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 	} else {
+		checkNetwork();
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
@@ -3122,6 +3138,65 @@ sub isLineInFile {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# returns 1 if active interface found
+# returns 0 if none found
+sub networkStatus {
+	my $dirHandle;
+	my $interfacesDir = '/sys/class/net';
+	if ( !opendir ($dirHandle, $interfacesDir)) {
+		printLog("unable to open $interfacesDir: $!");
+		return (0);
+	}
+	my @FILES = grep { $_ ne '.' && $_ ne '..' && $_ ne 'lo' } readdir($dirHandle);
+	if (scalar(@FILES) < 1) { return (0); }
+	foreach my $file (@FILES) {
+		if (readFileReturnLine("$interfacesDir/$file/operstate") eq 'up' ) {
+			return (1);
+		}
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# waitForNetwork('number of tries', 'wait seconds')
+# polls for a network interface for status up
+# tries 'number of tries' times and waits in between for 'wait seconds' seconds
+# returns 1 if network is active
+# returns 0 if network not active
+sub waitForNetwork {
+	my $tries = shift;
+	my $wait = shift;
+	for ( my $i=1; $i<=$tries; $i++ ) {
+		if (networkStatus()) { return (1); }
+		printLog("waiting for network: $i of $tries");
+		sleep ($wait);
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
+# waitForNetwork('number of tries', 'wait seconds')
+sub checkNetwork {
+	if ( (! $FAI) && (! $networkSearchDone) ) {
+		if (waitForNetwork(10, 10)) {
+			$networkSearchDone = 1;
+			printLog('found network !');
+		} else {
+			$networkSearchDone = 1;
+			printLog('no network found !! some fixes might not be applied correctly');
+		}
+	}
+}
+
 
 
 
