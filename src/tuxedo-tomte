@@ -3555,21 +3555,29 @@ sub findActiveEDIDs {
 		printLog("unable to open $cards_dir: $!");
 		return @edidfile;
 	}
+	`ls /sys/class/drm`;
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
+		#TODO lots of debugs
+		printLog("file: $file");
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
+				printLog("enabledfile: $file");
 				open(FILE, $enabledFile);
 				$enabledFileContent = <FILE>;
+				printLog("enabledfile content: $file");
 				close(FILE);
 				if ($enabledFileContent =~ /enabled/) {
 					my $statusFile = "$path/status";
 					if ( -e $statusFile ) {
+						printLog("statusfile: $file");
 						open(FILE2, $statusFile);
 						$statusFileContent = <FILE2>;
+						printLog("statusfile content: $file");
 						if ($statusFileContent =~ /connected/) {
+							printLog("!!! push $path/edid");
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
 						}
