@@ -2529,7 +2529,9 @@ sub apportfix() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 
-		$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
+		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
+			$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
+		}
 		if ($retval == 1) {
 			printLog('apport was disabled in /etc/default/apport');
 		}
@@ -2538,10 +2540,10 @@ sub apportfix() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			`service apport stop`;
-			printLog("service apport stop returned: $?");
-			`systemctl disable apport.service`;
-			printLog("systemctl disable apport.service returned: $?");
+			#`service apport stop`;
+			#printLog("service apport stop returned: $?");
+			#`systemctl disable apport.service`;
+			#printLog("systemctl disable apport.service returned: $?");
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
@@ -3101,7 +3103,7 @@ sub substituteLineInFile {
 
 
 ###############################################################################
-# isLineInFile('/filename', 'string')
+# isLineInFile('filename', 'string')
 # matches a line with the 'string' and returns
 # 1 if found
 # 0 if not found or failed to open file
