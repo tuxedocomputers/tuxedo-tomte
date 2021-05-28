@@ -627,7 +627,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
-
+	apportfix => {
+		name => 'apport-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Workaround for undefined problems with apport',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
 );
 
 
