@@ -30,6 +30,7 @@ my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
 my $FAI = 0;
+my $networkSearchDone = 0;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -226,6 +227,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -242,6 +244,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
     },
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -258,6 +261,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -274,6 +278,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	tuxedocontrolcenter => {
 		name => 'tuxedo-control-center',
@@ -290,6 +295,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedokeyboard => {
 		name => 'tuxedo-keyboard',
@@ -306,6 +312,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	nokeyboardaftersuspendfix => {
 		name => 'no-keyboard-after-suspend-fix',
@@ -322,6 +329,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -338,6 +346,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -354,6 +363,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
@@ -370,6 +380,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	corefix => {
 		name => 'core-fix',
@@ -386,6 +397,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -402,6 +414,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	elantechtouchpadfix => {
 		name => 'elantech-touchpad-fix',
@@ -418,6 +431,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -434,6 +448,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
@@ -450,6 +465,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'yes',
 	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
@@ -466,6 +482,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	fingerprintreader => {
 		name => 'fingerprint-reader',
@@ -482,6 +499,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedomicfix1 => {
 		name => 'tuxedo-micfix1',
@@ -498,6 +516,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'yes',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -514,6 +533,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedorestoreaudiofix => {
 		name => 'tuxedo-restore-audio-fix',
@@ -530,6 +550,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'no',
 	},
 	kernel => {
 		name => 'kernel',
@@ -546,6 +567,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'yes',
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -562,6 +584,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		checknetwork => 'yes',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -578,6 +601,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	amdgpudkms => {
 		name => 'amdgpu-dkms',
@@ -594,6 +618,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
@@ -610,6 +635,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	tuxedooledbrt => {
 		name => 'tuxedo-oled-brt',
@@ -626,6 +652,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'yes',
 	},
 	apportfix => {
 		name => 'apport-fix',
@@ -642,6 +669,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		checknetwork => 'no',
 	},
 );
 
@@ -767,14 +795,6 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	#TODO test
-	if ( ! $FAI ) {
-		if (waitForNetwork(10, 10)) {
-			printLog('found network !');
-		} else {
-			printLog('no network found !!');
-		}
-	}
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 }
@@ -1420,6 +1440,7 @@ sub tuxedorepos() {
 			if ($FAI) {
 				$output = `apt-get update`;
 			} else {
+				checkNetwork();
 				$output = `pkcon refresh`;
 			}
 			$exitStatus = $?/256;
@@ -1452,6 +1473,7 @@ sub tuxedorepos() {
 				if ($FAI) {
 					$output = `apt-get update`;
 				} else {
+					checkNetwork();
 					$output = `pkcon refresh`;
 				}
 				$exitStatus = $?/256;
@@ -1502,6 +1524,7 @@ sub tuxedomirrors() {
 			if ($FAI) {
 				$output = `apt-get update`;
 			} else {
+				checkNetwork();
 				$output = `pkcon refresh`;
 			}
 			$exitStatus = $?/256;
@@ -1534,6 +1557,7 @@ sub tuxedomirrors() {
 				if ($FAI) {
 					$output = `apt-get update`;
 				} else {
+					checkNetwork();
 					$output = `pkcon refresh`;
 				}
 				$exitStatus = $?/256;
@@ -2526,7 +2550,7 @@ sub tuxedooledbrt() {
 
 
 ###############################################################################
-# deactivates apport
+# deactivates apport reporting
 #
 sub apportfix() {
 	my $module = shift;
@@ -2737,6 +2761,7 @@ sub createRepos {
 sub addRepoKey {
 	my $output;
 	my $retval;
+	checkNetwork();
 	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
 	$retval = $?;
 	if ($retval != 0) {
@@ -2969,6 +2994,7 @@ sub installPackage {
 		system("apt-get -qy install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 	} else {
+		checkNetwork();
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
@@ -3147,8 +3173,6 @@ sub networkStatus {
 	if (scalar(@FILES) < 1) { return (0); }
 	foreach my $file (@FILES) {
 		if (readFileReturnLine("$interfacesDir/$file/operstate") eq 'up' ) {
-			#TODO debug
-			print "file: $interfacesDir/$file\n";
 			return (1);
 		}
 	}
@@ -3166,13 +3190,29 @@ sub networkStatus {
 sub waitForNetwork {
 	my $tries = shift;
 	my $wait = shift;
-	for ( my $i=0; $i<$tries; $i++ ) {
+	for ( my $i=1; $i<=$tries; $i++ ) {
 		if (networkStatus()) { return (1); }
-		#TODO debug
-		printLog('waiting for network');
+		printLog("waiting for network: $i of $tries");
 		sleep ($wait);
 	}
 	return (0);
+}
+
+
+
+
+###############################################################################
+# waitForNetwork('number of tries', 'wait seconds')
+sub checkNetwork {
+	if ( (! $FAI) && (! $networkSearchDone) ) {
+		if (waitForNetwork(10, 10)) {
+			$networkSearchDone = 1;
+			printLog('found network !');
+		} else {
+			$networkSearchDone = 1;
+			printLog('no network found !! some fixes might not be applied correctly');
+		}
+	}
 }
 
 
