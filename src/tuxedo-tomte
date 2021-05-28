@@ -227,7 +227,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -244,7 +243,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
     },
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -261,7 +259,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -278,7 +275,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	tuxedocontrolcenter => {
 		name => 'tuxedo-control-center',
@@ -295,7 +291,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedokeyboard => {
 		name => 'tuxedo-keyboard',
@@ -312,7 +307,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	nokeyboardaftersuspendfix => {
 		name => 'no-keyboard-after-suspend-fix',
@@ -329,7 +323,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -346,7 +339,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -363,7 +355,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
@@ -380,7 +371,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	corefix => {
 		name => 'core-fix',
@@ -397,7 +387,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -414,7 +403,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	elantechtouchpadfix => {
 		name => 'elantech-touchpad-fix',
@@ -431,7 +419,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -448,7 +435,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
@@ -465,7 +451,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'yes',
 	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
@@ -482,7 +467,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	fingerprintreader => {
 		name => 'fingerprint-reader',
@@ -499,7 +483,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedomicfix1 => {
 		name => 'tuxedo-micfix1',
@@ -516,7 +499,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'yes',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -533,7 +515,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedorestoreaudiofix => {
 		name => 'tuxedo-restore-audio-fix',
@@ -550,7 +531,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'no',
 	},
 	kernel => {
 		name => 'kernel',
@@ -567,7 +547,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'yes',
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -584,7 +563,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
-		checknetwork => 'yes',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -601,7 +579,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	amdgpudkms => {
 		name => 'amdgpu-dkms',
@@ -618,7 +595,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
@@ -635,7 +611,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	tuxedooledbrt => {
 		name => 'tuxedo-oled-brt',
@@ -652,7 +627,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'yes',
 	},
 	apportfix => {
 		name => 'apport-fix',
@@ -669,7 +643,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		checknetwork => 'no',
 	},
 );
 
