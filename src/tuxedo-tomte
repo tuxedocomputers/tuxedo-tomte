@@ -3126,6 +3126,46 @@ sub isLineInFile {
 
 
 ###############################################################################
+# returns 1 if active interface found
+# returns 0 if none found
+sub networkStatus {
+	my $dirHandle;
+	my $interfacesDir = '/sys/class/net';
+	if ( !opendir ($dirHandle, $interfacesDir)) {
+		printLog("unable to open $interfacesDir: $!");
+		return (0);
+	}
+	my @FILES = grep { $_ ne '.' && $_ ne '..' && $_ ne 'lo' } readdir($dirHandle);
+	if (scalar(@FILES) < 1) { return (0); }
+	foreach my $file (@FILES) {
+		if (readFileReturnLine("$interfacesDir/$file/operstate") eq 'up' ) {
+			#TODO debug
+			print "file: $interfacesDir/$file\n";
+			return (1);
+		}
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# waitForNetwork('number of tries', 'wait seconds')
+# polls for a network interface for status up
+# tries 'number of tries' times and waits in between for 'wait seconds' seconds
+# returns 1 if network is active
+# returns 0 if network not active
+sub waitForNetwork {
+	my $tries = shift;
+	my $wait = shift;
+	for ( my $i=0; $i<$tries; $i++ ) {
+		if (networkStatus()) { return (1); }
+		sleep ($wait);
+	}
+	return (0);
+}
+
+###############################################################################
 # inserts array values as kernel parameters if not present
 # example: my $retval = insertGrub(\@kernel_parameters);
 # returns number of inserted parameters

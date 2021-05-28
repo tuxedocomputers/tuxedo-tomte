@@ -27,6 +27,7 @@ sub networkStatus {
 	if (scalar(@FILES) < 1) { return (0); }
 	foreach my $file (@FILES) {
 		if (readFileReturnLine("$interfacesDir/$file/operstate") eq 'up' ) {
+			print "file: $interfacesDir/$file\n";
 			return (1);
 		}
 	}
