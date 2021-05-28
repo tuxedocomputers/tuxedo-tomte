@@ -3555,7 +3555,8 @@ sub findActiveEDIDs {
 		printLog("unable to open $cards_dir: $!");
 		return @edidfile;
 	}
-	`ls /sys/class/drm`;
+	my $output = `tree /sys/class/drm`;
+	printLog("output: $output");
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
 	foreach my $file (@FILES) {
 		my $path = "$cards_dir/$file";
