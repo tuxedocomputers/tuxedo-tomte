@@ -958,9 +958,11 @@ sub checkRequirements {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
 		printLog('detected tuxedo-oled-brt issue');
 	}
-	# apportfix will always be installed as a workaround
-	$origConfModules{apportfix}{required} = 'yes';
-	printLog('detected apport-fix issue');
+	if (isPackageInstalled('apport')) {
+		# apportfix will always be installed as a workaround
+		$origConfModules{apportfix}{required} = 'yes';
+		printLog('detected apport-fix issue');
+	}
 }
 
 
