@@ -626,7 +626,7 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 		reconfigure => '',
-		restart => '',
+		restart => 'yes',
 	},
 	apportfix => {
 		name => 'apport-fix',
