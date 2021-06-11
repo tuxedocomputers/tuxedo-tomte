@@ -976,10 +976,10 @@ sub findPciDevice {
 	my $pciDevice;
 	foreach $pciDevice (@pciDevices) {
 		if ($lspciList =~ /$pciDevice/) {
-			return 1;
+			return (1);
 		}
 	}
-	return 0;
+	return (0);
 }
 
 
@@ -2628,10 +2628,10 @@ sub loadMD5Store {
 			$initrdHashSaved{$key} = $val;
 		}
 		close FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("no readable md5sum file available");
-		return 0;
+		return (0);
 	}
 }
 
@@ -2711,14 +2711,12 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really wrong)");
-		print "No $sourcesListDir found, something's really wrong ...\n";
+		printLog("no $sourcesListDir found (something's really wrong)", 'TL');
 		# no apt directory, somethings fishy
 		return (0);
 	}
 	if (!-d $sourcesListDirD) {
-		printLog("no $sourcesListDirD found, creating one");
-		print "No $sourcesListDirD found, creating one\n";
+		printLog("no $sourcesListDirD found, creating one", 'TL');
 		mkdir($sourcesListDirD);
 	}
 
@@ -2846,8 +2844,7 @@ sub setComment {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open repository mirrors list at $reposList");
-		print "Could not open repository mirrors list at $reposList\n";
+		printLog("could not open repository mirrors list at $reposList", 'TL');
 		return (0);
 	}
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
@@ -2897,10 +2894,10 @@ sub deinstExcept {
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
-			return 1;
+			return (1);
 		}
 		printLog('something went wrong while searching for packages');
-		return 0;
+		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
@@ -2923,14 +2920,14 @@ sub deinstExcept {
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 0;
+			return (0);
 		} else {
 			printLog('deinstallation of packages successful');
-			return 1;
+			return (1);
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 1;
+		return (1);
 	}
 }
 
@@ -2951,10 +2948,10 @@ sub deinstallPackage {
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst");
-			return 0;
+			return (0);
 		}
 		printLog("something went wrong while searching for packages: $deinst");
-		return 1;
+		return (1);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
@@ -2973,14 +2970,14 @@ sub deinstallPackage {
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 1;
+			return (1);
 		} else {
 			printLog('deinstallation of packages successful');
-			return 0;
+			return (0);
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 0;
+		return (0);
 	}
 }
 
@@ -2998,10 +2995,10 @@ sub isPackageInstalled {
 	my $retValue = $?/256;
 	if ($retString =~ m/install ok installed/) {
 		printLog("package $package is installed");
-		return 1;
+		return (1);
 	} else {
 		printLog("package $package is not installed");
-		return 0;
+		return (0);
 	}
 }
 
@@ -3046,12 +3043,11 @@ sub createFile {
 	if (open $FH, ">",$fileName) {
 		print $FH "$fileText";
 		close $FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("Err: $!");
-		printLog("can't open $fileName for writing");
-		print "Can't open $fileName for writing\n";
-		return 0;
+		printLog("can't open $fileName for writing", 'TL');
+		return (0);
 	}
 }
 
@@ -3067,12 +3063,11 @@ sub appendFile {
 	if (open $FH, ">>",$fileName) {
 		print $FH "$fileText";
 		close $FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("Err: $!");
-		printLog("can't open $fileName for writing");
-		print "Can't open $fileName for writing\n";
-		return 0;
+		printLog("can't open $fileName for writing", 'TL');
+		return (0);
 	}
 }
 
@@ -3086,14 +3081,11 @@ sub backupFile {
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
 		printLog("created backup for $fileName", 'TL');
-		#TODO
-		#print "created backup for $fileName\n";
-		return 1;
+		return (1);
 	} else {
 		printLog("Err: $!");
 		printLog("can't create backup file for $fileName", 'TL');
-		#print "Can't create backup for $fileName\n";
-		return 0;
+		return (0);
 	}
 }
 
@@ -3555,8 +3547,7 @@ sub readConfigFile {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open configFile: $configFile $!");
-		print "Could not open configfile $configFile\n";
+		printLog("could not open configFile: $configFile $!", 'TL');
 		return (0);
 	}
 	return (1);
@@ -3627,8 +3618,7 @@ sub writeConfigFile {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("can't write to $configFile $!");
-		print "Can't write to configfile: $configFile\n";
+		printLog("can't write to configfile $configFile $!", 'TL');
 		exit (0);
 	}
 }
@@ -3645,8 +3635,7 @@ sub initConfigFile {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir");
-			print "Could not create $configDir\n";
+			printLog("could not create $configDir", 'TL');
 			exit (0);
 		}
 	}
@@ -3658,8 +3647,6 @@ sub initConfigFile {
 	} else {
 		# create a new configFile
 		printLog("no configfile present ... creating one", 'TL');
-		#TODO
-		#print "No configfile present ... creating one\n";
 		writeConfigFile();
 		return;
 	}
@@ -3865,9 +3852,9 @@ sub transferConfigValues {
 sub newVersion {
 	my $module = shift;
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
-		return 1;
+		return (1);
 	} else {
-		return 0;
+		return (0);
 	}
 }
 
@@ -3878,9 +3865,9 @@ sub newVersion {
 sub newHwid {
 	my $module = shift;
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
-		return 1;
+		return (1);
 	} else {
-		return 0;
+		return (0);
 	}
 }
 
@@ -4005,8 +3992,7 @@ sub configureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "Wrong module name\n";
+		printLog("wrong module name", 'TL');
 		return;
 	}
 
@@ -4066,8 +4052,7 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "Wrong module name\n";
+		printLog("wrong module name", 'TL');
 		return;
 	}
 
@@ -4443,8 +4428,7 @@ if (!tuxedoDevice()) {
 readOSData();
 
 if (!isOSSupported()) {
-	printLog('OS is not supported');
-	print "This OS is not supported\n";
+	printLog('This OS is not supported', 'TL');
 	exit (0);
 }
 
