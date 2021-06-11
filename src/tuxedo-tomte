@@ -4233,10 +4233,24 @@ sub listSuccess {
 	if ($restartSystem == 1) {
 		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
-	} else {
+	} elif ( configuredModulesExceptDefault() ) {
 		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 	}
 }
+
+
+
+###############################################################################
+# returns 1 if any modules except defined ones were configured
+# returns 0 if otherwise
+#
+sub configuredModulesExceptDefault {
+	@defaultModules = ( 'tuxedorepos', 'tuxedomirrors' );
+	foreach ( @defaultModules ) {
+	
+	}
+}
+
 
 
 ###############################################################################
