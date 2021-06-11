@@ -1408,38 +1408,10 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			# update of repos has to be immediate for possible later package
-			# installation
-			if ($FAI) {
-				$output = `apt-get update`;
-			} else {
-				checkNetwork();
-				$output = `pkcon refresh`;
-			}
-			$exitStatus = $?/256;
-			if ($exitStatus != 0) {
-				printLog('failed: update packages');
-				printLog("returned error code: $exitStatus");
-				if ($exitStatus == 7) {
-					printLog('possible network problems');
-				}
-				addToConfiguredModules($module, "failed");
-			} else {
-				printLog("success: update packages");
-				addToConfiguredModules($module, "success");
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+			if ($retval == 2) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1460,8 +1432,48 @@ sub tuxedorepos() {
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: update packages');
+					printLog("success: update packages");
 					addToConfiguredModules($module, "success");
+				}
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog("uprading $origConfModules{$module}{name}");
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				if ($retval == 2) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					# update of repos has to be immediate for possible later package
+					# installation
+					if ($FAI) {
+						$output = `apt-get update`;
+					} else {
+						checkNetwork();
+						$output = `pkcon refresh`;
+					}
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog('success: update packages');
+						addToConfiguredModules($module, "success");
+					}
 				}
 			}
 		}
@@ -1492,38 +1504,10 @@ sub tuxedomirrors() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			# update of repos has to be immediate for possible later package
-			# installation
-			if ($FAI) {
-				$output = `apt-get update`;
-			} else {
-				checkNetwork();
-				$output = `pkcon refresh`;
-			}
-			$exitStatus = $?/256;
-			if ($exitStatus != 0) {
-				printLog('failed: update packages');
-				printLog("returned error code: $exitStatus");
-				if ($exitStatus == 7) {
-					printLog('possible network problems');
-				}
-				addToConfiguredModules($module, "failed");
-			} else {
-				printLog("success: update packages");
-				addToConfiguredModules($module, "success");
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+			if ($retval == 2) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1544,8 +1528,48 @@ sub tuxedomirrors() {
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: update packages');
+					printLog("success: update packages");
 					addToConfiguredModules($module, "success");
+				}
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog("uprading $origConfModules{$module}{name}");
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				if ($retval == 2) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					# update of repos has to be immediate for possible later package
+					# installation
+					if ($FAI) {
+						$output = `apt-get update`;
+					} else {
+						checkNetwork();
+						$output = `pkcon refresh`;
+					}
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog('success: update packages');
+						addToConfiguredModules($module, "success");
+					}
 				}
 			}
 		}
@@ -2672,6 +2696,7 @@ sub createRepos {
 	my $key;
 	my $DH;
 	my $sourceline;
+	my $modified = 0;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
@@ -2724,17 +2749,19 @@ sub createRepos {
 						printLog("new file: $repos{$compDistVer}{$key}{filename}");
 						printLog("added: $_");
 						$firstEntry = 0;
+						$modified = 1;
 					# or append line
 					} else {
 						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 						printLog("append file: $repos{$compDistVer}{$key}{filename}");
 						printLog("added: $_");
+						$modified = 1;
 					}
 				}
 			}
 		}
 	}
-
+	return ($modified);
 }
 
 
@@ -2762,12 +2789,15 @@ sub addRepoKey {
 ###############################################################################
 # comment out anything else on sources.list which has
 # deb mirrorurl and not tuxedocomputers
+# returns 0 if nothing was changed
+# returns 1 if modifications were made
 #
 sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
 	my $sourcesListDir = '/etc/apt/';
+	my $modified = 0;
 	# read all the lines
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
 		chomp(@sourcelines = <$FHsource>);
@@ -2775,14 +2805,16 @@ sub cleanSourcesList {
 		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach $sourceline (@sourcelines) {
-				setComment(\$sourceline);
+				if (setComment(\$sourceline)) {
+					$modified = 1;
+				}
 				# no backup for the file as it only comments out lines
 				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
 		}
 	}
-
+	return ($modified);
 }
 
 
