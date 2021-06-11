@@ -3085,13 +3085,14 @@ sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
-		printLog("created backup for $fileName");
-		print "created backup for $fileName\n";
+		printLog("created backup for $fileName", 'TL');
+		#TODO
+		#print "created backup for $fileName\n";
 		return 1;
 	} else {
 		printLog("Err: $!");
-		printLog("can't create backup file for $fileName");
-		print "Can't create backup for $fileName\n";
+		printLog("can't create backup file for $fileName", 'TL');
+		#print "Can't create backup for $fileName\n";
 		return 0;
 	}
 }
@@ -3489,12 +3490,20 @@ sub getBackupFileTime {
 
 
 ###############################################################################
-# prints into logFile
+# prints into logFile or to terminal
+# printLog('message', 'tl')
+# it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
 #
 sub printLog {
 	my $message = shift;
-	print "$message\n" if $FAI;
-	if (! $noLogFile) {
+	my ($type) = @_;
+	if (!defined($type)) {
+		$type = 'l';
+	}
+	if ($FAI || ($type =~ /t/i)) {
+		print "$message\n";
+	}
+	if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
 			print $LOGFILE "$timestamp $message\n";
@@ -3648,8 +3657,9 @@ sub initConfigFile {
 		return;
 	} else {
 		# create a new configFile
-		printLog("no configfile present ... creating one");
-		print "No configfile present ... creating one\n";
+		printLog("no configfile present ... creating one", 'TL');
+		#TODO
+		#print "No configfile present ... creating one\n";
 		writeConfigFile();
 		return;
 	}
