@@ -1403,7 +1403,9 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = createRepos(\%tuxedo_repos);
-		$retval2 = addRepoKey();
+		if ($retval == 2) {
+			$retval2 = addRepoKey();
+		}
 		if (($retval == 0) && ($retval2 == 0)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -1502,7 +1504,9 @@ sub tuxedomirrors() {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		$retval2 = addRepoKey();
+		if ($retval == 2) {
+			$retval2 = addRepoKey();
+		}
 		if (($retval == 0) && ($retval2 == 0)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
