@@ -4233,7 +4233,7 @@ sub listSuccess {
 	if ($restartSystem == 1) {
 		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
-	} elif ( configuredModulesExceptDefault() ) {
+	} elsif ( configuredModulesExceptDefault(@successModules) ) {
 		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 	}
 }
@@ -4245,10 +4245,19 @@ sub listSuccess {
 # returns 0 if otherwise
 #
 sub configuredModulesExceptDefault {
-	@defaultModules = ( 'tuxedorepos', 'tuxedomirrors' );
+	my @modulesList = @_;
+	my @defaultModules = ( 'tuxedorepos', 'tuxedomirrors' );
 	foreach ( @defaultModules ) {
-	
+		for my $index (reverse 0..$#modulesList) {
+			if ($modulesList[$index] =~ /$_/) {
+				splice(@modulesList, $index, 1, ());
+			}
+		}
 	}
+	if (scalar(@modulesList) > 0) {
+		return (1);
+	}
+	return (0);
 }
 
 
