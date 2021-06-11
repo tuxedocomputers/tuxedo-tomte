@@ -1412,6 +1412,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifcations on repos');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1451,6 +1452,7 @@ sub tuxedorepos() {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "nothingToDo");
+					printLog('did no modifcations on repos');
 				} else {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
@@ -1508,6 +1510,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifcations on mirrors');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1547,6 +1550,7 @@ sub tuxedomirrors() {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "nothingToDo");
+					printLog('did no modifcations on mirrors');
 				} else {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
