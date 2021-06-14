@@ -976,10 +976,10 @@ sub findPciDevice {
 	my $pciDevice;
 	foreach $pciDevice (@pciDevices) {
 		if ($lspciList =~ /$pciDevice/) {
-			return 1;
+			return (1);
 		}
 	}
-	return 0;
+	return (0);
 }
 
 
@@ -1403,43 +1403,18 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = createRepos(\%tuxedo_repos);
-		$retval2 = addRepoKey();
+		if ($retval == 2) {
+			$retval2 = addRepoKey();
+		}
 		if (($retval == 0) && ($retval2 == 0)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			# update of repos has to be immediate for possible later package
-			# installation
-			if ($FAI) {
-				$output = `apt-get update`;
-			} else {
-				checkNetwork();
-				$output = `pkcon refresh`;
-			}
-			$exitStatus = $?/256;
-			if ($exitStatus != 0) {
-				printLog('failed: update packages');
-				printLog("returned error code: $exitStatus");
-				if ($exitStatus == 7) {
-					printLog('possible network problems');
-				}
-				addToConfiguredModules($module, "failed");
-			} else {
-				printLog("success: update packages");
-				addToConfiguredModules($module, "success");
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+			if ($retval == 1) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifcations on repos');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1460,8 +1435,49 @@ sub tuxedorepos() {
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: update packages');
+					printLog("success: update packages");
 					addToConfiguredModules($module, "success");
+				}
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog("uprading $origConfModules{$module}{name}");
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				if ($retval == 1) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "nothingToDo");
+					printLog('did no modifcations on repos');
+				} else {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					# update of repos has to be immediate for possible later package
+					# installation
+					if ($FAI) {
+						$output = `apt-get update`;
+					} else {
+						checkNetwork();
+						$output = `pkcon refresh`;
+					}
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog('success: update packages');
+						addToConfiguredModules($module, "success");
+					}
 				}
 			}
 		}
@@ -1480,50 +1496,26 @@ sub tuxedomirrors() {
 	my $action = shift;
 	my $retval;
 	my $retval2;
+	my $retval3;
 	my $exitStatus;
 	my $output;
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = createRepos(\%tuxedo_mirrors);
-		cleanSourcesList();
-		$retval2 = addRepoKey();
+		$retval3 = cleanSourcesList();
+		if ($retval == 2) {
+			$retval2 = addRepoKey();
+		}
 		if (($retval == 0) && ($retval2 == 0)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			# update of repos has to be immediate for possible later package
-			# installation
-			if ($FAI) {
-				$output = `apt-get update`;
-			} else {
-				checkNetwork();
-				$output = `pkcon refresh`;
-			}
-			$exitStatus = $?/256;
-			if ($exitStatus != 0) {
-				printLog('failed: update packages');
-				printLog("returned error code: $exitStatus");
-				if ($exitStatus == 7) {
-					printLog('possible network problems');
-				}
-				addToConfiguredModules($module, "failed");
-			} else {
-				printLog("success: update packages");
-				addToConfiguredModules($module, "success");
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+			if (($retval == 1) && ($retval3 == 0)) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifcations on mirrors');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1544,8 +1536,49 @@ sub tuxedomirrors() {
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
-					printLog('success: update packages');
+					printLog("success: update packages");
 					addToConfiguredModules($module, "success");
+				}
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ( $localConfModules{$module}{version} == 1 ) {
+			printLog("uprading $origConfModules{$module}{name}");
+			backupFile('/etc/apt/sources.list');
+			$retval = createRepos();
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				if ($retval == 1) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "nothingToDo");
+					printLog('did no modifcations on mirrors');
+				} else {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					# update of repos has to be immediate for possible later package
+					# installation
+					if ($FAI) {
+						$output = `apt-get update`;
+					} else {
+						checkNetwork();
+						$output = `pkcon refresh`;
+					}
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog('success: update packages');
+						addToConfiguredModules($module, "success");
+					}
 				}
 			}
 		}
@@ -2595,10 +2628,10 @@ sub loadMD5Store {
 			$initrdHashSaved{$key} = $val;
 		}
 		close FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("no readable md5sum file available");
-		return 0;
+		return (0);
 	}
 }
 
@@ -2662,7 +2695,8 @@ sub newInitrdFiles {
 
 ###############################################################################
 # Adds the TUXEDO repos to the system with public key
-# returns 1 if successful
+# returns 2 if successful and changes to repos were made
+# returns 1 if successful and no changes to repos
 # returns 0 if failed
 #
 sub createRepos {
@@ -2672,18 +2706,17 @@ sub createRepos {
 	my $key;
 	my $DH;
 	my $sourceline;
+	my $modified = 0;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really wrong)");
-		print "No $sourcesListDir found, something's really wrong ...\n";
+		printLog("no $sourcesListDir found (something's really wrong)", 'TL');
 		# no apt directory, somethings fishy
 		return (0);
 	}
 	if (!-d $sourcesListDirD) {
-		printLog("no $sourcesListDirD found, creating one");
-		print "No $sourcesListDirD found, creating one\n";
+		printLog("no $sourcesListDirD found, creating one", 'TL');
 		mkdir($sourcesListDirD);
 	}
 
@@ -2724,17 +2757,19 @@ sub createRepos {
 						printLog("new file: $repos{$compDistVer}{$key}{filename}");
 						printLog("added: $_");
 						$firstEntry = 0;
+						$modified = 1;
 					# or append line
 					} else {
 						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 						printLog("append file: $repos{$compDistVer}{$key}{filename}");
 						printLog("added: $_");
+						$modified = 1;
 					}
 				}
 			}
 		}
 	}
-
+	return ($modified+1);
 }
 
 
@@ -2762,12 +2797,15 @@ sub addRepoKey {
 ###############################################################################
 # comment out anything else on sources.list which has
 # deb mirrorurl and not tuxedocomputers
+# returns 0 if nothing was changed
+# returns 1 if modifications were made
 #
 sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
 	my $sourcesListDir = '/etc/apt/';
+	my $modified = 0;
 	# read all the lines
 	if (open $FHsource, "<", $sourcesListDir."sources.list") {
 		chomp(@sourcelines = <$FHsource>);
@@ -2775,14 +2813,16 @@ sub cleanSourcesList {
 		# open for writing
 		if (open $FHsource, ">", $sourcesListDir."sources.list") {
 			foreach $sourceline (@sourcelines) {
-				setComment(\$sourceline);
+				if (setComment(\$sourceline)) {
+					$modified = 1;
+				}
 				# no backup for the file as it only comments out lines
 				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
 		}
 	}
-
+	return ($modified);
 }
 
 
@@ -2804,8 +2844,7 @@ sub setComment {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open repository mirrors list at $reposList");
-		print "Could not open repository mirrors list at $reposList\n";
+		printLog("could not open repository mirrors list at $reposList", 'TL');
 		return (0);
 	}
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
@@ -2855,10 +2894,10 @@ sub deinstExcept {
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except");
-			return 1;
+			return (1);
 		}
 		printLog('something went wrong while searching for packages');
-		return 0;
+		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
@@ -2881,14 +2920,14 @@ sub deinstExcept {
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 0;
+			return (0);
 		} else {
 			printLog('deinstallation of packages successful');
-			return 1;
+			return (1);
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 1;
+		return (1);
 	}
 }
 
@@ -2909,10 +2948,10 @@ sub deinstallPackage {
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst");
-			return 0;
+			return (0);
 		}
 		printLog("something went wrong while searching for packages: $deinst");
-		return 1;
+		return (1);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
@@ -2931,14 +2970,14 @@ sub deinstallPackage {
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue");
-			return 1;
+			return (1);
 		} else {
 			printLog('deinstallation of packages successful');
-			return 0;
+			return (0);
 		}
 	} else {
 		printLog('nothing to deinstall');
-		return 0;
+		return (0);
 	}
 }
 
@@ -2956,10 +2995,10 @@ sub isPackageInstalled {
 	my $retValue = $?/256;
 	if ($retString =~ m/install ok installed/) {
 		printLog("package $package is installed");
-		return 1;
+		return (1);
 	} else {
 		printLog("package $package is not installed");
-		return 0;
+		return (0);
 	}
 }
 
@@ -3004,12 +3043,11 @@ sub createFile {
 	if (open $FH, ">",$fileName) {
 		print $FH "$fileText";
 		close $FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("Err: $!");
-		printLog("can't open $fileName for writing");
-		print "Can't open $fileName for writing\n";
-		return 0;
+		printLog("can't open $fileName for writing", 'TL');
+		return (0);
 	}
 }
 
@@ -3025,12 +3063,11 @@ sub appendFile {
 	if (open $FH, ">>",$fileName) {
 		print $FH "$fileText";
 		close $FH;
-		return 1;
+		return (1);
 	} else {
 		printLog("Err: $!");
-		printLog("can't open $fileName for writing");
-		print "Can't open $fileName for writing\n";
-		return 0;
+		printLog("can't open $fileName for writing", 'TL');
+		return (0);
 	}
 }
 
@@ -3043,14 +3080,12 @@ sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
-		printLog("created backup for $fileName");
-		print "created backup for $fileName\n";
-		return 1;
+		printLog("created backup for $fileName", 'TL');
+		return (1);
 	} else {
 		printLog("Err: $!");
-		printLog("can't create backup file for $fileName");
-		print "Can't create backup for $fileName\n";
-		return 0;
+		printLog("can't create backup file for $fileName", 'TL');
+		return (0);
 	}
 }
 
@@ -3447,12 +3482,20 @@ sub getBackupFileTime {
 
 
 ###############################################################################
-# prints into logFile
+# prints into logFile or to terminal
+# printLog('message', 'tl')
+# it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
 #
 sub printLog {
 	my $message = shift;
-	print "$message\n" if $FAI;
-	if (! $noLogFile) {
+	my ($type) = @_;
+	if (!defined($type)) {
+		$type = 'l';
+	}
+	if ($FAI || ($type =~ /t/i)) {
+		print "$message\n";
+	}
+	if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
 		if (open $LOGFILE, '>>'.$logFile) {
 			my $timestamp = getLoggingTime();
 			print $LOGFILE "$timestamp $message\n";
@@ -3504,8 +3547,7 @@ sub readConfigFile {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open configFile: $configFile $!");
-		print "Could not open configfile $configFile\n";
+		printLog("could not open configFile: $configFile $!", 'TL');
 		return (0);
 	}
 	return (1);
@@ -3576,8 +3618,7 @@ sub writeConfigFile {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("can't write to $configFile $!");
-		print "Can't write to configfile: $configFile\n";
+		printLog("can't write to configfile $configFile $!", 'TL');
 		exit (0);
 	}
 }
@@ -3594,8 +3635,7 @@ sub initConfigFile {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir");
-			print "Could not create $configDir\n";
+			printLog("could not create $configDir", 'TL');
 			exit (0);
 		}
 	}
@@ -3606,8 +3646,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# create a new configFile
-		printLog("no configfile present ... creating one");
-		print "No configfile present ... creating one\n";
+		printLog("no configfile present ... creating one", 'TL');
 		writeConfigFile();
 		return;
 	}
@@ -3813,9 +3852,9 @@ sub transferConfigValues {
 sub newVersion {
 	my $module = shift;
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
-		return 1;
+		return (1);
 	} else {
-		return 0;
+		return (0);
 	}
 }
 
@@ -3826,9 +3865,9 @@ sub newVersion {
 sub newHwid {
 	my $module = shift;
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
-		return 1;
+		return (1);
 	} else {
-		return 0;
+		return (0);
 	}
 }
 
@@ -3953,8 +3992,7 @@ sub configureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "Wrong module name\n";
+		printLog("wrong module name", 'TL');
 		return;
 	}
 
@@ -4014,8 +4052,7 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	if ($module eq "") {
-		printLog("wrong module name");
-		print "Wrong module name\n";
+		printLog("wrong module name", 'TL');
 		return;
 	}
 
@@ -4233,10 +4270,33 @@ sub listSuccess {
 	if ($restartSystem == 1) {
 		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
-	} else {
+	} elsif ( configuredModulesExceptDefault(@successModules) ) {
 		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 	}
 }
+
+
+
+###############################################################################
+# returns 1 if any modules except defined ones were configured
+# returns 0 if otherwise
+#
+sub configuredModulesExceptDefault {
+	my @modulesList = @_;
+	my @defaultModules = ( 'tuxedorepos', 'tuxedomirrors' );
+	foreach ( @defaultModules ) {
+		for my $index (reverse 0..$#modulesList) {
+			if ($modulesList[$index] =~ /$_/) {
+				splice(@modulesList, $index, 1, ());
+			}
+		}
+	}
+	if (scalar(@modulesList) > 0) {
+		return (1);
+	}
+	return (0);
+}
+
 
 
 ###############################################################################
@@ -4368,8 +4428,7 @@ if (!tuxedoDevice()) {
 readOSData();
 
 if (!isOSSupported()) {
-	printLog('OS is not supported');
-	print "This OS is not supported\n";
+	printLog('This OS is not supported', 'TL');
 	exit (0);
 }
 
