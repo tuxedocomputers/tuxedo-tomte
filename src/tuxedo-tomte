@@ -980,7 +980,7 @@ sub checkRequirements {
 		printLog('detected apport-fix issue');
 	}
 	if (isLineInFile('/etc/hosts', '88.99.148.10.*')) {
-		$origConfModules{opensuseipfix}{required};
+		$origConfModules{opensuseipfix}{required} = 'yes';
 		printLog('detected opensuseip-fix issue');
 	}
 }
@@ -2638,6 +2638,7 @@ sub opensuseipfix() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		substituteLineInFile('/etc/hosts', '80.99.148.10.*', '');
+	}
 	if ($action eq 'upgrade') {
 		# not neccessary
 	}
