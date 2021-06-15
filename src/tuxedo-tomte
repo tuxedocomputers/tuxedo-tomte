@@ -644,6 +644,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	opensuseipfix => {
+		name => 'opensuseip-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Deletes unnecessary IP adresses in hosts file',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
 );
 
 
@@ -962,6 +978,10 @@ sub checkRequirements {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog('detected apport-fix issue');
+	}
+	if (isLineInFile('/etc/hosts', '88.99.148.10.*')) {
+		$origConfModules{opensuseipfix}{required} = 'yes';
+		printLog('detected opensuseip-fix issue');
 	}
 }
 
@@ -2608,6 +2628,25 @@ sub apportfix() {
 
 
 
+###############################################################################
+# removes some unnecessary lines from /etc/hosts
+# these lines are old remnants from another dimension
+#
+sub opensuseipfix() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		substituteLineInFile('/etc/hosts', '88.99.148.10.*', '');
+	}
+	if ($action eq 'upgrade') {
+		# not neccessary
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 ###############################################################################
@@ -3126,7 +3165,7 @@ sub substituteLineInFile {
 
 	if ( open $FH, "<", $filename) {
 		while (<$FH>) {
-	    	push (@fileLines, $_);
+			push (@fileLines, $_);
 		}
 		close $FH;
 	} else {
@@ -3138,17 +3177,17 @@ sub substituteLineInFile {
 	foreach( @fileLines ) {
 		if ( $_ =~ /^$origLine$/ ) {
 			$_ = "$substLine\n";
-			if ( open $FH, ">", $filename ) {
-				print $FH @fileLines;
-				close ($FH);
-    		} else {
-				printLog("Err: $!");
-				printLog("no $filename present or unable to open the file for writing");
-				return (-1);
-    		}
-			return (1);
 		}
 	}
+	if ( open $FH, ">", $filename ) {
+		print $FH @fileLines;
+		close ($FH);
+		return (1);
+    } else {
+		printLog("Err: $!");
+		printLog("no $filename present or unable to open the file for writing");
+		return (-1);
+    }
 
 	return (0);
 }
