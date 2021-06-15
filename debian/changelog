@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.9-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.9-10) UNRELEASED; urgency=medium
 
   * after packaging
   * small test for array splicing
@@ -12,8 +12,9 @@ tuxedo-tomte (2.4.9-9) UNRELEASED; urgency=medium
   * before merge with master
   * added module opensuseip-fix
   * stupid little missing curly bracket
+  * error in IP, substitute all lines in file if pattern found
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 14 Jun 2021 12:13:49 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 15 Jun 2021 10:45:15 +0200
 
 tuxedo-tomte (2.4.9) focal; urgency=medium
 
