@@ -1,20 +1,10 @@
-tuxedo-tomte (2.4.9-10) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.10) focal; urgency=medium
 
-  * after packaging
-  * small test for array splicing
   * no reporting on desktop if only the default modules were configured
-  * added nothingtodo to repos and mirrors if nothing was done
-  * log messages if no modifications on repos or mirrors
-  * small retval bugs
-  * repokey add only if neccessary
-  * modified printLog against double messages
-  * beautified return parameters
-  * before merge with master
+  * no action if repos and mirrors were not changed
   * added module opensuseip-fix
-  * stupid little missing curly bracket
-  * error in IP, substitute all lines in file if pattern found
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 15 Jun 2021 10:45:15 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 15 Jun 2021 14:43:28 +0200
 
 tuxedo-tomte (2.4.9) focal; urgency=medium
 
