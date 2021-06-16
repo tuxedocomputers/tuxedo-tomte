@@ -660,6 +660,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	realtekr8125dkms => {
+		name => 'realtek-r8125-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Linux device driver for several Realtek Ethernet controllers',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
 );
 
 
@@ -983,6 +999,14 @@ sub checkRequirements {
 		$origConfModules{opensuseipfix}{required} = 'yes';
 		printLog('detected opensuseip-fix issue');
 	}
+	if (($boardname =~ m/GMxMGxx/) ||
+		($boardname =~ m/GMxNGxx/) ||
+		($boardname =~ m/GMxZGxx/) ||
+		($boardname =~ m/GMxTGxx/)) {
+		$origConfModules{realtekr8125dkms}{required} = 'yes';
+		printLog('detected realtek-r8125-dkms issue');
+	}
+
 }
 
 
@@ -2646,6 +2670,46 @@ sub opensuseipfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Installs Linux device driver for several Realtek Ethernet controllers
+#
+sub realtekr8125dkms() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
 
 
 
