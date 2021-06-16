@@ -270,10 +270,10 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
-		postconf => 'updateGrub',
+		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
