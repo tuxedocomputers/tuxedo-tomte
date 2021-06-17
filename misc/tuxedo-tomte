@@ -1,0 +1,25 @@
+#/usr/bin/env bash
+_tuxedo-tomte() {
+	COMPREPLY=()
+	local word="${COMP_WORDS[COMP_CWORD]}"
+
+	if [ "$COMP_CWORD" -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "list modules description configure reconfigure block unblock help" -- "$word") )
+	elif [ "$COMP_CWORD" -eq 2 ]; then
+		local words=("${COMP_WORDS[@]}")
+		unset "words[0]"
+		unset "words[$COMP_CWORD]"
+		case "${COMP_WORDS[1]}" in
+			description|block|unblock)
+				local modules=$(tuxedo-tomte modules "${words[@]}")
+				COMPREPLY=( $(compgen -W "$modules" -- "$word") )
+				;;
+			configure|reconfigure)
+				local modules=$(tuxedo-tomte modules "${words[@]}")
+				COMPREPLY=( $(compgen -W "all $modules" -- "$word") )
+				;;
+		esac
+	fi
+}
+
+complete -F _tuxedo-tomte tuxedo-tomte
