@@ -4274,11 +4274,6 @@ sub postConfigure {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 				$restartSystem = 1;
-				if ($postConfProgram{updateInitramfs}) {
-					readInitrdMD5Files();
-					writeMD5Store();
-					printLog('wrote new md5store');
-				}
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
