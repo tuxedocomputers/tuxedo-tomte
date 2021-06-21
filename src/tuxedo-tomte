@@ -385,7 +385,7 @@ my %origConfModules = (
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	threegfix => {
@@ -1658,7 +1658,7 @@ sub corefix() {
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
-		if (newInitrdFiles() || ($argValue{command} eq 'reconfigure') ) {
+		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
 			messageLongInstall();
 			printLog("applying $origConfModules{$module}{name}");
 			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
