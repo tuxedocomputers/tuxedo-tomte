@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.10-7) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.10-8) UNRELEASED; urgency=medium
 
   * after merge
   * added support for realtek-r8125-dkms
@@ -6,8 +6,9 @@ tuxedo-tomte (2.4.10-7) UNRELEASED; urgency=medium
   * added bash shell completion
   * before merge with master
   * removed corefix always install and after md5sum check
+  * removed md5sum check for core-fix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Jun 2021 08:46:22 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Jun 2021 09:26:40 +0200
 
 tuxedo-tomte (2.4.10) focal; urgency=medium
 
