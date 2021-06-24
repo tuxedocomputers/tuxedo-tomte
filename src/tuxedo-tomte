@@ -1222,24 +1222,7 @@ sub amdgpuwithnvidiafix() {
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /18.04/) {
-			printLog("applying $origConfModules{$module}{name}");
-			$retval = createFile($fileName, $fileText);
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			} else {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
-			}
-		} else {
-			printLog('amd-gpu-with-nvidia-fix is not necessary for this system, only on Ubuntu 18.04');
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}");
+		printLog("applying $origConfModules{$module}{name}");
 		$retval = createFile($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -1251,8 +1234,21 @@ sub amdgpuwithnvidiafix() {
 			$restartSystem = 1;
 		}
 	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
+	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		if (backupFile($fileName)) {
+			unlink($fileName);
+		} else {
+			printLog('can\'t remove fix, it seems to be gone already', 'TL');
+		}
+		$origConfModules{$module}{installed} = 'no';
+		$origConfModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'success');
 	}
 }
 
@@ -4638,6 +4634,18 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 	} elsif ($argValue{command} eq "remove") {
+		if ($argValue{module} ne '') {
+			initLogging();
+			prepareValues();
+			prerequisites();
+			removeSingleModule($argValue{module});
+			postConfigure();
+			listSuccess();
+			writeConfigFile();
+			printLog('Tomte finished');
+		} else {
+			print "Module name or \"all\" missing\n";
+		}
 		print "remove, does nothing yet\n";
 	} elsif ($argValue{command} eq "reconfigure") {
 		if ($argValue{module} ne '') {
@@ -4650,7 +4658,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {	
-				reconfigureSingleModule($ARGV[1]);
+				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
