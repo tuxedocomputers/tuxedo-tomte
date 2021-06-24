@@ -1466,23 +1466,21 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				if ($FAI) {
-					$output = `apt-get update`;
-				} else {
+				if (!$FAI) {
 					checkNetwork();
 					$output = `pkcon refresh`;
-				}
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
-					if ($exitStatus == 7) {
-						printLog('possible network problems');
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog("success: update packages");
+						addToConfiguredModules($module, "success");
 					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog("success: update packages");
-					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -1506,12 +1504,8 @@ sub tuxedorepos() {
 					$origConfModules{$module}{upgraded} = "yes";
 					# update of repos has to be immediate for possible later package
 					# installation
-					if ($FAI) {
-						$output = `apt-get update`;
-					} else {
-						checkNetwork();
-						$output = `pkcon refresh`;
-					}
+					checkNetwork();
+					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages');
@@ -1567,23 +1561,21 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				if ($FAI) {
-					$output = `apt-get update`;
-				} else {
+				if (!$FAI) {
 					checkNetwork();
 					$output = `pkcon refresh`;
-				}
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
-					if ($exitStatus == 7) {
-						printLog('possible network problems');
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog("success: update packages");
+						addToConfiguredModules($module, "success");
 					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog("success: update packages");
-					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -1607,12 +1599,8 @@ sub tuxedomirrors() {
 					$origConfModules{$module}{upgraded} = "yes";
 					# update of repos has to be immediate for possible later package
 					# installation
-					if ($FAI) {
-						$output = `apt-get update`;
-					} else {
-						checkNetwork();
-						$output = `pkcon refresh`;
-					}
+					checkNetwork();
+					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages');
@@ -4081,7 +4069,8 @@ sub configureAllModules {
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
 			}
-		} elsif ($localConfModules{$module}{installed} eq 'yes') {
+		} elsif ($origConfModules{$module}{required} eq 'no' &&
+				$localConfModules{$module}{installed} eq 'yes') {
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
