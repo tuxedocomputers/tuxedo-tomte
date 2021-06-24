@@ -842,8 +842,10 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
-		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-		printLog('detected amd-gpu-with-nvidia-fix issue');
+		if ($distributionVersion =~ /18.04/) {
+			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
+			printLog('detected amd-gpu-with-nvidia-fix issue');
+		}
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -1220,16 +1222,20 @@ sub amdgpuwithnvidiafix() {
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}");
-		$retval = createFile($fileName, $fileText);
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+		if ($distributionVersion =~ /18.04/) {
+			printLog("applying $origConfModules{$module}{name}");
+			$retval = createFile($fileName, $fileText);
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			}
 		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			printLog('amd-gpu-with-nvidia-fix is not necessary for this system, only on Ubuntu 18.04');
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -4033,7 +4039,7 @@ sub validModuleName {
 # R=remove
 # .=nothing
 #
-# installed blocked required	newversion	newhwid
+# installed blocked		required	newversion	newhwid
 # tomte.cfg	tomte.cfg	check		origConfig	origConfig
 # yes		yes			yes			yes			yes		.
 # yes		yes			yes			yes			no		.
@@ -4079,6 +4085,8 @@ sub configureAllModules {
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
 			}
+		} elsif ($localConfModules{$module}{installed} eq 'yes') {
+			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
 }
@@ -4131,6 +4139,32 @@ sub configureSingleModule {
 
 
 ###############################################################################
+# checks if the conditions to remove a module are met
+#
+sub removeSingleModule {
+	my $moduleName = shift;
+	my $module;
+	$module = getSubName($moduleName);
+	if ($module eq "") {
+		printLog("wrong module name", 'TL');
+		return;
+	}
+
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		printLog("removing module $module", 'TL');
+		removeModule($module);
+	}	
+
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "Module $moduleName cannot be removed because:\n";
+		print "- it is blocked (maybe use 'unblock')\n";
+	}
+}
+
+
+
+
+###############################################################################
 # reconfigures all modules if not blocked and if required even if it is
 # already installed
 #
@@ -4140,6 +4174,8 @@ sub reconfigureAllModules {
 	foreach $module (keys %origConfModules) {
 		if ($origConfModules{$module}{required} eq 'yes') {
 			reconfigureSingleModule($origConfModules{$module}{name});
+		} elsif ($localConfModules{$module}{installed} eq 'yes') {
+			removeModule($origConfModules{$module}{name});
 		}
 	}
 }
