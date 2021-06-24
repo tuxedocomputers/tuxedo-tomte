@@ -4029,8 +4029,8 @@ sub configureAllModules {
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
 			}
-		} elsif ($origConfModules{$module}{required} eq 'no' &&
-				$localConfModules{$module}{installed} eq 'yes') {
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				($localConfModules{$module}{installed} eq 'yes')) {
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
@@ -4119,7 +4119,8 @@ sub reconfigureAllModules {
 	foreach $module (keys %origConfModules) {
 		if ($origConfModules{$module}{required} eq 'yes') {
 			reconfigureSingleModule($origConfModules{$module}{name});
-		} elsif ($localConfModules{$module}{installed} eq 'yes') {
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				($localConfModules{$module}{installed} eq 'yes')) {
 			removeModule($origConfModules{$module}{name});
 		}
 	}
