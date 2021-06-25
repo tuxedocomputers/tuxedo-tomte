@@ -1224,6 +1224,7 @@ sub amdgpuwithnvidiafix() {
 	}
 	if ($action eq 'remove') {
 		printLog("removing $module", 'TL');
+		unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
 		if (backupFile($fileName)) {
 			unlink($fileName);
 		} else {
