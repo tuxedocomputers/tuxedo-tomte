@@ -906,7 +906,9 @@ sub checkRequirements {
 	}
 
 	if (($boardname =~ /X170SM/) ||
-		($boardname =~ /PCx0Dx_GN20/)) {
+		($boardname =~ /PCx0Dx_GN20/) ||
+		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxTGxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue');
 	}
