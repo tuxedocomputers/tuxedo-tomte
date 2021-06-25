@@ -966,7 +966,8 @@ sub checkRequirements {
 		printLog('detected nvidia-driver issue');
 	}
 
-	if (cpuBrand() eq 'AMD') {
+	if ((cpuBrand() eq 'AMD') &&
+		($distributionVersion =~ /20.04/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
