@@ -270,10 +270,10 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
-		postconf => 'updateGrub',
+		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
@@ -822,10 +822,12 @@ sub checkRequirements {
 		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue');
 	}
 
+	#TODO: remove test entry
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/)) {
+		($boardname =~ /POLARIS1501A2060/) ||
+		($boardname =~ /NH5xAx/)) {
 		if ($distributionVersion =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 			printLog('detected amd-gpu-with-nvidia-fix issue');
@@ -1221,6 +1223,7 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
+		printLog("removing $module", 'TL');
 		if (backupFile($fileName)) {
 			unlink($fileName);
 		} else {
