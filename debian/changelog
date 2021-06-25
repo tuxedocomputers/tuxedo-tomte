@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.11-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.11-5) UNRELEASED; urgency=medium
 
   * added remove subroutines checks
   * remove capability ready, remove amdgpu-with-nvidia-fix added
@@ -6,8 +6,9 @@ tuxedo-tomte (2.4.11-4) UNRELEASED; urgency=medium
   * removed opensuseip
   * added missing brackets
   * removed always and grub from amdgpuwithnvidiafix
+  * delete all backup files
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Jun 2021 09:29:33 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Jun 2021 09:45:34 +0200
 
 tuxedo-tomte (2.4.11) focal; urgency=medium
 
