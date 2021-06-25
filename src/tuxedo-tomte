@@ -822,12 +822,10 @@ sub checkRequirements {
 		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue');
 	}
 
-	#TODO: remove test entry
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/) ||
-		($boardname =~ /NH5xAx/)) {
+		($boardname =~ /POLARIS1501A2060/)) {
 		if ($distributionVersion =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 			printLog('detected amd-gpu-with-nvidia-fix issue');
