@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.11-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.11-6) UNRELEASED; urgency=medium
 
   * added remove subroutines checks
   * remove capability ready, remove amdgpu-with-nvidia-fix added
@@ -7,8 +7,9 @@ tuxedo-tomte (2.4.11-5) UNRELEASED; urgency=medium
   * added missing brackets
   * removed always and grub from amdgpuwithnvidiafix
   * delete all backup files
+  * added amdgpu-dkms install exclusively for 20.04
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Jun 2021 09:45:34 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Jun 2021 13:13:59 +0200
 
 tuxedo-tomte (2.4.11) focal; urgency=medium
 
