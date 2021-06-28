@@ -262,7 +262,7 @@ my %origConfModules = (
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -385,7 +385,7 @@ my %origConfModules = (
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	threegfix => {
@@ -644,22 +644,6 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
-	opensuseipfix => {
-		name => 'opensuseip-fix',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Deletes unnecessary IP adresses in hosts file',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => '',
-	},
 	realtekr8125dkms => {
 		name => 'realtek-r8125-dkms',
 		version => 1,
@@ -859,8 +843,10 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
-		$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-		printLog('detected amd-gpu-with-nvidia-fix issue');
+		if ($distributionVersion =~ /18.04/) {
+			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
+			printLog('detected amd-gpu-with-nvidia-fix issue');
+		}
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -937,7 +923,9 @@ sub checkRequirements {
 	}
 
 	if (($boardname =~ /X170SM/) ||
-		($boardname =~ /PCx0Dx_GN20/)) {
+		($boardname =~ /PCx0Dx_GN20/) ||
+		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxTGxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue');
 	}
@@ -995,7 +983,8 @@ sub checkRequirements {
 		printLog('detected nvidia-driver issue');
 	}
 
-	if (cpuBrand() eq 'AMD') {
+	if ((cpuBrand() eq 'AMD') &&
+		($distributionVersion =~ /20.04/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
@@ -1011,10 +1000,6 @@ sub checkRequirements {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog('detected apport-fix issue');
-	}
-	if (isLineInFile('/etc/hosts', '88.99.148.10.*')) {
-		$origConfModules{opensuseipfix}{required} = 'yes';
-		printLog('detected opensuseip-fix issue');
 	}
 	if (($boardname =~ m/GMxMGxx/) ||
 		($boardname =~ m/GMxNGxx/) ||
@@ -1256,19 +1241,21 @@ sub amdgpuwithnvidiafix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		$retval = createFile($fileName, $fileText);
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
-		}
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		printLog("removing $module", 'TL');
+		unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
+		if (backupFile($fileName)) {
+			unlink($fileName);
+		} else {
+			printLog('can\'t remove fix, it seems to be gone already', 'TL');
+		}
+		$origConfModules{$module}{installed} = 'no';
+		$origConfModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'success');
 	}
 }
 
@@ -1486,23 +1473,21 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				if ($FAI) {
-					$output = `apt-get update`;
-				} else {
+				if (!$FAI) {
 					checkNetwork();
 					$output = `pkcon refresh`;
-				}
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
-					if ($exitStatus == 7) {
-						printLog('possible network problems');
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog("success: update packages");
+						addToConfiguredModules($module, "success");
 					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog("success: update packages");
-					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -1526,12 +1511,8 @@ sub tuxedorepos() {
 					$origConfModules{$module}{upgraded} = "yes";
 					# update of repos has to be immediate for possible later package
 					# installation
-					if ($FAI) {
-						$output = `apt-get update`;
-					} else {
-						checkNetwork();
-						$output = `pkcon refresh`;
-					}
+					checkNetwork();
+					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages');
@@ -1587,23 +1568,21 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				if ($FAI) {
-					$output = `apt-get update`;
-				} else {
+				if (!$FAI) {
 					checkNetwork();
 					$output = `pkcon refresh`;
-				}
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
-					if ($exitStatus == 7) {
-						printLog('possible network problems');
+					$exitStatus = $?/256;
+					if ($exitStatus != 0) {
+						printLog('failed: update packages');
+						printLog("returned error code: $exitStatus");
+						if ($exitStatus == 7) {
+							printLog('possible network problems');
+						}
+						addToConfiguredModules($module, "failed");
+					} else {
+						printLog("success: update packages");
+						addToConfiguredModules($module, "success");
 					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog("success: update packages");
-					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -1627,12 +1606,8 @@ sub tuxedomirrors() {
 					$origConfModules{$module}{upgraded} = "yes";
 					# update of repos has to be immediate for possible later package
 					# installation
-					if ($FAI) {
-						$output = `apt-get update`;
-					} else {
-						checkNetwork();
-						$output = `pkcon refresh`;
-					}
+					checkNetwork();
+					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages');
@@ -1680,7 +1655,7 @@ sub corefix() {
 	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
 
 	if ($action eq 'install') {
-		if (newInitrdFiles() || ($argValue{command} eq 'reconfigure') ) {
+		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
 			messageLongInstall();
 			printLog("applying $origConfModules{$module}{name}");
 			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
@@ -2672,26 +2647,6 @@ sub apportfix() {
 	}
 }
 
-
-
-###############################################################################
-# removes some unnecessary lines from /etc/hosts
-# these lines are old remnants from another dimension
-#
-sub opensuseipfix() {
-	my $module = shift;
-	my $action = shift;
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}");
-		substituteLineInFile('/etc/hosts', '88.99.148.10.*', '');
-	}
-	if ($action eq 'upgrade') {
-		# not neccessary
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-	}
-}
 
 
 
@@ -4104,7 +4059,7 @@ sub validModuleName {
 # R=remove
 # .=nothing
 #
-# installed blocked required	newversion	newhwid
+# installed blocked		required	newversion	newhwid
 # tomte.cfg	tomte.cfg	check		origConfig	origConfig
 # yes		yes			yes			yes			yes		.
 # yes		yes			yes			yes			no		.
@@ -4150,6 +4105,9 @@ sub configureAllModules {
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
 			}
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				($localConfModules{$module}{installed} eq 'yes')) {
+			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
 }
@@ -4202,6 +4160,32 @@ sub configureSingleModule {
 
 
 ###############################################################################
+# checks if the conditions to remove a module are met
+#
+sub removeSingleModule {
+	my $moduleName = shift;
+	my $module;
+	$module = getSubName($moduleName);
+	if ($module eq "") {
+		printLog("wrong module name", 'TL');
+		return;
+	}
+
+	if ($localConfModules{$module}{blocked} eq 'no') {
+		printLog("removing module $module", 'TL');
+		removeModule($module);
+	}	
+
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "Module $moduleName cannot be removed because:\n";
+		print "- it is blocked (maybe use 'unblock')\n";
+	}
+}
+
+
+
+
+###############################################################################
 # reconfigures all modules if not blocked and if required even if it is
 # already installed
 #
@@ -4211,6 +4195,9 @@ sub reconfigureAllModules {
 	foreach $module (keys %origConfModules) {
 		if ($origConfModules{$module}{required} eq 'yes') {
 			reconfigureSingleModule($origConfModules{$module}{name});
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				($localConfModules{$module}{installed} eq 'yes')) {
+			removeModule($origConfModules{$module}{name});
 		}
 	}
 }
@@ -4345,11 +4332,6 @@ sub postConfigure {
 				printLog("success: $postConfProgram{$sysProgram}{command}");
 				postSetModulesState($sysProgram, "success");
 				$restartSystem = 1;
-				if ($postConfProgram{updateInitramfs}) {
-					readInitrdMD5Files();
-					writeMD5Store();
-					printLog('wrote new md5store');
-				}
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}");
@@ -4678,6 +4660,18 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 	} elsif ($argValue{command} eq "remove") {
+		if ($argValue{module} ne '') {
+			initLogging();
+			prepareValues();
+			prerequisites();
+			removeSingleModule($argValue{module});
+			postConfigure();
+			listSuccess();
+			writeConfigFile();
+			printLog('Tomte finished');
+		} else {
+			print "Module name or \"all\" missing\n";
+		}
 		print "remove, does nothing yet\n";
 	} elsif ($argValue{command} eq "reconfigure") {
 		if ($argValue{module} ne '') {
@@ -4690,7 +4684,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {	
-				reconfigureSingleModule($ARGV[1]);
+				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();

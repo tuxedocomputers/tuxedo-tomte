@@ -1,14 +1,27 @@
-tuxedo-tomte (2.4.10-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.11-7) UNRELEASED; urgency=medium
 
-  * after merge
+  * added remove subroutines checks
+  * remove capability ready, remove amdgpu-with-nvidia-fix added
+  * removed update packages in FAI
+  * removed opensuseip
+  * added missing brackets
+  * removed always and grub from amdgpuwithnvidiafix
+  * delete all backup files
+  * added amdgpu-dkms install exclusively for 20.04
+  * changed version amdgpunvidiafix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Jun 2021 15:34:56 +0200
+
+tuxedo-tomte (2.4.11) focal; urgency=medium
+
   * added support for realtek-r8125-dkms
   * before merge with master
   * changed amdgpuwithnvidiafix to not check every time
   * added support for amdgpu-backlight-aux-off
   * added bash shell completion
-  * UNRELEASED
+  * removed corefix always install and after md5sum check
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 17 Jun 2021 13:37:52 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Jun 2021 14:43:41 +0200
 
 tuxedo-tomte (2.4.10) focal; urgency=medium
 
