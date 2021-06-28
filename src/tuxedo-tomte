@@ -660,6 +660,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	amdgpubacklightauxoff => {
+		name => 'amdgpu-backlight-aux-off',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight control',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
+
 );
 
 
@@ -990,6 +1007,12 @@ sub checkRequirements {
 		($boardname =~ m/GMxTGxx/)) {
 		$origConfModules{realtekr8125dkms}{required} = 'yes';
 		printLog('detected realtek-r8125-dkms issue');
+	}
+	if ($boardname =~ m/GMxNGxx/) {
+		if (isDisplayPresent("BOE Model 2423 Serial Number 0")) {
+			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
+			printLog('detected amdgpu-backlight-aux-off issue');
+		}
 	}
 
 }
@@ -2663,6 +2686,55 @@ sub realtekr8125dkms() {
 }
 
 
+
+###############################################################################
+# Fixes backlight issue with BOE Model 2423 Serial Number 0 displays on
+# - GMxNGxx
+#
+sub amdgpubacklightauxoff() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("amdgpu.backlight=0");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
