@@ -755,6 +755,22 @@ sub readFileReturnLine {
 
 
 ###############################################################################
+# write a file with (text, filename)
+# returns 0 if file could not be written
+# returns 1 if file could be written
+#
+sub writeFile {
+	my $text = shift;
+	my $file = shift;
+	open(FH, '>', $file) or return (0);
+	print FH $text;
+	close(FH);
+	return (1);
+}
+
+
+
+###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
 #
@@ -4526,6 +4542,30 @@ sub modulesList() {
 		print "$origConfModules{$module}{name}\n";
 	}
 }
+
+
+
+###############################################################################
+# limits number of tries Tomte will do to accomplish some task
+# returns 0 if limit has been reached
+# returns 1 if limit is not reached
+#
+sub tries() {
+	#TODO: test this sub
+	my $limit = shift;
+	my $triesFile = '/tmp/tomteTries';
+	if (-e $triesFile) {
+		my $triesDone = readFileReturnLine($triesFile);
+		if ( $triesDone <= $limit ) {
+			return (1);
+		} else {
+			return (0);
+		}
+	else {
+		writeFile('1', $triesFile);
+	}
+}
+
 
 
 
