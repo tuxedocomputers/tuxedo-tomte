@@ -166,18 +166,18 @@ my %tuxedo_mirrors = (
 	"Ubuntu 18.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
 		},
 		name => 'bionic',
 	},
 	"Ubuntu 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
-'deb http://packages.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
 	},
@@ -375,7 +375,7 @@ my %origConfModules = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'prerequisite',
