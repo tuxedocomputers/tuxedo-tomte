@@ -4387,9 +4387,9 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
-	if (! tries(5)) {
-		printLog('repeat limit reached, program aborted');
-		exit (1);
+	if (! tries(3)) {
+		printLog('repeat limit reached, program will not start again');
+		return (1);
 	}
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
 	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
