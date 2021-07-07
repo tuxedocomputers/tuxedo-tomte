@@ -2998,7 +2998,7 @@ sub setComment {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
-		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/packages\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\// ) {
+		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// ) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
