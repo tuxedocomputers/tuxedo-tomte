@@ -4387,6 +4387,10 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
+	if (! tries(5)) {
+		printLog('repeat limit reached, program aborted');
+		exit (1);
+	}
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
 	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 	printLog("ret value: $retVal");
@@ -4556,14 +4560,19 @@ sub tries() {
 	my $triesFile = '/tmp/tomteTries';
 	if (-e $triesFile) {
 		my $triesDone = readFileReturnLine($triesFile);
+		$triesDone = $triesDone+0;
 		if ( $triesDone <= $limit ) {
+			printLog("repeat number $triesDone");
+			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
+			unlink($triesFile);
 			return (0);
 		}
-	else {
+	} else {
 		writeFile('1', $triesFile);
 	}
+	return (1);
 }
 
 
