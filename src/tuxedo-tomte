@@ -50,6 +50,7 @@ my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
+my $kernelRelease = `uname -r`;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -605,7 +606,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'yes',
 		fainame => '',
 		description => 'Enables AMD GPU and display to share configuration information',
@@ -1019,7 +1020,8 @@ sub checkRequirements {
 	}
 
 	if ((cpuBrand() eq 'AMD') &&
-		($distributionVersion =~ /20.04/)) {
+		($distributionVersion =~ /20.04/) &&
+		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
@@ -2554,7 +2556,30 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		my $counter = 0;
+		if( isPackageInstalled('amdgpu-dkms') ) {
+			if (!deinstallPackage('amdgpu-dkms')) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if( isPackageInstalled('amdgpu-dkms-firmware') ) {
+			if (!deinstallPackage('amdgpu-dkms-firmware')) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if ($counter == 2) {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'success');
+		} else {
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'no';
+			addToConfiguredModules($module, 'failed');
+		}
 	}
 }
 
@@ -3193,6 +3218,7 @@ sub installPackage {
 	}
 	return $retval;
 }
+
 
 
 ###############################################################################
