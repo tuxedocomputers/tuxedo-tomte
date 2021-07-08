@@ -49,6 +49,7 @@ my $distributionVersion;
 my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
+my $triesLimit = 3;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -4388,7 +4389,7 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
-	if (! tries(3)) {
+	if (! tries($triesLimit)) {
 		printLog('repeat limit reached, program will not start again');
 		return (1);
 	}
@@ -4449,6 +4450,9 @@ sub listSuccess {
 	}
 	if (@failedModules) {
 		print "\nThe following modules have failed to be installed:\n";
+		if (triesAlreadyDone() <= $triesLimit) {
+			print "Tomte will try to install them again in a few minutes\n";
+		}
 		printNameDescriptionModules(@failedModules);
 	}
 	if (@nothingToDoModules) {
