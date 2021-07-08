@@ -3548,9 +3548,7 @@ sub messageDesktop {
 # does nothing if the message was already sent
 #
 sub messageLongInstall {
-	my $triesNumber = 0;
-	$triesNumber = readFileReturnLine($triesFile);
-	if (($longInstall == 0) && ($triesNumber <=1)) {
+	if (($longInstall == 0) && (triesAlreadyDone() < 1)) {
 		if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
 			$longInstall = 1;
 		}
@@ -4464,9 +4462,7 @@ sub listSuccess {
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
 	}
-	my $triesInstall = 0;
-	$triesInstall = readFileReturnLine($triesFile);
-	if ($triesInstall <= 1) {
+	if (triesAlreadyDone() < 1) {
 		if ($restartSystem == 1) {
 			messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 			print "\nPlease restart the system for the changes to take effect\n";
@@ -4562,11 +4558,9 @@ sub modulesList() {
 # returns 1 if limit is not reached
 #
 sub tries() {
-	#TODO: test this sub
 	my $limit = shift;
 	if (-e $triesFile) {
-		my $triesDone = readFileReturnLine($triesFile);
-		$triesDone = $triesDone+0;
+		my $triesDone = triesAlreadyDone();
 		if ( $triesDone <= $limit ) {
 			printLog("repeat number $triesDone");
 			writeFile($triesDone+1, $triesFile);
@@ -4581,6 +4575,19 @@ sub tries() {
 	return (1);
 }
 
+
+
+
+###############################################################################
+# returns how many times Tomte got repeated
+#
+sub triesAlreadyDone() {
+	if (-e $triesFile) {
+		return (readFileReturnLine($triesFile));
+	} else {
+		return (0);
+	}
+}
 
 
 
