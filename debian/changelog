@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.13-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.13-4) UNRELEASED; urgency=medium
 
   * create and set file
   * added limit for repeating Tomte configure all
@@ -9,8 +9,10 @@ tuxedo-tomte (2.4.13-3) UNRELEASED; urgency=medium
   * before checkout
   * reading from triesDoneFile should not cause exception even if not present
   * refining next installation try
+  * before merge with master
+  * added remove and kernel release dependancy to amdgpu-dkms
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 08 Jul 2021 10:47:14 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 08 Jul 2021 13:43:14 +0200
 
 tuxedo-tomte (2.4.13) focal; urgency=medium
 
