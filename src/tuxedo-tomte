@@ -48,6 +48,8 @@ my $distribution;
 my $distributionVersion;
 my $FAI = 0;
 my $networkSearchDone = 0;
+my $triesFile = '/tmp/tomteTries';
+my $triesLimit = 3;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -751,6 +753,22 @@ sub readFileReturnLine {
 	return $line;
 }
 
+
+
+
+###############################################################################
+# write a file with (text, filename)
+# returns 0 if file could not be written
+# returns 1 if file could be written
+#
+sub writeFile {
+	my $text = shift;
+	my $file = shift;
+	open(FH, '>', $file) or return (0);
+	print FH $text;
+	close(FH);
+	return (1);
+}
 
 
 
@@ -3531,7 +3549,7 @@ sub messageDesktop {
 # does nothing if the message was already sent
 #
 sub messageLongInstall {
-	if ($longInstall == 0) {
+	if (($longInstall == 0) && (triesAlreadyDone() < 1)) {
 		if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
 			$longInstall = 1;
 		}
@@ -4371,6 +4389,10 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
+	if (! tries($triesLimit)) {
+		printLog('repeat limit reached, program will not start again');
+		return (1);
+	}
 	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
 	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 	printLog("ret value: $retVal");
@@ -4428,6 +4450,9 @@ sub listSuccess {
 	}
 	if (@failedModules) {
 		print "\nThe following modules have failed to be installed:\n";
+		if (triesAlreadyDone() <= $triesLimit) {
+			print "Tomte will try to install them again in a few minutes\n";
+		}
 		printNameDescriptionModules(@failedModules);
 	}
 	if (@nothingToDoModules) {
@@ -4441,11 +4466,13 @@ sub listSuccess {
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
 	}
-	if ($restartSystem == 1) {
-		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
-		print "\nPlease restart the system for the changes to take effect\n";
-	} elsif ( configuredModulesExceptDefault(@successModules) ) {
-		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+	if (triesAlreadyDone() < 1) {
+		if ($restartSystem == 1) {
+			messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+			print "\nPlease restart the system for the changes to take effect\n";
+		} elsif ( configuredModulesExceptDefault(@successModules) ) {
+			messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+		}
 	}
 }
 
@@ -4524,6 +4551,45 @@ sub modulesList() {
 	my $module;
 	foreach $module (keys %origConfModules) {
 		print "$origConfModules{$module}{name}\n";
+	}
+}
+
+
+
+###############################################################################
+# limits number of tries Tomte will do to accomplish some task
+# returns 0 if limit has been reached
+# returns 1 if limit is not reached
+#
+sub tries() {
+	my $limit = shift;
+	if (-e $triesFile) {
+		my $triesDone = triesAlreadyDone();
+		if ( $triesDone <= $limit ) {
+			printLog("repeat number $triesDone");
+			writeFile($triesDone+1, $triesFile);
+			return (1);
+		} else {
+			unlink($triesFile);
+			return (0);
+		}
+	} else {
+		writeFile('1', $triesFile);
+	}
+	return (1);
+}
+
+
+
+
+###############################################################################
+# returns how many times Tomte got repeated
+#
+sub triesAlreadyDone() {
+	if (-e $triesFile) {
+		return (readFileReturnLine($triesFile));
+	} else {
+		return (0);
 	}
 }
 
