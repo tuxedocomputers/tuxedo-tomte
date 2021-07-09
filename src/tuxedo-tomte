@@ -3180,14 +3180,14 @@ sub deinstallPackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package.' 2>&1';
+	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	if ($retString =~ m/install ok installed/) {
-		printLog("package $package is installed");
+	if ($retString =~ m/$package i/) {
+		printLog("package $package is installed: $retString");
 		return (1);
 	} else {
-		printLog("package $package is not installed");
+		printLog("package $package is not installed: $retString");
 		return (0);
 	}
 }
