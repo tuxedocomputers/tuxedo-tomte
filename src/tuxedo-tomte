@@ -78,6 +78,7 @@ $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 my $longInstall = 0;
 my $restartSystem = 0;
+my $startLaterAgain = 0;
 
 ###############################################################################
 # Argument values given to script
@@ -4419,9 +4420,12 @@ sub startTomteDelayed {
 		printLog('repeat limit reached, program will not start again');
 		return (1);
 	}
-	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
-	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
-	printLog("ret value: $retVal");
+	if ($startLaterAgain == 0) {
+		$startLaterAgain = 1;
+		$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
+		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
+		printLog("ret value: $retVal");
+	}
 }
 
 
