@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.13-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.13-9) UNRELEASED; urgency=medium
 
   * create and set file
   * added limit for repeating Tomte configure all
@@ -16,8 +16,9 @@ tuxedo-tomte (2.4.13-8) UNRELEASED; urgency=medium
   * UNRELEASED
   * removed bug removeModule name
   * refined return values for packages
+  * restart notice or not after failuer to install fix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 Jul 2021 13:41:44 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 Jul 2021 16:49:54 +0200
 
 tuxedo-tomte (2.4.13) focal; urgency=medium
 
