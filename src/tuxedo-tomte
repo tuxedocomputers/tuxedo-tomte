@@ -4260,7 +4260,7 @@ sub reconfigureAllModules {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				($localConfModules{$module}{installed} eq 'yes')) {
-			removeModule($origConfModules{$module}{name});
+			removeModule($origConfModules{$module});
 		}
 	}
 }
@@ -4426,6 +4426,7 @@ sub startTomteDelayed {
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
 		printLog("ret value: $retVal");
 	}
+	return (0);
 }
 
 
