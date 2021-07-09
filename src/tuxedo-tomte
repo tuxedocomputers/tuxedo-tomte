@@ -4418,7 +4418,6 @@ sub startTomteDelayed {
 	my $retVal;
 	if (! tries($triesLimit)) {
 		printLog('repeat limit reached, program will not start again');
-		messageDesktop();
 		if ($restartSystem) {
 			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
 			print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
