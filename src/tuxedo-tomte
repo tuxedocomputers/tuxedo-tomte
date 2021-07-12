@@ -50,6 +50,7 @@ my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
+my $kernelRelease = `uname -r`;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -77,6 +78,7 @@ $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 my $longInstall = 0;
 my $restartSystem = 0;
+my $startLaterAgain = 0;
 
 ###############################################################################
 # Argument values given to script
@@ -605,7 +607,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'yes',
 		fainame => '',
 		description => 'Enables AMD GPU and display to share configuration information',
@@ -1019,7 +1021,8 @@ sub checkRequirements {
 	}
 
 	if ((cpuBrand() eq 'AMD') &&
-		($distributionVersion =~ /20.04/)) {
+		($distributionVersion =~ /20.04/) &&
+		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
@@ -1503,7 +1506,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifcations on repos');
+				printLog('did no modifications on repos');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1541,7 +1544,7 @@ sub tuxedorepos() {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "nothingToDo");
-					printLog('did no modifcations on repos');
+					printLog('did no modifications on repos');
 				} else {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
@@ -1598,7 +1601,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifcations on mirrors');
+				printLog('did no modifications on mirrors');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -1636,7 +1639,7 @@ sub tuxedomirrors() {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "nothingToDo");
-					printLog('did no modifcations on mirrors');
+					printLog('did no modifications on mirrors');
 				} else {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
@@ -2554,7 +2557,30 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		my $counter = 0;
+		if( isPackageInstalled('amdgpu-dkms') ) {
+			if (!deinstallPackage('amdgpu-dkms')) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if( isPackageInstalled('amdgpu-dkms-firmware') ) {
+			if (!deinstallPackage('amdgpu-dkms-firmware')) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if ($counter == 2) {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'success');
+		} else {
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'no';
+			addToConfiguredModules($module, 'failed');
+		}
 	}
 }
 
@@ -3155,14 +3181,14 @@ sub deinstallPackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${status}\' '.$package.' 2>&1';
+	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	if ($retString =~ m/install ok installed/) {
-		printLog("package $package is installed");
+	if ($retString =~ m/^i[ncHUFWti][\sR]$/) {
+		printLog("package $package is installed: $retString");
 		return (1);
 	} else {
-		printLog("package $package is not installed");
+		printLog("package $package is not installed: $retString");
 		return (0);
 	}
 }
@@ -3193,6 +3219,7 @@ sub installPackage {
 	}
 	return $retval;
 }
+
 
 
 ###############################################################################
@@ -4233,7 +4260,7 @@ sub reconfigureAllModules {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				($localConfModules{$module}{installed} eq 'yes')) {
-			removeModule($origConfModules{$module}{name});
+			removeModule($origConfModules{$module});
 		}
 	}
 }
@@ -4391,11 +4418,22 @@ sub startTomteDelayed {
 	my $retVal;
 	if (! tries($triesLimit)) {
 		printLog('repeat limit reached, program will not start again');
+		if ($restartSystem) {
+			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+			print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
+		} else {
+			messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+			print "\nNot all the fixes could be installed\n";
+		}
 		return (1);
 	}
-	$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all");
-	printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
-	printLog("ret value: $retVal");
+	if ($startLaterAgain == 0) {
+		$startLaterAgain = 1;
+		$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all >/dev/null 2>&1");
+		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
+		printLog("ret value: $retVal");
+	}
+	return (0);
 }
 
 
@@ -4566,7 +4604,7 @@ sub tries() {
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
 		if ( $triesDone <= $limit ) {
-			printLog("repeat number $triesDone");
+			printLog("repeat number $triesDone of $limit");
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
