@@ -4604,7 +4604,7 @@ sub tries() {
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
 		if ( $triesDone <= $limit ) {
-			printLog("repeat number $triesDone");
+			printLog("repeat number $triesDone of $limit");
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
