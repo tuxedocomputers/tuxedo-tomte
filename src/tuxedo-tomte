@@ -363,7 +363,7 @@ my %origConfModules = (
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'prerequisite',
@@ -379,7 +379,7 @@ my %origConfModules = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'prerequisite',
@@ -1627,38 +1627,36 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+		printLog("uprading $origConfModules{$module}{name}");
+		backupFile('/etc/apt/sources.list');
+		$retval = createRepos();
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			if ($retval == 1) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifications on mirrors');
 			} else {
-				if ($retval == 1) {
-					$origConfModules{$module}{installed} = "yes";
-					$origConfModules{$module}{upgraded} = "yes";
-					addToConfiguredModules($module, "nothingToDo");
-					printLog('did no modifications on mirrors');
-				} else {
-					$origConfModules{$module}{installed} = "yes";
-					$origConfModules{$module}{upgraded} = "yes";
-					# update of repos has to be immediate for possible later package
-					# installation
-					checkNetwork();
-					$output = `pkcon refresh`;
-					$exitStatus = $?/256;
-					if ($exitStatus != 0) {
-						printLog('failed: update packages');
-						printLog("returned error code: $exitStatus");
-						if ($exitStatus == 7) {
-							printLog('possible network problems');
-						}
-						addToConfiguredModules($module, "failed");
-					} else {
-						printLog('success: update packages');
-						addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				checkNetwork();
+				$output = `pkcon refresh`;
+				$exitStatus = $?/256;
+				if ($exitStatus != 0) {
+					printLog('failed: update packages');
+					printLog("returned error code: $exitStatus");
+					if ($exitStatus == 7) {
+						printLog('possible network problems');
 					}
+					addToConfiguredModules($module, "failed");
+				} else {
+					printLog('success: update packages');
+					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -3042,7 +3040,7 @@ sub setComment {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
-		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http[s?]:\/\/packages\.tuxedocomputers\.com\// ) {
+		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\//) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline");
 			return (1);
