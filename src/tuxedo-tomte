@@ -1532,38 +1532,36 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		if ( $localConfModules{$module}{version} == 1 ) {
-			printLog("uprading $origConfModules{$module}{name}");
-			backupFile('/etc/apt/sources.list');
-			$retval = createRepos();
-			if ($retval == 0) {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+		printLog("uprading $origConfModules{$module}{name}");
+		backupFile('/etc/apt/sources.list');
+		$retval = createRepos(\%tuxedo_repos);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			if ($retval == 1) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifications on repos');
 			} else {
-				if ($retval == 1) {
-					$origConfModules{$module}{installed} = "yes";
-					$origConfModules{$module}{upgraded} = "yes";
-					addToConfiguredModules($module, "nothingToDo");
-					printLog('did no modifications on repos');
-				} else {
-					$origConfModules{$module}{installed} = "yes";
-					$origConfModules{$module}{upgraded} = "yes";
-					# update of repos has to be immediate for possible later package
-					# installation
-					checkNetwork();
-					$output = `pkcon refresh`;
-					$exitStatus = $?/256;
-					if ($exitStatus != 0) {
-						printLog('failed: update packages');
-						printLog("returned error code: $exitStatus");
-						if ($exitStatus == 7) {
-							printLog('possible network problems');
-						}
-						addToConfiguredModules($module, "failed");
-					} else {
-						printLog('success: update packages');
-						addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				checkNetwork();
+				$output = `pkcon refresh`;
+				$exitStatus = $?/256;
+				if ($exitStatus != 0) {
+					printLog('failed: update packages');
+					printLog("returned error code: $exitStatus");
+					if ($exitStatus == 7) {
+						printLog('possible network problems');
 					}
+					addToConfiguredModules($module, "failed");
+				} else {
+					printLog('success: update packages');
+					addToConfiguredModules($module, "success");
 				}
 			}
 		}
@@ -1629,7 +1627,7 @@ sub tuxedomirrors() {
 	if ($action eq 'upgrade') {
 		printLog("uprading $origConfModules{$module}{name}");
 		backupFile('/etc/apt/sources.list');
-		$retval = createRepos();
+		$retval = createRepos(\%tuxedo_mirrors);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
