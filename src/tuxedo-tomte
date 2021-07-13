@@ -2922,23 +2922,23 @@ sub createRepos {
 		closedir($DH);
 	}
 
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
+	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
+		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 	}
 	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
 		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
 	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
+		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
 	}
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
+	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
+		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
 	}
 	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
 		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
 	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
+		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
 	}
 
 	my $firstEntry;
