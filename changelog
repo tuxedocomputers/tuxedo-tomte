@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.13-13) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.13-21) UNRELEASED; urgency=medium
 
   * create and set file
   * added limit for repeating Tomte configure all
@@ -21,8 +21,16 @@ tuxedo-tomte (2.4.13-13) UNRELEASED; urgency=medium
   * muting systemd message
   * suppressing more from systemd
   * info about total possible tries
+  * modified http to https in sources
+  * added exception for repos and mirrors: change if URLs as http to https
+  * change http to https
+  * change to https part two
+  * to https part3
+  * to https part4
+  * to https part5
+  * delete comment
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Jul 2021 11:44:37 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 13 Jul 2021 12:39:41 +0200
 
 tuxedo-tomte (2.4.13) focal; urgency=medium
 
