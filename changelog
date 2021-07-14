@@ -1,36 +1,11 @@
-tuxedo-tomte (2.4.13-21) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.14) focal; urgency=medium
 
-  * create and set file
   * added limit for repeating Tomte configure all
-  * packing
-  * minor changes in repeat procedure
-  * packing
   * took away messages if retry
-  * before checkout
-  * reading from triesDoneFile should not cause exception even if not present
-  * refining next installation try
-  * before merge with master
   * added remove and kernel release dependency to amdgpu-dkms
-  * small typo
-  * changed package install test true even when not configured
-  * UNRELEASED
-  * removed bug removeModule name
-  * refined return values for packages
-  * restart notice or not after failuer to install fix
-  * deleted superfluous message
-  * muting systemd message
-  * suppressing more from systemd
-  * info about total possible tries
-  * modified http to https in sources
   * added exception for repos and mirrors: change if URLs as http to https
-  * change http to https
-  * change to https part two
-  * to https part3
-  * to https part4
-  * to https part5
-  * delete comment
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 13 Jul 2021 12:39:41 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 Jul 2021 11:23:16 +0200
 
 tuxedo-tomte (2.4.13) focal; urgency=medium
 
