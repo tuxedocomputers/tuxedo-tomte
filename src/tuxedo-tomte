@@ -558,7 +558,23 @@ my %origConfModules = (
 		version => 2,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel versions',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kerneloem2004 => {
+		name => 'kernel-oem-20.04',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
@@ -1051,6 +1067,13 @@ sub checkRequirements {
 			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
 			printLog('detected amdgpu-backlight-aux-off issue');
 		}
+	}
+	if ($boardname =~ m/GMxZGxx/) {
+		$origConfModules{kerneloem2004}{required} = 'yes';
+		printLog('kernel linux-oem-20.04 will be installed');
+	} else {
+		$origConfModules{kernel}{required} = 'yes';
+		printLog('standard kernel linux-generic-hwe will be installed');
 	}
 
 }
@@ -2237,8 +2260,121 @@ sub kernel() {
 		
 		}
 		if ($distributionVersion =~ /20.04/) {
+			my $noIncompatibleKernel = deinstallLinuxOEM2004();
+
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
+			} else {
+				$packageLinuxOem2004 = 1;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 1;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 1;
+			}
+
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		if ($distributionVersion =~ /20.04/) {
 			my $noIncompatibleKernel = 1;
 			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-image-oem-20.04'); 
+			}
+			if( isPackageInstalled('linux-headers-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-oem-20.04');
+			}
+			if( isPackageInstalled('linux-oem-20.04') ) {
+				$noIncompatibleKernel = 0;
+				deinstallPackage('linux-headers-oem-20.04');
+			}
+
+			# check if the package is already installed
+			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
+				messageLongInstall();
+				$wasInstalled = 0;
+				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
+			} else {
+				$packageLinuxOem2004 = 1;
+			}
+			if( ! isPackageInstalled('linux-firmware') ) {
+				$wasInstalled = 0;
+				$packageLinuxFirmware = installPackage('linux-firmware');
+			} else {
+				$packageLinuxFirmware = 1;
+			}
+			if( ! isPackageInstalled('intel-microcode') ) {
+				$wasInstalled = 0;
+				$packageIntelMicrocode = installPackage('intel-microcode');
+			} else {
+				$packageIntelMicrocode = 1;
+			}
+
+			if( $wasInstalled && $noIncompatibleKernel ) {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+
+###############################################################################
+# kernel-oem-20.04
+#
+sub kerneloem2004() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $packageLinuxOem2004;
+	my $packageLinuxFirmware;
+	my $packageIntelMicrocode;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /20.04/) {
+			my $noIncompatibleKernel = 1;
+			if( isPackageInstalled('linux-image-oem-20.04') ) {
+				messageLongInstall();
 				$noIncompatibleKernel = 0;
 				deinstallPackage('linux-image-oem-20.04'); 
 			}
@@ -2344,6 +2480,62 @@ sub kernel() {
 		# not implemented yet
 	}
 }
+
+
+
+
+
+
+###############################################################################
+# deinstalls kernel linux-oem-20.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxOEM2004() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-oem-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-oem-20.04');
+	}
+	if( isPackageInstalled('linux-headers-oem-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-oem-20.04');
+	}
+	if( isPackageInstalled('linux-image-oem-20.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-oem-20.04'); 
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+###############################################################################
+# deinstalls kernel linux-generic-hwe-20.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE2004() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-hwe-20.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-hwe-20.04'); 
+	}
+	if( isPackageInstalled('linux-headers-generic-hwe-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-hwe-20.04');
+	}
+	if( isPackageInstalled('linux-image-generic-hwe-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-hwe-20.04');
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+
+
 
 
 
