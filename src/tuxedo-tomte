@@ -553,9 +553,9 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernel => {
-		name => 'kernel',
-		version => 2,
+	kernelhwe => {
+		name => 'kernel-hwe',
+		version => 1,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -569,8 +569,8 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kerneloem2004 => {
-		name => 'kernel-oem-20.04',
+	kerneloem => {
+		name => 'kernel-oem',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1068,11 +1068,12 @@ sub checkRequirements {
 			printLog('detected amdgpu-backlight-aux-off issue');
 		}
 	}
-	if ($boardname =~ m/GMxZGxx/) {
-		$origConfModules{kerneloem2004}{required} = 'yes';
-		printLog('kernel linux-oem-20.04 will be installed');
+	if (($boardname =~ m/GMxZGxx/) &&
+   		($distributionVersion =~ /20.04/)) {
+		$origConfModules{kerneloem}{required} = 'yes';
+		printLog('kernel linux-oem will be installed');
 	} else {
-		$origConfModules{kernel}{required} = 'yes';
+		$origConfModules{kernelhwe}{required} = 'yes';
 		printLog('standard kernel linux-generic-hwe will be installed');
 	}
 
@@ -2201,9 +2202,9 @@ sub tuxedorestoreaudiofix() {
 
 
 ###############################################################################
-# kernel
+# kernel HWE
 #
-sub kernel() {
+sub kernelhwe() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
@@ -2214,50 +2215,37 @@ sub kernel() {
 	my $packageLinuxOem2004;
 	my $packageLinuxFirmware;
 	my $packageIntelMicrocode;
+	my $instFailed;
+	my $instDone;
+	my $tmpFailed;
+	my $tmpDone;
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /18.04/) {
-			# check if the package is already installed
-			if( ! isPackageInstalled('linux-generic-hwe-18.04') ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
-			} else {
-				$packageLinuxGenericHwe1804 = 1;
+			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-18.04');
+			if (!$instFailed) {
+				($instFailed, $instDone) = deinstallKernelPackages('linux-generic-18.04');
+				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-18.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-18.04-edge');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
 			}
-			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
-			} else {
-				$packageLinuxImageGenericHwe1804 = 1;
-			}
-			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
-			} else {
-				$packageLinuxHeadersGenericHwe1804 = 1;
-			}
-			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
-			} else {
-				$packageLinuxSignedGenericHwe1804 = 1;
-			}
-	
-			if( $packageLinuxGenericHwe1804 && $packageLinuxImageGenericHwe1804 && $packageLinuxHeadersGenericHwe1804 && $packageLinuxSignedGenericHwe1804 ) {
-				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
-				}
+			if ($instFailed > 0) {
+				printLog('new kernel linux-generic-hwe-18.04 could not be installed');
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-generic-hwe-18.04 was installed');
+				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
 			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
+				addToConfiguredModules($module, "nothingToDo");
 			}
-		
+
+
 		}
 		if ($distributionVersion =~ /20.04/) {
 			my $noIncompatibleKernel = deinstallLinuxOEM2004();
@@ -2486,33 +2474,40 @@ sub kerneloem2004() {
 ###############################################################################
 # installs a linux kernel from the name of the main metapackage
 # installLinuxKernel('metapackageName')
-# returns 1 if it worked
-# returns 0 if something went wrong
+# returns two parameters failed and nothingDone
+# failed = 0 all is good
+# failed = 1 some package was not installed
+# somethingDone = 1 something was changed
+# somethingDone = 0 nothing was changed (kernel was already installed)
 #
-sub installLinuxKernel {
+sub installKernelPackages {
 	my $fullName = shift;
-	my $result = 1;
+	my $failed = 0;
+	my $somethingDone = 0;
+	my $result;
 	my $partialName =~ s/linux//;
 	if( !isPackageInstalled("$fullName") ) {
-		messageLongInstall();
+		$somethingDone = 1;
 		installPackage("$fullName");
 		if( !isPackageInstalled("$fullName") ) {
-			$result = 0;
+			$failed = 1;
 		}
 	}
 	if( !isPackageInstalled("linux-headers$partialName") ) {
+		$somethingDone = 1;
 		installPackage("linux-headers$partialName");
 		if( !isPackageInstalled("linux-headers$partialName") ) {
-			$result = 0;
+			$failed = 1;
 		}
 	}
 	if( !isPackageInstalled("linux-image$partialName") ) {
+		$somethingDone = 1;
 		installPackage("linux-image$partialName");
 		if( !isPackageInstalled("linux-image$partialName") ) {
-			$result = 0;
+			$failed = 1;
 		}
 	}
-	return ($result);
+	return ($failed, $somethingDone);
 }
 
 
@@ -2523,12 +2518,11 @@ sub installLinuxKernel {
 # returns 1 if it worked
 # returns 0 if something went wrong
 #
-sub deinstallLinuxKernel {
+sub deinstallKernelPackages {
 	my $fullName = shift;
 	my $result = 1;
 	my $partialName =~ s/linux//;
 	if( isPackageInstalled("$fullName") ) {
-		messageLongInstall();
 		deinstallPackage("$fullName"); 
 		if( isPackageInstalled("$fullName") ) {
 			$result = 0;
