@@ -2215,7 +2215,7 @@ sub kernelhwe() {
 		if ($distributionVersion =~ /18.04/) {
 			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-18.04');
 			if (!$instFailed) {
-				($instFailed, $instDone) = deinstallKernelPackages('linux-generic-18.04');
+				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
 				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-18.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2242,7 +2242,7 @@ sub kernelhwe() {
 		if ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-20.04');
 			if (!$instFailed) {
-				($instFailed, $instDone) = deinstallKernelPackages('linux-generic-20.04');
+				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
 				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2293,7 +2293,7 @@ sub kerneloem2004() {
 		if ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelPackages('linux-oem-20.04');
 			if (!$instFailed) {
-				($instFailed, $instDone) = deinstallKernelPackages('linux-generic-20.04');
+				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
 				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3289,6 +3289,7 @@ sub installKernelPackages {
 # returns 1 if it worked
 # returns 0 if something went wrong
 #
+#TODO return parameters 0 1 2
 sub deinstallKernelPackages {
 	my $fullName = shift;
 	my $result = 1;
