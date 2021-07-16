@@ -2484,202 +2484,78 @@ sub kerneloem2004() {
 
 
 ###############################################################################
-# deinstalls kernel linux-generic-18.04
+# installs a linux kernel from the name of the main metapackage
+# installLinuxKernel('metapackageName')
 # returns 1 if it worked
 # returns 0 if something went wrong
 #
-sub deinstallLinuxGenericHWE1804() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-18.04') ) {
+sub installLinuxKernel {
+	my $fullName = shift;
+	my $result = 1;
+	my $partialName =~ s/linux//;
+	if( !isPackageInstalled("$fullName") ) {
 		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-18.04'); 
+		installPackage("$fullName");
+		if( !isPackageInstalled("$fullName") ) {
+			$result = 0;
+		}
 	}
-	if( isPackageInstalled('linux-headers-generic-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-18.04');
+	if( !isPackageInstalled("linux-headers$partialName") ) {
+		installPackage("linux-headers$partialName");
+		if( !isPackageInstalled("linux-headers$partialName") ) {
+			$result = 0;
+		}
 	}
-	if( isPackageInstalled('linux-image-generic-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-18.04');
+	if( !isPackageInstalled("linux-image$partialName") ) {
+		installPackage("linux-image$partialName");
+		if( !isPackageInstalled("linux-image$partialName") ) {
+			$result = 0;
+		}
 	}
-	return ($noIncompatibleKernel);
-}
-
-
-
-
-###############################################################################
-# deinstalls kernel linux-oem-18.04
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxOEM1804() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-oem-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-oem-18.04');
-	}
-	if( isPackageInstalled('linux-headers-oem-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-oem-18.04');
-	}
-	if( isPackageInstalled('linux-image-oem-18.04') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-oem-18.04'); 
-	}
-	return ($noIncompatibleKernel);
+	return ($result);
 }
 
 
 
 ###############################################################################
-# deinstalls kernel linux-generic-hwe-18.04
+# deinstalls a linux kernel from the name of the main metapackage
+# deinstallLinuxKernel('metapackageName')
 # returns 1 if it worked
 # returns 0 if something went wrong
 #
-sub deinstallLinuxGenericHWE1804() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-hwe-18.04') ) {
+sub deinstallLinuxKernel {
+	my $fullName = shift;
+	my $result = 1;
+	my $partialName =~ s/linux//;
+	if( isPackageInstalled("$fullName") ) {
 		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-hwe-18.04'); 
+		deinstallPackage("$fullName"); 
+		if( isPackageInstalled("$fullName") ) {
+			$result = 0;
+		}
 	}
-	if( isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-hwe-18.04');
+	if( isPackageInstalled("linux-headers$partialName") ) {
+		deinstallPackage("linux-headers$partialName");
+		if( !isPackageInstalled("linux-headers$partialName") ) {
+			$result = 0;
+		}
 	}
-	if( isPackageInstalled('linux-image-generic-hwe-18.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-hwe-18.04');
+	if( isPackageInstalled("linux-image$partialName") ) {
+		deinstallPackage("linux-image$partialName");
+		if( !isPackageInstalled("linux-image$partialName") ) {
+			$result = 0;
+		}
 	}
-	return ($noIncompatibleKernel);
-}
-
-
-
-###############################################################################
-# deinstalls kernel linux-generic-hwe-18.04-edge
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxGenericHWE1804Edge() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-hwe-18.04-edge') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-hwe-18.04-edge');
-	}
-	if( isPackageInstalled('linux-headers-generic-hwe-18.04-edge') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-hwe-18.04-edge');
-	}
-	if( isPackageInstalled('linux-image-generic-hwe-18.04-edge') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-hwe-18.04-edge');
-	}
-	return ($noIncompatibleKernel);
-}
-
-
-
-###############################################################################
-# deinstalls kernel linux-generic-20.04
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxGenericHWE2004() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-20.04') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-20.04'); 
-	}
-	if( isPackageInstalled('linux-headers-generic-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-20.04');
-	}
-	if( isPackageInstalled('linux-image-generic-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-20.04');
-	}
-	return ($noIncompatibleKernel);
+	return ($result);
 }
 
 
 
 
-###############################################################################
-# deinstalls kernel linux-oem-20.04
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxOEM2004() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-oem-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-oem-20.04');
-	}
-	if( isPackageInstalled('linux-headers-oem-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-oem-20.04');
-	}
-	if( isPackageInstalled('linux-image-oem-20.04') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-oem-20.04'); 
-	}
-	return ($noIncompatibleKernel);
-}
 
 
-###############################################################################
-# deinstalls kernel linux-generic-hwe-20.04
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxGenericHWE2004() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-hwe-20.04') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-hwe-20.04'); 
-	}
-	if( isPackageInstalled('linux-headers-generic-hwe-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-hwe-20.04');
-	}
-	if( isPackageInstalled('linux-image-generic-hwe-20.04') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-hwe-20.04');
-	}
-	return ($noIncompatibleKernel);
-}
 
 
-###############################################################################
-# deinstalls kernel linux-generic-hwe-20.04-edge
-# returns 1 if it worked
-# returns 0 if something went wrong
-#
-sub deinstallLinuxGenericHWE2004() {
-	my $noIncompatibleKernel = 1;
-	if( isPackageInstalled('linux-generic-hwe-20.04-edge') ) {
-		messageLongInstall();
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-generic-hwe-20.04-edge');
-	}
-	if( isPackageInstalled('linux-headers-generic-hwe-20.04-edge') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-headers-generic-hwe-20.04-edge');
-	}
-	if( isPackageInstalled('linux-image-generic-hwe-20.04-edge') ) {
-		$noIncompatibleKernel = 0;
-		deinstallPackage('linux-image-generic-hwe-20.04-edge');
-	}
-	return ($noIncompatibleKernel);
-}
 
 
 
