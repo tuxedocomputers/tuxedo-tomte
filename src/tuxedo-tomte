@@ -2483,6 +2483,130 @@ sub kerneloem2004() {
 
 
 
+###############################################################################
+# deinstalls kernel linux-generic-18.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE1804() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-18.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-18.04'); 
+	}
+	if( isPackageInstalled('linux-headers-generic-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-18.04');
+	}
+	if( isPackageInstalled('linux-image-generic-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-18.04');
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+
+
+###############################################################################
+# deinstalls kernel linux-oem-18.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxOEM1804() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-oem-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-oem-18.04');
+	}
+	if( isPackageInstalled('linux-headers-oem-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-oem-18.04');
+	}
+	if( isPackageInstalled('linux-image-oem-18.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-oem-18.04'); 
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+
+###############################################################################
+# deinstalls kernel linux-generic-hwe-18.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE1804() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-hwe-18.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-hwe-18.04'); 
+	}
+	if( isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-hwe-18.04');
+	}
+	if( isPackageInstalled('linux-image-generic-hwe-18.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-hwe-18.04');
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+
+###############################################################################
+# deinstalls kernel linux-generic-hwe-18.04-edge
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE1804Edge() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-hwe-18.04-edge') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-hwe-18.04-edge');
+	}
+	if( isPackageInstalled('linux-headers-generic-hwe-18.04-edge') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-hwe-18.04-edge');
+	}
+	if( isPackageInstalled('linux-image-generic-hwe-18.04-edge') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-hwe-18.04-edge');
+	}
+	return ($noIncompatibleKernel);
+}
+
+
+
+###############################################################################
+# deinstalls kernel linux-generic-20.04
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE2004() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-20.04') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-20.04'); 
+	}
+	if( isPackageInstalled('linux-headers-generic-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-20.04');
+	}
+	if( isPackageInstalled('linux-image-generic-20.04') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-20.04');
+	}
+	return ($noIncompatibleKernel);
+}
+
 
 
 
@@ -2532,6 +2656,32 @@ sub deinstallLinuxGenericHWE2004() {
 	}
 	return ($noIncompatibleKernel);
 }
+
+
+###############################################################################
+# deinstalls kernel linux-generic-hwe-20.04-edge
+# returns 1 if it worked
+# returns 0 if something went wrong
+#
+sub deinstallLinuxGenericHWE2004() {
+	my $noIncompatibleKernel = 1;
+	if( isPackageInstalled('linux-generic-hwe-20.04-edge') ) {
+		messageLongInstall();
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-generic-hwe-20.04-edge');
+	}
+	if( isPackageInstalled('linux-headers-generic-hwe-20.04-edge') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-headers-generic-hwe-20.04-edge');
+	}
+	if( isPackageInstalled('linux-image-generic-hwe-20.04-edge') ) {
+		$noIncompatibleKernel = 0;
+		deinstallPackage('linux-image-generic-hwe-20.04-edge');
+	}
+	return ($noIncompatibleKernel);
+}
+
+
 
 
 
