@@ -3255,8 +3255,8 @@ sub installKernelPackages {
 	my $fullName = shift;
 	my $failed = 0;
 	my $somethingDone = 0;
-	my $result;
-	my $partialName =~ s/linux//;
+	my $partialName;
+	($partialName) = $fullName =~ m/linux(.*)/;
 	if( !isPackageInstalled("$fullName") ) {
 		$somethingDone = 1;
 		installPackage("$fullName");
@@ -3286,33 +3286,40 @@ sub installKernelPackages {
 ###############################################################################
 # deinstalls a linux kernel from the name of the main metapackage
 # deinstallLinuxKernel('metapackageName')
-# returns 1 if it worked
-# returns 0 if something went wrong
+# returns two parameters failed and nothingDone
+# failed = 0 all is good
+# failed = 1 some package was not installed
+# somethingDone = 1 something was changed
+# somethingDone = 0 nothing was changed (kernel was already installed)
 #
-#TODO return parameters 0 1 2
 sub deinstallKernelPackages {
 	my $fullName = shift;
-	my $result = 1;
-	my $partialName =~ s/linux//;
+	my $failed = 0;
+	my $somethingDone = 0;
+	my $partialName;
+	($partialName) = $fullName =~ m/linux(.*)/;
 	if( isPackageInstalled("$fullName") ) {
+		$somethingDone = 1;
 		deinstallPackage("$fullName"); 
 		if( isPackageInstalled("$fullName") ) {
-			$result = 0;
+			$failed = 1;
 		}
 	}
 	if( isPackageInstalled("linux-headers$partialName") ) {
 		deinstallPackage("linux-headers$partialName");
-		if( !isPackageInstalled("linux-headers$partialName") ) {
-			$result = 0;
+		$somethingDone = 1;
+		if( isPackageInstalled("linux-headers$partialName") ) {
+			$failed = 1;
 		}
 	}
 	if( isPackageInstalled("linux-image$partialName") ) {
+		$somethingDone = 1;
 		deinstallPackage("linux-image$partialName");
-		if( !isPackageInstalled("linux-image$partialName") ) {
-			$result = 0;
+		if( isPackageInstalled("linux-image$partialName") ) {
+			$failed = 1;
 		}
 	}
-	return ($result);
+	return ($failed, $somethingDone);
 }
 
 
