@@ -65,13 +65,6 @@ my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
 my $sysvendor;
 $sysvendor = readFileReturnLine($sysvendorFilename);
 
-# for checking md5sums for corefix
-use Digest::MD5 qw(md5_hex);
-my %initrdHashSaved;
-my %initrdHashFiles;
-my $md5ConfigDir = '/etc/tomte/';
-my $md5Store = $md5ConfigDir.'md5sums';
-
 # for desktop messages
 my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
@@ -2243,9 +2236,11 @@ sub kernelhwe() {
 			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-20.04');
 			if (!$instFailed) {
 				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
-				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-20.04');
+				deinstallSinglePackage('linux-oem-20.04');
+				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-20.04b');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2792,85 +2787,6 @@ sub amdgpubacklightauxoff() {
 
 
 ###############################################################################
-###############################################################################
-# subs for corefix md5 tests
-#
-
-###############################################################################
-# returns 1 if md5 file loaded correctly
-# returns 0 if md5 file failed to load
-#
-sub loadMD5Store {
-	my $md5Line;
-	if (open(FH, "<", $md5Store)) {
-		while ($md5Line = <FH>) {
-			chop($md5Line);
-			my ($key, $val) = split /:/, $md5Line;
-			$initrdHashSaved{$key} = $val;
-		}
-		close FH;
-		return (1);
-	} else {
-		printLog("no readable md5sum file available");
-		return (0);
-	}
-}
-
-sub readInitrdMD5Files {
-	my $initrdData;
-	my $md5sum;
-	if (opendir(BOOTDIR, '/boot')) {
-		while (readdir BOOTDIR) {
-			if ($_ =~ /initrd\.img/) {
-				local $/ = undef;
-				if (open( INITRDFILE, "/boot/$_" ) ) {
-					binmode(INITRDFILE);
-					$initrdData = <INITRDFILE>;
-					$md5sum = md5_hex($initrdData);
-					$initrdHashFiles{$_} = $md5sum;
-					close(INITRDFILE);
-				}
-			}
-		}
-		close BOOTDIR;
-	}
-}
-
-sub writeMD5Store {
-	if (open(FH, ">", $md5Store)) {
-		foreach my $key (keys %initrdHashFiles ) {
-			print FH "$key:$initrdHashFiles{$key}\n";
-		}
-		close(FH);
-	} else {
-		printLog("could not open $md5Store");
-	}
-}
-
-###############################################################################
-# returns 1 if found non equal or missing value between value in files and
-# saved values
-# returns 0 if all values are the same
-# returns 1 if something is different
-#
-sub newInitrdFiles {
-	if (loadMD5Store()) {
-		readInitrdMD5Files();
-		foreach my $key (keys %initrdHashFiles) {
-			if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
-				return (1);
-			}
-		}
-	} else {
-		return (1);
-	}
-	return (0);
-}
-
-
-
-
-###############################################################################
 # subs for tuxedorepos & tuxedomirrors
 #
 
@@ -3190,6 +3106,38 @@ sub deinstallPackage {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# Deinstalls a package
+# returns 1 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 0 if everything was ok, even if no package were found
+#
+sub deinstallSinglePackage {
+	my $deinst = shift;
+	my $pkconDeinst = 'pkcon -yp remove';
+	my $retValue;
+
+	$pkconDeinst = $pkconDeinst.' '.$deinst;
+	printLog("deinstalling: $pkconDeinst");
+	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
+	if (isPackageInstalled($deinst)) {
+		if (system($pkconDeinst)) {
+			$retValue = $?/256;
+			printLog("failed to deinstall package, retvalue: $retValue");
+			return (1);
+		} else {
+			printLog('deinstallation of package successful');
+			return (0);
+		}
+	} else {
+		printLog("package $deinst was not found");
+	}
+}
+
+
 
 
 
