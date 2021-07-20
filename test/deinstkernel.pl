@@ -5,13 +5,18 @@ use warnings;
 use Data::Dumper qw(Dumper);
 
 
+###############################################################################
+# deinstall and checks if all packages of this kernel where uninstalled
+# return 1 if yes or nothing to deinstall
+# return 0 if no
+#
 sub uninstKernelFlavour {
 	my $flavour = shift;
 	my $retString;
 	my $searchCmd;
 	my @lines;
 	my %pkgsHash;
-	my $deinstString = 'apt-get remove';
+	my $deinstString = 'apt-get remove -y';
 	my $key;
 	my $notAllUninstalled = 0;
 	if ($flavour eq 'linux-generic') {
@@ -27,21 +32,33 @@ sub uninstKernelFlavour {
 		}
 	}
 	
-	print Dumper(%pkgsHash);
+	if ((keys %pkgsHash) != 0) {
 
-	# deinstall found packages
-	foreach $key (keys %pkgsHash) {
-		$deinstString = $deinstString.' '.$key;
-	}
-	print "$deinstString\n";
+		print Dumper(%pkgsHash);
 
-	# check wether packages have been deinstalled
-	foreach $key (keys %pkgsHash) {
-		if (isPackageInstalled($key)) {
-			$notAllUninstalled = 1;
+		# deinstall found packages
+		foreach $key (keys %pkgsHash) {
+			$deinstString = $deinstString.' '.$key;
 		}
+		print "$deinstString\n";
+		`$deinstString`;
+		if ($? != 0) {
+			print "error: $?\n";
+		} else {
+			print "no error from deinstall\n";
+		}
+
+		# check wether packages have been deinstalled
+		foreach $key (keys %pkgsHash) {
+			if (isPackageInstalled($key)) {
+				$notAllUninstalled = 1;
+			}
+		}
+		return (!$notAllUninstalled);
+	} else {
+		print "no packages to uninstall found\n";
+		return (1);
 	}
-	return (!$notAllUninstalled);
 }
 
 ###############################################################################
