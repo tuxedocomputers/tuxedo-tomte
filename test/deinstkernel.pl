@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict qw(vars subs);
 use warnings;
+use feature qw(switch);
 
 use Data::Dumper qw(Dumper);
 
@@ -16,12 +17,19 @@ sub uninstKernelFlavour {
 	my $searchCmd;
 	my @lines;
 	my %pkgsHash;
-	my $deinstString = 'apt-get remove -y';
+	my $deinstString = 'apt-get remove -y --force-yes --purge';
 	my $key;
-	my $notAllUninstalled = 0;
+	my $allUninstalled = 1;
+
 	if ($flavour eq 'linux-generic') {
 		# find installed packages
 		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic linux-image-generic linux-image-5.4.0-*-generic 2>&1";
+	} elsif ($flavour eq 'linux-oem-20.04') {
+		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem 2>&1";
+	} elsif ($flavour eq 'linux-generic-hwe-20.04') {
+		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic 2>&1";
+	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
+		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic 2>&1";
 	}
 	$retString = `$searchCmd`;
 	@lines = split /\n/, $retString;
@@ -33,14 +41,11 @@ sub uninstKernelFlavour {
 	}
 	
 	if ((keys %pkgsHash) != 0) {
-
-		print Dumper(%pkgsHash);
-
 		# deinstall found packages
 		foreach $key (keys %pkgsHash) {
 			$deinstString = $deinstString.' '.$key;
 		}
-		print "$deinstString\n";
+		$deinstString = $deinstString.' 2>&1';
 		`$deinstString`;
 		if ($? != 0) {
 			print "error: $?\n";
@@ -51,10 +56,10 @@ sub uninstKernelFlavour {
 		# check wether packages have been deinstalled
 		foreach $key (keys %pkgsHash) {
 			if (isPackageInstalled($key)) {
-				$notAllUninstalled = 1;
+				$allUninstalled = 0;
 			}
 		}
-		return (!$notAllUninstalled);
+		return ($allUninstalled);
 	} else {
 		print "no packages to uninstall found\n";
 		return (1);
