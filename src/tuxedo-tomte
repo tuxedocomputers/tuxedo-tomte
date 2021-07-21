@@ -555,7 +555,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel versions',
+		description => 'Required kernel version linux-generic-hwe',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -571,7 +571,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel versions',
+		description => 'Required kernel version tuxedo-linux',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -3201,11 +3201,84 @@ sub installPackage {
 # somethingDone = 1 something was changed
 # somethingDone = 0 nothing was changed (kernel was already installed)
 #
-sub installKernelPackages {
-	my $fullName = shift;
+sub installKernelFlavour {
+	my $flavour = shift;
 	my $failed = 0;
 	my $somethingDone = 0;
 	my $partialName;
+	my $installCmd = 'apt-get install -y ';
+	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
+	my $testCmd2 = $testCmd;
+	my $retString;
+	my %pkgsHash;
+	my $key;
+	my $allPackagesInstalled = 1;
+	my @packages;
+	my @lines;
+	my $packageMissing = 0;
+	if ($flavour eq 'linux-generic') {
+		$installCmd = $installCmd.'linux-generic linux-headers-generic linux-image-generic';
+		@packages = ('linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic';
+		$testCmd = $testCmd.join($", @packages);
+	} elsif ($flavour eq 'linux-oem-20.04') {
+		$installCmd = 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b';
+		@packages = 'linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem', 'linux-modules-5.4.0-*-generic';
+		$testCmd = $testCmd.join($", @packages);
+	} elsif ($flavour eq 'linux-generic-hwe-20.04') {
+		$installCmd = $installCmd.'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04';
+		@packages = 'linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8.0-*-generic', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic';
+		$testCmd = $testCmd.join($", @packages);
+	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
+		$installCmd = $installCmd.'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge';
+		@packages = 'linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic';
+		$testCmd = $testCmd.join($", @packages);
+	}
+
+	foreach $key (@packages) {
+		$testCmd2 = $testCmd2.$key;
+		$retString = `$testCmd`;
+		@lines = split /\n/, $retString;
+		foreach (@lines) {
+			if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][ncHUFWti]/))) {
+				$packageMissing = 1;
+			}
+		}
+	}
+
+	if ($packageMissing) {
+		printLog("installing $flavour");
+		`apt-get update`;
+		$retString = `$installCmd`;
+		if ($? != 0) {
+			printLog("something went wrong while installing kernel packages");
+			printLog("error: $?");
+			printLog("$retString");
+		}
+	
+		$retString = `$testCmd`;
+		@lines = split /\n/, $retString;
+		foreach (@lines) {
+			if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
+				/(\S+)\s*(\S+)/;
+				$pkgsHash{$1} = $2;
+			}
+		}
+
+		if ((keys %pkgsHash) != 0) {
+			# deinstall found packages
+			foreach $key (keys %pkgsHash) {
+				if (!isPackageInstalled("$key")) {
+					$allPackagesInstalled = 0;
+				}
+			}
+		} else {
+			$allPackagesInstalled = 0;
+		}
+	}
+
+
+
+
 	($partialName) = $fullName =~ m/linux(.*)/;
 	if( !isPackageInstalled("$fullName") ) {
 		$somethingDone = 1;
@@ -3282,7 +3355,7 @@ sub deinstallKernelPackages {
 sub uninstKernelFlavour {
 	my $flavour = shift;
 	my $retString;
-	my $searchCmd;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
 	my %pkgsHash;
 	my $deinstString = 'apt-get remove -y --force-yes --purge';
@@ -3291,13 +3364,13 @@ sub uninstKernelFlavour {
 
 	if ($flavour eq 'linux-generic') {
 		# find installed packages
-		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic linux-image-generic linux-image-5.4.0-*-generic 2>&1";
+		$searchCmd = $searchCmd."linux-generic linux-image-generic linux-image-5.4.0-*-generic 2>&1";
 	} elsif ($flavour eq 'linux-oem-20.04') {
-		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem 2>&1";
+		$searchCmd = $searchCmd."linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem 2>&1";
 	} elsif ($flavour eq 'linux-generic-hwe-20.04') {
-		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic 2>&1";
+		$searchCmd = $searchCmd."linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic 2>&1";
 	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
-		$searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic 2>&1";
+		$searchCmd = $searchCmd."linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic 2>&1";
 	}
 	$retString = `$searchCmd`;
 	@lines = split /\n/, $retString;
