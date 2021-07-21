@@ -1055,8 +1055,10 @@ sub checkRequirements {
 		$origConfModules{realtekr8125dkms}{required} = 'yes';
 		printLog('detected realtek-r8125-dkms issue');
 	}
-	if ($boardname =~ m/GMxNGxx/) {
-		if (isDisplayPresent("BOE Model 2423 Serial Number 0")) {
+	if (($boardname =~ m/GMxNGxx/) ||
+		($boardname =~ m/GMxZGxx/)) {
+		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
+			isDisplayPresent("BOE Model 2420 Serial Number 0")) {
 			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
 			printLog('detected amdgpu-backlight-aux-off issue');
 		}
