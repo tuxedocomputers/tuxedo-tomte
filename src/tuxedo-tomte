@@ -562,7 +562,7 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kerneloem => {
+	kerneloem2004 => {
 		name => 'kernel-oem',
 		version => 1,
 		installed => 'no',
@@ -1065,7 +1065,7 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/GMxZGxx/) &&
    		($distributionVersion =~ /20.04/)) {
-		$origConfModules{kerneloem}{required} = 'yes';
+		$origConfModules{kerneloem2004}{required} = 'yes';
 		printLog('kernel linux-oem will be installed');
 	} else {
 		$origConfModules{kernelhwe}{required} = 'yes';
@@ -2235,10 +2235,10 @@ sub kernelhwe() {
 				$origConfModules{$module}{upgraded} = "yes";
 			}
 		} elsif ($distributionVersion =~ /20.04/) {
-			($instFailed, $instDone) = installKernelFlavour('linux-oem-20.04');
+			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
@@ -2246,11 +2246,11 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-oem-20.04 could not be installed');
+				printLog('new kernel linux-generic-hwe-20.04 could not be installed');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-oem-20.04 was installed');
+				printLog('new kernel linux-generic-hwe-20.04 was installed');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3236,6 +3236,7 @@ sub installKernelFlavour {
 	foreach $package (@packages) {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
+	print "test: $testCmd2\n";
 	$retString = `$testCmd2`;
 	#TODO debugs
 	print "retstring2 testcmd: $retString\n";
@@ -3259,6 +3260,7 @@ sub installKernelFlavour {
 		}
 	
 		$retString = `$testCmd`;
+		print "check installed packages: $retString\n";
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
@@ -3270,8 +3272,10 @@ sub installKernelFlavour {
 		if ((keys %pkgsHash) != 0) {
 			foreach $package (keys %pkgsHash) {
 				if (!isPackageInstalled("$package")) {
+					print "$package not installed!!\n";
 					$allPackagesInstalled = 0;
 				} else {
+					print "$package is installed\n";
 					$somethingDone = 1;
 				}
 			}
@@ -3283,6 +3287,7 @@ sub installKernelFlavour {
 	}
 
 	$failed = !$allPackagesInstalled;
+	print "failed: $failed, somethingdone: $somethingDone\n";
 	return ($failed, $somethingDone);
 }
 
@@ -3368,12 +3373,15 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
+		print "kernel packages to deinstall found\n";
 		foreach $package (keys %pkgsHash) {
 			$deinstString = $deinstString.' '.$package;
 		}
 		$deinstString = $deinstString.' 2>&1';
 		printLog("uninstalling $flavour");
-		`$deinstString`;
+		print "deinststring: $deinstString\n";
+		$retString = `$deinstString`;
+		print "$retString\n";
 		if ($? != 0) {
 			printLog("error: $?");
 		} else {
@@ -3383,6 +3391,7 @@ sub uninstKernelFlavour {
 		# check wether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
+				print "unwanted package $package is still installed\n";
 				$failed = 1;
 			} else {
 				$somethingWasDone = 1;
@@ -3390,7 +3399,7 @@ sub uninstKernelFlavour {
 		}
 		return ($failed, $somethingWasDone);
 	} else {
-		printLog("no packages to uninstall found for $flavour");
+		printLog("all is good, no packages to uninstall found for $flavour");
 		return (0, 0);
 	}
 }
