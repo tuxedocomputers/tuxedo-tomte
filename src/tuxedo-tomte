@@ -3218,19 +3218,19 @@ sub installKernelFlavour {
 	my $packageMissing = 0;
 	if ($flavour eq 'linux-generic') {
 		$installCmd = $installCmd.'linux-generic linux-headers-generic linux-image-generic';
-		@packages = ('linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic';
+		@packages = ('linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic');
 		$testCmd = $testCmd.join($", @packages);
 	} elsif ($flavour eq 'linux-oem-20.04') {
 		$installCmd = 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b';
-		@packages = 'linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem', 'linux-modules-5.4.0-*-generic';
+		@packages = ('linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem', 'linux-modules-5.4.0-*-generic');
 		$testCmd = $testCmd.join($", @packages);
 	} elsif ($flavour eq 'linux-generic-hwe-20.04') {
 		$installCmd = $installCmd.'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04';
-		@packages = 'linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8.0-*-generic', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic';
+		@packages = ('linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8.0-*-generic', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic');
 		$testCmd = $testCmd.join($", @packages);
 	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
 		$installCmd = $installCmd.'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge';
-		@packages = 'linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic';
+		@packages = ('linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic');
 		$testCmd = $testCmd.join($", @packages);
 	}
 
@@ -3269,8 +3269,8 @@ sub installKernelFlavour {
 		}
 
 		if ((keys %pkgsHash) != 0) {
-			foreach $key (keys %pkgsHash) {
-				if (!isPackageInstalled("$key")) {
+			foreach $package (keys %pkgsHash) {
+				if (!isPackageInstalled("$package")) {
 					$allPackagesInstalled = 0;
 				} else {
 					$somethingDone = 1;
