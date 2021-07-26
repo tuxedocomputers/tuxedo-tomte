@@ -2288,13 +2288,13 @@ sub kerneloem2004() {
 	my $tmpDone;
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /20.04/) {
-			($instFailed, $instDone) = installKernelPackages('linux-oem-20.04');
-			if (!$instFailed) {
-				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
-				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-20.04');
+			($instFailed, $instDone) = installKernelFlavour('linux-oem-20.04');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
-				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -3211,7 +3211,7 @@ sub installKernelFlavour {
 	my $testCmd2 = $testCmd;
 	my $retString;
 	my %pkgsHash;
-	my $key;
+	my $package;
 	my $allPackagesInstalled = 1;
 	my @packages;
 	my @lines;
@@ -3234,12 +3234,16 @@ sub installKernelFlavour {
 		$testCmd = $testCmd.join($", @packages);
 	}
 
-	foreach $key (@packages) {
-		$testCmd2 = $testCmd2.$key;
-		$retString = `$testCmd`;
+	foreach $package (@packages) {
+		$testCmd2 = $testCmd2.$package;
+		$retString = `$testCmd2`;
+		#TODO debugs
+		print "restring2 testcmd: $retString\n";
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][ncHUFWti]/))) {
+				print "package missing\n";
+				print "$_\n";
 				$packageMissing = 1;
 			}
 		}
@@ -3265,42 +3269,21 @@ sub installKernelFlavour {
 		}
 
 		if ((keys %pkgsHash) != 0) {
-			# deinstall found packages
 			foreach $key (keys %pkgsHash) {
 				if (!isPackageInstalled("$key")) {
 					$allPackagesInstalled = 0;
+				} else {
+					$somethingDone = 1;
 				}
 			}
 		} else {
 			$allPackagesInstalled = 0;
 		}
+	} else {
+		$somethingDone = 0;
 	}
 
-
-
-
-	($partialName) = $fullName =~ m/linux(.*)/;
-	if( !isPackageInstalled("$fullName") ) {
-		$somethingDone = 1;
-		installPackage("$fullName");
-		if( !isPackageInstalled("$fullName") ) {
-			$failed = 1;
-		}
-	}
-	if( !isPackageInstalled("linux-headers$partialName") ) {
-		$somethingDone = 1;
-		installPackage("linux-headers$partialName");
-		if( !isPackageInstalled("linux-headers$partialName") ) {
-			$failed = 1;
-		}
-	}
-	if( !isPackageInstalled("linux-image$partialName") ) {
-		$somethingDone = 1;
-		installPackage("linux-image$partialName");
-		if( !isPackageInstalled("linux-image$partialName") ) {
-			$failed = 1;
-		}
-	}
+	$failed = !$allPackagesInstalled;
 	return ($failed, $somethingDone);
 }
 
@@ -3348,9 +3331,10 @@ sub deinstallKernelPackages {
 
 
 ###############################################################################
-# deinstall and checks if all packages of this kernel where uninstalled
-# return 1 if yes or nothing to deinstall
-# return 0 if no
+# deinstall and checks if all packages of this kernel were uninstalled
+# return (failed, somethingWasDone)
+# failed = 0 if there was no error
+# somethingWasDone = 1 if some package was uninstalled
 #
 sub uninstKernelFlavour {
 	my $flavour = shift;
@@ -3359,8 +3343,9 @@ sub uninstKernelFlavour {
 	my @lines;
 	my %pkgsHash;
 	my $deinstString = 'apt-get remove -y --force-yes --purge';
-	my $key;
-	my $allUninstalled = 1;
+	my $package;
+	my $somethingWasDone = 0;
+	my $failed = 0;
 
 	if ($flavour eq 'linux-generic') {
 		# find installed packages
@@ -3372,6 +3357,7 @@ sub uninstKernelFlavour {
 	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
 		$searchCmd = $searchCmd."linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic 2>&1";
 	}
+	# find which packages are installed
 	$retString = `$searchCmd`;
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
@@ -3381,10 +3367,10 @@ sub uninstKernelFlavour {
 		}
 	}
 
+	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
-		# deinstall found packages
-		foreach $key (keys %pkgsHash) {
-			$deinstString = $deinstString.' '.$key;
+		foreach $package (keys %pkgsHash) {
+			$deinstString = $deinstString.' '.$package;
 		}
 		$deinstString = $deinstString.' 2>&1';
 		printLog("uninstalling $flavour");
@@ -3396,15 +3382,17 @@ sub uninstKernelFlavour {
 		}
 
 		# check wether packages have been deinstalled
-		foreach $key (keys %pkgsHash) {
-			if (isPackageInstalled($key)) {
-				$allUninstalled = 0;
+		foreach $package (keys %pkgsHash) {
+			if (isPackageInstalled($package)) {
+				$failed = 1;
+			} else {
+				$somethingWasDone = 1;
 			}
 		}
-		return ($allUninstalled);
+		return ($failed, $somethingWasDone);
 	} else {
 		printLog("no packages to uninstall found for $flavour");
-		return (1);
+		return (0, 0);
 	}
 }
 
