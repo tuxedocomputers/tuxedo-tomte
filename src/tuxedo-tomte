@@ -2207,6 +2207,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
+		#TODO create version for 18.04
 		if ($distributionVersion =~ /18.04/) {
 			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-18.04');
 			if (!$instFailed) {
@@ -2233,26 +2234,23 @@ sub kernelhwe() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			}
-		}
-		if ($distributionVersion =~ /20.04/) {
-			($instFailed, $instDone) = installKernelPackages('linux-generic-hwe-20.04');
-			if (!$instFailed) {
-				($instFailed, $instDone) = deinstallKernelPackages('linux-generic');
-				deinstallSinglePackage('linux-oem-20.04');
-				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-oem-20.04b');
+		} elsif ($distributionVersion =~ /20.04/) {
+			($instFailed, $instDone) = installKernelFlavour('linux-oem-20.04');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
-
-				($tmpFailed, $tmpDone) = deinstallKernelPackages('linux-generic-hwe-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 could not be installed');
+				printLog('new kernel linux-oem-20.04 could not be installed');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 was installed');
+				printLog('new kernel linux-oem-20.04 was installed');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2287,6 +2285,7 @@ sub kerneloem2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
+		#TODO create version for 18.04
 		if ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelFlavour('linux-oem-20.04');
 			if ($instFailed == 0) {
