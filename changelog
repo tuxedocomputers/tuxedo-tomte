@@ -1,4 +1,4 @@
-tuxedo-tomte (2.4.14-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.14-13) UNRELEASED; urgency=medium
 
   * first steps
   * kernel remove subroutines
@@ -17,8 +17,10 @@ tuxedo-tomte (2.4.14-12) UNRELEASED; urgency=medium
   * debug
   * added debug notes
   * added apt-get -q
+  * added dirty trick to delete current kernel
+  * work around to deinstall current kernel
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 26 Jul 2021 15:02:00 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 27 Jul 2021 08:07:41 +0200
 
 tuxedo-tomte (2.4.14) focal; urgency=medium
 
