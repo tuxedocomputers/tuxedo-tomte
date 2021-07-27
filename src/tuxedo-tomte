@@ -3381,6 +3381,7 @@ sub uninstKernelFlavour {
 		printLog("uninstalling $flavour");
 		print "deinststring: $deinstString\n";
 		if ($deinstString =~ /$kernelRelease/) {
+			print "deinstalling current kernel\n";
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText);
@@ -3388,6 +3389,7 @@ sub uninstKernelFlavour {
 			$retString = `$deinstString`;
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
+			print "current kernel deinstalled\n";
 		} else {
 			$retString = `$deinstString`;
 		}
