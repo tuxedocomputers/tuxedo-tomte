@@ -2220,11 +2220,11 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 could not be installed');
+				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 was installed');
+				printLog('new kernel linux-generic-hwe-18.04 was installed', 'TL');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2246,11 +2246,11 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 could not be installed');
+				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 was installed');
+				printLog('new kernel linux-generic-hwe-20.04 was installed', 'TL');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2298,11 +2298,11 @@ sub kerneloem2004() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-oem-20.04 could not be installed');
+				printLog('new kernel linux-oem-20.04 could not be installed', 'TL');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-oem-20.04 was installed');
+				printLog('new kernel linux-oem-20.04 was installed', 'TL');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3250,13 +3250,13 @@ sub installKernelFlavour {
 	}
 
 	if ($packageMissing) {
-		printLog("installing $flavour");
+		printLog("installing $flavour", 'TL');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($? != 0) {
-			printLog("something went wrong while installing kernel packages");
-			printLog("error: $?");
-			printLog("$retString");
+			printLog("something went wrong while installing kernel packages", 'TL');
+			printLog("error: $?", 'TL');
+			printLog("$retString", 'TL');
 		}
 	
 		$retString = `$testCmd`;
@@ -3286,7 +3286,11 @@ sub installKernelFlavour {
 		$somethingDone = 0;
 	}
 
-	$failed = !$allPackagesInstalled;
+	if ($allPackagesInstalled) {
+		$failed = 0;
+	} else {
+		$failed = 1;
+	}
 	print "failed: $failed, somethingdone: $somethingDone\n";
 	return ($failed, $somethingDone);
 }
@@ -3378,7 +3382,7 @@ sub uninstKernelFlavour {
 			$deinstString = $deinstString.' '.$package;
 		}
 		$deinstString = $deinstString.' 2>&1';
-		printLog("uninstalling $flavour");
+		printLog("uninstalling $flavour", 'TL');
 		print "deinststring: $deinstString\n";
 		if ($deinstString =~ /$kernelRelease/) {
 			print "deinstalling current kernel\n";
@@ -3395,9 +3399,9 @@ sub uninstKernelFlavour {
 		}
 		print "$retString\n";
 		if ($? != 0) {
-			printLog("error: $?");
+			printLog("error: $?", 'TL');
 		} else {
-			printLog('no error from deinstall');
+			printLog('no error from deinstall', 'TL');
 		}
 
 		# check wether packages have been deinstalled
@@ -3411,7 +3415,7 @@ sub uninstKernelFlavour {
 		}
 		return ($failed, $somethingWasDone);
 	} else {
-		printLog("all is good, no packages to uninstall found for $flavour");
+		printLog("all is good, no packages to uninstall found for $flavour", 'TL');
 		return (0, 0);
 	}
 }
