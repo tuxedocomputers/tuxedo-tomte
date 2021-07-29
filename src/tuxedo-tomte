@@ -3335,7 +3335,7 @@ sub uninstKernelFlavour {
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
 	my %pkgsHash;
-	my $deinstString = 'apt-get remove -yq --force-yes --purge';
+	my $deinstString = 'apt-get remove -yq --purge';
 	my $package;
 	my $somethingWasDone = 0;
 	my $failed = 0;
