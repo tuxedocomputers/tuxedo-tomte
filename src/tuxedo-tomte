@@ -182,6 +182,50 @@ my %tuxedo_mirrors = (
 
 
 
+my %flavours = (
+	"18.04" => {
+		"linux-generic" => {
+			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
+			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-4.15.0-*-generic', 'linux-image-4.15.0-*-generic', 'linux-modules-extra-4.15.0-*-generic', 'linux-modules-4.15.0-*-generic'],
+			searchCommand => 'linux-generic linux-image-generic linux-image-4.15.0-*-generic',
+		},
+		"linux-generic-hwe-18.04" => {
+			installCommand => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
+			packages => ['linux-generic-hwe-18.04', 'linux-headers-generic-hwe-18.04', 'linux-image-generic-hwe-18.04', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
+			searchCommand => 'linux-generic-hwe-18.04 linux-image-generic-hwe-18.04 linux-image-5.4.0-*-generic',
+		},
+		"linux-generic-hwe-18.04-edge" => {
+			installCommand => 'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
+			packages => ['linux-generic-hwe-18.04-edge', 'linux-headers-generic-hwe-18.04-edge', 'linux-image-generic-hwe-18.04-edge', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
+			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge linux-image-5.4.0-*-generic',
+		},
+	},
+	"20.04" => {
+		"linux-generic" => {
+			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
+			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
+			searchCommand => 'linux-generic linux-image-generic linux-image-5.4.0-*-generic',
+		},
+		"linux-oem-20.04" => {
+			installCommand => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+			packages => ['linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem', 'linux-modules-5.4.0-*-generic'],
+			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem',
+		},
+		"linux-generic-hwe-20.04" => {
+			installCommand => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+			packages => ['linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8-headers-5.8.0-*', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic'],
+			searchCommand => 'linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installCommand => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+			packages => ['linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic'],
+			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic',
+		},
+	},
+);
+
+
+
 ###############################################################################
 #
 # For each new module add an entry into:
@@ -3213,39 +3257,8 @@ sub installKernelFlavour {
 	my @packages;
 	my @lines;
 	my $packageMissing = 0;
-	if ($distributionVersion =~ /18.04/) {
-		if ($flavour eq 'linux-generic') {
-			$installCmd = $installCmd.'linux-generic linux-headers-generic linux-image-generic';
-			@packages = ('linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-4.15.0-*-generic', 'linux-image-4.15.0-*-generic', 'linux-modules-extra-4.15.0-*-generic', 'linux-modules-4.15.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		} elsif ($flavour eq 'linux-generic-hwe-18.04') {
-			$installCmd = $installCmd.'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04';
-			@packages = ('linux-generic-hwe-18.04', 'linux-headers-generic-hwe-18.04', 'linux-image-generic-hwe-18.04', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		} elsif ($flavour eq 'linux-generic-hwe-18.04-edge') {
-			$installCmd = $installCmd.'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge';
-			@packages = ('linux-generic-hwe-18.04-edge', 'linux-headers-generic-hwe-18.04-edge', 'linux-image-generic-hwe-18.04-edge', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		}
-	} elsif ($distributionVersion =~ /20.04/) {
-		if ($flavour eq 'linux-generic') {
-			$installCmd = $installCmd.'linux-generic linux-headers-generic linux-image-generic';
-			@packages = ('linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		} elsif ($flavour eq 'linux-oem-20.04') {
-			$installCmd = 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b';
-			@packages = ('linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem', 'linux-modules-5.4.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		} elsif ($flavour eq 'linux-generic-hwe-20.04') {
-			$installCmd = $installCmd.'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04';
-			@packages = ('linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8-headers-5.8.0-*', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
-			$installCmd = $installCmd.'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge';
-			@packages = ('linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic');
-			$testCmd = $testCmd.' '.join($", @packages);
-		}
-	}
+	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'};
+	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
 
 	foreach $package (@packages) {
 		$testCmd2 = $testCmd2.' '.$package;
@@ -3312,47 +3325,6 @@ sub installKernelFlavour {
 
 
 ###############################################################################
-# deinstalls a linux kernel from the name of the main metapackage
-# deinstallLinuxKernel('metapackageName')
-# returns two parameters failed and nothingDone
-# failed = 0 all is good
-# failed = 1 some package was not installed
-# somethingDone = 1 something was changed
-# somethingDone = 0 nothing was changed (kernel was already installed)
-#
-sub deinstallKernelPackages {
-	my $fullName = shift;
-	my $failed = 0;
-	my $somethingDone = 0;
-	my $partialName;
-	($partialName) = $fullName =~ m/linux(.*)/;
-	if( isPackageInstalled("$fullName") ) {
-		$somethingDone = 1;
-		deinstallPackage("$fullName"); 
-		if( isPackageInstalled("$fullName") ) {
-			$failed = 1;
-		}
-	}
-	if( isPackageInstalled("linux-headers$partialName") ) {
-		deinstallPackage("linux-headers$partialName");
-		$somethingDone = 1;
-		if( isPackageInstalled("linux-headers$partialName") ) {
-			$failed = 1;
-		}
-	}
-	if( isPackageInstalled("linux-image$partialName") ) {
-		$somethingDone = 1;
-		deinstallPackage("linux-image$partialName");
-		if( isPackageInstalled("linux-image$partialName") ) {
-			$failed = 1;
-		}
-	}
-	return ($failed, $somethingDone);
-}
-
-
-
-###############################################################################
 # deinstall and checks if all packages of this kernel were uninstalled
 # return (failed, somethingWasDone)
 # failed = 0 if there was no error
@@ -3369,16 +3341,8 @@ sub uninstKernelFlavour {
 	my $somethingWasDone = 0;
 	my $failed = 0;
 
-	if ($flavour eq 'linux-generic') {
-		# find installed packages
-		$searchCmd = $searchCmd."linux-generic linux-image-generic linux-image-5.4.0-*-generic 2>&1";
-	} elsif ($flavour eq 'linux-oem-20.04') {
-		$searchCmd = $searchCmd."linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem 2>&1";
-	} elsif ($flavour eq 'linux-generic-hwe-20.04') {
-		$searchCmd = $searchCmd."linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic 2>&1";
-	} elsif ($flavour eq 'linux-generic-hwe-20.04-edge') {
-		$searchCmd = $searchCmd."linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic 2>&1";
-	}
+	# find installed packages
+	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
 	# find which packages are installed
 	$retString = `$searchCmd`;
 	@lines = split /\n/, $retString;
