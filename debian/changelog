@@ -1,3 +1,40 @@
+tuxedo-tomte (2.4.15-1) UNRELEASED; urgency=medium
+
+  * first steps
+  * kernel remove subroutines
+  * added install and deinstall kernel subroutines
+  * kernel install 18.04, first module done
+  * kernel install, modules ready
+  * packing
+  * debug return parameters kernel install
+  * finished deinstallKernel
+  * packing
+  * kernel remove stage 1
+  * test for kernel change
+  * checkout
+  * before checkout
+  * subprocedure uninstallKernelFlavour ready
+  * installKernelFlavour almost ready
+  * install and uninstall kernel ready
+  * packing
+  * corrected some arrays
+  * packing
+  * changed version 20.04 for hwe
+  * packing
+  * debug
+  * packing
+  * added debug notes
+  * packing
+  * added apt-get -q
+  * packing
+  * added dirty trick to delete current kernel
+  * work around to deinstall current kernel
+  * packing
+  * before checkout to master
+  * before checkout
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Jul 2021 08:54:26 +0200
+
 tuxedo-tomte (2.4.15) focal; urgency=medium
 
   * added BOE Model 2420 Serial Number 0 for GMxZGxx
