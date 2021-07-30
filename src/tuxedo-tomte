@@ -2255,9 +2255,6 @@ sub kernelhwe() {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-18.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-18.04');
-				$instFailed = $instFailed + $tmpFailed;
-				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-18.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2363,20 +2360,6 @@ sub kerneloem2004() {
 		# not implemented yet
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3248,7 +3231,7 @@ sub installKernelFlavour {
 	my $somethingDone = 0;
 	my $partialName;
 	my $installCmd = 'apt-get install -yq ';
-	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
+	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
 	my %pkgsHash;
@@ -3256,7 +3239,11 @@ sub installKernelFlavour {
 	my $allPackagesInstalled = 1;
 	my @lines;
 	my $packageMissing = 0;
-	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'};
+	if (!(exists $flavours{$distributionVersion}{$flavour})) {
+		print "flavour $flavour does not exist!!\n";
+		return (1,0);
+	}
+	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'}.' 2>&1';
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
 
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
@@ -3279,6 +3266,16 @@ sub installKernelFlavour {
 		printLog("installing $flavour", 'TL');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
+		if ($retString =~ /sudo dpkg --configure -a/) {
+			print "make configure -a\n";
+			`dpkg --configure -a`;
+			if ($? != 0) {
+				print "configure -a failed!!\n";
+				return (1,0);
+			} else {
+				$retString = `$installCmd`;
+			}
+		}
 		if ($? != 0) {
 			printLog("something went wrong while installing kernel packages", 'TL');
 			printLog("error: $?", 'TL');
@@ -3341,6 +3338,10 @@ sub uninstKernelFlavour {
 	my $failed = 0;
 
 	# find installed packages
+	if (!(exists $flavours{$distributionVersion}{$flavour})) {
+		print "flavour $flavour does not exist!!\n";
+		return (1,0);
+	}
 	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
 	# find which packages are installed
 	$retString = `$searchCmd`;
