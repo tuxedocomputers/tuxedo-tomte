@@ -3344,7 +3344,9 @@ sub uninstKernelFlavour {
 	}
 	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
 	# find which packages are installed
+	printLog('find which packages are installed', 'TL');
 	$retString = `$searchCmd`;
+	printLog("retString: $retString", 'TL');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
@@ -3355,13 +3357,14 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
-		print "kernel packages to deinstall found\n";
+		printLog("kernel packages to deinstall found", 'TL');
 		foreach $package (keys %pkgsHash) {
 			$deinstString = $deinstString.' '.$package;
 		}
 		$deinstString = $deinstString.' 2>&1';
 		printLog("uninstalling $flavour", 'TL');
 		printLog("deinststring: $deinstString", 'TL');
+		printLog("kernelRelease: $kernelRelease", 'TL');
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel", 'TL');
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
@@ -3375,7 +3378,7 @@ sub uninstKernelFlavour {
 		} else {
 			$retString = `$deinstString`;
 		}
-		printLog("$retString", 'TL');
+		printLog("retString: $retString", 'TL');
 		if ($? != 0) {
 			printLog("error: $?", 'TL');
 		} else {
