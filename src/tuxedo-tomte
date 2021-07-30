@@ -3240,7 +3240,7 @@ sub installKernelFlavour {
 	my @lines;
 	my $packageMissing = 0;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
-		print "flavour $flavour does not exist!!\n";
+		printLog("flavour $flavour does not exist!!", 'TL');
 		return (1,0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'}.' 2>&1';
@@ -3249,15 +3249,15 @@ sub installKernelFlavour {
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
-	print "test: $testCmd2\n";
+	printLog("test: $testCmd2", 'TL');
 	$retString = `$testCmd2`;
 	#TODO debugs
-	print "retstring2 testcmd: $retString\n";
+	printLog("retstring2 testcmd: $retString", 'TL');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][ncHUFWti]/))) {
-			print "package missing\n";
-			print "$_\n";
+			printLog("package missing", 'TL');
+			printLog("$_", 'TL');
 			$packageMissing = 1;
 		}
 	}
@@ -3267,10 +3267,10 @@ sub installKernelFlavour {
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
-			print "make configure -a\n";
+			printLog("make configure -a", 'TL');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				print "configure -a failed!!\n";
+				printLog("configure -a failed!!", 'TL');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
@@ -3283,7 +3283,7 @@ sub installKernelFlavour {
 		}
 	
 		$retString = `$testCmd`;
-		print "check installed packages: $retString\n";
+		printLog("check installed packages: $retString", 'TL');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
@@ -3295,10 +3295,10 @@ sub installKernelFlavour {
 		if ((keys %pkgsHash) != 0) {
 			foreach $package (keys %pkgsHash) {
 				if (!isPackageInstalled("$package")) {
-					print "$package not installed!!\n";
+					printLog("$package not installed!!", 'TL');
 					$allPackagesInstalled = 0;
 				} else {
-					print "$package is installed\n";
+					printLog("$package is installed", 'TL');
 					$somethingDone = 1;
 				}
 			}
@@ -3314,7 +3314,7 @@ sub installKernelFlavour {
 	} else {
 		$failed = 1;
 	}
-	print "failed: $failed, somethingdone: $somethingDone\n";
+	printLog("failed: $failed, somethingdone: $somethingDone", 'TL');
 	return ($failed, $somethingDone);
 }
 
@@ -3339,7 +3339,7 @@ sub uninstKernelFlavour {
 
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
-		print "flavour $flavour does not exist!!\n";
+		printLog("flavour $flavour does not exist!!", 'TL');
 		return (1,0);
 	}
 	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
@@ -3361,9 +3361,9 @@ sub uninstKernelFlavour {
 		}
 		$deinstString = $deinstString.' 2>&1';
 		printLog("uninstalling $flavour", 'TL');
-		print "deinststring: $deinstString\n";
+		printLog("deinststring: $deinstString", 'TL');
 		if ($deinstString =~ /$kernelRelease/) {
-			print "deinstalling current kernel\n";
+			printLog("deinstalling current kernel", 'TL');
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText);
@@ -3371,11 +3371,11 @@ sub uninstKernelFlavour {
 			$retString = `$deinstString`;
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-			print "current kernel deinstalled\n";
+			printLog("current kernel deinstalled", 'TL');
 		} else {
 			$retString = `$deinstString`;
 		}
-		print "$retString\n";
+		printLog("$retString", 'TL');
 		if ($? != 0) {
 			printLog("error: $?", 'TL');
 		} else {
@@ -3385,7 +3385,7 @@ sub uninstKernelFlavour {
 		# check wether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
-				print "unwanted package $package is still installed\n";
+				printLog("unwanted package $package is still installed", 'TL');
 				$failed = 1;
 			} else {
 				$somethingWasDone = 1;
