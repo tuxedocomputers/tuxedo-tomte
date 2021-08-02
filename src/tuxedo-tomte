@@ -204,7 +204,7 @@ my %flavours = (
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
 			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
-			searchCommand => 'linux-generic linux-image-generic linux-image-5.4.0-*-generic',
+			searchCommand => 'linux-generic linux-image-generic',
 		},
 		"linux-oem-20.04" => {
 			installCommand => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
