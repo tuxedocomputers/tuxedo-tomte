@@ -192,12 +192,12 @@ my %flavours = (
 		"linux-generic-hwe-18.04" => {
 			installCommand => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
 			packages => ['linux-generic-hwe-18.04', 'linux-headers-generic-hwe-18.04', 'linux-image-generic-hwe-18.04', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-18.04 linux-image-generic-hwe-18.04 linux-image-5.4.0-*-generic',
+			searchCommand => 'linux-generic-hwe-18.04 linux-image-generic-hwe-18.04',
 		},
 		"linux-generic-hwe-18.04-edge" => {
 			installCommand => 'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
 			packages => ['linux-generic-hwe-18.04-edge', 'linux-headers-generic-hwe-18.04-edge', 'linux-image-generic-hwe-18.04-edge', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge linux-image-5.4.0-*-generic',
+			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
 		},
 	},
 	"20.04" => {
