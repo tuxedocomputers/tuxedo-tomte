@@ -3249,6 +3249,7 @@ sub installKernelFlavour {
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
+	$testCmd2 = $testCmd2.' 2>&1';
 	printLog("test: $testCmd2", 'TL');
 	$retString = `$testCmd2`;
 	#TODO debugs
