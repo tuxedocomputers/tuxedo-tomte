@@ -28,6 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
+my $logLevel = 2;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -1354,7 +1355,7 @@ sub amdgpuwithnvidiafix() {
 		if (backupFile($fileName)) {
 			unlink($fileName);
 		} else {
-			printLog('can\'t remove fix, it seems to be gone already', 'TL');
+			printLog('can\'t remove fix, it seems to be gone already', 'TL1');
 		}
 		$origConfModules{$module}{installed} = 'no';
 		$origConfModules{$module}{upgraded} = 'yes';
@@ -2261,11 +2262,11 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL');
+				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 was installed', 'TL');
+				printLog('new kernel linux-generic-hwe-18.04 was installed', 'TL1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2287,11 +2288,11 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL');
+				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 was installed', 'TL');
+				printLog('new kernel linux-generic-hwe-20.04 was installed', 'TL1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2338,11 +2339,11 @@ sub kerneloem2004() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
-				printLog('new kernel linux-oem-20.04 could not be installed', 'TL');
+				printLog('new kernel linux-oem-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-oem-20.04 was installed', 'TL');
+				printLog('new kernel linux-oem-20.04 was installed', 'TL1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2835,12 +2836,12 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really wrong)", 'TL');
+		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
 		# no apt directory, somethings fishy
 		return (0);
 	}
 	if (!-d $sourcesListDirD) {
-		printLog("no $sourcesListDirD found, creating one", 'TL');
+		printLog("no $sourcesListDirD found, creating one", 'TL1');
 		mkdir($sourcesListDirD);
 	}
 
@@ -2997,7 +2998,7 @@ sub setComment {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open repository mirrors list at $reposList", 'TL');
+		printLog("could not open repository mirrors list at $reposList", 'TL0');
 		return (0);
 	}
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
@@ -3240,7 +3241,7 @@ sub installKernelFlavour {
 	my @lines;
 	my $packageMissing = 0;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
-		printLog("flavour $flavour does not exist!!", 'TL');
+		printLog("flavour $flavour does not exist!!", 'TL0');
 		return (1,0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'}.' 2>&1';
@@ -3250,49 +3251,49 @@ sub installKernelFlavour {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
 	$testCmd2 = $testCmd2.' 2>&1';
-	printLog("test: $testCmd2", 'TL');
+	printLog("test: $testCmd2", 'TL2');
 	$retString = `$testCmd2`;
 	#TODO debugs
-	printLog("retstring2 testcmd: $retString", 'TL');
+	printLog("retstring2 testcmd: $retString", 'TL2');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][i]/))) {
-			printLog("package missing", 'TL');
-			printLog("$_", 'TL');
+			printLog("package missing", 'TL2');
+			printLog("$_", 'TL3');
 			$packageMissing = 1;
 		}
 	}
 
 	if ($packageMissing) {
-		printLog("installing $flavour", 'TL');
+		printLog("installing $flavour", 'TL1');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
-			printLog("make configure -a", 'TL');
+			printLog("make configure -a", 'TL3');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				printLog("configure -a failed!!", 'TL');
+				printLog("configure -a failed!!", 'TL3');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
 			}
 		}
 		if ($? != 0) {
-			printLog("something went wrong while installing kernel packages", 'TL');
-			printLog("error: $?", 'TL');
-			printLog("$retString", 'TL');
+			printLog("something went wrong while installing kernel packages", 'TL0');
+			printLog("error: $?", 'TL1');
+			printLog("$retString", 'TL1');
 		}
 	
 		$retString = `$testCmd`;
-		printLog("check installed packages: $retString", 'TL');
+		printLog("check installed packages: $retString", 'TL2');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ($_ =~ /dpkg-query:/) {
-				printLog("$_", 'TL');
+				printLog("$_", 'TL2');
 				$allPackagesInstalled = 0;
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
-				printLog("$1 is installed", 'TL');
+				printLog("$1 is installed", 'TL2');
 				$somethingDone = 1;
 			}
 		}
@@ -3305,7 +3306,7 @@ sub installKernelFlavour {
 	} else {
 		$failed = 1;
 	}
-	printLog("failed: $failed, somethingdone: $somethingDone", 'TL');
+	printLog("failed: $failed, somethingdone: $somethingDone", 'TL2');
 	return ($failed, $somethingDone);
 }
 
@@ -3330,14 +3331,14 @@ sub uninstKernelFlavour {
 
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
-		printLog("flavour $flavour does not exist!!", 'TL');
+		printLog("flavour $flavour does not exist!!", 'TL0');
 		return (1,0);
 	}
 	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
 	# find which packages are installed
-	printLog('find which packages are installed', 'TL');
+	printLog('find which packages are installed', 'TL2');
 	$retString = `$searchCmd`;
-	printLog("retString: $retString", 'TL');
+	printLog("retString: $retString", 'TL2');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
@@ -3348,26 +3349,26 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
-		printLog("kernel packages to deinstall found", 'TL');
+		printLog("kernel packages to deinstall found", 'TL1');
 		foreach $package (keys %pkgsHash) {
 			$deinstString = $deinstString.' '.$package;
 		}
 		$deinstString = $deinstString.' 2>&1';
-		printLog("uninstalling $flavour", 'TL');
-		printLog("deinststring: $deinstString", 'TL');
-		printLog("kernelRelease: $kernelRelease", 'TL');
+		printLog("uninstalling $flavour", 'TL1');
+		printLog("deinststring: $deinstString", 'TL2');
+		printLog("kernelRelease: $kernelRelease", 'TL2');
 		if ($deinstString =~ /$kernelRelease/) {
-			printLog("deinstalling current kernel", 'TL');
+			printLog("deinstalling current kernel", 'TL2');
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText);
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
 			if ($retString =~ /sudo dpkg --configure -a/) {
-				printLog("make configure -a", 'TL');
+				printLog("make configure -a", 'TL2');
 				`dpkg --configure -a`;
 				if ($? != 0) {
-					printLog("configure -a failed!!", 'TL');
+					printLog("configure -a failed!!", 'TL2');
 					return (1,0);
 				} else {
 					$retString = `$deinstString`;
@@ -3375,21 +3376,21 @@ sub uninstKernelFlavour {
 			}
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-			printLog("current kernel deinstalled", 'TL');
+			printLog("current kernel deinstalled", 'TL1');
 		} else {
 			$retString = `$deinstString`;
 		}
-		printLog("retString: $retString", 'TL');
+		printLog("retString: $retString", 'TL2');
 		if ($? != 0) {
-			printLog("error: $?", 'TL');
+			printLog("error: $?", 'TL0');
 		} else {
-			printLog('no error from deinstall', 'TL');
+			printLog('no error from deinstall', 'TL1');
 		}
 
 		# check wether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
-				printLog("unwanted package $package is still installed", 'TL');
+				printLog("unwanted package $package is still installed", 'TL0');
 				$failed = 1;
 			} else {
 				$somethingWasDone = 1;
@@ -3397,7 +3398,7 @@ sub uninstKernelFlavour {
 		}
 		return ($failed, $somethingWasDone);
 	} else {
-		printLog("all is good, no packages to uninstall found for $flavour", 'TL');
+		printLog("all is good, no packages to uninstall found for $flavour", 'TL3');
 		return (0, 0);
 	}
 }
@@ -3870,23 +3871,31 @@ sub getBackupFileTime {
 
 ###############################################################################
 # prints into logFile or to terminal
-# printLog('message', 'tl')
+# printLog('message', 'tlX')
 # it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
+# loglevels for X:
+# 0 lowest
+# 1 normal
+# 2 debug
 #
 sub printLog {
 	my $message = shift;
 	my ($type) = @_;
 	if (!defined($type)) {
-		$type = 'l';
+		$type = 'l1';
 	}
-	if ($FAI || ($type =~ /t/i)) {
-		print "$message\n";
-	}
-	if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
-		if (open $LOGFILE, '>>'.$logFile) {
-			my $timestamp = getLoggingTime();
-			print $LOGFILE "$timestamp $message\n";
-			close $LOGFILE;
+	my $level = $type;
+	$type =~ s/\D//g;
+	if ($level <= $logLevel) {
+		if ($FAI || ($type =~ /t/i)) {
+			print "$message\n";
+		}
+		if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
+			if (open $LOGFILE, '>>'.$logFile) {
+				my $timestamp = getLoggingTime();
+				print $LOGFILE "$timestamp $message\n";
+				close $LOGFILE;
+			}
 		}
 	}
 }
