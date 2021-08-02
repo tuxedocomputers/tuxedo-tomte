@@ -51,6 +51,7 @@ my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
 my $kernelRelease = `uname -r`;
+$kernelRelease =~ s/[\n\r]//g;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -3177,7 +3178,7 @@ sub isPackageInstalled {
 	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	if ($retString =~ m/^i[ncHUFWti][\sR]$/) {
+	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString");
 		return (1);
 	} else {
@@ -3234,7 +3235,6 @@ sub installKernelFlavour {
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
-	my %pkgsHash;
 	my $package;
 	my $allPackagesInstalled = 1;
 	my @lines;
@@ -3256,7 +3256,7 @@ sub installKernelFlavour {
 	printLog("retstring2 testcmd: $retString", 'TL');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
-		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][ncHUFWti]/))) {
+		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][i]/))) {
 			printLog("package missing", 'TL');
 			printLog("$_", 'TL');
 			$packageMissing = 1;
@@ -3287,24 +3287,14 @@ sub installKernelFlavour {
 		printLog("check installed packages: $retString", 'TL');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
-			if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
+			if ($_ =~ /dpkg-query:/) {
+				printLog("$_", 'TL');
+				$allPackagesInstalled = 0;
+			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
-				$pkgsHash{$1} = $2;
+				printLog("$1 is installed", 'TL');
+				$somethingDone = 1;
 			}
-		}
-
-		if ((keys %pkgsHash) != 0) {
-			foreach $package (keys %pkgsHash) {
-				if (!isPackageInstalled("$package")) {
-					printLog("$package not installed!!", 'TL');
-					$allPackagesInstalled = 0;
-				} else {
-					printLog("$package is installed", 'TL');
-					$somethingDone = 1;
-				}
-			}
-		} else {
-			$allPackagesInstalled = 0;
 		}
 	} else {
 		$somethingDone = 0;
@@ -3350,7 +3340,7 @@ sub uninstKernelFlavour {
 	printLog("retString: $retString", 'TL');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
-		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[ih][ncHUFWti]/)) {
+		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
 			/(\S+)\s*(\S+)/;
 			$pkgsHash{$1} = $2;
 		}
@@ -3373,6 +3363,16 @@ sub uninstKernelFlavour {
 			createFile('/usr/bin/linux-check-removal', $fileText);
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
+			if ($retString =~ /sudo dpkg --configure -a/) {
+				printLog("make configure -a", 'TL');
+				`dpkg --configure -a`;
+				if ($? != 0) {
+					printLog("configure -a failed!!", 'TL');
+					return (1,0);
+				} else {
+					$retString = `$deinstString`;
+				}
+			}
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
 			printLog("current kernel deinstalled", 'TL');
