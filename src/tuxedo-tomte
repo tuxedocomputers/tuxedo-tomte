@@ -3362,6 +3362,7 @@ sub uninstKernelFlavour {
 		printLog("kernelRelease: $kernelRelease", 'TL2');
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel", 'TL2');
+			$restartSystem = 1;
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText);
