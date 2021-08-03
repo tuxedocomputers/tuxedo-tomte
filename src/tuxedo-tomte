@@ -2262,6 +2262,7 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
+				startTomteDelayed();
 				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
@@ -2288,6 +2289,7 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
+				startTomteDelayed();
 				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
@@ -2339,6 +2341,7 @@ sub kerneloem2004() {
 				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
+				startTomteDelayed();
 				printLog('new kernel linux-oem-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
@@ -3402,18 +3405,6 @@ sub uninstKernelFlavour {
 		return (0, 0);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
