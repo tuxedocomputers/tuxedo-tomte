@@ -4992,6 +4992,10 @@ if (@ARGV != 0) {
 		}
 		print "remove, does nothing yet\n";
 	} elsif ($argValue{command} eq "reconfigure") {
+		# reconfigure interrupts repeated execution
+		if (-e $triesFile) {
+			unlink($triesFile);
+		}
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
