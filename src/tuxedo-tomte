@@ -189,7 +189,7 @@ my %flavours = (
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
 			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-4.15.0-*-generic', 'linux-image-4.15.0-*-generic', 'linux-modules-extra-4.15.0-*-generic', 'linux-modules-4.15.0-*-generic'],
-			searchCommand => 'linux-generic linux-image-generic linux-image-4.15.0-*-generic linux-modules-extra-4.15.0-*-generic linux-image-unsigned-4.15.0-*-generic',
+			searchCommand => 'linux-generic linux-image-generic linux-image-4.15.0-*-generic linux-modules-extra-4.15.0-*-generic linux-image-unsigned-4.15.0-*-generic linux-image-4.15.0-*-generic linux-modules-4.15.0-*-generic',
 		},
 		"linux-generic-hwe-18.04" => {
 			installCommand => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
@@ -206,22 +206,22 @@ my %flavours = (
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
 			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
-			searchCommand => 'linux-generic linux-image-generic linux-modules-extra-5.4.0-*-generic linux-image-unsigned-5.4.0-*-generic',
+			searchCommand => 'linux-generic linux-image-generic linux-modules-extra-5.4.0-*-generic linux-image-unsigned-5.4.0-*-generic linux-modules-5.4.0-*-generic linux-image-5.4.0-*-generic',
 		},
 		"linux-oem-20.04" => {
 			installCommand => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 			packages => ['linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem'],
-			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem',
+			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem linux-modules-5.10.0-*-oem',
 		},
 		"linux-generic-hwe-20.04" => {
 			installCommand => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
 			packages => ['linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8-headers-5.8.0-*', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic linux-modules-extra-5.8.0-*-generic linux-image-unsigned-5.4.0-*-generic',
+			searchCommand => 'linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic linux-modules-extra-5.8.0-*-generic linux-image-unsigned-5.4.0-*-generic linux-modules-5.8.0-*-generic',
 		},
 		"linux-generic-hwe-20.04-edge" => {
 			installCommand => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
 			packages => ['linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic linux-image-unsigned-5.11.0-*-generic',
+			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic linux-modules-5.11.0-*-generic',
 		},
 	},
 );
