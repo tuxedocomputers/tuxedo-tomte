@@ -199,7 +199,7 @@ my %flavours = (
 		"linux-generic-hwe-18.04-edge" => {
 			installCommand => 'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
 			packages => ['linux-generic-hwe-18.04-edge', 'linux-headers-generic-hwe-18.04-edge', 'linux-image-generic-hwe-18.04-edge', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge linux-modules-extra-5.4.0-*-generic 	linux-image-unsigned-5.4.0-*-generic',
+			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge linux-modules-extra-5.4.0-*-generic linux-image-unsigned-5.4.0-*-generic',
 		},
 	},
 	"20.04" => {
@@ -221,7 +221,7 @@ my %flavours = (
 		"linux-generic-hwe-20.04-edge" => {
 			installCommand => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
 			packages => ['linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic'],
-			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic 	linux-image-unsigned-5.11.0-*-generic',
+			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic linux-image-unsigned-5.11.0-*-generic',
 		},
 	},
 );
@@ -3259,7 +3259,7 @@ sub installKernelFlavour {
 	foreach (@lines) {
 		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][i]/))) {
 			printLog("package missing", 'TL2');
-			printLog("$_", 'TL3');
+			printLog("$_", 'TL2');
 			$packageMissing = 1;
 		}
 	}
@@ -3269,10 +3269,10 @@ sub installKernelFlavour {
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
-			printLog("make configure -a", 'TL3');
+			printLog("make configure -a", 'TL2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				printLog("configure -a failed!!", 'TL3');
+				printLog("configure -a failed!!", 'TL2');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
@@ -3398,7 +3398,7 @@ sub uninstKernelFlavour {
 		}
 		return ($failed, $somethingWasDone);
 	} else {
-		printLog("all is good, no packages to uninstall found for $flavour", 'TL3');
+		printLog("all is good, no packages to uninstall found for $flavour", 'TL2');
 		return (0, 0);
 	}
 }
