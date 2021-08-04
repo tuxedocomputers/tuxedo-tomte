@@ -3270,6 +3270,7 @@ sub installKernelFlavour {
 	if ($packageMissing) {
 		printLog("installing $flavour", 'TL1');
 		`apt-get update -q`;
+		messageLongInstall();
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
 			printLog("make configure -a", 'TL2');
@@ -4612,6 +4613,7 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
+	$restartSystem = 0;
 	if (! tries($triesLimit)) {
 		printLog('repeat limit reached, program will not start again');
 		if ($restartSystem) {
@@ -4700,14 +4702,15 @@ sub listSuccess {
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
 	}
-	if (triesAlreadyDone() < 1) {
+	#TODO debug
+#	if (triesAlreadyDone() < 1) {
 		if ($restartSystem == 1) {
 			messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
 			print "\nPlease restart the system for the changes to take effect\n";
 		} elsif ( configuredModulesExceptDefault(@successModules) ) {
 			messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 		}
-	}
+#	}
 }
 
 
