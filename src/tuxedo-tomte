@@ -5043,4 +5043,12 @@ if (@ARGV != 0) {
 	help();
 }
 
-
+# interrupt repeated delayed execution if not necessary anymore
+#TODO debug
+printLog('testing repeated execution', 'TL2');
+if ($startLaterAgain == 0) {
+	if (-e $triesFile) {
+		printLog('interrupt delayed execution', 'TL2');
+		unlink($triesFile);
+	}
+}
