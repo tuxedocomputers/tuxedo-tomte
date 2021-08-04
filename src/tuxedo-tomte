@@ -211,7 +211,7 @@ my %flavours = (
 		"linux-oem-20.04" => {
 			installCommand => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 			packages => ['linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem'],
-			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b linux-image-5.10.0-*-oem linux-modules-5.10.0-*-oem',
+			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b',
 		},
 		"linux-generic-hwe-20.04" => {
 			installCommand => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
@@ -222,6 +222,11 @@ my %flavours = (
 			installCommand => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
 			packages => ['linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic'],
 			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic linux-modules-5.11.0-*-generic',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installCommand => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge linux-tools-tuxedo-20.04-edge',
+			packages => ['linux-tuxedo-20.04-edge', 'linux-headers-tuxedo-20.04-edge', 'linux-image-tuxedo-20.04-edge', 'linux-tools-tuxedo-20.04-edge', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-oem-5.10-headers-5.10.0-1034', 'linux-modules-5.10.0-1034-oem', 'linux-tools-5.10.0-1034-oem'],
+			searchCommand => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge linux-tools-tuxedo-20.04-edge',
 		},
 	},
 );
@@ -608,8 +613,8 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kerneloem2004 => {
-		name => 'kernel-oem',
+	kerneltuxedo2004edge => {
+		name => 'kernel-tuxedo-20.04-edge',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -617,7 +622,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel version tuxedo-linux',
+		description => 'Required kernel version linux-tuxedo',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1111,13 +1116,13 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/GMxZGxx/) &&
    		($distributionVersion =~ /20.04/)) {
-		$origConfModules{kerneloem2004}{required} = 'yes';
-		printLog('kernel linux-oem should be default');
-	} else {
+		#TODO change both just for debug purposes
 		$origConfModules{kernelhwe}{required} = 'yes';
+		printLog('kernel linux-tuxedo-20.04-edge should be default');
+	} else {
+		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		printLog('standard kernel linux-generic-hwe should be default');
 	}
-
 }
 
 
@@ -2321,7 +2326,7 @@ sub kernelhwe() {
 ###############################################################################
 # kernel-oem-20.04
 #
-sub kerneloem2004() {
+sub kerneltuxedo2004edge() {
 	my $module = shift;
 	my $action = shift;
 	my $instFailed;
@@ -2330,9 +2335,12 @@ sub kerneloem2004() {
 	my $tmpDone;
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /20.04/) {
-			($instFailed, $instDone) = installKernelFlavour('linux-oem-20.04');
+			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2342,11 +2350,11 @@ sub kerneloem2004() {
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
-				printLog('new kernel linux-oem-20.04 could not be installed', 'TL1');
+				printLog('new kernel linux-tuxedo-20.04-edge could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-oem-20.04 was installed', 'TL1');
+				printLog('new kernel linux-tuxedo-20.04-edge was installed', 'TL1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
