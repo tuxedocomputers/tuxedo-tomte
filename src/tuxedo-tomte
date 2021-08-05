@@ -188,44 +188,36 @@ my %flavours = (
 	"18.04" => {
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
-			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-4.15.0-*-generic', 'linux-image-4.15.0-*-generic', 'linux-modules-extra-4.15.0-*-generic', 'linux-modules-4.15.0-*-generic'],
 			searchCommand => 'linux-generic linux-image-generic linux-headers-generic linux-image-4.15.0-*-generic linux-modules-extra-4.15.0-*-generic linux-image-unsigned-4.15.0-*-generic linux-image-4.15.0-*-generic linux-modules-4.15.0-*-generic',
 		},
 		"linux-generic-hwe-18.04" => {
 			installCommand => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
-			packages => ['linux-generic-hwe-18.04', 'linux-headers-generic-hwe-18.04', 'linux-image-generic-hwe-18.04', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
 			searchCommand => 'linux-generic-hwe-18.04 linux-image-generic-hwe-18.04',
 		},
 		"linux-generic-hwe-18.04-edge" => {
 			installCommand => 'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
-			packages => ['linux-generic-hwe-18.04-edge', 'linux-headers-generic-hwe-18.04-edge', 'linux-image-generic-hwe-18.04-edge', 'linux-headers-5.4.0-*-generic', 'linux-hwe-5.4-headers-5.4.0-*', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
 			searchCommand => 'linux-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
 		},
 	},
 	"20.04" => {
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
-			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-5.4.0-*-generic', 'linux-image-5.4.0-*-generic', 'linux-modules-extra-5.4.0-*-generic', 'linux-modules-5.4.0-*-generic'],
 			searchCommand => 'linux-generic linux-image-generic linux-modules-extra-5.4.0-*-generic linux-image-unsigned-5.4.0-*-generic linux-modules-5.4.0-*-generic linux-image-5.4.0-*-generic',
 		},
 		"linux-oem-20.04" => {
 			installCommand => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
-			packages => ['linux-oem-20.04', 'linux-oem-20.04b', 'linux-headers-oem-20.04b', 'linux-image-oem-20.04b', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-modules-5.10.0-*-oem'],
 			searchCommand => 'linux-oem-20.04 linux-oem-20.04b linux-image-oem-20.04b',
 		},
 		"linux-generic-hwe-20.04" => {
 			installCommand => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
-			packages => ['linux-generic-hwe-20.04', 'linux-headers-generic-hwe-20.04', 'linux-image-generic-hwe-20.04', 'linux-headers-5.8.0-*-generic', 'linux-hwe-5.8-headers-5.8.0-*', 'linux-image-5.8.0-*-generic', 'linux-modules-extra-5.8.0-*-generic', 'linux-modules-5.8.0-*-generic'],
 			searchCommand => 'linux-generic-hwe-20.04 linux-image-generic-hwe-20.04 linux-image-5.8.0-*-generic linux-modules-extra-5.8.0-*-generic linux-image-unsigned-5.4.0-*-generic linux-modules-5.8.0-*-generic',
 		},
 		"linux-generic-hwe-20.04-edge" => {
 			installCommand => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
-			packages => ['linux-generic-hwe-20.04-edge', 'linux-headers-generic-hwe-20.04-edge', 'linux-image-generic-hwe-20.04-edge', 'linux-headers-5.11.0-*-generic', 'linux-hwe-5.11-headers-5.11.0-*', 'linux-image-5.11.0-*-generic', 'linux-modules-extra-5.11.0-*-generic', 'linux-modules-5.11.0-*-generic'],
 			searchCommand => 'linux-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge linux-image-5.11.0-*-generic linux-image-unsigned-5.11.0-*-generic linux-modules-extra-5.11.0-25-generic linux-modules-5.11.0-*-generic',
 		},
 		"linux-tuxedo-20.04-edge" => {
 			installCommand => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge linux-tools-tuxedo-20.04-edge',
-			packages => ['linux-tuxedo-20.04-edge', 'linux-headers-tuxedo-20.04-edge', 'linux-image-tuxedo-20.04-edge', 'linux-tools-tuxedo-20.04-edge', 'linux-headers-5.10.0-*-oem', 'linux-image-5.10.0-*-oem', 'linux-oem-5.10-headers-5.10.0-1034', 'linux-modules-5.10.0-1034-oem', 'linux-tools-5.10.0-1034-oem'],
 			searchCommand => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge linux-tools-tuxedo-20.04-edge',
 		},
 	},
@@ -3256,6 +3248,7 @@ sub installKernelFlavour {
 		return (1,0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installCommand'}.' 2>&1';
+	populateFlavourPackages("$flavour");
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
 
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
@@ -3276,9 +3269,9 @@ sub installKernelFlavour {
 	}
 
 	if ($packageMissing) {
+		messageLongInstall();
 		printLog("installing $flavour", 'TL1');
 		`apt-get update -q`;
-		messageLongInstall();
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
 			printLog("make configure -a", 'TL2');
@@ -3336,22 +3329,22 @@ sub populateFlavourPackages {
 	my $searchCmd;
 	my $result;
 	my @lines;
-	$searchCmd = 'dpkg-query -W -f=\'${Depends}\n\' '.$flavours{$distributionVersion}{$flavour}{'installCommand'};
+	$searchCmd = 'apt-cache depends '.$flavours{$distributionVersion}{$flavour}{'installCommand'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installCommand'});
 	$result = `$searchCmd`;
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
-		/([a-z0-9\-\_\.]+)/;
+		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
 		if ($_ =~ /^linux-.*(?:image|headers|modules|tools)-.*/) {
 			$packageLine = $packageLine." $_";
 			push @packages, $_;
 		}
 	}
-	$searchCmd = 'dpkg-query -W -f=\'${Depends}\n\' '.$packageLine;
+	$searchCmd = 'apt-cache depends '.$packageLine;
 	$result = `$searchCmd`;
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
-		/([a-z0-9\-\_\.]+)/;
+		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
 		if ($_ =~ /^linux-.*(?:image|headers|modules|tools)-.*/) {
 			push @packages, $_;
 		}
@@ -3379,6 +3372,7 @@ sub uniq {
 #
 sub uninstKernelFlavour {
 	my $flavour = shift;
+	my $keepFlavour = shift;
 	my $retString;
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
@@ -3393,7 +3387,15 @@ sub uninstKernelFlavour {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		return (1,0);
 	}
-	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'searchCommand'}.' 2>&1';
+	populateFlavourPackages("$flavour");
+	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = split(' ', $flavours{$distributionVersion}{$flavour}{'installCommand'});
+	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
+		if (($package =~ /^linux-.*(?:image|modules|tools)-.*/) &&
+			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$keepFlavour}{'packages'}}))) {
+			$flavours{$distributionVersion}{$flavour}{'deletePackages'} .=  " $package";
+		}
+	}
+	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'deletePackages'}.' 2>&1';
 	# find which packages are installed
 	printLog('find which packages are installed', 'TL2');
 	$retString = `$searchCmd`;
