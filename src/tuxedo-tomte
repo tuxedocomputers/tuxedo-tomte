@@ -189,7 +189,7 @@ my %flavours = (
 		"linux-generic" => {
 			installCommand => 'linux-generic linux-headers-generic linux-image-generic',
 			packages => ['linux-generic', 'linux-headers-generic', 'linux-image-generic', 'linux-headers-4.15.0-*-generic', 'linux-image-4.15.0-*-generic', 'linux-modules-extra-4.15.0-*-generic', 'linux-modules-4.15.0-*-generic'],
-			searchCommand => 'linux-generic linux-image-generic linux-image-4.15.0-*-generic linux-modules-extra-4.15.0-*-generic linux-image-unsigned-4.15.0-*-generic linux-image-4.15.0-*-generic linux-modules-4.15.0-*-generic',
+			searchCommand => 'linux-generic linux-image-generic linux-headers-generic linux-image-4.15.0-*-generic linux-modules-extra-4.15.0-*-generic linux-image-unsigned-4.15.0-*-generic linux-image-4.15.0-*-generic linux-modules-4.15.0-*-generic',
 		},
 		"linux-generic-hwe-18.04" => {
 			installCommand => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
@@ -3320,6 +3320,53 @@ sub installKernelFlavour {
 	}
 	printLog("failed: $failed, somethingdone: $somethingDone", 'TL2');
 	return ($failed, $somethingDone);
+}
+
+
+
+
+###############################################################################
+# finds which main packages belong to the flavour and puts them into a list
+# works only if packages are known and installed on the system
+#
+sub populateFlavourPackages {
+	my $flavour = shift;
+	my @packages;
+	my $packageLine;
+	my $searchCmd;
+	my $result;
+	my @lines;
+	$searchCmd = 'dpkg-query -W -f=\'${Depends}\n\' '.$flavours{$distributionVersion}{$flavour}{'installCommand'};
+	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installCommand'});
+	$result = `$searchCmd`;
+	@lines = split /[\n,\s]+/, $result;
+	foreach (@lines) {
+		/([a-z0-9\-\_\.]+)/;
+		if ($_ =~ /^linux-.*(?:image|headers|modules|tools)-.*/) {
+			$packageLine = $packageLine." $_";
+			push @packages, $_;
+		}
+	}
+	$searchCmd = 'dpkg-query -W -f=\'${Depends}\n\' '.$packageLine;
+	$result = `$searchCmd`;
+	@lines = split /[\n,\s]+/, $result;
+	foreach (@lines) {
+		/([a-z0-9\-\_\.]+)/;
+		if ($_ =~ /^linux-.*(?:image|headers|modules|tools)-.*/) {
+			push @packages, $_;
+		}
+	}
+	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
+}
+
+
+
+###############################################################################
+# returns array where all values are unique
+#
+sub uniq {
+    my %seen;
+    return grep { !$seen{$_}++ } @_;
 }
 
 
