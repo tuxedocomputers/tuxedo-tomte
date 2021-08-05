@@ -361,6 +361,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	backlightfix2 => {
+		name => 'backlight-fix2',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight issues for GTX1060 with AUO Model 21229 displays',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+
 	tuxedorepos => {
 		name => 'tuxedo-repos',
 		version => 3,
@@ -949,13 +966,19 @@ sub checkRequirements {
 		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
-	if (($boardname =~ /N8xEJEK/) ||
-		($boardname =~ /P95_HP/)) {
+	if ($boardname =~ /N8xEJEK/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('detected backlight-fix issue');
 		}
 	}
+	if ($boardname =~ /P95_HP/) {
+		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
+			$origConfModules{backlightfix2}{required} = 'yes';
+			printLog('detected backlight-fix2 issue');
+		}
+	}
+
 
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
@@ -1457,7 +1480,6 @@ sub nokeyboardaftersuspendfix() {
 ###############################################################################
 # Fixes backlight issue with AUO Model 12701 displays on
 # - DX1708
-# - P95_HP 
 #
 sub backlightfix() {
 	my $module = shift;
@@ -1503,6 +1525,59 @@ sub backlightfix() {
 		# not implemented yet
 	}
 }
+
+
+###############################################################################
+# Fixes backlight issue with AUO Model 21229 displays on
+# - P95_HP 
+#
+sub backlightfix2() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
 
 
 ###############################################################################
