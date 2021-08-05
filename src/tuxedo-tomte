@@ -949,7 +949,8 @@ sub checkRequirements {
 		printLog('detected tuxedo-touchpad-switch issue');
 	}
 
-	if ($boardname =~ /(N8xEJEK)/) {
+	if (($boardname =~ /N8xEJEK/) ||
+		($boardname =~ /P95_HP/)) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog('detected backlight-fix issue');
@@ -1455,7 +1456,8 @@ sub nokeyboardaftersuspendfix() {
 
 ###############################################################################
 # Fixes backlight issue with AUO Model 12701 displays on
-# - DX1708 
+# - DX1708
+# - P95_HP 
 #
 sub backlightfix() {
 	my $module = shift;
