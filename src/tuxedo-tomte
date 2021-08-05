@@ -697,6 +697,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	i915disablepsrfix => {
+		name => 'i915-disable-psr-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes screen flickering when using some input devices',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
 
 );
 
@@ -1053,6 +1069,10 @@ sub checkRequirements {
 			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
 			printLog('detected amdgpu-backlight-aux-off issue');
 		}
+	}
+	if ($boardname =~ m/PHxTxX1/) {
+		$origConfModules{i915disablepsrfix}{required} = 'yes';
+		printLog('detected i915-disable-psr-fix issue');
 	}
 
 }
@@ -2754,6 +2774,58 @@ sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
 	my @kernel_parameters = ("amdgpu.backlight=0");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
+# Fixes screen flickering when using some input devices
+# - PHxTxX1
+#
+sub i915disablepsrfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.enable_psr=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
