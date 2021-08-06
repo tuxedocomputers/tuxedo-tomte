@@ -2277,8 +2277,8 @@ sub kernelhwe() {
 		if ($distributionVersion =~ /18.04/) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-18.04');
 			if ($instFailed == 0) {
-				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-18.04-edge');
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-18.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-18.04-edge', 'linux-generic-hwe-18.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -2301,8 +2301,8 @@ sub kernelhwe() {
 		} elsif ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
-				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04');
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
@@ -2353,14 +2353,14 @@ sub kerneltuxedo2004edge() {
 		if ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
-				($instFailed, $instDone) = uninstKernelFlavour('linux-generic');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04');
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -3422,7 +3422,7 @@ sub populateFlavourPackages {
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
-		if ($_ =~ /^linux-.*(?:image|headers|modules|tools)-.*/) {
+		if ($_ =~ /^linux-.*(?:image|headers|modules)-.*/) {
 			push @packages, $_;
 		}
 	}
@@ -3465,12 +3465,12 @@ sub uninstKernelFlavour {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		return (1,0);
 	}
+	printLog("uninstKernel: $flavour keep: $keepFlavour", 'TL2');
 	populateFlavourPackages("$flavour");
 	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
-		if (($package =~ /^linux-.*(?:image|modules|tools)-.*/) &&
+		if (($package =~ /^linux-.*(?:image|modules)-.*/) &&
 			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$keepFlavour}{'packages'}}))) {
-			printLog("", 'TL2');
 			$flavours{$distributionVersion}{$flavour}{'deletePackages'} .= " $package";
 		}
 	}
