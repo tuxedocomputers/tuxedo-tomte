@@ -3331,15 +3331,13 @@ sub installKernelFlavour {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
 	$testCmd2 = $testCmd2.' 2>&1';
-	printLog("test: $testCmd2", 'TL2');
+	printLog("testcommand:\n$testCmd2", 'TL2');
 	$retString = `$testCmd2`;
-	#TODO debugs
-	printLog("retstring2 testcmd: $retString", 'TL2');
+	printLog("result:\n$retString", 'TL2');
 	@lines = split /\n/, $retString;
-	foreach (@lines) {
-		if (($_ =~ /dpkg-query:/) || (!($_ =~ /.*\s[ih][i]/))) {
-			printLog("package missing", 'TL2');
-			printLog("$_", 'TL2');
+	foreach $package (@lines) {
+		if (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/))) {
+			printLog("package missing: $package", 'TL2');
 			$packageMissing = 1;
 		}
 	}
@@ -3350,10 +3348,11 @@ sub installKernelFlavour {
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
-			printLog("make configure -a", 'TL2');
+			printLog("some packages are not configured", 'TL2');
+			printLog("executing: make configure -a", 'TL2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				printLog("configure -a failed!!", 'TL2');
+				printLog("configure -a failed!! exiting", 'TL2');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
@@ -3412,8 +3411,8 @@ sub populateFlavourPackages {
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
-		if ($_ =~ /^linux-.*(?:image|headers|modules)-.*/) {
-			$packageLine = $packageLine." $_";
+		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
+			$packageLine .= " $_";
 			push @packages, $_;
 		}
 	}
@@ -3433,7 +3432,8 @@ sub populateFlavourPackages {
 
 
 ###############################################################################
-# returns array where all values are unique
+# receives an array
+# returns an array where all values are unique
 #
 sub uniq {
     my %seen;
@@ -3443,7 +3443,9 @@ sub uniq {
 
 
 ###############################################################################
-# deinstall and checks if all packages of this kernel were uninstalled
+# deinstalls(flavour_to_deinstall, flavour_not_be_deinstalled
+# and checks if all packages of this kernel were uninstalled
+# takes care not to deinstall any package from flavour_not_be_deinstalled
 # return (failed, somethingWasDone)
 # failed = 0 if there was no error
 # somethingWasDone = 1 if some package was uninstalled
@@ -3475,11 +3477,11 @@ sub uninstKernelFlavour {
 		}
 	}
 	printLog("packages to delete: $flavours{$distributionVersion}{$flavour}{'deletePackages'}", 'TL2');
-	$searchCmd = $searchCmd.$flavours{$distributionVersion}{$flavour}{'deletePackages'}.' 2>&1';
+	$searchCmd .= $flavours{$distributionVersion}{$flavour}{'deletePackages'}.' 2>&1';
 	# find which packages are installed
 	printLog('find which packages are installed', 'TL2');
 	$retString = `$searchCmd`;
-	printLog("retString: $retString", 'TL2');
+	printLog("return values:\n$retString", 'TL2');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
@@ -3494,12 +3496,11 @@ sub uninstKernelFlavour {
 		foreach $package (keys %pkgsHash) {
 			$deinstString .= ' '.$package;
 		}
-		$deinstString = $deinstString.' 2>&1';
+		$deinstString .= ' 2>&1';
 		printLog("uninstalling $flavour", 'TL1');
-		printLog("deinststring: $deinstString", 'TL2');
-		printLog("kernelRelease: $kernelRelease", 'TL2');
+		printLog("deinstallation command: $deinstString", 'TL2');
 		if ($deinstString =~ /$kernelRelease/) {
-			printLog("deinstalling current kernel", 'TL2');
+			printLog("deinstalling current kernel!", 'TL2');
 			$restartSystem = 1;
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
@@ -3507,10 +3508,11 @@ sub uninstKernelFlavour {
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
 			if ($retString =~ /sudo dpkg --configure -a/) {
-				printLog("make configure -a", 'TL2');
+				printLog("some packages are not configured", 'TL2');
+				printLog("executing: make configure -a", 'TL2');
 				`dpkg --configure -a`;
 				if ($? != 0) {
-					printLog("configure -a failed!!", 'TL2');
+					printLog("configure -a failed!! exiting", 'TL2');
 					return (1,0);
 				} else {
 					$retString = `$deinstString`;
@@ -3522,7 +3524,7 @@ sub uninstKernelFlavour {
 		} else {
 			$retString = `$deinstString`;
 		}
-		printLog("retString: $retString", 'TL2');
+		printLog("return: $retString", 'TL2');
 		if ($? != 0) {
 			printLog("error: $?", 'TL0');
 		} else {
