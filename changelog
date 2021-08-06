@@ -1,66 +1,15 @@
-tuxedo-tomte (2.4.15-25) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.20) focal; urgency=medium
 
-  * first steps
-  * kernel remove subroutines
-  * added install and deinstall kernel subroutines
-  * kernel install 18.04, first module done
-  * kernel install, modules ready
-  * packing
-  * debug return parameters kernel install
-  * finished deinstallKernel
-  * packing
-  * kernel remove stage 1
-  * test for kernel change
-  * checkout
-  * before checkout
-  * subprocedure uninstallKernelFlavour ready
-  * installKernelFlavour almost ready
-  * install and uninstall kernel ready
-  * packing
-  * corrected some arrays
-  * packing
-  * changed version 20.04 for hwe
-  * packing
-  * debug
-  * packing
-  * added debug notes
-  * packing
-  * added apt-get -q
-  * packing
-  * added dirty trick to delete current kernel
-  * work around to deinstall current kernel
-  * packing
-  * before checkout to master
-  * before checkout
-  * corrected wrong package
-  * added kernels for 18.04
-  * preliminary kernels ready
-  * missing blanks
-  * remove --force-yes
-  * loots of tlittle debugs
-  * UNRELEASED
-  * debug
-  * debug deadlock
-  * debug deadlock 2
-  * corrected wrong output for kernel install
-  * major rewrite package pressence recognition
-  * added loglevel
-  * added packages to check and delete
-  * some debug changes, some blanks
-  * added packages to list to be removed
-  * some modules for kernels
-  * deleted packages from being deleted in 18.04
-  * added tomte delayed
-  * restartsystem
-  * some try again restriction
-  * limit repeated execution
-  * refinded restart procedure
-  * added tuxedo kernel
-  * added search for package names
-  * compare each package
-  * test release
+  * minor fix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Aug 2021 16:02:23 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Aug 2021 20:41:39 +0200
+
+tuxedo-tomte (2.4.19) focal; urgency=medium
+
+  * added i915-disable-psr-fix for PHxTxX1, IBP1406
+  * added P95_HP for backlightfix, GTX1060
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Aug 2021 18:33:40 +0200
 
 tuxedo-tomte (2.4.15) focal; urgency=medium
 
