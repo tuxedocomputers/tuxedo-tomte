@@ -1,3 +1,92 @@
+tuxedo-tomte (2.4.20-1) UNRELEASED; urgency=medium
+
+  * first steps
+  * kernel remove subroutines
+  * added install and deinstall kernel subroutines
+  * kernel install 18.04, first module done
+  * kernel install, modules ready
+  * packing
+  * debug return parameters kernel install
+  * finished deinstallKernel
+  * packing
+  * kernel remove stage 1
+  * test for kernel change
+  * checkout
+  * before checkout
+  * subprocedure uninstallKernelFlavour ready
+  * installKernelFlavour almost ready
+  * install and uninstall kernel ready
+  * packing
+  * corrected some arrays
+  * packing
+  * changed version 20.04 for hwe
+  * packing
+  * debug
+  * packing
+  * added debug notes
+  * packing
+  * added apt-get -q
+  * packing
+  * added dirty trick to delete current kernel
+  * work around to deinstall current kernel
+  * packing
+  * before checkout to master
+  * packing
+  * corrected wrong package
+  * packing
+  * added kernels for 18.04
+  * preliminary kernels ready
+  * packing
+  * missing blanks
+  * packing
+  * remove --force-yes
+  * packing
+  * loots of tlittle debugs
+  * packing
+  * packing
+  * debug
+  * packing
+  * debug deadlock
+  * packing
+  * debug deadlock 2
+  * packing
+  * corrected wrong output for kernel install
+  * packing
+  * major rewrite package pressence recognition
+  * packing
+  * added loglevel
+  * packing
+  * added packages to check and delete
+  * packing
+  * some debug changes, some blanks
+  * packing
+  * added packages to list to be removed
+  * packing
+  * some modules for kernels
+  * packing
+  * deleted packages from being deleted in 18.04
+  * packing
+  * added tomte delayed
+  * packing
+  * restartsystem
+  * packing
+  * some try again restriction
+  * packing
+  * limit repeated execution
+  * packing
+  * refinded restart procedure
+  * packing
+  * added tuxedo kernel
+  * packing
+  * added search for package names
+  * compare each package
+  * test release
+  * packing
+  * before checkout
+  * before checkout
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 06 Aug 2021 08:57:36 +0200
+
 tuxedo-tomte (2.4.20) focal; urgency=medium
 
   * minor fix
