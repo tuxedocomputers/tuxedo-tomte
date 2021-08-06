@@ -3421,7 +3421,7 @@ sub populateFlavourPackages {
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
-		if ($_ =~ /^linux-.*(?:image|headers|modules)-.*/) {
+		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
 			push @packages, $_;
 		}
 	}
@@ -3436,8 +3436,8 @@ sub populateFlavourPackages {
 # returns an array where all values are unique
 #
 sub uniq {
-    my %seen;
-    return grep { !$seen{$_}++ } @_;
+	my %seen;
+	return grep { !$seen{$_}++ } @_;
 }
 
 
