@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+my $logLevel = 1;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -2304,7 +2304,10 @@ sub kernelhwe() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-generic-hwe-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
