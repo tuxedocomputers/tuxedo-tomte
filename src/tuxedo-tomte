@@ -1126,15 +1126,15 @@ sub checkRequirements {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
-	if (($boardname =~ m/GMxZGxx/) &&
-   		($distributionVersion =~ /20.04/)) {
+	#	if (($boardname =~ m/GMxZGxx/) &&
+	#   		($distributionVersion =~ /20.04/)) {
 		#TODO change both just for debug purposes
-		$origConfModules{kernelhwe}{required} = 'yes';
-		printLog('kernel linux-tuxedo-20.04-edge should be default');
-	} else {
-		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		printLog('standard kernel linux-generic-hwe should be default');
-	}
+		#		$origConfModules{kernelhwe}{required} = 'yes';
+		#		printLog('kernel linux-tuxedo-20.04-edge should be default');
+		#	} else {
+	$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		#		printLog('standard kernel linux-generic-hwe should be default');
+		#	}
 
 }
 
@@ -4110,6 +4110,13 @@ sub writeConfigFile {
 		printLog("writing configfile");
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
+			#TODO debug!!!
+			if ($name =~ /kernel/) {
+				printLog("upgrade: $origConfModules{$name}{upgrade}", 'TL2');
+				printLog("upgraded: $origConfModules{$name}{upgraded}", 'TL2');
+				printLog("installed: $origConfModules{$name}{installed}", 'TL2');
+				printLog("installed: $localConfModules{$name}{installed}", 'TL2');
+			}
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{upgrade} eq 'yes') {
 				# upgrade available
@@ -5190,7 +5197,8 @@ if (@ARGV != 0) {
 printLog('testing repeated execution', 'TL2');
 if ($startLaterAgain == 0) {
 	if (-e $triesFile) {
-		printLog('interrupt delayed execution', 'TL2');
+		printLog('interrupt delayed execution, delete file', 'TL2');
 		unlink($triesFile);
 	}
+	printLog('no start again later', 'TL2');
 }
