@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 2;
+my $logLevel = 0;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -1126,15 +1126,14 @@ sub checkRequirements {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
-	#	if (($boardname =~ m/GMxZGxx/) &&
-	#   		($distributionVersion =~ /20.04/)) {
-		#TODO change both just for debug purposes
-		#		$origConfModules{kernelhwe}{required} = 'yes';
-		#		printLog('kernel linux-tuxedo-20.04-edge should be default');
-		#	} else {
-	$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		#		printLog('standard kernel linux-generic-hwe should be default');
-		#	}
+	if (($boardname =~ m/GMxZGxx/) &&
+		($distributionVersion =~ /20.04/)) {
+		printLog('kernel linux-tuxedo-20.04-edge should be default');
+		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+	} else {
+		printLog('standard kernel linux-generic-hwe should be default');
+		$origConfModules{kernelhwe}{required} = 'yes';
+	}
 
 }
 
@@ -4053,7 +4052,6 @@ sub readConfigFile {
 			if ($line =~ /^(\s)*$/) {
 				next;
 			}
-			printLog("line: $line", 'TL2');
 			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
@@ -4062,10 +4060,6 @@ sub readConfigFile {
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
-					#TODO debug
-					printLog("readConfig name: $shortname", 'TL2');
-					printLog("readConfig local install: $localConfModules{$shortname}{installed}", 'TL2');
-					printLog("readConfig orig install: $origConfModules{$shortname}{installed}", 'TL2');
 
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
@@ -4116,12 +4110,6 @@ sub writeConfigFile {
 		printLog("writing configfile");
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
-			#TODO debug!!!
-			printLog("name: $name", 'TL2');
-			printLog("upgrade: $origConfModules{$name}{upgrade}", 'TL2');
-			printLog("upgraded: $origConfModules{$name}{upgraded}", 'TL2');
-			printLog("installed: $origConfModules{$name}{installed}", 'TL2');
-			printLog("installed: $localConfModules{$name}{installed}", 'TL2');
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{upgrade} eq 'yes') {
 				# upgrade available
@@ -4853,15 +4841,12 @@ sub listSuccess {
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
 	}
-	#TODO debug
-#	if (triesAlreadyDone() < 1) {
-		if ($restartSystem == 1) {
-			messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
-			print "\nPlease restart the system for the changes to take effect\n";
-		} elsif ( configuredModulesExceptDefault(@successModules) ) {
-			messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
-		}
-#	}
+	if ($restartSystem == 1) {
+		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+		print "\nPlease restart the system for the changes to take effect\n";
+	} elsif ( configuredModulesExceptDefault(@successModules) ) {
+		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+	}
 }
 
 
@@ -5198,12 +5183,8 @@ if (@ARGV != 0) {
 }
 
 # interrupt repeated delayed execution if not necessary anymore
-#TODO debug
-printLog('testing repeated execution', 'TL2');
 if ($startLaterAgain == 0) {
 	if (-e $triesFile) {
-		printLog('interrupt delayed execution, delete file', 'TL2');
 		unlink($triesFile);
 	}
-	printLog('no start again later', 'TL2');
 }
