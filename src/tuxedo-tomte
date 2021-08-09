@@ -4417,7 +4417,7 @@ sub addToConfiguredModules {
 
 ###############################################################################
 # parses sub name from %origConfModules list from given module parameter name
-# returns the name of the module vector of found
+# returns the name of the module vector found
 # returns an empty string if not found
 #
 sub getSubName {
@@ -4599,7 +4599,7 @@ sub reconfigureAllModules {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				($localConfModules{$module}{installed} eq 'yes')) {
-			removeModule($origConfModules{$module});
+			removeModule($module);
 		}
 	}
 }
