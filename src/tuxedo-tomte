@@ -2309,8 +2309,8 @@ sub kernelhwe() {
 				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-generic-hwe-20.04');
 				if ($tmpFailed == 0) {
-					$origConfModules{'linux-tuxedo-20.04-edge'}{installed} = "no";
-					$origConfModules{'linux-tuxedo-20.04-edge'}{upgraded} = "no";
+					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004edge'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2365,8 +2365,8 @@ sub kerneltuxedo2004edge() {
 				$instDone = $instDone + $tmpDone;
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				if ($tmpFailed == 0) {
-					$origConfModules{'linux-generic-hwe-20.04'}{installed} = "no";
-					$origConfModules{'linux-generic-hwe-20.04'}{upgraded} = "no";
+					$origConfModules{'kernelhwe'}{installed} = "no";
+					$origConfModules{'kernelhwe'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
