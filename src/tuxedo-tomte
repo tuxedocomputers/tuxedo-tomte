@@ -4053,6 +4053,7 @@ sub readConfigFile {
 			if ($line =~ /^(\s)*$/) {
 				next;
 			}
+			printLog("line: $line", 'TL2');
 			# check data format
 			if (validConfigLine($line)) {
 				my ($name, @cols) = split /\s+/, $line;
@@ -4061,6 +4062,11 @@ sub readConfigFile {
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
+					#TODO debug
+					printLog("readConfig name: $shortname", 'TL2');
+					printLog("readConfig local install: $localConfModules{$shortname}{installed}", 'TL2');
+					printLog("readConfig orig install: $origConfModules{$shortname}{installed}", 'TL2');
+
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
@@ -4088,7 +4094,7 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line");
@@ -4111,12 +4117,11 @@ sub writeConfigFile {
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			#TODO debug!!!
-			if ($name =~ /kernel/) {
-				printLog("upgrade: $origConfModules{$name}{upgrade}", 'TL2');
-				printLog("upgraded: $origConfModules{$name}{upgraded}", 'TL2');
-				printLog("installed: $origConfModules{$name}{installed}", 'TL2');
-				printLog("installed: $localConfModules{$name}{installed}", 'TL2');
-			}
+			printLog("name: $name", 'TL2');
+			printLog("upgrade: $origConfModules{$name}{upgrade}", 'TL2');
+			printLog("upgraded: $origConfModules{$name}{upgraded}", 'TL2');
+			printLog("installed: $origConfModules{$name}{installed}", 'TL2');
+			printLog("installed: $localConfModules{$name}{installed}", 'TL2');
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{upgrade} eq 'yes') {
 				# upgrade available
@@ -4319,8 +4324,8 @@ sub listStatus {
 			$upgradeAvailable = ' - upgrade available';
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
-		($localConfModules{$module}{required} eq 'no') &&
-		($origConfModules{$module}{required} eq 'no')) {
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
 			$printIt = 1;
 			push(@arr,
