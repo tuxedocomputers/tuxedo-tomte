@@ -2287,7 +2287,7 @@ sub kernelhwe() {
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 was installed', 'TL1');
+				printLog('new kernel linux-generic-hwe-18.04 was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2321,7 +2321,7 @@ sub kernelhwe() {
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 was installed', 'TL1');
+				printLog('new kernel linux-generic-hwe-20.04 was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2380,7 +2380,7 @@ sub kerneltuxedo2004edge() {
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-tuxedo-20.04-edge was installed', 'TL1');
+				printLog('new kernel linux-tuxedo-20.04-edge was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3341,28 +3341,28 @@ sub installKernelFlavour {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
 	$testCmd2 = $testCmd2.' 2>&1';
-	printLog("testcommand:\n$testCmd2", 'TL2');
+	printLog("testcommand:\n$testCmd2", 'L2');
 	$retString = `$testCmd2`;
-	printLog("result:\n$retString", 'TL2');
+	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $package (@lines) {
 		if (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/))) {
-			printLog("package missing: $package", 'TL2');
+			printLog("package missing: $package", 'L2');
 			$packageMissing = 1;
 		}
 	}
 
 	if ($packageMissing) {
 		messageLongInstall();
-		printLog("installing $flavour", 'TL1');
+		printLog("installing $flavour", 'L1');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /sudo dpkg --configure -a/) {
-			printLog("some packages are not configured", 'TL2');
-			printLog("executing: make configure -a", 'TL2');
+			printLog("some packages are not configured", 'L2');
+			printLog("executing: make configure -a", 'L2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				printLog("configure -a failed!! exiting", 'TL2');
+				printLog("configure -a failed!! exiting", 'L2');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
@@ -3370,20 +3370,20 @@ sub installKernelFlavour {
 		}
 		if ($? != 0) {
 			printLog("something went wrong while installing kernel packages", 'TL0');
-			printLog("error: $?", 'TL1');
-			printLog("$retString", 'TL1');
+			printLog("error: $?", 'L1');
+			printLog("$retString", 'L1');
 		}
 	
 		$retString = `$testCmd`;
-		printLog("check installed packages: $retString", 'TL2');
+		printLog("check installed packages: $retString", 'L2');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ($_ =~ /dpkg-query:/) {
-				printLog("$_", 'TL2');
+				printLog("$_", 'L2');
 				$allPackagesInstalled = 0;
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
-				printLog("$1 is installed", 'TL2');
+				printLog("$1 is installed", 'L2');
 				$somethingDone = 1;
 			}
 		}
@@ -3396,7 +3396,7 @@ sub installKernelFlavour {
 	} else {
 		$failed = 1;
 	}
-	printLog("failed: $failed, somethingdone: $somethingDone", 'TL2');
+	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
 	return ($failed, $somethingDone);
 }
 
@@ -3414,7 +3414,7 @@ sub populateFlavourPackages {
 	my $searchCmd;
 	my $result;
 	my @lines;
-	printLog("populating $flavour", 'TL2');
+	printLog("populating $flavour", 'L2');
 	$searchCmd = 'apt-cache depends '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	$result = `$searchCmd`;
@@ -3436,7 +3436,7 @@ sub populateFlavourPackages {
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
-	printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'TL2');
+	printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'L2');
 }
 
 
@@ -3477,7 +3477,7 @@ sub uninstKernelFlavour {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		return (1,0);
 	}
-	printLog("uninstKernel: $flavour keep: $keepFlavour", 'TL2');
+	printLog("uninstKernel: $flavour keep: $keepFlavour", 'L2');
 	populateFlavourPackages("$flavour");
 	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
@@ -3486,12 +3486,12 @@ sub uninstKernelFlavour {
 			$flavours{$distributionVersion}{$flavour}{'deletePackages'} .= " $package";
 		}
 	}
-	printLog("packages to delete: $flavours{$distributionVersion}{$flavour}{'deletePackages'}", 'TL2');
+	printLog("packages to delete: $flavours{$distributionVersion}{$flavour}{'deletePackages'}", 'L2');
 	$searchCmd .= $flavours{$distributionVersion}{$flavour}{'deletePackages'}.' 2>&1';
 	# find which packages are installed
-	printLog('find which packages are installed', 'TL2');
+	printLog('find which packages are installed', 'L2');
 	$retString = `$searchCmd`;
-	printLog("return values:\n$retString", 'TL2');
+	printLog("return values:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach (@lines) {
 		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
@@ -3502,15 +3502,15 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
-		printLog("kernel packages to deinstall found", 'TL1');
+		printLog("kernel packages to deinstall found", 'L1');
 		foreach $package (keys %pkgsHash) {
 			$deinstString .= ' '.$package;
 		}
 		$deinstString .= ' 2>&1';
 		printLog("uninstalling $flavour", 'TL1');
-		printLog("deinstallation command: $deinstString", 'TL2');
+		printLog("deinstallation command: $deinstString", 'L2');
 		if ($deinstString =~ /$kernelRelease/) {
-			printLog("deinstalling current kernel!", 'TL2');
+			printLog("deinstalling current kernel!", 'L2');
 			$restartSystem = 1;
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
@@ -3518,11 +3518,11 @@ sub uninstKernelFlavour {
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
 			if ($retString =~ /sudo dpkg --configure -a/) {
-				printLog("some packages are not configured", 'TL2');
-				printLog("executing: make configure -a", 'TL2');
+				printLog("some packages are not configured", 'L2');
+				printLog("executing: make configure -a", 'L2');
 				`dpkg --configure -a`;
 				if ($? != 0) {
-					printLog("configure -a failed!! exiting", 'TL2');
+					printLog("configure -a failed!! exiting", 'L2');
 					return (1,0);
 				} else {
 					$retString = `$deinstString`;
@@ -3530,21 +3530,21 @@ sub uninstKernelFlavour {
 			}
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-			printLog("current kernel deinstalled", 'TL1');
+			printLog("current kernel deinstalled", 'L1');
 		} else {
 			$retString = `$deinstString`;
 		}
-		printLog("return: $retString", 'TL2');
+		printLog("return: $retString", 'L2');
 		if ($? != 0) {
-			printLog("error: $?", 'TL0');
+			printLog("error: $?", 'L0');
 		} else {
-			printLog('no error from deinstall', 'TL1');
+			printLog('no error from deinstall', 'L1');
 		}
 
 		# check wether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
-				printLog("unwanted package $package is still installed", 'TL0');
+				printLog("unwanted package $package is still installed", 'L0');
 				$failed = 1;
 			} else {
 				$somethingWasDone = 1;
@@ -3552,7 +3552,7 @@ sub uninstKernelFlavour {
 		}
 		return ($failed, $somethingWasDone);
 	} else {
-		printLog("all is good, no packages to uninstall found for $flavour", 'TL2');
+		printLog("all is good, no packages to uninstall found for $flavour", 'L2');
 		return (0, 0);
 	}
 }
