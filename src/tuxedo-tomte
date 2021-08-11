@@ -1066,6 +1066,11 @@ sub checkRequirements {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
 	}
+	if (($boardname =~ m/GMxZGxx/) &&
+		($kernelRelease =~ /5.1[01].0-/)) {
+		$origConfModules{amdgpudkms}{required} = 'yes';
+		printLog('detected amd-gpu issue');
+	}
 	if ($boardname =~ m/NHxxRZQ/) {
 		$origConfModules{r8168dkms}{required} = 'yes';
 		printLog('detected r8168-dkms issue');
