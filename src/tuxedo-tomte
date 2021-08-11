@@ -714,6 +714,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	tuxedopinfixtgldkms => {
+		name => 'tuxedo-pinfix-tgl-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes ',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
 
 );
 
@@ -1082,7 +1098,10 @@ sub checkRequirements {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
-
+	if ($boardname =~ m/GMxTGxx/) {
+		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
+		printLog('detected tuxedo-pinfix-tgl-dkms issue');
+	}
 }
 
 
@@ -2877,6 +2896,48 @@ sub i915disablepsrfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Fixes 
+# - GMxTGxx
+#
+sub tuxedopinfixtgldkms() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed");
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+
 
 
 
