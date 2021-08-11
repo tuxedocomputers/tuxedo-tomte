@@ -721,9 +721,9 @@ my %origConfModules = (
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
-		package => 'no',
+		package => 'yes',
 		fainame => '',
-		description => 'Fixes ',
+		description => 'Fixes unresponsive touchpad',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2900,7 +2900,7 @@ sub i915disablepsrfix() {
 
 
 ###############################################################################
-# Fixes 
+# Fixes unresponsive touchpad 
 # - GMxTGxx
 #
 sub tuxedopinfixtgldkms() {
