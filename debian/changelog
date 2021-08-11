@@ -1,19 +1,14 @@
-tuxedo-tomte (2.4.20-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.22) UNRELEASED; urgency=medium
 
-  * final
-  * final2
-  * final3
-  * delete old kernel from list
-  * correct module names
-  * removed several debug messages
+  * added pinfix-tgl-dkms for GMxTGxx, Stellaris/Polaris 15 AMD Gen3
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 10 Aug 2021 08:34:30 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 14:59:23 +0200
 
-tuxedo-tomte (2.4.20) focal; urgency=medium
+tuxedo-tomte (2.4.21) focal; urgency=medium
 
-  * minor fix
+  * added amdgpu-dkms for GMxZGxx, Stellaris/Polaris 15 AMD Gen3
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Aug 2021 20:41:39 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 10:28:11 +0200
 
 tuxedo-tomte (2.4.19) focal; urgency=medium
 
@@ -24,7 +19,7 @@ tuxedo-tomte (2.4.19) focal; urgency=medium
 
 tuxedo-tomte (2.4.15) focal; urgency=medium
 
-  * added BOE Model 2420 Serial Number 0 for GMxZGxx
+  * added BOE Model 2420 Serial Number 0 for GMxZGxx, Stellaris/Polaris 15 AMD Gen3
 
  -- E. Mohr <tux@tuxedocomputers.com>  Wed, 28 Jul 2021 16:23:37 +0200
 
