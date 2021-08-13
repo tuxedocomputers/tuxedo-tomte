@@ -3381,7 +3381,7 @@ sub installPackage {
 	my $retval;
 	printLog("install package $packageName");
 	if ($FAI) {
-		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		system("apt-get -qy install $packageName");
 		$retval = isPackageInstalled($packageName);
 	} else {
 		checkNetwork();
