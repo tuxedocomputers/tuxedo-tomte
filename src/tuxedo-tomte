@@ -212,6 +212,9 @@ my %flavours = (
 		"linux-tuxedo-20.04-edge" => {
 			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
 		},
+		"linux-tuxedo-20.04" => {
+			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
 	},
 );
 
@@ -599,6 +602,22 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004edge => {
+		name => 'kernel-tuxedo-20.04-edge',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kerneltuxedo2004 => {
 		name => 'kernel-tuxedo-20.04-edge',
 		version => 1,
 		installed => 'no',
@@ -1151,13 +1170,14 @@ sub checkRequirements {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
 		printLog('detected tuxedo-pinfix-tgl-dkms issue');
 	}
+	#kernel
 	if (($boardname =~ m/GMxZGxx/) &&
 		($distributionVersion =~ /20.04/)) {
 		printLog('kernel linux-tuxedo-20.04-edge should be default');
 		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 	} else {
-		printLog('standard kernel linux-generic-hwe should be default');
-		$origConfModules{kernelhwe}{required} = 'yes';
+		printLog('standard kernel linux-tuxedo-20.04 should be default');
+		$origConfModules{kerneltuxedo2004}{required} = 'yes';
 	}
 }
 
@@ -2338,6 +2358,13 @@ sub kernelhwe() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-generic-hwe-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
@@ -2423,6 +2450,74 @@ sub kerneltuxedo2004edge() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# kernel-tuxedo-20.04
+#
+sub kerneltuxedo2004() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed;
+	my $instDone;
+	my $tmpFailed;
+	my $tmpDone;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /20.04/) {
+			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelhwe'}{installed} = "no";
+					$origConfModules{'kernelhwe'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004edge'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				printLog('new kernel linux-tuxedo-20.04 could not be installed', 'TL1');
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-tuxedo-20.04 was installed', 'L1');
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		# no upgrades yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
 
 
 
