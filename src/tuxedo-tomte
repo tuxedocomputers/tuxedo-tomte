@@ -875,6 +875,15 @@ sub prerequisites {
 	reconfigureSingleModule('tuxedo-mirrors');
 }
 
+sub prerequisitesFAI {
+
+}
+
+sub postrequisitesFAI {
+	reconfigureSingleModule('tuxedo-repos');
+	reconfigureSingleModule('tuxedo-mirrors');
+}
+
 
 
 ###############################################################################
@@ -4931,8 +4940,9 @@ if (@ARGV != 0) {
 		$FAI = 1;
 		initLogging();
 		prepareValues();
-		prerequisites();
+		prerequisitesFAI();
 		configureAllModules();
+		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
