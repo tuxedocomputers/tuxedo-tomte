@@ -875,6 +875,15 @@ sub prerequisites {
 	reconfigureSingleModule('tuxedo-mirrors');
 }
 
+sub prerequisitesFAI {
+
+}
+
+sub postrequisitesFAI {
+	reconfigureSingleModule('tuxedo-repos');
+	reconfigureSingleModule('tuxedo-mirrors');
+}
+
 
 
 ###############################################################################
@@ -3381,7 +3390,7 @@ sub installPackage {
 	my $retval;
 	printLog("install package $packageName");
 	if ($FAI) {
-		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		system("apt-get -qy install $packageName");
 		$retval = isPackageInstalled($packageName);
 	} else {
 		checkNetwork();
@@ -4931,8 +4940,9 @@ if (@ARGV != 0) {
 		$FAI = 1;
 		initLogging();
 		prepareValues();
-		prerequisites();
+		prerequisitesFAI();
 		configureAllModules();
+		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
