@@ -1,9 +1,14 @@
-tuxedo-tomte (2.4.22-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.26) focal; urgency=medium
 
-  * packing
-  * before checkout
+  * FAI: Reorder repo modules install order
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 15:59:43 +0200
+ -- C. Sandberg <tux@tuxedocomputers.com>  Tue, 17 Aug 2021 12:32:39 +0200
+
+tuxedo-tomte (2.4.25) focal; urgency=medium
+
+  * added pinfix-tgl-dkms for GMxTGxx, Stellaris/Polaris 15 AMD Gen3
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 17:19:12 +0200
 
 tuxedo-tomte (2.4.21) focal; urgency=medium
 
