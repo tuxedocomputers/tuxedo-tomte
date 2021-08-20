@@ -969,6 +969,7 @@ sub checkRequirements {
 		($boardname =~ /PH4TQx1/) ||
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxMGxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
