@@ -28,6 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
+my $logLevel = 1;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -51,6 +52,7 @@ my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
 my $kernelRelease = `uname -r`;
+$kernelRelease =~ s/[\n\r]//g;
 
 my $lspciOutput = `lspci -vn`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -64,13 +66,6 @@ $boardvendor = readFileReturnLine($boardvendorFilename);
 my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
 my $sysvendor;
 $sysvendor = readFileReturnLine($sysvendorFilename);
-
-# for checking md5sums for corefix
-use Digest::MD5 qw(md5_hex);
-my %initrdHashSaved;
-my %initrdHashFiles;
-my $md5ConfigDir = '/etc/tomte/';
-my $md5Store = $md5ConfigDir.'md5sums';
 
 # for desktop messages
 my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
@@ -184,6 +179,39 @@ my %tuxedo_mirrors = (
 'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
+	},
+);
+
+
+
+my %flavours = (
+	"18.04" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-generic-hwe-18.04" => {
+			installPackages => 'linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04',
+		},
+		"linux-generic-hwe-18.04-edge" => {
+			installPackages => 'linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge',
+		},
+	},
+	"20.04" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-oem-20.04" => {
+			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-generic-hwe-20.04" => {
+			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
+		},
 	},
 );
 
@@ -554,16 +582,32 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernel => {
-		name => 'kernel',
-		version => 2,
+	kernelhwe => {
+		name => 'kernel-hwe',
+		version => 1,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel versions',
+		description => 'Required kernel version linux-generic-hwe',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kerneltuxedo2004edge => {
+		name => 'kernel-tuxedo-20.04-edge',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1117,6 +1161,14 @@ sub checkRequirements {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
 		printLog('detected tuxedo-pinfix-tgl-dkms issue');
 	}
+	if (($boardname =~ m/GMxZGxx/) &&
+		($distributionVersion =~ /20.04/)) {
+		printLog('kernel linux-tuxedo-20.04-edge should be default');
+		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+	} else {
+		printLog('standard kernel linux-generic-hwe should be default');
+		$origConfModules{kernelhwe}{required} = 'yes';
+	}
 }
 
 
@@ -1354,7 +1406,7 @@ sub amdgpuwithnvidiafix() {
 		if (backupFile($fileName)) {
 			unlink($fileName);
 		} else {
-			printLog('can\'t remove fix, it seems to be gone already', 'TL');
+			printLog('can\'t remove fix, it seems to be gone already', 'TL1');
 		}
 		$origConfModules{$module}{installed} = 'no';
 		$origConfModules{$module}{upgraded} = 'yes';
@@ -2245,173 +2297,142 @@ sub tuxedorestoreaudiofix() {
 
 
 ###############################################################################
-# kernel
+# kernel HWE 18.04 and 20.04
 #
-sub kernel() {
+sub kernelhwe() {
 	my $module = shift;
 	my $action = shift;
-	my $wasInstalled = 1;
-	my $packageLinuxGenericHwe1804;
-	my $packageLinuxImageGenericHwe1804;
-	my $packageLinuxHeadersGenericHwe1804;
-	my $packageLinuxSignedGenericHwe1804;
-	my $packageLinuxOem2004;
-	my $packageLinuxFirmware;
-	my $packageIntelMicrocode;
+	my $instFailed;
+	my $instDone;
+	my $tmpFailed;
+	my $tmpDone;
 	if ($action eq 'install') {
 		if ($distributionVersion =~ /18.04/) {
-			# check if the package is already installed
-			if( ! isPackageInstalled('linux-generic-hwe-18.04') ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageLinuxGenericHwe1804 = installPackage('linux-generic-hwe-18.04');
-			} else {
-				$packageLinuxGenericHwe1804 = 1;
+			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-18.04');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-18.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-18.04-edge', 'linux-generic-hwe-18.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
 			}
-			if( ! isPackageInstalled('linux-image-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxImageGenericHwe1804 = installPackage('linux-image-generic-hwe-18.04');
-			} else {
-				$packageLinuxImageGenericHwe1804 = 1;
-			}
-			if( ! isPackageInstalled('linux-headers-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxHeadersGenericHwe1804 = installPackage('linux-headers-generic-hwe-18.04');
-			} else {
-				$packageLinuxHeadersGenericHwe1804 = 1;
-			}
-			if( ! isPackageInstalled('linux-signed-generic-hwe-18.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxSignedGenericHwe1804 = installPackage('linux-signed-generic-hwe-18.04');
-			} else {
-				$packageLinuxSignedGenericHwe1804 = 1;
-			}
-	
-			if( $packageLinuxGenericHwe1804 && $packageLinuxImageGenericHwe1804 && $packageLinuxHeadersGenericHwe1804 && $packageLinuxSignedGenericHwe1804 ) {
-				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed");
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
-				}
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			} else {
-				$origConfModules{$module}{installed} = "failed";
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
-			}
-		
-		}
-		if ($distributionVersion =~ /20.04/) {
-			my $noIncompatibleKernel = 1;
-			if( isPackageInstalled('linux-image-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-image-oem-20.04'); 
-			}
-			if( isPackageInstalled('linux-headers-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-oem-20.04');
-			}
-			if( isPackageInstalled('linux-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-headers-oem-20.04');
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
-				$wasInstalled = 0;
-				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
-			} else {
-				$packageLinuxOem2004 = 1;
-			}
-			if( ! isPackageInstalled('linux-firmware') ) {
-				$wasInstalled = 0;
-				$packageLinuxFirmware = installPackage('linux-firmware');
-			} else {
-				$packageLinuxFirmware = 1;
-			}
-			if( ! isPackageInstalled('intel-microcode') ) {
-				$wasInstalled = 0;
-				$packageIntelMicrocode = installPackage('intel-microcode');
-			} else {
-				$packageIntelMicrocode = 1;
-			}
-
-			if( $wasInstalled && $noIncompatibleKernel ) {
-				printLog("$origConfModules{$module}{name} was already installed");
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-generic-hwe-18.04 was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				$restartSystem = 1;
 			} else {
-				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		} elsif ($distributionVersion =~ /20.04/) {
+			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-generic-hwe-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-generic-hwe-20.04');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-generic-hwe-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004edge'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-generic-hwe-20.04 was installed', 'L1');
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
 			}
 		}
 	}
 	if ($action eq 'upgrade') {
-		if ($distributionVersion =~ /20.04/) {
-			my $noIncompatibleKernel = 1;
-			if( isPackageInstalled('linux-image-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-image-oem-20.04'); 
-			}
-			if( isPackageInstalled('linux-headers-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-oem-20.04');
-			}
-			if( isPackageInstalled('linux-oem-20.04') ) {
-				$noIncompatibleKernel = 0;
-				deinstallPackage('linux-headers-oem-20.04');
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled('linux-generic-hwe-20.04') ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageLinuxOem2004 = installPackage('linux-generic-hwe-20.04');
-			} else {
-				$packageLinuxOem2004 = 1;
-			}
-			if( ! isPackageInstalled('linux-firmware') ) {
-				$wasInstalled = 0;
-				$packageLinuxFirmware = installPackage('linux-firmware');
-			} else {
-				$packageLinuxFirmware = 1;
-			}
-			if( ! isPackageInstalled('intel-microcode') ) {
-				$wasInstalled = 0;
-				$packageIntelMicrocode = installPackage('intel-microcode');
-			} else {
-				$packageIntelMicrocode = 1;
-			}
-
-			if( $wasInstalled && $noIncompatibleKernel ) {
-				printLog("$origConfModules{$module}{name} was already installed");
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			} elsif ( $packageLinuxOem2004 && $packageLinuxFirmware && $packageIntelMicrocode && !isPackageInstalled('linux-image-oem-20.04') && !isPackageInstalled('linux-headers-oem-20.04') && !isPackageInstalled('linux-oem-20.04') ) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
-			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-		}
+		# no upgrades yet
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
 
+
+
+
+
+###############################################################################
+# kernel-oem-20.04
+#
+sub kerneltuxedo2004edge() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed;
+	my $instDone;
+	my $tmpFailed;
+	my $tmpDone;
+	if ($action eq 'install') {
+		if ($distributionVersion =~ /20.04/) {
+			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelhwe'}{installed} = "no";
+					$origConfModules{'kernelhwe'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				printLog('new kernel linux-tuxedo-20.04-edge could not be installed', 'TL1');
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-tuxedo-20.04-edge was installed', 'L1');
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		# no upgrades yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
@@ -2959,85 +2980,6 @@ sub tuxedopinfixtgldkms() {
 
 
 ###############################################################################
-###############################################################################
-# subs for corefix md5 tests
-#
-
-###############################################################################
-# returns 1 if md5 file loaded correctly
-# returns 0 if md5 file failed to load
-#
-sub loadMD5Store {
-	my $md5Line;
-	if (open(FH, "<", $md5Store)) {
-		while ($md5Line = <FH>) {
-			chop($md5Line);
-			my ($key, $val) = split /:/, $md5Line;
-			$initrdHashSaved{$key} = $val;
-		}
-		close FH;
-		return (1);
-	} else {
-		printLog("no readable md5sum file available");
-		return (0);
-	}
-}
-
-sub readInitrdMD5Files {
-	my $initrdData;
-	my $md5sum;
-	if (opendir(BOOTDIR, '/boot')) {
-		while (readdir BOOTDIR) {
-			if ($_ =~ /initrd\.img/) {
-				local $/ = undef;
-				if (open( INITRDFILE, "/boot/$_" ) ) {
-					binmode(INITRDFILE);
-					$initrdData = <INITRDFILE>;
-					$md5sum = md5_hex($initrdData);
-					$initrdHashFiles{$_} = $md5sum;
-					close(INITRDFILE);
-				}
-			}
-		}
-		close BOOTDIR;
-	}
-}
-
-sub writeMD5Store {
-	if (open(FH, ">", $md5Store)) {
-		foreach my $key (keys %initrdHashFiles ) {
-			print FH "$key:$initrdHashFiles{$key}\n";
-		}
-		close(FH);
-	} else {
-		printLog("could not open $md5Store");
-	}
-}
-
-###############################################################################
-# returns 1 if found non equal or missing value between value in files and
-# saved values
-# returns 0 if all values are the same
-# returns 1 if something is different
-#
-sub newInitrdFiles {
-	if (loadMD5Store()) {
-		readInitrdMD5Files();
-		foreach my $key (keys %initrdHashFiles) {
-			if (!(exists $initrdHashSaved{$key}) || ($initrdHashFiles{$key} ne $initrdHashSaved{$key})) {
-				return (1);
-			}
-		}
-	} else {
-		return (1);
-	}
-	return (0);
-}
-
-
-
-
-###############################################################################
 # subs for tuxedorepos & tuxedomirrors
 #
 
@@ -3059,12 +3001,12 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 	if (!-d $sourcesListDir) {
-		printLog("no $sourcesListDir found (something's really wrong)", 'TL');
+		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
 		# no apt directory, somethings fishy
 		return (0);
 	}
 	if (!-d $sourcesListDirD) {
-		printLog("no $sourcesListDirD found, creating one", 'TL');
+		printLog("no $sourcesListDirD found, creating one", 'TL1');
 		mkdir($sourcesListDirD);
 	}
 
@@ -3221,7 +3163,7 @@ sub setComment {
 		close $FH;
 	} else {
 		printLog("Err: $!");
-		printLog("could not open repository mirrors list at $reposList", 'TL');
+		printLog("could not open repository mirrors list at $reposList", 'TL0');
 		return (0);
 	}
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
@@ -3361,6 +3303,38 @@ sub deinstallPackage {
 
 
 ###############################################################################
+# Deinstalls a package
+# returns 1 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 0 if everything was ok, even if no package were found
+#
+sub deinstallSinglePackage {
+	my $deinst = shift;
+	my $pkconDeinst = 'pkcon -yp remove';
+	my $retValue;
+
+	$pkconDeinst = $pkconDeinst.' '.$deinst;
+	printLog("deinstalling: $pkconDeinst");
+	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
+	if (isPackageInstalled($deinst)) {
+		if (system($pkconDeinst)) {
+			$retValue = $?/256;
+			printLog("failed to deinstall package, retvalue: $retValue");
+			return (1);
+		} else {
+			printLog('deinstallation of package successful');
+			return (0);
+		}
+	} else {
+		printLog("package $deinst was not found");
+	}
+}
+
+
+
+
+
+###############################################################################
 # Checks if the package is installed on the system
 # return 1 if yes
 # return 0 if no
@@ -3370,7 +3344,7 @@ sub isPackageInstalled {
 	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	if ($retString =~ m/^i[ncHUFWti][\sR]$/) {
+	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString");
 		return (1);
 	} else {
@@ -3405,6 +3379,260 @@ sub installPackage {
 	}
 	return $retval;
 }
+
+
+
+
+###############################################################################
+# installs a linux kernel from the name of the main metapackage
+# installLinuxKernel('metapackageName')
+# returns two parameters failed and nothingDone
+# failed = 0 all is good
+# failed = 1 some package was not installed
+# somethingDone = 1 something was changed
+# somethingDone = 0 nothing was changed (kernel was already installed)
+#
+sub installKernelFlavour {
+	my $flavour = shift;
+	my $failed = 0;
+	my $somethingDone = 0;
+	my $partialName;
+	my $installCmd = 'apt-get install -yq ';
+	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
+	my $testCmd2 = $testCmd;
+	my $retString;
+	my $package;
+	my $allPackagesInstalled = 1;
+	my @lines;
+	my $packageMissing = 0;
+	if (!(exists $flavours{$distributionVersion}{$flavour})) {
+		printLog("flavour $flavour does not exist!!", 'TL0');
+		return (1,0);
+	}
+	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
+	populateFlavourPackages("$flavour");
+	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
+
+	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
+		$testCmd2 = $testCmd2.' '.$package;
+	}
+	$testCmd2 = $testCmd2.' 2>&1';
+	printLog("testcommand:\n$testCmd2", 'L2');
+	$retString = `$testCmd2`;
+	printLog("result:\n$retString", 'L2');
+	@lines = split /\n/, $retString;
+	foreach $package (@lines) {
+		if (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/))) {
+			printLog("package missing: $package", 'L2');
+			$packageMissing = 1;
+		}
+	}
+
+	if ($packageMissing) {
+		messageLongInstall();
+		printLog("installing $flavour", 'L1');
+		`apt-get update -q`;
+		$retString = `$installCmd`;
+		if ($retString =~ /sudo dpkg --configure -a/) {
+			printLog("some packages are not configured", 'L2');
+			printLog("executing: make configure -a", 'L2');
+			`dpkg --configure -a`;
+			if ($? != 0) {
+				printLog("configure -a failed!! exiting", 'L2');
+				return (1,0);
+			} else {
+				$retString = `$installCmd`;
+			}
+		}
+		if ($? != 0) {
+			printLog("something went wrong while installing kernel packages", 'TL0');
+			printLog("error: $?", 'L1');
+			printLog("$retString", 'L1');
+		}
+	
+		$retString = `$testCmd`;
+		printLog("check installed packages: $retString", 'L2');
+		@lines = split /\n/, $retString;
+		foreach (@lines) {
+			if ($_ =~ /dpkg-query:/) {
+				printLog("$_", 'L2');
+				$allPackagesInstalled = 0;
+			} elsif ($_ =~ /.*\s[ih][i]/) {
+				/(\S+)\s*(\S+)/;
+				printLog("$1 is installed", 'L2');
+				$somethingDone = 1;
+			}
+		}
+	} else {
+		$somethingDone = 0;
+	}
+
+	if ($allPackagesInstalled) {
+		$failed = 0;
+	} else {
+		$failed = 1;
+	}
+	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
+	return ($failed, $somethingDone);
+}
+
+
+
+
+###############################################################################
+# finds which main packages belong to the flavour and puts them into a list
+# works only if packages are known and installed on the system
+#
+sub populateFlavourPackages {
+	my $flavour = shift;
+	my @packages;
+	my $packageLine;
+	my $searchCmd;
+	my $result;
+	my @lines;
+	printLog("populating $flavour", 'L2');
+	$searchCmd = 'apt-cache depends '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
+	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	$result = `$searchCmd`;
+	@lines = split /[\n,\s]+/, $result;
+	foreach (@lines) {
+		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
+		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
+			$packageLine .= " $_";
+			push @packages, $_;
+		}
+	}
+	$searchCmd = 'apt-cache depends '.$packageLine;
+	$result = `$searchCmd`;
+	@lines = split /[\n,\s]+/, $result;
+	foreach (@lines) {
+		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
+		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
+			push @packages, $_;
+		}
+	}
+	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
+	printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'L2');
+}
+
+
+
+###############################################################################
+# receives an array
+# returns an array where all values are unique
+#
+sub uniq {
+	my %seen;
+	return grep { !$seen{$_}++ } @_;
+}
+
+
+
+###############################################################################
+# deinstalls(flavour_to_deinstall, flavour_not_be_deinstalled
+# and checks if all packages of this kernel were uninstalled
+# takes care not to deinstall any package from flavour_not_be_deinstalled
+# return (failed, somethingWasDone)
+# failed = 0 if there was no error
+# somethingWasDone = 1 if some package was uninstalled
+#
+sub uninstKernelFlavour {
+	my $flavour = shift;
+	my $keepFlavour = shift;
+	my $retString;
+	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
+	my @lines;
+	my %pkgsHash;
+	my $deinstString = 'apt-get remove -yq --purge';
+	my $package;
+	my $somethingWasDone = 0;
+	my $failed = 0;
+
+	# find installed packages
+	if (!(exists $flavours{$distributionVersion}{$flavour})) {
+		printLog("flavour $flavour does not exist!!", 'TL0');
+		return (1,0);
+	}
+	printLog("uninstKernel: $flavour keep: $keepFlavour", 'L2');
+	populateFlavourPackages("$flavour");
+	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
+		if (($package =~ /^linux-.*(?:image|modules)-.*/) &&
+			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$keepFlavour}{'packages'}}))) {
+			$flavours{$distributionVersion}{$flavour}{'deletePackages'} .= " $package";
+		}
+	}
+	printLog("packages to delete: $flavours{$distributionVersion}{$flavour}{'deletePackages'}", 'L2');
+	$searchCmd .= $flavours{$distributionVersion}{$flavour}{'deletePackages'}.' 2>&1';
+	# find which packages are installed
+	printLog('find which packages are installed', 'L2');
+	$retString = `$searchCmd`;
+	printLog("return values:\n$retString", 'L2');
+	@lines = split /\n/, $retString;
+	foreach (@lines) {
+		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
+			/(\S+)\s*(\S+)/;
+			$pkgsHash{$1} = $2;
+		}
+	}
+
+	# deinstall found packages
+	if ((keys %pkgsHash) != 0) {
+		printLog("kernel packages to deinstall found", 'L1');
+		foreach $package (keys %pkgsHash) {
+			$deinstString .= ' '.$package;
+		}
+		$deinstString .= ' 2>&1';
+		printLog("uninstalling $flavour", 'TL1');
+		printLog("deinstallation command: $deinstString", 'L2');
+		if ($deinstString =~ /$kernelRelease/) {
+			printLog("deinstalling current kernel!", 'L2');
+			$restartSystem = 1;
+			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
+			my $fileText = "#!/bin/sh\nexit 0";
+			createFile('/usr/bin/linux-check-removal', $fileText);
+			chmod 755, '/usr/bin/linux-check-removal';
+			$retString = `$deinstString`;
+			if ($retString =~ /sudo dpkg --configure -a/) {
+				printLog("some packages are not configured", 'L2');
+				printLog("executing: make configure -a", 'L2');
+				`dpkg --configure -a`;
+				if ($? != 0) {
+					printLog("configure -a failed!! exiting", 'L2');
+					return (1,0);
+				} else {
+					$retString = `$deinstString`;
+				}
+			}
+			unlink '/usr/bin/linux-check-removal';
+			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
+			printLog("current kernel deinstalled", 'L1');
+		} else {
+			$retString = `$deinstString`;
+		}
+		printLog("return: $retString", 'L2');
+		if ($? != 0) {
+			printLog("error: $?", 'L0');
+		} else {
+			printLog('no error from deinstall', 'L1');
+		}
+
+		# check wether packages have been deinstalled
+		foreach $package (keys %pkgsHash) {
+			if (isPackageInstalled($package)) {
+				printLog("unwanted package $package is still installed", 'L0');
+				$failed = 1;
+			} else {
+				$somethingWasDone = 1;
+			}
+		}
+		return ($failed, $somethingWasDone);
+	} else {
+		printLog("all is good, no packages to uninstall found for $flavour", 'L2');
+		return (0, 0);
+	}
+}
+
 
 
 
@@ -3861,23 +4089,31 @@ sub getBackupFileTime {
 
 ###############################################################################
 # prints into logFile or to terminal
-# printLog('message', 'tl')
+# printLog('message', 'tlX')
 # it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
+# loglevels for X:
+# 0 lowest
+# 1 normal
+# 2 debug
 #
 sub printLog {
 	my $message = shift;
 	my ($type) = @_;
 	if (!defined($type)) {
-		$type = 'l';
+		$type = 'l1';
 	}
-	if ($FAI || ($type =~ /t/i)) {
-		print "$message\n";
-	}
-	if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
-		if (open $LOGFILE, '>>'.$logFile) {
-			my $timestamp = getLoggingTime();
-			print $LOGFILE "$timestamp $message\n";
-			close $LOGFILE;
+	my $level = $type;
+	$level =~ s/\D//g;
+	if ($level <= $logLevel) {
+		if ($FAI || ($type =~ /t/i)) {
+			print "$message\n";
+		}
+		if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
+			if (open $LOGFILE, '>>'.$logFile) {
+				my $timestamp = getLoggingTime();
+				print $LOGFILE "$timestamp $message\n";
+				close $LOGFILE;
+			}
 		}
 	}
 }
@@ -3911,6 +4147,7 @@ sub readConfigFile {
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
+
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
@@ -3938,7 +4175,7 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
-	if ($line =~ /^[a-zA-Z0-9\-]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line");
@@ -4162,8 +4399,8 @@ sub listStatus {
 			$upgradeAvailable = ' - upgrade available';
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
-		($localConfModules{$module}{required} eq 'no') &&
-		($origConfModules{$module}{required} eq 'no')) {
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
 			$printIt = 1;
 			push(@arr,
@@ -4264,7 +4501,7 @@ sub addToConfiguredModules {
 
 ###############################################################################
 # parses sub name from %origConfModules list from given module parameter name
-# returns the name of the module vector of found
+# returns the name of the module vector found
 # returns an empty string if not found
 #
 sub getSubName {
@@ -4446,7 +4683,7 @@ sub reconfigureAllModules {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				($localConfModules{$module}{installed} eq 'yes')) {
-			removeModule($origConfModules{$module});
+			removeModule($module);
 		}
 	}
 }
@@ -4602,6 +4839,7 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $retVal;
+	$restartSystem = 0;
 	if (! tries($triesLimit)) {
 		printLog('repeat limit reached, program will not start again');
 		if ($restartSystem) {
@@ -4690,13 +4928,11 @@ sub listSuccess {
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
 	}
-	if (triesAlreadyDone() < 1) {
-		if ($restartSystem == 1) {
-			messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
-			print "\nPlease restart the system for the changes to take effect\n";
-		} elsif ( configuredModulesExceptDefault(@successModules) ) {
-			messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
-		}
+	if ($restartSystem == 1) {
+		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+		print "\nPlease restart the system for the changes to take effect\n";
+	} elsif ( configuredModulesExceptDefault(@successModules) ) {
+		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
 	}
 }
 
@@ -4983,6 +5219,10 @@ if (@ARGV != 0) {
 		}
 		print "remove, does nothing yet\n";
 	} elsif ($argValue{command} eq "reconfigure") {
+		# reconfigure interrupts repeated execution
+		if (-e $triesFile) {
+			unlink($triesFile);
+		}
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
@@ -5030,4 +5270,9 @@ if (@ARGV != 0) {
 	help();
 }
 
-
+# interrupt repeated delayed execution if not necessary anymore
+if ($startLaterAgain == 0) {
+	if (-e $triesFile) {
+		unlink($triesFile);
+	}
+}
