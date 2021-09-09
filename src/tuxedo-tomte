@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 1;
+#TODO: modify loglevel
+my $logLevel = 2;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -586,7 +587,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kernelhwe => {
-		name => 'kernel-hwe',
+		name => 'kernel-hwe-20.04',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -594,7 +595,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel version linux-generic-hwe',
+		description => 'Required kernel version linux-generic-hwe-20.04',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -610,7 +611,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo',
+		description => 'Required kernel version linux-tuxedo-20.04-edge',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -618,7 +619,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
-		name => 'kernel-tuxedo-20.04-edge',
+		name => 'kernel-tuxedo-20.04',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -626,7 +627,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo',
+		description => 'Required kernel version linux-tuxedo-20.04',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1173,11 +1174,11 @@ sub checkRequirements {
 	#kernel
 	if (($boardname =~ m/GMxZGxx/) &&
 		($distributionVersion =~ /20.04/)) {
-		printLog('kernel linux-tuxedo-20.04-edge should be default');
-		$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-	} else {
-		printLog('standard kernel linux-tuxedo-20.04 should be default');
+		printLog('kernel linux-tuxedo-20.04 should be default');
 		$origConfModules{kerneltuxedo2004}{required} = 'yes';
+	} else {
+		printLog('standard kernel linux-generic-hwe-20.04 should be default');
+		$origConfModules{kernelhwe}{required} = 'yes';
 	}
 }
 
