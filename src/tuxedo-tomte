@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 1;
+#TODO: debug mode on
+my $logLevel = 2;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -4096,14 +4097,18 @@ sub getBackupFileTime {
 # 1 normal
 # 2 debug
 #
+#TODO: debugs
 sub printLog {
 	my $message = shift;
 	my ($type) = @_;
+	print "message: $message\n";
+	print "type: $type\n";
 	if (!defined($type)) {
 		$type = 'l1';
 	}
 	my $level = $type;
 	$level =~ s/\D//g;
+	print "level: $level\n";
 	if ($level <= $logLevel) {
 		if ($FAI || ($type =~ /t/i)) {
 			print "$message\n";
@@ -5177,9 +5182,14 @@ if (@ARGV != 0) {
 		$FAI = 1;
 		initLogging();
 		prepareValues();
+#TODO: debugs
+		print "sources.list before\n";
+		`cat /etc/apt/sources.list`;
 		prerequisitesFAI();
 		configureAllModules();
 		postrequisitesFAI();
+		print "sources.list after\n";
+		`cat /etc/apt/sources.list`;
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
