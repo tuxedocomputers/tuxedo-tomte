@@ -74,4 +74,5 @@ print "build\n";
 system("gbp buildpackage -us -uc");
 
 # return to original branch
+print "returning\n";
 system("git checkout $branch");
