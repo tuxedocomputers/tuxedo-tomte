@@ -672,7 +672,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 2,
+		hwid => 3,
 		package => 'yes',
 		fainame => '',
 		description => 'Enables AMD GPU and display to share configuration information',
@@ -937,6 +937,17 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	`apt-get -yq update`;
+}
+
+sub prerequisitesFAI {
+
+}
+
+sub postrequisitesFAI {
+	reconfigureSingleModule('tuxedo-repos');
+	reconfigureSingleModule('tuxedo-mirrors');
+	`apt-get -yq update`;
 }
 
 
@@ -1024,6 +1035,7 @@ sub checkRequirements {
 		($boardname =~ /PH4TQx1/) ||
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxMGxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
@@ -3451,7 +3463,7 @@ sub installPackage {
 	my $retval;
 	printLog("install package $packageName");
 	if ($FAI) {
-		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		system("apt-get -qy install $packageName");
 		$retval = isPackageInstalled($packageName);
 	} else {
 		checkNetwork();
@@ -4186,10 +4198,18 @@ sub printLog {
 	my $message = shift;
 	my ($type) = @_;
 	if (!defined($type)) {
-		$type = 'l1';
+		$type = 'L1';
 	}
 	my $level = $type;
-	$level =~ s/\D//g;
+	if ($level =~ /[0-2]/) {
+		$level =~ s/\D//g;
+		$level += 0;
+	} else {
+		$level = 0;
+	}
+	if (!($type =~ /[A-Za-z]/)) {
+		$type = 'L';
+	}
 	if ($level <= $logLevel) {
 		if ($FAI || ($type =~ /t/i)) {
 			print "$message\n";
@@ -5263,8 +5283,9 @@ if (@ARGV != 0) {
 		$FAI = 1;
 		initLogging();
 		prepareValues();
-		prerequisites();
+		prerequisitesFAI();
 		configureAllModules();
+		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
