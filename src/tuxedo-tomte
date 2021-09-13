@@ -4101,14 +4101,22 @@ sub getBackupFileTime {
 sub printLog {
 	my $message = shift;
 	my ($type) = @_;
-	print "message: $message\n";
-	print "type: $type\n";
+	#print "message: $message\n";
+	#print "type: $type\n";
 	if (!defined($type)) {
-		$type = 'l1';
+		$type = 'L1';
 	}
 	my $level = $type;
-	$level =~ s/\D//g;
-	print "level: $level\n";
+	if ($level =~ /[0-2]/) {
+		$level =~ s/\D//g;
+		$level += 0;
+	} else {
+		$level = 0;
+	}
+	if (!($type =~ /[A-Za-z]/)) {
+		$type = 'L';
+	}
+	#print "level: $level\n";
 	if ($level <= $logLevel) {
 		if ($FAI || ($type =~ /t/i)) {
 			print "$message\n";
