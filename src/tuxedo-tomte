@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO: modify loglevel
-my $logLevel = 2;
+my $logLevel = 1;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -624,7 +623,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
@@ -1183,14 +1182,10 @@ sub checkRequirements {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
 		printLog('detected tuxedo-pinfix-tgl-dkms issue');
 	}
-	#kernel
-	if (($boardname =~ m/GMxZGxx/) &&
-		($distributionVersion =~ /20.04/)) {
+	# kernel
+	if ($distributionVersion =~ /20.04/) {
 		printLog('kernel linux-tuxedo-20.04 should be default');
 		$origConfModules{kerneltuxedo2004}{required} = 'yes';
-	} else {
-		printLog('standard kernel linux-generic-hwe-20.04 should be default');
-		$origConfModules{kernelhwe}{required} = 'yes';
 	}
 }
 
