@@ -1,8 +1,10 @@
-tuxedo-tomte (2.4.27-16) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.27-17) UNRELEASED; urgency=medium
 
   * added kernel installation linux-tuxedo-20.04
+  * removed argument numeric error
+  * Stellaris uses now TUXEDO kernel
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 13 Sep 2021 11:28:12 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 13 Sep 2021 16:09:19 +0200
 
 tuxedo-tomte (2.4.27) focal; urgency=medium
 
@@ -22,7 +24,6 @@ tuxedo-tomte (2.4.25) focal; urgency=medium
   * added pinfix-tgl-dkms for GMxTGxx, Stellaris/Polaris 15 AMD Gen3
 
  -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 17:19:12 +0200
->>>>>>> master
 
 tuxedo-tomte (2.4.21) focal; urgency=medium
 
