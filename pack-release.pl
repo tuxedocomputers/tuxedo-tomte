@@ -71,7 +71,7 @@ system("git commit -m 'packing'");
 print "import\n";
 system("gbp import-orig --no-interactive ../$prefix.orig.tar.gz");
 print "build\n";
-system("gbp buildpackage -us -uc");
+system("gbp buildpackage -us -uc --git-tag");
 
 # return to original branch
 print "returning\n";

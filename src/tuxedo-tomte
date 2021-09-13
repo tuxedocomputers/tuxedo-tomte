@@ -917,6 +917,7 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	`apt-get -yq update`;
 }
 
 sub prerequisitesFAI {
@@ -926,6 +927,7 @@ sub prerequisitesFAI {
 sub postrequisitesFAI {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	`apt-get -yq update`;
 }
 
 
@@ -4100,10 +4102,18 @@ sub printLog {
 	my $message = shift;
 	my ($type) = @_;
 	if (!defined($type)) {
-		$type = 'l1';
+		$type = 'L1';
 	}
 	my $level = $type;
-	$level =~ s/\D//g;
+	if ($level =~ /[0-2]/) {
+		$level =~ s/\D//g;
+		$level += 0;
+	} else {
+		$level = 0;
+	}
+	if (!($type =~ /[A-Za-z]/)) {
+		$type = 'L';
+	}
 	if ($level <= $logLevel) {
 		if ($FAI || ($type =~ /t/i)) {
 			print "$message\n";
