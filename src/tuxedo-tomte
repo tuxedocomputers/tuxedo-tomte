@@ -1187,6 +1187,10 @@ sub checkRequirements {
 		printLog('kernel linux-tuxedo-20.04 should be default');
 		$origConfModules{kerneltuxedo2004}{required} = 'yes';
 	}
+	if ($distributionVersion =~ /18.04/) {
+		printLog('kernel linux-generic-hwe-18.04 should be default');
+		$origConfModules{kernelthwe}{required} = 'yes';
+	}
 }
 
 
