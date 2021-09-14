@@ -1,7 +1,9 @@
-tuxedo-tomte (2.4.27-19) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.27-20) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * added kernel installation linux-tuxedo-20.04
+  * removed argument numeric error
+  * Stellaris uses now TUXEDO kernel
   * removed argument numeric error
   * Stellaris uses now TUXEDO kernel
   * removed argument numeric error
@@ -10,8 +12,11 @@ tuxedo-tomte (2.4.27-19) UNRELEASED; urgency=medium
   * added kernel for 18.04
   * packing
   * removed kernel configuration for 18.04
+  * packing
+  * lowered debug level
+  * added sleep
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 14 Sep 2021 12:29:14 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 14 Sep 2021 13:59:59 +0200
 
 tuxedo-tomte (2.4.27) focal; urgency=medium
 
