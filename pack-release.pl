@@ -30,6 +30,7 @@ $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
 print "got version: $version\n";
 $prefix = $package.'_'.$version;
 print "prefix: $prefix\n";
+sleep(2);
 
 system("gbp dch --verbose --debian-branch $branch --new-version=$version");
 system("vim $changelog");
