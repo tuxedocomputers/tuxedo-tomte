@@ -1,10 +1,20 @@
-tuxedo-tomte (2.4.27-17) UNRELEASED; urgency=medium
+tuxedo-tomte (2.4.27-18) UNRELEASED; urgency=medium
 
+  [ E. Mohr ]
   * added kernel installation linux-tuxedo-20.04
   * removed argument numeric error
   * Stellaris uses now TUXEDO kernel
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 13 Sep 2021 16:09:19 +0200
+
+  [ Christoffer Sandberg ]
+  * FAI: Reorder repo modules install order
+  * Add Stellaris/Polaris Intel gen 3 to tuxedotouchpadswitch
+  * removed argument numeric error
+  * Stellaris uses now TUXEDO kernel
+  * packing
+  * added kernel for 18.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 14 Sep 2021 12:03:43 +0200
 
 tuxedo-tomte (2.4.27) focal; urgency=medium
 
