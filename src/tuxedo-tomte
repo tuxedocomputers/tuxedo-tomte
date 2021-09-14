@@ -1187,10 +1187,6 @@ sub checkRequirements {
 		printLog('kernel linux-tuxedo-20.04 should be default');
 		$origConfModules{kerneltuxedo2004}{required} = 'yes';
 	}
-	if ($distributionVersion =~ /18.04/) {
-		printLog('kernel linux-generic-hwe-18.04 should be default');
-		$origConfModules{kernelthwe}{required} = 'yes';
-	}
 }
 
 
@@ -2329,31 +2325,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /18.04/) {
-			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-18.04');
-			if ($instFailed == 0) {
-				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-18.04');
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-18.04-edge', 'linux-generic-hwe-18.04');
-				$instFailed = $instFailed + $tmpFailed;
-				$instDone = $instDone + $tmpDone;
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				printLog('new kernel linux-generic-hwe-18.04 could not be installed', 'TL1');
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-18.04 was installed', 'L1');
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		} elsif ($distributionVersion =~ /20.04/) {
+		if ($distributionVersion =~ /20.04/) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
