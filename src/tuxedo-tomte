@@ -822,8 +822,8 @@ sub readFileReturnLines {
 		chomp(@lines = <$FH>);
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("no $file present or unable to open the file for reading");
+		printLog("Err: $!", 'L0');
+		printLog("no $file present or unable to open the file for reading", 'L0');
 		return;
 	}
 	return @lines;
@@ -844,8 +844,8 @@ sub readFileReturnLine {
 		chomp($line = <$FH>);
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("no $file present or unable to open the file for reading");
+		printLog("Err: $!", 'L0');
+		printLog("no $file present or unable to open the file for reading", 'L0');
 		return;
 	}
 	return $line;
@@ -936,7 +936,6 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
-	`apt-get -yq update`;
 }
 
 sub prerequisitesFAI {
@@ -946,7 +945,6 @@ sub prerequisitesFAI {
 sub postrequisitesFAI {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
-	`apt-get -yq update`;
 }
 
 
@@ -1061,10 +1059,8 @@ sub checkRequirements {
 	$main::biosVersion = '1.07.04NBC';
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname =~ /NH5xAx/) {
-		# if ($main::biosVersion =~ m/1\.07\.04NBC/) {
 		$origConfModules{corefix}{required} = 'yes';
 		printLog('detected core-fix issue');
-		#}
 	}
 
 	# if Threeg Huawei ME936 device found
@@ -1647,17 +1643,17 @@ sub tuxedorepos() {
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				# update of repos has to be immediate for possible later package
+				# repo updates have to be immediate for possible later package
 				# installation
 				if (!$FAI) {
 					checkNetwork();
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
-						printLog('failed: update packages');
-						printLog("returned error code: $exitStatus");
+						printLog('failed: update packages', 'L0');
+						printLog("returned error code: $exitStatus", 'L0');
 						if ($exitStatus == 7) {
-							printLog('possible network problems');
+							printLog('possible network problems', 'L0');
 						}
 						addToConfiguredModules($module, "failed");
 					} else {
@@ -1690,10 +1686,10 @@ sub tuxedorepos() {
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
+					printLog('failed: update packages', 'L0');
+					printLog("returned error code: $exitStatus", 'L0');
 					if ($exitStatus == 7) {
-						printLog('possible network problems');
+						printLog('possible network problems', 'L0');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
@@ -1783,10 +1779,10 @@ sub tuxedomirrors() {
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
-					printLog('failed: update packages');
-					printLog("returned error code: $exitStatus");
+					printLog('failed: update packages', 'L0');
+					printLog("returned error code: $exitStatus", 'L0');
 					if ($exitStatus == 7) {
-						printLog('possible network problems');
+						printLog('possible network problems', 'L0');
 					}
 					addToConfiguredModules($module, "failed");
 				} else {
@@ -2013,9 +2009,9 @@ sub tuxedonvmefix() {
 	my $nvmeFWPackageWasInstalled = 0;
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
 		if (! deinstallPackage('tuxedo-nvme-fix')) {
-			printLog('obsolete package tuxedo-nvme-fix was successfully removed');
+			printLog('obsolete package tuxedo-nvme-fix was successfully removed', 'L0');
 		} else {
-			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time');
+			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time', 'L0');
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 			return (0);
@@ -2037,7 +2033,7 @@ sub tuxedonvmefix() {
 				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
 				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}");
 				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
-					printLog("firmware upgrade required");
+					printLog("firmware upgrade required", 'L0');
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
 						if (! installPackage('nvme-cli')) {
@@ -2053,7 +2049,7 @@ sub tuxedonvmefix() {
 						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}");
 						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						if ($? != 0) {
-							printLog('firmware could not be uploaded');
+							printLog('firmware could not be uploaded!', 'L0');
 							printLog($output);
 							$origConfModules{$module}{installed} = "failed";
 							addToConfiguredModules($module, "failed");
@@ -2292,7 +2288,7 @@ sub tuxedorestoreaudiofix() {
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
-				printLog('systemd could not initialize restore-audiocards.service');
+				printLog('systemd could not initialize restore-audiocards.service', 'L0');
 			}
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3075,7 +3071,7 @@ sub createRepos {
 		return (0);
 	}
 	if (!-d $sourcesListDirD) {
-		printLog("no $sourcesListDirD found, creating one", 'TL1');
+		printLog("no $sourcesListDirD found, creating one", 'TL0');
 		mkdir($sourcesListDirD);
 	}
 
@@ -3142,15 +3138,15 @@ sub createRepos {
 					# create file + line
 					if (! -e $repos{$compDistVer}{$key}{filename}) {
 						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
-						printLog("new file: $repos{$compDistVer}{$key}{filename}");
-						printLog("added: $_");
+						printLog("new file: $repos{$compDistVer}{$key}{filename}", 'L0');
+						printLog("added: $_", 'L0');
 						$firstEntry = 0;
 						$modified = 1;
 					# or append line
 					} else {
 						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
-						printLog("append file: $repos{$compDistVer}{$key}{filename}");
-						printLog("added: $_");
+						printLog("append file: $repos{$compDistVer}{$key}{filename}", 'L0');
+						printLog("added: $_", 'L0');
 						$modified = 1;
 					}
 				}
@@ -3172,9 +3168,9 @@ sub addRepoKey {
 	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
 	$retval = $?;
 	if ($retval != 0) {
-		printLog("error when apt-key adv");
-		printLog("return value: $retval");
-		printLog("could not add pub key for TUXEDO repos");
+		printLog("error when apt-key adv", 'L0');
+		printLog("return value: $retval", 'L0');
+		printLog("could not add pub key for TUXEDO repos", 'L0');
 		return (0);
 	}
 	return (1);
@@ -3231,8 +3227,8 @@ sub setComment {
 		chomp(@repolines = <$FH>);
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("could not open repository mirrors list at $reposList", 'TL0');
+		printLog("Err: $!", 'L0');
+		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
@@ -3241,7 +3237,7 @@ sub setComment {
 		# delete old mirrors.tuxedocomputers.com urls
 		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\//) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
-			printLog("commented out: $$repoline");
+			printLog("commented out: $$repoline", 'L0');
 			return (1);
 		}
 		# check for repos in comprehensive mirror list
@@ -3249,7 +3245,7 @@ sub setComment {
 			if ( $$repoline =~ /$_/ ) {
 				# repo matches
 				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
-				printLog("commented out: $$repoline");
+				printLog("commented out: $$repoline", 'L0');
 				return (1);
 			}
 		}
@@ -3303,11 +3299,11 @@ sub deinstExcept {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstCmd");
+		printLog("deinstalling: $deinstCmd", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
-			printLog("failed to deinstall packages, retvalue: $retValue");
+			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
 			return (0);
 		} else {
 			printLog('deinstallation of packages successful');
@@ -3353,18 +3349,18 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst");
+		printLog("deinstalling: $pkconDeinst", 'L0');
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
-			printLog("failed to deinstall packages, retvalue: $retValue");
+			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
 			return (1);
 		} else {
-			printLog('deinstallation of packages successful');
+			printLog('deinstallation of packages successful', 'L0');
 			return (0);
 		}
 	} else {
-		printLog('nothing to deinstall');
+		printLog('nothing to deinstall', 'L0');
 		return (0);
 	}
 }
@@ -3383,19 +3379,19 @@ sub deinstallSinglePackage {
 	my $retValue;
 
 	$pkconDeinst = $pkconDeinst.' '.$deinst;
-	printLog("deinstalling: $pkconDeinst");
+	printLog("deinstalling: $pkconDeinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
-			printLog("failed to deinstall package, retvalue: $retValue");
+			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
 			return (1);
 		} else {
-			printLog('deinstallation of package successful');
+			printLog('deinstallation of package successful', 'L0');
 			return (0);
 		}
 	} else {
-		printLog("package $deinst was not found");
+		printLog("package $deinst was not found", 'L0');
 	}
 }
 
@@ -3441,8 +3437,8 @@ sub installPackage {
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
-			printLog("failed to install $packageName");
-			printLog("will try again later");
+			printLog("failed to install $packageName", 'L0');
+			printLog("will try again later", 'L0');
 			startTomteDelayed();
 		}
 	}
@@ -3507,7 +3503,7 @@ sub installKernelFlavour {
 			printLog("executing: make configure -a", 'L2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
-				printLog("configure -a failed!! exiting", 'L2');
+				printLog("configure -a failed!! exiting", 'L0');
 				return (1,0);
 			} else {
 				$retString = `$installCmd`;
@@ -3515,8 +3511,8 @@ sub installKernelFlavour {
 		}
 		if ($? != 0) {
 			printLog("something went wrong while installing kernel packages", 'TL0');
-			printLog("error: $?", 'L1');
-			printLog("$retString", 'L1');
+			printLog("error: $?", 'L0');
+			printLog("$retString", 'L0');
 		}
 	
 		$retString = `$testCmd`;
@@ -4161,7 +4157,7 @@ sub getBackupFileTime {
 # printLog('message', 'tlX')
 # it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
 # loglevels for X:
-# 0 lowest
+# 0 highest/errors/fatal
 # 1 normal
 # 2 debug
 #
@@ -4572,6 +4568,11 @@ sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
 	$configuredModules{$module} = $status;
+	if ($status =~ /failed/) {
+		printLog("failed to install $module", 'L0');
+	} elsif ($status =~ /success/) {
+		printLog("succefully installed $module", 'L0');
+	}
 }
 
 
