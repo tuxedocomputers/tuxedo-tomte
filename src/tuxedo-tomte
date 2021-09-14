@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 1;
+my $logLevel = 0;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
