@@ -4575,7 +4575,7 @@ sub addToConfiguredModules {
 	if ($status =~ /failed/) {
 		printLog("failed to install $module", 'L0');
 	} elsif ($status =~ /success/) {
-		printLog("succefully installed $module", 'L0');
+		printLog("succesfully installed $module", 'L0');
 	}
 }
 
