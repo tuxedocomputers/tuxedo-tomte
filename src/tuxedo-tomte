@@ -511,7 +511,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'yes',
 		fainame => '',
 		description => 'Keyboard back-light driver for ITE devices',
@@ -1071,6 +1071,7 @@ sub checkRequirements {
 	}
 
 	if (($boardname =~ /X170SM/) ||
+		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/)) {
