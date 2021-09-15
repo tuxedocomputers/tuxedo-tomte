@@ -3671,7 +3671,7 @@ sub uninstKernelFlavour {
 			}
 			unlink '/usr/bin/linux-check-removal';
 			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-			printLog("current kernel deinstalled", 'L1');
+			printLog("current kernel deinstalled", 'L0');
 		} else {
 			$retString = `$deinstString`;
 		}
@@ -3716,8 +3716,8 @@ sub createFile {
 		close $FH;
 		return (1);
 	} else {
-		printLog("Err: $!");
-		printLog("can't open $fileName for writing", 'TL');
+		printLog("Err: $!", 'L0');
+		printLog("can't open $fileName for writing", 'TL0');
 		return (0);
 	}
 }
@@ -3736,8 +3736,8 @@ sub appendFile {
 		close $FH;
 		return (1);
 	} else {
-		printLog("Err: $!");
-		printLog("can't open $fileName for writing", 'TL');
+		printLog("Err: $!", 'L0');
+		printLog("can't open $fileName for writing", 'TL0');
 		return (0);
 	}
 }
@@ -3754,8 +3754,8 @@ sub backupFile {
 		printLog("created backup for $fileName", 'TL');
 		return (1);
 	} else {
-		printLog("Err: $!");
-		printLog("can't create backup file for $fileName", 'TL');
+		printLog("Err: $!", 'L0');
+		printLog("can't create backup file for $fileName", 'TL0');
 		return (0);
 	}
 }
@@ -3801,8 +3801,8 @@ sub substituteLineInFile {
 		}
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("no $filename present or unable to open the file for reading");
+		printLog("Err: $!", 'L0');
+		printLog("no $filename present or unable to open the file for reading", 'L0');
 		return (-1);
 	}
 
@@ -3816,8 +3816,8 @@ sub substituteLineInFile {
 		close ($FH);
 		return (1);
     } else {
-		printLog("Err: $!");
-		printLog("no $filename present or unable to open the file for writing");
+		printLog("Err: $!", 'L0');
+		printLog("no $filename present or unable to open the file for writing", 'L0');
 		return (-1);
     }
 
@@ -3842,7 +3842,7 @@ sub isLineInFile {
 			}
 		}
 	} else {
-		printLog("can't open file $filename");
+		printLog("can't open file $filename", 'L0');
 	}
 	return (0);
 }
@@ -3856,7 +3856,7 @@ sub networkStatus {
 	my $dirHandle;
 	my $interfacesDir = '/sys/class/net';
 	if ( !opendir ($dirHandle, $interfacesDir)) {
-		printLog("unable to open $interfacesDir: $!");
+		printLog("unable to open $interfacesDir: $!", 'L0');
 		return (0);
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' && $_ ne 'lo' } readdir($dirHandle);
@@ -3900,7 +3900,7 @@ sub checkNetwork {
 			printLog('found network !');
 		} else {
 			$networkSearchDone = 1;
-			printLog('no network found !! some fixes might not be applied correctly');
+			printLog('no network found !! some fixes might not be applied correctly', 'L0');
 		}
 	}
 }
@@ -3928,8 +3928,8 @@ sub insertGrub {
 		}
 		close $grubFH;
     } else {
-		printLog("Err: $!");
-		printLog("no $grubFile present or unable to open the file for reading");
+		printLog("Err: $!", 'L0');
+		printLog("no $grubFile present or unable to open the file for reading", 'L0');
 		return (-1);
     }
 
@@ -3949,8 +3949,8 @@ sub insertGrub {
 		print $grubFH @grub_lines;
 		close ($grubFH);
     } else {
-		printLog("Err: $!");
-		printLog("no $grubFile present or unable to open the file for writing");
+		printLog("Err: $!", 'L0');
+		printLog("no $grubFile present or unable to open the file for writing", 'L0');
 		return (-1);
     }
     return $inserted;
@@ -4120,7 +4120,7 @@ sub initLogging {
 			printLog('starting Tomte');
 			return;
 		} else {
-			printLog("Err: $!");
+			printLog("Err: $!", 'L0');
 			$noLogFile =1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
@@ -4164,7 +4164,7 @@ sub getBackupFileTime {
 sub printLog {
 	my $message = shift;
 	my ($type) = @_;
-	if (!defined($type)) {
+	if ((!defined($type)) || ($type eq '')) {
 		$type = 'L1';
 	}
 	my $level = $type;
@@ -4172,24 +4172,28 @@ sub printLog {
 		$level =~ s/\D//g;
 		$level += 0;
 	} else {
-		$level = 0;
+		$level = 1;
 	}
-	if (!($type =~ /[A-Za-z]/)) {
+	if (!($type =~ /[LlTt]/)) {
 		$type = 'L';
 	}
-	if ($level <= $logLevel) {
-		if ($FAI || ($type =~ /t/i)) {
-			print "$message\n";
-		}
-		if ((!$noLogFile) && (!$FAI && ($type =~ /l/i))) {
+
+	if ($FAI) {
+		print "$message\n";
+	} elsif ($level <= $logLevel) {
+		if ((!$noLogFile) && ($type =~ /L/i)) {
 			if (open $LOGFILE, '>>'.$logFile) {
 				my $timestamp = getLoggingTime();
 				print $LOGFILE "$timestamp $message\n";
 				close $LOGFILE;
 			}
 		}
+		if ($type =~ /T/i) {
+			print "$message\n";
+		}
 	}
 }
+
 
 
 ###############################################################################
@@ -4229,13 +4233,13 @@ sub readConfigFile {
 					printLog("module: $name does not exist");
 				}
 			} else {
-				printLog("invalid line in $configFile");
+				printLog("invalid line in $configFile", 'L0');
 			}
 		}
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("could not open configFile: $configFile $!", 'TL');
+		printLog("Err: $!", 'L0');
+		printLog("could not open configFile: $configFile $!", 'TL0');
 		return (0);
 	}
 	return (1);
@@ -4251,7 +4255,7 @@ sub validConfigLine {
 	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
-		printLog("found invalid configuration line in $configFile:\n$line");
+		printLog("found invalid configuration line in $configFile:\n$line", 'L0');
 		return (0);
 	}
 }
@@ -4305,8 +4309,8 @@ sub writeConfigFile {
 		}
 		close $FH;
 	} else {
-		printLog("Err: $!");
-		printLog("can't write to configfile $configFile $!", 'TL');
+		printLog("Err: $!", 'L0');
+		printLog("can't write to configfile $configFile $!", 'TL0');
 		exit (0);
 	}
 }
@@ -4323,7 +4327,7 @@ sub initConfigFile {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir", 'TL');
+			printLog("could not create $configDir", 'TL0');
 			exit (0);
 		}
 	}
@@ -4898,8 +4902,8 @@ sub postConfigure {
 				$restartSystem = 1;
 			} else {
 				$postConfTrigger = 1;
-				printLog("failed: $postConfProgram{$sysProgram}{command}");
-				printLog("returned error code: $exitStatus");
+				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0');
+				printLog("returned error code: $exitStatus", 'L0');
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
@@ -4932,8 +4936,8 @@ sub startTomteDelayed {
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
 		$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all >/dev/null 2>&1");
-		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration");
-		printLog("ret value: $retVal");
+		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
+		printLog("ret value: $retVal", 'L0');
 	}
 	return (0);
 }
@@ -5104,7 +5108,7 @@ sub tries() {
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
 		if ( $triesDone <= $limit ) {
-			printLog("repeat number $triesDone of $limit");
+			printLog("repeat number $triesDone of $limit", 'L0');
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
@@ -5220,7 +5224,7 @@ if (!tuxedoDevice()) {
 readOSData();
 
 if (!isOSSupported()) {
-	printLog('This OS is not supported', 'TL');
+	printLog('This OS is not supported', 'TL0');
 	exit (0);
 }
 
