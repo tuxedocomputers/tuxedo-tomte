@@ -3620,7 +3620,7 @@ sub uninstKernelFlavour {
 	}
 	printLog("uninstKernel: $flavour keep: $keepFlavour", 'L2');
 	populateFlavourPackages("$flavour");
-	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	$flavours{$distributionVersion}{$flavour}{'deletePackages'} = $flavours{$distributionVersion}{$flavour}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) &&
 			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$keepFlavour}{'packages'}}))) {
