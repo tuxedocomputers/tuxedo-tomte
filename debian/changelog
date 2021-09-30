@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.1-15) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.1-40) UNRELEASED; urgency=medium
 
   [ Eckhart Mohr ]
   * initial commit
@@ -1121,7 +1121,1131 @@ tuxedo-tomte (2.5.1-15) UNRELEASED; urgency=medium
   * sent logging to null at installing packages
   * packing
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 23 Sep 2021 16:25:18 +0200
+  [ Eckhart Mohr ]
+  * initial commit
+  * changed base directory structure
+
+  [ pablo ]
+  * created rpm Version of package
+  * initial program structure, config of packages
+  * read and write configfile
+  * - tuxedo-packager files
+
+  [ emohrtuxedo ]
+  * tuxedo-packager testfiles added
+
+  [ pablo ]
+  * added subroutines to work with edid data
+  * cleaned code, warnings, restructured some subs
+  * added some more modules from FAI
+  * added some more modules
+
+  [ Eckhart Mohr ]
+  * Add README.md
+  * Add new file
+  * Update README.md
+
+  [ pablo ]
+  * cleanup for development branch
+  * deleting yml file for git
+  * heavy modifications on tomte, deaktivated all, inserted i8042fix and nobootonbatery
+  * add sub insert_grub
+  * debugging
+  * added description, module execution
+  * added reconfigure
+  * subs for install reinstall single module
+  * check installable, review code
+  * error handling, first stage
+  * grub error handling, failed field introduced
+  * more error handling
+  * beginning to prepare package
+  * created man page
+  * man page
+  * logfile creation and wrinting subroutine created
+  * timestamp for logging added
+  * redirect messages to logfile
+  * check if started as root
+  * changed var and sub names, added read and write configfile
+  * configfile and logfile error handling
+  * major restructure for option update and reading and writing configfile
+  * clening up some old variables
+  * deleted state failed, added state failed to installed
+  * modified unknown states to undef in origConfModules
+  * added postConfigModule
+  * only list available fixes
+  * modified insertGrub, added subs for each main action, modified insertModule
+  * configureAllModules ready
+  * configureSingleModule finished
+  * added forgotten condition on configureSingleModule
+  * finished reconfigureAllModules and reconfigureSingleModule
+  * deleted unused sub
+  * added postConfigure
+  * added postSetModulesFailed and %configuredModules
+  * fixed lots of superfluous bugs
+  * implemented listSuccess and printing subs
+  * minor changes
+  * build debian files to build package
+
+  [ Eckhart Mohr ]
+  * Update README.md
+  * Update README.md
+
+  [ emohrtuxedo ]
+  * added compat file for deb packaging
+
+  [ E. Mohr ]
+  * modified changelog and copyright filewq
+  * several little bugs, undefined ARGValues
+
+  [ Eckhart Mohr ]
+  * Update README.md
+
+  [ pablo ]
+  * added initConfig
+  * added decription for modules change
+  * added validator for config line
+  * redefined checkroot subroutine
+  * correct handling in empty lines on configfile
+  * repair write config at end
+  * bugfix insertGrub
+
+  [ E. Mohr ]
+  * some minor bugs and added separator lines
+  * cleaned up debug lines
+  * modified deb building config files
+  * added gitattributes
+  * testing different place for gitattributes
+  * more stuff into gitattributes
+  * changed copyright placement
+  * changes to several files in debian for package building
+  * added lf
+  * removed some printout
+  * removed some debug prints
+  * repaired double listing when using list
+  * count insert into grub even if already present
+  * removed No arguments
+  * modified help message
+  * list without configfile
+  * listStatus refined, added version numbers check and proper installed-required options
+  * listStatus refined config matrix and adequate responses
+  * check undefined values at reading configFile
+  * added data dumper to debug
+  * debugging casting of version 2
+
+  [ emohrtuxedo ]
+  * retabbed source
+  * minor formating
+
+  [ E. Mohr ]
+  * added amd-xhci-hcd-usb-quirk-suspend-fix from https://gitlab.com/tuxedocomputers/produktmanagement/notebooks/polaris-15-gen1-amd-id-o-gk5n/-/issues/24
+  * debug the weird type change in version
+
+  [ emohrtuxedo ]
+  * added testscript for variable type change
+  * int conversion tested
+
+  [ E. Mohr ]
+  * added conversion to numeral on version and hwid
+  * catch undefined variable properly
+  * TODOs to convert some code into subs
+  * debug validModuleName
+  * validModuleName done, catching bad error
+  * deleted unnecessary check of version number
+  * delete debug lines
+  * tested logging and isRoot check
+  * deleted newlines in logging
+  * need root for this options
+  * first attempt at reporting status
+  * inserted debugs for listSuccess
+  * listSucces passed first tests
+  * modified undef in postConfProgram trigger
+  * modified reconfigure subs for better answers
+  * modified getSubName to conform to blacklist
+  * blacklisting subs done
+  * blacklisting tested and debugged
+  * modified some print
+
+  [ emohrtuxedo ]
+  * packaging
+  * debugging blacklist-installed issue
+
+  [ E. Mohr ]
+  * list now produces config if not present
+  * redefined state as status to avoid confusion
+  * added some hash values into modules
+  * modified transferConfig to prepare for update and modified writeConfig
+  * created prepareValues
+  * finished prepareValues
+  * changed writeConfigFile to writeConfigFileAbsent
+  * inserted forgotten sub
+  * completed writeConfigFile taking old values into account
+  * list modified to reflect empty config file and update
+  * repaired blacklisting bug
+  * better no configfile warning
+  * new version
+  * added debhelper token
+  * moved position of some subs
+  * changed release to focal
+  * added barebones, modified amd-xhci-hcd-usb-quirk-suspend-fix
+  * added amdgpuwithnvidiafix
+  * added module amdgpuwithnvidiafix
+  * please restart system
+  * repaired createFile
+  * repaired backupFile bug
+  * modified testing
+  * implemented installation of packages
+  * better reporting of package installation
+  * added no-keyboard-after-suspend-fix
+  * added XC1711
+  * added gbd.conf
+  * added Makefile
+  * debuged nokeyboardaftersuspendfix
+  * untangled modulename - shortname connection
+  * added Makefile to export-ignore
+  * add upgrade matrix
+  * modified upgrade and added remove logic
+  * upgrades into configfile
+  * added upgrade option to all modules
+  * checked hwid and versions
+  * renamed Makefile
+  * building package
+  * added debian directory
+  * packaging
+  * packaging
+  * fixed multiple install-upgrade
+  * fixed save version and hwid in config
+  * remove debugs
+  * packaging
+  * building package
+  * added restriction to only one instance
+
+  [ Vinzenz Vietzke ]
+  * Update README.md
+  * Switch description to make it more obvious what Tomte is and does
+
+  [ E. Mohr ]
+  * test pkcon
+  * systemd services
+  * refined services
+  * added systemd services to ignore
+  * building package
+  * building package
+  * added InfinityBook Pro 14 v5 and replaced blacklist and unblacklist
+  * building package
+  * modified helper script
+  * activate EDID
+  * added edid testscript
+  * added some verbosity
+  * added dumper for test
+  * searching model added
+  * test model
+  * test
+  * build edid string
+  * refined results
+  * added isDisplayPresent function
+  * modified testscript
+  * some bugs
+  * little bug
+  * added dependency to libparse-edid-perl
+  * testing display recognition
+  * revert test
+  * remodified display recognition
+  * added changelog to source files
+  * rebasing
+  * merged README.md
+  * deleted META-package from README
+  * building package
+  * changed packing script
+  * log message if no edids found
+  * changed packer script
+  * added debug stuff to packager
+  * changes in packer
+  * copied changelog
+  * testing edid
+  * building package
+  * user and email name
+  * package script
+  * release script
+  * changes packaging
+  * mod sheebang
+  * modified changelog
+  * debug
+  * modified changelog
+  * deleted debugs
+  * prep systemd
+  * modified changelog
+  * removed postinst first run
+  * modified changelog
+  * removed non realized projects
+  * added changelog
+  * added changelog
+  * packaging
+  * added changelog
+  * added changelog
+  * added changelog
+  * branch name in script
+  * change in pack script
+  * packer script
+  * added os recognition
+  * added OS and Version recognition and exit if not in supported list
+  * built supported OS structure hash
+  * added list of repos
+  * added subroutine to simplify file reading
+  * rewrote checkRequirements
+  * part of tuxedorepos
+  * testscript
+  * read repo files implemented
+  * finding line in apt
+  * create tuxedo repos
+  * added outcommenting for sources.list
+  * debugged add repos
+  * debugging
+  * create repos test done
+  * copied subs for repos
+  * finished copying repo subroutines
+  * added pubkey, end debug
+  * added changelog
+  * changed wrong debug paths
+  * added changelog
+  * added changelog
+  * repaired bug in repos
+  * create backup if there is a file
+  * create backup if there is a file2
+  * deleted second build script
+  * added changelog
+  * backup if no change but commented out sources.list
+  * added update apt
+  * one letter
+  * added changelog
+  * lookup for deb repos
+  * get Repos finished
+  * building search for repos
+  * finished comment setting
+  * finished repos
+  * added changelog
+  * added changelog
+  * added changelog
+  * added xhci_hcd quirks fix for AURA1501
+  * added changelog
+  * merge from master
+  * added model names
+  * added changelog
+  * added changelog
+  * removed packager uncommented lines
+  * adding aml install parts
+  * corefix
+  * debug crorefix
+  * debug corefix
+  * packing
+  * added corefixfiles
+  * packing
+  * debug corefix
+  * packing
+  * packing
+  * set biosversion global
+  * packing
+  * debug
+  * packing
+  * permissions hook script
+  * packing
+  * debug corefix
+  * packing
+  * changed services to avoid start twice
+  * packing
+  * changes in files
+  * packing
+  * added child return value
+  * added some error logging
+  * systemd caller sub
+  * packing
+  * reconfigured systemd timer, added transient timer
+  * packing
+  * corrected return value for apt-key
+  * finfished package installation frame
+  * add pkcon dependency
+  * check before install package
+  * packing
+  * debug tcc install
+  * repaired wrong return value on createrepos
+  * packing
+  * some changes
+  * packing
+  * packing
+  * packing
+  * packing
+  * check if systemd active
+  * packing
+  * no bios version if not root
+  * packing
+  * changed after boot timer
+  * packing
+  * added failed for configure all
+  * packing
+  * changed apt-key command
+  * packing
+  * remove bios version check
+  * start message
+  * packing
+  * changed bios version id
+  * packing
+  * added fix for Elantech touchpads on X35R
+  * packing
+  * added threeg recognition and rules
+  * changed tuxedo repo mirrors
+  * packing
+  * packing
+  * packing
+  * activated repos upgrade
+  * packing
+  * packing
+  * added update section for tuxedorepos
+  * delete old repos, create new
+  * packing
+  * corrected line in sources.list
+  * packing
+  * debug
+  * packing
+  * debug2
+  * packing
+  * packing
+  * added prerequisite packages and changed workflow for pres
+  * preliminar section
+  * packing
+  * added prerequisite
+  * packing
+  * changed module name
+  * packing
+  * create exception install for prerequisites
+  * packing
+  * changed delete mirrors
+  * packing
+  * changed singleInstall
+  * packing
+  * packing
+  * packing
+  * packing
+  * added pres to show list
+  * packing
+  * removed backup inside outcommenting code
+  * packing
+  * packing
+  * added description in manpage for block and unblock
+  * packing
+  * stashing
+  * packing
+  * packaging
+  * packing
+  * packing
+  * packing
+  * skel for uniwill touchpad fix
+  * added boardnames for uniwill fix
+  * packing
+  * changed some description
+  * added some models
+  * packing
+  * modified description for uniwill fix
+  * modified package name uniwillfix
+  * packing
+  * added some debug for package installation
+  * packing
+  * changed package recognition
+  * packing
+  * before merge
+  * packing
+  * stashing files
+  * added nvme fix
+  * found missing right bracket
+  * added log for discovered fixes
+  * packing
+  * packing
+  * last commit
+  * finished N150CU
+  * packing
+  * packing
+  * changed package name
+  * added support for ITE Keyboard devices
+  * packing
+  * finished fingerprintreader packages
+  * packing
+  * before checkout
+  * packing
+  * stashing
+  * modified fprintreader, wrong packages and refined regexp
+  * packing
+  * changed values id package was installed, fingerprintreader
+  * packing
+  * added addconfiguredmodule for 2 packages
+  * packing
+  * changed configured flags on fprintreader
+  * packing
+  * success message modifications
+  * packing
+  * before merge
+  * added tuxedo-micfix1
+  * packing
+  * added boardname to micfix1
+  * adding mesa-utils always install
+  * packing
+  * added restore-audio-fix
+  * packing
+  * changes at systemd file
+  * packing
+  * before merge
+  * sneaked in little bugfix for threeg and restore-audio-fix
+  * kernel installer part finished
+  * packing
+  * before merge
+  * little tester + first entries for nvidia
+  * packing
+  * changed lsusb -> lspci
+  * packing
+  * packing
+  * files
+  * added nvidia drivers
+  * packing
+  * kernel and nvidia driver messages at install
+  * packing
+
+  [ emohrtuxedo ]
+  * packing
+  * huawei module char error
+  * packing
+  * restoreaudiofix changed return value systemd
+  * packing
+
+  [ E. Mohr ]
+  * stash
+  * test for nvidia deinstall
+  * added deinstall subroutine deinstExcept
+  * finished nvidia drivers
+  * packing
+  * changed nvidia pci address
+  * added pkcon option for nvidia
+  * modified return values from deinstExcept
+  * modified insertGrub, updateGrub only if did modifications
+  * packing
+  * insertGrubParameters changed return parameters
+  * packing
+  * deinstall packages modified return values and added some log info
+  * packing
+  * print retValue
+  * packing
+  * debug deinst nvidia
+  * packing
+  * debug retvalue
+  * packing
+  * final testversion
+  * packing
+  * before merge
+  * finished block unblock
+  * changed placeholder on boardname
+  * modified kernel for 20.04
+  * packing
+  * before merge
+  * wrote test lspci
+  * added findPciDevices and rewrote nvme and micfix1 pci device query
+  * packing
+  * massive changes in reporting
+  * packing
+  * some more changes in reporting
+  * packing
+  * added module installation nothingToDo result
+  * packing
+  * some formatting on output
+  * packing
+  * tuxedo-repos will not be configured if blocked
+  * packing
+  * sneaked in douplicate name for AURA1501 -> NL5xRU
+  * added detection of TUXEDO string
+  * packing
+  * retired superfluous tomte cfg file in etc
+  * packing
+  * added rm for purge tomte.cfg in postrm
+  * packing
+  * Tomte status in logfile
+  * logging for post-configuration
+  * packing
+  * moved log entry
+  * changed tuxedo restriction to FAI conditions
+  * packing
+  * readded bios dummy
+  * packing
+  * XMG Fusion as bordname added
+  * packing
+  * reconfigure with shifted parameter instead ARGV
+  * packing
+  * bugfix argument block unblock
+  * packing
+  * changed configure to reconfigure prerequisite
+  * packing
+  * refined error if no network
+  * packing
+  * mod pkcon for apt
+  * packing
+  * grabbing output
+  * packing
+  * grab output add-key
+  * packing
+  * grab stderr too
+  * packing
+  * grab annoying initupdate output
+  * packing
+  * before merge with master
+  * packing
+  * small change in return value
+  * changed single all subs
+  * packing
+  * override installinit
+  * packing
+  * add debhelper tag
+  * packing
+  * module name
+  * packing
+  * ommit non necessary modules from being configured in configuremor reconfigure all
+  * packing
+  * before merge
+  * packing
+  * testscript for md5sum
+  * added package cracklib-runtime
+  * packing
+  * after merge
+  * packing
+  * more md5 stuff
+  * always check if grub entry present if module is required by the system
+  * packing
+  * after tests
+  * packing
+  * separated repos into tuxedo_repos tuxedo_mirrors and also required subroutines
+  * packing
+  * before merge
+  * first kernel upgrade attempt
+  * packing
+  * added deinstall 5.10 at install
+  * packing
+  * kernel remove causes unbootable system
+  * added proper response kernel deinst
+  * packing
+  * hide answer from package search
+  * packing
+  * hide pkcon output
+  * packing
+  * refinig output pkcon
+  * packing
+  * delete linux-oem-20.04
+  * packing
+  * reversed kernel deinstall
+  * packing
+  * before merge
+  * packing
+  * after package build
+  * md5 tests
+  * md5sum subs ready
+  * transfered md5check to main file
+  * changed some output for installed modules
+  * packing
+  * before merge
+  * added NS50MU to no-keyboard-after-suspend-fix
+  * packing
+  * beforde merge
+  * packing
+  * after merge
+  * added always reconfigure modules marked with always
+  * packing
+  * before merge with master
+  * added md5store check
+  * packing
+  * m5sum ready
+  * packing
+  * debug md5store
+  * packing
+  * before merge
+  * added hash instead argv
+  * packing
+  * before merge with master
+  * added libnotify example
+  * several experiments with notify and dbus
+  * final solution for messages in test script
+  * included messaging in main script
+  * finished testing message capability
+  * messaging sub in main prog done
+  * finished message system
+  * packing
+  * before checkout
+  * packing
+  * configure also failed modules
+  * packing
+  * modified package installer amdgpu
+  * packing
+  * debug pkcon
+  * packing
+  * before checkout
+  * added micfix1 for XP1512 and XP1712
+  * packing
+  * packing
+  * packing
+  * before merge with master
+  * packing
+  * failed should also configure
+  * packing
+  * added tuxedo-keyboard-ite to XP1512/XP1712
+  * packing
+  * before merge
+  * packing
+  * packing
+  * added debug info
+  * packing
+  * more debug
+  * packing
+  * more debug
+  * packing
+  * more debug
+  * packing
+  * vor checkout
+  * added TUXEDO to desktop messages
+  * added FAI stage and apt-get instead pkcon
+  * packing
+  * rework and adapt of installPackage to FAI conditions
+  * packing
+  * adapted remove packages to FAI conditions
+  * packing
+  * modified package refresh to FAI compatibility
+  * packing
+  * some debug
+  * packing
+  * removed debugs
+  * packing
+  * nvidia debugs
+  * packing
+  * deleted debugs
+  * packing
+  * before megre with master
+  * packing
+  * before checkout
+  * packing
+  * changed lsusb for ME936
+  * refined cpuinfo
+  * packing
+  * changed case for successful installation
+  * packing
+  * before merge with master
+  * packing
+  * after packaging
+  * packing
+  * added EDUBOOK1502
+  * packing
+  * last commit
+  * added tuxedo-touchpad-switch for PHxTxX1, PH4TQx1, GMxNGxx, GMxZGxx, GMxMGxx
+  * packing
+  * include displays other then 0 as well
+  * packing
+  * added remaining modules desktop messaging
+  * packing
+  * before merge with master
+  * packing
+  * Tomte is now TUXEDO Tomte
+  * packing
+  * semanthics amd-gpu detection
+  * added r8168-dkms driver
+  * packing
+  * before merge
+  * packing
+  * before pull
+  * add testcase for nvme in FAI
+  * added nvme fw install
+  * added error log when nvme fix installation failed
+  * added fwupdate commands
+  * outcomment nvme update commands
+  * packing
+  * packing
+  * some debug for install nvme and deinstall at last possibillity
+  * packing
+  * small things
+  * module report configure for more then one nvme device
+  * packing
+  * prepare for live stage
+  * packing
+  * missing uncomment
+  * packing
+  * delete some log for installing
+  * keep FW if was installed before
+  * packing
+  * packing
+  * added support for OLED brightness control for SDC Model 41001 Serial Number 0
+  * packing
+  * changed name of module in check
+  * packing
+  * before merge
+  * changed oled recognition to display only
+  * repaired module description
+  * packing
+  * before merge
+  * returned boardname for backlight-fix
+  * packing
+  * added apport-fix
+  * packing
+  * disable apport in systemctl as well
+  * packing
+  * apport stop now always active
+  * packing
+  * added apportfix into hash
+  * packing
+  * commented out disable apport service
+  * debugs for EDID
+  * packing
+  * added tree
+  * packing
+  * deleted all debug from EDID
+  * network status test script
+  * added polling subroutine
+  * test scenario for network wait
+  * packing
+  * network search only when required by fix
+  * delete unnecessary checknetwork info on modules
+  * packing
+  * modified check and return handling for apport
+  * packing
+  * before merge with master
+  * packing
+  * apport debug
+  * packing
+  * do not disable apport if it is not installed
+  * packing
+  * restart required after OLED module install
+  * excluding tuxedo mirrors which don't have restricted universe multiverse except mirrors.tuxedocomputers acording to https://gitlab.com/tuxedocomputers/development/tuxedo-tomte/-/issues/82
+  * packing
+  * after packaging
+  * small test for array splicing
+  * no reporting on desktop if only the default modules were configured
+  * packing
+  * added nothingtodo to repos and mirrors if nothing was done
+  * packing
+  * log messages if no modifications on repos or mirrors
+  * packing
+  * small retval bugs
+  * packing
+  * repokey add only if neccessary
+  * packing
+  * modified printLog against double messages
+  * packing
+  * beautified return parameters
+  * packing
+  * before merge with master
+  * added module opensuseip-fix
+  * packing
+  * stupid little missing curly bracket
+  * packing
+  * error in IP, substitute all lines in file if pattern found
+  * packing
+  * before merge with master
+  * packing
+  * after merge
+  * added support for realtek-r8125-dkms
+  * packing
+  * before merge with master
+  * changed amdgpuwithnvidiafix to not check every time
+  * added support for amdgpu-backlight-aux-off
+  * packing
+  * commit before merge
+  * added bash shell completion
+  * packing
+  * before merge with master
+  * packing
+  * before checkout
+  * removed corefix always install and after md5sum check
+  * packing
+  * removed md5sum check for core-fix
+  * packing
+  * before merge with master
+  * packing
+  * added remove subroutines checks
+  * remove capability ready, remove amdgpu-with-nvidia-fix added
+  * packing
+  * removed update packages in FAI
+  * removed opensuseip
+  * packing
+  * added missing brackets
+  * packing
+  * removed always and grub from amdgpuwithnvidiafix
+  * packing
+  * delete all backup files
+  * packing
+  * added amdgpu-dkms install exclusively for 20.04
+  * packing
+  * changed version amdgpunvidiafix
+  * packing
+  * removed debug entries
+  * added logrotate
+  * added devices to tuxedo-keyboard-ite
+  * changed check to first boradname then EDID
+  * packing
+  * before checkout
+  * added copyright preamble
+
+  [ Vinzenz Vietzke ]
+  * Typos
+
+  [ E. Mohr ]
+  * files cleanup and ignorelist
+  * create and set file
+  * added limit for repeating Tomte configure all
+  * packing
+  * minor changes in repeat procedure
+  * packing
+  * took away messages if retry
+  * changed mirrors from packages to mirrors
+  * packing
+  * changed also regexp to comment out
+  * packing
+  * before merge
+  * packing
+  * before checkout
+  * packing
+  * reading from triesDoneFile should not cause exception even if not present
+  * packing
+  * refining next installation try
+  * packing
+  * before merge with master
+  * added remove and kernel release dependancy to amdgpu-dkms
+  * packing
+  * small typo
+  * changed package install test true even when not configured
+  * packing
+  * do not start Tomte several times in systemd if more than one problem has to be solved
+  * packing
+  * removed bug removeModule name
+  * packing
+  * refined return values for packages
+  * packing
+  * restart notice or not after failuer to install fix
+  * packing
+  * deleted superfluous message
+  * packing
+  * muting systemd message
+  * packing
+  * suppressing more from systemd
+  * packing
+  * info about total possible tries
+  * packing
+  * modified http to https in sources
+  * packing
+  * added exception for repos and mirrors: change if URLs as http to https
+  * packing
+  * change http to https
+  * packing
+  * change to https part two
+  * packing
+  * to https part3
+  * packing
+  * to https part4
+  * packing
+  * to https part5
+  * packing
+  * delete comment
+  * packing
+  * before merge with master
+  * packing
+  * first steps
+  * kernel remove subroutines
+  * added install and deinstall kernel subroutines
+  * kernel install 18.04, first module done
+  * kernel install, modules ready
+  * packing
+  * debug return parameters kernel install
+  * finished deinstallKernel
+  * packing
+  * kernel remove stage 1
+  * test for kernel change
+  * added BOE Model 2420 Serial Number 0 for GMxZGxx
+  * packing
+  * before checkout
+  * checkout
+  * smal copy bug
+  * packing
+  * before checkout
+  * before checkout
+  * subprocedure uninstallKernelFlavour ready
+  * installKernelFlavour almost ready
+  * install and uninstall kernel ready
+  * packing
+  * corrected some arrays
+  * packing
+  * changed version 20.04 for hwe
+  * packing
+  * debug
+  * packing
+  * added debug notes
+  * packing
+  * added apt-get -q
+  * packing
+  * added dirty trick to delete current kernel
+  * work around to deinstall current kernel
+  * packing
+  * before checkout to master
+  * packing
+  * before checkout
+  * packing
+  * corrected wrong package
+  * packing
+  * added kernels for 18.04
+  * preliminary kernels ready
+  * packing
+  * missing blanks
+  * packing
+  * remove --force-yes
+  * packing
+  * loots of tlittle debugs
+  * packing
+  * packing
+  * debug
+  * packing
+  * debug deadlock
+  * packing
+  * debug deadlock 2
+  * packing
+  * corrected wrong output for kernel install
+  * packing
+  * major rewrite package pressence recognition
+  * packing
+  * added loglevel
+  * packing
+  * added packages to check and delete
+  * packing
+  * some debug changes, some blanks
+  * packing
+  * added packages to list to be removed
+  * packing
+  * some modules for kernels
+  * packing
+  * deleted packages from being deleted in 18.04
+  * packing
+  * added tomte delayed
+  * packing
+  * restartsystem
+  * packing
+  * some try again restriction
+  * packing
+  * limit repeated execution
+  * packing
+  * refinded restart procedure
+  * packing
+  * added tuxedo kernel
+  * packing
+  * added search for package names
+  * compare each package
+  * test release
+  * packing
+  * before checkout
+  * added i915-disable-psr-fix for PHxTxX1
+  * packing
+  * before merge
+  * added P95_HP for backlightfix
+  * packing
+  * changed fix name
+  * packing
+  * redundancy
+  * packing
+  * new version number
+  * packing
+  * before checkout
+  * packing
+  * added exclude packages from uninst
+  * packing
+  * last beautification
+  * packing
+  * debug
+  * packing
+  * debug
+  * packing
+  * debug2
+  * packing
+  * final
+  * packing
+  * final2
+  * packing
+  * final3
+  * packing
+  * delete old kernel from list
+  * packing
+  * correct module names
+  * packing
+  * removed several debug messages
+  * packing
+  * before checkout
+  * before checkout
+  * added amdgpu-dkms for GMxZGxx
+  * packing
+  * before checkout
+  * added description
+  * packing
+  * before checkout
+  * packing
+  * before checkout
+  * packing
+  * new ID
+  * packing
+  * activated error messages on install
+  * packing
+  * before checkout
+  * added kernel installation linux-tuxedo-20.04
+  * packing
+  * before checkout
+  * packing
+
+  [ Christoffer Sandberg ]
+  * FAI: Reorder repo modules install order
+  * packing
+  * Add Stellaris/Polaris Intel gen 3 to tuxedotouchpadswitch
+  * packing
+
+  [ emohrtuxedo ]
+  * added debug mode
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+  * packing
+
+  [ E. Mohr ]
+  * packing
+  * packing
+  * debug
+  * packing
+  * packing
+  * debug reposw
+  * packing
+  * removed argument numeric error
+  * Stellaris uses now TUXEDO kernel
+  * packing
+  * added kernel for 18.04
+  * packing
+  * removed kernel configuration for 18.04
+  * packing
+  * lowered debug level
+  * added sleep
+  * packing
+  * changed loglevels part 1
+  * finished logs reporting
+  * packing
+  * typo
+  * removed number in kernel package list
+  * packing
+  * before merge
+  * packing
+  * sent logging to null at installing packages
+  * packing
+  * packing
+  * before checkout
+  * added i915 fix for IBP14G6, boardname PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 30 Sep 2021 12:12:12 +0200
 
 tuxedo-tomte (2.5.1) focal; urgency=medium
 
