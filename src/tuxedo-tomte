@@ -1112,7 +1112,8 @@ sub checkRequirements {
 		'1558:a500', 
 		'1558:51a1',
 		'1558:67e5',
-		'1558:65e5'
+		'1558:65e5',
+		'1d05:1132'
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
