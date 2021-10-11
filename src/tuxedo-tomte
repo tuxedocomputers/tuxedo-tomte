@@ -511,7 +511,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'yes',
 		fainame => '',
 		description => 'Keyboard back-light driver for ITE devices',
@@ -543,7 +543,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'yes',
 		fainame => '',
 		description => 'Kernel audio module which fixes different issues with audio output',
@@ -767,7 +767,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Fixes screen flickering when using some input devices',
@@ -1071,6 +1071,7 @@ sub checkRequirements {
 	}
 
 	if (($boardname =~ /X170SM/) ||
+		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/)) {
@@ -1112,7 +1113,9 @@ sub checkRequirements {
 		'1558:a500', 
 		'1558:51a1',
 		'1558:67e5',
-		'1558:65e5'
+		'1558:65e5',
+		'1d05:1132',
+		'1558:7715'
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
