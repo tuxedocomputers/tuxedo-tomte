@@ -1002,7 +1002,8 @@ sub checkRequirements {
 		($boardname =~ /AURA1501/) ||
 		($boardname =~ /EDUBOOK1502/) ||
 		($boardname =~ /PB50_70DFx,DDx/) ||
-		($boardname =~ /NS50MU/)) {
+		($boardname =~ /NS50MU/) ||
+		($boardname =~ /NS50_70MU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('detected no-keyboard-after-suspend-fix issue');
 	}
