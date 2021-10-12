@@ -937,7 +937,8 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
-	`pkcon refresh`;
+	my $output = `pkcon refresh`;
+	printLog("return from pkcon refresh: $output", 'L2');
 }
 
 sub prerequisitesFAI {
@@ -947,7 +948,8 @@ sub prerequisitesFAI {
 sub postrequisitesFAI {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
-	`apt-get update`;
+	my $output = `apt-get update`;
+	printLog("return from apt-get update: $output", 'T2');
 }
 
 
