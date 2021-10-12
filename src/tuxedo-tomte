@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO: debug
+my $logLevel = 2;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -936,6 +937,7 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	`pkcon refresh`;
 }
 
 sub prerequisitesFAI {
@@ -945,6 +947,7 @@ sub prerequisitesFAI {
 sub postrequisitesFAI {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	`apt-get update`;
 }
 
 
