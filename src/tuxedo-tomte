@@ -367,7 +367,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 2,
+		hwid => 3,
 		package => 'no',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem',
@@ -937,6 +937,7 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
+	checkNetwork(10,10);
 	my $output = `pkcon refresh`;
 	printLog("return from pkcon refresh: $output", 'L2');
 }
@@ -1656,7 +1657,7 @@ sub tuxedorepos() {
 				# repo updates have to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork();
+					checkNetwork(10,10);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -1692,7 +1693,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork();
+				checkNetwork(10,10);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -1749,7 +1750,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork();
+					checkNetwork(10,10);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -1785,7 +1786,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork();
+				checkNetwork(10,10);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -3174,7 +3175,7 @@ sub createRepos {
 sub addRepoKey {
 	my $output;
 	my $retval;
-	checkNetwork();
+	checkNetwork(10,10);
 	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
 	$retval = $?;
 	if ($retval != 0) {
@@ -3443,7 +3444,7 @@ sub installPackage {
 		system("apt-get -qy install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 	} else {
-		checkNetwork();
+		checkNetwork(10,10);
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
@@ -3904,8 +3905,10 @@ sub waitForNetwork {
 ###############################################################################
 # waitForNetwork('number of tries', 'wait seconds')
 sub checkNetwork {
+	my $tries = shift;
+	my $wait = shift;
 	if ( (! $FAI) && (! $networkSearchDone) ) {
-		if (waitForNetwork(10, 10)) {
+		if (waitForNetwork($tries, $wait)) {
 			$networkSearchDone = 1;
 			printLog('found network !');
 		} else {
