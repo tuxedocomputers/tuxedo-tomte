@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO: debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -937,7 +936,6 @@ sub isOSSupported {
 sub prerequisites {
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
-	checkNetwork(10,10);
 	my $output = `pkcon refresh`;
 	printLog("return from pkcon refresh: $output", 'L2');
 }
