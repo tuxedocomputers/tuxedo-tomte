@@ -18,6 +18,17 @@ $branch =~ s/\s//g;
 
 print "on branch: $branch<\n\n";
 
+open my $fh, '<', './src/tuxedo-tomte';
+while (my $line = <$fh>) {
+	if ($line =~ /#TODO/) {
+		print "#########################################\n";
+		print "#########################################\n";
+		print "     WARNING! '#TODO' in file!!!         \n";
+		print "#########################################\n";
+		print "#########################################\n";
+	}
+}
+
 # get version number
 print "Old version:\n";
 open (CL, $changelog) || die "could not open $changelog\n";
