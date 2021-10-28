@@ -366,7 +366,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 3,
+		hwid => 4,
 		package => 'no',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem',
@@ -1007,7 +1007,8 @@ sub checkRequirements {
 		($boardname =~ /EDUBOOK1502/) ||
 		($boardname =~ /PB50_70DFx,DDx/) ||
 		($boardname =~ /NS50MU/) ||
-		($boardname =~ /NS50_70MU/)) {
+		($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NJ50_70CU/)) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('detected no-keyboard-after-suspend-fix issue');
 	}
