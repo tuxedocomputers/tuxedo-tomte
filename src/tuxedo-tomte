@@ -607,7 +607,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 1,
+		hwid => 2,
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-edge',
@@ -1190,8 +1190,12 @@ sub checkRequirements {
 	}
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
-		printLog('kernel linux-tuxedo-20.04 should be default');
-		$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		if ($boardname =~ m/X170KM-G/) {
+			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		} else {
+			printLog('kernel linux-tuxedo-20.04 should be default');
+			$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		}
 	}
 }
 
