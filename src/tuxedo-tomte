@@ -1188,14 +1188,17 @@ sub checkRequirements {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
 		printLog('detected tuxedo-pinfix-tgl-dkms issue');
 	}
+
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
-		if ($boardname =~ m/X170KM-G/) {
-			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} else {
-			printLog('kernel linux-tuxedo-20.04 should be default');
-			$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		}
+		printLog('kernel linux-tuxedo-20.04 should be default');
+		$origConfModules{kerneltuxedo2004}{required} = 'yes';
+			#if ($boardname =~ m/X170KM-G/) {
+			#$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+			#} else {
+			#printLog('kernel linux-tuxedo-20.04 should be default');
+			#$origConfModules{kerneltuxedo2004}{required} = 'yes';
+			#}
 	}
 }
 
