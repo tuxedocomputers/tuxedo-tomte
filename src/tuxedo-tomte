@@ -1191,15 +1191,14 @@ sub checkRequirements {
 
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
-		#TODO: debug
-		#printLog('kernel linux-tuxedo-20.04 should be default');
-		#$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		if ($boardname =~ m/X170KM-G/) {
-			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} else {
-			printLog('kernel linux-tuxedo-20.04 should be default');
-			$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		}
+		printLog('kernel linux-tuxedo-20.04 should be default');
+		$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		#if ($boardname =~ m/X170KM-G/) {
+		#	$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		#} else {
+		#	printLog('kernel linux-tuxedo-20.04 should be default');
+		#	$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		#}
 	}
 }
 
