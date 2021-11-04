@@ -3576,7 +3576,9 @@ sub populateFlavourPackages {
 	printLog("populating $flavour", 'L2');
 	$searchCmd = 'apt-cache depends '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
+	printLog("first result: $result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
@@ -3586,7 +3588,9 @@ sub populateFlavourPackages {
 		}
 	}
 	$searchCmd = 'apt-cache depends '.$packageLine;
+	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
+	printLog("second result: $result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
