@@ -942,8 +942,8 @@ sub prerequisites {
 }
 
 sub prerequisitesFAI {
-	my $output = `pkcon refresh`;
-	printLog("return from pkcon refresh: $output", 'L2');
+	my $output = `apt-get update`;
+	printLog("return from apt-get update: $output", 'T2');
 }
 
 sub postrequisitesFAI {
