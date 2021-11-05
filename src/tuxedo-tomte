@@ -3449,7 +3449,8 @@ sub installPackage {
 	my $retval;
 	printLog("install package $packageName");
 	if ($FAI) {
-		system("apt-get -y install $packageName");
+		system("apt-get -o Debug::pkgDPkgPM -o Debug::pkgDPkgProgressReporting -o Debug::pkgOrderList -o Debug::pkgPackageManager -o Debug::RunScripts -y install $packageName");
+		printLog('after system', 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
 		checkNetwork(10,10);
