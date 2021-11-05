@@ -942,7 +942,8 @@ sub prerequisites {
 }
 
 sub prerequisitesFAI {
-
+	my $output = `pkcon refresh`;
+	printLog("return from pkcon refresh: $output", 'L2');
 }
 
 sub postrequisitesFAI {
