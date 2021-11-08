@@ -1037,6 +1037,7 @@ sub checkRequirements {
 		($boardname =~ /TRINITY1501I/) ||
 		($boardname =~ /PHxTxX1/) ||
 		($boardname =~ /PH4TQx1/) ||
+		($boardname =~ /PHxTQx1/) ||
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
@@ -1181,7 +1182,8 @@ sub checkRequirements {
 		}
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/)) {
+		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
