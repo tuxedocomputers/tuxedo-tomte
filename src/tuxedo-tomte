@@ -1038,6 +1038,7 @@ sub checkRequirements {
 		($boardname =~ /TRINITY1501I/) ||
 		($boardname =~ /PHxTxX1/) ||
 		($boardname =~ /PH4TQx1/) ||
+		($boardname =~ /PHxTQx1/) || #alias to PH4TQx1
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
@@ -1182,7 +1183,8 @@ sub checkRequirements {
 		}
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/)) {
+		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
@@ -3447,14 +3449,15 @@ sub isPackageInstalled {
 sub installPackage {
 	my $packageName = shift;
 	my $retval;
-	printLog("install package $packageName");
 	if ($FAI) {
+		printLog("install package $packageName", 'TL0');
 		#TODO debug
 		#system("apt-get -o Debug::pkgDPkgPM=true -o Debug::pkgDPkgProgressReporting=true -o Debug::pkgOrderList=true -o Debug::pkgPackageManager=true -o Debug::RunScripts=true -y install $packageName");
-		system("apt-get -y install $packageName");
-		printLog('after system', 'TL2');
+		$retval = `apt-get -y install $packageName`;
+		printLog("return from install:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
+		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
