@@ -3454,6 +3454,9 @@ sub installPackage {
 		#TODO debug
 		#system("apt-get -o Debug::pkgDPkgPM=true -o Debug::pkgDPkgProgressReporting=true -o Debug::pkgOrderList=true -o Debug::pkgPackageManager=true -o Debug::RunScripts=true -y install $packageName");
 		#Debug::pkgDPkgPM=true
+		if ($packageName eq 'tuxedo-micfix1') {
+			printLog('sleep 20', 'TL2');
+		}
 		system("apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName 2>&1");
 		printLog("return from install", 'TL2');
 		$retval = isPackageInstalled($packageName);
