@@ -2414,6 +2414,7 @@ sub kerneltuxedo2004edge() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2421,6 +2422,15 @@ sub kerneltuxedo2004edge() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2471,6 +2481,7 @@ sub kerneltuxedo2004() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2478,6 +2489,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
@@ -2485,6 +2497,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
