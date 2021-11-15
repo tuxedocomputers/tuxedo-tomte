@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -393,7 +392,6 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-
 	tuxedorepos => {
 		name => 'tuxedo-repos',
 		version => 3,
@@ -2230,6 +2228,9 @@ sub tuxedomicfix1() {
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'yes';
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 	if ($action eq 'upgrade') {
 		printLog('upgrade not necessary for packages');
@@ -3451,7 +3452,8 @@ sub installPackage {
 	my $retval;
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
-		system("apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName 2>&1");
+		# usefull debug option: Debug::pkgDPkgProgressReporting=true
+		system("apt-get -y install $packageName 2>&1");
 		printLog("return from install", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
