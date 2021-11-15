@@ -33,7 +33,7 @@ my $logLevel = 0;
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
-flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
+flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running, please wait till it is finished\n";
 
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
