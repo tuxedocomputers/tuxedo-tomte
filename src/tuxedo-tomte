@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO
+my $logLevel = 2;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -3599,7 +3600,12 @@ sub populateFlavourPackages {
 	printLog("first result:\n$result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
+		#TODO debugs
 		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		printLog("catched string: $_", 'TL2');
+		if ($_ =~ /unsigned/) {
+			printLog("unsigned found", 'TL2');
+		}
 		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
 			printLog("Accepted: $_", 'L2');
 			$packageLine .= " $_";
@@ -3613,6 +3619,10 @@ sub populateFlavourPackages {
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
 		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		printLog("catched string: $_", 'TL2');
+		if ($_ =~ /unsigned/) {
+			printLog("unsigned found", 'TL2');
+		}
 		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
 			printLog("Accepted: $_", 'L2');
 			push @packages, $_;
