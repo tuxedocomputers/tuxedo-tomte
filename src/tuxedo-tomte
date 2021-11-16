@@ -3596,11 +3596,12 @@ sub populateFlavourPackages {
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
-	printLog("first result: $result", 'L2');
+	printLog("first result:\n$result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
-		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
+		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
 		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
+			printLog("Accepted: $_", 'L2');
 			$packageLine .= " $_";
 			push @packages, $_;
 		}
@@ -3608,11 +3609,12 @@ sub populateFlavourPackages {
 	$searchCmd = 'apt-cache depends --important '.$packageLine;
 	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
-	printLog("second result: $result", 'L2');
+	printLog("second result:\n$result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
 	foreach (@lines) {
-		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
+		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
 		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
+			printLog("Accepted: $_", 'L2');
 			push @packages, $_;
 		}
 	}
