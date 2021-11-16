@@ -33,7 +33,7 @@ my $logLevel = 0;
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
-flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
+flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running, please wait till it is finished\n";
 
 my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
@@ -1193,14 +1193,12 @@ sub checkRequirements {
 
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
-		printLog('kernel linux-tuxedo-20.04 should be default');
-		$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		#if ($boardname =~ m/X170KM-G/) {
-		#	$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		#} else {
-		#	printLog('kernel linux-tuxedo-20.04 should be default');
-		#	$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		#}
+		if ($boardname =~ m/X170KM-G/) {
+			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		} else {
+			printLog('kernel linux-tuxedo-20.04 should be default');
+			$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		}
 	}
 }
 
@@ -2416,6 +2414,7 @@ sub kerneltuxedo2004edge() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2423,6 +2422,15 @@ sub kerneltuxedo2004edge() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2473,6 +2481,7 @@ sub kerneltuxedo2004() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2480,6 +2489,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
@@ -2487,6 +2497,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
