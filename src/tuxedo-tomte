@@ -3592,6 +3592,7 @@ sub populateFlavourPackages {
 	my $searchCmd;
 	my $result;
 	my @lines;
+	my $line;
 	printLog("populating $flavour", 'L2');
 	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
@@ -3599,17 +3600,21 @@ sub populateFlavourPackages {
 	$result = `$searchCmd`;
 	printLog("first result:\n$result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
-	foreach (@lines) {
+	foreach $line (@lines) {
 		#TODO debugs
-		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
-		printLog("catched string: $_", 'TL2');
-		if ($_ =~ /unsigned/) {
+		printLog("original line: $line", 'TL2');
+		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		printLog("catched string: $1", 'TL2');
+		if ($1 =~ /unsigned/) {
 			printLog("unsigned found", 'TL2');
 		}
-		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
-			printLog("Accepted: $_", 'L2');
-			$packageLine .= " $_";
-			push @packages, $_;
+		if ($1 =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			printLog("valid kernel package found", 'TL2');
+		}
+		if (($1 =~ /^linux-.*(?:image|headers|modules)-.*/) && !($1 =~ /unsigned/)) {
+			printLog("Accepted: $1", 'L2');
+			$packageLine .= " $1";
+			push @packages, $1;
 		}
 	}
 	$searchCmd = 'apt-cache depends --important '.$packageLine;
@@ -3617,15 +3622,19 @@ sub populateFlavourPackages {
 	$result = `$searchCmd`;
 	printLog("second result:\n$result", 'L2');
 	@lines = split /[\n,\s]+/, $result;
-	foreach (@lines) {
-		/\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
-		printLog("catched string: $_", 'TL2');
-		if ($_ =~ /unsigned/) {
+	foreach $line (@lines) {
+		printLog("original line: $line", 'TL2');
+		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		printLog("catched string: $1", 'TL2');
+		if ($1 =~ /unsigned/) {
 			printLog("unsigned found", 'TL2');
 		}
-		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
-			printLog("Accepted: $_", 'L2');
-			push @packages, $_;
+		if ($1 =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			printLog("valid kernel package found", 'TL2');
+		}
+		if (($1 =~ /^linux-.*(?:image|headers|modules)-.*/) && !($1 =~ /unsigned/)) {
+			printLog("Accepted: $1", 'L2');
+			push @packages, $1;
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
