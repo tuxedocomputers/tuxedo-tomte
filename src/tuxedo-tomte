@@ -3606,17 +3606,17 @@ sub populateFlavourPackages {
 		printLog("original line: $line", 'TL2');
 		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
 		$pkgString = $1;
-		printLog("catched string: $1", 'TL2');
-		if ($1 =~ /unsigned/) {
+		printLog("catched string: $pkgString", 'TL2');
+		if ($pkgString =~ /unsigned/) {
 			printLog("unsigned found", 'TL2');
 		}
-		if ($1 =~ /^linux-.*(?:image|headers|modules)-.*/) {
+		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
 			printLog("valid kernel package found", 'TL2');
 		}
-		if (($1 =~ /^linux-.*(?:image|headers|modules)-.*/) && !($1 =~ /unsigned/)) {
-			printLog("Accepted: $1", 'L2');
-			$packageLine .= " $1";
-			push @packages, $1;
+		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			printLog("Accepted: $pkgString", 'L2');
+			$packageLine .= " $pkgString";
+			push @packages, $pkgString;
 		}
 	}
 	$searchCmd = 'apt-cache depends --important '.$packageLine;
@@ -3627,16 +3627,17 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		printLog("original line: $line", 'TL2');
 		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
-		printLog("catched string: $1", 'TL2');
-		if ($1 =~ /unsigned/) {
+		$pkgString = $1;
+		printLog("catched string: $pkgString", 'TL2');
+		if ($pkgString =~ /unsigned/) {
 			printLog("unsigned found", 'TL2');
 		}
-		if ($1 =~ /^linux-.*(?:image|headers|modules)-.*/) {
+		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
 			printLog("valid kernel package found", 'TL2');
 		}
-		if (($1 =~ /^linux-.*(?:image|headers|modules)-.*/) && !($1 =~ /unsigned/)) {
-			printLog("Accepted: $1", 'L2');
-			push @packages, $1;
+		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			printLog("Accepted: $pkgString", 'L2');
+			push @packages, $pkgString;
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
