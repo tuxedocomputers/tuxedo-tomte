@@ -3593,17 +3593,19 @@ sub populateFlavourPackages {
 	my $result;
 	my @lines;
 	my $line;
+	my $pkgString;
 	printLog("populating $flavour", 'L2');
 	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("first result:\n$result", 'L2');
-	@lines = split /[\n,\s]+/, $result;
+	@lines = split /\n/, $result;
 	foreach $line (@lines) {
 		#TODO debugs
 		printLog("original line: $line", 'TL2');
 		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		$pkgString = $1;
 		printLog("catched string: $1", 'TL2');
 		if ($1 =~ /unsigned/) {
 			printLog("unsigned found", 'TL2');
@@ -3621,7 +3623,7 @@ sub populateFlavourPackages {
 	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("second result:\n$result", 'L2');
-	@lines = split /[\n,\s]+/, $result;
+	@lines = split /\n/, $result;
 	foreach $line (@lines) {
 		printLog("original line: $line", 'TL2');
 		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
