@@ -3604,7 +3604,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		#TODO debugs
 		printLog("original line: $line", 'TL2');
-		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 		$pkgString = $1;
 		printLog("catched string: $pkgString", 'TL2');
 		if ($pkgString =~ /unsigned/) {
@@ -3618,6 +3618,9 @@ sub populateFlavourPackages {
 			$packageLine .= " $pkgString";
 			push @packages, $pkgString;
 		}
+		} else {
+			printLog("line not matching", 'TL2');
+		}
 	}
 	$searchCmd = 'apt-cache depends --important '.$packageLine;
 	printLog("second searchcommand: $searchCmd", 'L2');
@@ -3626,7 +3629,7 @@ sub populateFlavourPackages {
 	@lines = split /\n/, $result;
 	foreach $line (@lines) {
 		printLog("original line: $line", 'TL2');
-		$line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/;
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 		$pkgString = $1;
 		printLog("catched string: $pkgString", 'TL2');
 		if ($pkgString =~ /unsigned/) {
@@ -3638,6 +3641,9 @@ sub populateFlavourPackages {
 		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
 			printLog("Accepted: $pkgString", 'L2');
 			push @packages, $pkgString;
+		}
+		} else {
+			printLog("line not matching", 'TL2');
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
