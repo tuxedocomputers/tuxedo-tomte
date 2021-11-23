@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO
-my $logLevel = 2;
+my $logLevel = 0;
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -3601,24 +3600,13 @@ sub populateFlavourPackages {
 	printLog("first result:\n$result", 'L2');
 	@lines = split /\n/, $result;
 	foreach $line (@lines) {
-		#TODO debugs
-		printLog("original line: $line", 'TL2');
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
-		$pkgString = $1;
-		printLog("catched string: $pkgString", 'TL2');
-		if ($pkgString =~ /unsigned/) {
-			printLog("unsigned found", 'TL2');
-		}
-		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
-			printLog("valid kernel package found", 'TL2');
-		}
-		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
-			printLog("Accepted: $pkgString", 'L2');
-			$packageLine .= " $pkgString";
-			push @packages, $pkgString;
-		}
-		} else {
-			printLog("line not matching", 'TL2');
+			$pkgString = $1;
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				printLog("Accepted: $pkgString", 'L2');
+				$packageLine .= " $pkgString";
+				push @packages, $pkgString;
+			}
 		}
 	}
 	$searchCmd = 'apt-cache depends --important '.$packageLine;
@@ -3627,22 +3615,12 @@ sub populateFlavourPackages {
 	printLog("second result:\n$result", 'L2');
 	@lines = split /\n/, $result;
 	foreach $line (@lines) {
-		printLog("original line: $line", 'TL2');
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
-		$pkgString = $1;
-		printLog("catched string: $pkgString", 'TL2');
-		if ($pkgString =~ /unsigned/) {
-			printLog("unsigned found", 'TL2');
-		}
-		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
-			printLog("valid kernel package found", 'TL2');
-		}
-		if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
-			printLog("Accepted: $pkgString", 'L2');
-			push @packages, $pkgString;
-		}
-		} else {
-			printLog("line not matching", 'TL2');
+			$pkgString = $1;
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				printLog("Accepted: $pkgString", 'L2');
+				push @packages, $pkgString;
+			}
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
