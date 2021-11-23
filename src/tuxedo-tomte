@@ -2122,7 +2122,7 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
@@ -2141,6 +2141,9 @@ sub tuxedokeyboardite() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
