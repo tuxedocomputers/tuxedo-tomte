@@ -1022,7 +1022,6 @@ sub checkRequirements {
 	if (($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /PF5PU1G/) ||
-		($boardname =~ /PF5PU1G/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/) ||
 		($boardname =~ /POLARIS1501I1650TI/) ||
@@ -1034,7 +1033,7 @@ sub checkRequirements {
 		($boardname =~ /PULSE1401/) ||
 		($boardname =~ /PULSE1501/) ||
 		($boardname =~ /TRINITY1501I/) ||
-		($boardname =~ /TRINITY1501I/) ||
+		($boardname =~ /TRINITY1701I/) ||
 		($boardname =~ /PHxTxX1/) ||
 		($boardname =~ /PH4TQx1/) ||
 		($boardname =~ /PHxTQx1/) || #alias to PH4TQx1
