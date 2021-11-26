@@ -39,11 +39,6 @@ use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
 flock $file, LOCK_EX|LOCK_NB or dieSingleton();
 
-sub dieSingleton {
-	initLogging();
-	printLog('Another instance is already running, please wait till it is finished', 'TL0');
-	die();
-}
 
 my $grubFile = '/etc/default/grub';
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
@@ -814,6 +809,12 @@ my %localConfModules = %origConfModules;
 #
 my %configuredModules;
 
+
+sub dieSingleton {
+	initLogging();
+	printLog('Another instance is already running, please wait till it is finished', 'TL0');
+	die();
+}
 
 ###############################################################################
 # reads a file and returns an array with the lines
