@@ -1192,14 +1192,14 @@ sub checkRequirements {
 
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
-		printLog('kernel linux-tuxedo-20.04 should be default');
-		$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		#if ($boardname =~ m/X170KM-G/) {
-		#	$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		#} else {
-		#	printLog('kernel linux-tuxedo-20.04 should be default');
-		#	$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		#}
+		#printLog('kernel linux-tuxedo-20.04 should be default');
+		#$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		if ($boardname =~ m/X170KM-G/) {
+			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		} else {
+			printLog('kernel linux-tuxedo-20.04 should be default');
+			$origConfModules{kerneltuxedo2004}{required} = 'yes';
+		}
 	}
 }
 
@@ -3930,11 +3930,11 @@ sub networkStatus {
 # returns 1 if network is active
 # returns 0 if network not active
 sub waitForNetwork {
-	my $tries = shift;
+	my $triesNbr = shift;
 	my $wait = shift;
-	for ( my $i=1; $i<=$tries; $i++ ) {
+	for ( my $i=1; $i<=$triesNbr; $i++ ) {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $tries");
+		printLog("waiting for network: $i of $triesNbr");
 		sleep ($wait);
 	}
 	return (0);
@@ -3946,10 +3946,10 @@ sub waitForNetwork {
 ###############################################################################
 # waitForNetwork('number of tries', 'wait seconds')
 sub checkNetwork {
-	my $tries = shift;
+	my $triesNbr = shift;
 	my $wait = shift;
 	if ( (! $FAI) && (! $networkSearchDone) ) {
-		if (waitForNetwork($tries, $wait)) {
+		if (waitForNetwork($triesNbr, $wait)) {
 			$networkSearchDone = 1;
 			printLog('found network !');
 		} else {
