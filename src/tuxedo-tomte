@@ -30,20 +30,22 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper;
 my $logLevel = 0;
 
+my $logDir = '/var/log/tomte/';
+my $logFile = $logDir.'tomte.log';
+my $LOGFILE;
+
 # make sure this is the only running instance
 use Fcntl qw(:flock);
 open our $file, '<', $0 or die $!;
 flock $file, LOCK_EX|LOCK_NB or dieSingleton();
 
 sub dieSingleton {
+	initLogging();
 	printLog('Another instance is already running, please wait till it is finished', 'TL0');
 	die();
 }
 
 my $grubFile = '/etc/default/grub';
-my $logDir = '/var/log/tomte/';
-my $logFile = $logDir.'tomte.log';
-my $LOGFILE;
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
