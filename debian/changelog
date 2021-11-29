@@ -1,3 +1,40 @@
+tuxedo-tomte (2.5.18) focal; urgency=medium
+
+  * added initLogging to singleton death
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Nov 2021 20:20:19 +0100
+
+tuxedo-tomte (2.5.15) focal; urgency=medium
+
+  * added linux-tuxedo-20.04-edge kernel for XUX713
+  * removed tuxedo-keyboard-ite from FAI install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Nov 2021 18:21:35 +0100
+
+tuxedo-tomte (2.5.14) focal; urgency=medium
+
+  * moved micfix1 installation out of FAI
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 Nov 2021 13:24:55 +0100
+
+tuxedo-tomte (2.5.13) focal; urgency=medium
+
+  * added PHxTQx1 as alias to PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 08 Nov 2021 14:52:02 +0100
+
+tuxedo-tomte (2.5.12) focal; urgency=medium
+
+  * added some debug during FAI install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 05 Nov 2021 13:55:04 +0100
+
+tuxedo-tomte (2.5.11) focal; urgency=medium
+
+  * removed special kernel linux-tuxedo-20.04-edge for XUX713
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 03 Nov 2021 18:13:45 +0100
+
 tuxedo-tomte (2.5.10) focal; urgency=medium
 
   * added XUX713 with boardname X170KM-G for kernel linux-tuxedo-20.04-edge

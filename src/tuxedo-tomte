@@ -30,15 +30,17 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper;
 my $logLevel = 0;
 
-# make sure this is the only running instance
-use Fcntl qw(:flock);
-open our $file, '<', $0 or die $!;
-flock $file, LOCK_EX|LOCK_NB or die "Another instance is already running\n";
-
-my $grubFile = '/etc/default/grub';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+
+# make sure this is the only running instance
+use Fcntl qw(:flock);
+open our $file, '<', $0 or die $!;
+flock $file, LOCK_EX|LOCK_NB or dieSingleton();
+
+
+my $grubFile = '/etc/default/grub';
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
@@ -392,7 +394,6 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-
 	tuxedorepos => {
 		name => 'tuxedo-repos',
 		version => 3,
@@ -536,22 +537,6 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-	},
-	tuxedomicfix1 => {
-		name => 'tuxedo-micfix1',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 2,
-		package => 'yes',
-		fainame => '',
-		description => 'Kernel audio module which fixes different issues with audio output',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -793,6 +778,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	tuxedomicfix1 => {
+		name => 'tuxedo-micfix1',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'yes',
+		fainame => '',
+		description => 'Kernel audio module which fixes different issues with audio output',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
 
 );
 
@@ -808,6 +809,12 @@ my %localConfModules = %origConfModules;
 #
 my %configuredModules;
 
+
+sub dieSingleton {
+	initLogging();
+	printLog('Another instance is already running, please wait till it is finished', 'TL0');
+	die();
+}
 
 ###############################################################################
 # reads a file and returns an array with the lines
@@ -941,7 +948,8 @@ sub prerequisites {
 }
 
 sub prerequisitesFAI {
-
+	my $output = `apt-get update`;
+	printLog("return from apt-get update: $output", 'T2');
 }
 
 sub postrequisitesFAI {
@@ -1021,7 +1029,6 @@ sub checkRequirements {
 	if (($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /PF5PU1G/) ||
-		($boardname =~ /PF5PU1G/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/) ||
 		($boardname =~ /POLARIS1501I1650TI/) ||
@@ -1033,9 +1040,10 @@ sub checkRequirements {
 		($boardname =~ /PULSE1401/) ||
 		($boardname =~ /PULSE1501/) ||
 		($boardname =~ /TRINITY1501I/) ||
-		($boardname =~ /TRINITY1501I/) ||
+		($boardname =~ /TRINITY1701I/) ||
 		($boardname =~ /PHxTxX1/) ||
 		($boardname =~ /PH4TQx1/) ||
+		($boardname =~ /PHxTQx1/) || #alias to PH4TQx1
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
@@ -1180,7 +1188,8 @@ sub checkRequirements {
 		}
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/)) {
+		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915disablepsrfix}{required} = 'yes';
 		printLog('detected i915-disable-psr-fix issue');
 	}
@@ -1188,10 +1197,11 @@ sub checkRequirements {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
 		printLog('detected tuxedo-pinfix-tgl-dkms issue');
 	}
+
 	# kernel
 	if ($distributionVersion =~ /20.04/) {
 		if ($boardname =~ m/X170KM-G/) {
-			printLog('kernel linux-tuxedo-20.04-edge will be default');
+			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-20.04 will be default');
@@ -2119,7 +2129,7 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
@@ -2138,6 +2148,9 @@ sub tuxedokeyboardite() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
@@ -2205,7 +2218,7 @@ sub fingerprintreader() {
 sub tuxedomicfix1() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
@@ -2224,6 +2237,9 @@ sub tuxedomicfix1() {
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'yes';
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 	if ($action eq 'upgrade') {
 		printLog('upgrade not necessary for packages');
@@ -2409,6 +2425,7 @@ sub kerneltuxedo2004edge() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2416,6 +2433,15 @@ sub kerneltuxedo2004edge() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -2466,6 +2492,7 @@ sub kerneltuxedo2004() {
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kernelhwe'}{installed} = "no";
@@ -2473,6 +2500,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
@@ -2480,6 +2508,7 @@ sub kerneltuxedo2004() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3443,11 +3472,14 @@ sub isPackageInstalled {
 sub installPackage {
 	my $packageName = shift;
 	my $retval;
-	printLog("install package $packageName");
 	if ($FAI) {
-		system("apt-get -qy install $packageName >/dev/null 2>&1");
+		printLog("install package $packageName", 'TL0');
+		# usefull debug option: Debug::pkgDPkgProgressReporting=true
+		system("apt-get -y install $packageName 2>&1");
+		printLog("return from install", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
+		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		system("pkcon -yp install $packageName >/dev/null 2>&1");
 		$retval = isPackageInstalled($packageName);
@@ -3570,25 +3602,37 @@ sub populateFlavourPackages {
 	my $searchCmd;
 	my $result;
 	my @lines;
+	my $line;
+	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = 'apt-cache depends '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
+	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
-	@lines = split /[\n,\s]+/, $result;
-	foreach (@lines) {
-		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
-		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
-			$packageLine .= " $_";
-			push @packages, $_;
+	printLog("first result:\n$result", 'L2');
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$pkgString = $1;
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				printLog("Accepted: $pkgString", 'L2');
+				$packageLine .= " $pkgString";
+				push @packages, $pkgString;
+			}
 		}
 	}
-	$searchCmd = 'apt-cache depends '.$packageLine;
+	$searchCmd = 'apt-cache depends --important '.$packageLine;
+	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
-	@lines = split /[\n,\s]+/, $result;
-	foreach (@lines) {
-		/\s\sDepends:\s([a-z0-9\-\_\.]+)/;
-		if (($_ =~ /^linux-.*(?:image|headers|modules)-.*/) && !($_ =~ /unsigned/)) {
-			push @packages, $_;
+	printLog("second result:\n$result", 'L2');
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$pkgString = $1;
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				printLog("Accepted: $pkgString", 'L2');
+				push @packages, $pkgString;
+			}
 		}
 	}
 	@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
@@ -3893,11 +3937,11 @@ sub networkStatus {
 # returns 1 if network is active
 # returns 0 if network not active
 sub waitForNetwork {
-	my $tries = shift;
+	my $triesNbr = shift;
 	my $wait = shift;
-	for ( my $i=1; $i<=$tries; $i++ ) {
+	for ( my $i=1; $i<=$triesNbr; $i++ ) {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $tries");
+		printLog("waiting for network: $i of $triesNbr");
 		sleep ($wait);
 	}
 	return (0);
@@ -3909,10 +3953,10 @@ sub waitForNetwork {
 ###############################################################################
 # waitForNetwork('number of tries', 'wait seconds')
 sub checkNetwork {
-	my $tries = shift;
+	my $triesNbr = shift;
 	my $wait = shift;
 	if ( (! $FAI) && (! $networkSearchDone) ) {
-		if (waitForNetwork($tries, $wait)) {
+		if (waitForNetwork($triesNbr, $wait)) {
 			$networkSearchDone = 1;
 			printLog('found network !');
 		} else {
