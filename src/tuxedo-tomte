@@ -329,7 +329,6 @@ my %tuxedo_devices = (
 		board_name => ['PCx0Dx_GN20'],
 		fix => ['tuxedokeyboardite', 'tuxedomicfix1'],
 		flavour => ['18.04', '20.04'],
-		#TODO modify all pci_id to arrays?
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
 		kernel => '',
