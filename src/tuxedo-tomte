@@ -1268,6 +1268,42 @@ my %origConfModules = (
 );
 
 
+
+sub printTuxedoDevices {
+	my $ID;
+	foreach $ID (keys %tuxedo_devices) {
+		if ((defined $tuxedo_devices{$ID}) && ($tuxedo_devices{$ID} ne '') && (exists $tuxedo_devices{$ID})) {
+			printIfExistsNotUndefinedNotEmpty("$ID", "model");
+			printIfExistsNotUndefinedNotEmpty("$ID", "board_name");
+			printIfExistsNotUndefinedNotEmpty("$ID", "fix");
+			printIfExistsNotUndefinedNotEmpty("$ID", "flavour");
+			printIfExistsNotUndefinedNotEmpty("$ID", "pci_id");
+			printIfExistsNotUndefinedNotEmpty("$ID", "cpu");
+			printIfExistsNotUndefinedNotEmpty("$ID", "kernel");
+			printIfExistsNotUndefinedNotEmpty("$ID", "display");
+			printIfExistsNotUndefinedNotEmpty("$ID", "usb_device");
+		}
+	}
+}
+
+
+sub printIfExistsNotUndefinedNotEmpty {
+	my $ID = shift;
+	my $type = shift;
+	if ((defined $tuxedo_devices{$ID}{$type}) && ($tuxedo_devices{$ID}{$type} ne '') && (exists $tuxedo_devices{$ID}{$type})) {
+		if (ref($tuxedo_devices{$ID}{$type}) eq 'ARRAY') {
+			if ($tuxedo_devices{$ID}{$type}->[0] ne '') {
+				my $joinedArray = join ' ', @{$tuxedo_devices{$ID}{$type}};
+				print "$type: $joinedArray\n";
+			}
+		} else {
+			print "$type: $tuxedo_devices{$ID}{$type}\n";
+		}
+	}
+}
+
+
+
 # hash to load the configfile
 # is a copy from origConfModules to evade undefined values
 my %localConfModules = %origConfModules;
@@ -5776,10 +5812,10 @@ if (@ARGV != 0) {
 		initLogging();
 		prepareValues();
 		listStatus();
-		#TODO debug Dumper
-		print Dumper(\%tuxedo_devices);
 	} elsif ($argValue{command} eq "modules") {
 		modulesList();
+	} elsif ($argValue{command} eq "printcompletefixeslist") {
+		printTuxedoDevices();
 	} elsif ($argValue{command} eq "description") {
 		moduleDescription();
 	} elsif ($argValue{command} eq "help") {
