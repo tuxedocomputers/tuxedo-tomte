@@ -970,7 +970,8 @@ sub checkRequirements {
 	my $biosVersion;
 
 	# check values for each module
-	if ($boardname =~ /PB50_70DFx,DDx/) {
+	if (($boardname =~ /PB50_70DFx,DDx/) ||
+		($boardname =~ /X170KM-G/ )) {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('detected i8042-fix issue');
 	}
