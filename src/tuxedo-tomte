@@ -794,6 +794,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	thunderboltbootdelayfix => {
+		name => 'thunderbolt-boot-delay-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Solves kernel takes too long at loading thundebolt module at boot',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
 
 );
 
@@ -1208,6 +1224,10 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04 should be default');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
+	}
+	if ($boardname =~ m/X170KM-G/) {
+		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
+		printLog('detected thunderbolt-boot-delay-fix issue');
 	}
 }
 
@@ -3080,6 +3100,61 @@ sub tuxedopinfixtgldkms() {
 	}
 }
 
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+# for reducing the timeout on loading the thunderbolt kernel module when
+# booting the system
+# - X170KM-G
+#
+sub thunderboltbootdelayfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
