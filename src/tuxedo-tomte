@@ -3119,7 +3119,7 @@ sub nvidiadriver() {
 	my $oldDriversRemoved;
 	my $compDistVer = $distribution.' '.$distributionVersion;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /Ubuntu 18.04/) {
+		if ($compDistVer =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -3177,7 +3177,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($distributionVersion =~ /Ubuntu 20.04/) || ($distributionVersion =~ /elementary OS 6/)) {
+		} elsif (($compDistVer =~ /Ubuntu 20.04/) || ($compDistVer =~ /elementary OS 6/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
