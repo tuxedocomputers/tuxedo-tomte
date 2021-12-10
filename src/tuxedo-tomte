@@ -5778,16 +5778,16 @@ sub modulesList() {
 sub tries() {
 	#TODO debug
 	my $limit = shift;
-	printLog("tries: given limit: $limit", '2');
+	printLog("tries: given limit: $limit", 'L2');
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
 		printLog("repeat number $triesDone of $limit", 'L0');
 		if ( $triesDone < $limit ) {
-			printLog("rising tries done", '2');
+			printLog("rising tries done", 'L2');
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
-			printLog("limit tries done reached", '2');
+			printLog("limit tries done reached", 'L2');
 			unlink($triesFile);
 			return (0);
 		}
