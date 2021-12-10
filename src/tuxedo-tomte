@@ -3117,8 +3117,9 @@ sub nvidiadriver() {
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
+	my $compDistVer = $distribution.' '.$distributionVersion;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /18.04/) {
+		if ($distributionVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -3176,8 +3177,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		}
-		if ($distributionVersion =~ /20.04/) {
+		} elsif (($distributionVersion =~ /Ubuntu 20.04/) || ($distributionVersion =~ /elementary OS 6/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -3216,6 +3216,8 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+		} else {
+			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
 		}
 	}
 	if ($action eq 'upgrade') {
