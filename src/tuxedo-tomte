@@ -166,7 +166,7 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
-	"elementary OS" => {
+	"elementary OS 6" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
@@ -5776,14 +5776,18 @@ sub modulesList() {
 # returns 1 if limit is not reached
 #
 sub tries() {
+	#TODO debug
 	my $limit = shift;
+	printLog("tries: given limit: $limit", '2');
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
-		if ( $triesDone <= $limit ) {
-			printLog("repeat number $triesDone of $limit", 'L0');
+		printLog("repeat number $triesDone of $limit", 'L0');
+		if ( $triesDone < $limit ) {
+			printLog("rising tries done", '2');
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
+			printLog("limit tries done reached", '2');
 			unlink($triesFile);
 			return (0);
 		}
