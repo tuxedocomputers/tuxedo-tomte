@@ -125,6 +125,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"elementary OS" => {
+		versions => {
+			"6" => {
+				name => '6 Odin',
+			},
+		},
+	},
 );
 
 
@@ -159,6 +166,21 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"elementary OS" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => '6 Odin',
+	},
 );
 
 
@@ -179,6 +201,15 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
+	},
+	"elementary OS" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
 	},
@@ -349,7 +380,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'kernel linux-tuxedo-20.04-edge', 'tuxedomicfix1'],
+		fix => ['tuxedokeyboardite', 'kernel linux-tuxedo-20.04-edge', 'tuxedomicfix1', 'i8042fix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04'],
 		pci_id => '1558:7715',
 		cpu => '',
