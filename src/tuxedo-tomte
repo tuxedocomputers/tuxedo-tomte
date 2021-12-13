@@ -3118,6 +3118,8 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $compDistVer = $distribution.' '.$distributionVersion;
+	#TODO: debug
+	printLog("compDistVer: $compDistVer", 'L2');
 	if ($action eq 'install') {
 		if ($compDistVer =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -5594,10 +5596,12 @@ sub postConfigure {
 ###############################################################################
 # starts the tuxedo-tomte service for delayed configuration
 #
+#TODO: debug
 sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
-	if (! tries($triesLimit)) {
+	my $tries = tries($triesLimit);
+	if (! $tries) {
 		printLog('repeat limit reached, program will not start again');
 		if ($restartSystem) {
 			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
@@ -5607,7 +5611,10 @@ sub startTomteDelayed {
 			print "\nNot all the fixes could be installed\n";
 		}
 		return (1);
+	} else {
+		printLog("program will start again, tries = $tries, trieslimit: $triesLimit", 'L2');
 	}
+	printLog("startLaterAgain: $startLaterAgain", 'L2');
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
 		$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all >/dev/null 2>&1");
