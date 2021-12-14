@@ -5620,19 +5620,22 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
-	my $triesValue = tries($triesLimit);
-	if (! $triesValue) {
-		printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
-		if ($restartSystem) {
-			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
-			print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
+	my $triesValue;
+	if ($startLaterAgain != 1) {
+		$triesValue = tries($triesLimit);
+		if (! $triesValue) {
+			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
+			if ($restartSystem) {
+				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
+			} else {
+				messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				print "\nNot all the fixes could be installed\n";
+			}
+			return (1);
 		} else {
-			messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
-			print "\nNot all the fixes could be installed\n";
+			printLog("program will start again, tries: $triesValue, trieslimit: $triesLimit", 'L2');
 		}
-		return (1);
-	} else {
-		printLog("program will start again, tries: $triesValue, trieslimit: $triesLimit", 'L2');
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
