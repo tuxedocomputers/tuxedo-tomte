@@ -1060,9 +1060,8 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
-	#TODO test package name
 	mesautils => {
-		name => 'mesa-utils2',
+		name => 'mesa-utils',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
