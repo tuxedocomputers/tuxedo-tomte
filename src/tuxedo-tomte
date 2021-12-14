@@ -205,14 +205,14 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
-	"elementary OS" => {
+	"elementary OS 6" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
-		name => 'focal',
+		name => '6 Odin',
 	},
 );
 
