@@ -1039,8 +1039,9 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	#TODO test package name
 	mesautils => {
-		name => 'mesa-utils',
+		name => 'mesa-utils2',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -3118,8 +3119,6 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $compDistVer = $distribution.' '.$distributionVersion;
-	#TODO: debug
-	printLog("compDistVer: $compDistVer", 'L2');
 	if ($action eq 'install') {
 		if ($compDistVer =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -5600,9 +5599,9 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
-	my $tries = tries($triesLimit);
-	if (! $tries) {
-		printLog('repeat limit reached, program will not start again');
+	my $triesValue = tries($triesLimit);
+	if (! $triesValue) {
+		printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
 		if ($restartSystem) {
 			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
 			print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
@@ -5612,7 +5611,7 @@ sub startTomteDelayed {
 		}
 		return (1);
 	} else {
-		printLog("program will start again, tries = $tries, trieslimit: $triesLimit", 'L2');
+		printLog("program will start again, tries = $triesValue, trieslimit: $triesLimit", 'L2');
 	}
 	printLog("startLaterAgain: $startLaterAgain", 'L2');
 	if ($startLaterAgain == 0) {
@@ -5793,7 +5792,7 @@ sub tries() {
 		my $triesDone = triesAlreadyDone();
 		printLog("repeat number $triesDone of $limit", 'L0');
 		if ( $triesDone < $limit ) {
-			printLog("rising tries done", 'L2');
+			printLog("rising tries, triesDone below limit", 'L2');
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
