@@ -5621,6 +5621,7 @@ sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
 	my $triesValue;
+	printLog("start later again: $startLaterAgain", 'L2');
 	if ($startLaterAgain != 1) {
 		$triesValue = tries($triesLimit);
 		if (! $triesValue) {
