@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO
-my $logLevel = 2;
+my $logLevel = 0;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -3198,22 +3197,21 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		# TODO wrong package names
 		} elsif (($compDistVer =~ /Ubuntu 20.04/) || ($compDistVer =~ /elementary OS 6/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-4604') ) {
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver460 = installPackage('nvidia-driver-4604');
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
 				$packageNvidiaDriver460 = 1;
 			}
-			if( ! isPackageInstalled('mesa-utils4') ) {
+			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
-				$packageMesaUtils = installPackage('mesa-utils4');
+				$packageMesaUtils = installPackage('mesa-utils');
 			} else {
 				$packageMesaUtils = 1;
 			}
@@ -5625,7 +5623,6 @@ sub startTomteDelayed {
 		$triesValue = tries($triesLimit);
 		if (! $triesValue) {
 			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
-			#TODO test!!
 			$startLaterAgain = 1;
 			if ($restartSystem) {
 				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
@@ -5810,7 +5807,6 @@ sub modulesList() {
 # returns 1 if limit is not reached
 #
 sub tries() {
-	#TODO debug
 	my $limit = shift;
 	printLog("tries: given limit: $limit", 'L2');
 	if (-e $triesFile) {
