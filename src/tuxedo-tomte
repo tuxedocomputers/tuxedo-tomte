@@ -5826,6 +5826,7 @@ sub tries() {
 			return (0);
 		}
 	} else {
+		printLog('creating triesFile', 'L2');
 		writeFile('1', $triesFile);
 	}
 	return (1);
@@ -5839,7 +5840,7 @@ sub tries() {
 #
 sub triesAlreadyDone() {
 	if (-e $triesFile) {
-		return (readFileReturnLine($triesFile));
+		return (readFileReturnLine($triesFile)+0);
 	} else {
 		return (0);
 	}
@@ -6015,6 +6016,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "reconfigure") {
 		# reconfigure interrupts repeated execution
 		if (-e $triesFile) {
+			printLog('delete triesFile', 'L2');
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
@@ -6067,7 +6069,7 @@ if (@ARGV != 0) {
 # interrupt repeated delayed execution if not necessary anymore
 if ($startLaterAgain == 0) {
 	if (-e $triesFile) {
-		printLog('deleting triesFile', 'L0');
+		printLog('deleting triesFile', 'L2');
 		unlink($triesFile);
 	}
 }
