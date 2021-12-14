@@ -5821,6 +5821,7 @@ sub tries() {
 			return (1);
 		} else {
 			printLog("limit tries done reached", 'L2');
+			printLog('deleting triesFile', 'L2');
 			unlink($triesFile);
 			return (0);
 		}
@@ -6066,6 +6067,7 @@ if (@ARGV != 0) {
 # interrupt repeated delayed execution if not necessary anymore
 if ($startLaterAgain == 0) {
 	if (-e $triesFile) {
+		printLog('deleting triesFile', 'L0');
 		unlink($triesFile);
 	}
 }
