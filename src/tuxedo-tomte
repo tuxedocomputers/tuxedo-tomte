@@ -3218,9 +3218,9 @@ sub nvidiadriver() {
 			} else {
 				$packageMesaUtils = 1;
 			}
-			if( ! isPackageInstalled('nvidia-prime4') ) {
+			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime4');
+				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
 				$packageNvidiaPrime = 1;
 			}
