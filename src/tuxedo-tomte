@@ -1826,7 +1826,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if ($distributionVersion =~ /20.04/) {
+	if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
