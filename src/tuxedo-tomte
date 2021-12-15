@@ -114,6 +114,11 @@ my %postConfProgram = (
 # list of supported OS versions
 # with repective repo entries
 #
+# NAME
+#     versions
+#         VERSION_ID
+#             name = VERSION_CODENAME
+# 
 my %supportedOS = (
 	Ubuntu => {
 		versions => {
@@ -129,6 +134,9 @@ my %supportedOS = (
 		versions => {
 			"6" => {
 				name => '6 Odin',
+			},
+			"6.1" => {
+				name => 'jolnir',
 			},
 		},
 	},
@@ -181,6 +189,22 @@ my %tuxedo_repos = (
 		},
 		name => '6 Odin',
 	},
+	"elementary OS 6.1" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => '6.1 jolnir',
+	},
+
 );
 
 
@@ -213,6 +237,16 @@ my %tuxedo_mirrors = (
 		},
 		name => '6 Odin',
 	},
+	"elementary OS 6" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => '6.1 jolnir',
+	},
+
 );
 
 
@@ -269,7 +303,26 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
 		},
 	},
-
+	"6.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-oem-20.04" => {
+			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-generic-hwe-20.04" => {
+			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
+		},
+		"linux-tuxedo-20.04" => {
+			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+	},
 );
 
 
@@ -3197,7 +3250,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($compDistVer =~ /Ubuntu 20.04/) || ($compDistVer =~ /elementary OS 6/)) {
+		} elsif (($compDistVer =~ /Ubuntu 20.04/) || ($compDistVer =~ /elementary OS 6/) || ($compDistVer =~ /elementary OS 6.1/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
