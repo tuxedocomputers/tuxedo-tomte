@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 2;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -237,7 +238,7 @@ my %tuxedo_mirrors = (
 		},
 		name => '6 Odin',
 	},
-	"elementary OS 6" => {
+	"elementary OS 6.1" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
@@ -3197,10 +3198,10 @@ sub nvidiadriver() {
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-4604') ) {
+			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver460 = installPackage('nvidia-driver-4604');
+				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
 			} else {
 				$packageNvidiaDriver460 = 1;
 			}
@@ -3210,9 +3211,9 @@ sub nvidiadriver() {
 			} else {
 				$packageMesaUtils = 1;
 			}
-			if( ! isPackageInstalled('nvidia-prime4') ) {
+			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime4');
+				$packageNvidiaPrime = installPackage('nvidia-prime');
 			} else {
 				$packageNvidiaPrime = 1;
 			}
