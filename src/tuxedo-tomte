@@ -2983,7 +2983,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
@@ -3049,7 +3049,7 @@ sub kerneltuxedo2004edge() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
@@ -3116,7 +3116,7 @@ sub kerneltuxedo2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
