@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.19-28) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.19-29) UNRELEASED; urgency=medium
 
   * added log for kernel type
   * tuxedo-devices table part1
@@ -34,8 +34,9 @@ tuxedo-tomte (2.5.19-28) UNRELEASED; urgency=medium
   * added clause for repoline
   * debug for postinst
   * reenable tomte on upgrade
+  * modded systemctl
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 12:22:22 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 12:32:03 +0100
 
 tuxedo-tomte (2.5.19) focal; urgency=medium
 
