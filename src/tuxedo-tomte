@@ -3917,7 +3917,7 @@ sub setComment {
 		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
-	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ || $$repoline = ~ m/$regExElementaryOS/ ) {
+	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
