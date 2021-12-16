@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.19-27) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.19-28) UNRELEASED; urgency=medium
 
   * added log for kernel type
   * tuxedo-devices table part1
@@ -33,8 +33,9 @@ tuxedo-tomte (2.5.19-27) UNRELEASED; urgency=medium
   * added regex for elementaryOS repos
   * added clause for repoline
   * debug for postinst
+  * reenable tomte on upgrade
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 11:52:46 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 12:22:22 +0100
 
 tuxedo-tomte (2.5.19) focal; urgency=medium
 
