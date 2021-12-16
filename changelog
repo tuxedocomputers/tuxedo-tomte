@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.19-31) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.19-32) UNRELEASED; urgency=medium
 
   * added log for kernel type
   * tuxedo-devices table part1
@@ -38,8 +38,9 @@ tuxedo-tomte (2.5.19-31) UNRELEASED; urgency=medium
   * reverted back systemctl
   * deleted space
   * another space deleted
+  * removed debug systemctl
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 14:31:58 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Dec 2021 14:33:45 +0100
 
 tuxedo-tomte (2.5.19) focal; urgency=medium
 
