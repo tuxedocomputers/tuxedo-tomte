@@ -1509,7 +1509,7 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if ($distribution =~ /elementary OS/ && $distributionVersion =~ /^6$/) {
+	if ($distribution =~ /elementary OS/ && !($distributionVersion =~ /^6.1$/)) {
 		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
 		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning')
 	}
