@@ -3907,7 +3907,8 @@ sub setComment {
 	my $FH;
 	my @repolines;
 	my $compDistVers = "$distribution $distributionVersion";
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$compDistVers}{name}.'.*$';
+	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$compDistVers}{name}.'.*$';
+	my $regExElementaryOS = '^deb.*mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt .* main restricted universe multiverse$';
 	if (open $FH, '<', $reposList ) {
 		chomp(@repolines = <$FH>);
 		close $FH;
@@ -3920,7 +3921,7 @@ sub setComment {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
-		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\//) {
+		if ( ((($$repoline =~ m/$regExUbuntu/) || ($$repoline = ~ m/$regExElementaryOS/)) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\//) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline", 'L0');
 			return (1);
