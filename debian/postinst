@@ -11,7 +11,8 @@ case "$1" in
     configure)
 		# only run if systemd is active
 		if ps --no-headers -o comm 1 | grep 'systemd' > /dev/null; then
-			systemctl start tuxedo-tomte
+			#systemctl start tuxedo-tomte
+			systemd-run tuxedo-tomte configure all
 			echo "postinst configure ###############################"
 		fi
     ;;
