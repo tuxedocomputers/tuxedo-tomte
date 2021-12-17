@@ -246,9 +246,9 @@ my %tuxedo_mirrors = (
 	"KDE neon 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
-'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
 	},
@@ -290,26 +290,6 @@ my %flavours = (
 		},
 	},
 	"6.1" => {
-		"linux-generic" => {
-			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
-		},
-		"linux-oem-20.04" => {
-			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
-		},
-		"linux-generic-hwe-20.04" => {
-			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
-		},
-		"linux-generic-hwe-20.04-edge" => {
-			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
-		},
-		"linux-tuxedo-20.04-edge" => {
-			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
-		},
-		"linux-tuxedo-20.04" => {
-			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
-		},
-	},
-	"20.04" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -4194,7 +4174,7 @@ sub installPackage {
 
 ###############################################################################
 # installs a linux kernel from the name of the main metapackage
-# installLinuxKernel('metapackageName')
+# installKernelFlavour('metapackageName')
 # returns two parameters failed and nothingDone
 # failed = 0 all is good
 # failed = 1 some package was not installed
