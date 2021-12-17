@@ -50,6 +50,7 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
+my $completeDistVersion;
 my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
@@ -138,6 +139,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"KDE neon" => {
+		versions => {
+			"5.23" => {
+				name => 'focal',
+			},
+		},
+	},
 );
 
 
@@ -187,6 +195,21 @@ my %tuxedo_repos = (
 		},
 		name => '6.1 jolnir',
 	},
+	"KDE neon 5.23" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => 'focal',
+	},
 
 );
 
@@ -219,6 +242,15 @@ my %tuxedo_mirrors = (
 'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => '6.1 jolnir',
+	},
+	"KDE neon 5.23" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
 	},
 
 );
@@ -277,6 +309,27 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
 		},
 	},
+	"5.23" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-oem-20.04" => {
+			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-generic-hwe-20.04" => {
+			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
+		},
+		"linux-tuxedo-20.04" => {
+			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+	},
+
 );
 
 
@@ -1481,6 +1534,7 @@ sub readOSData {
 			$distributionVersion = $1;
 		}
 	}
+	$completeDistVersion = $distribution.' '.$distributionVersion;
 }
 
 
@@ -1509,7 +1563,7 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if ($distribution =~ /elementary OS/ && !($distributionVersion =~ /^6.1$/)) {
+	if ($distribution =~ /elementary OS/ && !($distributionVersion < 6.1)) {
 		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
 		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning')
 	}
@@ -1783,7 +1837,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
@@ -2940,7 +2994,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
@@ -3006,7 +3060,7 @@ sub kerneltuxedo2004edge() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
@@ -3073,7 +3127,7 @@ sub kerneltuxedo2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
@@ -3148,9 +3202,8 @@ sub nvidiadriver() {
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
-	my $compDistVer = $distribution.' '.$distributionVersion;
 	if ($action eq 'install') {
-		if ($compDistVer =~ /Ubuntu 18.04/) {
+		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -3208,7 +3261,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($compDistVer =~ /Ubuntu 20.04/) || ($compDistVer =~ /elementary OS 6.1/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -3746,7 +3799,6 @@ sub thunderboltbootdelayfix() {
 sub createRepos {
 	my %repos = %{$_[0]};
 	my %repoHash;
-	my $compDistVer = $distribution.' '.$distributionVersion;
 	my $key;
 	my $DH;
 	my $sourceline;
@@ -3810,31 +3862,31 @@ sub createRepos {
 
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
-	foreach $key (keys %{ $repos{$compDistVer} }) {
+	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
 			$firstEntry = 1;
-			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+			foreach (@{ $repos{$completeDistVersion}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					# make backup if file exists and is first entry into file
-					if ( (-s $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
-						backupFile($repos{$compDistVer}{$key}{filename});
+					if ( (-s $repos{$completeDistVersion}{$key}{filename}) && ($firstEntry == 1) ) {
+						backupFile($repos{$completeDistVersion}{$key}{filename});
 						$firstEntry = 0;
-						if ($repos{$compDistVer}{$key}{filename} eq '/etc/apt/sources.list' ) {
+						if ($repos{$completeDistVersion}{$key}{filename} eq '/etc/apt/sources.list' ) {
 							$sourcesListBackedup = 1;
 						}
 					}
 					# create file + line
-					if (! -e $repos{$compDistVer}{$key}{filename}) {
-						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
-						printLog("new file: $repos{$compDistVer}{$key}{filename}", 'L0');
+					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
+						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$firstEntry = 0;
 						$modified = 1;
 					# or append line
 					} else {
-						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
-						printLog("append file: $repos{$compDistVer}{$key}{filename}", 'L0');
+						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+						printLog("append file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$modified = 1;
 					}
@@ -3910,8 +3962,7 @@ sub setComment {
 	my $tmpline = $$repoline;
 	my $FH;
 	my @repolines;
-	my $compDistVers = "$distribution $distributionVersion";
-	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$compDistVers}{name}.'.*$';
+	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$completeDistVersion}{name}.'.*$';
 	my $regExElementaryOS = '^deb.*mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt .* main restricted universe multiverse$';
 	if (open $FH, '<', $reposList ) {
 		chomp(@repolines = <$FH>);
@@ -3921,7 +3972,7 @@ sub setComment {
 		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
-	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
+	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
