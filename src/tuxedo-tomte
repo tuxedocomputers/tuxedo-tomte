@@ -141,7 +141,7 @@ my %supportedOS = (
 	},
 	"KDE neon" => {
 		versions => {
-			"5.23" => {
+			"20.04" => {
 				name => 'focal',
 			},
 		},
@@ -195,7 +195,7 @@ my %tuxedo_repos = (
 		},
 		name => '6.1 jolnir',
 	},
-	"KDE neon 5.23" => {
+	"KDE neon 20.04" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
@@ -243,7 +243,7 @@ my %tuxedo_mirrors = (
 		},
 		name => '6.1 jolnir',
 	},
-	"KDE neon 5.23" => {
+	"KDE neon 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
@@ -309,7 +309,7 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
 		},
 	},
-	"5.23" => {
+	"20.04" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -1837,7 +1837,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
@@ -2994,7 +2994,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
@@ -3060,7 +3060,7 @@ sub kerneltuxedo2004edge() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
@@ -3127,7 +3127,7 @@ sub kerneltuxedo2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
@@ -3261,7 +3261,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 5.23/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
