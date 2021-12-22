@@ -49,6 +49,7 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
+my $completeDistVersion;
 my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
@@ -114,12 +115,31 @@ my %postConfProgram = (
 # list of supported OS versions
 # with repective repo entries
 #
+# NAME
+#     versions
+#         VERSION_ID
+#             name = VERSION_CODENAME
+# 
 my %supportedOS = (
 	Ubuntu => {
 		versions => {
 			"18.04" => {
 				name => 'bionic',
 			},
+			"20.04" => {
+				name => 'focal',
+			},
+		},
+	},
+	"elementary OS" => {
+		versions => {
+			"6.1" => {
+				name => 'jolnir',
+			},
+		},
+	},
+	"KDE neon" => {
+		versions => {
 			"20.04" => {
 				name => 'focal',
 			},
@@ -159,6 +179,37 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"elementary OS 6.1" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => '6.1 jolnir',
+	},
+	"KDE neon 20.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => 'focal',
+	},
+
 );
 
 
@@ -182,6 +233,25 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
+	"elementary OS 6.1" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => '6.1 jolnir',
+	},
+	"KDE neon 20.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
+	},
+
 );
 
 
@@ -217,6 +287,496 @@ my %flavours = (
 		"linux-tuxedo-20.04" => {
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
 		},
+	},
+	"6.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-oem-20.04" => {
+			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-generic-hwe-20.04" => {
+			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
+		},
+		"linux-tuxedo-20.04" => {
+			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+	},
+
+);
+
+
+
+###############################################################################
+#
+# Each device has
+# - a unique ID
+# - one or more model names (array)
+# - one or more board names (array)
+# - the fixes that apply (array)
+# - which Ubuntu flavours (array)
+# - PCI device (if available, regex)
+# - CPU (if needed)
+# - Kernel (if needed, regex)
+# - display (if needed, as array)
+# - USB device (if needed)
+my %tuxedo_devices = (
+	'0' => {
+		model => ['Stellaris 15 AMD Gen3', 'Polaris 15 AMD Gen3'],
+		board_name => ['GMxZGxx'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => ['BOE Model 2423 Serial Number 0', 'BOE Model 2420 Serial Number 0'],
+		usb_device => '',
+	},
+	'1' => {
+		model => ['TUXEDO Aura 15 Gen1'],
+		board_name => ['NL5xRU', 'AURA1501'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1558:a500',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'2' => {
+		model => ['TUXEDO Book BA15 Gen1'],
+		board_name => ['PF5PU1G'],
+		fix => ['nobootonbattery', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'3' => {
+		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
+		board_name => ['NHxxRZQ'],
+		fix => ['r8168dkms', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1558:8562',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'4' => {
+		model => ['TUXEDO Book BX1507'],
+		board_name => ['N350TW'],
+		fix => ['tuxedorestoreaudiofix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'5' => {
+		model => ['TUXEDO Book DX1508', 'TUXEDO Book DX1708'],
+		board_name => ['N8xEJEK'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'AUO Model 12701 Serial Number 585803690',
+		usb_device => '',
+	},
+	'6' => {
+		model => ['TUXEDO Book XA15 Gen10'],
+		board_name => ['NH5xAx'],
+		fix => ['nokeyboardaftersuspendfix', 'corefix', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1558:50f0',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'7' => {
+		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
+		board_name => ['PB50_70DFx,DDx'],
+		fix => ['i8042fix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1558:67e1',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'8' => {
+		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
+		board_name => ['PCx0Dx_GN20'],
+		fix => ['tuxedokeyboardite', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => ['1558:65e5', '1558:67e5'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'9' => {
+		model => ['TUXEDO Book XUX7 Gen11'],
+		board_name => ['X170SM'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedokeyboardite'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'10' => {
+		model => ['TUXEDO Book XUX7 Gen13'],
+		board_name => ['X170KM-G'],
+		fix => ['tuxedokeyboardite', 'kernel linux-tuxedo-20.04-edge', 'tuxedomicfix1', 'i8042fix', 'thunderboltbootdelayfix'],
+		flavour => ['20.04'],
+		pci_id => '1558:7715',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'11' => {
+		model => ['TUXEDO EduBook 15 Gen2'],
+		board_name => ['EDUBOOK1502'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'12' => {
+		model => ['TUXEDO InfinityBook 14 v2'],
+		board_name => ['X35R'],
+		fix => ['elantechtouchpadfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'13' => {
+		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
+		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
+		fix => ['tuxedotouchpadswitch', 'i915disablepsrfix', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1d05:1132',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'14' => {
+		model => ['TUXEDO InfinityBook Pro 14 v5'],
+		board_name => ['N141CU'],
+		fix => ['nokeyboardaftersuspendfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'15' => {
+		model => ['TUXEDO InfinityBook Pro 15 v5'],
+		board_name => ['N150CU'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '1558:1404',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'16' => {
+		model => ['TUXEDO InsanityBook 1501'],
+		board_name => ['P95_HP'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'AUO Model 21229 Serial Number 808797180',
+		usb_device => '',
+	},
+	'17' => {
+		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
+		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'18' => {
+		model => ['TUXEDO Polaris Gen1 AMD NVIDIA RTX2060'],
+		board_name => ['POLARIS1501A2060', 'POLARIS1701A2060'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'19' => {
+		model => ['TUXEDO Polaris Gen1 Intel NVIDIA GTX1650Ti'],
+		board_name => ['POLARIS1501I1650TI', 'POLARIS1701I1650TI'],
+		fix => ['tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'20' => {
+		model => ['TUXEDO Polaris Gen1 Intel NVIDIA RTX2060'],
+		board_name => ['POLARIS1501I2060', 'POLARIS1701I2060'],
+		fix => ['tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'21' => {
+		model => ['TUXEDO Pulse 14 Gen1'],
+		board_name => ['PULSE1401'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'22' => {
+		model => ['TUXEDO Pulse 15 Gen1'],
+		board_name => ['PULSE1501'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'23' => {
+		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
+		board_name => ['GMxNGxx'],
+		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'BOE Model 2423 Serial Number 0',
+		usb_device => '',
+	},
+	'24' => {
+		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
+		board_name => ['GMxMGxx'],
+		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', ''],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'25' => {
+		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
+		board_name => ['GMxZGxx'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => ['BOE Model 2423 Serial Number 0', 'BOE Model 2420 Serial Number 0'],
+		usb_device => '',
+	},
+	'26' => {
+		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
+		board_name => ['GMxTGxx'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'27' => {
+		model => ['TUXEDO Trinity Gen1 Intel'],
+		board_name => ['TRINITY1501I', 'TRINITY1701I'],
+		fix => ['tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'28' => {
+		model => ['XMG Fusion 15 L19 GTX1660Ti'],
+		board_name => ['LAPQC71A'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'29' => {
+		model => ['XMG Fusion 15 L19 RTX2070'],
+		board_name => ['LAPQC71B'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'30' => {
+		model => ['all models'],
+		board_name => [''],
+		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'31' => {
+		model => ['all with AMD GPU'],
+		board_name => [''],
+		fix => ['amdgpu'],
+		flavour => ['20.04'],
+		pci_id => '',
+		cpu => 'AMD',
+		kernel => '5.8.0-([0-9]|[1-4][0-9]|5[0-4])-',
+		display => '',
+		usb_device => '',
+	},
+	'32' => {
+		model => ['all with fingerprintreader'],
+		board_name => [''],
+		fix => ['fingerprintreader'],
+		flavour => ['18.04', 20.04],
+		pci_id => ['147e:100[0123]', '147e:20(15|16|20)', '147e:300[01]', '147e:500[23]', '0483:201[56]', '1c7a:0603'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'33' => {
+		model => ['all with LTE module'],
+		board_name => [''],
+		fix => ['threegfix'],
+		flavour => ['18.04', 20.04],
+		pci_id => '12d1:15bb',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => 'ME936',
+	},
+	'34' => {
+		model => ['all with NVIDIA'],
+		board_name => [''],
+		fix => ['nvidiadriver'],
+		flavour => ['18.04', 20.04],
+		pci_id => '030[02]:',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'35' => {
+		model => ['all with OLED display'],
+		board_name => [''],
+		fix => ['tuxedooledbrt'],
+		flavour => ['18.04', 20.04],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'SDC Model 41001 Serial Number 0',
+		usb_device => '',
+	},
+	'36' => {
+		model => ['Kinston NVMe'],
+		board_name => [''],
+		fix => ['tuxedonvmefix'],
+		flavour => ['18.04', 20.04],
+		pci_id => '2646:2263',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'37' => {
+		model => [''],
+		board_name => [''],
+		fix => [''],
+		flavour => ['18.04', 20.04],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'38' => {
+		model => [''],
+		board_name => [''],
+		fix => [''],
+		flavour => ['18.04', 20.04],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'39' => {
+		model => [''],
+		board_name => [''],
+		fix => [''],
+		flavour => ['18.04', 20.04],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'40' => {
+		model => [''],
+		board_name => [''],
+		fix => [''],
+		flavour => ['18.04', 20.04],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	},
 );
 
@@ -814,6 +1374,42 @@ my %origConfModules = (
 );
 
 
+
+sub printTuxedoDevices {
+	my $ID;
+	foreach $ID (keys %tuxedo_devices) {
+		if ((defined $tuxedo_devices{$ID}) && ($tuxedo_devices{$ID} ne '') && (exists $tuxedo_devices{$ID})) {
+			printIfExistsNotUndefinedNotEmpty("$ID", "model");
+			printIfExistsNotUndefinedNotEmpty("$ID", "board_name");
+			printIfExistsNotUndefinedNotEmpty("$ID", "fix");
+			printIfExistsNotUndefinedNotEmpty("$ID", "flavour");
+			printIfExistsNotUndefinedNotEmpty("$ID", "pci_id");
+			printIfExistsNotUndefinedNotEmpty("$ID", "cpu");
+			printIfExistsNotUndefinedNotEmpty("$ID", "kernel");
+			printIfExistsNotUndefinedNotEmpty("$ID", "display");
+			printIfExistsNotUndefinedNotEmpty("$ID", "usb_device");
+		}
+	}
+}
+
+
+sub printIfExistsNotUndefinedNotEmpty {
+	my $ID = shift;
+	my $type = shift;
+	if ((defined $tuxedo_devices{$ID}{$type}) && ($tuxedo_devices{$ID}{$type} ne '') && (exists $tuxedo_devices{$ID}{$type})) {
+		if (ref($tuxedo_devices{$ID}{$type}) eq 'ARRAY') {
+			if ($tuxedo_devices{$ID}{$type}->[0] ne '') {
+				my $joinedArray = join ' ', @{$tuxedo_devices{$ID}{$type}};
+				print "$type: $joinedArray\n";
+			}
+		} else {
+			print "$type: $tuxedo_devices{$ID}{$type}\n";
+		}
+	}
+}
+
+
+
 # hash to load the configfile
 # is a copy from origConfModules to evade undefined values
 my %localConfModules = %origConfModules;
@@ -917,6 +1513,7 @@ sub readOSData {
 			$distributionVersion = $1;
 		}
 	}
+	$completeDistVersion = $distribution.' '.$distributionVersion;
 }
 
 
@@ -945,9 +1542,15 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
+	if (($distribution =~ /elementary OS/) && ($distributionVersion < 6.1)) {
+		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
+		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning');
+		return (0);
+	}
 	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
 		return (1);
 	}
+	printLog("This OS is not supported", 'TL0');
 	return (0);
 }
 
@@ -1030,7 +1633,6 @@ sub checkRequirements {
    		($boardname =~ /NL5xRU/) ||
 		($boardname =~ /AURA1501/) ||
 		($boardname =~ /EDUBOOK1502/) ||
-		($boardname =~ /PB50_70DFx,DDx/) ||
 		($boardname =~ /NS50MU/) ||
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/)) {
@@ -1216,12 +1818,12 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if ($distributionVersion =~ /20.04/) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} else {
-			printLog('kernel linux-tuxedo-20.04 should be default');
+			printLog('kernel linux-tuxedo-20.04 will be default');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	}
@@ -2373,7 +2975,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
@@ -2439,7 +3041,7 @@ sub kerneltuxedo2004edge() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
@@ -2506,7 +3108,7 @@ sub kerneltuxedo2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /20.04/) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
@@ -2582,7 +3184,7 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	if ($action eq 'install') {
-		if ($distributionVersion =~ /18.04/) {
+		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -2640,8 +3242,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		}
-		if ($distributionVersion =~ /20.04/) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
@@ -2680,6 +3281,8 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+		} else {
+			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3177,7 +3780,6 @@ sub thunderboltbootdelayfix() {
 sub createRepos {
 	my %repos = %{$_[0]};
 	my %repoHash;
-	my $compDistVer = $distribution.' '.$distributionVersion;
 	my $key;
 	my $DH;
 	my $sourceline;
@@ -3241,31 +3843,31 @@ sub createRepos {
 
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
-	foreach $key (keys %{ $repos{$compDistVer} }) {
+	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
 			$firstEntry = 1;
-			foreach (@{ $repos{$compDistVer}{$key}{content} }) {
+			foreach (@{ $repos{$completeDistVersion}{$key}{content} }) {
 				if (!isLinePresent($_, %repoHash)) {
 					# make backup if file exists and is first entry into file
-					if ( (-s $repos{$compDistVer}{$key}{filename}) && ($firstEntry == 1) ) {
-						backupFile($repos{$compDistVer}{$key}{filename});
+					if ( (-s $repos{$completeDistVersion}{$key}{filename}) && ($firstEntry == 1) ) {
+						backupFile($repos{$completeDistVersion}{$key}{filename});
 						$firstEntry = 0;
-						if ($repos{$compDistVer}{$key}{filename} eq '/etc/apt/sources.list' ) {
+						if ($repos{$completeDistVersion}{$key}{filename} eq '/etc/apt/sources.list' ) {
 							$sourcesListBackedup = 1;
 						}
 					}
 					# create file + line
-					if (! -e $repos{$compDistVer}{$key}{filename}) {
-						createFile($repos{$compDistVer}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
-						printLog("new file: $repos{$compDistVer}{$key}{filename}", 'L0');
+					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
+						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$firstEntry = 0;
 						$modified = 1;
 					# or append line
 					} else {
-						appendFile($repos{$compDistVer}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
-						printLog("append file: $repos{$compDistVer}{$key}{filename}", 'L0');
+						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+						printLog("append file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$modified = 1;
 					}
@@ -3341,8 +3943,8 @@ sub setComment {
 	my $tmpline = $$repoline;
 	my $FH;
 	my @repolines;
-	my $compDistVers = "$distribution $distributionVersion";
-	my $regEx = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$compDistVers}{name}.'.*$';
+	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$completeDistVersion}{name}.'.*$';
+	my $regExElementaryOS = '^deb.*mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt .* main restricted universe multiverse$';
 	if (open $FH, '<', $reposList ) {
 		chomp(@repolines = <$FH>);
 		close $FH;
@@ -3351,11 +3953,11 @@ sub setComment {
 		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
-	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$compDistVers}{name}.*/ ) {
+	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
 		# delete old mirrors.tuxedocomputers.com urls
-		if ( (($$repoline =~ m/$regEx/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\//) {
+		if ( (($$repoline =~ m/$regExUbuntu/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\// || $$repoline =~ m/$regExElementaryOS/) {
 			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
 			printLog("commented out: $$repoline", 'L0');
 			return (1);
@@ -3573,7 +4175,7 @@ sub installPackage {
 
 ###############################################################################
 # installs a linux kernel from the name of the main metapackage
-# installLinuxKernel('metapackageName')
+# installKernelFlavour('metapackageName')
 # returns two parameters failed and nothingDone
 # failed = 0 all is good
 # failed = 1 some package was not installed
@@ -5059,16 +5661,24 @@ sub postConfigure {
 sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
-	if (! tries($triesLimit)) {
-		printLog('repeat limit reached, program will not start again');
-		if ($restartSystem) {
-			messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
-			print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
+	my $triesValue;
+	printLog("start later again: $startLaterAgain", 'L2');
+	if ($startLaterAgain != 1) {
+		$triesValue = tries($triesLimit);
+		if (! $triesValue) {
+			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
+			$startLaterAgain = 1;
+			if ($restartSystem) {
+				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
+			} else {
+				messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				print "\nNot all the fixes could be installed\n";
+			}
+			return (1);
 		} else {
-			messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
-			print "\nNot all the fixes could be installed\n";
+			printLog("program will start again, tries: $triesValue, trieslimit: $triesLimit", 'L2');
 		}
-		return (1);
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
@@ -5242,17 +5852,22 @@ sub modulesList() {
 #
 sub tries() {
 	my $limit = shift;
+	printLog("tries: given limit: $limit", 'L2');
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
-		if ( $triesDone <= $limit ) {
-			printLog("repeat number $triesDone of $limit", 'L0');
+		printLog("repeat number $triesDone of $limit", 'L0');
+		if ( $triesDone < $limit ) {
+			printLog("rising tries, triesDone below limit", 'L2');
 			writeFile($triesDone+1, $triesFile);
 			return (1);
 		} else {
+			printLog("limit tries done reached", 'L2');
+			printLog('deleting triesFile', 'L2');
 			unlink($triesFile);
 			return (0);
 		}
 	} else {
+		printLog('creating triesFile', 'L2');
 		writeFile('1', $triesFile);
 	}
 	return (1);
@@ -5266,7 +5881,7 @@ sub tries() {
 #
 sub triesAlreadyDone() {
 	if (-e $triesFile) {
-		return (readFileReturnLine($triesFile));
+		return (readFileReturnLine($triesFile)+0);
 	} else {
 		return (0);
 	}
@@ -5361,7 +5976,6 @@ if (!tuxedoDevice()) {
 readOSData();
 
 if (!isOSSupported()) {
-	printLog('This OS is not supported', 'TL0');
 	exit (0);
 }
 
@@ -5385,6 +5999,8 @@ if (@ARGV != 0) {
 		listStatus();
 	} elsif ($argValue{command} eq "modules") {
 		modulesList();
+	} elsif ($argValue{command} eq "printcompletefixeslist") {
+		printTuxedoDevices();
 	} elsif ($argValue{command} eq "description") {
 		moduleDescription();
 	} elsif ($argValue{command} eq "help") {
@@ -5440,6 +6056,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "reconfigure") {
 		# reconfigure interrupts repeated execution
 		if (-e $triesFile) {
+			printLog('delete triesFile', 'L2');
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
@@ -5492,6 +6109,7 @@ if (@ARGV != 0) {
 # interrupt repeated delayed execution if not necessary anymore
 if ($startLaterAgain == 0) {
 	if (-e $triesFile) {
+		printLog('deleting triesFile', 'L2');
 		unlink($triesFile);
 	}
 }
