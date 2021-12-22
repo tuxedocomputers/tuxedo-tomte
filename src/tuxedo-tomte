@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -1543,13 +1542,15 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if ($distribution =~ /elementary OS/ && !($distributionVersion < 6.1)) {
+	if (($distribution =~ /elementary OS/) && ($distributionVersion < 6.1)) {
 		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
-		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning')
+		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning');
+		return (0);
 	}
 	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
 		return (1);
 	}
+	printLog("This OS is not supported", 'TL0');
 	return (0);
 }
 
@@ -5975,7 +5976,6 @@ if (!tuxedoDevice()) {
 readOSData();
 
 if (!isOSSupported()) {
-	printLog('This OS is not supported', 'TL0');
 	exit (0);
 }
 
