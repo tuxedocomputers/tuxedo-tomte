@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 2;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -287,6 +288,9 @@ my %flavours = (
 		"linux-tuxedo-20.04" => {
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
 		},
+		"linux-tuxedo-20.04-next" => {
+			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
+		},
 	},
 	"6.1" => {
 		"linux-generic" => {
@@ -306,6 +310,9 @@ my %flavours = (
 		},
 		"linux-tuxedo-20.04" => {
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+		"linux-tuxedo-20.04-next" => {
+			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
 		},
 	},
 
@@ -616,7 +623,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1156,6 +1163,22 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-edge',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kerneltuxedo2004next => {
+		name => 'kernel-tuxedo-20.04-next',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-20.04-next',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1822,6 +1845,9 @@ sub checkRequirements {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
+		} elsif ($boardname =~ m/GMxTGxx/) {
+			printLog('kernel linux-tuxedo-20.04-next should be installed');
+			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-20.04 will be default');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
@@ -3031,7 +3057,7 @@ sub kernelhwe() {
 
 
 ###############################################################################
-# kernel-oem-20.04
+# kernel-tuxedo-20.04-edge
 #
 sub kerneltuxedo2004edge() {
 	my $module = shift;
@@ -3094,6 +3120,82 @@ sub kerneltuxedo2004edge() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# kernel-tuxedo-20.04-next
+#
+sub kerneltuxedo2004next() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed;
+	my $instDone;
+	my $tmpFailed;
+	my $tmpDone;
+	if ($action eq 'install') {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-next');
+			if ($instFailed == 0) {
+				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-next');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-next');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-next');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelhwe'}{installed} = "no";
+					$origConfModules{'kernelhwe'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-next');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04-next');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelhwe'}{installed} = "no";
+					$origConfModules{'kernelhwe'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-next');
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				printLog('new kernel linux-tuxedo-20.04-next could not be installed', 'TL1');
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				printLog('new kernel linux-tuxedo-20.04-next was installed', 'L1');
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		# no upgrades yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
