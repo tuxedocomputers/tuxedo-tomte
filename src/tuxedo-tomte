@@ -145,6 +145,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"Linux Mint" => {
+		versions => {
+			"20.2" => {
+				name => 'focal'
+			}
+		}
+	}
 );
 
 
@@ -209,6 +216,21 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"Linux Mint 20.2" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => 'focal',
+	},
 
 );
 
@@ -243,6 +265,15 @@ my %tuxedo_mirrors = (
 		name => '6.1 jolnir',
 	},
 	"KDE neon 20.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
+	},
+	"Linux Mint 20.2" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
@@ -289,6 +320,26 @@ my %flavours = (
 		},
 	},
 	"6.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-oem-20.04" => {
+			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-generic-hwe-20.04" => {
+			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
+		},
+		"linux-generic-hwe-20.04-edge" => {
+			installPackages => 'linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge',
+		},
+		"linux-tuxedo-20.04-edge" => {
+			installPackages => 'linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge',
+		},
+		"linux-tuxedo-20.04" => {
+			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+	},
+	"20.2" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -1818,7 +1869,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 		if ($boardname =~ m/X170KM-G/) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
@@ -2975,7 +3026,7 @@ sub kernelhwe() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
@@ -3041,7 +3092,7 @@ sub kerneltuxedo2004edge() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
@@ -3108,7 +3159,7 @@ sub kerneltuxedo2004() {
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
@@ -3242,7 +3293,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
