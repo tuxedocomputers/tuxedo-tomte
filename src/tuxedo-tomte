@@ -1137,7 +1137,7 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernelhwe => {
+	kernelhwe2004 => {
 		name => 'kernel-hwe-20.04',
 		version => 1,
 		installed => 'no',
@@ -1201,6 +1201,22 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	kernelgenerichwe2004edge => {
+		name => 'linux-generic-hwe-20.04-edge',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-generic-hwe-20.04-edge',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},	
 	nvidiadriver => {
 		name => 'nvidia-driver',
 		version => 1,
@@ -2993,24 +3009,30 @@ sub tuxedorestoreaudiofix() {
 ###############################################################################
 # kernel HWE 18.04 and 20.04
 #
-sub kernelhwe() {
+sub kernelhwe2004() {
 	my $module = shift;
 	my $action = shift;
-	my $instFailed;
-	my $instDone;
+	my $instFailed = 0;
+	my $instDone = 0;
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-			($instFailed, $instDone) = installKernelFlavour('linux-generic-hwe-20.04');
+			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04');
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-generic-hwe-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-generic-hwe-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
+					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
+				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-generic-hwe-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
@@ -3018,10 +3040,19 @@ sub kernelhwe() {
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04', 'linux-generic-hwe-20.04');
 				if ($tmpFailed == 0) {
 					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
 					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-generic-hwe-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3062,23 +3093,31 @@ sub kernelhwe() {
 sub kerneltuxedo2004edge() {
 	my $module = shift;
 	my $action = shift;
-	my $instFailed;
-	my $instDone;
+	my $instFailed = 0;
+	my $instDone = 0;
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-edge');
+			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge');
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
+					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge');
 				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe'}{installed} = "no";
-					$origConfModules{'kernelhwe'}{upgraded} = "no";
+					$origConfModules{'kernelhwe2004'}{installed} = "no";
+					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3091,7 +3130,11 @@ sub kerneltuxedo2004edge() {
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-tuxedo-20.04-edge');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
+				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -3129,23 +3172,31 @@ sub kerneltuxedo2004edge() {
 sub kerneltuxedo2004next() {
 	my $module = shift;
 	my $action = shift;
-	my $instFailed;
-	my $instDone;
+	my $instFailed = 0;
+	my $instDone = 0;
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04-next');
+			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-next');
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-next');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-next');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
+					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-next');
 				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe'}{installed} = "no";
-					$origConfModules{'kernelhwe'}{upgraded} = "no";
+					$origConfModules{'kernelhwe2004'}{installed} = "no";
+					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3160,13 +3211,9 @@ sub kerneltuxedo2004next() {
 
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04-next');
 				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe'}{installed} = "no";
-					$origConfModules{'kernelhwe'}{upgraded} = "no";
+					$origConfModules{'kernelhwe2004'}{installed} = "no";
+					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
 				}
-				$instFailed = $instFailed + $tmpFailed;
-				$instDone = $instDone + $tmpDone;
-
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-next');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -3205,23 +3252,31 @@ sub kerneltuxedo2004next() {
 sub kerneltuxedo2004() {
 	my $module = shift;
 	my $action = shift;
-	my $instFailed;
-	my $instDone;
+	my $instFailed = 0;
+	my $instDone = 0;
 	my $tmpFailed;
 	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-			($instFailed, $instDone) = installKernelFlavour('linux-tuxedo-20.04');
+			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				($instFailed, $instDone) = uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
+					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
+				}
+				$instFailed = $instFailed + $tmpFailed;
+				$instDone = $instDone + $tmpDone;
+
 				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04');
 				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe'}{installed} = "no";
-					$origConfModules{'kernelhwe'}{upgraded} = "no";
+					$origConfModules{'kernelhwe2004'}{installed} = "no";
+					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
 				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
@@ -3234,7 +3289,11 @@ sub kerneltuxedo2004() {
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 
-				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04');
+				($tmpFailed, $tmpDone) = uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-tuxedo-20.04');
+				if ($tmpFailed == 0) {
+					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
+					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
+				}
 				$instFailed = $instFailed + $tmpFailed;
 				$instDone = $instDone + $tmpDone;
 			}
@@ -4277,17 +4336,17 @@ sub installPackage {
 
 ###############################################################################
 # installs a linux kernel from the name of the main metapackage
-# installKernelFlavour('metapackageName')
-# returns two parameters failed and nothingDone
-# failed = 0 all is good
-# failed = 1 some package was not installed
-# somethingDone = 1 something was changed
-# somethingDone = 0 nothing was changed (kernel was already installed)
+# installKernelFlavour('metapackageName', \$failed, \$somethingDone)
+# reqires two parameters failed and nothingDone
 #
 sub installKernelFlavour {
-	my $flavour = shift;
-	my $failed = 0;
-	my $somethingDone = 0;
+	my ($flavour, $failed, $somethingDone) = shift;
+	if (undef $failed) {
+		${$failed} = 0;
+	}
+	if (undef $somethingDone) {
+		${$somethingDone} = 0;
+	}
 	my $partialName;
 	my $installCmd = 'apt-get install -yq ';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
@@ -4352,20 +4411,16 @@ sub installKernelFlavour {
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
-				$somethingDone = 1;
+				${$somethingDone} = ${$somethingDone} + 1;
 			}
 		}
-	} else {
-		$somethingDone = 0;
 	}
 
-	if ($allPackagesInstalled) {
-		$failed = 0;
-	} else {
-		$failed = 1;
+	if (!$allPackagesInstalled) {
+		${$failed} = ${$failed} + 1;
 	}
 	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
-	return ($failed, $somethingDone);
+	return (1);
 }
 
 
