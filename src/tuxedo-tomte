@@ -3020,32 +3020,7 @@ sub kernelhwe2004() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
-				uninstKernelFlavour('linux-generic', 'linux-generic-hwe-20.04', \$instFailed, \ $instDone);
-				uninstKernelFlavour('linux-oem-20.04', 'linux-generic-hwe-20.04', \$instFailed, \$instDone);
-
-				uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-generic-hwe-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
-					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-generic-hwe-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04', 'linux-generic-hwe-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-generic-hwe-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
-				}
+				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
@@ -3091,32 +3066,7 @@ sub kerneltuxedo2004edge() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
-				uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-				uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-
-				uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
-					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe2004'}{installed} = "no";
-					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-tuxedo-20.04-edge', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
-				}
+				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
@@ -3160,32 +3110,7 @@ sub kerneltuxedo2004next() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
-				uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04-next');
-				uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04-next');
-
-				uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04-next', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
-					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04-next', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe2004'}{installed} = "no";
-					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04', 'linux-tuxedo-20.04-next', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04-next', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe2004'}{installed} = "no";
-					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
-				}
+				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
@@ -3230,32 +3155,7 @@ sub kerneltuxedo2004() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
-				uninstKernelFlavour('linux-generic', 'linux-tuxedo-20.04');
-				uninstKernelFlavour('linux-oem-20.04', 'linux-tuxedo-20.04');
-
-				uninstKernelFlavour('linux-generic-hwe-20.04-edge', 'linux-tuxedo-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelgenerichwe2004edge'}{installed} = "no";
-					$origConfModules{'kernelgenerichwe2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-generic-hwe-20.04', 'linux-tuxedo-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kernelhwe2004'}{installed} = "no";
-					$origConfModules{'kernelhwe2004'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-edge', 'linux-tuxedo-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004edge'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004edge'}{upgraded} = "no";
-				}
-
-				uninstKernelFlavour('linux-tuxedo-20.04-next', 'linux-tuxedo-20.04', \$instFailed, \ $instDone);
-				if ($tmpFailed == 0) {
-					$origConfModules{'kerneltuxedo2004next'}{installed} = "no";
-					$origConfModules{'kerneltuxedo2004next'}{upgraded} = "no";
-				}
+				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
@@ -4298,6 +4198,8 @@ sub installPackage {
 # installs a linux kernel from the name of the main metapackage
 # installKernelFlavour('metapackageName', \$failed, \$somethingDone)
 # reqires two parameters failed and nothingDone
+# returns 0 if something went wrong
+# returns 1 if subroutine run through
 #
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = shift;
@@ -4318,7 +4220,7 @@ sub installKernelFlavour {
 	my $packageMissing = 0;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
-		return (1,0);
+		return (0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	populateFlavourPackages("$flavour");
@@ -4350,7 +4252,7 @@ sub installKernelFlavour {
 			`dpkg --configure -a`;
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
-				return (1,0);
+				return (0);
 			} else {
 				$retString = `$installCmd`;
 			}
@@ -4382,6 +4284,40 @@ sub installKernelFlavour {
 	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
 	return (1);
 }
+
+
+
+
+###############################################################################
+# uninstallAllOtherKernelFlavours($exceptKernel, \$failed, \$somethingWasDone)
+# uninstall all other kernels except the one given
+#
+sub uninstallAllOtherKernelFlavours {
+	my ($exceptKernel, $failed, $somethingWasDone) = shift;
+	my $tempInstFailed = 0;
+	my $tempInstDone = 0;
+	if ($exceptKernel ne 'linux-generic') {
+		uninstKernelFlavour('linux-generic',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-oem-20.04') {
+		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
+		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04') {
+		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
+		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+	}
+	${$failed} = $tempInstFailed;
+	${$somethingWasDone} = $$tempInstDone;
+}
+
 
 
 
@@ -4448,12 +4384,16 @@ sub uniq {
 
 
 ###############################################################################
-# deinstalls(flavour_to_deinstall, flavour_not_be_deinstalled
-# and checks if all packages of this kernel were uninstalled
-# takes care not to deinstall any package from flavour_not_be_deinstalled
-# return (failed, somethingWasDone)
-# failed = 0 if there was no error
-# somethingWasDone = 1 if some package was uninstalled
+# deinstalls flavourToUninstall, keeps flavourNotToBeUninstalled
+# modifies failed and somethingWasDone
+# uninstKernelFlavour($flavourToDeinstall, $flavourNotToBeUninstalled, \$failed, \$somethingWasDone)
+# failed = 0 if everything went well (kernel uninstalled)
+# failed = 1 if something could not be uninstalled
+# somethingWasDone = 0 if no packages were uninstalled
+# somethingWasDone = 1 if at least some package was uninstalled
+# takes care not to uninstall any package from flavourNotBeUninstalled
+# returns 0 if something went wrong
+# returns 1 if subroutine run through
 #
 sub uninstKernelFlavour {
 	#TODO remove returns
@@ -4472,7 +4412,8 @@ sub uninstKernelFlavour {
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
 		printLog("flavour $kernelToDelete does not exist!!", 'TL0');
-		return (1,0);
+		${$failed} += 1;
+		return (0);
 	}
 	printLog("uninstKernel: $kernelToDelete keep: $kernelToKeep", 'L2');
 	populateFlavourPackages("$kernelToDelete");
@@ -4506,6 +4447,7 @@ sub uninstKernelFlavour {
 		$deinstString .= ' 2>&1';
 		printLog("uninstalling $kernelToDelete", 'TL1');
 		printLog("deinstallation command: $deinstString", 'L2');
+		# circumvent Ubuntu failsafe for currently installed kernel
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel!", 'L2');
 			$restartSystem = 1;
@@ -4520,7 +4462,8 @@ sub uninstKernelFlavour {
 				`dpkg --configure -a`;
 				if ($? != 0) {
 					printLog("configure -a failed!! exiting", 'L2');
-					return (1,0);
+					${$failed} += 1;
+					return (0);
 				} else {
 					$retString = `$deinstString`;
 				}
@@ -4542,21 +4485,22 @@ sub uninstKernelFlavour {
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
 				printLog("unwanted package $package is still installed", 'L0');
-				$failed = 1;
+				${$failed} += 1;
 			} else {
-				$somethingWasDone = 1;
+				${$somethingWasDone} += 1;
 			}
 		}
-		if ($failed == 0) {
-			$origConfModules{$kernelToDelete}{installed} = "no";                                                                |        }
+		if (${$failed} == 0) {
+			$origConfModules{$kernelToDelete}{installed} = "no";
 			$origConfModules{$kernelToDelete}{upgraded} = "no";
+			return (1);
 		}
-		return ($failed, $somethingWasDone);
+		return (0);
 	} else {
 		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
-		$origConfModules{$kernelToDelete}{installed} = "no";                                                                |        }
+		$origConfModules{$kernelToDelete}{installed} = "no";
 		$origConfModules{$kernelToDelete}{upgraded} = "no";
-		return (0, 0);
+		return (1);
 	}
 }
 
