@@ -3018,6 +3018,8 @@ sub kernelhwe2004() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
+				#TODO debug
+				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
@@ -3062,6 +3064,8 @@ sub kerneltuxedo2004edge() {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
+				#TODO debug
+				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
@@ -3102,6 +3106,8 @@ sub kerneltuxedo2004next() {
 	my $instDone = 0;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+				#TODO debug
+				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -3145,6 +3151,8 @@ sub kerneltuxedo2004() {
 	my $instDone = 0;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+				#TODO debug
+				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
