@@ -3062,10 +3062,10 @@ sub kerneltuxedo2004edge() {
 	my $instDone = 0;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+				#TODO debug
+				printLog("before iAOKF instFailed: $instFailed instDone: $instDone", 'TL2');
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
-				#TODO debug
-				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
@@ -3107,7 +3107,7 @@ sub kerneltuxedo2004next() {
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 				#TODO debug
-				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
+				printLog("before iAOKF instFailed: $instFailed instDone: $instDone", 'TL2');
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -3152,7 +3152,7 @@ sub kerneltuxedo2004() {
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 				#TODO debug
-				printLog("before uAOKF instFailed: $instFailed instDone: $instDone");
+				printLog("before iAOKF instFailed: $instFailed instDone: $instDone", 'TL2');
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
