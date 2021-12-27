@@ -3014,8 +3014,6 @@ sub kernelhwe2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	my $tmpFailed;
-	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -3060,8 +3058,6 @@ sub kerneltuxedo2004edge() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	my $tmpFailed;
-	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -3104,8 +3100,6 @@ sub kerneltuxedo2004next() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	my $tmpFailed;
-	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -3149,8 +3143,6 @@ sub kerneltuxedo2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	my $tmpFailed;
-	my $tmpDone;
 	if ($action eq 'install') {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -4203,6 +4195,8 @@ sub installPackage {
 #
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = shift;
+	#TODO debug
+	printLog("installKernelFlavour flavour: $flavour failed: ${$failed} somethingDone: ${$somethingDone}", 'TL2');
 	if (undef ${$failed}) {
 		${$failed} = 0;
 	}
@@ -4273,13 +4267,13 @@ sub installKernelFlavour {
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
-				${$somethingDone} = ${$somethingDone} + 1;
+				${$somethingDone} += 1;
 			}
 		}
 	}
 
 	if (!$allPackagesInstalled) {
-		${$failed} = ${$failed} + 1;
+		${$failed} += 1;
 	}
 	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2');
 	return (1);
