@@ -4204,6 +4204,8 @@ sub installPackage {
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
+	printLog("begin installKernelFlavour", 'TL2');
+	print Dumper(\%origConfModules);
 	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
 	if (!(defined $failed)) {
 		$failed = 0;
@@ -4298,6 +4300,8 @@ sub uninstallAllOtherKernelFlavours {
 	my ($exceptKernel, $failed, $somethingWasDone) = @_;
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
+	printLog("begin uninstallAllOtherKernel", 'TL2');
+	print Dumper(\%origConfModules);
 	if ($exceptKernel ne 'linux-generic') {
 		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
@@ -4411,6 +4415,8 @@ sub uninstKernelFlavour {
 	my $kernelModuleName;
 
 	#TODO change everything!!!!
+	printLog("begin uninstKernelFlavour", 'TL2');
+	print Dumper(\%origConfModules);
 	#if (exists $origConfModules{$flavour}{name}) {
 	#	$kernelToDelete = $origConfModules{$flavour}{name};
 	#} else {
