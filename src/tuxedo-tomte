@@ -4202,7 +4202,7 @@ sub installPackage {
 # returns 1 if subroutine run through
 #
 sub installKernelFlavour {
-	my ($flavour, $failed, $somethingDone) = shift;
+	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
 	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
 	if (undef ${$failed}) {
@@ -4295,7 +4295,7 @@ sub installKernelFlavour {
 # uninstall all other kernels except the one given
 #
 sub uninstallAllOtherKernelFlavours {
-	my ($exceptKernel, $failed, $somethingWasDone) = shift;
+	my ($exceptKernel, $failed, $somethingWasDone) = @_;
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
 	if ($exceptKernel ne 'linux-generic') {
@@ -4317,7 +4317,7 @@ sub uninstallAllOtherKernelFlavours {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, \$tempInstFailed, \$tempInstDone);
 	}
 	${$failed} = $tempInstFailed;
-	${$somethingWasDone} = $$tempInstDone;
+	${$somethingWasDone} = $tempInstDone;
 }
 
 
@@ -4399,7 +4399,7 @@ sub uniq {
 #
 sub uninstKernelFlavour {
 	#TODO remove returns
-	my ($flavour, $keepFlavour, $failed, $somethingWasDone) = shift;
+	my ($flavour, $keepFlavour, $failed, $somethingWasDone) = @_;
 	my $retString;
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
