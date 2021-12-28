@@ -4399,31 +4399,31 @@ sub uniq {
 #
 sub uninstKernelFlavour {
 	#TODO remove returns
-	my ($flavour, $keepFlavour, $failed, $somethingWasDone) = @_;
+	my ($kernelToDelete, $kernelToKeep, $failed, $somethingWasDone) = @_;
 	my $retString;
 	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
 	my %pkgsHash;
 	my $deinstString = 'apt-get remove -yq --purge';
 	my $package;
-	my $kernelToDelete;
-	my $kernelToKeep;
+	#my $kernelToDelete;
+	#my $kernelToKeep;
 
 	#TODO change everything!!!!
-	if (exists $origConfModules{$flavour}{name}) {
-		$kernelToDelete = $origConfModules{$flavour}{name};
-	} else {
-		printLog("flavour $flavour does not exist!!", 'TL0');
-		$failed += 1;
-		return (0);
-	}
-	if (exists $origConfModules{$keepFlavour}{name}) {
-		$kernelToKeep = $origConfModules{$keepFlavour}{name};
-	} else {
-		printLog("flavour $keepFlavour does not exist!!", 'TL0');
-		$failed += 1;
-		return (0);
-	}
+	#if (exists $origConfModules{$flavour}{name}) {
+	#	$kernelToDelete = $origConfModules{$flavour}{name};
+	#} else {
+	#	printLog("flavour $flavour does not exist!!", 'TL0');
+	#	$failed += 1;
+	#	return (0);
+	#}
+	#if (exists $origConfModules{$keepFlavour}{name}) {
+	#	$kernelToKeep = $origConfModules{$keepFlavour}{name};
+	#} else {
+	#	printLog("flavour $keepFlavour does not exist!!", 'TL0');
+	#	$failed += 1;
+	#	return (0);
+	#}
 
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
