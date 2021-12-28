@@ -4205,10 +4205,10 @@ sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
 	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
-	if (undef $failed) {
+	if (!(defined $failed)) {
 		$failed = 0;
 	}
-	if (undef $somethingDone) {
+	if (!(defined $somethingDone)) {
 		$somethingDone = 0;
 	}
 	my $partialName;
@@ -4299,22 +4299,22 @@ sub uninstallAllOtherKernelFlavours {
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
 	if ($exceptKernel ne 'linux-generic') {
-		uninstKernelFlavour('linux-generic',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-oem-20.04') {
-		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
-		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
-		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
-		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, \$tempInstFailed, \$tempInstDone);
+		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	$failed = $tempInstFailed;
 	$somethingWasDone = $tempInstDone;
@@ -4410,6 +4410,20 @@ sub uninstKernelFlavour {
 	my $kernelToKeep;
 
 	#TODO change everything!!!!
+	if (exists $origConfModules{$flavour}{name}) {
+		$kernelToDelete = $origConfModules{$flavour}{name};
+	} else {
+		printLog("flavour $flavour does not exist!!", 'TL0');
+		$failed += 1;
+		return (0);
+	}
+	if (exists $origConfModules{$keepFlavour}{name}) {
+		$kernelToKeep = $origConfModules{$keepFlavour}{name};
+	} else {
+		printLog("flavour $keepFlavour does not exist!!", 'TL0');
+		$failed += 1;
+		return (0);
+	}
 
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
@@ -4422,8 +4436,6 @@ sub uninstKernelFlavour {
 		$failed += 1;
 		return (0);
 	}
-	$kernelToDelete = $origConfModules{$flavour}{name};
-	$kernelToKeep = $origConfModules{$keepFlavour}{name};
 
 	printLog("uninstKernel: $kernelToDelete keep: $kernelToKeep", 'L2');
 	populateFlavourPackages("$kernelToDelete");
