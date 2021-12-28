@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.20-13) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.20-14) UNRELEASED; urgency=medium
 
   * added linux-tuxedo-20.04-next
   * modified installKernel
@@ -14,8 +14,9 @@ tuxedo-tomte (2.5.20-13) UNRELEASED; urgency=medium
   * added some test for kernel
   * kernel install
   * added resolve kernelModuleName
+  * check if modulename defined
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 28 Dec 2021 15:09:01 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 28 Dec 2021 15:50:28 +0100
 
 tuxedo-tomte (2.5.20) focal; urgency=medium
 
