@@ -4204,6 +4204,7 @@ sub installPackage {
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
+	printLog('##################################################################', 'TL2');
 	printLog("begin installKernelFlavour", 'TL2');
 	print Dumper(\%origConfModules);
 	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
@@ -4300,6 +4301,7 @@ sub uninstallAllOtherKernelFlavours {
 	my ($exceptKernel, $failed, $somethingWasDone) = @_;
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
+	printLog('##################################################################', 'TL2');
 	printLog("begin uninstallAllOtherKernel", 'TL2');
 	print Dumper(\%origConfModules);
 	if ($exceptKernel ne 'linux-generic') {
@@ -4415,6 +4417,7 @@ sub uninstKernelFlavour {
 	my $kernelModuleName;
 
 	#TODO change everything!!!!
+	printLog('##################################################################', 'TL2');
 	printLog("begin uninstKernelFlavour", 'TL2');
 	print Dumper(\%origConfModules);
 	#if (exists $origConfModules{$flavour}{name}) {
@@ -4469,6 +4472,10 @@ sub uninstKernelFlavour {
 
 	$kernelModuleName = getSubName($kernelToDelete);
 
+	printLog('##################################################################', 'TL2');
+	printLog("before deinstall found packages", 'TL2');
+	print Dumper(\%origConfModules);
+
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
 		printLog("kernel packages to deinstall found", 'L1');
@@ -4514,6 +4521,7 @@ sub uninstKernelFlavour {
 
 		# check wether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
+			printLog("package: $package", 'TL2');
 			if (isPackageInstalled($package)) {
 				printLog("unwanted package $package is still installed", 'L0');
 				$failed += 1;
