@@ -5422,9 +5422,13 @@ sub addToConfiguredModules {
 sub getSubName {
 	my $moduleName = shift;
 	my $module;
+	#TODO debug
+	printLog("noduleName: $moduleName", 'TL2');
 	foreach $module ( keys %origConfModules ) {
-		if ( $moduleName eq $origConfModules{$module}{name} ) {
-			return $module;
+		if (defined $origConfModules{$module}{name}) {
+			if ( $moduleName eq $origConfModules{$module}{name} ) {
+				return $module;
+			}
 		}
 	}
 	# return empty string if module is not found
