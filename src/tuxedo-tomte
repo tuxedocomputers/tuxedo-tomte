@@ -4205,11 +4205,11 @@ sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
 	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
-	if (undef ${$failed}) {
-		${$failed} = 0;
+	if (undef $failed) {
+		$failed = 0;
 	}
-	if (undef ${$somethingDone}) {
-		${$somethingDone} = 0;
+	if (undef $somethingDone) {
+		$somethingDone = 0;
 	}
 	my $partialName;
 	my $installCmd = 'apt-get install -yq ';
@@ -4275,15 +4275,15 @@ sub installKernelFlavour {
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
-				${$somethingDone} += 1;
+				$somethingDone += 1;
 			}
 		}
 	}
 
 	if (!$allPackagesInstalled) {
-		${$failed} += 1;
+		$failed += 1;
 	}
-	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2');
+	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
 	return (1);
 }
 
@@ -4316,8 +4316,8 @@ sub uninstallAllOtherKernelFlavours {
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, \$tempInstFailed, \$tempInstDone);
 	}
-	${$failed} = $tempInstFailed;
-	${$somethingWasDone} = $tempInstDone;
+	$failed = $tempInstFailed;
+	$somethingWasDone = $tempInstDone;
 }
 
 
@@ -4414,12 +4414,12 @@ sub uninstKernelFlavour {
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
 		printLog("flavour $kernelToDelete does not exist!!", 'TL0');
-		${$failed} += 1;
+		$failed += 1;
 		return (0);
 	}
 	if (!(exists $flavours{$distributionVersion}{$kernelToKeep})) {
 		printLog("flavour $kernelToKeep does not exist!!", 'TL0');
-		${$failed} += 1;
+		$failed += 1;
 		return (0);
 	}
 	$kernelToDelete = $origConfModules{$flavour}{name};
@@ -4472,7 +4472,7 @@ sub uninstKernelFlavour {
 				`dpkg --configure -a`;
 				if ($? != 0) {
 					printLog("configure -a failed!! exiting", 'L2');
-					${$failed} += 1;
+					$failed += 1;
 					return (0);
 				} else {
 					$retString = `$deinstString`;
@@ -4495,12 +4495,12 @@ sub uninstKernelFlavour {
 		foreach $package (keys %pkgsHash) {
 			if (isPackageInstalled($package)) {
 				printLog("unwanted package $package is still installed", 'L0');
-				${$failed} += 1;
+				$failed += 1;
 			} else {
-				${$somethingWasDone} += 1;
+				$somethingWasDone += 1;
 			}
 		}
-		if (${$failed} == 0) {
+		if ($failed == 0) {
 			$origConfModules{$kernelToDelete}{installed} = "no";
 			$origConfModules{$kernelToDelete}{upgraded} = "no";
 			return (1);
