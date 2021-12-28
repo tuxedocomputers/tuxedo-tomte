@@ -4408,6 +4408,7 @@ sub uninstKernelFlavour {
 	my $package;
 	#my $kernelToDelete;
 	#my $kernelToKeep;
+	my $kernelModuleName;
 
 	#TODO change everything!!!!
 	#if (exists $origConfModules{$flavour}{name}) {
@@ -4459,6 +4460,8 @@ sub uninstKernelFlavour {
 			$pkgsHash{$1} = $2;
 		}
 	}
+
+	$kernelModuleName = getSubName($kernelToDelete);
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
@@ -4513,15 +4516,15 @@ sub uninstKernelFlavour {
 			}
 		}
 		if ($failed == 0) {
-			$origConfModules{$kernelToDelete}{installed} = "no";
-			$origConfModules{$kernelToDelete}{upgraded} = "no";
+			$origConfModules{$kernelModuleName}{installed} = "no";
+			$origConfModules{$kernelModuleName}{upgraded} = "no";
 			return (1);
 		}
 		return (0);
 	} else {
-		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
-		$origConfModules{$kernelToDelete}{installed} = "no";
-		$origConfModules{$kernelToDelete}{upgraded} = "no";
+		printLog("all is good, no packages to uninstall found for $kernelModuleName", 'L2');
+		$origConfModules{$kernelModuleName}{installed} = "no";
+		$origConfModules{$kernelModuleName}{upgraded} = "no";
 		return (1);
 	}
 }
