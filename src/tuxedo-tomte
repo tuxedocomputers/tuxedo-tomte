@@ -4530,15 +4530,20 @@ sub uninstKernelFlavour {
 			}
 		}
 		if ($failed == 0) {
-			$origConfModules{$kernelModuleName}{installed} = "no";
-			$origConfModules{$kernelModuleName}{upgraded} = "no";
+			printLog("all is good, all packages uninstalled for $kernelToDelete", 'L2');
+			if ($kernelModuleName ne '') {
+				$origConfModules{$kernelModuleName}{installed} = "no";
+				$origConfModules{$kernelModuleName}{upgraded} = "no";
+			}
 			return (1);
 		}
 		return (0);
 	} else {
-		printLog("all is good, no packages to uninstall found for $kernelModuleName", 'L2');
-		$origConfModules{$kernelModuleName}{installed} = "no";
-		$origConfModules{$kernelModuleName}{upgraded} = "no";
+		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
+		if ($kernelModuleName ne '') {
+			$origConfModules{$kernelModuleName}{installed} = "no";
+			$origConfModules{$kernelModuleName}{upgraded} = "no";
+		}
 		return (1);
 	}
 }
@@ -5441,6 +5446,7 @@ sub getSubName {
 	foreach $module ( keys %origConfModules ) {
 		if (defined $origConfModules{$module}{name}) {
 			if ( $moduleName eq $origConfModules{$module}{name} ) {
+				printLog("noduleName result: $module", 'TL2');
 				return $module;
 			}
 		}
