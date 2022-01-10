@@ -479,7 +479,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915disablepsrfix', 'tuxedomicfix1'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -1360,6 +1360,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	i915enablepsrfix => {
+		name => 'i915-enable-psr-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 3,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes ', #TODO
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
 	tuxedopinfixtgldkms => {
 		name => 'tuxedo-pinfix-tgl-dkms',
 		version => 1,
@@ -1846,9 +1862,10 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/NH5xAx/) || #TODO only for testing
 		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{i915disablepsrfix}{required} = 'yes';
-		printLog('detected i915-disable-psr-fix issue');
+		$origConfModules{i915enablepsrfix}{required} = 'yes';
+		printLog('detected i915-enable-psr-fix issue');
 	}
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
@@ -3681,6 +3698,60 @@ sub i915disablepsrfix() {
 
 
 ###############################################################################
+# Fixes TODO
+#
+sub i915enablepsrfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.tuxedo_disable_psr2_psr=1");
+	my $retval;
+	if ($action eq 'install') {
+		if (isLineInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
+
+
+###############################################################################
 # Fixes unresponsive touchpad 
 # - GMxTGxx
 #
@@ -4654,6 +4725,38 @@ sub isLineInFile {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# replaceTextInFile('filename', 'string', 'replacement')
+# replaces a text 'string' in file 'filename' with 'replacement'
+# 1 if replaced
+# 0 if not found or failed to open file
+#
+sub replaceTextInFile {
+	my ($filename, $match, $replace) = @_;
+	my @lines;
+	my $found = 0;
+	if ( open FH, '<', $filename ) {
+		@lines = <FH>;
+		close(FH);
+		foreach(@lines) {
+			$_ =~ s/$match/$replace/;
+			$found = 1;
+		}
+		if ($found) {
+			open(FH, ">$filename");
+			print FH @lines;
+			close(FH);
+			return(1);
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
 
 
 
