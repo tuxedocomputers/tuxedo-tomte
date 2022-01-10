@@ -3707,7 +3707,7 @@ sub i915enablepsrfix() {
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		if (isLineInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
 			#TODO debug
 			printLog('install, text found', 'TL2');
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
@@ -3729,7 +3729,7 @@ sub i915enablepsrfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		if (isLineInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
 			#TODO debug
 			printLog('upgrade, text found', 'TL2');
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
@@ -4714,7 +4714,7 @@ sub substituteLineInFile {
 
 ###############################################################################
 # isLineInFile('filename', 'string')
-# matches a line with the 'string' and returns
+# matches a line with the 'string' as RegEx(!!!) and returns
 # 1 if found
 # 0 if not found or failed to open file
 #
@@ -4732,6 +4732,30 @@ sub isLineInFile {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# isTextInFile('filename', 'string')
+# matches a line with the 'string' and returns
+# 1 if found
+# 0 if not found or failed to open file
+#
+sub isTextInFile {
+	my $filename = shift;
+	my $match = shift;
+	if ( open FH, '<', $filename ) {
+		while( <FH> ) {
+			if ( $_ =~ /$match/) {
+				return (1);
+			}
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
 
 
 
