@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO
-my $logLevel = 2;
+my $logLevel = 0;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -1875,7 +1874,11 @@ sub checkRequirements {
 
 	# kernel
 	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-		if ($boardname =~ m/X170KM-G/) {
+		if (($boardname =~ m/X170KM-G/) ||
+			($boardname =~ m/PHxTxX1/) ||
+			($boardname =~ m/PH4TQx1/) ||
+			($boardname =~ m/NH5xAx/) || #TODO only for testing
+			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} elsif ($boardname =~ m/GMxTGxx/) {
@@ -3708,8 +3711,6 @@ sub i915enablepsrfix() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
-			#TODO debug
-			printLog('install, text found', 'TL2');
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
 		}
 		$retval = insertGrub($module, \@kernel_parameters);
@@ -3730,8 +3731,6 @@ sub i915enablepsrfix() {
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
 		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
-			#TODO debug
-			printLog('upgrade, text found', 'TL2');
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
 		}
 		$retval = insertGrub($module, \@kernel_parameters);
@@ -4773,10 +4772,10 @@ sub replaceTextInFile {
 		@lines = <FH>;
 		close(FH);
 		foreach(@lines) {
-			$_ =~ s/$match/$replace/;
-			$found = 1;
-			#TODO debug
-			printLog("found $match", 'TL2');
+			if ($_ =~ /$match/) {
+				$_ =~ s/$match/$replace/;
+				$found = 1;
+			}
 		}
 		if ($found) {
 			open(FH, ">$filename");
