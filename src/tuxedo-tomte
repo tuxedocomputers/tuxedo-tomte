@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO
+my $logLevel = 2;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -3648,7 +3649,6 @@ sub amdgpubacklightauxoff() {
 
 ###############################################################################
 # Fixes screen flickering when using some input devices
-# - PHxTxX1
 #
 sub i915disablepsrfix() {
 	my $module = shift;
@@ -3703,13 +3703,15 @@ sub i915disablepsrfix() {
 sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i915.tuxedo_disable_psr2_psr=1");
+	my @kernel_parameters = ("i915.tuxedo_disable_psr2=1");
 	my $retval;
 	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
 		if (isLineInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			#TODO debug
+			printLog('install, text found', 'TL2');
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
 		}
-		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3727,6 +3729,11 @@ sub i915enablepsrfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
+		if (isLineInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			#TODO debug
+			printLog('upgrade, text found', 'TL2');
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -4744,6 +4751,8 @@ sub replaceTextInFile {
 		foreach(@lines) {
 			$_ =~ s/$match/$replace/;
 			$found = 1;
+			#TODO debug
+			printLog("found $match", 'TL2');
 		}
 		if ($found) {
 			open(FH, ">$filename");
