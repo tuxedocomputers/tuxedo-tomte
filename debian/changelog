@@ -1,12 +1,13 @@
-tuxedo-tomte (2.5.21-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.21-6) UNRELEASED; urgency=medium
 
   * before checkout
   * added board for testing
   * more debug
   * added isTextInFile
   * removed some debug, added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6 boardnames PHxTQx1 PHxTxX1 PH4TQx1
+  * set localInstalled to false if kernel removed
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 10 Jan 2022 19:53:02 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 11 Jan 2022 11:16:46 +0100
 
 tuxedo-tomte (2.5.21) focal; urgency=medium
 
