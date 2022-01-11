@@ -4567,6 +4567,7 @@ sub uninstKernelFlavour {
 		}
 		if ($failed == 0) {
 			printLog("all is good, all packages uninstalled for $kernelToDelete", 'L2');
+			printLog("kernelmodulename: $kernelModuleName", 'TL2');
 			if ($kernelModuleName ne '') {
 				printLog("remove $kernelModuleName from origConfModules", 'TL2');
 				$origConfModules{$kernelModuleName}{installed} = 'no';
