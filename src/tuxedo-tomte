@@ -1138,7 +1138,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kernelhwe2004 => {
-		name => 'kernel-hwe-20.04',
+		name => 'linux-hwe-20.04',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1154,7 +1154,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004edge => {
-		name => 'kernel-tuxedo-20.04-edge',
+		name => 'linux-tuxedo-20.04-edge',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1170,7 +1170,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
-		name => 'kernel-tuxedo-20.04-next',
+		name => 'linux-tuxedo-20.04-next',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1186,7 +1186,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
-		name => 'kernel-tuxedo-20.04',
+		name => 'linux-tuxedo-20.04',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
