@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 2;
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -4567,8 +4568,10 @@ sub uninstKernelFlavour {
 		if ($failed == 0) {
 			printLog("all is good, all packages uninstalled for $kernelToDelete", 'L2');
 			if ($kernelModuleName ne '') {
-				$origConfModules{$kernelModuleName}{installed} = "no";
-				$origConfModules{$kernelModuleName}{upgraded} = "no";
+				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				$origConfModules{$kernelModuleName}{installed} = 'no';
+				$origConfModules{$kernelModuleName}{upgraded} = 'no';
+				$localConfModules{$kernelModuleName}{installed} = 'no';
 			}
 			return (1);
 		}
@@ -4576,8 +4579,10 @@ sub uninstKernelFlavour {
 	} else {
 		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
 		if ($kernelModuleName ne '') {
-			$origConfModules{$kernelModuleName}{installed} = "no";
-			$origConfModules{$kernelModuleName}{upgraded} = "no";
+			printLog("remove $kernelModuleName from origConfModules", 'TL2');
+			$origConfModules{$kernelModuleName}{installed} = 'no';
+			$origConfModules{$kernelModuleName}{upgraded} = 'no';
+			$localConfModules{$kernelModuleName}{installed} = 'no';
 		}
 		return (1);
 	}
@@ -5245,12 +5250,16 @@ sub writeConfigFile {
 				$hwid = $origConfModules{$name}{hwid};
 				$installed = $origConfModules{$name}{installed};
 			}
-			print $FH "$origConfModules{$name}{name} ".
+			unless(($origConfModules{$name}{installed} eq 'no') &&
+					($origConfModules{$name}{upgraded} eq 'no') &&
+					($origConfModules{$name}{required} eq 'no')) {
+				print $FH "$origConfModules{$name}{name} ".
 					"$version ".
 					"$installed ".
 					"$origConfModules{$name}{blocked} ".
 					"$origConfModules{$name}{required} ".
 					"$hwid\n";
+			}
 		}
 		close $FH;
 	} else {
