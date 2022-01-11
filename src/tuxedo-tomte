@@ -276,6 +276,9 @@ my %flavours = (
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
 		},
@@ -298,6 +301,9 @@ my %flavours = (
 		},
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
@@ -1137,22 +1143,6 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernelhwe2004 => {
-		name => 'linux-hwe-20.04',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Required kernel version linux-generic-hwe-20.04',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
-	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
 		version => 1,
@@ -1195,6 +1185,22 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kernelgenerichwe2004 => {
+		name => 'linux-generic-hwe-20.04',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-generic-hwe-20.04',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -4334,7 +4340,7 @@ sub installKernelFlavour {
 		}
 	
 		$retString = `$testCmd`;
-		printLog("check installed packages: $retString", 'L2');
+		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ($_ =~ /dpkg-query:/) {
@@ -4372,14 +4378,20 @@ sub uninstallAllOtherKernelFlavours {
 	if ($exceptKernel ne 'linux-oem-20.04') {
 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
+	if ($exceptKernel ne 'linux-oem-20.04-edge') {
+		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
+		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
