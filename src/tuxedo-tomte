@@ -1375,7 +1375,7 @@ my %origConfModules = (
 		hwid => 3,
 		package => 'no',
 		fainame => '',
-		description => 'Fixes ', #TODO
+		description => 'Provides better battery life',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -3705,7 +3705,7 @@ sub i915disablepsrfix() {
 
 
 ###############################################################################
-# Fixes TODO
+# Provides better battery life
 #
 sub i915enablepsrfix() {
 	my $module = shift;
