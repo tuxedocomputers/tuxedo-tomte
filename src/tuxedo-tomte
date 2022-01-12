@@ -275,6 +275,9 @@ my %flavours = (
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
 		},
@@ -297,6 +300,9 @@ my %flavours = (
 		},
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
@@ -479,7 +485,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915disablepsrfix', 'tuxedomicfix1'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -1136,24 +1142,8 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernelhwe2004 => {
-		name => 'kernel-hwe-20.04',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Required kernel version linux-generic-hwe-20.04',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
-	},
 	kerneltuxedo2004edge => {
-		name => 'kernel-tuxedo-20.04-edge',
+		name => 'linux-tuxedo-20.04-edge',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1169,7 +1159,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
-		name => 'kernel-tuxedo-20.04-next',
+		name => 'linux-tuxedo-20.04-next',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1185,7 +1175,7 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
-		name => 'kernel-tuxedo-20.04',
+		name => 'linux-tuxedo-20.04',
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
@@ -1194,6 +1184,22 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+	kernelgenerichwe2004 => {
+		name => 'linux-generic-hwe-20.04',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-generic-hwe-20.04',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1354,6 +1360,22 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Fixes screen flickering when using some input devices',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
+	i915enablepsrfix => {
+		name => 'i915-enable-psr-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 3,
+		package => 'no',
+		fainame => '',
+		description => 'Provides better battery life',
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1806,7 +1828,7 @@ sub checkRequirements {
 	}
 
 	if ((cpuBrand() eq 'AMD') &&
-		($distributionVersion =~ /20.04/) &&
+		(($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) &&
 		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
@@ -1847,8 +1869,8 @@ sub checkRequirements {
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
 		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{i915disablepsrfix}{required} = 'yes';
-		printLog('detected i915-disable-psr-fix issue');
+		$origConfModules{i915enablepsrfix}{required} = 'yes';
+		printLog('detected i915-enable-psr-fix issue');
 	}
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
@@ -1857,7 +1879,10 @@ sub checkRequirements {
 
 	# kernel
 	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-		if ($boardname =~ m/X170KM-G/) {
+		if (($boardname =~ m/X170KM-G/) ||
+			($boardname =~ m/PHxTxX1/) ||
+			($boardname =~ m/PH4TQx1/) ||
+			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} elsif ($boardname =~ m/GMxTGxx/) {
@@ -3631,7 +3656,6 @@ sub amdgpubacklightauxoff() {
 
 ###############################################################################
 # Fixes screen flickering when using some input devices
-# - PHxTxX1
 #
 sub i915disablepsrfix() {
 	my $module = shift;
@@ -3677,6 +3701,63 @@ sub i915disablepsrfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Provides better battery life
+#
+sub i915enablepsrfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.tuxedo_disable_psr2=1");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
@@ -4256,7 +4337,7 @@ sub installKernelFlavour {
 		}
 	
 		$retString = `$testCmd`;
-		printLog("check installed packages: $retString", 'L2');
+		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ($_ =~ /dpkg-query:/) {
@@ -4294,14 +4375,20 @@ sub uninstallAllOtherKernelFlavours {
 	if ($exceptKernel ne 'linux-oem-20.04') {
 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
+	if ($exceptKernel ne 'linux-oem-20.04-edge') {
+		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
+		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
@@ -4436,6 +4523,7 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
+		messageLongInstall();
 		printLog("kernel packages to deinstall found", 'L1');
 		foreach $package (keys %pkgsHash) {
 			$deinstString .= ' '.$package;
@@ -4489,18 +4577,24 @@ sub uninstKernelFlavour {
 		}
 		if ($failed == 0) {
 			printLog("all is good, all packages uninstalled for $kernelToDelete", 'L2');
+			printLog("kernelmodulename: $kernelModuleName", 'TL2');
 			if ($kernelModuleName ne '') {
-				$origConfModules{$kernelModuleName}{installed} = "no";
-				$origConfModules{$kernelModuleName}{upgraded} = "no";
+				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				$origConfModules{$kernelModuleName}{installed} = 'no';
+				$origConfModules{$kernelModuleName}{upgraded} = 'no';
+				$localConfModules{$kernelModuleName}{installed} = 'no';
 			}
 			return (1);
 		}
 		return (0);
 	} else {
 		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
+		printLog("kernelmodulename: >$kernelModuleName<", 'TL2');
 		if ($kernelModuleName ne '') {
-			$origConfModules{$kernelModuleName}{installed} = "no";
-			$origConfModules{$kernelModuleName}{upgraded} = "no";
+			printLog("remove $kernelModuleName from origConfModules", 'TL2');
+			$origConfModules{$kernelModuleName}{installed} = 'no';
+			$origConfModules{$kernelModuleName}{upgraded} = 'no';
+			$localConfModules{$kernelModuleName}{installed} = 'no';
 		}
 		return (1);
 	}
@@ -4636,7 +4730,7 @@ sub substituteLineInFile {
 
 ###############################################################################
 # isLineInFile('filename', 'string')
-# matches a line with the 'string' and returns
+# matches a line with the 'string' as RegEx(!!!) and returns
 # 1 if found
 # 0 if not found or failed to open file
 #
@@ -4654,6 +4748,64 @@ sub isLineInFile {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# isTextInFile('filename', 'string')
+# matches a line with the 'string' and returns
+# 1 if found
+# 0 if not found or failed to open file
+#
+sub isTextInFile {
+	my $filename = shift;
+	my $match = shift;
+	if ( open FH, '<', $filename ) {
+		while( <FH> ) {
+			if ( $_ =~ /$match/) {
+				return (1);
+			}
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
+# replaceTextInFile('filename', 'string', 'replacement')
+# replaces a text 'string' in file 'filename' with 'replacement'
+# 1 if replaced
+# 0 if not found or failed to open file
+#
+sub replaceTextInFile {
+	my ($filename, $match, $replace) = @_;
+	my @lines;
+	my $found = 0;
+	if ( open FH, '<', $filename ) {
+		@lines = <FH>;
+		close(FH);
+		foreach(@lines) {
+			if ($_ =~ /$match/) {
+				$_ =~ s/$match/$replace/;
+				$found = 1;
+			}
+		}
+		if ($found) {
+			open(FH, ">$filename");
+			print FH @lines;
+			close(FH);
+			return(1);
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
 
 
 
@@ -5110,12 +5262,16 @@ sub writeConfigFile {
 				$hwid = $origConfModules{$name}{hwid};
 				$installed = $origConfModules{$name}{installed};
 			}
-			print $FH "$origConfModules{$name}{name} ".
+			unless(($origConfModules{$name}{installed} eq 'no') &&
+					($origConfModules{$name}{upgraded} eq 'no') &&
+					($origConfModules{$name}{required} eq 'no')) {
+				print $FH "$origConfModules{$name}{name} ".
 					"$version ".
 					"$installed ".
 					"$origConfModules{$name}{blocked} ".
 					"$origConfModules{$name}{required} ".
 					"$hwid\n";
+			}
 		}
 		close $FH;
 	} else {
