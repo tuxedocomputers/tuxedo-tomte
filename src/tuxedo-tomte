@@ -1828,7 +1828,7 @@ sub checkRequirements {
 	}
 
 	if ((cpuBrand() eq 'AMD') &&
-		($distributionVersion =~ /20.04/) &&
+		(($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) &&
 		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
@@ -1868,7 +1868,6 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/NH5xAx/) || #TODO only for testing
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue');
@@ -1883,7 +1882,6 @@ sub checkRequirements {
 		if (($boardname =~ m/X170KM-G/) ||
 			($boardname =~ m/PHxTxX1/) ||
 			($boardname =~ m/PH4TQx1/) ||
-			($boardname =~ m/NH5xAx/) || #TODO only for testing
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
