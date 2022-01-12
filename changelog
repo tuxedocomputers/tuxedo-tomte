@@ -1,20 +1,9 @@
-tuxedo-tomte (2.5.21-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.21-1) UNRELEASED; urgency=medium
 
-  * before checkout
-  * added board for testing
-  * more debug
-  * added isTextInFile
-  * removed some debug, added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6 boardnames PHxTQx1 PHxTxX1 PH4TQx1
-  * set localInstalled to false if kernel removed
-  * more debug
-  * more debug
-  * changed kernel names
-  * added some kernel delete options
-  * added messageLongInstall for Kernel uninstall
-  * removed some debug and testdevice
-  * added description for enable psr2
+  * added nokeyboardaftersuspendfix for XUX7 Gen.13 boardname X170KM-G
+  * added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6 boardnames PHxTQx1 PHxTxX1 PH4TQx1
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 12 Jan 2022 10:59:35 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 10 Jan 2022 15:16:34 +0100
 
 tuxedo-tomte (2.5.21) focal; urgency=medium
 
