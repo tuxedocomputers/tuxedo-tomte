@@ -689,7 +689,7 @@ my %tuxedo_devices = (
 		model => ['all with fingerprintreader'],
 		board_name => [''],
 		fix => ['fingerprintreader'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => ['147e:100[0123]', '147e:20(15|16|20)', '147e:300[01]', '147e:500[23]', '0483:201[56]', '1c7a:0603'],
 		cpu => '',
 		kernel => '',
@@ -700,7 +700,7 @@ my %tuxedo_devices = (
 		model => ['all with LTE module'],
 		board_name => [''],
 		fix => ['threegfix'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '12d1:15bb',
 		cpu => '',
 		kernel => '',
@@ -711,7 +711,7 @@ my %tuxedo_devices = (
 		model => ['all with NVIDIA'],
 		board_name => [''],
 		fix => ['nvidiadriver'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '030[02]:',
 		cpu => '',
 		kernel => '',
@@ -722,7 +722,7 @@ my %tuxedo_devices = (
 		model => ['all with OLED display'],
 		board_name => [''],
 		fix => ['tuxedooledbrt'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -733,7 +733,7 @@ my %tuxedo_devices = (
 		model => ['Kinston NVMe'],
 		board_name => [''],
 		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '2646:2263',
 		cpu => '',
 		kernel => '',
@@ -744,7 +744,7 @@ my %tuxedo_devices = (
 		model => [''],
 		board_name => [''],
 		fix => [''],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -755,7 +755,7 @@ my %tuxedo_devices = (
 		model => [''],
 		board_name => [''],
 		fix => [''],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -766,7 +766,7 @@ my %tuxedo_devices = (
 		model => [''],
 		board_name => [''],
 		fix => [''],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -777,13 +777,25 @@ my %tuxedo_devices = (
 		model => [''],
 		board_name => [''],
 		fix => [''],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
 		display => '',
 		usb_device => '',
 	},
+	'41' => {
+		model => ['InfinityBook S 17 Gen17'],
+		board_name => ['NS50_70MU'],
+		fix => ['i8042noaux'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1408,6 +1420,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	i8042noauxfix => {
+		name => 'i8042noaux-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fix for touchpad related issues',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
+
 
 );
 
@@ -1631,6 +1660,10 @@ sub checkRequirements {
 		($boardname =~ /X170KM-G/ )) {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('detected i8042-fix issue');
+	}
+	if ($boardname =~ /NS50_70MU/) {
+		$origConfModules{i8042noauxfix}{required} = 'yes';
+		printLog('detected i8042.noaux-fix issue');
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
@@ -1947,6 +1980,59 @@ sub i8042fix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# for touchpad problems
+#
+sub i8042fixnoaux() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i8042.noaux");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 ###############################################################################
