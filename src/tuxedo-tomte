@@ -419,7 +419,7 @@ my %tuxedo_devices = (
 	'7' => {
 		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
 		board_name => ['PB50_70DFx,DDx'],
-		fix => ['i8042fix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:67e1',
 		cpu => '',
@@ -1678,10 +1678,6 @@ sub checkRequirements {
 	my $biosVersion;
 
 	# check values for each module
-	if ($boardname =~ /PB50_70DFx,DDx/) {
-		$origConfModules{i8042fix}{required} = 'yes';
-		printLog('detected i8042-fix issue');
-	}
 	if ($boardname =~ /NS50_70MU/) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
 		printLog('detected i8042.noaux-fix issue');
@@ -1957,8 +1953,6 @@ sub findPciDevice {
 # they set 'installed' status and $postConfModule trigger
 #
 # for keyboard not present on boot
-# for XC1711 on all distributions
-# - PB50_70DFx,DDx
 #
 sub i8042fix() {
 	my $module = shift;
