@@ -1682,7 +1682,8 @@ sub checkRequirements {
 		$origConfModules{i8042fix}{required} = 'yes';
 		printLog('detected i8042-fix issue');
 	}
-	if ($boardname =~ /NS50_70MU/) {
+	#if ($boardname =~ /NS50_70MU/) {
+	if ($boardname =~ /NH5xAx/) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
 		printLog('detected i8042.noaux-fix issue');
 	}
