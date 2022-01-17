@@ -785,9 +785,9 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'41' => {
-		model => ['InfinityBook S 17 Gen17'],
+		model => ['InfinityBook S 17 Gen6'],
 		board_name => ['NS50_70MU'],
-		fix => ['i8042noaux'],
+		fix => ['i8042noauxfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1986,7 +1986,7 @@ sub i8042fix() {
 ###############################################################################
 # for touchpad problems
 #
-sub i8042fixnoaux() {
+sub i8042noauxfix() {
 	my $module = shift;
 	my $action = shift;
 	my @kernel_parameters = ("i8042.noaux");
