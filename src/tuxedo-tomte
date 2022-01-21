@@ -5654,7 +5654,9 @@ sub transferConfigValues {
 	foreach $name (sort keys %localConfModules) {
 		# always copy blocked status
 		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
-		if (newVersion($name) or newHwid($name)) {
+		if (newVersion($name) || newHwid($name)) {
+			#TODO
+			printLog("sets upgrade necessary", 'TL0');
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
@@ -5676,8 +5678,10 @@ sub newVersion {
 	#TODO
 	printLog("$module local: $localConfModules{$module}{version} orig: $origConfModules{$module}{version}", 'TL0');
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
+		printLog("return 1", 'TL0');
 		return (1);
 	} else {
+		printLog("return 0", 'TL0');
 		return (0);
 	}
 }
@@ -5691,8 +5695,10 @@ sub newHwid {
 	#TODO
 	printLog("$module local: $localConfModules{$module}{hwid} orig: $origConfModules{$module}{hwid}", 'TL0');
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
+		printLog("return 1", 'TL0');
 		return (1);
 	} else {
+		printLog("return 0", 'TL0');
 		return (0);
 	}
 }
