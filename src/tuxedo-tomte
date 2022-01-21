@@ -5602,9 +5602,9 @@ sub listStatus {
 	my $upgradeAvailable = '';
 
 	foreach $module (sort keys %localConfModules) {
-		#if($origConfModules{$module}{upgrade} eq 'yes') {
-		#	$upgradeAvailable = ' - upgrade available';
-		#}
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
