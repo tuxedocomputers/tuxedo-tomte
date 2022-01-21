@@ -801,6 +801,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'42' => {
+		model => ['TUXEDO Book XP14 Gen12'],
+		board_name => ['NV4XMB,ME,MZ'],
+		fix => ['lightdmlogindcheckgraphicalfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 
 );
 
@@ -1940,7 +1952,8 @@ sub checkRequirements {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue');
 	}
-	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
+	#if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
+	if (($boardname =~ m/NH5xAx/) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue');
 	}
@@ -5589,9 +5602,9 @@ sub listStatus {
 	my $upgradeAvailable = '';
 
 	foreach $module (sort keys %localConfModules) {
-		if($origConfModules{$module}{upgrade} eq 'yes') {
-			$upgradeAvailable = ' - upgrade available';
-		}
+		#if($origConfModules{$module}{upgrade} eq 'yes') {
+		#	$upgradeAvailable = ' - upgrade available';
+		#}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
@@ -5660,6 +5673,8 @@ sub transferConfigValues {
 # returns 1 if new version
 sub newVersion {
 	my $module = shift;
+	#TODO
+	printLog("$module local: $localConfModules{$module}{version} orig: $origConfModules{$module}{version}", 'TL0');
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
 		return (1);
 	} else {
@@ -5673,6 +5688,8 @@ sub newVersion {
 # returns 1 if new hwid
 sub newHwid {
 	my $module = shift;
+	#TODO
+	printLog("$module local: $localConfModules{$module}{hwid} orig: $origConfModules{$module}{hwid}", 'TL0');
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
 		return (1);
 	} else {
