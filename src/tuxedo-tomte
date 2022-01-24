@@ -5941,8 +5941,13 @@ sub reconfigureSingleModule {
 	if ( $localConfModules{$module}{blocked} eq 'no' &&
 		($origConfModules{$module}{required} eq 'yes' ||
 		$origConfModules{$module}{required} eq 'prerequisite')) {
-		printLog("configure module: $module");
-		configureModule($module);
+		if ($origConfModules{$module}{upgrade} eq 'yes') {
+			printLog("upgrade module: $module");
+			upgradeModule($module);
+		} else {
+			printLog("configure module: $module");
+			configureModule($module);
+		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
