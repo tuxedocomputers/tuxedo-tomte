@@ -2345,6 +2345,8 @@ sub nokeyboardaftersuspendfix() {
 	my $action = shift;
 	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
+	#TODO
+	printLog("nokeyboardaftersuspendfix action: $action", 'TL0');
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
@@ -2364,7 +2366,9 @@ sub nokeyboardaftersuspendfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
+		#TODO
 		$retval = insertGrub($module, \@kernel_parameters);
+		printLog("nokeyboardaftersuspendfix retval: $retval", 'TL0');
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5604,6 +5608,8 @@ sub listStatus {
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
@@ -5670,6 +5676,7 @@ sub transferConfigValues {
 		}
 		printLog("-> RESULT: $origConfModules{$name}{upgrade}", 'TL0');
 	}
+	print Dumper(\%origConfModules);
 }
 
 
