@@ -1952,6 +1952,7 @@ sub checkRequirements {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue');
 	}
+	#TODO
 	#if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
 	if (($boardname =~ m/NH5xAx/) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
@@ -5925,9 +5926,19 @@ sub reconfigureSingleModule {
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module");
 			upgradeModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
 		} else {
 			printLog("configure module: $module");
 			configureModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
 		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
