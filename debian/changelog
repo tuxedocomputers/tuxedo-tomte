@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.21-38) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.21-39) UNRELEASED; urgency=medium
 
   * added i8042noauxfix for InfinityBook S 17 Gen6, boardname NS50_70MU
   * added nokeyboardaftersuspendfix for XUX7 Gen.13 boardname X170KM-G
@@ -11,8 +11,9 @@ tuxedo-tomte (2.5.21-38) UNRELEASED; urgency=medium
   * restored upgrade notice
   * debug
   * debug, added empty string if not upgrade
+  * added upgrade to reconfigureSingleModule
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 24 Jan 2022 10:13:29 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 24 Jan 2022 11:05:53 +0100
 
 tuxedo-tomte (2.5.21) focal; urgency=medium
 
