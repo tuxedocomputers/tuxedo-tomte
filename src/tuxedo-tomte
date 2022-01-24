@@ -5656,7 +5656,10 @@ sub transferConfigValues {
 		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
 		if (newVersion($name) || newHwid($name)) {
 			#TODO
-			printLog("sets upgrade necessary", 'TL0');
+			my $testVersion = newVersion($name);
+			my $testHwid = newHwid($name);
+			printLog("newVersion: $testVersion newHwid: $testHwid", 'TL0');
+			printLog("### sets upgrade necessary", 'TL0');
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
@@ -5665,6 +5668,7 @@ sub transferConfigValues {
 			$origConfModules{$name}{upgrade} = 'no';
 			$origConfModules{$name}{upgraded} = 'no';
 		}
+		printLog("-> RESULT: $origConfModules{$name}{upgrade}", 'TL0');
 	}
 }
 
