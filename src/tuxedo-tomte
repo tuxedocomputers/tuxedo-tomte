@@ -2345,8 +2345,6 @@ sub nokeyboardaftersuspendfix() {
 	my $action = shift;
 	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
-	#TODO
-	printLog("nokeyboardaftersuspendfix action: $action", 'TL0');
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
 		$retval = insertGrub($module, \@kernel_parameters);
@@ -2366,9 +2364,7 @@ sub nokeyboardaftersuspendfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		#TODO
 		$retval = insertGrub($module, \@kernel_parameters);
-		printLog("nokeyboardaftersuspendfix retval: $retval", 'TL0');
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5661,11 +5657,6 @@ sub transferConfigValues {
 		# always copy blocked status
 		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
 		if (newVersion($name) || newHwid($name)) {
-			#TODO
-			my $testVersion = newVersion($name);
-			my $testHwid = newHwid($name);
-			printLog("newVersion: $testVersion newHwid: $testHwid", 'TL0');
-			printLog("### sets upgrade necessary", 'TL0');
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
@@ -5686,13 +5677,9 @@ sub transferConfigValues {
 # returns 1 if new version
 sub newVersion {
 	my $module = shift;
-	#TODO
-	printLog("$module local: $localConfModules{$module}{version} orig: $origConfModules{$module}{version}", 'TL0');
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
-		printLog("return 1", 'TL0');
 		return (1);
 	} else {
-		printLog("return 0", 'TL0');
 		return (0);
 	}
 }
@@ -5703,13 +5690,9 @@ sub newVersion {
 # returns 1 if new hwid
 sub newHwid {
 	my $module = shift;
-	#TODO
-	printLog("$module local: $localConfModules{$module}{hwid} orig: $origConfModules{$module}{hwid}", 'TL0');
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
-		printLog("return 1", 'TL0');
 		return (1);
 	} else {
-		printLog("return 0", 'TL0');
 		return (0);
 	}
 }
