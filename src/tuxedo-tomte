@@ -5665,7 +5665,6 @@ sub transferConfigValues {
 			$origConfModules{$name}{upgrade} = 'no';
 			$origConfModules{$name}{upgraded} = 'no';
 		}
-		printLog("-> RESULT: $origConfModules{$name}{upgrade}", 'TL0');
 	}
 }
 
