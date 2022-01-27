@@ -801,6 +801,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'42' => {
+		model => ['TUXEDO Book XP14 Gen12'],
+		board_name => ['NV4XMB,ME,MZ'],
+		fix => ['lightdmlogindcheckgraphicalfix'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 
 );
 
@@ -1458,8 +1470,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
-
-
+	lightdmlogindcheckgraphicalfix => {
+		name => 'lightdm-logind-check-graphical-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes lightdm starting before windowmanager',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'no',
+	},
 );
 
 
@@ -1926,6 +1952,10 @@ sub checkRequirements {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue');
 	}
+	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
+		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
+		printLog('detected lightdm-logind-check-graphical-fix issue');
+	}
 }
 
 
@@ -2191,7 +2221,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval = createFile($fileName, $fileText);
+		$retval = createFile($fileName, $fileText, 1);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2721,8 +2751,8 @@ sub threegfix() {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName1, $fileText1);
-		$retval2 = createFile($fileName2, $fileText2);
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2735,8 +2765,8 @@ sub threegfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName1, $fileText1);
-		$retval2 = createFile($fileName2, $fileText2);
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3084,7 +3114,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName, $fileText);
+		$retval1 = createFile($fileName, $fileText, 1);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -3934,6 +3964,59 @@ sub thunderboltbootdelayfix() {
 
 
 
+###############################################################################
+# inserts a parameter to start lightdm after the windowmanager has started
+#
+sub lightdmlogindcheckgraphicalfix() {
+	my $module = shift;
+	my $action = shift;
+	my $lightdmLine = 'logind-check-graphical=true';
+	my $lightdmCheckGraphicalDir = '/etc/lightdm/lightdm.conf.d/';
+	my $lightdmCheckGraphicalFile = $lightdmCheckGraphicalDir.'99_tuxedo.conf';
+
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		unless (-d $lightdmCheckGraphicalDir) {
+			unless (mkdir $lightdmCheckGraphicalDir) {
+				printLog("could not create directory $lightdmCheckGraphicalDir", 'TL0');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+		if (-e $lightdmCheckGraphicalFile) {
+			unless (isTextInFile($lightdmCheckGraphicalFile, '[LightDM]') && isTextInFile($lightdmCheckGraphicalFile, 'logind-check-graphical=true')) {
+				if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "success");
+				} else {
+					$origConfModules{$module}{installed} = "failed";
+					addToConfiguredModules($module, "failed");
+					return (0);
+				}
+			}
+		} else {
+			if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+	}
+
+	if ($action eq 'upgrade') {
+		# not neccessary
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
@@ -4032,7 +4115,7 @@ sub createRepos {
 					}
 					# create file + line
 					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
-						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
 						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$firstEntry = 0;
@@ -4617,7 +4700,7 @@ sub uninstKernelFlavour {
 			$restartSystem = 1;
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
-			createFile('/usr/bin/linux-check-removal', $fileText);
+			createFile('/usr/bin/linux-check-removal', $fileText, 1);
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
 			if ($retString =~ /sudo dpkg --configure -a/) {
@@ -4685,12 +4768,12 @@ sub uninstKernelFlavour {
 
 ###############################################################################
 # creates file with content
+# $backup accepts 0 and 1
 # 
 sub createFile {
-	my $fileName = shift;
-	my $fileText = shift;
+	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
-	if (-e $fileName) {
+	if ((-e $fileName) && ($backup)) {
 		backupFile($fileName);
 	}
 	if (open $FH, ">",$fileName) {
@@ -5520,6 +5603,8 @@ sub listStatus {
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
@@ -5570,7 +5655,7 @@ sub transferConfigValues {
 	foreach $name (sort keys %localConfModules) {
 		# always copy blocked status
 		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
-		if (newVersion($name) or newHwid($name)) {
+		if (newVersion($name) || newHwid($name)) {
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
@@ -5836,8 +5921,23 @@ sub reconfigureSingleModule {
 	if ( $localConfModules{$module}{blocked} eq 'no' &&
 		($origConfModules{$module}{required} eq 'yes' ||
 		$origConfModules{$module}{required} eq 'prerequisite')) {
-		printLog("configure module: $module");
-		configureModule($module);
+		if ($origConfModules{$module}{upgrade} eq 'yes') {
+			printLog("upgrade module: $module");
+			upgradeModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
+		} else {
+			printLog("configure module: $module");
+			configureModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
+		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
