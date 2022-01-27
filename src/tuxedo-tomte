@@ -145,6 +145,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"TUXEDO_OS Plasma" => {
+		versions => {
+			"20.04" => {
+				name => 'focal',
+			}
+		},
+	},
 );
 
 
@@ -209,6 +216,22 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"TUXEDO_OS Plasma 20.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => 'focal',
+	},
+
 
 );
 
@@ -243,6 +266,15 @@ my %tuxedo_mirrors = (
 		name => '6.1 jolnir',
 	},
 	"KDE neon 20.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
+	},
+	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
