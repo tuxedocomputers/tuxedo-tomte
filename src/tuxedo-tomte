@@ -1952,9 +1952,7 @@ sub checkRequirements {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue');
 	}
-	#TODO
-	#if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
-	if (($boardname =~ m/NH5xAx/) && (-d '/etc/lightdm/')) {
+	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue');
 	}
