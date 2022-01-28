@@ -1,3 +1,13 @@
+tuxedo-tomte (2.5.23-5) UNRELEASED; urgency=medium
+
+  * added TUXEDO_OS Plasma 20.04
+  * activated debug
+  * moved ARGV init up
+  * removed Tomte first start from postinst as it is already started as service
+  * moved ARGV even upper
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 10:23:25 +0100
+
 tuxedo-tomte (2.5.23) focal; urgency=medium
 
   * added lightdmlogindcheckgraphicalfix for TUXEDO Book XP14 Gen12,
