@@ -30,6 +30,9 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper;
 my $logLevel = 0;
 
+# for console language
+my $consoleLanguage = 'LANG=C; LANGUAGE=C;';
+
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -1202,7 +1205,7 @@ my %origConfModules = (
 	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1218,7 +1221,7 @@ my %origConfModules = (
 	},
 	kerneltuxedo2004next => {
 		name => 'linux-tuxedo-20.04-next',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1234,7 +1237,7 @@ my %origConfModules = (
 	},
 	kerneltuxedo2004 => {
 		name => 'linux-tuxedo-20.04',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1250,7 +1253,7 @@ my %origConfModules = (
 	},
 	kernelgenerichwe2004 => {
 		name => 'linux-generic-hwe-20.04',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1266,7 +1269,7 @@ my %origConfModules = (
 	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -3182,7 +3185,7 @@ sub kernelhwe2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3206,9 +3209,10 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3226,7 +3230,7 @@ sub kerneltuxedo2004edge() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3250,9 +3254,10 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3268,7 +3273,7 @@ sub kerneltuxedo2004next() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3292,9 +3297,9 @@ sub kerneltuxedo2004next() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3311,7 +3316,7 @@ sub kerneltuxedo2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3335,9 +3340,9 @@ sub kerneltuxedo2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -4612,7 +4617,7 @@ sub populateFlavourPackages {
 	my $line;
 	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
@@ -4628,7 +4633,7 @@ sub populateFlavourPackages {
 			}
 		}
 	}
-	$searchCmd = 'apt-cache depends --important '.$packageLine;
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$packageLine;
 	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("second result:\n$result", 'L2');
