@@ -86,6 +86,8 @@ my %argValue = (
 	module => '',
 );
 
+if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 
 
@@ -5228,8 +5230,6 @@ sub messageLongInstall {
 sub initLogging {
 	my %options;
 	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
-	if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-	if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
