@@ -1,11 +1,12 @@
-tuxedo-tomte (2.5.24-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.24-4) UNRELEASED; urgency=medium
 
   * after packaging
   * removed ^ from apt-cache query for kernel packages
   * raised kernel version for update
   * introduced locale for apt-cache
+  * merged kernel install with upgrades
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 15:44:48 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 16:20:23 +0100
 
 tuxedo-tomte (2.5.24) focal; urgency=medium
 
