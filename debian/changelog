@@ -1,12 +1,8 @@
-tuxedo-tomte (2.5.24-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.25) focal; urgency=medium
 
-  * after packaging
-  * removed ^ from apt-cache query for kernel packages
-  * raised kernel version for update
-  * introduced locale for apt-cache
-  * merged kernel install with upgrades
+  * added support for locale other than English
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 16:20:23 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 17:26:07 +0100
 
 tuxedo-tomte (2.5.24) focal; urgency=medium
 
@@ -21,7 +17,8 @@ tuxedo-tomte (2.5.23) focal; urgency=medium
     boardname NV4XMB,ME,MZ
   * added i8042noauxfix for InfinityBook S 17 Gen6, boardname NS50_70MU
   * added nokeyboardaftersuspendfix for XUX7 Gen.13 boardname X170KM-G
-  * added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6 boardnames PHxTQx1 PHxTxX1 PH4TQx1
+  * added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6
+    boardnames PHxTQx1 PHxTxX1 PH4TQx1
 
  -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Jan 2022 13:06:15 +0100
 
