@@ -30,6 +30,9 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper;
 my $logLevel = 0;
 
+# for console language
+my $consoleLanguage = 'LANG=C; LANGUAGE=0;';
+
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -4612,7 +4615,7 @@ sub populateFlavourPackages {
 	my $line;
 	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
@@ -4621,14 +4624,14 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /linux-.*(?:image|headers|modules)-.*/) {
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
 				printLog("Accepted: $pkgString", 'L2');
 				$packageLine .= " $pkgString";
 				push @packages, $pkgString;
 			}
 		}
 	}
-	$searchCmd = 'apt-cache depends --important '.$packageLine;
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$packageLine;
 	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("second result:\n$result", 'L2');
@@ -4636,7 +4639,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /linux-.*(?:image|headers|modules)-.*/) {
+			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
 				printLog("Accepted: $pkgString", 'L2');
 				push @packages, $pkgString;
 			}
