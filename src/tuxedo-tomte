@@ -31,7 +31,7 @@ use Data::Dumper;
 my $logLevel = 0;
 
 # for console language
-my $consoleLanguage = 'LANG=C; LANGUAGE=0;';
+my $consoleLanguage = 'LANG=C; LANGUAGE=C;';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -3185,7 +3185,7 @@ sub kernelhwe2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3209,9 +3209,10 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3229,7 +3230,7 @@ sub kerneltuxedo2004edge() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3253,9 +3254,10 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3271,7 +3273,7 @@ sub kerneltuxedo2004next() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3295,9 +3297,9 @@ sub kerneltuxedo2004next() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3314,7 +3316,7 @@ sub kerneltuxedo2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3338,9 +3340,9 @@ sub kerneltuxedo2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
