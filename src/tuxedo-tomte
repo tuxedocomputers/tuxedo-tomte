@@ -5228,6 +5228,9 @@ sub messageLongInstall {
 sub initLogging {
 	my %options;
 	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+	if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
+
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
 		return;
@@ -6426,8 +6429,6 @@ if (!isOSSupported()) {
 if (@ARGV != 0) {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
-	if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-	if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
