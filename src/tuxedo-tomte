@@ -871,7 +871,7 @@ my %origConfModules = (
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2076,18 +2076,21 @@ sub i8042noauxfix() {
 
 
 ###############################################################################
-# for not being able to boot if system is on battery
+# deletes iommu=soft from grub
+# was before for not being able to boot if system is on battery and used to set
+# iommu=soft on grub
 # affects BA15
 # - PF5PU1G
 #
 sub nobootonbattery() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("iommu=soft");
-	my $retval;
+	my $retval = -1;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval = insertGrub($module, \@kernel_parameters);
+		if (isTextInFile('/etc/default/grub', 'iommu=soft')) {
+			$retval = replaceTextInFile('/etc/default/grub', 'iommu=soft', '');
+		}
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2105,7 +2108,9 @@ sub nobootonbattery() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		$retval = insertGrub($module, \@kernel_parameters);
+		if (isTextInFile('/etc/default/grub', 'iommu=soft')) {
+			$retval = replaceTextInFile('/etc/default/grub', 'iommu=soft', '');
+		}
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4935,7 +4940,8 @@ sub isTextInFile {
 # replaceTextInFile('filename', 'string', 'replacement')
 # replaces a text 'string' in file 'filename' with 'replacement'
 # 1 if replaced
-# 0 if not found or failed to open file
+# 0 if not found
+# -1 if failed to open or write file
 #
 sub replaceTextInFile {
 	my ($filename, $match, $replace) = @_;
@@ -4951,15 +4957,21 @@ sub replaceTextInFile {
 			}
 		}
 		if ($found) {
-			open(FH, ">$filename");
-			print FH @lines;
-			close(FH);
-			return(1);
+			if ( open FH, '>', $filename ) {
+				print FH @lines;
+				close(FH);
+				return (1);
+			} else {
+				return (-1);
+			}
+		} else {
+			return (0);
 		}
 	} else {
 		printLog("can't open file $filename", 'L0');
+		return (-1);
 	}
-	return (0);
+	return (-1);
 }
 
 
