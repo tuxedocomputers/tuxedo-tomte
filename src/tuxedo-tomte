@@ -32,6 +32,9 @@ use Parse::EDID qw(parse_edid);
 use Data::Dumper;
 my $logLevel = 0;
 
+# for console language
+my $consoleLanguage = 'LANG=C; LANGUAGE=C;';
+
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
@@ -88,6 +91,8 @@ my %argValue = (
 	module => '',
 );
 
+if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 
 
@@ -145,6 +150,13 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
+		},
+	},
+	"TUXEDO_OS Plasma" => {
+		versions => {
+			"20.04" => {
+				name => 'focal',
+			}
 		},
 	},
 );
@@ -211,6 +223,22 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"TUXEDO_OS Plasma 20.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+		},
+		name => 'focal',
+	},
+
 
 );
 
@@ -253,6 +281,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
+	"TUXEDO_OS Plasma 20.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+		},
+		name => 'focal',
+	},
 
 );
 
@@ -277,6 +314,9 @@ my %flavours = (
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
 		},
@@ -299,6 +339,9 @@ my %flavours = (
 		},
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
@@ -338,7 +381,7 @@ my %tuxedo_devices = (
 	'0' => {
 		model => ['Stellaris 15 AMD Gen3', 'Polaris 15 AMD Gen3'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -349,7 +392,7 @@ my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:a500',
 		cpu => '',
@@ -360,7 +403,7 @@ my %tuxedo_devices = (
 	'2' => {
 		model => ['TUXEDO Book BA15 Gen1'],
 		board_name => ['PF5PU1G'],
-		fix => ['nobootonbattery', 'tuxedotouchpadswitch'],
+		fix => ['nobootonbattery', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -371,7 +414,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms', 'tuxedomicfix1'],
+		fix => ['r8168dkms', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -382,7 +425,7 @@ my %tuxedo_devices = (
 	'4' => {
 		model => ['TUXEDO Book BX1507'],
 		board_name => ['N350TW'],
-		fix => ['tuxedorestoreaudiofix'],
+		fix => ['tuxedorestoreaudiofix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -393,7 +436,7 @@ my %tuxedo_devices = (
 	'5' => {
 		model => ['TUXEDO Book DX1508', 'TUXEDO Book DX1708'],
 		board_name => ['N8xEJEK'],
-		fix => ['backlightfix'],
+		fix => ['backlightfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -404,7 +447,7 @@ my %tuxedo_devices = (
 	'6' => {
 		model => ['TUXEDO Book XA15 Gen10'],
 		board_name => ['NH5xAx'],
-		fix => ['nokeyboardaftersuspendfix', 'corefix', 'tuxedomicfix1'],
+		fix => ['nokeyboardaftersuspendfix', 'corefix', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:50f0',
 		cpu => '',
@@ -415,7 +458,7 @@ my %tuxedo_devices = (
 	'7' => {
 		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
 		board_name => ['PB50_70DFx,DDx'],
-		fix => ['i8042fix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:67e1',
 		cpu => '',
@@ -426,7 +469,7 @@ my %tuxedo_devices = (
 	'8' => {
 		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
 		board_name => ['PCx0Dx_GN20'],
-		fix => ['tuxedokeyboardite', 'tuxedomicfix1'],
+		fix => ['tuxedokeyboardite', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
@@ -437,7 +480,7 @@ my %tuxedo_devices = (
 	'9' => {
 		model => ['TUXEDO Book XUX7 Gen11'],
 		board_name => ['X170SM'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedokeyboardite'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedokeyboardite', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -448,7 +491,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'kernel linux-tuxedo-20.04-edge', 'tuxedomicfix1', 'i8042fix', 'thunderboltbootdelayfix'],
+		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'tuxedomicfix1', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04'],
 		pci_id => '1558:7715',
 		cpu => '',
@@ -459,7 +502,7 @@ my %tuxedo_devices = (
 	'11' => {
 		model => ['TUXEDO EduBook 15 Gen2'],
 		board_name => ['EDUBOOK1502'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -470,7 +513,7 @@ my %tuxedo_devices = (
 	'12' => {
 		model => ['TUXEDO InfinityBook 14 v2'],
 		board_name => ['X35R'],
-		fix => ['elantechtouchpadfix'],
+		fix => ['elantechtouchpadfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -481,7 +524,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915disablepsrfix', 'tuxedomicfix1'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -492,7 +535,7 @@ my %tuxedo_devices = (
 	'14' => {
 		model => ['TUXEDO InfinityBook Pro 14 v5'],
 		board_name => ['N141CU'],
-		fix => ['nokeyboardaftersuspendfix'],
+		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -503,7 +546,7 @@ my %tuxedo_devices = (
 	'15' => {
 		model => ['TUXEDO InfinityBook Pro 15 v5'],
 		board_name => ['N150CU'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:1404',
 		cpu => '',
@@ -514,7 +557,7 @@ my %tuxedo_devices = (
 	'16' => {
 		model => ['TUXEDO InsanityBook 1501'],
 		board_name => ['P95_HP'],
-		fix => ['backlightfix'],
+		fix => ['backlightfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -525,7 +568,7 @@ my %tuxedo_devices = (
 	'17' => {
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -536,7 +579,7 @@ my %tuxedo_devices = (
 	'18' => {
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA RTX2060'],
 		board_name => ['POLARIS1501A2060', 'POLARIS1701A2060'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -547,7 +590,7 @@ my %tuxedo_devices = (
 	'19' => {
 		model => ['TUXEDO Polaris Gen1 Intel NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501I1650TI', 'POLARIS1701I1650TI'],
-		fix => ['tuxedotouchpadswitch'],
+		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -558,7 +601,7 @@ my %tuxedo_devices = (
 	'20' => {
 		model => ['TUXEDO Polaris Gen1 Intel NVIDIA RTX2060'],
 		board_name => ['POLARIS1501I2060', 'POLARIS1701I2060'],
-		fix => ['tuxedotouchpadswitch'],
+		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -569,7 +612,7 @@ my %tuxedo_devices = (
 	'21' => {
 		model => ['TUXEDO Pulse 14 Gen1'],
 		board_name => ['PULSE1401'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -580,7 +623,7 @@ my %tuxedo_devices = (
 	'22' => {
 		model => ['TUXEDO Pulse 15 Gen1'],
 		board_name => ['PULSE1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -591,7 +634,7 @@ my %tuxedo_devices = (
 	'23' => {
 		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
 		board_name => ['GMxNGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -602,7 +645,7 @@ my %tuxedo_devices = (
 	'24' => {
 		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
 		board_name => ['GMxMGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', ''],
+		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -613,7 +656,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -635,7 +678,7 @@ my %tuxedo_devices = (
 	'27' => {
 		model => ['TUXEDO Trinity Gen1 Intel'],
 		board_name => ['TRINITY1501I', 'TRINITY1701I'],
-		fix => ['tuxedotouchpadswitch'],
+		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -646,7 +689,7 @@ my %tuxedo_devices = (
 	'28' => {
 		model => ['XMG Fusion 15 L19 GTX1660Ti'],
 		board_name => ['LAPQC71A'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -657,7 +700,7 @@ my %tuxedo_devices = (
 	'29' => {
 		model => ['XMG Fusion 15 L19 RTX2070'],
 		board_name => ['LAPQC71B'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -691,7 +734,7 @@ my %tuxedo_devices = (
 		model => ['all with fingerprintreader'],
 		board_name => [''],
 		fix => ['fingerprintreader'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => ['147e:100[0123]', '147e:20(15|16|20)', '147e:300[01]', '147e:500[23]', '0483:201[56]', '1c7a:0603'],
 		cpu => '',
 		kernel => '',
@@ -702,7 +745,7 @@ my %tuxedo_devices = (
 		model => ['all with LTE module'],
 		board_name => [''],
 		fix => ['threegfix'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '12d1:15bb',
 		cpu => '',
 		kernel => '',
@@ -713,7 +756,7 @@ my %tuxedo_devices = (
 		model => ['all with NVIDIA'],
 		board_name => [''],
 		fix => ['nvidiadriver'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '030[02]:',
 		cpu => '',
 		kernel => '',
@@ -724,7 +767,7 @@ my %tuxedo_devices = (
 		model => ['all with OLED display'],
 		board_name => [''],
 		fix => ['tuxedooledbrt'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -735,7 +778,7 @@ my %tuxedo_devices = (
 		model => ['Kinston NVMe'],
 		board_name => [''],
 		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', 20.04],
+		flavour => ['18.04', '20.04'],
 		pci_id => '2646:2263',
 		cpu => '',
 		kernel => '',
@@ -743,10 +786,10 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'37' => {
-		model => [''],
-		board_name => [''],
-		fix => [''],
-		flavour => ['18.04', 20.04],
+		model => ['InfinityBook S 17 Gen6'],
+		board_name => ['NS50_70MU'],
+		fix => ['i8042noauxfix', 'kerneltuxedo2004'],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -754,32 +797,10 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'38' => {
-		model => [''],
-		board_name => [''],
-		fix => [''],
-		flavour => ['18.04', 20.04],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'39' => {
-		model => [''],
-		board_name => [''],
-		fix => [''],
-		flavour => ['18.04', 20.04],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'40' => {
-		model => [''],
-		board_name => [''],
-		fix => [''],
-		flavour => ['18.04', 20.04],
+		model => ['TUXEDO Book XP14 Gen12'],
+		board_name => ['NV4XMB,ME,MZ'],
+		fix => ['lightdmlogindcheckgraphicalfix', 'kerneltuxedo2004'],
+		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -936,7 +957,7 @@ my %origConfModules = (
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
-		hwid => 4,
+		hwid => 5,
 		package => 'no',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem',
@@ -1138,25 +1159,9 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-	kernelhwe2004 => {
-		name => 'kernel-hwe-20.04',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Required kernel version linux-generic-hwe-20.04',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
-	},
 	kerneltuxedo2004edge => {
-		name => 'kernel-tuxedo-20.04-edge',
-		version => 1,
+		name => 'linux-tuxedo-20.04-edge',
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1171,8 +1176,8 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
-		name => 'kernel-tuxedo-20.04-next',
-		version => 1,
+		name => 'linux-tuxedo-20.04-next',
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1187,8 +1192,8 @@ my %origConfModules = (
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
-		name => 'kernel-tuxedo-20.04',
-		version => 1,
+		name => 'linux-tuxedo-20.04',
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1202,9 +1207,25 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	kernelgenerichwe2004 => {
+		name => 'linux-generic-hwe-20.04',
+		version => 3,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-generic-hwe-20.04',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
-		version => 1,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1362,6 +1383,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	i915enablepsrfix => {
+		name => 'i915-enable-psr-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 3,
+		package => 'no',
+		fainame => '',
+		description => 'Provides better battery life',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
 	tuxedopinfixtgldkms => {
 		name => 'tuxedo-pinfix-tgl-dkms',
 		version => 1,
@@ -1410,7 +1447,38 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
-
+	i8042noauxfix => {
+		name => 'i8042noaux-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fix for touchpad related issues',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
+	lightdmlogindcheckgraphicalfix => {
+		name => 'lightdm-logind-check-graphical-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes lightdm starting before windowmanager',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'no',
+	},
 );
 
 
@@ -1629,10 +1697,9 @@ sub checkRequirements {
 	my $biosVersion;
 
 	# check values for each module
-	if (($boardname =~ /PB50_70DFx,DDx/) ||
-		($boardname =~ /X170KM-G/ )) {
-		$origConfModules{i8042fix}{required} = 'yes';
-		printLog('detected i8042-fix issue');
+	if ($boardname =~ /NS50_70MU/) {
+		$origConfModules{i8042noauxfix}{required} = 'yes';
+		printLog('detected i8042.noaux-fix issue');
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
@@ -1675,7 +1742,8 @@ sub checkRequirements {
 		($boardname =~ /EDUBOOK1502/) ||
 		($boardname =~ /NS50MU/) ||
 		($boardname =~ /NS50_70MU/) ||
-		($boardname =~ /NJ50_70CU/)) {
+		($boardname =~ /NJ50_70CU/) ||
+		($boardname =~ /X170KM-G/ )) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('detected no-keyboard-after-suspend-fix issue');
 	}
@@ -1808,7 +1876,7 @@ sub checkRequirements {
 	}
 
 	if ((cpuBrand() eq 'AMD') &&
-		($distributionVersion =~ /20.04/) &&
+		(($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) &&
 		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
 		$origConfModules{amdgpudkms}{required} = 'yes';
 		printLog('detected amd-gpu issue');
@@ -1849,8 +1917,8 @@ sub checkRequirements {
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
 		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{i915disablepsrfix}{required} = 'yes';
-		printLog('detected i915-disable-psr-fix issue');
+		$origConfModules{i915enablepsrfix}{required} = 'yes';
+		printLog('detected i915-enable-psr-fix issue');
 	}
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
@@ -1859,7 +1927,10 @@ sub checkRequirements {
 
 	# kernel
 	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
-		if ($boardname =~ m/X170KM-G/) {
+		if (($boardname =~ m/X170KM-G/) ||
+			($boardname =~ m/PHxTxX1/) ||
+			($boardname =~ m/PH4TQx1/) ||
+			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} elsif ($boardname =~ m/GMxTGxx/) {
@@ -1873,6 +1944,10 @@ sub checkRequirements {
 	if ($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue');
+	}
+	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
+		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
+		printLog('detected lightdm-logind-check-graphical-fix issue');
 	}
 }
 
@@ -1901,8 +1976,6 @@ sub findPciDevice {
 # they set 'installed' status and $postConfModule trigger
 #
 # for keyboard not present on boot
-# for XC1711 on all distributions
-# - PB50_70DFx,DDx
 #
 sub i8042fix() {
 	my $module = shift;
@@ -1949,6 +2022,59 @@ sub i8042fix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# for touchpad problems
+#
+sub i8042noauxfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i8042.noaux");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 ###############################################################################
@@ -2088,7 +2214,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval = createFile($fileName, $fileText);
+		$retval = createFile($fileName, $fileText, 1);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2618,8 +2744,8 @@ sub threegfix() {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName1, $fileText1);
-		$retval2 = createFile($fileName2, $fileText2);
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2632,8 +2758,8 @@ sub threegfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName1, $fileText1);
-		$retval2 = createFile($fileName2, $fileText2);
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2981,7 +3107,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval1 = createFile($fileName, $fileText);
+		$retval1 = createFile($fileName, $fileText, 1);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -3015,7 +3141,7 @@ sub kernelhwe2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3039,9 +3165,10 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3059,7 +3186,7 @@ sub kerneltuxedo2004edge() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3083,9 +3210,10 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#TODO
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3101,7 +3229,7 @@ sub kerneltuxedo2004next() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3125,9 +3253,9 @@ sub kerneltuxedo2004next() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3144,7 +3272,7 @@ sub kerneltuxedo2004() {
 	my $action = shift;
 	my $instFailed = 0;
 	my $instDone = 0;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
@@ -3168,9 +3296,9 @@ sub kerneltuxedo2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
+	#	if ($action eq 'upgrade') {
 		# no upgrades yet
-	}
+		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3633,7 +3761,6 @@ sub amdgpubacklightauxoff() {
 
 ###############################################################################
 # Fixes screen flickering when using some input devices
-# - PHxTxX1
 #
 sub i915disablepsrfix() {
 	my $module = shift;
@@ -3679,6 +3806,63 @@ sub i915disablepsrfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Provides better battery life
+#
+sub i915enablepsrfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("i915.tuxedo_disable_psr2=1");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;	
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
+			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
+		}
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				addToConfiguredModules($module, "success");
+				$postConfProgram{updateGrub}{trigger} = 1;
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
 
 
 
@@ -3774,6 +3958,59 @@ sub thunderboltbootdelayfix() {
 }
 
 
+
+###############################################################################
+# inserts a parameter to start lightdm after the windowmanager has started
+#
+sub lightdmlogindcheckgraphicalfix() {
+	my $module = shift;
+	my $action = shift;
+	my $lightdmLine = 'logind-check-graphical=true';
+	my $lightdmCheckGraphicalDir = '/etc/lightdm/lightdm.conf.d/';
+	my $lightdmCheckGraphicalFile = $lightdmCheckGraphicalDir.'99_tuxedo.conf';
+
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		unless (-d $lightdmCheckGraphicalDir) {
+			unless (mkdir $lightdmCheckGraphicalDir) {
+				printLog("could not create directory $lightdmCheckGraphicalDir", 'TL0');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+		if (-e $lightdmCheckGraphicalFile) {
+			unless (isTextInFile($lightdmCheckGraphicalFile, '[LightDM]') && isTextInFile($lightdmCheckGraphicalFile, 'logind-check-graphical=true')) {
+				if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "success");
+				} else {
+					$origConfModules{$module}{installed} = "failed";
+					addToConfiguredModules($module, "failed");
+					return (0);
+				}
+			}
+		} else {
+			if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+	}
+
+	if ($action eq 'upgrade') {
+		# not neccessary
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
@@ -3873,7 +4110,7 @@ sub createRepos {
 					}
 					# create file + line
 					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
-						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n");
+						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
 						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$firstEntry = 0;
@@ -4258,7 +4495,7 @@ sub installKernelFlavour {
 		}
 	
 		$retString = `$testCmd`;
-		printLog("check installed packages: $retString", 'L2');
+		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
 		foreach (@lines) {
 			if ($_ =~ /dpkg-query:/) {
@@ -4296,14 +4533,20 @@ sub uninstallAllOtherKernelFlavours {
 	if ($exceptKernel ne 'linux-oem-20.04') {
 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
+	if ($exceptKernel ne 'linux-oem-20.04-edge') {
+		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
+		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+	}
+	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
@@ -4330,7 +4573,7 @@ sub populateFlavourPackages {
 	my $line;
 	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = 'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
 	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
@@ -4346,7 +4589,7 @@ sub populateFlavourPackages {
 			}
 		}
 	}
-	$searchCmd = 'apt-cache depends --important '.$packageLine;
+	$searchCmd = $consoleLanguage.' '.'apt-cache depends --important '.$packageLine;
 	printLog("second searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("second result:\n$result", 'L2');
@@ -4438,6 +4681,7 @@ sub uninstKernelFlavour {
 
 	# deinstall found packages
 	if ((keys %pkgsHash) != 0) {
+		messageLongInstall();
 		printLog("kernel packages to deinstall found", 'L1');
 		foreach $package (keys %pkgsHash) {
 			$deinstString .= ' '.$package;
@@ -4451,7 +4695,7 @@ sub uninstKernelFlavour {
 			$restartSystem = 1;
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
-			createFile('/usr/bin/linux-check-removal', $fileText);
+			createFile('/usr/bin/linux-check-removal', $fileText, 1);
 			chmod 755, '/usr/bin/linux-check-removal';
 			$retString = `$deinstString`;
 			if ($retString =~ /sudo dpkg --configure -a/) {
@@ -4491,18 +4735,24 @@ sub uninstKernelFlavour {
 		}
 		if ($failed == 0) {
 			printLog("all is good, all packages uninstalled for $kernelToDelete", 'L2');
+			printLog("kernelmodulename: $kernelModuleName", 'TL2');
 			if ($kernelModuleName ne '') {
-				$origConfModules{$kernelModuleName}{installed} = "no";
-				$origConfModules{$kernelModuleName}{upgraded} = "no";
+				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				$origConfModules{$kernelModuleName}{installed} = 'no';
+				$origConfModules{$kernelModuleName}{upgraded} = 'no';
+				$localConfModules{$kernelModuleName}{installed} = 'no';
 			}
 			return (1);
 		}
 		return (0);
 	} else {
 		printLog("all is good, no packages to uninstall found for $kernelToDelete", 'L2');
+		printLog("kernelmodulename: >$kernelModuleName<", 'TL2');
 		if ($kernelModuleName ne '') {
-			$origConfModules{$kernelModuleName}{installed} = "no";
-			$origConfModules{$kernelModuleName}{upgraded} = "no";
+			printLog("remove $kernelModuleName from origConfModules", 'TL2');
+			$origConfModules{$kernelModuleName}{installed} = 'no';
+			$origConfModules{$kernelModuleName}{upgraded} = 'no';
+			$localConfModules{$kernelModuleName}{installed} = 'no';
 		}
 		return (1);
 	}
@@ -4513,12 +4763,12 @@ sub uninstKernelFlavour {
 
 ###############################################################################
 # creates file with content
+# $backup accepts 0 and 1
 # 
 sub createFile {
-	my $fileName = shift;
-	my $fileText = shift;
+	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
-	if (-e $fileName) {
+	if ((-e $fileName) && ($backup)) {
 		backupFile($fileName);
 	}
 	if (open $FH, ">",$fileName) {
@@ -4638,7 +4888,7 @@ sub substituteLineInFile {
 
 ###############################################################################
 # isLineInFile('filename', 'string')
-# matches a line with the 'string' and returns
+# matches a line with the 'string' as RegEx(!!!) and returns
 # 1 if found
 # 0 if not found or failed to open file
 #
@@ -4656,6 +4906,64 @@ sub isLineInFile {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# isTextInFile('filename', 'string')
+# matches a line with the 'string' and returns
+# 1 if found
+# 0 if not found or failed to open file
+#
+sub isTextInFile {
+	my $filename = shift;
+	my $match = shift;
+	if ( open FH, '<', $filename ) {
+		while( <FH> ) {
+			if ( $_ =~ /$match/) {
+				return (1);
+			}
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
+# replaceTextInFile('filename', 'string', 'replacement')
+# replaces a text 'string' in file 'filename' with 'replacement'
+# 1 if replaced
+# 0 if not found or failed to open file
+#
+sub replaceTextInFile {
+	my ($filename, $match, $replace) = @_;
+	my @lines;
+	my $found = 0;
+	if ( open FH, '<', $filename ) {
+		@lines = <FH>;
+		close(FH);
+		foreach(@lines) {
+			if ($_ =~ /$match/) {
+				$_ =~ s/$match/$replace/;
+				$found = 1;
+			}
+		}
+		if ($found) {
+			open(FH, ">$filename");
+			print FH @lines;
+			close(FH);
+			return(1);
+		}
+	} else {
+		printLog("can't open file $filename", 'L0');
+	}
+	return (0);
+}
+
 
 
 
@@ -4883,6 +5191,7 @@ sub messageLongInstall {
 sub initLogging {
 	my %options;
 	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
 		return;
@@ -5112,12 +5421,16 @@ sub writeConfigFile {
 				$hwid = $origConfModules{$name}{hwid};
 				$installed = $origConfModules{$name}{installed};
 			}
-			print $FH "$origConfModules{$name}{name} ".
+			unless(($origConfModules{$name}{installed} eq 'no') &&
+					($origConfModules{$name}{upgraded} eq 'no') &&
+					($origConfModules{$name}{required} eq 'no')) {
+				print $FH "$origConfModules{$name}{name} ".
 					"$version ".
 					"$installed ".
 					"$origConfModules{$name}{blocked} ".
 					"$origConfModules{$name}{required} ".
 					"$hwid\n";
+			}
 		}
 		close $FH;
 	} else {
@@ -5286,6 +5599,8 @@ sub listStatus {
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
@@ -5336,7 +5651,7 @@ sub transferConfigValues {
 	foreach $name (sort keys %localConfModules) {
 		# always copy blocked status
 		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
-		if (newVersion($name) or newHwid($name)) {
+		if (newVersion($name) || newHwid($name)) {
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
 			$origConfModules{$name}{upgraded} = 'no';
@@ -5602,8 +5917,23 @@ sub reconfigureSingleModule {
 	if ( $localConfModules{$module}{blocked} eq 'no' &&
 		($origConfModules{$module}{required} eq 'yes' ||
 		$origConfModules{$module}{required} eq 'prerequisite')) {
-		printLog("configure module: $module");
-		configureModule($module);
+		if ($origConfModules{$module}{upgrade} eq 'yes') {
+			printLog("upgrade module: $module");
+			upgradeModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
+		} else {
+			printLog("configure module: $module");
+			configureModule($module);
+			if ($origConfModules{$module}{installed} eq 'yes') {
+				$configuredModules{$module} = 'success';
+			} elsif ($origConfModules{$module}{installed} eq 'no') {
+				$configuredModules{$module} = 'failed';
+			}
+		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
@@ -6060,8 +6390,6 @@ if (!isOSSupported()) {
 if (@ARGV != 0) {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
-	if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-	if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
