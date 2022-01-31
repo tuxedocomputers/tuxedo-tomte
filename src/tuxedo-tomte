@@ -665,7 +665,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1477,6 +1477,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'no',
 	},
+	nvidiabacklightcontrolfix => {
+		name => 'nvidia-backlight-control-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight control for Nvidia GPUs',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
+
 );
 
 
@@ -1947,6 +1964,12 @@ sub checkRequirements {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue');
 	}
+	#if ($boardname =~ m/GMxTGxx/) {
+	if ($boardname =~ m/NH5xAx/) {
+		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
+		printLog('detected nvidia-backlight-control-fix issue');
+	}
+
 }
 
 
@@ -3907,9 +3930,6 @@ sub tuxedopinfixtgldkms() {
 
 
 ###############################################################################
-###############################################################################
-###############################################################################
-#
 # for reducing the timeout on loading the thunderbolt kernel module when
 # booting the system
 # - X170KM-G
@@ -4017,10 +4037,67 @@ sub lightdmlogindcheckgraphicalfix() {
 
 
 
+###############################################################################
+# For functioning backlight control on Nvidia GPU's
+#
+# - GMxTGxx
+#
+sub nvidiabacklightcontrolfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernel_parameters = ("NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}");
+		$retval = insertGrub($module, \@kernel_parameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
 
+
+
+
+
+
+###############################################################################
+###############################################################################
 ###############################################################################
 # subs for tuxedorepos & tuxedomirrors
 #
