@@ -1,3 +1,27 @@
+tuxedo-tomte (2.5.25) focal; urgency=medium
+
+  * added support for locale other than English
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 17:26:07 +0100
+
+tuxedo-tomte (2.5.24) focal; urgency=medium
+
+  * added TUXEDO_OS Plasma 20.04
+  * removed Tomte first start from postinst as it is already started as service
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 12:45:43 +0100
+
+tuxedo-tomte (2.5.23) focal; urgency=medium
+
+  * added lightdmlogindcheckgraphicalfix for TUXEDO Book XP14 Gen12,
+    boardname NV4XMB,ME,MZ
+  * added i8042noauxfix for InfinityBook S 17 Gen6, boardname NS50_70MU
+  * added nokeyboardaftersuspendfix for XUX7 Gen.13 boardname X170KM-G
+  * added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6
+    boardnames PHxTQx1 PHxTxX1 PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Jan 2022 13:06:15 +0100
+
 tuxedo-tomte (2.5.21) focal; urgency=medium
 
   * added linux-tuxedo-20.04-next for Stellaris/Polaris Gen3 Intel with
