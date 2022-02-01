@@ -1,4 +1,4 @@
-tuxedo-tomte (2.5.25-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.25-5) UNRELEASED; urgency=medium
 
   * adapted kernel names on list
   * removed nobootonbattery and grub entries
@@ -7,8 +7,9 @@ tuxedo-tomte (2.5.25-4) UNRELEASED; urgency=medium
   * removed debug
   * before merging
   * added log messages and console language
+  * moved some logs around and better empty kernelname handling
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 01 Feb 2022 12:52:45 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 01 Feb 2022 16:46:55 +0100
 
 tuxedo-tomte (2.5.25) focal; urgency=medium
 
