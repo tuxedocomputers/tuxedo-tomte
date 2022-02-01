@@ -1964,8 +1964,7 @@ sub checkRequirements {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue');
 	}
-	#if ($boardname =~ m/GMxTGxx/) {
-	if ($boardname =~ m/NH5xAx/) {
+	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
 		printLog('detected nvidia-backlight-control-fix issue');
 	}
