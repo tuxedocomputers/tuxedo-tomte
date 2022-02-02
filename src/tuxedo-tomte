@@ -3175,11 +3175,9 @@ sub kernelhwe2004() {
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
-				printLog('new kernel linux-generic-hwe-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-generic-hwe-20.04 was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3220,11 +3218,9 @@ sub kerneltuxedo2004edge() {
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
-				printLog('new kernel linux-tuxedo-20.04-edge could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-tuxedo-20.04-edge was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3263,11 +3259,9 @@ sub kerneltuxedo2004next() {
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
-				printLog('new kernel linux-tuxedo-20.04-next could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-tuxedo-20.04-next was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3306,11 +3300,9 @@ sub kerneltuxedo2004() {
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
-				printLog('new kernel linux-tuxedo-20.04 could not be installed', 'TL1');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "failed";
 			} elsif ($instDone > 0) {
-				printLog('new kernel linux-tuxedo-20.04 was installed', 'L1');
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4750,7 +4742,7 @@ sub uninstKernelFlavour {
 
 	printLog("uninstKernel: $kernelToDelete keep: $kernelToKeep", 'L2');
 	if (!populateFlavourPackages("$kernelToDelete")) {
-		printLog("no packages found for kernel $kernelToDelete while uninstalling, this should not happen!", 'L0');
+		printLog("no packages found for kernel $kernelToDelete while uninstalling", 'L0');
 		return (0);
 	}
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
@@ -4772,12 +4764,6 @@ sub uninstKernelFlavour {
 			/(\S+)\s*(\S+)/;
 			$pkgsHash{$1} = $2;
 		}
-	}
-
-	$kernelModuleName = getSubName($kernelToDelete);
-
-	if ($kernelModuleName eq '') {
-		return (0);
 	}
 
 	# deinstall found packages
@@ -4836,21 +4822,27 @@ sub uninstKernelFlavour {
 			}
 		}
 		if ($failed == 0) {
+			$kernelModuleName = getSubName($kernelToDelete);
 			printLog("all packages uninstalled for $kernelToDelete", 'L0');
+			if ($kernelModuleName ne '') {
+				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				$origConfModules{$kernelModuleName}{installed} = 'no';
+				$origConfModules{$kernelModuleName}{upgraded} = 'no';
+				$localConfModules{$kernelModuleName}{installed} = 'no';
+				return (1);
+			}
+		}
+		return (0);
+	} else {
+		$kernelModuleName = getSubName($kernelToDelete);
+		printLog("no packages to uninstall found for $kernelToDelete", 'L2');
+		if ($kernelModuleName ne '') {
 			printLog("remove $kernelModuleName from origConfModules", 'TL2');
 			$origConfModules{$kernelModuleName}{installed} = 'no';
 			$origConfModules{$kernelModuleName}{upgraded} = 'no';
 			$localConfModules{$kernelModuleName}{installed} = 'no';
 			return (1);
 		}
-		return (0);
-	} else {
-		printLog("no packages to uninstall found for $kernelToDelete", 'L2');
-		printLog("remove $kernelModuleName from origConfModules", 'TL2');
-		$origConfModules{$kernelModuleName}{installed} = 'no';
-		$origConfModules{$kernelModuleName}{upgraded} = 'no';
-		$localConfModules{$kernelModuleName}{installed} = 'no';
-		return (1);
 	}
 	return (0);
 }
@@ -5387,8 +5379,7 @@ sub getBackupFileTime {
 # 2 debug
 #
 sub printLog {
-	my $message = shift;
-	my ($type) = @_;
+	my ($message, $type) = @_;
 	if ((!defined($type)) || ($type eq '')) {
 		$type = 'L1';
 	}
@@ -5398,8 +5389,11 @@ sub printLog {
 		$level += 0;
 	} else {
 		$level = 1;
+		$level += 0;
 	}
-	if (!($type =~ /[LlTt]/)) {
+	if ($type =~ /[LlTt]/) {
+		$type =~ s/[\W\d]//g;
+	} else {
 		$type = 'L';
 	}
 
