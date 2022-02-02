@@ -6084,8 +6084,7 @@ sub unblock {
 	}
 	if ($localConfModules{$module}{blocked} eq 'yes') {
 		print "Unblocking module $moduleName\n";
-		print "$moduleName will be upgraded or installed after restart or".
-			"next tuxedo-tomte configure or reconfigure\n";
+		print "$moduleName will be upgraded or installed after restart or next tuxedo-tomte configure or reconfigure\n";
 		$origConfModules{$module}{blocked} = 'no';
 		printLog("unblocking module $moduleName", 'L1');
 		return;
