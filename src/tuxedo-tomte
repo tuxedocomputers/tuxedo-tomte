@@ -1985,10 +1985,8 @@ sub checkRequirements {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
 		printLog('detected nvidia-backlight-control-fix issue', 'L1');
 	}
-	#TODO debug
 	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
-		($boardname =~ m/PHxTQx1/) ||
-		($boardname =~ m/NH5xAx/)) {
+		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
