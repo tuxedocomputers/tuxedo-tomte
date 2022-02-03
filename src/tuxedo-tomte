@@ -522,7 +522,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -797,7 +797,7 @@ my %tuxedo_devices = (
 	'38' => {
 		model => ['TUXEDO Book XP14 Gen12'],
 		board_name => ['NV4XMB,ME,MZ'],
-		fix => ['lightdmlogindcheckgraphicalfix', 'kerneltuxedo2004'],
+		fix => ['lightdmlogindcheckgraphicalfix', 'kerneltuxedo2004', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1493,6 +1493,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	earlyloadbacklightcontrolfix => {
+		name => 'early-load-backlight-control-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Fixes backlight control for Nvidia GPUs',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
 
 );
 
@@ -1968,6 +1984,13 @@ sub checkRequirements {
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
 		printLog('detected nvidia-backlight-control-fix issue', 'L1');
+	}
+	#TODO debug
+	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
+		($boardname =~ m/PHxTQx1/) ||
+		($boardname =~ m/NH5xAx/)) {
+		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
+		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
 
 }
@@ -4081,6 +4104,59 @@ sub nvidiabacklightcontrolfix() {
 }
 
 
+
+###############################################################################
+# inserts a parameter to start lightdm after the windowmanager has started
+#
+sub earlyloadbacklightcontrolfix() {
+	my $module = shift;
+	my $action = shift;
+	my $elbcLine = 'softdep nvidia pre: i915';
+	my $elbcDir = '/etc/modprobe.d/';
+	my $elbcFile = $elbcDir.'tuxedo_early_load_backlight_control_fix.conf';
+
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		unless (-d $elbcDir) {
+			unless (mkdir $elbcDir) {
+				printLog("could not create directory $elbcDir", 'TL0');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+		if (-e $elbcFile) {
+			unless (isTextInFile($elbcFile, $elbcLine)) {
+				if (createFile($elbcFile, $elbcLine)) {
+					$origConfModules{$module}{installed} = "yes";
+					$origConfModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "success");
+				} else {
+					$origConfModules{$module}{installed} = "failed";
+					addToConfiguredModules($module, "failed");
+					return (0);
+				}
+			}
+		} else {
+			if (createFile($elbcFile, $elbcLine)) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return (0);
+			}
+		}
+	}
+
+	if ($action eq 'upgrade') {
+		# not neccessary
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
