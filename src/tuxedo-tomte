@@ -1958,7 +1958,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 		if (($boardname =~ m/X170KM-G/) ||
 			($boardname =~ m/PHxTxX1/) ||
 			($boardname =~ m/PH4TQx1/) ||
@@ -3189,7 +3189,7 @@ sub kernelhwe2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -3232,7 +3232,7 @@ sub kerneltuxedo2004edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -3273,7 +3273,7 @@ sub kerneltuxedo2004next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -3314,7 +3314,7 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -3423,7 +3423,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
