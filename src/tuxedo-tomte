@@ -4822,8 +4822,10 @@ sub uninstKernelFlavour {
 	}
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
-		if (($package =~ /^linux-.*(?:image|modules)-.*/) &&
-			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+		#TODO debug
+		printLog("check package: >$package<", 'TL2');
+		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+			printLog("accepted", 'TL2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
