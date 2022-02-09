@@ -4828,7 +4828,7 @@ sub uninstKernelFlavour {
 		if ($package =~ /^linux-.*(?:image|modules)-.*/) {
 			printLog("does not fit first condition", 'TL2');
 		}
-		if (!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}})) {
+		if (!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
 			printLog("does not fit second condition", 'TL2');
 		}
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
