@@ -4826,10 +4826,14 @@ sub uninstKernelFlavour {
 		#TODO debug
 		printLog("check package: >$package<", 'TL2');
 		if ($package =~ /^linux-.*(?:image|modules)-.*/) {
-			printLog("does not fit first condition", 'TL2');
+			printLog("does fit first condition", 'TL2');
+		} else {
+			printLog("does NOT fit first condition", 'TL2');
 		}
 		if (!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-			printLog("does not fit second condition", 'TL2');
+			printLog("does fit second condition", 'TL2');
+		} else {
+			printLog("does NOT fit second condition", 'TL2');
 		}
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
 			printLog("accepted", 'TL2');
