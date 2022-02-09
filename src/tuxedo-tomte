@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4391,7 +4390,7 @@ sub setComment {
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	my $deinstCmd;
@@ -4406,9 +4405,9 @@ sub deinstExcept {
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
 	if ($FAI) {
-		$deinstCmd = 'apt-get -yq remove';
+		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		$deinstCmd = 'pkcon -yp remove';
+		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
 	}
 	my $deinstCounter = 0;
 
@@ -4446,7 +4445,7 @@ sub deinstExcept {
 #
 sub deinstallPackage {
 	my $deinst = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	if ($retValue != 0) {
@@ -4459,7 +4458,7 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -yp remove';
+	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
@@ -4824,18 +4823,6 @@ sub uninstKernelFlavour {
 	print "dumper packages:\n";
 	print Dumper(@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}});
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
-		#TODO debug
-		printLog("check package: >$package<", 'TL2');
-		if ($package =~ /^linux-.*(?:image|modules)-.*/) {
-			printLog("does fit first condition", 'TL2');
-		} else {
-			printLog("does NOT fit first condition", 'TL2');
-		}
-		if (!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-			printLog("does fit second condition", 'TL2');
-		} else {
-			printLog("does NOT fit second condition", 'TL2');
-		}
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
 			printLog("accepted", 'TL2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
