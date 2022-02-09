@@ -4821,7 +4821,8 @@ sub uninstKernelFlavour {
 		return (0);
 	}
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
-	print Dumper(\@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}});
+	print "dumper packages:\n";
+	print Dumper(@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}});
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
 		#TODO debug
 		printLog("check package: >$package<", 'TL2');
