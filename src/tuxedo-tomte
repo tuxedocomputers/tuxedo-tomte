@@ -57,6 +57,7 @@ my $FAI = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
+my $tomteFinishedFile = '/tmp/tomte_finished';
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -6609,6 +6610,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			}
+			createFile($tomteFinishedFile, 'finished', 0);
 			printLog('Tomte finished', 'L1');
 		} else {
 			print "Module name or \"all\" missing\n";
