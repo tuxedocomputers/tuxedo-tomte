@@ -4420,7 +4420,7 @@ sub deinstExcept {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstCmd", 'L0');
+		printLog("deinstalling: $deinstKey", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
@@ -4470,7 +4470,7 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst", 'L0');
+		printLog("deinstalling: $deinstKey", 'L0');
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
@@ -4500,7 +4500,7 @@ sub deinstallSinglePackage {
 	my $retValue;
 
 	$pkconDeinst = $pkconDeinst.' '.$deinst;
-	printLog("deinstalling: $pkconDeinst", 'L0');
+	printLog("deinstalling: $deinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
 		if (system($pkconDeinst)) {
