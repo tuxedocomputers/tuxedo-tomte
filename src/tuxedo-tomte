@@ -914,7 +914,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
@@ -930,7 +930,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	tuxedokeyboard => {
@@ -946,7 +946,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	nokeyboardaftersuspendfix => {
@@ -978,7 +978,7 @@ my %origConfModules = (
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	tuxedorepos => {
@@ -994,7 +994,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	tuxedomirrors => {
@@ -1010,7 +1010,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	corefix => {
@@ -1026,7 +1026,7 @@ my %origConfModules = (
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	threegfix => {
@@ -1042,7 +1042,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	elantechtouchpadfix => {
@@ -1074,7 +1074,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	tuxedonvmefix => {
@@ -1090,7 +1090,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	tuxedokeyboardite => {
@@ -1106,7 +1106,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	fingerprintreader => {
@@ -1122,7 +1122,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	mesautils => {
@@ -1138,7 +1138,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	tuxedorestoreaudiofix => {
@@ -1154,7 +1154,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kerneltuxedo2004edge => {
@@ -1170,7 +1170,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
@@ -1186,7 +1186,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
@@ -1202,7 +1202,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004 => {
@@ -1218,7 +1218,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004edge => {
@@ -1234,7 +1234,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},	
 	nvidiadriver => {
@@ -1250,7 +1250,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	cracklibruntime => {
@@ -1266,7 +1266,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	amdgpudkms => {
@@ -1282,7 +1282,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	r8168dkms => {
@@ -1298,7 +1298,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	tuxedooledbrt => {
@@ -1314,7 +1314,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	apportfix => {
@@ -1330,7 +1330,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	realtekr8125dkms => {
@@ -1346,7 +1346,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 	},
 	amdgpubacklightauxoff => {
@@ -1410,7 +1410,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	tuxedomicfix1 => {
@@ -1426,7 +1426,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	thunderboltbootdelayfix => {
@@ -1442,7 +1442,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	i8042noauxfix => {
@@ -1474,7 +1474,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'no',
 	},
 	nvidiabacklightcontrolfix => {
@@ -4390,7 +4390,7 @@ sub setComment {
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	my $deinstCmd;
@@ -4405,9 +4405,9 @@ sub deinstExcept {
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
 	if ($FAI) {
-		$deinstCmd = 'apt-get -yq remove';
+		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		$deinstCmd = 'pkcon -yp remove';
+		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
 	}
 	my $deinstCounter = 0;
 
@@ -4445,7 +4445,7 @@ sub deinstExcept {
 #
 sub deinstallPackage {
 	my $deinst = shift;
-	my $searchCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	if ($retValue != 0) {
@@ -4458,7 +4458,7 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = 'pkcon -yp remove';
+	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
@@ -4821,8 +4821,8 @@ sub uninstKernelFlavour {
 	}
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
-		if (($package =~ /^linux-.*(?:image|modules)-.*/) &&
-			!(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+			printLog("accepted", 'TL2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
