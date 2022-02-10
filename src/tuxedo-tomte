@@ -4396,6 +4396,7 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	my $deinstCmd;
+	my $deinstKey;
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1');
@@ -4413,7 +4414,7 @@ sub deinstExcept {
 	}
 	my $deinstCounter = 0;
 
-	foreach my $deinstKey (keys %retHash) {
+	foreach $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
 			$deinstCmd = $deinstCmd.' '.$deinstKey;
@@ -4447,6 +4448,7 @@ sub deinstExcept {
 #
 sub deinstallPackage {
 	my $deinst = shift;
+	my $deinstKey;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
@@ -4463,7 +4465,7 @@ sub deinstallPackage {
 	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
 	my $deinstCounter = 0;
 
-	foreach my $deinstKey (keys %retHash) {
+	foreach $deinstKey (keys %retHash) {
 		if ($retHash{$deinstKey} =~ /i./) {
 			$deinstCounter++;
 			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
