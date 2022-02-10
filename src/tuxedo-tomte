@@ -6606,6 +6606,7 @@ if (@ARGV != 0) {
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
+		createFile($tomteFinishedFile, 'finished', 0);
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
@@ -6623,7 +6624,6 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			}
-			createFile($tomteFinishedFile, 'finished', 0);
 			printLog('Tomte finished', 'L1');
 		} else {
 			print "Module name or \"all\" missing\n";
