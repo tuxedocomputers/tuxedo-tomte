@@ -54,6 +54,7 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
+my $LiveISO = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
@@ -6590,6 +6591,18 @@ if (@ARGV != 0) {
 		prerequisitesFAI();
 		configureAllModules();
 		postrequisitesFAI();
+		postConfigure();
+		listSuccess();
+		writeConfigFile();
+	} elsif ($argValue{command} eq "LiveISO") {
+		print "Starting tuxedo-tomte in LiveISO modus\n".
+				"This should not be used in a normal situation\n".
+				"only when installing a new system with LiveISO\n";
+		$LiveISO = 1;
+		initLogging();
+		prepareValues();
+		prerequisites();
+		configureAllModules();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
