@@ -5362,7 +5362,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", "LiveISO"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
