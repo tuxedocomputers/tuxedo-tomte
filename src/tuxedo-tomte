@@ -54,9 +54,11 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
+my $LiveISO = 0;
 my $networkSearchDone = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 3;
+my $tomteFinishedFile = '/tmp/tomte_finished';
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -4394,6 +4396,8 @@ sub deinstExcept {
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	my $deinstCmd;
+	my $deinstKey;
+	my $deinstList ='';
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1');
@@ -4411,14 +4415,15 @@ sub deinstExcept {
 	}
 	my $deinstCounter = 0;
 
-	foreach my $deinstKey (keys %retHash) {
+	foreach $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
 			$deinstCmd = $deinstCmd.' '.$deinstKey;
+			$deinstList = $deinstList.' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstCmd", 'L0');
+		printLog("deinstalling: $deinstList", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
 		if (system($deinstCmd)) {
 			$retValue = $?/256;
@@ -4445,6 +4450,8 @@ sub deinstExcept {
 #
 sub deinstallPackage {
 	my $deinst = shift;
+	my $deinstKey;
+	my $deinstList = '';
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
@@ -4461,14 +4468,15 @@ sub deinstallPackage {
 	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
 	my $deinstCounter = 0;
 
-	foreach my $deinstKey (keys %retHash) {
+	foreach $deinstKey (keys %retHash) {
 		if ($retHash{$deinstKey} =~ /i./) {
 			$deinstCounter++;
 			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
+			$deinstList = $deinstList.' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $pkconDeinst", 'L0');
+		printLog("deinstalling: $deinstList", 'L0');
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
@@ -4498,7 +4506,7 @@ sub deinstallSinglePackage {
 	my $retValue;
 
 	$pkconDeinst = $pkconDeinst.' '.$deinst;
-	printLog("deinstalling: $pkconDeinst", 'L0');
+	printLog("deinstalling: $deinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
 		if (system($pkconDeinst)) {
@@ -5360,7 +5368,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", "LiveISO"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6592,6 +6600,19 @@ if (@ARGV != 0) {
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
+	} elsif ($argValue{command} eq "LiveISO") {
+		print "Starting tuxedo-tomte in LiveISO modus\n".
+				"This should not be used in a normal situation\n".
+				"only when installing a new system with LiveISO\n";
+		$LiveISO = 1;
+		initLogging();
+		prepareValues();
+		prerequisites();
+		configureAllModules();
+		postConfigure();
+		listSuccess();
+		writeConfigFile();
+		createFile($tomteFinishedFile, 'finished', 0);
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
