@@ -4820,8 +4820,6 @@ sub uninstKernelFlavour {
 		return (0);
 	}
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
-	print "dumper packages:\n";
-	print Dumper(@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}});
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
 			printLog("accepted", 'TL2');
