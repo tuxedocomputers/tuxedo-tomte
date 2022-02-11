@@ -6578,7 +6578,7 @@ if (@ARGV != 0) {
 
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
-	if (-d '/fll') {
+	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
 		print "Starting tuxedo-tomte in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
