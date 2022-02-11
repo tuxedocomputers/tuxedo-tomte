@@ -5295,6 +5295,11 @@ sub messageDesktop {
 	my $mLine = '';
 	my @whoLines = `who -u`;
 
+	# don't message the desktop if LiveISO
+	if ($LiveISO) {
+		return (0);
+	}
+
 	foreach $mLine (@whoLines) {
 		if ($mLine =~ /\(:\d+\)/) {
 			$mLine =~ /^(\w*).*\s(\d*)\s.*/;
