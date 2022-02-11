@@ -93,6 +93,11 @@ my %argValue = (
 
 if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
 if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
+#TODO debug
+printLog("ARGV 0: $ARGV[0]", 'TL0');
+printLog("ARGV 1: $ARGV[1]", 'TL0');
+printLog("argValue 0: $argValue{command}", 'TL0');
+printLog("argValue 1: $argValue{module}", 'TL0');
 
 
 
@@ -1555,7 +1560,7 @@ my %configuredModules;
 sub dieSingleton {
 	initLogging();
 	printLog('Another instance is already running, please wait till it is finished', 'TL0');
-	die();
+	exit (1);
 }
 
 ###############################################################################
