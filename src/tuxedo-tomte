@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 1;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -36,6 +37,22 @@ my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+
+###############################################################################
+# Argument values given to script
+#
+my %argValue = (
+	command => '',
+	module => '',
+);
+
+if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
+#TODO debug
+printLog("ARGV 0: $ARGV[0]", 'TL0');
+printLog("ARGV 1: $ARGV[1]", 'TL0');
+printLog("argValue 0: $argValue{command}", 'TL0');
+printLog("argValue 1: $argValue{module}", 'TL0');
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -82,23 +99,6 @@ $sessionID = hex($1);
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
-
-###############################################################################
-# Argument values given to script
-#
-my %argValue = (
-	command => '',
-	module => '',
-);
-
-if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
-#TODO debug
-printLog("ARGV 0: $ARGV[0]", 'TL0');
-printLog("ARGV 1: $ARGV[1]", 'TL0');
-printLog("argValue 0: $argValue{command}", 'TL0');
-printLog("argValue 1: $argValue{module}", 'TL0');
-
 
 
 ###############################################################################
@@ -6570,6 +6570,9 @@ if (@ARGV != 0) {
 	}
 
 	if ($argValue{command} eq "list") {
+		#TODO debug
+		printLog("command: list: $argValue{command}", 'TL0');
+
 		initLogging();
 		prepareValues();
 		listStatus();
