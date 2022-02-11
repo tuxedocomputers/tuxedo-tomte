@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -5368,7 +5369,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", "LiveISO"} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6575,6 +6576,24 @@ if (@ARGV != 0) {
 		exit (0);
 	}
 
+	# check whether it is a LiveISO installation
+	# checks if directory /fll exists
+	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
+		print "Starting tuxedo-tomte in LiveISO mode\n".
+				"This should not be used in a normal situation\n".
+				"only when installing a new system with LiveISO\n";
+		$LiveISO = 1;
+		initLogging();
+		printLog("starting Tomte in LiveISO mode", 'L0');
+		prepareValues();
+		prerequisites();
+		configureAllModules();
+		postConfigure();
+		listSuccess();
+		writeConfigFile();
+		createFile($tomteFinishedFile, 'finished', 0);
+	}
+
 	if ($argValue{command} eq "list") {
 		initLogging();
 		prepareValues();
@@ -6588,7 +6607,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "help") {
 		help();
 	} elsif ($argValue{command} eq "FAI") {
-		print "Starting tuxedo-tomte in FAI modus\n".
+		print "Starting tuxedo-tomte in FAI mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 		$FAI = 1;
@@ -6600,19 +6619,6 @@ if (@ARGV != 0) {
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
-	} elsif ($argValue{command} eq "LiveISO") {
-		print "Starting tuxedo-tomte in LiveISO modus\n".
-				"This should not be used in a normal situation\n".
-				"only when installing a new system with LiveISO\n";
-		$LiveISO = 1;
-		initLogging();
-		prepareValues();
-		prerequisites();
-		configureAllModules();
-		postConfigure();
-		listSuccess();
-		writeConfigFile();
-		createFile($tomteFinishedFile, 'finished', 0);
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
