@@ -378,17 +378,6 @@ my %flavours = (
 # - display (if needed, as array)
 # - USB device (if needed)
 my %tuxedo_devices = (
-	'0' => {
-		model => ['Stellaris 15 AMD Gen3', 'Polaris 15 AMD Gen3'],
-		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => ['BOE Model 2423 Serial Number 0', 'BOE Model 2420 Serial Number 0'],
-		usb_device => '',
-	},
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
@@ -886,7 +875,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-    },
+	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
 		version => 1,
