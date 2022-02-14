@@ -3425,6 +3425,7 @@ sub nvidiadriver() {
 				$wasInstalled = 0;
 				$packageNvidiaDriver = installPackage('nvidia-driver-470');
 			} else {
+				setAptMark('nvidia-driver-470','manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4384,6 +4385,7 @@ sub deinstExcept {
 	my $except = shift;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
+	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
 	my $deinstCmd;
 	my $deinstKey;
@@ -4567,6 +4569,27 @@ sub installPackage {
 	return $retval;
 }
 
+
+
+###############################################################################
+# sets mark to auto or manual
+# usage setAptMark('package_name','auto|manual')
+# returns 1 if set 0 if not
+#
+sub setAptMark {
+	my ($package, $mark) = @_;
+	my $retVal;
+	if ( `$consoleLanguage apt-mark showauto $package` =~ /$package/ ) {
+		printLog("package is set to auto, changing to manual now", 'L1');
+		$retVal = `$consoleLanguage apt-mark manual $package`;
+		if ($retVal =~ /was already/) {
+			return (0);
+		} else {
+			return (1);
+		}
+	}
+	return (0);
+}
 
 
 
