@@ -3361,6 +3361,7 @@ sub nvidiadriver() {
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
 
 			# check if the package is already installed
+			# TODO check if driver has also changed
 			if( ! isPackageInstalled('nvidia-driver-460') ) {
 				messageLongInstall();
 				$wasInstalled = 0;
@@ -4525,6 +4526,7 @@ sub isPackageInstalled {
 	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
+	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
