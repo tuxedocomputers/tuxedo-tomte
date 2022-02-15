@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -382,7 +381,7 @@ my %tuxedo_devices = (
 	'0' => {
 		model => ['Stellaris 15 AMD Gen3', 'Polaris 15 AMD Gen3'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -635,7 +634,7 @@ my %tuxedo_devices = (
 	'23' => {
 		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
 		board_name => ['GMxNGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -646,7 +645,7 @@ my %tuxedo_devices = (
 	'24' => {
 		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
 		board_name => ['GMxMGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -657,7 +656,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -668,7 +667,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -917,7 +916,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
@@ -933,7 +932,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedokeyboard => {
@@ -949,7 +948,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	nokeyboardaftersuspendfix => {
@@ -1029,7 +1028,7 @@ my %origConfModules = (
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	threegfix => {
@@ -1045,7 +1044,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	elantechtouchpadfix => {
@@ -1077,7 +1076,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedonvmefix => {
@@ -1093,7 +1092,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedokeyboardite => {
@@ -1109,7 +1108,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	fingerprintreader => {
@@ -1125,7 +1124,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	mesautils => {
@@ -1141,7 +1140,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedorestoreaudiofix => {
@@ -1157,7 +1156,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004edge => {
@@ -1173,7 +1172,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
@@ -1189,7 +1188,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
@@ -1205,7 +1204,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004 => {
@@ -1221,7 +1220,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004edge => {
@@ -1237,7 +1236,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},	
 	nvidiadriver => {
@@ -1253,7 +1252,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	cracklibruntime => {
@@ -1269,7 +1268,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	amdgpudkms => {
@@ -1285,7 +1284,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	r8168dkms => {
@@ -1301,7 +1300,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedooledbrt => {
@@ -1317,7 +1316,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	apportfix => {
@@ -1333,9 +1332,10 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
+	# deprecated since 20220215
 	realtekr8125dkms => {
 		name => 'realtek-r8125-dkms',
 		version => 1,
@@ -1349,7 +1349,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	amdgpubacklightauxoff => {
@@ -1413,7 +1413,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedomicfix1 => {
@@ -1429,7 +1429,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	thunderboltbootdelayfix => {
@@ -1445,7 +1445,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	i8042noauxfix => {
@@ -1477,7 +1477,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'no',
 	},
 	nvidiabacklightcontrolfix => {
@@ -1933,13 +1933,6 @@ sub checkRequirements {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog('detected apport-fix issue', 'L1');
-	}
-	if (($boardname =~ m/GMxMGxx/) ||
-		($boardname =~ m/GMxNGxx/) ||
-		($boardname =~ m/GMxZGxx/) ||
-		($boardname =~ m/GMxTGxx/)) {
-		$origConfModules{realtekr8125dkms}{required} = 'yes';
-		printLog('detected realtek-r8125-dkms issue', 'L1');
 	}
 	if (($boardname =~ m/GMxNGxx/) ||
 		($boardname =~ m/GMxZGxx/)) {
