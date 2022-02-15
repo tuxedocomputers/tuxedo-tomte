@@ -397,6 +397,9 @@ my %flavours = (
 		"linux-oem-20.04" => {
 			installPackages => 'linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
 		},
+		"linux-oem-20.04-edge" => {
+			installPackages => 'linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b',
+		},
 		"linux-generic-hwe-20.04" => {
 			installPackages => 'linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04',
 		},
@@ -408,6 +411,9 @@ my %flavours = (
 		},
 		"linux-tuxedo-20.04" => {
 			installPackages => 'linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04',
+		},
+		"linux-tuxedo-20.04-next" => {
+			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
 		},
 	},
 
