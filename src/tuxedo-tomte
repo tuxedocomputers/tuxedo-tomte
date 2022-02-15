@@ -719,17 +719,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	'31' => {
-		model => ['all with AMD GPU'],
-		board_name => [''],
-		fix => ['amdgpu'],
-		flavour => ['20.04'],
-		pci_id => '',
-		cpu => 'AMD',
-		kernel => '5.8.0-([0-9]|[1-4][0-9]|5[0-4])-',
-		display => '',
-		usb_device => '',
-	},
 	'32' => {
 		model => ['all with fingerprintreader'],
 		board_name => [''],
