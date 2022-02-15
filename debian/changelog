@@ -1,3 +1,18 @@
+tuxedo-tomte (2.5.26-23) UNRELEASED; urgency=medium
+
+  * added always reconfigure to all modules
+  * added LiveISO option
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 11 Feb 2022 14:06:00 +0100
+
+tuxedo-tomte (2.5.26) focal; urgency=medium
+
+  * removed nobootonbattery and grub entries
+  * added nvidiabacklightcontrolfix for TUXEDO Stellaris/Polaris Gen3 Intel with boardname GMxTGxx
+  * added earlyloadbacklightfix for TUXEDO Book XP14 Gen12 and TUXEDO InfinityBook Pro 14 Gen6, boardnames NV4XMB,ME,MZ and PHxTQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 07 Feb 2022 08:47:26 +0100
+
 tuxedo-tomte (2.5.25) focal; urgency=medium
 
   * added support for locale other than English
