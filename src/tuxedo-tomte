@@ -644,7 +644,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -3686,11 +3686,15 @@ sub apportfix() {
 
 
 ###############################################################################
-# Installs Linux device driver for several Realtek Ethernet controllers
+# Removes Linux device driver if installed
 #
 sub realtekr8125dkms() {
 	my $module = shift;
 	my $action = shift;
+	# ignore if FAI or LiveISO install
+	if ($FAI || $LiveISO) {
+		return (1);
+	}
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
@@ -4551,6 +4555,28 @@ sub installPackage {
 	return $retval;
 }
 
+
+
+###############################################################################
+# removes a package by pkcon or apt-get
+# returns 1 if successful or not installed
+# returns 0 if failed
+#
+sub removePackage {
+	my $packageName = shift;
+	my $retval;
+	printLog("remove package $packageName", 'TL0');
+	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
+	printLog("return from pkcon:\n$retval", 'TL2');
+	$retval = isPackageInstalled($packageName);
+	if ($retval == 1) {
+		printLog("failed to remove $packageName", 'L0');
+		printLog("will try again later", 'L0');
+		startTomteDelayed();
+		return (0);
+	}
+	return (1);
+}
 
 
 ###############################################################################
