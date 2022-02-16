@@ -1731,6 +1731,15 @@ sub checkRequirements {
 	my $FH;
 	my $biosVersion;
 
+	# only used to remove the package
+	if (($boardname =~ m/GMxMGxx/) ||
+		($boardname =~ m/GMxNGxx/) ||
+		($boardname =~ m/GMxZGxx/) ||
+		($boardname =~ m/GMxTGxx/)) {
+		$origConfModules{realtekr8125dkms}{required} = 'yes';
+		printLog('detected realtek-r8125-dkms issue', 'L1');
+	}
+
 	# check values for each module
 	if ($boardname =~ /NS50_70MU/) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
