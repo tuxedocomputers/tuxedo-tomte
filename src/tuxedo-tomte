@@ -893,7 +893,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
