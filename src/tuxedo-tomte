@@ -893,7 +893,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
@@ -1229,7 +1229,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	cracklibruntime => {
