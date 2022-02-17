@@ -27,6 +27,13 @@ while (my $line = <$fh>) {
 		print "#########################################\n";
 		print "#########################################\n";
 	}
+	if (($line =~ /my \$logLevel =/) && ($line !~ /my \$logLevel = 0;/)) {
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		print "     WARNING! 'Debug level not ZERO!!!   \n";
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	}
 }
 
 # get version number
@@ -88,3 +95,7 @@ system("gbp buildpackage -us -uc");
 # return to original branch
 print "returning\n";
 system("git checkout $branch");
+# commit last changes to debian/file
+system("git add .");
+system("git commit -m 'after packaging'");
+system("git push");
