@@ -1713,9 +1713,11 @@ sub checkRequirements {
 	if (($boardname =~ m/GMxMGxx/) ||
 		($boardname =~ m/GMxNGxx/) ||
 		($boardname =~ m/GMxZGxx/) ||
+		#TODO test debug
+		($boardname =~ m/NH5xAx/) ||
 		($boardname =~ m/GMxTGxx/)) {
 		$origConfModules{realtekr8125dkms}{required} = 'yes';
-		printLog('detected realtek-r8125-dkms issue', 'L1');
+		printLog('detected realtek-r8125-dkms issue - has to be removed', 'L1');
 	}
 
 	# check values for each module
