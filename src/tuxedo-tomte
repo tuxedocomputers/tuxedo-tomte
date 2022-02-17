@@ -3697,7 +3697,13 @@ sub realtekr8125dkms() {
 	if ($FAI || $LiveISO) {
 		return (1);
 	}
-	if (($action eq 'install') && (($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+	if ($action eq 'install') {
+		printLog("package is obsolete", 'L1');
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "no";
+		$origConfModules{$module}{required} = "no";
+	}
+	if (($action eq 'upgrade') && (($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 		# check before if the package is already installed
 		if (isPackageInstalled($origConfModules{$module}{name})) {
 			if (removePackage($origConfModules{$module}{name})) {
@@ -3716,10 +3722,9 @@ sub realtekr8125dkms() {
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "no";
 			$origConfModules{$module}{required} = "no";
+			$origConfModules{$module}{version} = $localConfModules{$module}{version};
+			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -6059,7 +6064,7 @@ sub configureSingleModule {
 		print "Module $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
-	if ( $origConfModules{$module}{required} eq 'no' ) {
+	if (($origConfModules{$module}{required} eq 'no') && ($configuredModules{$module} ne 'nothingToDo')) {
 		print "Module $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
@@ -6373,7 +6378,7 @@ sub listSuccess {
 		printNameDescriptionPrograms(@failedPrograms);
 	}
 	if (@removedModules) {
-		print "\nThe modules have been removed:\n";
+		print "\nThe following modules have been removed:\n";
 		printNameDescriptionPrograms(@removedModules);
 	}
 	if (! $successOrFailed) {
