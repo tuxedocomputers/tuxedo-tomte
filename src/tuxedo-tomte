@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -37,6 +36,17 @@ my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+
+###############################################################################
+# Argument values given to script
+#
+my %argValue = (
+	command => '',
+	module => '',
+);
+
+if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
+if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
@@ -83,18 +93,6 @@ $sessionID = hex($1);
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
-
-###############################################################################
-# Argument values given to script
-#
-my %argValue = (
-	command => '',
-	module => '',
-);
-
-if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
-
 
 
 ###############################################################################
@@ -435,17 +433,6 @@ my %flavours = (
 # - display (if needed, as array)
 # - USB device (if needed)
 my %tuxedo_devices = (
-	'0' => {
-		model => ['Stellaris 15 AMD Gen3', 'Polaris 15 AMD Gen3'],
-		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => ['BOE Model 2423 Serial Number 0', 'BOE Model 2420 Serial Number 0'],
-		usb_device => '',
-	},
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
@@ -713,7 +700,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpudkms', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -773,17 +760,6 @@ my %tuxedo_devices = (
 		pci_id => '',
 		cpu => '',
 		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'31' => {
-		model => ['all with AMD GPU'],
-		board_name => [''],
-		fix => ['amdgpu'],
-		flavour => ['20.04'],
-		pci_id => '',
-		cpu => 'AMD',
-		kernel => '5.8.0-([0-9]|[1-4][0-9]|5[0-4])-',
 		display => '',
 		usb_device => '',
 	},
@@ -943,7 +919,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
-    },
+	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
 		version => 1,
@@ -973,7 +949,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedocontrolcenter => {
@@ -989,7 +965,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedokeyboard => {
@@ -1005,7 +981,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	nokeyboardaftersuspendfix => {
@@ -1085,7 +1061,7 @@ my %origConfModules = (
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	threegfix => {
@@ -1101,7 +1077,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	elantechtouchpadfix => {
@@ -1133,7 +1109,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedonvmefix => {
@@ -1149,7 +1125,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedokeyboardite => {
@@ -1165,7 +1141,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	fingerprintreader => {
@@ -1181,7 +1157,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	mesautils => {
@@ -1197,7 +1173,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedorestoreaudiofix => {
@@ -1213,7 +1189,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004edge => {
@@ -1229,7 +1205,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
@@ -1245,7 +1221,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
@@ -1261,7 +1237,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004 => {
@@ -1277,7 +1253,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004edge => {
@@ -1293,7 +1269,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},	
 	nvidiadriver => {
@@ -1325,7 +1301,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	amdgpudkms => {
@@ -1341,7 +1317,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	r8168dkms => {
@@ -1357,7 +1333,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	tuxedooledbrt => {
@@ -1373,7 +1349,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	apportfix => {
@@ -1389,7 +1365,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	realtekr8125dkms => {
@@ -1405,7 +1381,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 	},
 	amdgpubacklightauxoff => {
@@ -1469,7 +1445,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	tuxedomicfix1 => {
@@ -1485,7 +1461,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	thunderboltbootdelayfix => {
@@ -1501,7 +1477,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 	i8042noauxfix => {
@@ -1533,7 +1509,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'no',
 	},
 	nvidiabacklightcontrolfix => {
@@ -1623,7 +1599,7 @@ my %configuredModules;
 sub dieSingleton {
 	initLogging();
 	printLog('Another instance is already running, please wait till it is finished', 'TL0');
-	die();
+	exit (1);
 }
 
 ###############################################################################
@@ -1966,17 +1942,6 @@ sub checkRequirements {
 		printLog('detected nvidia-driver issue', 'L1');
 	}
 
-	if ((cpuBrand() eq 'AMD') &&
-		(($distributionVersion =~ /20.04/) || ($distributionVersion =~ /6.1/)) &&
-		($kernelRelease =~ /5.8.0-([0-9]|[1-4][0-9]|5[0-4])-/)) {
-		$origConfModules{amdgpudkms}{required} = 'yes';
-		printLog('detected amd-gpu issue', 'L1');
-	}
-	if (($boardname =~ m/GMxZGxx/) &&
-		($kernelRelease =~ /5.1[01].0-/)) {
-		$origConfModules{amdgpudkms}{required} = 'yes';
-		printLog('detected amd-gpu issue', 'L1');
-	}
 	if ($boardname =~ m/NHxxRZQ/) {
 		$origConfModules{r8168dkms}{required} = 'yes';
 		printLog('detected r8168-dkms issue', 'L1');
@@ -3416,7 +3381,7 @@ sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver460;
+	my $packageNvidiaDriver;
 	my $packageMesaUtils;
 	my $packageNvidiaPrime;
 	my $packagePythonAppindicator;
@@ -3426,15 +3391,16 @@ sub nvidiadriver() {
 	if ($action eq 'install') {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-460') ) {
+			if( ! isPackageInstalled('nvidia-driver-470') ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
+				$packageNvidiaDriver = installPackage('nvidia-driver-470');
 			} else {
-				$packageNvidiaDriver460 = 1;
+				setAptMark('nvidia-driver-470','manual');
+				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
@@ -3467,7 +3433,7 @@ sub nvidiadriver() {
 				$packagePythonGtk2 = 1;
 			}
 	
-			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -3484,15 +3450,16 @@ sub nvidiadriver() {
 		
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-460');
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-460') ) {
+			if( ! isPackageInstalled('nvidia-driver-470') ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver460 = installPackage('nvidia-driver-460');
+				$packageNvidiaDriver = installPackage('nvidia-driver-470');
 			} else {
-				$packageNvidiaDriver460 = 1;
+				setAptMark('nvidia-driver-470','manual');
+				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
@@ -3507,7 +3474,7 @@ sub nvidiadriver() {
 				$packageNvidiaPrime = 1;
 			}
 	
-			if( $oldDriversRemoved && $packageNvidiaDriver460 && $packageMesaUtils && $packageNvidiaPrime ) {
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -4451,6 +4418,7 @@ sub deinstExcept {
 	my $except = shift;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	my $retString = `$searchCmd`;
+	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
 	my $deinstCmd;
 	my $deinstKey;
@@ -4593,6 +4561,7 @@ sub isPackageInstalled {
 	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
+	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
@@ -4615,13 +4584,14 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		system("apt-get -y install $packageName 2>&1");
-		printLog("return from install", 'TL2');
+		$retval = `apt-get -y install $packageName 2>&1`;
+		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
-		system("pkcon -yp install $packageName >/dev/null 2>&1");
+		$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+		printLog("return from pkcon:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
 			printLog("failed to install $packageName", 'L0');
@@ -4632,6 +4602,27 @@ sub installPackage {
 	return $retval;
 }
 
+
+
+###############################################################################
+# sets mark to auto or manual
+# usage setAptMark('package_name','auto|manual')
+# returns 1 if set 0 if not
+#
+sub setAptMark {
+	my ($package, $mark) = @_;
+	my $retVal;
+	if ( `$consoleLanguage apt-mark showauto $package` =~ /$package/ ) {
+		printLog("package is set to auto, changing to manual now", 'L1');
+		$retVal = `$consoleLanguage apt-mark manual $package`;
+		if ($retVal =~ /was already/) {
+			return (0);
+		} else {
+			return (1);
+		}
+	}
+	return (0);
+}
 
 
 
@@ -4887,7 +4878,7 @@ sub uninstKernelFlavour {
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-			printLog("accepted", 'TL2');
+			printLog("accepted: $package", 'TL2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
@@ -5362,6 +5353,11 @@ sub messageDesktop {
 	my $mPid = '';
 	my $mLine = '';
 	my @whoLines = `who -u`;
+
+	# don't message the desktop if LiveISO
+	if ($LiveISO) {
+		return (0);
+	}
 
 	foreach $mLine (@whoLines) {
 		if ($mLine =~ /\(:\d+\)/) {
