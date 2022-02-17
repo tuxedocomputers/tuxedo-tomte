@@ -3715,6 +3715,8 @@ sub realtekr8125dkms() {
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{version} = $localConfModules{$module}{version};
+				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 			}
 		} else {
 			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
@@ -3722,8 +3724,6 @@ sub realtekr8125dkms() {
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "no";
 			$origConfModules{$module}{required} = "no";
-			$origConfModules{$module}{version} = $localConfModules{$module}{version};
-			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 		}
 	}
 	if ($action eq 'remove') {
