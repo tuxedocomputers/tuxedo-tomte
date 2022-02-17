@@ -1323,7 +1323,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'yes',
 		fainame => '',
-		description => 'Linux device driver for several Realtek Ethernet controllers',
+		description => 'Linux device driver for several Realtek Ethernet controllers [obsolete]',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -3686,7 +3686,7 @@ sub apportfix() {
 
 
 ###############################################################################
-# Removes Linux device driver if installed
+# Removes Linux device driver if installed and in configuration list
 #
 sub realtekr8125dkms() {
 	my $module = shift;
@@ -3695,24 +3695,25 @@ sub realtekr8125dkms() {
 	if ($FAI || $LiveISO) {
 		return (1);
 	}
-	if ($action eq 'install') {
+	if (($action eq 'install') && (($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 		# check before if the package is already installed
-		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			messageLongInstall();
-			if (installPackage($origConfModules{$module}{name})) {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
+		if (isPackageInstalled($origConfModules{$module}{name})) {
+			if (removePackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "no";
+				$origConfModules{$module}{upgraded} = "no";
+				$origConfModules{$module}{required} = "no";
+				addToConfiguredModules($module, "removed");
 				$restartSystem = 1;
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
 		} else {
-			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
 			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			$origConfModules{$module}{required} = "no";
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -6328,6 +6329,7 @@ sub listSuccess {
 	my @failedModules;
 	my @successModules;
 	my @nothingToDoModules;
+	my @removedModules;
 	my $successOrFailed = 0;
 
 	foreach $confProgram (keys %postConfProgram) {
@@ -6345,6 +6347,8 @@ sub listSuccess {
 			push(@successModules, $confModule);
 		} elsif ($configuredModules{$confModule} eq "nothingToDo") {
 			push(@nothingToDoModules, $confModule);
+		} elsif ($configuredModules{$confModule} eq "removed") {
+			push(@removedModules, $confModule);
 		}
 	}
 	if (@successModules) {
@@ -6365,6 +6369,10 @@ sub listSuccess {
 	if (@failedPrograms) {
 		print "\nThe following post installation programs have failed:\n";
 		printNameDescriptionPrograms(@failedPrograms);
+	}
+	if (@removedModules) {
+		print "\nThe modules have been removed:\n";
+		printNameDescriptionPrograms(@removedModules);
 	}
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
