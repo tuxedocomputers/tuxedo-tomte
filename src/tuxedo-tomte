@@ -1359,7 +1359,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
-		remove => '',
+		remove => 'yes',
 	},
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
@@ -3744,27 +3744,22 @@ sub realtekr8125dkms() {
 		$origConfModules{$module}{upgraded} = "no";
 		$origConfModules{$module}{required} = "no";
 	}
-	#TODO lots of debug
 	if (($action eq 'upgrade') && (($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 		# check before if the package is already installed
 		if (isPackageInstalled($origConfModules{$module}{name})) {
-			printLog("package is installed", 'L2');
 			if (removePackage($origConfModules{$module}{name})) {
-				printLog("package removed", 'L2');
 				addToConfiguredModules($module, "removed");
 				$origConfModules{$module}{installed} = "no";
 				$origConfModules{$module}{upgraded} = "yes";
 				$origConfModules{$module}{required} = "no";
 				$restartSystem = 1;
 			} else {
-				printLog("remove failed", 'L2');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "remove failed";
 				$origConfModules{$module}{version} = $localConfModules{$module}{version};
 				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 			}
 		} else {
-			printLog("package is not installed", 'L2');
 			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
 			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "no";
@@ -5658,8 +5653,6 @@ sub writeConfigFile {
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
-			# TODO debug
-			printLog("required: $name $origConfModules{$name}{required}", 'L0');
 			if ($origConfModules{$name}{required} ne 'no') {
 				if ($origConfModules{$name}{upgrade} eq 'yes') {
 					# upgrade available
@@ -5687,8 +5680,6 @@ sub writeConfigFile {
 					$installed = $origConfModules{$name}{installed};
 				}
 				unless(($origConfModules{$name}{installed} eq 'no') &&
-					#TODO test
-					#		($origConfModules{$name}{upgraded} eq 'no') &&
 						($origConfModules{$name}{required} eq 'no')) {
 					print $FH "$origConfModules{$name}{name} ".
 						"$version ".
@@ -6122,6 +6113,7 @@ sub configureSingleModule {
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 	if (($origConfModules{$module}{required} eq 'no') &&
+		($origConfModules{$module}{remove} ne 'yes') &&
 		($configuredModules{$module} ne 'nothingToDo') &&
 		($configuredModules{$module} ne 'remove failed') &&
 		($configuredModules{$module} ne 'removed')) {
@@ -6731,8 +6723,6 @@ if (@ARGV != 0) {
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				configureAllModules();
-				#TODO debug
-				printLog("between: $origConfModules{'realtekr8125dkms'}{required}",'L2');
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
