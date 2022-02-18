@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -3703,22 +3703,27 @@ sub realtekr8125dkms() {
 		$origConfModules{$module}{upgraded} = "no";
 		$origConfModules{$module}{required} = "no";
 	}
+	#TODO lots of debug
 	if (($action eq 'upgrade') && (($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 		# check before if the package is already installed
 		if (isPackageInstalled($origConfModules{$module}{name})) {
+			printLog("package is installed", 'L2');
 			if (removePackage($origConfModules{$module}{name})) {
+				printLog("package removed", 'L2');
 				addToConfiguredModules($module, "removed");
 				$origConfModules{$module}{installed} = "no";
 				$origConfModules{$module}{upgraded} = "yes";
 				$origConfModules{$module}{required} = "no";
 				$restartSystem = 1;
 			} else {
+				printLog("remove failed", 'L2');
 				addToConfiguredModules($module, "failed");
 				$origConfModules{$module}{installed} = "remove failed";
 				$origConfModules{$module}{version} = $localConfModules{$module}{version};
 				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 			}
 		} else {
+			printLog("package is not installed", 'L2');
 			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
 			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "no";
@@ -5612,41 +5617,46 @@ sub writeConfigFile {
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
-			if ($origConfModules{$name}{upgrade} eq 'yes') {
-				# upgrade available
-				if ($origConfModules{$name}{upgraded} eq 'yes') {
-					# upgrade was executed
+			# TODO debug
+			printLog("required: $origConfModules{$name}{required}", 'L0');
+			if ($origConfModules{$name}{required} ne 'no') {
+				if ($origConfModules{$name}{upgrade} eq 'yes') {
+					# upgrade available
+					if ($origConfModules{$name}{upgraded} eq 'yes') {
+						# upgrade was executed
+						$version = $origConfModules{$name}{version};
+						$hwid = $origConfModules{$name}{hwid};
+						$installed = $origConfModules{$name}{installed};
+					} else {
+						# upgrade was not executed
+						if ( $origConfModules{$name}{installed} eq 'yes' ) {
+							$version = $localConfModules{$name}{version};
+							$hwid = $localConfModules{$name}{hwid};
+							$installed = $localConfModules{$name}{installed};
+						} else {
+							$version = $origConfModules{$name}{version};
+							$hwid = $origConfModules{$name}{hwid};
+							$installed = $localConfModules{$name}{installed};
+						}
+					}
+				} else {
+					# no upgrade available
 					$version = $origConfModules{$name}{version};
 					$hwid = $origConfModules{$name}{hwid};
 					$installed = $origConfModules{$name}{installed};
-				} else {
-					# upgrade was not executed
-					if ( $origConfModules{$name}{installed} eq 'yes' ) {
-						$version = $localConfModules{$name}{version};
-						$hwid = $localConfModules{$name}{hwid};
-						$installed = $localConfModules{$name}{installed};
-					} else {
-						$version = $origConfModules{$name}{version};
-						$hwid = $origConfModules{$name}{hwid};
-						$installed = $localConfModules{$name}{installed};
-					}
 				}
-			} else {
-				# no upgrade available
-				$version = $origConfModules{$name}{version};
-				$hwid = $origConfModules{$name}{hwid};
-				$installed = $origConfModules{$name}{installed};
-			}
-			unless(($origConfModules{$name}{installed} eq 'no') &&
-				#TODO test
-				#		($origConfModules{$name}{upgraded} eq 'no') &&
-					($origConfModules{$name}{required} eq 'no')) {
-				print $FH "$origConfModules{$name}{name} ".
-					"$version ".
-					"$installed ".
-					"$origConfModules{$name}{blocked} ".
-					"$origConfModules{$name}{required} ".
-					"$hwid\n";
+				unless(($origConfModules{$name}{installed} eq 'no') &&
+					#TODO test
+					#		($origConfModules{$name}{upgraded} eq 'no') &&
+						($origConfModules{$name}{required} eq 'no')) {
+					print $FH "$origConfModules{$name}{name} ".
+						"$version ".
+						"$installed ".
+						"$origConfModules{$name}{blocked} ".
+						"$origConfModules{$name}{required} ".
+						"$hwid\n";
+				}
+
 			}
 		}
 		close $FH;
