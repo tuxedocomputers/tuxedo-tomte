@@ -847,6 +847,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -863,6 +864,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -879,6 +881,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -895,6 +898,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedocontrolcenter => {
 		name => 'tuxedo-control-center',
@@ -911,6 +915,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	tuxedokeyboard => {
 		name => 'tuxedo-keyboard',
@@ -927,6 +932,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	nokeyboardaftersuspendfix => {
 		name => 'no-keyboard-after-suspend-fix',
@@ -943,6 +949,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -959,6 +966,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -975,6 +983,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		remove => '',
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
@@ -991,6 +1000,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		remove => '',
 	},
 	corefix => {
 		name => 'core-fix',
@@ -1007,6 +1017,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -1023,6 +1034,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	elantechtouchpadfix => {
 		name => 'elantech-touchpad-fix',
@@ -1039,6 +1051,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -1055,6 +1068,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
@@ -1071,6 +1085,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
@@ -1087,6 +1102,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	fingerprintreader => {
 		name => 'fingerprint-reader',
@@ -1103,6 +1119,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -1119,6 +1136,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	tuxedorestoreaudiofix => {
 		name => 'tuxedo-restore-audio-fix',
@@ -1135,6 +1153,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
@@ -1151,6 +1170,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	kerneltuxedo2004next => {
 		name => 'linux-tuxedo-20.04-next',
@@ -1167,6 +1187,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	kerneltuxedo2004 => {
 		name => 'linux-tuxedo-20.04',
@@ -1183,6 +1204,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	kernelgenerichwe2004 => {
 		name => 'linux-generic-hwe-20.04',
@@ -1199,6 +1221,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
@@ -1215,6 +1238,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},	
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -1231,6 +1255,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -1247,6 +1272,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	# deprecated since 20220216
 	amdgpudkms => {
@@ -1264,6 +1290,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => 'yes',
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
@@ -1280,6 +1307,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	tuxedooledbrt => {
 		name => 'tuxedo-oled-brt',
@@ -1296,6 +1324,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	apportfix => {
 		name => 'apport-fix',
@@ -1312,6 +1341,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	# deprecated since 20220215
 	realtekr8125dkms => {
@@ -1329,6 +1359,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		remove => '',
 	},
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
@@ -1345,6 +1376,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	i915disablepsrfix => {
 		name => 'i915-disable-psr-fix',
@@ -1361,6 +1393,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	i915enablepsrfix => {
 		name => 'i915-enable-psr-fix',
@@ -1377,6 +1410,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedopinfixtgldkms => {
 		name => 'tuxedo-pinfix-tgl-dkms',
@@ -1393,6 +1427,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	tuxedomicfix1 => {
 		name => 'tuxedo-micfix1',
@@ -1409,6 +1444,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
@@ -1425,6 +1461,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		remove => '',
 	},
 	i8042noauxfix => {
 		name => 'i8042noaux-fix',
@@ -1441,6 +1478,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	lightdmlogindcheckgraphicalfix => {
 		name => 'lightdm-logind-check-graphical-fix',
@@ -1457,6 +1495,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'no',
+		remove => '',
 	},
 	nvidiabacklightcontrolfix => {
 		name => 'nvidia-backlight-control-fix',
@@ -1473,6 +1512,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 	earlyloadbacklightcontrolfix => {
 		name => 'early-load-backlight-control-fix',
@@ -1489,6 +1529,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		remove => '',
 	},
 
 );
@@ -5618,7 +5659,7 @@ sub writeConfigFile {
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			# TODO debug
-			printLog("required: $origConfModules{$name}{required}", 'L0');
+			printLog("required: $name $origConfModules{$name}{required}", 'L0');
 			if ($origConfModules{$name}{required} ne 'no') {
 				if ($origConfModules{$name}{upgrade} eq 'yes') {
 					# upgrade available
@@ -5656,7 +5697,6 @@ sub writeConfigFile {
 						"$origConfModules{$name}{required} ".
 						"$hwid\n";
 				}
-
 			}
 		}
 		close $FH;
@@ -5841,8 +5881,10 @@ sub listStatus {
 				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
-		if (($localConfModules{$module}{required} eq 'yes') ||
-			($localConfModules{$module}{required} eq 'prerequisite')) {
+		# required, installed and not removed
+		if ((($localConfModules{$module}{required} eq 'yes') ||
+			($localConfModules{$module}{required} eq 'prerequisite')) &&
+			(($origConfModules{$module}{remove} ne 'yes') && ($localConfModules{$module}{installed} ne 'no'))) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
@@ -6689,6 +6731,8 @@ if (@ARGV != 0) {
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				configureAllModules();
+				#TODO debug
+				printLog("between: $origConfModules{'realtekr8125dkms'}{required}",'L2');
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
