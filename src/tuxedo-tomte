@@ -1316,7 +1316,7 @@ my %origConfModules = (
 	# deprecated since 20220215
 	realtekr8125dkms => {
 		name => 'realtek-r8125-dkms',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -3707,14 +3707,14 @@ sub realtekr8125dkms() {
 		# check before if the package is already installed
 		if (isPackageInstalled($origConfModules{$module}{name})) {
 			if (removePackage($origConfModules{$module}{name})) {
-				$origConfModules{$module}{installed} = "no";
-				$origConfModules{$module}{upgraded} = "no";
-				$origConfModules{$module}{required} = "no";
 				addToConfiguredModules($module, "removed");
+				$origConfModules{$module}{installed} = "no";
+				$origConfModules{$module}{upgraded} = "yes";
+				$origConfModules{$module}{required} = "no";
 				$restartSystem = 1;
 			} else {
-				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "remove failed";
 				$origConfModules{$module}{version} = $localConfModules{$module}{version};
 				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 			}
@@ -3722,7 +3722,7 @@ sub realtekr8125dkms() {
 			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
 			addToConfiguredModules($module, "nothingToDo");
 			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "no";
+			$origConfModules{$module}{upgraded} = "yes";
 			$origConfModules{$module}{required} = "no";
 		}
 	}
@@ -5638,7 +5638,8 @@ sub writeConfigFile {
 				$installed = $origConfModules{$name}{installed};
 			}
 			unless(($origConfModules{$name}{installed} eq 'no') &&
-					($origConfModules{$name}{upgraded} eq 'no') &&
+				#TODO test
+				#		($origConfModules{$name}{upgraded} eq 'no') &&
 					($origConfModules{$name}{required} eq 'no')) {
 				print $FH "$origConfModules{$name}{name} ".
 					"$version ".
@@ -5919,6 +5920,10 @@ sub addToConfiguredModules {
 		printLog("failed to install $module", 'L0');
 	} elsif ($status =~ /success/) {
 		printLog("succesfully installed $module", 'L0');
+	} elsif ($status =~ /removed/) {
+		printLog("succesfully removed $module", 'L0');
+	} elsif ($status =~ /remove failed/) {
+		printLog("failed to remove $module", 'L0');
 	}
 }
 
@@ -6064,7 +6069,10 @@ sub configureSingleModule {
 		print "Module $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
-	if (($origConfModules{$module}{required} eq 'no') && ($configuredModules{$module} ne 'nothingToDo')) {
+	if (($origConfModules{$module}{required} eq 'no') &&
+		($configuredModules{$module} ne 'nothingToDo') &&
+		($configuredModules{$module} ne 'remove failed') &&
+		($configuredModules{$module} ne 'removed')) {
 		print "Module $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
@@ -6156,7 +6164,9 @@ sub reconfigureSingleModule {
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
-	if ( $origConfModules{$module}{required} eq 'no' ) {
+	if (($origConfModules{$module}{required} eq 'no') &&
+		($configuredModules{$module} ne 'remove failed') &&
+		($configuredModules{$module} ne 'removed')) {
 		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
@@ -6379,7 +6389,7 @@ sub listSuccess {
 	}
 	if (@removedModules) {
 		print "\nThe following modules have been removed:\n";
-		printNameDescriptionPrograms(@removedModules);
+		printNameDescriptionModules(@removedModules);
 	}
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
