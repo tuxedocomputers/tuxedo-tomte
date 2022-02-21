@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1709,18 +1709,6 @@ sub checkRequirements {
 	my $FH;
 	my $biosVersion;
 
-	#TODO remove!
-	# only used to remove the package
-	#if (($boardname =~ m/GMxMGxx/) ||
-	#	($boardname =~ m/GMxNGxx/) ||
-	#	($boardname =~ m/GMxZGxx/) ||
-	#	#TODO test debug
-	#	($boardname =~ m/NH5xAx/) ||
-	#	($boardname =~ m/GMxTGxx/)) {
-	#	$origConfModules{realtekr8125dkms}{required} = 'yes';
-	#	printLog('detected realtek-r8125-dkms issue - has to be removed', 'L1');
-	#}
-
 	# check values for each module
 	if ($boardname =~ /NS50_70MU/) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
@@ -3185,10 +3173,9 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	#TODO
-	#	if ($action eq 'upgrade') {
-		# no upgrades yet
-		#	}
+	if ($action eq 'upgrade') {
+		#no upgrades yet
+	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3228,10 +3215,9 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	#TODO
-	#	if ($action eq 'upgrade') {
+	if ($action eq 'upgrade') {
 		# no upgrades yet
-		#	}
+	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -4556,7 +4542,7 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
-		printLog("return from pkcon:\n$retval", 'TL2');
+		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
 			printLog("failed to install $packageName", 'L0');
@@ -4579,7 +4565,7 @@ sub removePackage {
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
-	printLog("return from pkcon:\n$retval", 'TL2');
+	printLog("return from pkcon:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
 		printLog("failed to remove $packageName", 'L0');
@@ -6068,13 +6054,6 @@ sub configureSingleModule {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1');
 		upgradeModule($module);
-	#} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
-	#	$localConfModules{$module}{blocked} eq 'no' &&
-	#	$origConfModules{$module}{required} eq 'no' &&
-	#	$origConfModules{$module}{upgrade} eq 'yes' ) {
-	#	# upgrade if new version or hwid
-	#	printLog("remove module: $module", 'L1');
-	#	removeModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
 	}
@@ -6082,15 +6061,6 @@ sub configureSingleModule {
 		print "Module $moduleName cannot be installed/removed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
-	#TODO test
-	#if (($origConfModules{$module}{required} eq 'no') &&
-	#	($origConfModules{$module}{remove} ne 'yes') &&
-	#	($configuredModules{$module} ne 'nothingToDo') &&
-	#	($configuredModules{$module} ne 'remove failed') &&
-	#	($configuredModules{$module} ne 'removed')) {
-	#	print "Module $moduleName cannot be installed because:\n";
-	#	print "- it is not required by this system (this is the main reason)\n";
-	#}
 }
 
 
