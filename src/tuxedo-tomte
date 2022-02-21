@@ -4523,7 +4523,7 @@ sub deinstallSinglePackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
+	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
 	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
@@ -4865,7 +4865,7 @@ sub uninstKernelFlavour {
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-			printLog("accepted: $package", 'TL2');
+			printLog("accepted: $package", 'L2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
@@ -4942,7 +4942,7 @@ sub uninstKernelFlavour {
 			$kernelModuleName = getSubName($kernelToDelete);
 			printLog("all packages uninstalled for $kernelToDelete", 'L0');
 			if ($kernelModuleName ne '') {
-				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				printLog("remove $kernelModuleName from origConfModules", 'L2');
 				$origConfModules{$kernelModuleName}{installed} = 'no';
 				$origConfModules{$kernelModuleName}{upgraded} = 'no';
 				$localConfModules{$kernelModuleName}{installed} = 'no';
@@ -4954,7 +4954,7 @@ sub uninstKernelFlavour {
 		$kernelModuleName = getSubName($kernelToDelete);
 		printLog("no packages to uninstall found for $kernelToDelete", 'L2');
 		if ($kernelModuleName ne '') {
-			printLog("remove $kernelModuleName from origConfModules", 'TL2');
+			printLog("remove $kernelModuleName from origConfModules", 'L2');
 			$origConfModules{$kernelModuleName}{installed} = 'no';
 			$origConfModules{$kernelModuleName}{upgraded} = 'no';
 			$localConfModules{$kernelModuleName}{installed} = 'no';
