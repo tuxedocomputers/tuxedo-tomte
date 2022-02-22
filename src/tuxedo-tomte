@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -3412,12 +3413,14 @@ sub nvidiadriver() {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
+					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
+				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -6121,19 +6124,21 @@ sub reconfigureSingleModule {
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
 			upgradeModule($module);
-			if ($origConfModules{$module}{installed} eq 'yes') {
-				$configuredModules{$module} = 'success';
-			} elsif ($origConfModules{$module}{installed} eq 'no') {
-				$configuredModules{$module} = 'failed';
-			}
+			#TODO test
+			#	if ($origConfModules{$module}{installed} eq 'yes') {
+			#		$configuredModules{$module} = 'success';
+			#} elsif ($origConfModules{$module}{installed} eq 'no') {
+			#		$configuredModules{$module} = 'failed';
+			#}
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
-			if ($origConfModules{$module}{installed} eq 'yes') {
-				$configuredModules{$module} = 'success';
-			} elsif ($origConfModules{$module}{installed} eq 'no') {
-				$configuredModules{$module} = 'failed';
-			}
+			#TODO test
+			#	if ($origConfModules{$module}{installed} eq 'yes') {
+			#		$configuredModules{$module} = 'success';
+			#} elsif ($origConfModules{$module}{installed} eq 'no') {
+			#		$configuredModules{$module} = 'failed';
+			#}
 		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
