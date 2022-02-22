@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -6124,21 +6123,9 @@ sub reconfigureSingleModule {
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
 			upgradeModule($module);
-			#TODO test
-			#	if ($origConfModules{$module}{installed} eq 'yes') {
-			#		$configuredModules{$module} = 'success';
-			#} elsif ($origConfModules{$module}{installed} eq 'no') {
-			#		$configuredModules{$module} = 'failed';
-			#}
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
-			#TODO test
-			#	if ($origConfModules{$module}{installed} eq 'yes') {
-			#		$configuredModules{$module} = 'success';
-			#} elsif ($origConfModules{$module}{installed} eq 'no') {
-			#		$configuredModules{$module} = 'failed';
-			#}
 		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
