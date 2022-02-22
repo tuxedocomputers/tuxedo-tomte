@@ -3321,7 +3321,7 @@ sub nvidiadriver() {
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
@@ -3424,9 +3424,6 @@ sub nvidiadriver() {
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
 		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -6036,10 +6033,8 @@ sub configureSingleModule {
 
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
-	# also if reconfigure is 'always'
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
 		($localConfModules{$module}{installed} eq 'failed') ||
-		($localConfModules{$module}{reconfigure} eq 'always') ||
 	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
