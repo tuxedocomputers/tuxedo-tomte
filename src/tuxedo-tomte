@@ -4727,6 +4727,7 @@ sub uninstallAllOtherKernelFlavours {
 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
 	}
+	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
 	$failed = $tempInstFailed;
 	$somethingWasDone = $tempInstDone;
 }
@@ -4909,7 +4910,7 @@ sub uninstKernelFlavour {
 			printLog('no error from deinstall', 'L1');
 		}
 
-		# check wether packages have been deinstalled
+		# check whether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
 			printLog("package: $package", 'TL2');
 			if (isPackageInstalled($package)) {
@@ -4921,7 +4922,10 @@ sub uninstKernelFlavour {
 		}
 		if ($failed == 0) {
 			$kernelModuleName = getSubName($kernelToDelete);
-			printLog("all packages uninstalled for $kernelToDelete", 'L0');
+			if ($somethingWasDone > 0) {
+				printLog("packages for $kernelToDelete were uninstalled", 'L2');
+			}
+			printLog("no packages for $kernelToDelete present", 'L0');
 			if ($kernelModuleName ne '') {
 				printLog("remove $kernelModuleName from origConfModules", 'L2');
 				$origConfModules{$kernelModuleName}{installed} = 'no';
@@ -4943,6 +4947,75 @@ sub uninstKernelFlavour {
 		}
 	}
 	return (0);
+}
+
+
+
+###############################################################################
+# uninstalls remnant kernels not connected with the desired metapackage
+# returns 1 if all were uninstalled or no packages found
+# returns 0 if something failed
+# 
+sub uninstallRemnantKernels {
+	#TODO lots of debug!!!
+	my ($kernelToKeep, $failed, $somethingWasDone) = @_;
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-image-* linux-modules-* 2>&1";
+	my $retString;
+	my @lines;
+	my @removePackages;
+	my $package;
+	my $deinstString = $consoleLanguage.'apt-get remove -yq --purge ';
+	$retString = `$searchCmd`;
+	printLog("result query remnant linux kernels: $retString", 'L2');
+	@lines = split /\n/, $retString;
+	printLog("kerneltokeep packages: @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}", 'L2');
+	foreach (@lines) {
+		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
+			/(\S+)\s*(\S+)/;
+			if (($2 =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$2$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+				printLog("accepted: $2", 'L2');
+				push(@removePackages, $2);
+			} else {
+				printLog("rejected: $2", 'L2');
+			}
+		}
+	}
+	printLog("amount packages: @removePackages", 'L2');
+	if (@removePackages > 0) {
+		$deinstString .= join(' ', @removePackages).' 2>&1';
+		printLog("deinstallation command: $deinstString", 'L2');
+		$retString = `$deinstString`;
+		printLog("deinstallation result: $retString", 'L2');
+		if ($? != 0) {
+			printLog("error: $?", 'L0');
+		} else {
+			printLog('no error from deinstall', 'L1');
+		}
+		# check whether packages have been deinstalled
+		foreach $package (@removePackages) {
+			printLog("test package: $package", 'TL2');
+			if (isPackageInstalled($package)) {
+				printLog("unwanted package $package is still installed", 'L0');
+				$failed += 1;
+			} else {
+				$somethingWasDone += 1;
+			}
+		}
+		if (($failed == 0) && ($somethingWasDone > 0)) {
+			printLog("all remnant kernel packages uninstalled", 'L0');
+			return (1);
+		} elsif ($failed == 0) {
+			printLog("no remnant kernel packages to uninstall found", 'L1');
+			return (1);
+		} else {
+			printLog("error in uninstalling remnant kernel packages", 'L1');	
+			return (0);
+		}
+
+	} else {
+		printLog("no remnant kernel packages to uninstall found", 'L1');
+		return (1);
+	}
 }
 
 
