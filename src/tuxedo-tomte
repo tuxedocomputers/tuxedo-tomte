@@ -4964,24 +4964,30 @@ sub uninstallRemnantKernels {
 	my @lines;
 	my @removePackages;
 	my $package;
+	my $line;
 	my $deinstString = $consoleLanguage.'apt-get remove -yq --purge ';
 	$retString = `$searchCmd`;
-	printLog("result query remnant linux kernels: $retString", 'L2');
+	printLog("result query remnant linux kernels:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
-	printLog("kerneltokeep packages: @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}", 'L2');
-	foreach (@lines) {
-		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
-			/(\S+)\s*(\S+)/;
-			if (($1 =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$1$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-				printLog("accepted: $1", 'L2');
-				push(@removePackages, $1);
+	printLog("kerneltokeep packages:\n@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}", 'L2');
+	foreach $line (@lines) {
+		if ((!($line =~ /dpkg-query:/)) && ($line =~ /.*\s[uirp][cHUFWti]/)) {
+			$line =~ /(\S+)\s*(\S+)/;
+			$package = $1;
+			if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+				printLog("accepted: $package", 'L2');
+				push(@removePackages, $package);
 			} else {
-				printLog("rejected: $1", 'L2');
+				printLog("rejected: $package", 'L2');
 			}
 		}
 	}
-	printLog("amount packages: @removePackages", 'L2');
-	if (@removePackages > 0) {
+	$package = '';
+	#TODO debug
+	my $length = scalar(@removePackages);
+
+	printLog("amount packages: $length", 'L2');
+	if (scalar(@removePackages) > 0) {
 		$deinstString .= join(' ', @removePackages).' 2>&1';
 		printLog("deinstallation command: $deinstString", 'L2');
 		$retString = `$deinstString`;
