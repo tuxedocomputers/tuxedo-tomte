@@ -624,7 +624,7 @@ my %tuxedo_devices = (
 	'23' => {
 		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
 		board_name => ['GMxNGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -635,7 +635,7 @@ my %tuxedo_devices = (
 	'24' => {
 		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
 		board_name => ['GMxMGxx'],
-		fix => ['tuxedotouchpadswitch', 'realtekr8125dkms', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -646,7 +646,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -657,7 +657,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'realtekr8125dkms', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1220,7 +1220,7 @@ my %origConfModules = (
 	},	
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1250,6 +1250,7 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	# deprecated since 20220216
 	amdgpudkms => {
 		name => 'amdgpu-dkms',
 		version => 1,
@@ -1314,16 +1315,17 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => '',
 	},
+	# deprecated since 20220215
 	realtekr8125dkms => {
 		name => 'realtek-r8125-dkms',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
 		fainame => '',
-		description => 'Linux device driver for several Realtek Ethernet controllers',
+		description => 'Linux device driver for several Realtek Ethernet controllers [obsolete]',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1900,13 +1902,6 @@ sub checkRequirements {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog('detected apport-fix issue', 'L1');
-	}
-	if (($boardname =~ m/GMxMGxx/) ||
-		($boardname =~ m/GMxNGxx/) ||
-		($boardname =~ m/GMxZGxx/) ||
-		($boardname =~ m/GMxTGxx/)) {
-		$origConfModules{realtekr8125dkms}{required} = 'yes';
-		printLog('detected realtek-r8125-dkms issue', 'L1');
 	}
 	if (($boardname =~ m/GMxNGxx/) ||
 		($boardname =~ m/GMxZGxx/)) {
@@ -3180,10 +3175,9 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	#TODO
-	#	if ($action eq 'upgrade') {
-		# no upgrades yet
-		#	}
+	if ($action eq 'upgrade') {
+		#no upgrades yet
+	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3223,10 +3217,9 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	#TODO
-	#	if ($action eq 'upgrade') {
+	if ($action eq 'upgrade') {
 		# no upgrades yet
-		#	}
+	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3315,10 +3308,6 @@ sub kerneltuxedo2004() {
 
 
 
-
-
-
-
 ###############################################################################
 # nvidiadriver
 # installs TUXEDO approved nvidia drivers and removes all the other ones
@@ -3334,7 +3323,7 @@ sub nvidiadriver() {
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
-	if ($action eq 'install') {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
@@ -3425,21 +3414,20 @@ sub nvidiadriver() {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
+					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
+				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
 		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
@@ -3485,6 +3473,7 @@ sub cracklibruntime() {
 
 ###############################################################################
 # Fixes AMD GPU frequency communication with display
+# !! deprecated since 20220216
 #
 sub amdgpudkms() {
 	my $module = shift;
@@ -3683,36 +3672,49 @@ sub apportfix() {
 
 
 ###############################################################################
-# Installs Linux device driver for several Realtek Ethernet controllers
+# Removes Linux device driver if installed and in configuration list
 #
 sub realtekr8125dkms() {
 	my $module = shift;
 	my $action = shift;
+	# ignore if FAI or LiveISO install
+	if ($FAI || $LiveISO) {
+		return (1);
+	}
 	if ($action eq 'install') {
-		# check before if the package is already installed
-		if (! isPackageInstalled($origConfModules{$module}{name})) {
-			messageLongInstall();
-			if (installPackage($origConfModules{$module}{name})) {
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
-			} else {
-				$origConfModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-		} else {
-			printLog("$origConfModules{$module}{name} was already installed", 'L1');
-			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-		}
+		printLog("package is obsolete", 'L1');
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "no";
+		$origConfModules{$module}{required} = "no";
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages", 'L1');
+		printLog("package is obsolete", 'L1');
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "no";
+		$origConfModules{$module}{required} = "no";
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		# check before if the package is already installed
+		if (isPackageInstalled($origConfModules{$module}{name})) {
+			if (removePackage($origConfModules{$module}{name})) {
+				addToConfiguredModules($module, "removed");
+				$origConfModules{$module}{installed} = "no";
+				$origConfModules{$module}{upgraded} = "yes";
+				$origConfModules{$module}{required} = "no";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "remove failed";
+				$origConfModules{$module}{version} = $localConfModules{$module}{version};
+				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{required} = "no";
+		}
 	}
 }
 
@@ -4504,7 +4506,7 @@ sub deinstallSinglePackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
-	my $cmd = 'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
+	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
 	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
@@ -4537,7 +4539,7 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
-		printLog("return from pkcon:\n$retval", 'TL2');
+		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
 			printLog("failed to install $packageName", 'L0');
@@ -4548,6 +4550,28 @@ sub installPackage {
 	return $retval;
 }
 
+
+
+###############################################################################
+# removes a package by pkcon or apt-get
+# returns 1 if successful or not installed
+# returns 0 if failed
+#
+sub removePackage {
+	my $packageName = shift;
+	my $retval;
+	printLog("remove package $packageName", 'TL0');
+	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
+	printLog("return from pkcon:\n$retval", 'L2');
+	$retval = isPackageInstalled($packageName);
+	if ($retval == 1) {
+		printLog("failed to remove $packageName", 'L0');
+		printLog("will try again later", 'L0');
+		startTomteDelayed();
+		return (0);
+	}
+	return (1);
+}
 
 
 ###############################################################################
@@ -4824,7 +4848,7 @@ sub uninstKernelFlavour {
 	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
 	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-			printLog("accepted: $package", 'TL2');
+			printLog("accepted: $package", 'L2');
 			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
@@ -4901,7 +4925,7 @@ sub uninstKernelFlavour {
 			$kernelModuleName = getSubName($kernelToDelete);
 			printLog("all packages uninstalled for $kernelToDelete", 'L0');
 			if ($kernelModuleName ne '') {
-				printLog("remove $kernelModuleName from origConfModules", 'TL2');
+				printLog("remove $kernelModuleName from origConfModules", 'L2');
 				$origConfModules{$kernelModuleName}{installed} = 'no';
 				$origConfModules{$kernelModuleName}{upgraded} = 'no';
 				$localConfModules{$kernelModuleName}{installed} = 'no';
@@ -4913,7 +4937,7 @@ sub uninstKernelFlavour {
 		$kernelModuleName = getSubName($kernelToDelete);
 		printLog("no packages to uninstall found for $kernelToDelete", 'L2');
 		if ($kernelModuleName ne '') {
-			printLog("remove $kernelModuleName from origConfModules", 'TL2');
+			printLog("remove $kernelModuleName from origConfModules", 'L2');
 			$origConfModules{$kernelModuleName}{installed} = 'no';
 			$origConfModules{$kernelModuleName}{upgraded} = 'no';
 			$localConfModules{$kernelModuleName}{installed} = 'no';
@@ -5552,6 +5576,7 @@ sub readConfigFile {
 #
 sub validConfigLine {
 	my $line = shift;
+	# name version installed blocked required hwid
 	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
@@ -5575,40 +5600,41 @@ sub writeConfigFile {
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
-			if ($origConfModules{$name}{upgrade} eq 'yes') {
-				# upgrade available
-				if ($origConfModules{$name}{upgraded} eq 'yes') {
-					# upgrade was executed
+			if ($origConfModules{$name}{required} ne 'no') {
+				if ($origConfModules{$name}{upgrade} eq 'yes') {
+					# upgrade available
+					if ($origConfModules{$name}{upgraded} eq 'yes') {
+						# upgrade was executed
+						$version = $origConfModules{$name}{version};
+						$hwid = $origConfModules{$name}{hwid};
+						$installed = $origConfModules{$name}{installed};
+					} else {
+						# upgrade was not executed
+						if ( $origConfModules{$name}{installed} eq 'yes' ) {
+							$version = $localConfModules{$name}{version};
+							$hwid = $localConfModules{$name}{hwid};
+							$installed = $localConfModules{$name}{installed};
+						} else {
+							$version = $origConfModules{$name}{version};
+							$hwid = $origConfModules{$name}{hwid};
+							$installed = $localConfModules{$name}{installed};
+						}
+					}
+				} else {
+					# no upgrade available
 					$version = $origConfModules{$name}{version};
 					$hwid = $origConfModules{$name}{hwid};
 					$installed = $origConfModules{$name}{installed};
-				} else {
-					# upgrade was not executed
-					if ( $origConfModules{$name}{installed} eq 'yes' ) {
-						$version = $localConfModules{$name}{version};
-						$hwid = $localConfModules{$name}{hwid};
-						$installed = $localConfModules{$name}{installed};
-					} else {
-						$version = $origConfModules{$name}{version};
-						$hwid = $origConfModules{$name}{hwid};
-						$installed = $localConfModules{$name}{installed};
-					}
 				}
-			} else {
-				# no upgrade available
-				$version = $origConfModules{$name}{version};
-				$hwid = $origConfModules{$name}{hwid};
-				$installed = $origConfModules{$name}{installed};
-			}
-			unless(($origConfModules{$name}{installed} eq 'no') &&
-					($origConfModules{$name}{upgraded} eq 'no') &&
-					($origConfModules{$name}{required} eq 'no')) {
-				print $FH "$origConfModules{$name}{name} ".
-					"$version ".
-					"$installed ".
-					"$origConfModules{$name}{blocked} ".
-					"$origConfModules{$name}{required} ".
-					"$hwid\n";
+				unless(($origConfModules{$name}{installed} eq 'no') &&
+						($origConfModules{$name}{required} eq 'no')) {
+					print $FH "$origConfModules{$name}{name} ".
+						"$version ".
+						"$installed ".
+						"$origConfModules{$name}{blocked} ".
+						"$origConfModules{$name}{required} ".
+						"$hwid\n";
+				}
 			}
 		}
 		close $FH;
@@ -5793,8 +5819,9 @@ sub listStatus {
 				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
-		if (($localConfModules{$module}{required} eq 'yes') ||
-			($localConfModules{$module}{required} eq 'prerequisite')) {
+		# required, installed and not removed
+		if ((($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) &&
+			($localConfModules{$module}{installed} ne 'no')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
@@ -5882,6 +5909,10 @@ sub addToConfiguredModules {
 		printLog("failed to install $module", 'L0');
 	} elsif ($status =~ /success/) {
 		printLog("succesfully installed $module", 'L0');
+	} elsif ($status =~ /removed/) {
+		printLog("succesfully removed $module", 'L0');
+	} elsif ($status =~ /remove failed/) {
+		printLog("failed to remove $module", 'L0');
 	}
 }
 
@@ -5982,7 +6013,7 @@ sub configureAllModules {
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				($localConfModules{$module}{installed} eq 'yes')) {
+				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
@@ -6024,12 +6055,8 @@ sub configureSingleModule {
 		$configuredModules{$module} = 'nothingToDo';
 	}
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-		print "Module $moduleName cannot be installed because:\n";
+		print "Module $moduleName cannot be installed/removed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
-	}
-	if ( $origConfModules{$module}{required} eq 'no' ) {
-		print "Module $moduleName cannot be installed because:\n";
-		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
 
@@ -6072,7 +6099,7 @@ sub reconfigureAllModules {
 		if ($origConfModules{$module}{required} eq 'yes') {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				($localConfModules{$module}{installed} eq 'yes')) {
+				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
 			removeModule($module);
 		}
 	}
@@ -6094,24 +6121,13 @@ sub reconfigureSingleModule {
 	}
 
 	if ( $localConfModules{$module}{blocked} eq 'no' &&
-		($origConfModules{$module}{required} eq 'yes' ||
-		$origConfModules{$module}{required} eq 'prerequisite')) {
+		($origConfModules{$module}{required} eq 'yes' || $origConfModules{$module}{required} eq 'prerequisite')) {
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
 			upgradeModule($module);
-			if ($origConfModules{$module}{installed} eq 'yes') {
-				$configuredModules{$module} = 'success';
-			} elsif ($origConfModules{$module}{installed} eq 'no') {
-				$configuredModules{$module} = 'failed';
-			}
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
-			if ($origConfModules{$module}{installed} eq 'yes') {
-				$configuredModules{$module} = 'success';
-			} elsif ($origConfModules{$module}{installed} eq 'no') {
-				$configuredModules{$module} = 'failed';
-			}
 		}
 	} else {
 		print "Module: $moduleName cannot be installed because:\n";
@@ -6119,7 +6135,9 @@ sub reconfigureSingleModule {
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
-	if ( $origConfModules{$module}{required} eq 'no' ) {
+	if (($origConfModules{$module}{required} eq 'no') &&
+		($configuredModules{$module} ne 'remove failed') &&
+		($configuredModules{$module} ne 'removed')) {
 		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
@@ -6299,6 +6317,7 @@ sub listSuccess {
 	my @failedModules;
 	my @successModules;
 	my @nothingToDoModules;
+	my @removedModules;
 	my $successOrFailed = 0;
 
 	foreach $confProgram (keys %postConfProgram) {
@@ -6316,6 +6335,8 @@ sub listSuccess {
 			push(@successModules, $confModule);
 		} elsif ($configuredModules{$confModule} eq "nothingToDo") {
 			push(@nothingToDoModules, $confModule);
+		} elsif ($configuredModules{$confModule} eq "removed") {
+			push(@removedModules, $confModule);
 		}
 	}
 	if (@successModules) {
@@ -6336,6 +6357,10 @@ sub listSuccess {
 	if (@failedPrograms) {
 		print "\nThe following post installation programs have failed:\n";
 		printNameDescriptionPrograms(@failedPrograms);
+	}
+	if (@removedModules) {
+		print "\nThe following modules have been removed:\n";
+		printNameDescriptionModules(@removedModules);
 	}
 	if (! $successOrFailed) {
 		print "\nNothing has been configured\n";
