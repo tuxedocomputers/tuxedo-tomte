@@ -1149,7 +1149,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kerneltuxedo2004next => {
@@ -1165,7 +1165,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kerneltuxedo2004 => {
@@ -1181,7 +1181,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004 => {
@@ -1197,7 +1197,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},
 	kernelgenerichwe2004edge => {
@@ -1213,7 +1213,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => 'yes',
 	},	
 	nvidiadriver => {
