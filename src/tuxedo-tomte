@@ -4972,11 +4972,11 @@ sub uninstallRemnantKernels {
 	foreach (@lines) {
 		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
 			/(\S+)\s*(\S+)/;
-			if (($2 =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$2$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
-				printLog("accepted: $2", 'L2');
-				push(@removePackages, $2);
+			if (($1 =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$1$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+				printLog("accepted: $1", 'L2');
+				push(@removePackages, $1);
 			} else {
-				printLog("rejected: $2", 'L2');
+				printLog("rejected: $1", 'L2');
 			}
 		}
 	}
