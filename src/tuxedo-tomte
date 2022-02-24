@@ -3173,9 +3173,6 @@ sub kernelhwe2004() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
-		#no upgrades yet
-	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3215,9 +3212,6 @@ sub kerneltuxedo2004edge() {
 			}
 		}
 	}
-	if ($action eq 'upgrade') {
-		# no upgrades yet
-	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3255,9 +3249,6 @@ sub kerneltuxedo2004next() {
 			}
 		}
 	}
-	#	if ($action eq 'upgrade') {
-		# no upgrades yet
-		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -3296,9 +3287,6 @@ sub kerneltuxedo2004() {
 			}
 		}
 	}
-	#	if ($action eq 'upgrade') {
-		# no upgrades yet
-		#	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
@@ -4912,7 +4900,7 @@ sub uninstKernelFlavour {
 
 		# check whether packages have been deinstalled
 		foreach $package (keys %pkgsHash) {
-			printLog("package: $package", 'TL2');
+			printLog("package: $package", 'L2');
 			if (isPackageInstalled($package)) {
 				printLog("unwanted package $package is still installed", 'L0');
 				$failed += 1;
@@ -4999,7 +4987,7 @@ sub uninstallRemnantKernels {
 		}
 		# check whether packages have been deinstalled
 		foreach $package (@removePackages) {
-			printLog("test package: $package", 'TL2');
+			printLog("test package: $package", 'L2');
 			if (isPackageInstalled($package)) {
 				printLog("unwanted package $package is still installed", 'L0');
 				$failed += 1;
@@ -6466,7 +6454,7 @@ sub configuredModulesExceptDefault {
 			}
 		}
 	}
-	if (scalar(@modulesList) > 0) {
+	if ((scalar(@modulesList) > 0) || ($longInstall == 1)) {
 		return (1);
 	}
 	return (0);
