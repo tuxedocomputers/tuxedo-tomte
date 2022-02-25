@@ -1928,7 +1928,7 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif ($boardname =~ m/GMxTGxx/) {
+		} elsif ($boardname =~ m/GMxZGxx/) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
