@@ -28,7 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4945,7 +4945,6 @@ sub uninstKernelFlavour {
 # returns 0 if something failed
 # 
 sub uninstallRemnantKernels {
-	#TODO lots of debug!!!
 	my ($kernelToKeep, $failed, $somethingWasDone) = @_;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-image-* linux-modules-* 2>&1";
 	my $retString;
@@ -4957,7 +4956,6 @@ sub uninstallRemnantKernels {
 	$retString = `$searchCmd`;
 	printLog("result query remnant linux kernels:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
-	printLog("kerneltokeep packages:\n@{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}", 'L2');
 	foreach $line (@lines) {
 		if ((!($line =~ /dpkg-query:/)) && ($line =~ /.*\s[uirp][cHUFWti]/)) {
 			$line =~ /(\S+)\s*(\S+)/;
@@ -4971,10 +4969,6 @@ sub uninstallRemnantKernels {
 		}
 	}
 	$package = '';
-	#TODO debug
-	my $length = scalar(@removePackages);
-
-	printLog("amount packages: $length", 'L2');
 	if (scalar(@removePackages) > 0) {
 		$deinstString .= join(' ', @removePackages).' 2>&1';
 		printLog("deinstallation command: $deinstString", 'L2');
