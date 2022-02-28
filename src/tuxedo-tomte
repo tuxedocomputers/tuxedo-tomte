@@ -4609,11 +4609,13 @@ sub installKernelFlavour {
 	my $packageMissing = 0;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
+		$failed += 1;
 		return (0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
+		$failed += 1;
 		return (0);
 	}
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
@@ -4638,12 +4640,13 @@ sub installKernelFlavour {
 		printLog("installing $flavour", 'L1');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
-		if ($retString =~ /sudo dpkg --configure -a/) {
+		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
 			printLog("executing: make configure -a", 'L2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
+				$failed += 1;
 				return (0);
 			} else {
 				$retString = `$installCmd`;
