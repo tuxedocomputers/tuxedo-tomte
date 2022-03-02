@@ -28,7 +28,8 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-my $logLevel = 0;
+#TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4518,7 +4519,11 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
+		if ($logLevel > 1) {
+			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
+		} else {
+			$retval = `apt-get -y install $packageName`;
+		}
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
