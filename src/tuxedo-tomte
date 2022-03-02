@@ -28,8 +28,7 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4530,9 +4529,9 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		if ($logLevel > 1) {
-			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
-		} else {
 			$retval = `pkcon -yp install $packageName >$logFile 2>&1`;
+		} else {
+			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
 		}
 		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
