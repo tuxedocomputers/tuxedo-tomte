@@ -4518,13 +4518,17 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		$retval = `apt-get -y install $packageName 2>&1`;
+		$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
-		$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+		if ($logLevel > 1) {
+			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+		} else {
+			$retval = `pkcon -yp install $packageName >$logFile 2>&1`;
+		}
 		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
