@@ -1,3 +1,16 @@
+tuxedo-tomte (2.5.32-1) UNRELEASED; urgency=medium
+
+  [ E. Mohr ]
+  * after packaging
+
+  [ Werner Sembach ]
+  * Fix false success return of kernel installation and parsing of dpgk error
+
+  [ E. Mohr ]
+  * debug options for pkcon and apt-get while installPackage
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 02 Mar 2022 08:59:54 +0100
+
 tuxedo-tomte (2.5.31) focal; urgency=medium
 
   * added subroutine to remove orphaned kernel images
