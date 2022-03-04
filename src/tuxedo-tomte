@@ -4574,13 +4574,21 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		$retval = `apt-get -y install $packageName 2>&1`;
+		if ($logLevel > 1) {
+			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
+		} else {
+			$retval = `apt-get -y install $packageName`;
+		}
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
-		$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+		if ($logLevel > 1) {
+			$retval = `pkcon -yp install $packageName >$logFile 2>&1`;
+		} else {
+			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+		}
 		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
@@ -4665,11 +4673,13 @@ sub installKernelFlavour {
 	my $packageMissing = 0;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
+		$failed += 1;
 		return (0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
+		$failed += 1;
 		return (0);
 	}
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
@@ -4694,12 +4704,13 @@ sub installKernelFlavour {
 		printLog("installing $flavour", 'L1');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
-		if ($retString =~ /sudo dpkg --configure -a/) {
+		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
 			printLog("executing: make configure -a", 'L2');
 			`dpkg --configure -a`;
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
+				$failed += 1;
 				return (0);
 			} else {
 				$retString = `$installCmd`;
