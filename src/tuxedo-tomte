@@ -4702,31 +4702,31 @@ sub uninstallAllOtherKernelFlavours {
 	my ($exceptKernel, $failed, $somethingWasDone) = @_;
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
-	if ($exceptKernel ne 'linux-generic') {
-		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-oem-20.04') {
-		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-oem-20.04-edge') {
-		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
-		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
-		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04') {
-		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
-		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
+# 	if ($exceptKernel ne 'linux-generic') {
+# 		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-oem-20.04') {
+# 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-oem-20.04-edge') {
+# 		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
+# 		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
+# 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
 	$failed = $tempInstFailed;
 	$somethingWasDone = $tempInstDone;
 }
