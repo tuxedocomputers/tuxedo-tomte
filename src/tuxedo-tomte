@@ -3431,6 +3431,13 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
+					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
+					`$primeSelectNvidiaCmd`;
+					if (`prime-select query` =~ /nvidia/) {
+						printLog('Nvidia GPU selected', 'L1');
+					} else {
+						printLog('Nvidia GPU could not be selected', 'L0');
+					}
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
@@ -4170,6 +4177,7 @@ sub primeselectnvidia() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
 		} else {
 			printLog('Nvidia GPU not set, something is wrong', 'L0');
 			$origConfModules{$module}{installed} = "no";
