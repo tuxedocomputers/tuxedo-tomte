@@ -1,9 +1,22 @@
-tuxedo-tomte (2.5.31-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.5.33-4) UNRELEASED; urgency=medium
 
+  * added primeselectnvidia
   * changed kernel for Stellaris/Polaris 15/17 Gen3 AMD GMxZGxx to linux-tuxedo-20.04-next
   * changed kernel for Stellaris/Polaris 15/17 Gen3 Intel GMxTGxx to linux-tuxedo-20.04
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Feb 2022 14:06:51 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 09 Mar 2022 10:14:47 +0100
+
+tuxedo-tomte (2.5.33) focal; urgency=medium
+
+  * Momentarily deactivate kernel deinstallation
+
+ -- Werner Sembach <wse@tuxedo.de>  Fri, 04 Mar 2022 19:12:52 +0100
+
+tuxedo-tomte (2.5.32) focal; urgency=medium
+
+  * Fix false success return of kernel installation and parsing of dpkg error
+
+ -- Werner Sembach <wse@tuxedo.de>  Mon, 28 Feb 2022 18:56:04 +0100
 
 tuxedo-tomte (2.5.31) focal; urgency=medium
 
