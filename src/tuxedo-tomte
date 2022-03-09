@@ -28,6 +28,10 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
+# logLevel:
+# 0 = normal
+# 1 = some debug
+# 2 = everything
 my $logLevel = 0;
 
 # for console language
@@ -512,7 +516,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -1490,6 +1494,22 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	primeselectnvidia => {
+		name => 'prime-select-nvidia',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Chooses Nvidia GPU as main device to avoid microstuttering',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+	},
 
 );
 
@@ -1952,6 +1972,12 @@ sub checkRequirements {
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
+	}
+	if (($boardname =~ m/PHxTxX1/) ||
+		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/PHxTQx1/)) {
+		$origConfModules{primeselectnvidia}{required} = 'yes';
+		printLog('detected possible prime-select-nvidia issue', 'L1');
 	}
 
 }
@@ -3402,6 +3428,13 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
+					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
+					`$primeSelectNvidiaCmd`;
+					if (`prime-select query` =~ /nvidia/) {
+						printLog('Nvidia GPU selected', 'L1');
+					} else {
+						printLog('Nvidia GPU could not be selected', 'L0');
+					}
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
@@ -4115,6 +4148,43 @@ sub earlyloadbacklightcontrolfix() {
 		# not implemented yet
 	}
 }
+
+
+###############################################################################
+# checks if Nvidia is set as main GPU. Switches to Nvidia as main GPU if not
+#
+sub primeselectnvidia() {
+	my $module = shift;
+	my $action = shift;
+
+	my $getGPU = $consoleLanguage.'prime-select query';
+	my $setGPU = $consoleLanguage.'prime-select nvidia';
+	my $retValue = `$getGPU`;
+	if ($retValue =~ /nvidia/) {
+		printLog('Nvidia is already set', 'L1');
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "nothingToDo");
+	} else {
+		printLog('Nvidia not set -> activating now', 'L1');
+		`$setGPU`;
+		$retValue = `$getGPU`;
+		if ($retValue =~ /nvidia/) {
+			printLog('Nvidia GPU set suchessfully', 'L1');
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		} else {
+			printLog('Nvidia GPU not set, something is wrong', 'L0');
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+		}
+	}
+}
+
+
 
 
 
