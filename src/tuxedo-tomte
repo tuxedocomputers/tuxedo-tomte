@@ -32,7 +32,8 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+# TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1494,6 +1495,7 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	# fix should only be applied once on Tomte installation
 	primeselectnvidia => {
 		name => 'prime-select-nvidia',
 		version => 1,
@@ -1503,11 +1505,11 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Chooses Nvidia GPU as main device to avoid microstuttering',
+		description => 'Reinitializes Nvidia GPU to avoid microstuttering',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => 'yes',
 	},
 
@@ -1975,6 +1977,8 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
+		#TODO test
+		($boardname =~ m/NH5xAx/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{primeselectnvidia}{required} = 'yes';
 		printLog('detected possible prime-select-nvidia issue', 'L1');
@@ -4158,16 +4162,32 @@ sub primeselectnvidia() {
 	my $action = shift;
 
 	my $getGPU = $consoleLanguage.'prime-select query';
-	my $setGPU = $consoleLanguage.'prime-select nvidia';
+	my $setGPUNvidia = $consoleLanguage.'prime-select nvidia';
+	my $setGPUIntel = $consoleLanguage.'prime-select intel';
 	my $retValue = `$getGPU`;
 	if ($retValue =~ /nvidia/) {
-		printLog('Nvidia is already set', 'L1');
-		$origConfModules{$module}{installed} = "yes";
-		$origConfModules{$module}{upgraded} = "yes";
-		addToConfiguredModules($module, "nothingToDo");
+		printLog('Nvidia is set, switching to Intel', 'L1');
+		`$setGPUIntel`;
+		$retValue = `$getGPU`;
+		if ($retValue =~ 'intel') {
+			printLog('Intel is set, switching back to Nvidia', 'L1');
+			`$setGPUNvidia`;
+			if ($retValue =~ 'nvidia') {
+				printLog('Nvidia is set, cycle complete, fix applied', 'L1');
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+				return (0);
+			}
+		}
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "no";
+		addToConfiguredModules($module, "failed");
+		printLog('Fix could not be applied', 'L0');
 	} else {
 		printLog('Nvidia not set -> activating now', 'L1');
-		`$setGPU`;
+		`$setGPUNvidia`;
 		$retValue = `$getGPU`;
 		if ($retValue =~ /nvidia/) {
 			printLog('Nvidia GPU set suchessfully', 'L1');
