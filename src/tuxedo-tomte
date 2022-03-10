@@ -1974,12 +1974,12 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
-	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{primeselectnvidia}{required} = 'yes';
-		printLog('detected possible prime-select-nvidia issue', 'L1');
-	}
+	#	if (($boardname =~ m/PHxTxX1/) ||
+	#		($boardname =~ m/PH4TQx1/) ||
+	#		($boardname =~ m/PHxTQx1/)) {
+	#		$origConfModules{primeselectnvidia}{required} = 'yes';
+	#		printLog('detected possible prime-select-nvidia issue', 'L1');
+	#}
 
 }
 
