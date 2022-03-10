@@ -32,8 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-# TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1950,8 +1949,7 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-			#TODO debug
-		} elsif (($boardname =~ m/GMxZGxx/) || ($boardname =~ m/NH5xAx/)) {
+		} elsif ($boardname =~ m/GMxZGxx/) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
@@ -1978,8 +1976,6 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		#TODO test
-		($boardname =~ m/NH5xAx/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{primeselectnvidia}{required} = 'yes';
 		printLog('detected possible prime-select-nvidia issue', 'L1');
@@ -4156,7 +4152,7 @@ sub earlyloadbacklightcontrolfix() {
 
 
 ###############################################################################
-# checks if Nvidia is set as main GPU. Switches to Nvidia as main GPU if not
+# checks if Nvidia is set as main GPU. Switches to Intel and back to Nvidia
 #
 sub primeselectnvidia() {
 	my $module = shift;
@@ -4187,21 +4183,7 @@ sub primeselectnvidia() {
 		addToConfiguredModules($module, "failed");
 		printLog('Fix could not be applied', 'L0');
 	} else {
-		printLog('Nvidia not set -> activating now', 'L1');
-		`$setGPUNvidia`;
-		$retValue = `$getGPU`;
-		if ($retValue =~ /nvidia/) {
-			printLog('Nvidia GPU set suchessfully', 'L1');
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
-		} else {
-			printLog('Nvidia GPU not set, something is wrong', 'L0');
-			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "no";
-			addToConfiguredModules($module, "failed");
-		}
+		printLog('Intel GPU set not set -> leaving it as it is', 'L1');
 	}
 }
 
