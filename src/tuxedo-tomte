@@ -649,7 +649,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004next'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -660,7 +660,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1950,7 +1950,8 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif ($boardname =~ m/GMxTGxx/) {
+			#TODO debug
+		} elsif (($boardname =~ m/GMxZGxx/) || ($boardname =~ m/NH5xAx/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
