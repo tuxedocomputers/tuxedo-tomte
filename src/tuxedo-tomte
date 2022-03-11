@@ -67,6 +67,8 @@ my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
+my $distributionIdLike;
+my $distributionVersionCodename;
 my $completeDistVersion;
 my $FAI = 0;
 my $LiveISO = 0;
@@ -1646,19 +1648,48 @@ sub readOSData {
 	}
 	foreach ( @osReleaseLines ) {
 		if ( $_ =~ /^NAME=/ ) {
-			$_ =~ /NAME=\"(.*)\"/;
+			$_ =~ /NAME=\"?(.*)\"?/;
 			$distribution = $1;
 		}
-		if ( $_ =~ /^VERSION_ID=/ ) {
-			$_ =~ /VERSION_ID=\"(.*)\"/;
+		elsif ( $_ =~ /^VERSION_ID=/ ) {
+			$_ =~ /VERSION_ID=\"?(.*)\"?/;
 			$distributionVersion = $1;
 		}
+		elsif ( $_ =~ /^ID_LIKE=/ ) {
+			$_ =~ /ID_LIKE=\"?(.*)\"?/;
+			$distributionIdLike = $1;
+		}
+		elsif ( $_ =~ /^VERSION_CODENAME=/ ) {
+			$_ =~ /VERSION_CODENAME=\"?(.*)\"?/;
+			$distributionVersionCodename = $1;
+		}
 	}
+	
+	workaroundUbuntuForks();
+	
 	$completeDistVersion = $distribution.' '.$distributionVersion;
 }
 
 
+###############################################################################
+# correct $distribution and $distributionVersion if OS is an Ubuntu fork with
+# same sources
 
+sub workaroundUbuntuForks {
+	if ( $distributionIdLike =~ /^ubuntu$/ ) {
+		if ( $distributionVersionCodename =~ /^(bionic|focal)$/ ) {
+			printLog("Workaround Ubuntu forks: Change $distribution to Ubuntu and use sources of $distributionVersionCodename", 'TL0');
+			$distribution = 'Ubuntu';
+
+			if ( $distributionVersionCodename =~ /^bionic$/ ) {
+				$distributionVersion = '18.04';
+			}
+			elsif ( $distributionVersionCodename =~ /^focal$/ ) {
+				$distributionVersion = '20.04';
+			}
+		}
+	}
+}
 
 ###############################################################################
 # returns the brand of the CPU (AMD or Intel)
