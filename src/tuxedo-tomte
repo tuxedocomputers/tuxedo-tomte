@@ -28,6 +28,10 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
+# logLevel:
+# 0 = normal
+# 1 = some debug
+# 2 = everything
 my $logLevel = 0;
 
 # for console language
@@ -568,7 +572,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -700,7 +704,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004next'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -711,7 +715,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004next', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1546,6 +1550,23 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	# fix should only be applied once on Tomte installation
+	primeselectnvidia => {
+		name => 'prime-select-nvidia',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Reinitializes Nvidia GPU to avoid microstuttering',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
 
 );
 
@@ -1984,7 +2005,7 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif ($boardname =~ m/GMxTGxx/) {
+		} elsif ($boardname =~ m/GMxZGxx/) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
@@ -2009,6 +2030,12 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
+	#	if (($boardname =~ m/PHxTxX1/) ||
+	#		($boardname =~ m/PH4TQx1/) ||
+	#		($boardname =~ m/PHxTQx1/)) {
+	#		$origConfModules{primeselectnvidia}{required} = 'yes';
+	#		printLog('detected possible prime-select-nvidia issue', 'L1');
+	#}
 
 }
 
@@ -3458,6 +3485,13 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
+					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
+					`$primeSelectNvidiaCmd`;
+					if (`prime-select query` =~ /nvidia/) {
+						printLog('Nvidia GPU selected', 'L1');
+					} else {
+						printLog('Nvidia GPU could not be selected', 'L0');
+					}
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
@@ -4173,6 +4207,45 @@ sub earlyloadbacklightcontrolfix() {
 }
 
 
+###############################################################################
+# checks if Nvidia is set as main GPU. Switches to Intel and back to Nvidia
+#
+sub primeselectnvidia() {
+	my $module = shift;
+	my $action = shift;
+
+	my $getGPU = $consoleLanguage.'prime-select query';
+	my $setGPUNvidia = $consoleLanguage.'prime-select nvidia';
+	my $setGPUIntel = $consoleLanguage.'prime-select intel';
+	my $retValue = `$getGPU`;
+	if ($retValue =~ /nvidia/) {
+		printLog('Nvidia is set, switching to Intel', 'L1');
+		`$setGPUIntel`;
+		$retValue = `$getGPU`;
+		if ($retValue =~ 'intel') {
+			printLog('Intel is set, switching back to Nvidia', 'L1');
+			`$setGPUNvidia`;
+			if ($retValue =~ 'nvidia') {
+				printLog('Nvidia is set, cycle complete, fix applied', 'L1');
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+				return (0);
+			}
+		}
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "no";
+		addToConfiguredModules($module, "failed");
+		printLog('Fix could not be applied', 'L0');
+	} else {
+		printLog('Intel GPU set not set -> leaving it as it is', 'L1');
+	}
+}
+
+
+
+
 
 
 
@@ -4758,31 +4831,31 @@ sub uninstallAllOtherKernelFlavours {
 	my ($exceptKernel, $failed, $somethingWasDone) = @_;
 	my $tempInstFailed = 0;
 	my $tempInstDone = 0;
-	if ($exceptKernel ne 'linux-generic') {
-		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-oem-20.04') {
-		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-oem-20.04-edge') {
-		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
-		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
-		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04') {
-		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
-		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
-	}
-	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
+# 	if ($exceptKernel ne 'linux-generic') {
+# 		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-oem-20.04') {
+# 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-oem-20.04-edge') {
+# 		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
+# 		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
+# 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
+# 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
+# 	}
+# 	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
 	$failed = $tempInstFailed;
 	$somethingWasDone = $tempInstDone;
 }
