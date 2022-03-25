@@ -4167,7 +4167,7 @@ sub primeselectnvidia() {
 	my $setGPUIntel = $consoleLanguage.'prime-select intel';
 	my $retValue;
 	#TODO lots of debug
-	if (($localConfModules{$module}{'installed'} != 'yes') && !(-e $nvidiaKmsFile)) {
+	if (($localConfModules{$module}{'installed'} !~ 'yes') && !(-e $nvidiaKmsFile)) {
 		printLog('##### primeselectnvidia not installed', 'L2');
 		$retValue = `$getGPU`;
 		if ($retValue =~ /nvidia/) {
