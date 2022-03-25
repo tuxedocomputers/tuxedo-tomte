@@ -4177,7 +4177,7 @@ sub primeselectnvidia() {
 			if ($retValue =~ 'intel') {
 				printLog('Intel is set, switching back to Nvidia', 'L1');
 				`$setGPUNvidia`;
-				if ($retValue =~ 'nvidia') {
+				if ($retValue =~ /nvidia/) {
 					printLog('Nvidia is set, cycle complete, fix applied', 'L1');
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
