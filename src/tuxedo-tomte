@@ -4174,7 +4174,7 @@ sub primeselectnvidia() {
 			printLog('Nvidia is set, switching to Intel', 'L1');
 			`$setGPUIntel`;
 			$retValue = `$getGPU`;
-			if ($retValue =~ 'intel') {
+			if ($retValue =~ /intel/) {
 				printLog('Intel is set, switching back to Nvidia', 'L1');
 				`$setGPUNvidia`;
 				if ($retValue =~ /nvidia/) {
