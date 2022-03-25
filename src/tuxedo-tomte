@@ -1504,7 +1504,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Reinitializes Nvidia GPU to avoid microstuttering',
+		description => 'Reselects NVIDIA GPU to get configuration files to avoid microstuttering',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1974,12 +1974,12 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
-	#	if (($boardname =~ m/PHxTxX1/) ||
-	#		($boardname =~ m/PH4TQx1/) ||
-	#		($boardname =~ m/PHxTQx1/)) {
-	#		$origConfModules{primeselectnvidia}{required} = 'yes';
-	#		printLog('detected possible prime-select-nvidia issue', 'L1');
-	#}
+	if (($boardname =~ m/PHxTxX1/) ||
+		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/PHxTQx1/)) {
+		$origConfModules{primeselectnvidia}{required} = 'yes';
+		printLog('detected possible prime-select-nvidia issue', 'L1');
+	}
 
 }
 
@@ -4162,6 +4162,7 @@ sub primeselectnvidia() {
 	my $setGPUNvidia = $consoleLanguage.'prime-select nvidia';
 	my $setGPUIntel = $consoleLanguage.'prime-select intel';
 	my $retValue = `$getGPU`;
+	#TODO needs different start condition
 	if ($retValue =~ /nvidia/) {
 		printLog('Nvidia is set, switching to Intel', 'L1');
 		`$setGPUIntel`;
