@@ -139,6 +139,9 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
+			"22.04" => {
+				name => 'jammy',
+			},
 		},
 	},
 	"elementary OS" => {
@@ -195,6 +198,21 @@ my %tuxedo_repos = (
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
 		name => 'focal',
+	},
+	"Ubuntu 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
 	},
 	"elementary OS 6.1" => {
 		deb => {
@@ -266,6 +284,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
+	"Ubuntu 22.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"elementary OS 6.1" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -334,6 +361,23 @@ my %flavours = (
 		},
 		"linux-tuxedo-20.04-next" => {
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
+		},
+	},
+	"22.04" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
 		},
 	},
 	"6.1" => {
@@ -1957,6 +2001,7 @@ sub checkRequirements {
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	}
+
 	if ($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
