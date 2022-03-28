@@ -3491,6 +3491,55 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+		} elsif ($completeDistVersion =~ /Ubuntu 20.04/) {
+			# deinstall other nvidia drivers
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
+
+			# check if the package is already installed
+			if( ! isPackageInstalled('nvidia-driver-470') ) {
+				messageLongInstall();
+				$wasInstalled = 0;
+				$packageNvidiaDriver = installPackage('nvidia-driver-470');
+			} else {
+				setAptMark('nvidia-driver-470','manual');
+				$packageNvidiaDriver = 1;
+			}
+			if( ! isPackageInstalled('mesa-utils') ) {
+				$wasInstalled = 0;
+				$packageMesaUtils = installPackage('mesa-utils');
+			} else {
+				$packageMesaUtils = 1;
+			}
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 1;
+			}
+	
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed", 'L1');
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					printLog("installed $origConfModules{$module}{name}", 'L1');
+					addToConfiguredModules($module, "success");
+					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
+					`$primeSelectNvidiaCmd`;
+					if (`prime-select query` =~ /nvidia/) {
+						printLog('Nvidia GPU selected', 'L1');
+					} else {
+						printLog('Nvidia GPU could not be selected', 'L0');
+					}
+					$restartSystem = 1;
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				printLog("$origConfModules{$module}{name} installation failed", 'L1');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
 		}
