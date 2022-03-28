@@ -3491,7 +3491,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif ($completeDistVersion =~ /Ubuntu 20.04/) {
+		} elsif ($completeDistVersion =~ /Ubuntu 22.04/) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
 
