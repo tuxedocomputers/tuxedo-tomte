@@ -2001,6 +2001,9 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
+	} elsif ($completeDistVersion =~ /Ubuntu 22.04/) {
+		printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
+		$origConfModules{kerneltuxedo2204}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
