@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1464,7 +1464,7 @@ my %origConfModules = (
 	},
 	nvidiabacklightcontrolfix => {
 		name => 'nvidia-backlight-control-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -4052,7 +4052,7 @@ sub lightdmlogindcheckgraphicalfix() {
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
+	my @kernel_parameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -4074,6 +4074,9 @@ sub nvidiabacklightcontrolfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0')) {
+			replaceTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0', ' nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0');
+		}
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
