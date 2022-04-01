@@ -265,6 +265,21 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"TUXEDO_OS Plasma 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		oibaf => {
+			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
+			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		graphics => {
+			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
+			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
 
 
 );
@@ -325,6 +340,15 @@ my %tuxedo_mirrors = (
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
+	},
+	"TUXEDO_OS Plasma 22.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
 	},
 
 );
