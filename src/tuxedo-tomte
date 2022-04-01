@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1962,8 +1962,7 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} elsif (($boardname =~ m/GMxZGxx/) ||
-				($boardname =~ m/NL5xNU/) ||
-				($boardname =~ m/NH5xAx/)) {
+				($boardname =~ m/NL5xNU/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
