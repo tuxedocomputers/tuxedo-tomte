@@ -789,6 +789,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'39' => {
+		model => ['TUXEDO Aura 15 Gen2'],
+		board_name => ['NL5xNU'],
+		fix => ['kerneltuxedo2004next'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1950,7 +1962,8 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif ($boardname =~ m/GMxZGxx/) {
+		} elsif (($boardname =~ m/GMxZGxx/) ||
+				($boardname =~ m/NL5xNU/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
