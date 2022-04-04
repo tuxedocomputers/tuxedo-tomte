@@ -844,6 +844,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'39' => {
+		model => ['TUXEDO Aura 15 Gen2'],
+		board_name => ['NL5xNU'],
+		fix => ['kerneltuxedo2004next'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1520,7 +1532,7 @@ my %origConfModules = (
 	},
 	nvidiabacklightcontrolfix => {
 		name => 'nvidia-backlight-control-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2005,7 +2017,8 @@ sub checkRequirements {
 			($boardname =~ m/PHxTQx1/)) {
 			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif ($boardname =~ m/GMxZGxx/) {
+		} elsif (($boardname =~ m/GMxZGxx/) ||
+				($boardname =~ m/NL5xNU/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} else {
@@ -4108,7 +4121,7 @@ sub lightdmlogindcheckgraphicalfix() {
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
+	my @kernel_parameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -4130,6 +4143,9 @@ sub nvidiabacklightcontrolfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0')) {
+			replaceTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0', ' nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0');
+		}
 		$retval = insertGrub($module, \@kernel_parameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
