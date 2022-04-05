@@ -5996,8 +5996,9 @@ sub listStatus {
 				"$localConfModules{$module}{required}"]);
 		}
 		# required, installed and not removed
-		if ((($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) &&
-			($localConfModules{$module}{installed} ne 'no')) {
+		if ((($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) 
+			#&& ($localConfModules{$module}{installed} ne 'no')
+			) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
