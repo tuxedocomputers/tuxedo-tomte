@@ -4183,34 +4183,40 @@ sub primeselectnvidia() {
 	my $setGPUIntel = $consoleLanguage.'prime-select intel';
 	my $retValue;
 	#TODO lots of debug
-	if (($localConfModules{$module}{'installed'} !~ 'yes') && !(-e $nvidiaKmsFile)) {
-		printLog('##### primeselectnvidia not installed', 'L2');
-		$retValue = `$getGPU`;
-		if ($retValue =~ /nvidia/) {
-			printLog('Nvidia is set, switching to Intel', 'L1');
-			`$setGPUIntel`;
+	if ($localConfModules{$module}{'installed'} !~ 'yes') {
+		if (!(-e $nvidiaKmsFile)) {
+			printLog('##### primeselectnvidia not installed', 'L2');
 			$retValue = `$getGPU`;
-			if ($retValue =~ /intel/) {
-				printLog('Intel is set, switching back to Nvidia', 'L1');
-				`$setGPUNvidia`;
-				if ($retValue =~ /nvidia/) {
-					printLog('Nvidia is set, cycle complete, fix applied', 'L1');
-					$origConfModules{$module}{installed} = "yes";
-					$origConfModules{$module}{upgraded} = "yes";
-					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
-					return (0);
+			if ($retValue =~ /nvidia/) {
+				printLog('Nvidia is set, switching to Intel', 'L1');
+				`$setGPUIntel`;
+				$retValue = `$getGPU`;
+				if ($retValue =~ /intel/) {
+					printLog('Intel is set, switching back to Nvidia', 'L1');
+					`$setGPUNvidia`;
+					if ($retValue =~ /nvidia/) {
+						printLog('Nvidia is set, cycle complete, fix applied', 'L1');
+					} else {
+						$origConfModules{$module}{installed} = "no";
+						$origConfModules{$module}{upgraded} = "no";
+						addToConfiguredModules($module, "failed");
+						printLog('primeselectnvidia installation failed, can\'t switch back to NVIDIA', 'L2');
+						return;
+					}
+				} else {
+					$origConfModules{$module}{installed} = "no";
+					$origConfModules{$module}{upgraded} = "no";
+					addToConfiguredModules($module, "failed");
+					printLog('primeselectnvidia installation failed, can\'t switch to Intel', 'L2');
+					return;
 				}
 			}
-			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "no";
-			addToConfiguredModules($module, "failed");
-			printLog('Fix could not be applied', 'L0');
-		} else {
-			printLog('Intel GPU set not set -> leaving it as it is', 'L1');
 		}
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
 	} else {
-		printLog('', 'L2');
+		printLog('primeselectnvidia is already installed', 'L2');
 	}
 }
 
