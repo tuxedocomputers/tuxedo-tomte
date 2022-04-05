@@ -4633,7 +4633,7 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
 		if ($logLevel > 1) {
-			$retval = `pkcon -yp install $packageName >$logFile 2>&1`;
+			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 		} else {
 			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
 		}
