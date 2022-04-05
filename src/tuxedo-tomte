@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1989,8 +1989,6 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		#TODO debug
-		($boardname =~ m/NH5xAx/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{primeselectnvidia}{required} = 'yes';
 		printLog('detected possible prime-select-nvidia issue', 'L1');
@@ -4186,14 +4184,14 @@ sub primeselectnvidia() {
 			printLog('primeselectnvidia not installed', 'L2');
 			$retValue = `$getGPU`;
 			if ($retValue =~ /nvidia/) {
-				printLog('Nvidia is set, switching to Intel', 'L1');
+				printLog('NVIDIA is set, switching to Intel', 'L1');
 				`$setGPUIntel`;
 				$retValue = `$getGPU`;
 				if ($retValue =~ /intel/) {
-					printLog('Intel is set, switching back to Nvidia', 'L1');
+					printLog('Intel is set, switching back to NVIDIA', 'L1');
 					$retValue = `$setGPUNvidia`;
 					if ($retValue =~ /nvidia/) {
-						printLog('Nvidia is set, cycle complete, fix applied', 'L1');
+						printLog('NVIDIA is set, cycle complete, fix applied', 'L1');
 					} else {
 						$origConfModules{$module}{installed} = "no";
 						$origConfModules{$module}{upgraded} = "no";
