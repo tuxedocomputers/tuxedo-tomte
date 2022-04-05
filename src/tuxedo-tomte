@@ -5600,6 +5600,9 @@ sub initLogging {
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
 			printLog('starting Tomte', 'L1');
+			if ($FAI) {
+				printLog('in FAI mode', 'L1');
+			}
 			return;
 		} else {
 			printLog("Err: $!", 'L1');
@@ -5614,6 +5617,9 @@ sub initLogging {
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
 			printLog('starting Tomte', 'L1');
+			if ($FAI) {
+				printLog('in FAI mode', 'L1');
+			}
 			return;
 		} else {
 			printLog("Err: $!", 'L0', 'L1');
