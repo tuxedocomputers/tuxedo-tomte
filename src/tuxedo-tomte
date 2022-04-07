@@ -222,14 +222,6 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		oibaf => {
-			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
-			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		graphics => {
-			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
-		},
 		name => 'jammy',
 	},
 	"elementary OS 6.1" => {
@@ -282,14 +274,6 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		oibaf => {
-			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
-			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		graphics => {
-			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
-		},
 		name => 'jammy',
 	},
 	"TUXEDO OS 20.04" => {
@@ -311,14 +295,6 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		oibaf => {
-			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
-			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		graphics => {
-			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
 		},
 		name => 'jammy',
 	},
