@@ -435,14 +435,8 @@ my %flavours = (
 		"linux-aws" => {
 			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
 		},
-		"linux-tuxedo-22.04-edge" => {
-			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
-		},
 		"linux-tuxedo-22.04" => {
 			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
-		},
-		"linux-tuxedo-22.04-next" => {
-			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
 		},
 	},
 	"6.1" => {
@@ -902,6 +896,17 @@ my %tuxedo_devices = (
 		board_name => ['NL5xNU'],
 		fix => ['kerneltuxedo2004next'],
 		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'40' => {
+		model => ['all models'],
+		board_name => [''],
+		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors', 'kerneltuxedo2204'],
+		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -2094,7 +2099,7 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif ($completeDistVersion =~ /Ubuntu 22.04/) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
 		$origConfModules{kerneltuxedo2204}{required} = 'yes';
 	}
@@ -3472,7 +3477,7 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($completeDistVersion =~ /Ubuntu 22.04/) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
