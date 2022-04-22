@@ -163,24 +163,24 @@ my %supportedOS = (
 		versions => {
 			"20.04" => {
 				name => 'focal',
-			}
+			},
 		},
 		versions => {
 			"22.04" => {
 				name => 'jammy',
-			}
+			},
 		},
 	},
 	"TUXEDO OS" => {
 		versions => {
 			"20.04" => {
 				name => 'focal',
-			}
+			},
 		},
 		versions => {
 			"22.04" => {
 				name => 'jammy',
-			}
+			},
 		},
 	},
 );
@@ -1838,6 +1838,7 @@ sub isOSSupported {
 	printLog("This OS is not supported", 'TL0');
 	printLog("distribution: >$distribution<", 'TL1');
 	printLog("distributionVersion: >$distributionVersion<", 'TL1');
+	print Dumper(\%supportedOS);
 	return (0);
 }
 
