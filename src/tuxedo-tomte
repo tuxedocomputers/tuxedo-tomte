@@ -1836,6 +1836,8 @@ sub isOSSupported {
 		return (1);
 	}
 	printLog("This OS is not supported", 'TL0');
+	printLog("distribution: >$distribution<", 'TL1');
+	printLog("distributionVersion: >$distributionVersion<", 'TL1');
 	return (0);
 }
 
