@@ -132,7 +132,7 @@ my %postConfProgram = (
 #             name = VERSION_CODENAME
 # 
 my %supportedOS = (
-	Ubuntu => {
+	"Ubuntu" => {
 		versions => {
 			"18.04" => {
 				name => 'bionic',
@@ -169,7 +169,7 @@ my %supportedOS = (
 			"22.04" => {
 				name => 'jammy',
 			}
-		}
+		},
 	},
 	"TUXEDO OS" => {
 		versions => {
@@ -181,7 +181,7 @@ my %supportedOS = (
 			"22.04" => {
 				name => 'jammy',
 			}
-		}
+		},
 	},
 );
 
