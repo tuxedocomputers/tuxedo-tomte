@@ -49,10 +49,10 @@ print "got version: $version\n";
 if ($version =~ /^\d+\.\d+\.\d+$/) {
 	open my $fh, '<', './src/tuxedo-tomte';
 	while (my $line = <$fh>) {
-		if (($line =~ /^my \$logLevel = /) && ($line ne /my \$logLevel = 0;/)) {
+		if (($line =~ /^my \$logLevel = /) && ($line ne 'my $logLevel = 0;')) {
 			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-			print "\$loglevel not ZERO!!!";
-			print "for master releases loglevel must be '0'!!!";
+			print "\$loglevel not ZERO!!!\n";
+			print "for master releases loglevel must be '0'!!!\n";
 			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 			exit (0);
 		}
