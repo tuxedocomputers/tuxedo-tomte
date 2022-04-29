@@ -909,6 +909,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'41' => {
+		model => ['TUXEDO Stellaris Gen4 Intel'],
+		board_name => ['GMxAGxx'],
+		fix => ['tuxedokeyboardite'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 
 );
 
@@ -1989,6 +2001,7 @@ sub checkRequirements {
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
 		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxTGxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
