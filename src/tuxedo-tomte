@@ -912,7 +912,7 @@ my %tuxedo_devices = (
 	'41' => {
 		model => ['TUXEDO Stellaris Gen4 Intel'],
 		board_name => ['GMxAGxx'],
-		fix => ['tuxedokeyboardite'],
+		fix => ['tuxedokeyboardite', "tuxedotouchpadswitch"],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1960,6 +1960,7 @@ sub checkRequirements {
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
+		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxMGxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
