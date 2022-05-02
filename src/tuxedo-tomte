@@ -483,7 +483,7 @@ my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:a500',
 		cpu => '',
@@ -505,7 +505,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['r8168dkms', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -538,7 +538,7 @@ my %tuxedo_devices = (
 	'6' => {
 		model => ['TUXEDO Book XA15 Gen10'],
 		board_name => ['NH5xAx'],
-		fix => ['nokeyboardaftersuspendfix', 'corefix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'corefix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:50f0',
 		cpu => '',
@@ -549,7 +549,7 @@ my %tuxedo_devices = (
 	'7' => {
 		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
 		board_name => ['PB50_70DFx,DDx'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:67e1',
 		cpu => '',
@@ -560,7 +560,7 @@ my %tuxedo_devices = (
 	'8' => {
 		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
 		board_name => ['PCx0Dx_GN20'],
-		fix => ['tuxedokeyboardite', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['tuxedokeyboardite', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
@@ -582,7 +582,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'tuxedomicfix1', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
+		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04'],
 		pci_id => '1558:7715',
 		cpu => '',
@@ -615,7 +615,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -637,7 +637,7 @@ my %tuxedo_devices = (
 	'15' => {
 		model => ['TUXEDO InfinityBook Pro 15 v5'],
 		board_name => ['N150CU'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:1404',
 		cpu => '',
@@ -758,7 +758,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -2030,21 +2030,13 @@ sub checkRequirements {
 	}
 
 	my @tuxedomicfix1Devices = (
-		'1558:67e1', 
 		'1558:8562', 
 		'1558:1401', 
-		'1558:1404', 
 		'1558:14a1', 
 		'1558:40a1', 
-		'1558:50f0', 
 		'1558:8686', 
 		'1558:4018', 
-		'1558:a500', 
-		'1558:51a1',
-		'1558:67e5',
-		'1558:65e5',
-		'1d05:1132',
-		'1558:7715'
+		'1558:51a1'
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
@@ -2089,10 +2081,6 @@ sub checkRequirements {
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue', 'L1');
-	}
-	if ($boardname =~ m/GMxTGxx/) {
-		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
-		printLog('detected tuxedo-pinfix-tgl-dkms issue', 'L1');
 	}
 
 	# kernel
