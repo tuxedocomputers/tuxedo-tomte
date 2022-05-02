@@ -3585,18 +3585,18 @@ sub nvidiadriver() {
 			}
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
+				#TODO debug
+				printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				if ($FAI || ($origConfModules{$module}{upgrade} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					#TODO debug
-					printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
-					if ($FAI || ($origConfModules{$module}{upgrade} eq 'no')) {
-						`prime-select nvidia`;
-						printLog('selecting NVIDIA GPU', 'TL0');
-					}
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
@@ -3633,18 +3633,18 @@ sub nvidiadriver() {
 			}
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
+				#TODO debug
+				printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				if ($FAI|| ($origConfModules{$module}{upgrade} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					#TODO debug
-					printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
-					if ($FAI|| ($origConfModules{$module}{upgrade} eq 'no')) {
-						`prime-select nvidia`;
-						printLog('selecting NVIDIA GPU', 'TL0');
-					}
 					$restartSystem = 1;
 				}
 				$origConfModules{$module}{installed} = "yes";
