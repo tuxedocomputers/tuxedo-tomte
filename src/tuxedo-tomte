@@ -32,7 +32,8 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+# TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -615,7 +616,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -1644,23 +1645,6 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
-	# fix should only be applied once on Tomte installation
-	primeselectnvidia => {
-		name => 'prime-select-nvidia',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Reselects NVIDIA GPU to get configuration files to avoid microstuttering',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
-	},
 
 );
 
@@ -2121,13 +2105,6 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
-	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{primeselectnvidia}{required} = 'yes';
-		printLog('detected possible prime-select-nvidia issue', 'L1');
-	}
-
 }
 
 
@@ -3614,12 +3591,11 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
-					`$primeSelectNvidiaCmd`;
-					if (`prime-select query` =~ /nvidia/) {
-						printLog('Nvidia GPU selected', 'L1');
-					} else {
-						printLog('Nvidia GPU could not be selected', 'L0');
+					#TODO debug
+					printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+					if ($FAI || ($origConfModules{$module}{upgrade} eq 'no')) {
+						`prime-select nvidia`;
+						printLog('selecting NVIDIA GPU', 'TL0');
 					}
 					$restartSystem = 1;
 				}
@@ -3663,12 +3639,11 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
-					`$primeSelectNvidiaCmd`;
-					if (`prime-select query` =~ /nvidia/) {
-						printLog('Nvidia GPU selected', 'L1');
-					} else {
-						printLog('Nvidia GPU could not be selected', 'L0');
+					#TODO debug
+					printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+					if ($FAI|| ($origConfModules{$module}{upgrade} eq 'no')) {
+						`prime-select nvidia`;
+						printLog('selecting NVIDIA GPU', 'TL0');
 					}
 					$restartSystem = 1;
 				}
@@ -4388,54 +4363,6 @@ sub earlyloadbacklightcontrolfix() {
 }
 
 
-###############################################################################
-# checks if Nvidia is set as main GPU. Switches to Intel and back to Nvidia
-#
-sub primeselectnvidia() {
-	my $module = shift;
-	my $action = shift;
-	my $nvidiaKmsFile = '/lib/modprobe.d/nvidia-kms.conf';
-
-	my $getGPU = $consoleLanguage.'prime-select query';
-	my $setGPUNvidia = $consoleLanguage.'prime-select nvidia';
-	my $setGPUIntel = $consoleLanguage.'prime-select intel';
-	my $retValue;
-	if ($localConfModules{$module}{'installed'} !~ 'yes') {
-		if (!(-e $nvidiaKmsFile)) {
-			printLog('primeselectnvidia not installed', 'L2');
-			$retValue = `$getGPU`;
-			if ($retValue =~ /nvidia/) {
-				printLog('NVIDIA is set, switching to Intel', 'L1');
-				`$setGPUIntel`;
-				$retValue = `$getGPU`;
-				if ($retValue =~ /intel/) {
-					printLog('Intel is set, switching back to NVIDIA', 'L1');
-					$retValue = `$setGPUNvidia`;
-					if ($retValue =~ /nvidia/) {
-						printLog('NVIDIA is set, cycle complete, fix applied', 'L1');
-					} else {
-						$origConfModules{$module}{installed} = "no";
-						$origConfModules{$module}{upgraded} = "no";
-						addToConfiguredModules($module, "failed");
-						printLog('primeselectnvidia installation failed, can\'t switch back to NVIDIA', 'L2');
-						return;
-					}
-				} else {
-					$origConfModules{$module}{installed} = "no";
-					$origConfModules{$module}{upgraded} = "no";
-					addToConfiguredModules($module, "failed");
-					printLog('primeselectnvidia installation failed, can\'t switch to Intel', 'L2');
-					return;
-				}
-			}
-		}
-		$origConfModules{$module}{installed} = "yes";
-		$origConfModules{$module}{upgraded} = "yes";
-		addToConfiguredModules($module, "success");
-	} else {
-		printLog('primeselectnvidia is already installed', 'L2');
-	}
-}
 
 
 
