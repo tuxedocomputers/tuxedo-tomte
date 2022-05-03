@@ -1,4 +1,4 @@
-tuxedo-tomte (2.6.2-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.2-4) UNRELEASED; urgency=medium
 
   * removed all necesary removables
   * after packaging
@@ -8,8 +8,11 @@ tuxedo-tomte (2.6.2-3) UNRELEASED; urgency=medium
   * correction prime-select
   * after packaging
   * selective copy from nextRelease
+  * after packaging
+  * added TUXEDO OS to repo list
+  * changed check for prime-select to origconfmodules installed=no
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 03 May 2022 12:50:28 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 03 May 2022 16:24:24 +0200
 
 tuxedo-tomte (2.6.2) jammy; urgency=medium
 
