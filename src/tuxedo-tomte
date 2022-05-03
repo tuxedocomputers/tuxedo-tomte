@@ -95,6 +95,7 @@ $sysvendor = readFileReturnLine($sysvendorFilename);
 my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
+printLog("sessionID: $sessionID", 'TL2');
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
@@ -4420,7 +4421,7 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04')) {
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
