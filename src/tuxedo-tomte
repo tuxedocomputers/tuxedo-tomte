@@ -3585,12 +3585,6 @@ sub nvidiadriver() {
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				#TODO debug
-				printLog("### origConfModules upgrade: $origConfModules{$module}{upgrade}", 'TL0');
-				printLog("### localConfModules upgrade: $localConfModules{$module}{upgrade}", 'TL0');
-				if ($FAI || ($origConfModules{$module}{upgrade} eq 'no')) {
-					`prime-select nvidia`;
-					printLog('selecting NVIDIA GPU', 'TL0');
-				}
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -3598,6 +3592,11 @@ sub nvidiadriver() {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
+				}
+				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3634,12 +3633,6 @@ sub nvidiadriver() {
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				#TODO debug
-				printLog("### origConfModules upgrade: $origConfModules{$module}{upgrade}", 'TL0');
-				printLog("### localConfModules upgrade: $localConfModules{$module}{upgrade}", 'TL0');
-				if ($FAI|| ($origConfModules{$module}{upgrade} eq 'no')) {
-					`prime-select nvidia`;
-					printLog('selecting NVIDIA GPU', 'TL0');
-				}
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -3647,6 +3640,11 @@ sub nvidiadriver() {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
+				}
+				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
