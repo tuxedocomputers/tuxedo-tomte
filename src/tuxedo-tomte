@@ -921,8 +921,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
-
 );
 
 
@@ -3586,7 +3584,8 @@ sub nvidiadriver() {
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				#TODO debug
-				printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				printLog("### origConfModules upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				printLog("### localConfModules upgrade: $localConfModules{$module}{upgrade}", 'TL0');
 				if ($FAI || ($origConfModules{$module}{upgrade} eq 'no')) {
 					`prime-select nvidia`;
 					printLog('selecting NVIDIA GPU', 'TL0');
@@ -3634,7 +3633,8 @@ sub nvidiadriver() {
 	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				#TODO debug
-				printLog("### upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				printLog("### origConfModules upgrade: $origConfModules{$module}{upgrade}", 'TL0');
+				printLog("### localConfModules upgrade: $localConfModules{$module}{upgrade}", 'TL0');
 				if ($FAI|| ($origConfModules{$module}{upgrade} eq 'no')) {
 					`prime-select nvidia`;
 					printLog('selecting NVIDIA GPU', 'TL0');
@@ -4419,34 +4419,56 @@ sub createRepos {
 		closedir($DH);
 	}
 
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
+	# workaround for possible old entries in sources list
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04')) {
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
+		}
+	} else {
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
+			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
+				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1');
+			}
+		}
+		if (-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
+			if (unlink('/etc/apt/sources.list.d/oibaf-tuxedo.list')) {
+				printLog('deleted /etc/apt/sources.list.d/oibaf-tuxedo.list', 'TL1');
+			}
+		}
 	}
 
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
-	}
+
+
 
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
@@ -5272,7 +5294,9 @@ sub uninstallRemnantKernels {
 
 ###############################################################################
 # creates file with content
+# createFile( filename, text, backup )
 # $backup accepts 0 and 1
+# returns '1' if successfull, '0' if not
 # 
 sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
