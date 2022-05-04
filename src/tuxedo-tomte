@@ -32,7 +32,8 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+# TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -823,7 +824,7 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'33' => {
-		model => ['all with LTE module'],
+		model => ['all with LTE module ME936'],
 		board_name => [''],
 		fix => ['threegfix'],
 		flavour => ['18.04', '20.04'],
@@ -921,6 +922,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'42' => {
+		model => ['all with LTE module ME906s'],
+		board_name => [''],
+		fix => ['threegfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '12d1:15c1',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => 'ME906',
+	},
+
 );
 
 
@@ -1161,6 +1174,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	threegfix2 => {
+		name => 'threeg-fix2',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Configuration needed to operate Huawei-ME906s',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+
 	elantechtouchpadfix => {
 		name => 'elantech-touchpad-fix',
 		version => 1,
@@ -1978,6 +2008,13 @@ sub checkRequirements {
 	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue', 'L1');
+	}
+
+	# if Threeg Huawei ME906s device found
+	my $lsusb = `lsusb -d 12d1:15c1`;
+	if ($lsusb =~ /huawei/i) {
+		$origConfModules{threegfix2}{required} = 'yes';
+		printLog('detected threeg-fix2 issue', 'L1');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -2926,6 +2963,61 @@ sub threegfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Creates a configuration to use Huawei-ME906s
+# - if USB device 12d1:15c1 detected
+# !!!! not tested, could not work at all but should not have any negative
+# effects
+#
+sub threegfix2() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $retval2;
+	my $fileName1 = '/etc/modprobe.d/huawei-me906s.conf';
+	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"options usbserial vendor=0x12d1 product=0x15c1\n";
+	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15c1\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"2\", ATTR{bConfigurationValue}=\"2\"";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
+		if ($retval1 == 0 || $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
+		if ($retval1 == 0 || $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 ###############################################################################
