@@ -32,7 +32,8 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+# TODO debug
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -3584,12 +3585,12 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily deactivated fix
-				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
-				#if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-				#	`prime-select nvidia`;
-				#	printLog('selecting NVIDIA GPU', 'TL0');
-				#}
+				# temporarily activated fix
+				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -3632,12 +3633,12 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily deactivated fix
-				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
-				#if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
-				#	`prime-select nvidia`;
-				#	printLog('selecting NVIDIA GPU', 'TL0');
-				#}
+				# temporarily activated fix
+				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
+					`prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
