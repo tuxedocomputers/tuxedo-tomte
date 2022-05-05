@@ -3586,6 +3586,7 @@ sub nvidiadriver() {
 					$restartSystem = 1;
 				}
 				# temporarily activated fix
+				# TODO debug
 				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					`gpu-manager && prime-select nvidia`;
@@ -3634,6 +3635,7 @@ sub nvidiadriver() {
 					$restartSystem = 1;
 				}
 				# temporarily activated fix
+				# TODO debug
 				printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
 				if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
 					`gpu-manager && prime-select nvidia`;
