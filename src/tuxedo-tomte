@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright (c) 2019-2021 TUXEDO Computers GmbH <tux@tuxedocomputers.com>
+# Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
 #
 # TUXEDO Tomte is free software: you can redistribute it and/or modify
@@ -94,6 +94,7 @@ $sysvendor = readFileReturnLine($sysvendorFilename);
 my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
+printLog("sessionID: $sessionID", 'TL2');
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
@@ -537,7 +538,7 @@ my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:a500',
 		cpu => '',
@@ -559,7 +560,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['r8168dkms', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -592,7 +593,7 @@ my %tuxedo_devices = (
 	'6' => {
 		model => ['TUXEDO Book XA15 Gen10'],
 		board_name => ['NH5xAx'],
-		fix => ['nokeyboardaftersuspendfix', 'corefix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'corefix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:50f0',
 		cpu => '',
@@ -603,7 +604,7 @@ my %tuxedo_devices = (
 	'7' => {
 		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
 		board_name => ['PB50_70DFx,DDx'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:67e1',
 		cpu => '',
@@ -614,7 +615,7 @@ my %tuxedo_devices = (
 	'8' => {
 		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
 		board_name => ['PCx0Dx_GN20'],
-		fix => ['tuxedokeyboardite', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['tuxedokeyboardite', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
@@ -636,7 +637,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'tuxedomicfix1', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
+		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04'],
 		pci_id => '1558:7715',
 		cpu => '',
@@ -669,7 +670,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'tuxedomicfix1', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix', 'primeselectnvidia'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -691,7 +692,7 @@ my %tuxedo_devices = (
 	'15' => {
 		model => ['TUXEDO InfinityBook Pro 15 v5'],
 		board_name => ['N150CU'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedomicfix1', 'kerneltuxedo2004'],
+		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:1404',
 		cpu => '',
@@ -812,7 +813,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'tuxedopinfixtgldkms', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -963,7 +964,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
+	'41' => {
+		model => ['TUXEDO Stellaris Gen4 Intel'],
+		board_name => ['GMxAGxx'],
+		fix => ['tuxedokeyboardite', "tuxedotouchpadswitch"],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -1686,23 +1697,6 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
-	# fix should only be applied once on Tomte installation
-	primeselectnvidia => {
-		name => 'prime-select-nvidia',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		fainame => '',
-		description => 'Reselects NVIDIA GPU to get configuration files to avoid microstuttering',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => 'yes',
-	},
 
 );
 
@@ -2002,6 +1996,7 @@ sub checkRequirements {
 		($boardname =~ /GMxNGxx/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
+		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxMGxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
@@ -2043,6 +2038,7 @@ sub checkRequirements {
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
 		($boardname =~ /GMxZGxx/) ||
+		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxTGxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
@@ -2070,21 +2066,6 @@ sub checkRequirements {
 	}
 
 	my @tuxedomicfix1Devices = (
-		'1558:67e1', 
-		'1558:8562', 
-		'1558:1401', 
-		'1558:1404', 
-		'1558:14a1', 
-		'1558:40a1', 
-		'1558:50f0', 
-		'1558:8686', 
-		'1558:4018', 
-		'1558:a500', 
-		'1558:51a1',
-		'1558:67e5',
-		'1558:65e5',
-		'1d05:1132',
-		'1558:7715'
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
@@ -2130,10 +2111,6 @@ sub checkRequirements {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue', 'L1');
 	}
-	if ($boardname =~ m/GMxTGxx/) {
-		$origConfModules{tuxedopinfixtgldkms}{required} = 'yes';
-		printLog('detected tuxedo-pinfix-tgl-dkms issue', 'L1');
-	}
 
 	# kernel
 	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
@@ -2173,13 +2150,6 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
-	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/)) {
-		$origConfModules{primeselectnvidia}{required} = 'yes';
-		printLog('detected possible prime-select-nvidia issue', 'L1');
-	}
-
 }
 
 
@@ -3666,15 +3636,14 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
-					`$primeSelectNvidiaCmd`;
-					if (`prime-select query` =~ /nvidia/) {
-						printLog('Nvidia GPU selected', 'L1');
-					} else {
-						printLog('Nvidia GPU could not be selected', 'L0');
-					}
 					$restartSystem = 1;
 				}
+				# temporarily deactivated fix
+				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				#if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+				#	`prime-select nvidia`;
+				#	printLog('selecting NVIDIA GPU', 'TL0');
+				#}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -3715,15 +3684,14 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					my $primeSelectNvidiaCmd = $consoleLanguage.'prime-select nvidia';
-					`$primeSelectNvidiaCmd`;
-					if (`prime-select query` =~ /nvidia/) {
-						printLog('Nvidia GPU selected', 'L1');
-					} else {
-						printLog('Nvidia GPU could not be selected', 'L0');
-					}
 					$restartSystem = 1;
 				}
+				# temporarily deactivated fix
+				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
+				#if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
+				#	`prime-select nvidia`;
+				#	printLog('selecting NVIDIA GPU', 'TL0');
+				#}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -4440,54 +4408,6 @@ sub earlyloadbacklightcontrolfix() {
 }
 
 
-###############################################################################
-# checks if Nvidia is set as main GPU. Switches to Intel and back to Nvidia
-#
-sub primeselectnvidia() {
-	my $module = shift;
-	my $action = shift;
-	my $nvidiaKmsFile = '/lib/modprobe.d/nvidia-kms.conf';
-
-	my $getGPU = $consoleLanguage.'prime-select query';
-	my $setGPUNvidia = $consoleLanguage.'prime-select nvidia';
-	my $setGPUIntel = $consoleLanguage.'prime-select intel';
-	my $retValue;
-	if ($localConfModules{$module}{'installed'} !~ 'yes') {
-		if (!(-e $nvidiaKmsFile)) {
-			printLog('primeselectnvidia not installed', 'L2');
-			$retValue = `$getGPU`;
-			if ($retValue =~ /nvidia/) {
-				printLog('NVIDIA is set, switching to Intel', 'L1');
-				`$setGPUIntel`;
-				$retValue = `$getGPU`;
-				if ($retValue =~ /intel/) {
-					printLog('Intel is set, switching back to NVIDIA', 'L1');
-					$retValue = `$setGPUNvidia`;
-					if ($retValue =~ /nvidia/) {
-						printLog('NVIDIA is set, cycle complete, fix applied', 'L1');
-					} else {
-						$origConfModules{$module}{installed} = "no";
-						$origConfModules{$module}{upgraded} = "no";
-						addToConfiguredModules($module, "failed");
-						printLog('primeselectnvidia installation failed, can\'t switch back to NVIDIA', 'L2');
-						return;
-					}
-				} else {
-					$origConfModules{$module}{installed} = "no";
-					$origConfModules{$module}{upgraded} = "no";
-					addToConfiguredModules($module, "failed");
-					printLog('primeselectnvidia installation failed, can\'t switch to Intel', 'L2');
-					return;
-				}
-			}
-		}
-		$origConfModules{$module}{installed} = "yes";
-		$origConfModules{$module}{upgraded} = "yes";
-		addToConfiguredModules($module, "success");
-	} else {
-		printLog('primeselectnvidia is already installed', 'L2');
-	}
-}
 
 
 
@@ -4544,34 +4464,56 @@ sub createRepos {
 		closedir($DH);
 	}
 
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
+	# workaround for possible old entries in sources list
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
+		}
+	} else {
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main', '');
+		}
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
+			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
+		}
+		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
+			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
+				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1');
+			}
+		}
+		if (-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
+			if (unlink('/etc/apt/sources.list.d/oibaf-tuxedo.list')) {
+				printLog('deleted /etc/apt/sources.list.d/oibaf-tuxedo.list', 'TL1');
+			}
+		}
 	}
 
-	if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte', '');
-	}
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
-		substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
-	}
+
+
 
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
@@ -5397,7 +5339,9 @@ sub uninstallRemnantKernels {
 
 ###############################################################################
 # creates file with content
+# createFile( filename, text, backup )
 # $backup accepts 0 and 1
+# returns '1' if successfull, '0' if not
 # 
 sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
