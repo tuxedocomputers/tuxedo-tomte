@@ -46,6 +46,18 @@ $version = <>;
 chomp($version);
 $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
 print "got version: $version\n";
+if ($version =~ /^\d+\.\d+\.\d+$/) {
+	open my $fh, '<', './src/tuxedo-tomte';
+	while (my $line = <$fh>) {
+		if (($line =~ /^my \$logLevel = /) && ($line !~ /my \$logLevel = 0;/)) {
+			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+			print "\$loglevel not ZERO!!!\n";
+			print "for master releases loglevel must be '0'!!!\n";
+			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+			exit (0);
+		}
+	}
+}
 $prefix = $package.'_'.$version;
 print "prefix: $prefix\n";
 sleep(2);

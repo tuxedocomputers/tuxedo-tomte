@@ -1,19 +1,16 @@
-tuxedo-tomte (2.6.1-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.3) jammy; urgency=medium
 
-  * after packaging
-  * debug activated
-  * after packaging
-  * test for distribution for debug
-  * after packaging
-  * added some comas
-  * after packaging
-  * more comas
-  * after packaging
-  * removed superfluous blocks
-  * after packaging
-  * removed some debug, checked hashes
+  * removed remaining IDs for tuxedo-micfix1
+  * added TUXEDO OS to repo list
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Apr 2022 13:55:22 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 03 May 2022 17:44:53 +0200
+
+tuxedo-tomte (2.6.2) jammy; urgency=medium
+
+  * added tuxedokeyboardite for Stellaris Gen4 Intel with boardname GMxAGxx
+  * added tuxedotouchpadswitch for Stellaris Gen4 Intel with boardname GMxAGxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 29 Apr 2022 14:33:28 +0200
 
 tuxedo-tomte (2.6.1) focal; urgency=medium
 
@@ -23,7 +20,7 @@ tuxedo-tomte (2.6.1) focal; urgency=medium
 
 tuxedo-tomte (2.6.0) focal; urgency=medium
 
-  * added primeselectnvidia for InfinityBook Pro 14 Gen6 boardnames PH4TQx1
+  * added primeselectnvidia for InfinityBook Pro 14 Gen6 boardname PH4TQx1
     PHxTQx1
   * added 22.04
 
