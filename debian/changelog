@@ -1,13 +1,9 @@
-tuxedo-tomte (2.6.3-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.3-13) UNRELEASED; urgency=medium
 
-  * after packaging
-  * added systemd wait for oem and oneshot
-  * after packaging
-  * after packaging
-  * testing old service file
-  * after packaging
+  * added systemd wait for OEM
+  * set NVIDIA to 'on' when installing the drivers
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 May 2022 16:55:34 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 13 May 2022 15:42:25 +0200
 
 tuxedo-tomte (2.6.3) jammy; urgency=medium
 
