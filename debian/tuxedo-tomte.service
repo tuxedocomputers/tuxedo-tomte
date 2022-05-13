@@ -1,7 +1,9 @@
 [Unit]
 Description = Tomte-daemon, finishes tasks that could not be accomplished before
 After = network.target auditd.target
+Before = oem-config.service
 
 [Service]
+Type = oneshot
 ExecStart = /usr/bin/tuxedo-tomte configure all
 Restart = no

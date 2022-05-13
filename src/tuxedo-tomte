@@ -3676,12 +3676,11 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily deactivated fix
-				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
-				#if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-				#	`prime-select nvidia`;
-				#	printLog('selecting NVIDIA GPU', 'TL0');
-				#}
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
@@ -3724,12 +3723,11 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily deactivated fix
-				#printLog("### origConfModules installed: $origConfModules{$module}{installed}", 'TL0');
-				#if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
-				#	`prime-select nvidia`;
-				#	printLog('selecting NVIDIA GPU', 'TL0');
-				#}
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
