@@ -32,8 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-# TODO debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -3633,7 +3632,7 @@ sub nvidiadriver() {
 					$restartSystem = 1;
 				}
 				# temporarily activated fix
-				if ($FAI|| ($origConfModules{$module}{installed} eq 'no')) {
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					`gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU', 'TL0');
 				}
