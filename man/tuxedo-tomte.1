@@ -30,6 +30,7 @@ Shows a small description about the fix\&.
 Configures the specified module or fix if possible\&. That means, it is not
 already installed, blocked and designed to fix something on this system\&.
 If \fBall\fR is used then all possible fixes will be installed\&.
+Does nothing if \fBSTOP_ALL_CONFIGURATION\fR is set\&.
 .RE
 .PP
 \fBreconfigure \fIMODULE\fR|\fIall\fR
@@ -38,15 +39,28 @@ Configures the specified module or fix even if it is already installed\&.
 It will not do anything if it is blocked or not designed to work on this
 system\&.
 If \fBall\fR is used then all possible fixes will be reconfigured\&.
+Does nothing if \fBSTOP_ALL_CONFIGURATION\fR is set\&.
 .RE
 .PP
-\fBblock \fIMODULE\fR
+\fBblock \fIMODULE\fR|\fIall\fR
 .RS 4
 Prevents the module from being installed\&.
 Already installed modules will not be upgraded except for packages which are
 managed by the systems package manager\&.
+Modules marked as
+.B prerequisite
+can't be blocked\&.
 .RE
 .PP
-\fBunblock \fIMODULE\fR
+\fBunblock \fIMODULE\fR|\fIall\fR
 .RS 4
 Allows the module to be installed or upgraded if it is required by this system\&.
+.RE
+.PP
+\fBSTOP_ALL_CONFIGURATION \fIyes\fR|\fIno\fR
+.RS 4
+Stops/activates automatic configuration\&.
+It just creates/deletes an empty file
+.BR /etc/tomte/DONT_CONFIGURE \&.
+This file can be set as well manually\&. Useful to stop Tomte from applying
+fixes at system start or at installation if set before installing Tomte\&.
