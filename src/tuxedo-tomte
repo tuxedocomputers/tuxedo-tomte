@@ -63,6 +63,7 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
+my $fileDontConfigure = $configDir.'DONT_CONFIGURE';
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
@@ -1836,6 +1837,9 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
+	if (checkDontConfigure() == 1) {
+		return;
+	}
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `pkcon refresh`;
