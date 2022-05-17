@@ -63,7 +63,10 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
+#TODO delete
 my $fileDontConfigure = $configDir.'DONT_CONFIGURE';
+my $fileMode = $configDir.'MODE';
+my $mode = 'rolling';
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
@@ -5728,7 +5731,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", 'STOP_ALL_CONFIGURATION'} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", 'mode'} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6548,7 +6551,7 @@ sub blockAllModules {
 	}
 }
 
-
+#TODO delete
 ###############################################################################
 # inhibit/activate system configuration by Tomte
 # pass 'yes' or 'no' as argument
@@ -6592,11 +6595,44 @@ sub setDontConfigureAnything {
 
 
 ###############################################################################
+# set configuration mode setMode('mode')
+# rolling: update all automatically
+# updates: block new modules but update installed modules
+# fixed: block everything
+#
+sub setMode {
+	$mode = shift;
+	if (($mode eq 'rolling') || ($mode eq 'updates') || ($mode eq 'fixed')) {
+		printLog("requested mode: $mode", 'L0');
+	} else {
+		printLog("invalid mode, set to default: rolling", 'TL0');
+		$mode = 'rolling';
+	}
+	unless (-d $configDir) {
+		unless (mkdir($configDir)) {
+			printLog("could not create $configDir, something is very fishy", 'TL0');
+			return;
+		}
+	}
+	if (-e $fileMode) {
+		unlink($fileMode);
+	}
+	if (writeFile($mode, $fileMode)) {
+		printLog("mode set to $mode", 'TL0');
+		print "$mode will be active after next restart or next execution of tomte\n";
+	}
+}
+
+
+
+###############################################################################
 # configures a module, does no checks
 #
 sub configureModule {
 	my $module = shift;
-	$module->($module, 'install');
+	if (checkModePermission('install')) {
+		$module->($module, 'install');
+	}
 }
 
 
@@ -6615,7 +6651,9 @@ sub removeModule {
 #
 sub upgradeModule {
 	my $module = shift;
-	$module->($module, 'upgrade');
+	if (checkModePermission('upgrade')) {
+		$module->($module, 'upgrade');
+	}
 }
 
 
@@ -6909,7 +6947,7 @@ tuxedo-tomte [COMMAND]
   reconfigure MODULE...|all      Reconfigure a configured module
   block MODULE ...|all           Block a module
   unblock MODULE ... |all        Unblock a module
-  STOP_ALL_CONFIGURATION yes|no  Stops/activates system configuration
+  mode rolling|updates|fixes     Update all|only updates|block everything
   help                           Prints this message
 USAGE
 
@@ -6971,7 +7009,7 @@ sub tuxedoDevice {
 }
 
 
-
+#TODO delete
 ###############################################################################
 # checks if file /etc/tomte/DONT_CONFIGURE exists
 # returns 1 of yes, 0 if none
@@ -6984,6 +7022,52 @@ sub checkDontConfigure {
 	return (0);
 }
 
+
+
+###############################################################################
+# checks mode in file /etc/tomte/MODE
+# returns the mode
+# if it is not possible, returns the default 'rolling'
+#
+sub checkMode {
+	if ( -e $fileMode) {
+		$mode = readFileReturnLine();
+		if (($mode eq 'rolling') || ($mode eq 'updates') || ($mode eq 'fixed')) {
+			printLog("detected mode $mode", 'L2');
+			return ($mode);
+		}
+	}
+	return ('rolling');
+}
+
+
+
+###############################################################################
+# checks if the operation is allowed in this mode
+# usage: checkModePermision(install|update)
+# returns 0 if not and 1 if allowed
+sub checkModePermission {
+	my $operation = shift;
+	if (($operation eq 'install') && ($mode eq 'rolling')) {
+		return (1);
+	}
+	if (($operation eq 'install') && ($mode eq 'updates')) {
+		return (0);
+	}
+	if (($operation eq 'install') && ($mode eq 'fixed')) {
+		return (0);
+	}
+	if (($operation eq 'upgrade') && ($mode eq 'rolling')) {
+		return (1);
+	}
+	if (($operation eq 'upgrade') && ($mode eq 'updates')) {
+		return (1);
+	}
+	if (($operation eq 'upgrade') && ($mode eq 'fixed')) {
+		return (0);
+	}
+	return (1);
+}
 
 
 
@@ -7007,7 +7091,7 @@ if (!isOSSupported()) {
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", 'STOP_ALL_CONFIGURATION'} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", 'mode'} = ();
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
@@ -7060,14 +7144,13 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
+			checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkDontConfigure() == 0) {
-					configureAllModules();
-					postConfigure();
-				}
+				configureAllModules();
+				postConfigure();
 				listSuccess();
 				writeConfigFile();
 			} else {
@@ -7101,14 +7184,13 @@ if (@ARGV != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
+			checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkDontConfigure() == 0) {
-					reconfigureAllModules();
-					postConfigure();
-				}
+				reconfigureAllModules();
+				postConfigure();
 				listSuccess();
 				writeConfigFile();
 			} else {	
@@ -7145,15 +7227,15 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name missing\n";
 		}
-	} elsif ($argValue{command} eq "STOP_ALL_CONFIGURATION") {
-		if (($argValue{module} eq 'yes') || ($argValue{module} eq 'no')) {
+	} elsif ($argValue{command} eq "mode") {
+		if (($argValue{module} eq 'rolling') || ($argValue{module} eq 'updates') || ($argValue{module} eq 'fixed')) {
 			initLogging();
 			prepareValues();
-			setDontConfigureAnything($argValue{module});
+			setMode($argValue{module});
 			writeConfigFile();
 			printLog('Tomte finished', 'L0');
 		} else {
-			print "yes/no missing\n";
+			print "rolling/updates/fixed missing\n";
 		}
 	} else {
 		print "Unknown command: $argValue{command}\n";

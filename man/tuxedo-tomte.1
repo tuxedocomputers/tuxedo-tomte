@@ -57,10 +57,10 @@ can't be blocked\&.
 Allows the module to be installed or upgraded if it is required by this system\&.
 .RE
 .PP
-\fBSTOP_ALL_CONFIGURATION \fIyes\fR|\fIno\fR
+\fBmode \fIrolling\fR|\fIupdates\fR|\fIfixed\fR
 .RS 4
-Stops/activates automatic configuration\&.
-It just creates/deletes an empty file
-.BR /etc/tomte/DONT_CONFIGURE \&.
+Stops/activates automatic configuration or updates\&.
+It creates a file with the text 'rolling', 'updates' or 'fixed'.
+.BR /etc/tomte/MODE \&.
 This file can be set as well manually\&. Useful to stop Tomte from applying
 fixes at system start or at installation if set before installing Tomte\&.
