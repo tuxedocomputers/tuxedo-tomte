@@ -5728,7 +5728,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", 'STOP_ALL_CONFIGURATION'} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6536,6 +6536,62 @@ sub unblock {
 
 
 ###############################################################################
+# blocks all modules
+#
+sub blockAllModules {
+	my $module;
+	foreach $module (keys %origConfModules) {
+		if ($origConfModules{$module}{required} eq 'yes') {
+			$origConfModules{$module}{blocked} = 'yes';
+			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
+		}
+	}
+}
+
+
+###############################################################################
+# inhibit/activate system configuration by Tomte
+# pass 'yes' or 'no' as argument
+#
+sub setDontConfigureAnything {
+	my $flag = shift;
+	my $FDC;
+	unless (-d $configDir) {
+		unless (mkdir($configDir)) {
+			printLog("could not create $configDir, something is very fishy", 'TL0');
+			return;
+		}
+	}
+	if ($flag eq 'yes') {
+		if (-e $fileDontConfigure) {
+			printLog("Tomte had already stopped all automatic configuration", 'TL0');
+		} else {
+			if (open $FDC, ">", $fileDontConfigure) {
+				printLog("Tomte stopping all automatic configuration!", 'TL0');
+				close $FDC;
+			} else {
+				printLog("could not create $fileDontConfigure !!", 'TL0');
+			}
+		}
+	} elsif ($flag eq 'no') {
+		if (-e $fileDontConfigure) {
+			if (unlink $fileDontConfigure) {
+				printLog("Tomte activating automatic configuration", 'TL0');
+				printLog("next configuration will start at reboot or when executing:", 'T0');
+				printLog("tomte configure all\ntomte reconfigure all", 'T0');
+			} else {
+				printLog("Unable to activate Tomte automatic configuration", 'TL0');
+				printLog("could not delete $fileDontConfigure", 'TL0');
+			}
+		} else {
+			printLog("Tomte is already active", 'T0');
+		}
+	}
+}
+
+
+
+###############################################################################
 # configures a module, does no checks
 #
 sub configureModule {
@@ -6846,14 +6902,15 @@ sub triesAlreadyDone() {
 #
 my $USAGE =<<USAGE;
 tuxedo-tomte [COMMAND]
-  list                        List all installable modules with detailed status
-  modules                     List all available modules
-  description MODULE          Shows the module description
-  configure MODULE ...|all    Configure an unconfigured module
-  reconfigure MODULE...|all   Reconfigure a configured module
-  block MODULE ...            Block a module
-  unblock MODULE ...          Unblock a module
-  help                        Prints this message
+  list                           List all installable modules with detailed status
+  modules                        List all available modules
+  description MODULE             Shows the module description
+  configure MODULE ...|all       Configure an unconfigured module
+  reconfigure MODULE...|all      Reconfigure a configured module
+  block MODULE ...|all           Block a module
+  unblock MODULE ... |all        Unblock a module
+  STOP_ALL_CONFIGURATION yes|no  Stops/activates system configuration
+  help                           Prints this message
 USAGE
 
 
@@ -6915,6 +6972,20 @@ sub tuxedoDevice {
 
 
 
+###############################################################################
+# checks if file /etc/tomte/DONT_CONFIGURE exists
+# returns 1 of yes, 0 if none
+#
+sub checkDontConfigure {
+	if ( -e $fileDontConfigure) {
+		printLog("file $fileDontConfigure is present!", 'TL0');
+		return (1);
+	}
+	return (0);
+}
+
+
+
 
 ###############################################################################
 ###############################################################################
@@ -6936,7 +7007,7 @@ if (!isOSSupported()) {
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", 'STOP_ALL_CONFIGURATION'} = ();
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
@@ -6993,8 +7064,10 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				configureAllModules();
-				postConfigure();
+				if (checkDontConfigure() == 0) {
+					configureAllModules();
+					postConfigure();
+				}
 				listSuccess();
 				writeConfigFile();
 			} else {
@@ -7032,8 +7105,10 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				reconfigureAllModules();
-				postConfigure();
+				if (checkDontConfigure() == 0) {
+					reconfigureAllModules();
+					postConfigure();
+				}
 				listSuccess();
 				writeConfigFile();
 			} else {	
@@ -7060,11 +7135,25 @@ if (@ARGV != 0) {
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
-			unblock($argValue{module});
+			if ($argValue{module} eq "all") {
+				unblockAllModules();
+			} else {
+				unblock($argValue{module});
+			}
 			writeConfigFile();
 			printLog('Tomte finished', 'L1');
 		} else {
 			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "STOP_ALL_CONFIGURATION") {
+		if (($argValue{module} eq 'yes') || ($argValue{module} eq 'no')) {
+			initLogging();
+			prepareValues();
+			setDontConfigureAnything($argValue{module});
+			writeConfigFile();
+			printLog('Tomte finished', 'L0');
+		} else {
+			print "yes/no missing\n";
 		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
