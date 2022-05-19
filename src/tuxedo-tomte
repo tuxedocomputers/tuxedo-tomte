@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -484,7 +484,7 @@ my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004', 'cardreaderfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:a500',
 		cpu => '',
@@ -891,7 +891,7 @@ my %tuxedo_devices = (
 	'39' => {
 		model => ['TUXEDO Aura 15 Gen2'],
 		board_name => ['NL5xNU'],
-		fix => ['kerneltuxedo2004next'],
+		fix => ['kerneltuxedo2004next', 'cardreaderfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -1643,6 +1643,23 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	cardreaderfix => {
+		name => 'cardreader-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+
 
 );
 
@@ -1863,6 +1880,7 @@ sub postrequisitesFAI {
 sub checkRequirements {
 	my $FH;
 	my $biosVersion;
+	my $lsusb;
 
 	# check values for each module
 	if ($boardname =~ /NS50_70MU/) {
@@ -1974,10 +1992,18 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME936 device found
-	my $lsusb = `lsusb -d 12d1:15bb`;
+	$lsusb = `lsusb -d 12d1:15bb`;
 	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue', 'L1');
+	}
+
+	# if cardreader Realtek RTS522A found
+	$lsusb = `lsusb -d 10ec:522a`;
+	#TODO correct string to parse
+	if ($lsusb =~ /ME936/) {
+		$origConfModules{cardreaderfix}{required} = 'yes';
+		printLog('detected cardreader-fix issue', 'L1');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -4350,6 +4376,43 @@ sub earlyloadbacklightcontrolfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Forces cardreader Realtek RTS522A to stay on when device goes into idle
+# - if USB device 0x10ec:0x522a detected
+#
+sub cardreaderfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		if ($retval1 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 
