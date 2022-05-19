@@ -484,7 +484,7 @@ my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004', 'cardreaderfix'],
+		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '1558:a500',
 		cpu => '',
@@ -891,7 +891,7 @@ my %tuxedo_devices = (
 	'39' => {
 		model => ['TUXEDO Aura 15 Gen2'],
 		board_name => ['NL5xNU'],
-		fix => ['kerneltuxedo2004next', 'cardreaderfix'],
+		fix => ['kerneltuxedo2004next'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
 		cpu => '',
@@ -921,6 +921,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'42' => {
+		model => ['all with cardreader Realtek RTS522A'],
+		board_name => [''],
+		fix => ['cardreaderfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => ['10ec:522a'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1998,14 +2010,6 @@ sub checkRequirements {
 		printLog('detected threeg-fix issue', 'L1');
 	}
 
-	# if cardreader Realtek RTS522A found
-	$lsusb = `lsusb -d 10ec:522a`;
-	#TODO correct string to parse
-	if ($lsusb =~ /ME936/) {
-		$origConfModules{cardreaderfix}{required} = 'yes';
-		printLog('detected cardreader-fix issue', 'L1');
-	}
-
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
@@ -2122,6 +2126,14 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
+
+	# if cardreader Realtek RTS522A found
+	my @cardreaderDevices = (qr/10ec:522a/); 
+	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
+		$origConfModules{cardreaderfix}{required} = 'yes';
+		printLog('detected cardreader-fix issue', 'L1');
+	}
+
 }
 
 
