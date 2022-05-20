@@ -10,12 +10,13 @@ is a little helper that provides services, updates and fixes for
 TUXEDO devices in the background\&. It does not send any information, telemetry
 data or similar stuff out!
 .P
-The program has to be startet with administrator privileges\&.
+Many but not all options require administrator privileges\&.
 .SH "COMMANDS"
 .PP
 The following commands are understood:
 .PP 
 \fBlist\fR
+.RS 4
 Lists all available fixes with name, version and whether it is active,
 blocked and required for this system\&.
 .RE
@@ -64,3 +65,43 @@ It creates a file with the text 'rolling', 'updates' or 'fixed'.
 .BR /etc/tomte/MODE \&.
 This file can be set as well manually\&. Useful to stop Tomte from applying
 fixes at system start or at installation if set before installing Tomte\&.
+.TP  12
+rolling
+All updates and new fixes will be applied automatically. This includes
+installing new packages, deleting or replacing them if not needed anymore,
+changing kernels, adding or deleting configuration files, etc.
+.TP
+updates
+Only fixes that are not blocked and already installed on the system will be
+updated as required.
+Fixes can still be installed with: tomte \fBconfigure \fIMODULE\fR
+.TP
+fixed
+Nothing will be changed in the system except for the TUXEDO repositories which
+are an absolute requirement for the other fixes to work.
+Fixes can still be installed with: tomte \fBconfigure \fIMODULE\fR
+.SH Typical workflow
+.TP
+FAI installation
+Everything will be installed automatically. After a FAI installation, the
+system should be ready to go. Fixes can be blocked afterwards if e.g. kernel
+updates are not desired. If new fixes should be necessary, these will be
+installed automatically.
+.TP
+Installation on vanilla system
+Everything will be installed automatically, it might take a few minutes till
+all is installed. Messages will appear on the desktop. Interrupting the
+installation might damage the system.
+.TP
+Installation without modifications
+If creating the file /etc/tomte/MODE with the
+text: 'updates' or 'fixed' inside, Tomte will configure the TUXEDO
+repositories and continue as described above.
+To find out which fixes are available to the system:
+.br
+      \fBtomte \fBlist\fP
+.br
+
+Then to install a required fix:
+.br
+      \fBtomte \fBconfigure \fIMODULE\fR
