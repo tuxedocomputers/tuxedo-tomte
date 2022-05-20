@@ -486,7 +486,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Aura 15 Gen1'],
 		board_name => ['NL5xRU', 'AURA1501'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:a500',
 		cpu => '',
 		kernel => '',
@@ -497,7 +497,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book BA15 Gen1'],
 		board_name => ['PF5PU1G'],
 		fix => ['nobootonbattery', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -508,7 +508,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
 		fix => ['r8168dkms', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:8562',
 		cpu => '',
 		kernel => '',
@@ -519,7 +519,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book BX1507'],
 		board_name => ['N350TW'],
 		fix => ['tuxedorestoreaudiofix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -530,7 +530,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book DX1508', 'TUXEDO Book DX1708'],
 		board_name => ['N8xEJEK'],
 		fix => ['backlightfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -541,7 +541,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book XA15 Gen10'],
 		board_name => ['NH5xAx'],
 		fix => ['nokeyboardaftersuspendfix', 'corefix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:50f0',
 		cpu => '',
 		kernel => '',
@@ -552,7 +552,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
 		board_name => ['PB50_70DFx,DDx'],
 		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:67e1',
 		cpu => '',
 		kernel => '',
@@ -563,7 +563,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
 		board_name => ['PCx0Dx_GN20'],
 		fix => ['tuxedokeyboardite', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
 		kernel => '',
@@ -574,7 +574,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book XUX7 Gen11'],
 		board_name => ['X170SM'],
 		fix => ['nokeyboardaftersuspendfix', 'tuxedokeyboardite', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -585,7 +585,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
 		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
-		flavour => ['20.04'],
+		flavour => ['20.04', '22.04'],
 		pci_id => '1558:7715',
 		cpu => '',
 		kernel => '',
@@ -596,7 +596,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO EduBook 15 Gen2'],
 		board_name => ['EDUBOOK1502'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -607,7 +607,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO InfinityBook 14 v2'],
 		board_name => ['X35R'],
 		fix => ['elantechtouchpadfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -618,7 +618,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
 		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
 		kernel => '',
@@ -629,7 +629,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO InfinityBook Pro 14 v5'],
 		board_name => ['N141CU'],
 		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -640,7 +640,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO InfinityBook Pro 15 v5'],
 		board_name => ['N150CU'],
 		fix => ['nokeyboardaftersuspendfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:1404',
 		cpu => '',
 		kernel => '',
@@ -651,7 +651,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO InsanityBook 1501'],
 		board_name => ['P95_HP'],
 		fix => ['backlightfix', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -662,7 +662,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -673,7 +673,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA RTX2060'],
 		board_name => ['POLARIS1501A2060', 'POLARIS1701A2060'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -684,7 +684,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Polaris Gen1 Intel NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501I1650TI', 'POLARIS1701I1650TI'],
 		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -695,7 +695,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Polaris Gen1 Intel NVIDIA RTX2060'],
 		board_name => ['POLARIS1501I2060', 'POLARIS1701I2060'],
 		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -706,7 +706,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Pulse 14 Gen1'],
 		board_name => ['PULSE1401'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -717,7 +717,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Pulse 15 Gen1'],
 		board_name => ['PULSE1501'],
 		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -728,7 +728,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
 		board_name => ['GMxNGxx'],
 		fix => ['tuxedotouchpadswitch', 'amdgpubacklightauxoff', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -739,7 +739,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
 		board_name => ['GMxMGxx'],
 		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -750,7 +750,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
 		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004next'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -761,7 +761,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
 		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'kerneltuxedo2004', 'nvidiabacklightcontrolfix'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -772,7 +772,7 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Trinity Gen1 Intel'],
 		board_name => ['TRINITY1501I', 'TRINITY1701I'],
 		fix => ['tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -783,7 +783,7 @@ my %tuxedo_devices = (
 		model => ['XMG Fusion 15 L19 GTX1660Ti'],
 		board_name => ['LAPQC71A'],
 		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -794,7 +794,7 @@ my %tuxedo_devices = (
 		model => ['XMG Fusion 15 L19 RTX2070'],
 		board_name => ['LAPQC71B'],
 		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch', 'kerneltuxedo2004'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -816,7 +816,7 @@ my %tuxedo_devices = (
 		model => ['all with fingerprintreader'],
 		board_name => [''],
 		fix => ['fingerprintreader'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => ['147e:100[0123]', '147e:20(15|16|20)', '147e:300[01]', '147e:500[23]', '0483:201[56]', '1c7a:0603'],
 		cpu => '',
 		kernel => '',
@@ -849,7 +849,7 @@ my %tuxedo_devices = (
 		model => ['all with OLED display'],
 		board_name => [''],
 		fix => ['tuxedooledbrt'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -860,7 +860,7 @@ my %tuxedo_devices = (
 		model => ['Kinston NVMe'],
 		board_name => [''],
 		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', '20.04'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '2646:2263',
 		cpu => '',
 		kernel => '',
@@ -933,6 +933,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => 'ME906',
 	},
+	'43' => {
+		model => ['all with Realtek RTL8125'],
+		board_name => [''],
+		fix => ['rtl8125dkms'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '10ec:8125',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 
 );
 
@@ -1673,6 +1685,23 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	r8125kms => {
+		name => 'r8125-dkms',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		fainame => '',
+		description => 'Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+	},
+
 
 );
 
@@ -1893,6 +1922,7 @@ sub postrequisitesFAI {
 sub checkRequirements {
 	my $FH;
 	my $biosVersion;
+	my $lsusb;
 
 	# check values for each module
 	if ($boardname =~ /NS50_70MU/) {
@@ -2004,14 +2034,14 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME936 device found
-	my $lsusb = `lsusb -d 12d1:15bb`;
+	$lsusb = `lsusb -d 12d1:15bb`;
 	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue', 'L1');
 	}
 
 	# if Threeg Huawei ME906s device found
-	my $lsusb = `lsusb -d 12d1:15c1`;
+	$lsusb = `lsusb -d 12d1:15c1`;
 	if ($lsusb =~ /huawei/i) {
 		$origConfModules{threegfix2}{required} = 'yes';
 		printLog('detected threeg-fix2 issue', 'L1');
@@ -2120,19 +2150,29 @@ sub checkRequirements {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
+
 	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue', 'L1');
 	}
+
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
 		printLog('detected nvidia-backlight-control-fix issue', 'L1');
 	}
+
 	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
+
+	my @r8125Devices = ('10ec:8125');
+	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
+		$origConfModules{r8125dkms}{required} = 'yes';
+		printLog('detected r8125dkms issue', 'L1');
+	}
+
 }
 
 
@@ -4442,6 +4482,68 @@ sub earlyloadbacklightcontrolfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Installs the newest driver for RTL8125 2.5GbE Controller
+# Solves some ethernet problems/hang/slow connection
+#
+sub r8125dkms() {
+	my $module = shift;
+	my $action = shift;
+	my $wasInstalled = 1;
+	my $package_tuxedo_r8125_dkms;
+	if ($action eq 'install') {
+		# check if the package is already installed
+		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
+			messageLongInstall();
+			$wasInstalled = 0;
+			$package_tuxedo_r8125_dkms = installPackage('tuxedo-r8125-dkms');
+		} else {
+			$package_tuxedo_r8125_dkms = 1;
+		}
+
+		if( $package_tuxedo_r8125_dkms ) {
+			if ($wasInstalled) {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			} else {
+				addToConfiguredModules($module, 'success');
+			}
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'yes';
+		} else {
+			$origConfModules{$module}{installed} = 'failed';
+			addToConfiguredModules($module, 'failed');
+		}
+	}
+
+	if ($action eq 'upgrade') {
+		printLog('upgrade not necessary for packages', 'L1');
+	}
+
+	if ($action eq 'remove') {
+		my $counter = 0;
+		if( isPackageInstalled('tuxedo-r8125-dkms') ) {
+			if (!deinstallPackage('tuxedo-r8125-dkms')) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if ($counter == 1) {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'success');
+		} else {
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'no';
+			addToConfiguredModules($module, 'failed');
+		}
+	}
+}
+
 
 
 
