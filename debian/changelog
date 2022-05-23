@@ -1,7 +1,14 @@
+tuxedo-tomte (2.6.4) jammy; urgency=medium
+
+  * added systemd wait for OEM completion in FAI installation
+  * set NVIDIA to 'on' when installing the drivers
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 16 May 2022 07:39:28 +0200
+
 tuxedo-tomte (2.6.3) jammy; urgency=medium
 
   * removed remaining IDs for tuxedo-micfix1
-  * added TUXEDO OS to repo list
+  * added TUXEDO_OS 22.04 as valid distribution
 
  -- E. Mohr <tux@tuxedocomputers.com>  Tue, 03 May 2022 17:44:53 +0200
 
