@@ -6273,6 +6273,7 @@ sub listStatus {
 	}
 	if ($printIt) {
 		print "Only showing fixes that are available for this hardware\n";
+		print "Tomte mode setting is: $mode\n";
 		for my $row (@arr) {
 			format STDOUT =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
@@ -6688,22 +6689,26 @@ sub setDontConfigureAnything {
 
 ###############################################################################
 # set configuration mode setMode('mode')
-# rolling: update all automatically
-# updates: block new modules but update installed modules
-# fixed: block everything
+# rolling: install/remove/update all automatically
+# updates: block installation/removal but update installed modules
+# fixed:   block everything
 #
 sub setMode {
-	$mode = shift;
-	if (($mode eq 'rolling') || ($mode eq 'updates') || ($mode eq 'fixed')) {
+	my $tmpMode = shift;
+	if ($tmpMode eq $mode) {
+		print "requested mode and current mode are the same!\n";
+		return (0);
+	}
+	if (($tmpMode eq 'rolling') || ($tmpMode eq 'updates') || ($tmpMode eq 'fixed')) {
 		printLog("requested mode: $mode", 'L0');
+		$mode = $tmpMode;
 	} else {
-		printLog("invalid mode, set to default: rolling", 'TL0');
-		$mode = 'rolling';
+		printLog("invalid mode, leaving it on current: $mode", 'TL0');
 	}
 	unless (-d $configDir) {
 		unless (mkdir($configDir)) {
 			printLog("could not create $configDir, something is very fishy", 'TL0');
-			return;
+			return (0);
 		}
 	}
 	if (-e $fileMode) {
@@ -7122,11 +7127,12 @@ sub checkDontConfigure {
 # if it is not possible, returns the default 'rolling'
 #
 sub checkMode {
+	my $tmpMode;
 	if ( -e $fileMode) {
-		$mode = readFileReturnLine();
-		if (($mode eq 'rolling') || ($mode eq 'updates') || ($mode eq 'fixed')) {
-			printLog("detected mode $mode", 'L2');
-			return ($mode);
+		$tmpMode = readFileReturnLine();
+		if (($tmpMode eq 'rolling') || ($tmpMode eq 'updates') || ($tmpMode eq 'fixed')) {
+			printLog("detected mode $tmpMode", 'L2');
+			return ($tmpMode);
 		}
 	}
 	return ('rolling');
@@ -7140,14 +7146,16 @@ sub checkMode {
 # returns 0 if not and 1 if allowed
 sub checkModePermission {
 	my $operation = shift;
-	if (($operation eq 'install') && ($mode eq 'rolling')) {
-		return (1);
-	}
-	if (($operation eq 'install') && ($mode eq 'updates')) {
-		return (0);
-	}
-	if (($operation eq 'install') && ($mode eq 'fixed')) {
-		return (0);
+	if (($operation eq 'install') {
+		if ($mode eq 'rolling')) {
+			return (1);
+		}
+		if ($mode eq 'fixed')) {
+			return (0);
+		}
+		if ($mode eq 'updates')) {
+			return (0);
+		}
 	}
 	if (($operation eq 'upgrade') && ($mode eq 'rolling')) {
 		return (1);
@@ -7209,6 +7217,7 @@ if (@ARGV != 0) {
 	}
 
 	if ($argValue{command} eq "list") {
+		$mode = checkMode();
 		initLogging();
 		prepareValues();
 		listStatus();
@@ -7236,7 +7245,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
-			checkMode();
+			$mode = checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
@@ -7257,6 +7266,7 @@ if (@ARGV != 0) {
 		}
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
+			$mode = checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
@@ -7276,7 +7286,7 @@ if (@ARGV != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
-			checkMode();
+			$mode = checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
@@ -7321,13 +7331,14 @@ if (@ARGV != 0) {
 		}
 	} elsif ($argValue{command} eq "mode") {
 		if (($argValue{module} eq 'rolling') || ($argValue{module} eq 'updates') || ($argValue{module} eq 'fixed')) {
+			$mode = checkMode();
 			initLogging();
 			prepareValues();
 			setMode($argValue{module});
 			writeConfigFile();
 			printLog('Tomte finished', 'L0');
 		} else {
-			print "rolling/updates/fixed missing\n";
+			print "valid options are: rolling|updates|fixed\n";
 		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
