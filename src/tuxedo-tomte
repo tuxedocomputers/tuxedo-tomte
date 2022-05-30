@@ -933,6 +933,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => 'ME906',
 	},
+	'43' => {
+		model => ['all with cardreader Realtek RTS522A'],
+		board_name => [''],
+		fix => ['cardreaderfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => ['10ec:522a'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 
 );
 
@@ -1673,6 +1684,23 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
+	cardreaderfix => {
+		name => 'cardreader-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+
 
 );
 
@@ -1893,6 +1921,7 @@ sub postrequisitesFAI {
 sub checkRequirements {
 	my $FH;
 	my $biosVersion;
+	my $lsusb;
 
 	# check values for each module
 	if ($boardname =~ /NS50_70MU/) {
@@ -2004,7 +2033,7 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME936 device found
-	my $lsusb = `lsusb -d 12d1:15bb`;
+	$lsusb = `lsusb -d 12d1:15bb`;
 	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
 		printLog('detected threeg-fix issue', 'L1');
@@ -2133,6 +2162,14 @@ sub checkRequirements {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog('detected early-load-backlight-control-fix issue', 'L1');
 	}
+
+	# if cardreader Realtek RTS522A found
+	my @cardreaderDevices = (qr/10ec:522a/); 
+	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
+		$origConfModules{cardreaderfix}{required} = 'yes';
+		printLog('detected cardreader-fix issue', 'L1');
+	}
+
 }
 
 
@@ -4442,6 +4479,43 @@ sub earlyloadbacklightcontrolfix() {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Forces cardreader Realtek RTS522A to stay on when device goes into idle
+# - if USB device 0x10ec:0x522a detected
+#
+sub cardreaderfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		if ($retval1 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
+
+
 
 
 
