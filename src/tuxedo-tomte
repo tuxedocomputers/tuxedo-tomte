@@ -934,6 +934,17 @@ my %tuxedo_devices = (
 		usb_device => 'ME906',
 	},
 	'43' => {
+		model => ['all with cardreader Realtek RTS522A'],
+		board_name => [''],
+		fix => ['cardreaderfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => ['10ec:522a'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'44' => {
 		model => ['all with Realtek RTL8125'],
 		board_name => [''],
 		fix => ['rtl8125dkms'],
@@ -944,8 +955,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
-
 );
 
 
@@ -1699,7 +1708,23 @@ my %origConfModules = (
 		upgrade => '',
 		upgraded => '',
 		reconfigure => '',
-		restart => '',
+		restart => 'yes',
+	},
+	cardreaderfix => {
+		name => 'cardreader-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
 	},
 
 
@@ -2171,6 +2196,13 @@ sub checkRequirements {
 	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
 		$origConfModules{r8125dkms}{required} = 'yes';
 		printLog('detected r8125dkms issue', 'L1');
+	}
+
+	# if cardreader Realtek RTS522A found
+	my @cardreaderDevices = (qr/10ec:522a/); 
+	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
+		$origConfModules{cardreaderfix}{required} = 'yes';
+		printLog('detected cardreader-fix issue', 'L1');
 	}
 
 }
@@ -4541,6 +4573,41 @@ sub r8125dkms() {
 			$origConfModules{$module}{upgraded} = 'no';
 			addToConfiguredModules($module, 'failed');
 		}
+	}
+}
+
+
+
+###############################################################################
+# Forces cardreader Realtek RTS522A to stay on when device goes into idle
+# - if USB device 0x10ec:0x522a detected
+#
+sub cardreaderfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		if ($retval1 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
 	}
 }
 
