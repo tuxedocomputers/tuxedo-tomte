@@ -1694,7 +1694,7 @@ my %origConfModules = (
 		reconfigure => 'always',
 		restart => 'yes',
 	},
-	r8125kms => {
+	r8125dkms => {
 		name => 'r8125-dkms',
 		version => 1,
 		installed => 'no',
