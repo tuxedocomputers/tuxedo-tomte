@@ -3704,11 +3704,6 @@ sub nvidiadriver() {
 				$packageNvidiaPrime = 1;
 			}
 
-			#TODO debug
-			printLog("packageNvidiaDriver: $packageNvidiaDriver", 'TL2');
-			printLog("packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
-			printLog("origconfmodules $module installed: $origConfModules{$module}{installed}", 'TL2');
-			printLog("localconfmodules $module installed: $localConfModules{$module}{installed}", 'TL2');
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
@@ -4822,13 +4817,11 @@ sub deinstExcept {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
-		#TODO test
 		my $retText = `$deinstCmd`;
 		if ($? != 0) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
-			printLog("retText: $retText", 'TL0');
-
+			printLog("retText: $retText", 'L0');
 			return (0);
 		} else {
 			printLog('deinstallation of packages successful', 'L1');
