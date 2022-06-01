@@ -2040,7 +2040,7 @@ sub checkRequirements {
 	}
 
 	# if Threeg Huawei ME906s device found
-	my $lsusb = `lsusb -d 12d1:15c1`;
+	$lsusb = `lsusb -d 12d1:15c1`;
 	if ($lsusb =~ /huawei/i) {
 		$origConfModules{threegfix2}{required} = 'yes';
 		printLog('detected threeg-fix2 issue', 'L1');
@@ -3713,17 +3713,19 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily activated fix
-				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU', 'TL0');
-				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
+			}
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
@@ -3760,17 +3762,19 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "success");
 					$restartSystem = 1;
 				}
-				# temporarily activated fix
-				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU', 'TL0');
-				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
+			}
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU', 'TL0');
+				}
 			}
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
