@@ -3653,6 +3653,7 @@ sub nvidiadriver() {
 	my $packagePythonCairo;
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
+	my $output;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -3742,8 +3743,9 @@ sub nvidiadriver() {
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
+					$output = `gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU: on', 'TL0');
+					printLog("$output", 'L2');
 				}
 			}
 
@@ -3792,8 +3794,9 @@ sub nvidiadriver() {
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
+					$output = `gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU: on', 'TL0');
+					printLog("$output", 'L2');
 				}
 			}
 
