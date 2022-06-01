@@ -3703,7 +3703,20 @@ sub nvidiadriver() {
 			} else {
 				$packageNvidiaPrime = 1;
 			}
-	
+
+			#TODO debug
+			printLog("packageNvidiaDriver: $packageNvidiaDriver", 'TL2');
+			printLog("packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
+			printLog("origconfmodules $module installed: $origConfModules{$module}{installed}", 'TL2');
+			printLog("localconfmodules $module installed: $localConfModules{$module}{installed}", 'TL2');
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0');
+				}
+			}
+
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -3719,18 +3732,6 @@ sub nvidiadriver() {
 				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
-			}
-			#TODO debug
-			printLog("packageNvidiaDriver: $packageNvidiaDriver", 'TL2');
-			printLog("packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
-			printLog("origconfmodules $module installed: $origConfModules{$module}{installed}", 'TL2');
-			printLog("localconfmodules $module installed: $localConfModules{$module}{installed}", 'TL2');
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0');
-				}
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
@@ -3757,7 +3758,15 @@ sub nvidiadriver() {
 			} else {
 				$packageNvidiaPrime = 1;
 			}
-	
+
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					`gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0');
+				}
+			}
+
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -3773,13 +3782,6 @@ sub nvidiadriver() {
 				printLog("$origConfModules{$module}{name} installation failed", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
-			}
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
-					`gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0');
-				}
 			}
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
