@@ -1,18 +1,11 @@
-tuxedo-tomte (2.6.4-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.5) jammy; urgency=medium
 
-  * added Huawei ME906s
-  * ME906 added
-  * after packaging
-  * after packaging
+  * added threegfix2 for Huawei ME906s
   * added cardreaderfix for Realtek RTS522A PCI Express Card Reader
-  * after packaging
-  * finished cardreaderfix
-  * after packaging
-  * added newest driver for Realtek RTL8125 2.5GbE Controller
-  * after packaging
-  * corrected typo
+  * added newest driver for Realtek RTL8125 2.5GbE Controller in module
+    r8125dkms with package tuxedo-r8125-dkms, replaces standard driver
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 30 May 2022 15:21:10 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 02 Jun 2022 12:40:31 +0200
 
 tuxedo-tomte (2.6.4) jammy; urgency=medium
 
