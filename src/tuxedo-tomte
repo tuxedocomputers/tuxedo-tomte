@@ -37,6 +37,7 @@ my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+$ENV{LC_MESSAGES} = 'C';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
