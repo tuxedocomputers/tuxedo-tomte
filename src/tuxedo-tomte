@@ -37,7 +37,12 @@ my $logLevel = 2;
 
 # for console language
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+#TODO debug test
+print "ENV before setting locale\n";
+print $ENV{VAR};
 $ENV{LC_MESSAGES} = 'C';
+print "ENV after setting locale\n";
+print $ENV{VAR};
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
