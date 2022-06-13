@@ -64,10 +64,8 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
-#TODO delete
 my $fileDontConfigure = $configDir.'DONT_CONFIGURE';
-my $fileMode = $configDir.'MODE';
-my $mode = 'rolling';
+my $dontConfigure = 0;
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
@@ -1022,6 +1020,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -1038,6 +1037,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -1054,6 +1054,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -1070,6 +1071,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedocontrolcenter => {
 		name => 'tuxedo-control-center',
@@ -1086,6 +1088,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	tuxedokeyboard => {
 		name => 'tuxedo-keyboard',
@@ -1102,6 +1105,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	nokeyboardaftersuspendfix => {
 		name => 'no-keyboard-after-suspend-fix',
@@ -1118,6 +1122,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -1134,6 +1139,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -1150,6 +1156,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		mode => 'rolling',
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
@@ -1166,6 +1173,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		mode => 'rolling',
 	},
 	corefix => {
 		name => 'core-fix',
@@ -1182,6 +1190,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -1198,6 +1207,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	threegfix2 => {
 		name => 'threeg-fix2',
@@ -1214,6 +1224,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 
 	elantechtouchpadfix => {
@@ -1231,6 +1242,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -1247,6 +1259,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
@@ -1263,6 +1276,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
@@ -1279,6 +1293,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	fingerprintreader => {
 		name => 'fingerprint-reader',
@@ -1295,6 +1310,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -1311,6 +1327,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	tuxedorestoreaudiofix => {
 		name => 'tuxedo-restore-audio-fix',
@@ -1327,6 +1344,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
@@ -1343,6 +1361,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kerneltuxedo2004next => {
 		name => 'linux-tuxedo-20.04-next',
@@ -1359,6 +1378,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kerneltuxedo2004 => {
 		name => 'linux-tuxedo-20.04',
@@ -1375,6 +1395,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kernelgenerichwe2004 => {
 		name => 'linux-generic-hwe-20.04',
@@ -1391,6 +1412,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
@@ -1407,6 +1429,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	kerneltuxedo2204 => {
 		name => 'linux-tuxedo-22.04',
@@ -1423,6 +1446,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -1439,6 +1463,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -1455,6 +1480,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	# deprecated since 20220216
 	amdgpudkms => {
@@ -1472,6 +1498,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
@@ -1488,6 +1515,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	tuxedooledbrt => {
 		name => 'tuxedo-oled-brt',
@@ -1504,6 +1532,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	apportfix => {
 		name => 'apport-fix',
@@ -1520,6 +1549,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	# deprecated since 20220215
 	realtekr8125dkms => {
@@ -1537,6 +1567,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		mode => 'rolling',
 	},
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
@@ -1553,6 +1584,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	i915disablepsrfix => {
 		name => 'i915-disable-psr-fix',
@@ -1569,6 +1601,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	i915enablepsrfix => {
 		name => 'i915-enable-psr-fix',
@@ -1585,6 +1618,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedopinfixtgldkms => {
 		name => 'tuxedo-pinfix-tgl-dkms',
@@ -1601,6 +1635,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	tuxedomicfix1 => {
 		name => 'tuxedo-micfix1',
@@ -1617,6 +1652,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
@@ -1633,6 +1669,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	i8042noauxfix => {
 		name => 'i8042noaux-fix',
@@ -1649,6 +1686,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	lightdmlogindcheckgraphicalfix => {
 		name => 'lightdm-logind-check-graphical-fix',
@@ -1665,6 +1703,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'no',
+		mode => 'rolling',
 	},
 	nvidiabacklightcontrolfix => {
 		name => 'nvidia-backlight-control-fix',
@@ -1681,6 +1720,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	earlyloadbacklightcontrolfix => {
 		name => 'early-load-backlight-control-fix',
@@ -1697,6 +1737,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	r8125dkms => {
 		name => 'r8125-dkms',
@@ -1713,6 +1754,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
 	cardreaderfix => {
 		name => 'cardreader-fix',
@@ -1729,9 +1771,8 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		mode => 'rolling',
 	},
-
-
 );
 
 
@@ -1772,7 +1813,7 @@ sub printIfExistsNotUndefinedNotEmpty {
 
 
 # hash to load the configfile
-# is a copy from origConfModules to evade undefined values
+# is a copy from origConfModules to exclude undefined values
 my %localConfModules = %origConfModules;
 
 
@@ -6165,7 +6206,7 @@ sub readConfigFile {
 				$shortname = validModuleName($name);
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
-					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
+					@comp{qw(name version installed mode required hwid)} = ($name, @cols);
 
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
@@ -6195,7 +6236,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no|rolling|updates|fixed)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line", 'L0');
@@ -6215,7 +6256,7 @@ sub writeConfigFile {
 	my $hwid;
 	if ( open $FH, '>', $configFile ) {
 		printLog("writing configfile", 'L1');
-		print $FH "# name version installed blocked required hwid\n";
+		print $FH "# name version installed mode required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{required} ne 'no') {
@@ -6249,7 +6290,7 @@ sub writeConfigFile {
 					print $FH "$origConfModules{$name}{name} ".
 						"$version ".
 						"$installed ".
-						"$origConfModules{$name}{blocked} ".
+						"$origConfModules{$name}{mode} ".
 						"$origConfModules{$name}{required} ".
 						"$hwid\n";
 				}
@@ -6413,7 +6454,7 @@ sub isDisplayPresent {
 # to be done in next version
 #
 sub listStatus {
-	my @arr = ( ['Name', 'Version', 'Installed', 'Blocked', 'Required'] );
+	my @arr = ( ['Name', 'Version', 'Installed', 'Mode', 'Required'] );
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
@@ -6434,7 +6475,7 @@ sub listStatus {
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{mode}",
 				"$localConfModules{$module}{required}"]);
 		}
 		# required, installed and not removed
@@ -6447,12 +6488,13 @@ sub listStatus {
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{mode}",
 				"$localConfModules{$module}{required}$upgradeAvailable"]);
 		}
 	}
 	if ($printIt) {
 		print "Only showing fixes that are available for this hardware\n";
+		#TODO print DONT_CONFIGURE 
 		print "Tomte mode setting is: $mode\n";
 		for my $row (@arr) {
 			format STDOUT =
@@ -7224,7 +7266,7 @@ tuxedo-tomte [COMMAND]
   reconfigure MODULE...|all      Reconfigure a configured module
   block MODULE ...|all           Block a module
   unblock MODULE ... |all        Unblock a module
-  mode rolling|updates|fixes     Update all|only updates|block everything
+  mode rolling|updates|fixed     Update all|only updates|block everything
   help                           Prints this message
 USAGE
 
@@ -7294,8 +7336,10 @@ sub tuxedoDevice {
 sub checkDontConfigure {
 	if ( -e $fileDontConfigure) {
 		printLog("file $fileDontConfigure is present!", 'TL0');
+		$dontConfigure = 1;
 		return (1);
 	}
+	$dontConfigure = 0;
 	return (0);
 }
 
@@ -7313,6 +7357,10 @@ sub checkMode {
 		if (($tmpMode eq 'rolling') || ($tmpMode eq 'updates') || ($tmpMode eq 'fixed')) {
 			printLog("detected mode $tmpMode", 'L2');
 			return ($tmpMode);
+		} else {
+			printLog("mode not detected, creating mode file with default mode 'rolling'", 'TL2');
+			unlink($fileMode);
+			createFile($fileMode, 'rolling', 0);
 		}
 	}
 	return ('rolling');
@@ -7322,10 +7370,20 @@ sub checkMode {
 
 ###############################################################################
 # checks if the operation is allowed in this mode
-# usage: checkModePermision(install|update)
+# usage: checkModePermision(module, install|remove|update)
 # returns 0 if not and 1 if allowed
 sub checkModePermission {
-	my $operation = shift;
+	my ($module, $operation) = (@_);
+	# this is a double check, just in case ...
+	if(($argValue{module} eq "all") && ($mode eq 'fixed')) {
+		printLog("mode set to 'fixed', exiting without modifying anything", 'T0');
+		printLog("mode set to 'fixed', exiting without modifying anything", 'L1');
+		exit(0);
+	}
+	my $isInstalled = $localConfModules{$module}{installed};
+	my $isBlocked = $localConfModules{$module}{blocked};
+	#TODO debug
+	printLog("checkmodepermission module: $module installed: $isInstalled blocked: $isBlocked", 'TL2');
 	if (($operation eq 'install') {
 		if ($mode eq 'rolling')) {
 			return (1);
@@ -7337,15 +7395,29 @@ sub checkModePermission {
 			return (0);
 		}
 	}
-	if (($operation eq 'upgrade') && ($mode eq 'rolling')) {
-		return (1);
+	if (($operation eq 'remove') {
+		if ($mode eq 'rolling')) {
+			return (1);
+		}
+		if ($mode eq 'fixed')) {
+			return (0);
+		}
+		if ($mode eq 'updates')) {
+			return (0);
+		}
 	}
-	if (($operation eq 'upgrade') && ($mode eq 'updates')) {
-		return (1);
+	if (($operation eq 'upgrade') {
+		if ($mode eq 'rolling')) {
+			return (1);
+		}
+		if ($mode eq 'fixed')) {
+			return (0);
+		}
+		if ($mode eq 'updates')) {
+			return (0);
+		}
 	}
-	if (($operation eq 'upgrade') && ($mode eq 'fixed')) {
-		return (0);
-	}
+
 	return (1);
 }
 
@@ -7430,6 +7502,11 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				if($mode eq 'fixed') {
+					printLog("mode set to 'fixed', exiting without modifying anything", 'T0');
+					printLog("mode set to 'fixed', exiting without modifying anything", 'L1');
+					exit(0);
+				}
 				configureAllModules();
 				postConfigure();
 				listSuccess();
@@ -7471,6 +7548,11 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				if($mode eq 'fixed') {
+					printLog("mode set to 'fixed', exiting without modifying anything", 'T0');
+					printLog("mode set to 'fixed', exiting without modifying anything", 'L1');
+					exit(0);
+				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
