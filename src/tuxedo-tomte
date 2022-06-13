@@ -34,7 +34,7 @@ use Data::Dumper;
 # 2 = everything
 my $logLevel = 0;
 
-# for console language
+# for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 $ENV{LC_MESSAGES} = 'C';
 
