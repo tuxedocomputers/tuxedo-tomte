@@ -6874,20 +6874,21 @@ sub setMode {
 sub checkMode {
 	my $tmpMode;
 	my $countModes = 0;
-	if (-e $fileAutomatic) {
+	if (-e $modeFile{AUTOMATIC}) {
 		++$countModes;
 		$mode = 'AUTOMATIC';
 	}
-	if (-e $fileUpdatesOnly) {
+	if (-e $modeFile{UPDATES_ONLY}) {
 		++$countModes;
 		$mode = 'UPDATES_ONLY';
 	}
-	if (-e $fileDontConfigure) {
+	if (-e $modeFile{DONT_CONFIGURE}) {
 		++$countModes;
 		$mode = 'DONT_CONFIGURE';
 	}
 	if ($countModes == 0) {
 		$mode = 'AUTOMATIC';
+		setMode('AUTOMATIC');
 		printLog('No mode setting found, assuming AUTOMATIC', 'L2');
 	}
 	if ($countModes == 1) {
@@ -7390,7 +7391,7 @@ if (@ARGV != 0) {
 	}
 
 	if ($argValue{command} eq "list") {
-		checkDontConfigure();
+		checkMode();
 		initLogging();
 		prepareValues();
 		listStatus();
@@ -7422,7 +7423,8 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkDontConfigure()) {
+				if (checkMode() eq 'DONT_CONFIGURE') {
+					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
 				configureAllModules();
@@ -7430,6 +7432,10 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
+				if (checkMode() eq 'DONT_CONFIGURE') {
+					printLog("DONT_CONFIGURE is set", 'TL0');
+					exit (0);
+				}
 				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
@@ -7440,7 +7446,8 @@ if (@ARGV != 0) {
 		}
 		printLog('Tomte finished', 'L1');
 	} elsif ($argValue{command} eq "remove") {
-		if (checkDontConfigure()) {
+		if ((checkMode() eq 'DONT_CONFIGURE') || (checkMode() eq 'UPDATES_ONLY')) {
+			printLog("$mode is set", 'TL0');
 			exit (0);
 		}
 		if ($argValue{module} ne '') {
@@ -7466,14 +7473,19 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkDontConfigure()) {
+				if (checkMode() eq 'DONT_CONFIGURE') {
+					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-			} else {	
+			} else {
+				if (checkMode() eq 'DONT_CONFIGURE') {
+					printLog("DONT_CONFIGURE is set", 'TL0');
+					exit (0);
+				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
@@ -7485,9 +7497,33 @@ if (@ARGV != 0) {
 		printLog('Tomte finished', 'L1');
 	#TODO finish this
 	} elsif ($argValue{command} eq "block") {
-		printLog("block is deprecated, use 'fixed' instead", 'T0');
+		if (checkMode() eq 'DONT_CONFIGURE') {
+			printLog("DONT_CONFIGURE is set", 'TL0');
+			exit (0);
+		}
+		if ($argValue{module} ne '') {
+			initLogging();
+			prepareValues();
+			block($argValue{module});
+			writeConfigFile();
+			printLog('Tomte finished', 'L1');
+		} else {
+			print "Module name missing\n";
+		}
 	} elsif ($argValue{command} eq "unblock") {
-		printLog("unblock is deprecated, use 'rolling' or 'updates' instead", 'T0');
+		if (checkMode() eq 'DONT_CONFIGURE') {
+			printLog("DONT_CONFIGURE is set", 'TL0');
+			exit (0);
+		}
+		if ($argValue{module} ne '') {
+			initLogging();
+			prepareValues();
+			unblock($argValue{module});
+			writeConfigFile();
+			printLog('Tomte finished', 'L1');
+		} else {
+			print "Module name missing\n";
+		}
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
