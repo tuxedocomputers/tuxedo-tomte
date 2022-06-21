@@ -2542,7 +2542,23 @@ sub tuxedocontrolcenter() {
 		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		my $counter = 0;
+		if( isPackageInstalled($origConfModules{$module}{name}) ) {
+			if (!deinstallPackage($origConfModules{$module}{name})) {
+				$counter = $counter+1;
+			}
+		} else {
+			$counter = $counter+1;
+		}
+		if ($counter == 1) {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'success');
+		} else {
+			$origConfModules{$module}{installed} = 'yes';
+			$origConfModules{$module}{upgraded} = 'no';
+			addToConfiguredModules($module, 'failed');
+		}
 	}
 }
 
@@ -4091,7 +4107,7 @@ sub realtekr8125dkms() {
 		$origConfModules{$module}{required} = "no";
 	}
 	if ($action eq 'remove') {
-		# check before if the package is already installed
+		# check before if the package is installed
 		if (isPackageInstalled($origConfModules{$module}{name})) {
 			if (removePackage($origConfModules{$module}{name})) {
 				addToConfiguredModules($module, "removed");
