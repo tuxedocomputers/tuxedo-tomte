@@ -1923,9 +1923,6 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	if (checkDontConfigure() == 1) {
-		return;
-	}
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `pkcon refresh`;
@@ -2508,7 +2505,7 @@ sub amdgpuwithnvidiafix() {
 		}
 		$origConfModules{$module}{installed} = 'no';
 		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'success');
+		addToConfiguredModules($module, 'removed');
 	}
 }
 
@@ -2553,11 +2550,11 @@ sub tuxedocontrolcenter() {
 		if ($counter == 1) {
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'success');
+			addToConfiguredModules($module, 'removed');
 		} else {
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'failed');
+			addToConfiguredModules($module, 'remove failed');
 		}
 	}
 }
@@ -3947,11 +3944,11 @@ sub amdgpudkms() {
 		if ($counter == 2) {
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'success');
+			addToConfiguredModules($module, 'removed');
 		} else {
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'failed');
+			addToConfiguredModules($module, 'remove failed');
 		}
 	}
 }
@@ -4116,7 +4113,7 @@ sub realtekr8125dkms() {
 				$origConfModules{$module}{required} = "no";
 				$restartSystem = 1;
 			} else {
-				addToConfiguredModules($module, "failed");
+				addToConfiguredModules($module, "remove failed");
 				$origConfModules{$module}{installed} = "remove failed";
 				$origConfModules{$module}{version} = $localConfModules{$module}{version};
 				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
@@ -4598,11 +4595,11 @@ sub r8125dkms() {
 		if ($counter == 1) {
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'success');
+			addToConfiguredModules($module, 'removed');
 		} else {
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'failed');
+			addToConfiguredModules($module, 'remove failed');
 		}
 	}
 }
@@ -6018,7 +6015,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update", 'mode'} = ();
+	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6180,7 +6177,7 @@ sub readConfigFile {
 				$shortname = validModuleName($name);
 				if ($shortname ne '') {
 					# @comp values have to be same as in writeConfigFile
-					@comp{qw(name version installed mode required hwid)} = ($name, @cols);
+					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
 
 					$localConfModules{$shortname} = { %comp };
 					# convert to numbers
@@ -6232,7 +6229,7 @@ sub writeConfigFile {
 	my $hwid;
 	if ( open $FH, '>', $configFile ) {
 		printLog("writing configfile", 'L1');
-		print $FH "# name version installed mode required hwid\n";
+		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
 			if ($origConfModules{$name}{required} ne 'no') {
@@ -6266,7 +6263,7 @@ sub writeConfigFile {
 					print $FH "$origConfModules{$name}{name} ".
 						"$version ".
 						"$installed ".
-						"$origConfModules{$name}{mode} ".
+						"$origConfModules{$name}{blocked} ".
 						"$origConfModules{$name}{required} ".
 						"$hwid\n";
 				}
@@ -6430,7 +6427,7 @@ sub isDisplayPresent {
 # to be done in next version
 #
 sub listStatus {
-	my @arr = ( ['Name', 'Version', 'Installed', 'Mode', 'Required'] );
+	my @arr = ( ['Name', 'Version', 'Installed', 'Blocked', 'Required'] );
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
@@ -6451,20 +6448,18 @@ sub listStatus {
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{mode}",
+				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}"]);
 		}
 		# required, installed and not removed
-		if ((($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) 
-			#&& ($localConfModules{$module}{installed} ne 'no')
-			) {
+		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
 				["$localConfModules{$module}{name}",
 				"$localConfModules{$module}{version}",
 				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{mode}",
+				"$localConfModules{$module}{blocked}",
 				"$localConfModules{$module}{required}$upgradeAvailable"]);
 		}
 	}
@@ -6491,14 +6486,8 @@ sub listStatus {
 sub transferConfigValues {
 	my $name;
 	foreach $name (sort keys %localConfModules) {
-		# always copy mode, take into account old blocking
-		if ($localConfModules{$name}{mode} eq 'yes') {
-			$origConfModules{$name}{mode} = 'fixed';
-		} elsif ($localConfModules{$name}{mode} eq 'no') {
-			$origConfModules{$name}{mode} = 'rolling';
-		} else {
-			$origConfModules{$name}{mode} = $localConfModules{$name}{mode};
-		}
+		# always copy blocked status
+		$origConfModules{$name}{blocked} = $localConfModules{$name}{blocked};
 		if (newVersion($name) || newHwid($name)) {
 			# new version or new hwid => upgrade necessary
 			$origConfModules{$name}{upgrade} = 'yes';
@@ -6678,23 +6667,19 @@ sub configureSingleModule {
 		return;
 	}
 
-	if ($origConfModules{$module}{mode} eq 'fixed') {
-		return;
-	}
-
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
 			($localConfModules{$module}{installed} eq 'failed') ||
 		   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
-			$origConfModules{$module}{required} eq 'yes' &&
-			$origConfModules{$module}{mode} eq 'rolling') {
+			$localConfModules{$module}{blocked} eq 'no' &&
+			$origConfModules{$module}{required} eq 'yes') {
 		printLog("configure module: $module", 'L1');
 		configureModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
+			$localConfModules{$module}{blocked} eq 'no' &&
 			$origConfModules{$module}{required} eq 'yes' &&
-			$origConfModules{$module}{upgrade} eq 'yes' &&
-	   		$origConfModules{$module}{mode} eq 'updates') {
+			$origConfModules{$module}{upgrade} eq 'yes') {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1');
 		upgradeModule($module);
@@ -6702,7 +6687,7 @@ sub configureSingleModule {
 		$configuredModules{$module} = 'nothingToDo';
 	}
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-		print "Module $moduleName cannot be installed/removed because:\n";
+		print "Module $moduleName cannot be installed/removed/upgraded because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 }
@@ -6718,10 +6703,6 @@ sub removeSingleModule {
 	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
-		return;
-	}
-
-	if ($origConfModules{$module}{mode} eq 'fixed') {
 		return;
 	}
 
@@ -6868,7 +6849,6 @@ sub setMode {
 	my $requestedMode = shift;
 	my $key;
 
-	checkMode();
 	if ($mode eq $requestedMode) {
 		printLog("Requested mode '$requestedMode' is already set", 'TL0');
 	} else {
@@ -7377,11 +7357,11 @@ if (!isOSSupported()) {
 }
 
 # define for each argvalues procedures
-# modify $USAGE if any modifications here
+# modify $USAGE if any modifications are made here
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", 'mode'} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
@@ -7424,6 +7404,7 @@ if (@ARGV != 0) {
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 		$FAI = 1;
+		$mode = 'AUTOMATIC';
 		initLogging();
 		prepareValues();
 		prerequisitesFAI();
@@ -7435,11 +7416,12 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
+			checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkMode() eq 'DONT_CONFIGURE') {
+				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
@@ -7448,7 +7430,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
-				if (checkMode() eq 'DONT_CONFIGURE') {
+				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
@@ -7462,7 +7444,8 @@ if (@ARGV != 0) {
 		}
 		printLog('Tomte finished', 'L1');
 	} elsif ($argValue{command} eq "remove") {
-		if ((checkMode() eq 'DONT_CONFIGURE') || (checkMode() eq 'UPDATES_ONLY')) {
+		checkMode();
+		if (($mode eq 'DONT_CONFIGURE') || ($mode eq 'UPDATES_ONLY')) {
 			printLog("$mode is set", 'TL0');
 			exit (0);
 		}
@@ -7485,11 +7468,12 @@ if (@ARGV != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
+			checkMode();
 			initLogging();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (checkMode() eq 'DONT_CONFIGURE') {
+				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
@@ -7498,7 +7482,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 			} else {
-				if (checkMode() eq 'DONT_CONFIGURE') {
+				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					exit (0);
 				}
@@ -7543,7 +7527,6 @@ if (@ARGV != 0) {
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
-		checkDontConfigure();
 		initLogging();
 		prepareValues();
 		setMode($argValue{command});
