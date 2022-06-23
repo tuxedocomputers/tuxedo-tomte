@@ -6542,6 +6542,9 @@ sub addToConfiguredModules {
 		printLog("succesfully installed $module", 'L0');
 	} elsif ($status =~ /removed/) {
 		printLog("succesfully removed $module", 'L0');
+		print "The module $module has been removed. Please bloc it with:\n";
+		print "sudo tomte block $module\n";
+		print "or tomte will reinstall it again at the next boot\n";
 	} elsif ($status =~ /remove failed/) {
 		printLog("failed to remove $module", 'L0');
 	}
