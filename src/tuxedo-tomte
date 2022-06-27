@@ -34,8 +34,9 @@ use Data::Dumper;
 # 2 = everything
 my $logLevel = 0;
 
-# for console language
+# for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+$ENV{LC_MESSAGES} = 'C';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -1475,7 +1476,7 @@ my %origConfModules = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -3707,18 +3708,19 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $output;
+	my $nvidiaDriver = 'nvidia-driver-510';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-470') ) {
+			if( ! isPackageInstalled($nvidiaDriver) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage('nvidia-driver-470');
+				$packageNvidiaDriver = installPackage($nvidiaDriver);
 			} else {
-				setAptMark('nvidia-driver-470','manual');
+				setAptMark($nvidiaDriver,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -3769,15 +3771,15 @@ sub nvidiadriver() {
 		
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-470') ) {
+			if( ! isPackageInstalled($nvidiaDriver) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage('nvidia-driver-470');
+				$packageNvidiaDriver = installPackage($nvidiaDriver);
 			} else {
-				setAptMark('nvidia-driver-470','manual');
+				setAptMark($nvidiaDriver,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -3820,15 +3822,15 @@ sub nvidiadriver() {
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', 'nvidia-driver-470');
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled('nvidia-driver-470') ) {
+			if( ! isPackageInstalled($nvidiaDriver) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage('nvidia-driver-470');
+				$packageNvidiaDriver = installPackage($nvidiaDriver);
 			} else {
-				setAptMark('nvidia-driver-470','manual');
+				setAptMark($nvidiaDriver,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
