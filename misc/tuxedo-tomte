@@ -4,7 +4,7 @@ _tuxedo-tomte() {
 	local word="${COMP_WORDS[COMP_CWORD]}"
 
 	if [ "$COMP_CWORD" -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "list modules description configure reconfigure block unblock mode help" -- "$word") )
+		COMPREPLY=( $(compgen -W "list modules description configure reconfigure block unblock remove AUTOMATIC DEFAULT_ONLY DONT_CONFIGURE help" -- "$word") )
 	elif [ "$COMP_CWORD" -eq 2 ]; then
 		local words=("${COMP_WORDS[@]}")
 		unset "words[0]"
@@ -18,9 +18,9 @@ _tuxedo-tomte() {
 				local modules=$(tuxedo-tomte modules "${words[@]}")
 				COMPREPLY=( $(compgen -W "all $modules" -- "$word") )
 				;;
-			mode)
+			remove)
 				local modules=$(tuxedo-tomte modules "${words[@]}")
-				COMPREPLY=( $(compgen -W "rolling updates fixed" -- "$word") )
+				COMPREPLY=( $(compgen -W "$modules" -- "$word") )
 				;;
 		esac
 	fi

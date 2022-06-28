@@ -31,7 +31,7 @@ Shows a small description about the fix\&.
 Configures the specified module or fix if possible\&. That means, it is not
 already installed, blocked and designed to fix something on this system\&.
 If \fBall\fR is used then all possible fixes will be installed\&.
-Does nothing if \fBSTOP_ALL_CONFIGURATION\fR is set\&.
+Does nothing if \fBDONT_CONFIGURE\fR is set\&.
 .RE
 .PP
 \fBreconfigure \fIMODULE\fR|\fIall\fR
@@ -40,7 +40,7 @@ Configures the specified module or fix even if it is already installed\&.
 It will not do anything if it is blocked or not designed to work on this
 system\&.
 If \fBall\fR is used then all possible fixes will be reconfigured\&.
-Does nothing if \fBSTOP_ALL_CONFIGURATION\fR is set\&.
+Does nothing if \fBDONT_CONFIGURE\fR is set\&.
 .RE
 .PP
 \fBblock \fIMODULE\fR|\fIall\fR
@@ -58,65 +58,63 @@ can't be blocked\&.
 Allows the module to be installed or upgraded if it is required by this system\&.
 .RE
 .PP
-\fBConfiguration modes\fR
+\fBremove \fIMODULE\fR
+.RS 4
+Removes the named module independent from mode
+(AUTOMATIC|UPGRADES_ONLY|DONT_CONFIGURE)\&.
+After removing the module it has to be blocked with:
+.br
+      \fBtomte \fBblock \fIMODULE\fP
+.br
+or the module will be installed again automatically if the mode is set to
+AUTOMATIC\&.
+.RE
+.PP
+.SH "CONFIGURATION MODES"
 .RS 4
 There are three configuration modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE.
 The modes are set by creating an empty file with the name of the configuration
 mode in
 .BR /etc/tomte/ \&
-The file can be created manually as well.
-.TP  12
-AUTOMATIC
+The file may be created manually as well\&.
+.RE
+.TP
+\fBAUTOMATIC\fR
 This is the default mode. Everything will be installed/updated/removed
-automatically by Tomte.
+automatically by Tomte\&.
+.RE
 .TP
-UPDATES_ONLY
+\fBUPDATES_ONLY\fR
 Only updates will be handled automatically by Tomte. No modules will be installed
-or removed without user intervention.
+or removed without user intervention\&.
+.RE
 .TP
-DONT_CONFIGURE
+\fBDONT_CONFIGURE\fR
 Nothing will be configured by Tomte. Usefull if you want to create the file
 before installing Tomte to avoid Tomte to make any unwanted changes to the
-system or to set Tomte on hold after having the configuration you want.
-\fBmode \fIrolling\fR|\fIupdates\fR|\fIfixed\fR
+system or to set Tomte on hold after having the configuration you want\&.
+.RE
+.PP
+.SH "FAI INSTALLATION"
 .RS 4
-Stops/activates automatic configuration or updates\&.
-It creates a file with the text 'rolling', 'updates' or 'fixed'.
-.BR /etc/tomte/MODE \&.
-This file can be set as well manually\&. Useful to stop Tomte from applying
-fixes at system start or at installation if set before installing Tomte\&.
-.TP  12
-rolling
-All updates and new fixes will be applied automatically. This includes
-installing new packages, deleting or replacing them if not needed anymore,
-changing kernels, adding or deleting configuration files, etc.
-.TP
-updates
-Only fixes that are not blocked and already installed on the system will be
-updated as required.
-Fixes can still be installed with: tomte \fBconfigure \fIMODULE\fR
-.TP
-fixed
-Nothing will be changed in the system except for the TUXEDO repositories which
-are an absolute requirement for the other fixes to work.
-Fixes can still be installed with: tomte \fBconfigure \fIMODULE\fR
-.SH Typical workflow
-.TP
-FAI installation
 Everything will be installed automatically. After a FAI installation, the
 system should be ready to go. Fixes can be blocked afterwards if e.g. kernel
 updates are not desired. If new fixes should be necessary, these will be
-installed automatically.
-.TP
-Installation on vanilla system
+installed automatically\&.
+.RE
+.PP
+.SH "INSTALLATION ON VANILLA SYSTEM"
+.RS 4
 Everything will be installed automatically, it might take a few minutes till
 all is installed. Messages will appear on the desktop. Interrupting the
-installation might damage the system.
-.TP
-Installation without modifications
+installation might damage the system\&.
+.RE
+.PP
+.SH "INSTALLATION WITHOUT MODIFICATIONS"
+.RS 4
 If creating the file /etc/tomte/MODE with the
 text: 'updates' or 'fixed' inside, Tomte will configure the TUXEDO
-repositories and continue as described above.
+repositories and continue as described above\&.
 To find out which fixes are available to the system:
 .br
       \fBtomte \fBlist\fP

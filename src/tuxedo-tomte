@@ -2536,25 +2536,23 @@ sub tuxedocontrolcenter() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrade not necessary for packages");
+		printLog("upgrade not necessary for packages, it is done by the package manager");
 	}
 	if ($action eq 'remove') {
-		my $counter = 0;
 		if( isPackageInstalled($origConfModules{$module}{name}) ) {
 			if (!deinstallPackage($origConfModules{$module}{name})) {
-				$counter = $counter+1;
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			} else {
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'removed');
 			}
 		} else {
-			$counter = $counter+1;
-		}
-		if ($counter == 1) {
 			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-		} else {
-			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'remove failed');
+			addToConfiguredModules($module, 'nothingToDo');
 		}
 	}
 }
@@ -6465,6 +6463,7 @@ sub listStatus {
 		}
 	}
 	if ($printIt) {
+		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
 		for my $row (@arr) {
 			format STDOUT =
@@ -6538,16 +6537,18 @@ sub addToConfiguredModules {
 	my $status = shift;
 	$configuredModules{$module} = $status;
 	if ($status =~ /failed/) {
-		printLog("failed to install $module", 'L0');
+		printLog("failed to install $origConfModules{$module}{name}", 'L0');
 	} elsif ($status =~ /success/) {
-		printLog("succesfully installed $module", 'L0');
+		printLog("succesfully installed $origConfModules{$module}{name}", 'L0');
 	} elsif ($status =~ /removed/) {
-		printLog("succesfully removed $module", 'L0');
-		print "The module $module has been removed. Please bloc it with:\n";
-		print "sudo tomte block $module\n";
-		print "or tomte will reinstall it again at the next boot\n";
+		printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
+		print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
+		print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+		print "or tomte will reinstall it again at the next start\n";
 	} elsif ($status =~ /remove failed/) {
-		printLog("failed to remove $module", 'L0');
+		printLog("failed to remove $origConfModules{$module}{name}", 'L0');
+	} elsif ($status =~ /nothingToDo/) {
+		printLog("nothing to do for $origConfModules{$module}{name}", 'L0');
 	}
 }
 
@@ -6853,6 +6854,7 @@ sub setMode {
 	my $requestedMode = shift;
 	my $key;
 
+	$mode = checkMode();
 	if ($mode eq $requestedMode) {
 		printLog("Requested mode '$requestedMode' is already set", 'TL0');
 	} else {
@@ -6860,10 +6862,9 @@ sub setMode {
 			if ($key eq $requestedMode) {
 				createFile($modeFile{$requestedMode}, '', 0);
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
-
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
-				printLog("removing modefile: $modeFile{$key}", 'TL2');
+				printLog("removing superfluous modefile: $modeFile{$key}", 'TL2');
 			}
 		}
 	}
@@ -6888,8 +6889,8 @@ sub checkMode {
 	}
 	if ($countModes == 0) {
 		$mode = 'AUTOMATIC';
-		setMode('AUTOMATIC');
 		printLog('No mode setting found, assuming AUTOMATIC', 'L2');
+		$mode = 'AUTOMATIC';
 	}
 	if ($countModes == 1) {
 		printLog("Found mode setting $mode", 'L2');
@@ -7068,7 +7069,7 @@ sub listSuccess {
 		printNameDescriptionModules(@failedModules);
 	}
 	if (@nothingToDoModules) {
-		print "\nThe following modules were already installed:\n";
+		print "\nNothing was done for the following modules:\n";
 		printNameDescriptionModules(@nothingToDoModules);
 	}
 	if (@failedPrograms) {
@@ -7226,11 +7227,9 @@ tuxedo-tomte [COMMAND]
   reconfigure MODULE...|all      Reconfigure a configured module
   block MODULE ...|all           Deprecated, use 'fixed' instead
   unblock MODULE ... |all        Deprecated, use 'rolling' or 'updates' instead
-  rolling MODULE                 Install/remove/update module automatically
-  updates MODULE                 Only update module automatically if installed
-  fixed MODULE                   Block install/remove/update on this module
-  DONT_CONFIGURE                 Stops all automatic configuration
   AUTOMATIC                      Activates automatic configuration
+  UPDATES_ONLY                   Only updates will be installed automatically
+  DONT_CONFIGURE                 Stops all automatic configuration
   help                           Prints this message
   
   more details can be found in the man page
@@ -7321,10 +7320,10 @@ sub checkModePermission {
 			return (1);
 		}
 		if ($mode eq 'UPDATES_ONLY') {
-			return (0);
+			return (1);
 		}
 		if ($mode eq 'DONT_CONFIGURE') {
-			return (0);
+			return (1);
 		}
 
 	}
@@ -7381,6 +7380,7 @@ if (@ARGV != 0) {
 		$LiveISO = 1;
 		initLogging();
 		printLog("starting Tomte in LiveISO mode", 'L0');
+		setMode('AUTOMATIC');
 		prepareValues();
 		prerequisites();
 		configureAllModules();
@@ -7391,8 +7391,8 @@ if (@ARGV != 0) {
 	}
 
 	if ($argValue{command} eq "list") {
-		checkMode();
 		initLogging();
+		checkMode();
 		prepareValues();
 		listStatus();
 	} elsif ($argValue{command} eq "modules") {
@@ -7408,8 +7408,8 @@ if (@ARGV != 0) {
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 		$FAI = 1;
-		$mode = 'AUTOMATIC';
 		initLogging();
+		setMode('AUTOMATIC');
 		prepareValues();
 		prerequisitesFAI();
 		configureAllModules();
@@ -7420,13 +7420,14 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
-			checkMode();
 			initLogging();
+			checkMode();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("DONT_CONFIGURE is set", 'TL0');
+					printLog("Mode DONT_CONFIGURE is set", 'TL0');
+					printLog("exiting without changing anything", 'T0');
 					exit (0);
 				}
 				configureAllModules();
@@ -7435,7 +7436,8 @@ if (@ARGV != 0) {
 				writeConfigFile();
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("DONT_CONFIGURE is set", 'TL0');
+					printLog("Mode DONT_CONFIGURE is set", 'TL0');
+					printLog("exiting without changing anything", 'T0');
 					exit (0);
 				}
 				configureSingleModule($argValue{module});
@@ -7448,13 +7450,9 @@ if (@ARGV != 0) {
 		}
 		printLog('Tomte finished', 'L1');
 	} elsif ($argValue{command} eq "remove") {
-		checkMode();
-		if (($mode eq 'DONT_CONFIGURE') || ($mode eq 'UPDATES_ONLY')) {
-			printLog("$mode is set", 'TL0');
-			exit (0);
-		}
 		if ($argValue{module} ne '') {
 			initLogging();
+			checkMode();
 			prepareValues();
 			prerequisites();
 			removeSingleModule($argValue{module});
@@ -7472,13 +7470,14 @@ if (@ARGV != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
-			checkMode();
 			initLogging();
+			checkMode();
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
+					printLog("exiting without changing anything", 'T0');
 					exit (0);
 				}
 				reconfigureAllModules();
@@ -7488,6 +7487,7 @@ if (@ARGV != 0) {
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
+					printLog("exiting without changing anything", 'T0');
 					exit (0);
 				}
 				reconfigureSingleModule($argValue{module});
@@ -7499,12 +7499,8 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 		printLog('Tomte finished', 'L1');
-	#TODO finish this
+	# blocking/unblocking should work in any mode
 	} elsif ($argValue{command} eq "block") {
-		if (checkMode() eq 'DONT_CONFIGURE') {
-			printLog("DONT_CONFIGURE is set", 'TL0');
-			exit (0);
-		}
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
@@ -7515,10 +7511,6 @@ if (@ARGV != 0) {
 			print "Module name missing\n";
 		}
 	} elsif ($argValue{command} eq "unblock") {
-		if (checkMode() eq 'DONT_CONFIGURE') {
-			printLog("DONT_CONFIGURE is set", 'TL0');
-			exit (0);
-		}
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
@@ -7532,8 +7524,8 @@ if (@ARGV != 0) {
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
 		initLogging();
-		prepareValues();
 		setMode($argValue{command});
+		prepareValues();
 		printLog('Tomte finished', 'L0');
 	} else {
 		print "Unknown command: $argValue{command}\n";
