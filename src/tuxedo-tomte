@@ -6641,7 +6641,7 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') && ($origConfModules{$module}{blocked} eq 'no')) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -6649,6 +6649,7 @@ sub configureAllModules {
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				($origConfModules{$module}{blocked} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeSingleModule($origConfModules{$module}{name});
@@ -6899,6 +6900,56 @@ sub checkMode {
 		printLog("More then one mode setting found, assuming $mode", 'L2');
 	}
 	return $mode;
+}
+
+
+
+###############################################################################
+# checks if the operation is allowed in this mode
+# usage: checkModePermision(install|remove|update)
+# returns 0 if not and 1 if allowed
+sub checkModePermission {
+	my $operation = shift;
+	# this is a double check, just in case ...
+
+	#TODO debug
+	printLog("checkmodepermission mode: $mode", 'TL2');
+	if ($operation eq 'install') {
+		if ($mode eq 'AUTOMATIC') {
+			return (1);
+		}
+		if ($mode eq 'UPDATES_ONLY') {
+			return (1);
+		}
+		if ($mode eq 'DONT_CONFIGURE') {
+			return (0);
+		}
+	}
+	if ($operation eq 'remove') {
+		if ($mode eq 'AUTOMATIC') {
+			return (1);
+		}
+		if ($mode eq 'UPDATES_ONLY') {
+			return (1);
+		}
+		if ($mode eq 'DONT_CONFIGURE') {
+			return (1);
+		}
+
+	}
+	if ($operation eq 'upgrade') {
+		if ($mode eq 'AUTOMATIC') {
+			return (0);
+		}
+		if ($mode eq 'UPDATES_ONLY') {
+			return (1);
+		}
+		if ($mode eq 'DONT_CONFIGURE') {
+			return (0);
+		}
+	}
+
+	return (1);
 }
 
 
@@ -7225,6 +7276,7 @@ tuxedo-tomte [COMMAND]
   description MODULE             Shows the module description
   configure MODULE ...|all       Configure an unconfigured module
   reconfigure MODULE...|all      Reconfigure a configured module
+  remove MODULE                  Remove a module from the system
   block MODULE ...|all           Deprecated, use 'fixed' instead
   unblock MODULE ... |all        Deprecated, use 'rolling' or 'updates' instead
   AUTOMATIC                      Activates automatic configuration
@@ -7294,54 +7346,6 @@ sub tuxedoDevice {
 
 
 
-###############################################################################
-# checks if the operation is allowed in this mode
-# usage: checkModePermision(install|remove|update)
-# returns 0 if not and 1 if allowed
-sub checkModePermission {
-	my $operation = shift;
-	# this is a double check, just in case ...
-
-	#TODO debug
-	printLog("checkmodepermission mode: $mode", 'TL2');
-	if ($operation eq 'install') {
-		if ($mode eq 'AUTOMATIC') {
-			return (1);
-		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
-		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (0);
-		}
-	}
-	if ($operation eq 'remove') {
-		if ($mode eq 'AUTOMATIC') {
-			return (1);
-		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
-		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (1);
-		}
-
-	}
-	if ($operation eq 'upgrade') {
-		if ($mode eq 'AUTOMATIC') {
-			return (0);
-		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
-		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (0);
-		}
-	}
-
-	return (1);
-}
-
 
 
 ###############################################################################
@@ -7390,19 +7394,30 @@ if (@ARGV != 0) {
 		createFile($tomteFinishedFile, 'finished', 0);
 	}
 
+	# list
 	if ($argValue{command} eq "list") {
 		initLogging();
 		checkMode();
 		prepareValues();
 		listStatus();
+
+	# modules
 	} elsif ($argValue{command} eq "modules") {
 		modulesList();
+
+	# printcompletefixeslist
 	} elsif ($argValue{command} eq "printcompletefixeslist") {
 		printTuxedoDevices();
+
+	# description
 	} elsif ($argValue{command} eq "description") {
 		moduleDescription();
+
+	# help
 	} elsif ($argValue{command} eq "help") {
 		help();
+
+	# FAI
 	} elsif ($argValue{command} eq "FAI") {
 		print "Starting tuxedo-tomte in FAI mode\n".
 				"This should not be used in a normal situation\n".
@@ -7417,6 +7432,8 @@ if (@ARGV != 0) {
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
+
+	# configure
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne '') {
@@ -7449,6 +7466,8 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 		printLog('Tomte finished', 'L1');
+
+	# remove
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			initLogging();
@@ -7463,6 +7482,8 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 		printLog('Tomte finished', 'L1');
+
+	# reconfigure
 	} elsif ($argValue{command} eq "reconfigure") {
 		# reconfigure interrupts repeated execution
 		if (-e $triesFile) {
@@ -7499,7 +7520,9 @@ if (@ARGV != 0) {
 			print "Module name or \"all\" missing\n";
 		}
 		printLog('Tomte finished', 'L1');
+
 	# blocking/unblocking should work in any mode
+	# block
 	} elsif ($argValue{command} eq "block") {
 		if ($argValue{module} ne '') {
 			initLogging();
@@ -7510,6 +7533,8 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name missing\n";
 		}
+
+	# unblock
 	} elsif ($argValue{command} eq "unblock") {
 		if ($argValue{module} ne '') {
 			initLogging();
@@ -7520,6 +7545,8 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name missing\n";
 		}
+
+	# modes
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
