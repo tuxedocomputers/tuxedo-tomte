@@ -6685,18 +6685,18 @@ sub configureSingleModule {
 	if ($origConfModules{$module}{required} ne 'yes') {
 		if (($localConfModules{$module}{installed} eq 'yes') && ($localConfModules{$module}{installed} eq 'yes')) {
 			printLog("removeModule $moduleName", 'L2');
-			removeModule($moduleName);
+			removeModule($module);
 			return (0);
 		}
 	}
 	if(($origConfModules{$module}{reconfigure} ne 'always') &&
 		(($localConfModules{$module}{installed} eq 'no') || ($localConfModules{$module}{installed} eq 'failed') || ($origConfModules{$module}{postconf} eq 'updategrub'))) {
-		configureModule($moduleName);
+		configureModule($module);
 		return (0);
 	}
 	if (($origConfModules{$module}{always}) || (($localConfModules{$module}{installed} eq 'no') || ($localConfModules{$module}{installed} eq 'failed') || ($origConfModules{$module}{postconf} eq 'updategrub'))) {
 		if (($localConfModules{$module}{installed} eq 'yes') && ($origConfModules{$module}{upgrade} eq 'yes')) {
-			upgradeModule($moduleName);
+			upgradeModule($module);
 			return (0);
 		} else {
 			if ($localConfModules{$module}{installed} eq 'yes') {
@@ -6833,10 +6833,10 @@ sub reconfigureSingleModule {
 	if ($origConfModules{$module}{required} eq 'yes') {
 		if ($origConfModules{$module}{required} eq 'prerequisite') {
 			if ($origConfModules{$module}{upgrade} eq 'yes') {
-				upgradeModule($moduleName);
+				upgradeModule($module);
 				return (0);
 			} else {
-				configureModule($moduleName);
+				configureModule($module);
 				return (0);
 			}
 		}
@@ -6847,10 +6847,10 @@ sub reconfigureSingleModule {
 		}
 		if ($origConfModules{$module}{required} eq 'prerequisite') {
 			if ($origConfModules{$module}{upgrade} eq 'yes') {
-				upgradeModule($moduleName);
+				upgradeModule($module);
 				return (0);
 			} else {
-				configureModule($moduleName);
+				configureModule($module);
 				return (0);	
 			}
 		}
