@@ -6638,36 +6638,31 @@ sub validModuleName {
 # no		no			no			no			no		.
 
 
+
 sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		configureSingleModule($origConfModules{$module}{name});
+		if ($origConfModules{$module}{required} eq 'yes') {
+			if ($origConfModules{$module}{reconfigure} eq 'always') {
+				# reconfigure modules with 'always' every single time
+				reconfigureSingleModule($origConfModules{$module}{name});
+			} else {
+				configureSingleModule($origConfModules{$module}{name});
+			}
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+			removeSingleModule($origConfModules{$module}{name});
+		}
 	}
 }
 
 
-#sub configureAllModules {
-#	my $module;
-#	my $exit_status;
-#	foreach $module (keys %origConfModules) {
-#		if (($origConfModules{$module}{required} eq 'yes') && ($origConfModules{$module}{blocked} eq 'no')) {
-#			if ($origConfModules{$module}{reconfigure} eq 'always') {
-#				# reconfigure modules with 'always' every single time
-#				reconfigureSingleModule($origConfModules{$module}{name});
-#			} else {
-#				configureSingleModule($origConfModules{$module}{name});
-#			}
-#		} elsif (($origConfModules{$module}{required} eq 'no') &&
-#				($origConfModules{$module}{blocked} eq 'no') &&
-#				(($localConfModules{$module}{installed} eq 'yes') ||
-#				($localConfModules{$module}{installed} eq 'failed'))) {
-#			removeSingleModule($origConfModules{$module}{name});
-#		}
-#	}
-#}
 
-
+###############################################################################
+# configures a single module
+# if not blocked, required and not installed
+#
 sub configureSingleModule {
 	my $moduleName = shift;
 	my $module;
@@ -6677,87 +6672,41 @@ sub configureSingleModule {
 		return;
 	}
 
-	if ($localConfModules{$module}{blocked} eq 'yes') {
-		printLog("module $moduleName is blocked", 'T0');
-		printLog("module $moduleName is blocked", 'L2');
-		return (0);
-	}
-	if ($origConfModules{$module}{required} ne 'yes') {
-		if (($localConfModules{$module}{installed} eq 'yes') && ($localConfModules{$module}{installed} eq 'yes')) {
-			printLog("removeModule $moduleName", 'L2');
-			removeModule($module);
-			return (0);
-		}
-	}
-	if(($origConfModules{$module}{reconfigure} ne 'always') &&
-		(($localConfModules{$module}{installed} eq 'no') || ($localConfModules{$module}{installed} eq 'failed') || ($origConfModules{$module}{postconf} eq 'updategrub'))) {
+	# grub file should always be checked for correct entries if there
+	# is a fix available for this system
+	if ( (($localConfModules{$module}{installed} eq 'no') ||
+		($localConfModules{$module}{installed} eq 'failed') ||
+	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
+		$localConfModules{$module}{blocked} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes') {
+		printLog("configure module: $module", 'L1');
 		configureModule($module);
-		return (0);
+	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
+		$localConfModules{$module}{blocked} eq 'no' &&
+		$origConfModules{$module}{required} eq 'yes' &&
+		$origConfModules{$module}{upgrade} eq 'yes' ) {
+		# upgrade if new version or hwid
+		printLog("upgrade module: $module", 'L1');
+		upgradeModule($module);
+	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
+		$configuredModules{$module} = 'nothingToDo';
 	}
-	if (($origConfModules{$module}{always}) || (($localConfModules{$module}{installed} eq 'no') || ($localConfModules{$module}{installed} eq 'failed') || ($origConfModules{$module}{postconf} eq 'updategrub'))) {
-		if (($localConfModules{$module}{installed} eq 'yes') && ($origConfModules{$module}{upgrade} eq 'yes')) {
-			upgradeModule($module);
-			return (0);
-		} else {
-			if ($localConfModules{$module}{installed} eq 'yes') {
-				$configuredModules{$module} = 'nothingToDo';
-				return (0);
-			}
-		}
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "Module $moduleName cannot be installed/removed because:\n";
+		print "- it is blocked (maybe use 'unblock')\n";
 	}
 }
 
 
 
-
-################################################################################
-## configures a single module
-## if not blocked, required and not installed
-##
-#sub configureSingleModule {
-#	my $moduleName = shift;
-#	my $module;
-#	$module = getSubName($moduleName);
-#	if ($module eq "") {
-#		printLog("wrong module name", 'TL');
-#		return;
-#	}
-#
-#	# grub file should always be checked for correct entries if there
-#	# is a fix available for this system
-#	if ( (($localConfModules{$module}{installed} eq 'no') ||
-#			($localConfModules{$module}{installed} eq 'failed') ||
-#		   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
-#			$localConfModules{$module}{blocked} eq 'no' &&
-#			$origConfModules{$module}{required} eq 'yes') {
-#		printLog("configure module: $module", 'L1');
-#		configureModule($module);
-#	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
-#			$localConfModules{$module}{blocked} eq 'no' &&
-#			$origConfModules{$module}{required} eq 'yes' &&
-#			$origConfModules{$module}{upgrade} eq 'yes') {
-#		# upgrade if new version or hwid
-#		printLog("upgrade module: $module", 'L1');
-#		upgradeModule($module);
-#	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
-#		$configuredModules{$module} = 'nothingToDo';
-#	}
-#	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-#		print "Module $moduleName cannot be installed/removed/upgraded because:\n";
-#		print "- it is blocked (maybe use 'unblock')\n";
-#	}
-#}
-
-
-
-################:wq
-################################################################
+###############################################################################
 # checks if the conditions to remove a module are met
 #
 sub removeSingleModule {
 	my $moduleName = shift;
 	my $module;
 	$module = getSubName($moduleName);
+
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
 		return;
@@ -6784,28 +6733,14 @@ sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		reconfigureSingleModule($origConfModules{$module}{name});
+		if ($origConfModules{$module}{required} eq 'yes') {
+			reconfigureSingleModule($origConfModules{$module}{name});
+		} elsif (($origConfModules{$module}{required} eq 'no') &&
+				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+			removeModule($module);
+		}
 	}
 }
-
-
-
-################################################################################
-## reconfigures all modules if not blocked and if required even if it is
-## already installed
-##
-#sub reconfigureAllModules {
-#	my $module;
-#	my $exit_status;
-#	foreach $module (keys %origConfModules) {
-#		if ($origConfModules{$module}{required} eq 'yes') {
-#			reconfigureSingleModule($origConfModules{$module}{name});
-#		} elsif (($origConfModules{$module}{required} eq 'no') &&
-#				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
-#			removeModule($module);
-#		}
-#	}
-#}
 
 
 
@@ -6822,80 +6757,30 @@ sub reconfigureSingleModule {
 		return;
 	}
 
-	if ($localConfModules{$module}{blocked} eq 'yes') {
-		printLog("module $moduleName is blocked", 'T0');
-		printLog("module $moduleName is blocked", 'L2');
-		print "Module: $moduleName cannot be installed because:\n";
-		print "- it is blocked (maybe use 'unblock')\n";
-		return (0);
-	}
-
-	if ($origConfModules{$module}{required} eq 'yes') {
-		if ($origConfModules{$module}{required} eq 'prerequisite') {
-			if ($origConfModules{$module}{upgrade} eq 'yes') {
-				upgradeModule($module);
-				return (0);
-			} else {
-				configureModule($module);
-				return (0);
-			}
+	if ( $localConfModules{$module}{blocked} eq 'no' &&
+		($origConfModules{$module}{required} eq 'yes' || $origConfModules{$module}{required} eq 'prerequisite')) {
+		if ($origConfModules{$module}{upgrade} eq 'yes') {
+			printLog("upgrade module: $module", 'L1');
+			upgradeModule($module);
+		} else {
+			printLog("configure module: $module", 'L1');
+			configureModule($module);
 		}
 	} else {
-		if (($configuredModules{$module} ne 'remove failed') &&
-			($configuredModules{$module} ne 'removed')) {
-			print "- it is not required by this system (this is the main reason)\n";
-		}
-		if ($origConfModules{$module}{required} eq 'prerequisite') {
-			if ($origConfModules{$module}{upgrade} eq 'yes') {
-				upgradeModule($module);
-				return (0);
-			} else {
-				configureModule($module);
-				return (0);	
-			}
-		}
+		print "Module: $moduleName cannot be installed because:\n";
 	}
-	print "Module: $moduleName cannot be installed because:\n";
-	print "- it is not required by this system (this is the main reason)\n";
+
+	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+		print "- it is blocked (maybe use 'unblock')\n";
+	}
+
+	if (($origConfModules{$module}{required} eq 'no') &&
+		($configuredModules{$module} ne 'remove failed') &&
+		($configuredModules{$module} ne 'removed')) {
+		print "- it is not required by this system (this is the main reason)\n";
+	}
 }
 
-
-
-
-################################################################################
-## reconfigures a single module if not blocked and if required or prerequisite
-## even if it is already installed
-##
-#sub reconfigureSingleModule {
-#	my $moduleName = shift;
-#	my $module;
-#	$module = getSubName($moduleName);
-#	if ($module eq "") {
-#		printLog("wrong module name", 'TL');
-#		return;
-#	}
-#
-#	if ( $localConfModules{$module}{blocked} eq 'no' &&
-#		($origConfModules{$module}{required} eq 'yes' || $origConfModules{$module}{required} eq 'prerequisite')) {
-#		if ($origConfModules{$module}{upgrade} eq 'yes') {
-#			printLog("upgrade module: $module", 'L1');
-#			upgradeModule($module);
-#		} else {
-#			printLog("configure module: $module", 'L1');
-#			configureModule($module);
-#		}
-#	} else {
-#		print "Module: $moduleName cannot be installed because:\n";
-#	}
-#	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-#		print "- it is blocked (maybe use 'unblock')\n";
-#	}
-#	if (($origConfModules{$module}{required} eq 'no') &&
-#		($configuredModules{$module} ne 'remove failed') &&
-#		($configuredModules{$module} ne 'removed')) {
-#		print "- it is not required by this system (this is the main reason)\n";
-#	}
-#}
 
 
 
@@ -7022,7 +6907,7 @@ sub checkMode {
 
 
 ###############################################################################
-# checks if the operation is allowed in this mode
+# checks if the operation is allowed in this mode/command/module
 # usage: checkModePermision(install|remove|update)
 # returns 0 if not and 1 if allowed
 sub checkModePermission {
@@ -7030,41 +6915,255 @@ sub checkModePermission {
 	# this is a double check, just in case ...
 
 	#TODO debug
-	printLog("checkmodepermission mode: $mode", 'TL2');
-	if ($operation eq 'install') {
-		if ($mode eq 'AUTOMATIC') {
-			return (1);
-		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
-		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (0);
+	printLog("checkmodepermission mode: $mode operation: $operation", 'TL2');
+	if ($argValue{command} eq 'configure') {
+		if ($argValue{module} eq 'all') {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (0);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+		} else {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
 		}
 	}
-	if ($operation eq 'remove') {
-		if ($mode eq 'AUTOMATIC') {
-			return (1);
+	if ($argValue{command} eq "reconfigure") {
+		if ($argValue{module} eq 'all') {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (0);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+		} else {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
 		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
+	}
+	if ($argValue{command} eq "remove") {
+		if ($argValue{module} eq 'all') {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (0);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (0);
+				}
+				if ($operation eq 'update') {
+					return (0);
+				}
+				if ($operation eq 'remove') {
+					return (0);
+				}
+			}
+		} else {
+			if ($mode eq 'AUTOMATIC') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'UPDATES_ONLY') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
+			if ($mode eq 'DONT_CONFIGURE') {
+				if ($operation eq 'install') {
+					return (1);
+				}
+				if ($operation eq 'update') {
+					return (1);
+				}
+				if ($operation eq 'remove') {
+					return (1);
+				}
+			}
 		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (1);
-		}
+	}
 
-	}
-	if ($operation eq 'upgrade') {
-		if ($mode eq 'AUTOMATIC') {
-			return (0);
-		}
-		if ($mode eq 'UPDATES_ONLY') {
-			return (1);
-		}
-		if ($mode eq 'DONT_CONFIGURE') {
-			return (0);
-		}
-	}
+	#	if ($operation eq 'install') {
+	#		if ($mode eq 'AUTOMATIC') {
+	#			return (1);
+	#		}
+	#		if ($mode eq 'UPDATES_ONLY') {
+	#			return (1);
+	#		}
+	#		if ($mode eq 'DONT_CONFIGURE') {
+	#			return (0);
+	#		}
+	#	}
+	#	if ($operation eq 'remove') {
+	#		if ($mode eq 'AUTOMATIC') {
+	#			return (1);
+	#		}
+	#		if ($mode eq 'UPDATES_ONLY') {
+	#			return (1);
+	#		}
+	#		if ($mode eq 'DONT_CONFIGURE') {
+	#			return (1);
+	#		}
+	#
+	#	}
+	#	if ($operation eq 'upgrade') {
+	#		if ($mode eq 'AUTOMATIC') {
+	#			return (0);
+	#		}
+	#		if ($mode eq 'UPDATES_ONLY') {
+	#			return (1);
+	#		}
+	#		if ($mode eq 'DONT_CONFIGURE') {
+	#			return (0);
+	#		}
+	#	}
 
 	return (1);
 }
