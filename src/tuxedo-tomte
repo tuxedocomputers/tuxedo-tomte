@@ -1012,7 +1012,7 @@ my %origConfModules = (
 		name => 'i8042-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1028,7 +1028,7 @@ my %origConfModules = (
 		name => 'no-boot-on-battery',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1044,7 +1044,7 @@ my %origConfModules = (
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1060,7 +1060,7 @@ my %origConfModules = (
 		name => 'amd-gpu-with-nvidia-fix',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1076,7 +1076,7 @@ my %origConfModules = (
 		name => 'tuxedo-control-center',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
@@ -1092,7 +1092,7 @@ my %origConfModules = (
 		name => 'tuxedo-keyboard',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
@@ -1108,7 +1108,7 @@ my %origConfModules = (
 		name => 'no-keyboard-after-suspend-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 5,
 		package => 'no',
@@ -1124,7 +1124,7 @@ my %origConfModules = (
 		name => 'backlight-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1140,7 +1140,7 @@ my %origConfModules = (
 		name => 'tuxedo-repos',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
@@ -1156,7 +1156,7 @@ my %origConfModules = (
 		name => 'tuxedo-mirrors',
 		version => 4,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
@@ -1172,7 +1172,7 @@ my %origConfModules = (
 		name => 'core-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1188,7 +1188,7 @@ my %origConfModules = (
 		name => 'threeg-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1204,7 +1204,7 @@ my %origConfModules = (
 		name => 'threeg-fix2',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1221,7 +1221,7 @@ my %origConfModules = (
 		name => 'elantech-touchpad-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1237,7 +1237,7 @@ my %origConfModules = (
 		name => 'tuxedo-touchpad-switch',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1253,7 +1253,7 @@ my %origConfModules = (
 		name => 'tuxedo-nvme-fix',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1269,7 +1269,7 @@ my %origConfModules = (
 		name => 'tuxedo-keyboard-ite',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
@@ -1285,7 +1285,7 @@ my %origConfModules = (
 		name => 'fingerprint-reader',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1301,7 +1301,7 @@ my %origConfModules = (
 		name => 'mesa-utils',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
@@ -1317,7 +1317,7 @@ my %origConfModules = (
 		name => 'tuxedo-restore-audio-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1333,7 +1333,7 @@ my %origConfModules = (
 		name => 'linux-tuxedo-20.04-edge',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1349,7 +1349,7 @@ my %origConfModules = (
 		name => 'linux-tuxedo-20.04-next',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1365,7 +1365,7 @@ my %origConfModules = (
 		name => 'linux-tuxedo-20.04',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1381,7 +1381,7 @@ my %origConfModules = (
 		name => 'linux-generic-hwe-20.04',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1397,7 +1397,7 @@ my %origConfModules = (
 		name => 'linux-generic-hwe-20.04-edge',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1413,7 +1413,7 @@ my %origConfModules = (
 		name => 'linux-tuxedo-22.04',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1429,7 +1429,7 @@ my %origConfModules = (
 		name => 'nvidia-driver',
 		version => 3,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1445,7 +1445,7 @@ my %origConfModules = (
 		name => 'cracklib-runtime',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
@@ -1462,7 +1462,7 @@ my %origConfModules = (
 		name => 'amdgpu-dkms',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 3,
 		package => 'yes',
@@ -1478,7 +1478,7 @@ my %origConfModules = (
 		name => 'r8168-dkms',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1494,7 +1494,7 @@ my %origConfModules = (
 		name => 'tuxedo-oled-brt',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1510,7 +1510,7 @@ my %origConfModules = (
 		name => 'apport-fix',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1527,7 +1527,7 @@ my %origConfModules = (
 		name => 'realtek-r8125-dkms',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1543,7 +1543,7 @@ my %origConfModules = (
 		name => 'amdgpu-backlight-aux-off',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1559,7 +1559,7 @@ my %origConfModules = (
 		name => 'i915-disable-psr-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'no',
@@ -1575,7 +1575,7 @@ my %origConfModules = (
 		name => 'i915-enable-psr-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 3,
 		package => 'no',
@@ -1591,7 +1591,7 @@ my %origConfModules = (
 		name => 'tuxedo-pinfix-tgl-dkms',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1607,7 +1607,7 @@ my %origConfModules = (
 		name => 'tuxedo-micfix1',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
@@ -1623,7 +1623,7 @@ my %origConfModules = (
 		name => 'thunderbolt-boot-delay-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1639,7 +1639,7 @@ my %origConfModules = (
 		name => 'i8042noaux-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1655,7 +1655,7 @@ my %origConfModules = (
 		name => 'lightdm-logind-check-graphical-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1671,7 +1671,7 @@ my %origConfModules = (
 		name => 'nvidia-backlight-control-fix',
 		version => 2,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1687,7 +1687,7 @@ my %origConfModules = (
 		name => 'early-load-backlight-control-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -1703,7 +1703,7 @@ my %origConfModules = (
 		name => 'r8125-dkms',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
@@ -1719,7 +1719,7 @@ my %origConfModules = (
 		name => 'cardreader-fix',
 		version => 1,
 		installed => 'no',
-		blocked => '',
+		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
@@ -6206,7 +6206,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no|rolling|updates|fixed)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		#TODO debug
 		printLog("valid configline: $line", 'L2');
 		return (1);
@@ -6259,6 +6259,8 @@ sub writeConfigFile {
 				}
 				unless(($origConfModules{$name}{installed} eq 'no') &&
 						($origConfModules{$name}{required} eq 'no')) {
+					#TODO debug
+					printLog("$origConfModules{$name}{name} v: $version i: $installed b: $origConfModules{$name}{blocked} r: $origConfModules{$name}{required} h: $hwid", 'L2');
 					print $FH "$origConfModules{$name}{name} ".
 						"$version ".
 						"$installed ".
@@ -7165,7 +7167,8 @@ sub checkModePermission {
 	#		}
 	#	}
 
-	return (1);
+	# just to be safe return 0
+	return (0);
 }
 
 
@@ -7175,7 +7178,9 @@ sub checkModePermission {
 #
 sub configureModule {
 	my $module = shift;
-	if (checkModePermission('install')) {
+	my $permission = checkModePermission('install');
+	printLog("install module: $module permission: $permission", 'L2');
+	if ($permission) {
 		$module->($module, 'install');
 	}
 }
@@ -7186,7 +7191,9 @@ sub configureModule {
 #
 sub removeModule {
 	my $module = shift;
-	if (checkModePermission('remove')) {
+	my $permission = checkModePermission('remove');	
+	printLog("remove module: $module permission: $permission", 'L2');
+	if ($permission) {
 		$module->($module, 'remove');
 	}
 }
@@ -7198,7 +7205,9 @@ sub removeModule {
 #
 sub upgradeModule {
 	my $module = shift;
-	if (checkModePermission('upgrade')) {
+	my $permission = checkModePermission('upgrade');
+	printLog("upgrade module: $module permission: $permission", 'L2');
+	if ($permission) {
 		$module->($module, 'upgrade');
 	}
 }
