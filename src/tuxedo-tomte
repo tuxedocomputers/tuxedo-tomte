@@ -6917,7 +6917,7 @@ sub checkModePermission {
 	# this is a double check, just in case ...
 
 	#TODO debug
-	printLog("checkmodepermission module: $module mode: $mode operation: $operation", 'TL2');
+	printLog("checkmodepermission module: $argValue{module} mode: $mode operation: $operation", 'TL2');
 	if ($argValue{command} eq 'configure') {
 		if ($argValue{module} eq 'all') {
 			if ($mode eq 'AUTOMATIC') {
