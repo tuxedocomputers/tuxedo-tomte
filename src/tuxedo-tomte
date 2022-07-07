@@ -6206,7 +6206,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		#TODO debug
 		printLog("valid configline: $line", 'L2');
 		return (1);
@@ -6917,7 +6917,7 @@ sub checkModePermission {
 	# this is a double check, just in case ...
 
 	#TODO debug
-	printLog("checkmodepermission mode: $mode operation: $operation", 'TL2');
+	printLog("checkmodepermission module: $module mode: $mode operation: $operation", 'TL2');
 	if ($argValue{command} eq 'configure') {
 		if ($argValue{module} eq 'all') {
 			if ($mode eq 'AUTOMATIC') {

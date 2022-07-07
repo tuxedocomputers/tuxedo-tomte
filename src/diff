@@ -1,0 +1,872 @@
+diff --git a/src/tuxedo-tomte b/src/tuxedo-tomte
+index 8af17a1..2734951 100755
+--- a/src/tuxedo-tomte
++++ b/src/tuxedo-tomte
+@@ -32,7 +32,7 @@ use Data::Dumper;
+ # 0 = normal
+ # 1 = some debug
+ # 2 = everything
+-my $logLevel = 2;
++my $logLevel = 0;
+ 
+ # for console language and locale
+ my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+@@ -64,12 +64,6 @@ my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
+ my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
+ my $configDir = '/etc/tomte/';
+ my $configFile = $configDir.'tomte.cfg';
+-my %modeFile = (
+-	DONT_CONFIGURE => $configDir.'DONT_CONFIGURE',
+-	UPDATES_ONLY => $configDir.'UPDATES_ONLY',
+-	AUTOMATIC => $configDir.'AUTOMATIC',
+-);
+-my $mode = 'AUTOMATIC'; #default mode
+ my $shareDir = '/usr/share/tuxedo-tomte/';
+ my $reposList = $shareDir.'repolist.txt';
+ my $distribution;
+@@ -980,7 +974,8 @@ my %tuxedo_devices = (
+ # defined by a 'short name' which is the name without '-'
+ # e.g. no-boot-on-battery = nobootonbattery
+ #
+-#   name			name of package or name of solution
++#   name			name of package or name of solution,
++#					is 'short name' without '-'
+ #   version			the package or solution version
+ #					rises if the solution changes
+ #   installed		'no' not installed / 'yes' installed / 'failed' failed to
+@@ -1731,6 +1726,8 @@ my %origConfModules = (
+ 		reconfigure => '',
+ 		restart => 'yes',
+ 	},
++
++
+ );
+ 
+ 
+@@ -1771,7 +1768,7 @@ sub printIfExistsNotUndefinedNotEmpty {
+ 
+ 
+ # hash to load the configfile
+-# is a copy from origConfModules to exclude undefined values
++# is a copy from origConfModules to evade undefined values
+ my %localConfModules = %origConfModules;
+ 
+ 
+@@ -2505,7 +2502,7 @@ sub amdgpuwithnvidiafix() {
+ 		}
+ 		$origConfModules{$module}{installed} = 'no';
+ 		$origConfModules{$module}{upgraded} = 'yes';
+-		addToConfiguredModules($module, 'removed');
++		addToConfiguredModules($module, 'success');
+ 	}
+ }
+ 
+@@ -2536,24 +2533,10 @@ sub tuxedocontrolcenter() {
+ 		}
+ 	}
+ 	if ($action eq 'upgrade') {
+-		printLog("upgrade not necessary for packages, it is done by the package manager");
++		printLog("upgrade not necessary for packages");
+ 	}
+ 	if ($action eq 'remove') {
+-		if( isPackageInstalled($origConfModules{$module}{name}) ) {
+-			if (!deinstallPackage($origConfModules{$module}{name})) {
+-				$origConfModules{$module}{installed} = 'yes';
+-				$origConfModules{$module}{upgraded} = 'no';
+-				addToConfiguredModules($module, 'remove failed');
+-			} else {
+-				$origConfModules{$module}{installed} = 'no';
+-				$origConfModules{$module}{upgraded} = 'no';
+-				addToConfiguredModules($module, 'removed');
+-			}
+-		} else {
+-			$origConfModules{$module}{installed} = 'no';
+-			$origConfModules{$module}{upgraded} = 'no';
+-			addToConfiguredModules($module, 'nothingToDo');
+-		}
++		# not implemented yet
+ 	}
+ }
+ 
+@@ -3943,11 +3926,11 @@ sub amdgpudkms() {
+ 		if ($counter == 2) {
+ 			$origConfModules{$module}{installed} = 'no';
+ 			$origConfModules{$module}{upgraded} = 'yes';
+-			addToConfiguredModules($module, 'removed');
++			addToConfiguredModules($module, 'success');
+ 		} else {
+ 			$origConfModules{$module}{installed} = 'yes';
+ 			$origConfModules{$module}{upgraded} = 'no';
+-			addToConfiguredModules($module, 'remove failed');
++			addToConfiguredModules($module, 'failed');
+ 		}
+ 	}
+ }
+@@ -4103,7 +4086,7 @@ sub realtekr8125dkms() {
+ 		$origConfModules{$module}{required} = "no";
+ 	}
+ 	if ($action eq 'remove') {
+-		# check before if the package is installed
++		# check before if the package is already installed
+ 		if (isPackageInstalled($origConfModules{$module}{name})) {
+ 			if (removePackage($origConfModules{$module}{name})) {
+ 				addToConfiguredModules($module, "removed");
+@@ -4112,7 +4095,7 @@ sub realtekr8125dkms() {
+ 				$origConfModules{$module}{required} = "no";
+ 				$restartSystem = 1;
+ 			} else {
+-				addToConfiguredModules($module, "remove failed");
++				addToConfiguredModules($module, "failed");
+ 				$origConfModules{$module}{installed} = "remove failed";
+ 				$origConfModules{$module}{version} = $localConfModules{$module}{version};
+ 				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+@@ -4594,11 +4577,11 @@ sub r8125dkms() {
+ 		if ($counter == 1) {
+ 			$origConfModules{$module}{installed} = 'no';
+ 			$origConfModules{$module}{upgraded} = 'yes';
+-			addToConfiguredModules($module, 'removed');
++			addToConfiguredModules($module, 'success');
+ 		} else {
+ 			$origConfModules{$module}{installed} = 'yes';
+ 			$origConfModules{$module}{upgraded} = 'no';
+-			addToConfiguredModules($module, 'remove failed');
++			addToConfiguredModules($module, 'failed');
+ 		}
+ 	}
+ }
+@@ -6206,9 +6189,7 @@ sub readConfigFile {
+ sub validConfigLine {
+ 	my $line = shift;
+ 	# name version installed blocked required hwid
+-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+-		#TODO debug
+-		printLog("valid configline: $line", 'L2');
++	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+ 		return (1);
+ 	} else {
+ 		printLog("found invalid configuration line in $configFile:\n$line", 'L0');
+@@ -6259,8 +6240,6 @@ sub writeConfigFile {
+ 				}
+ 				unless(($origConfModules{$name}{installed} eq 'no') &&
+ 						($origConfModules{$name}{required} eq 'no')) {
+-					#TODO debug
+-					printLog("$origConfModules{$name}{name} v: $version i: $installed b: $origConfModules{$name}{blocked} r: $origConfModules{$name}{required} h: $hwid", 'L2');
+ 					print $FH "$origConfModules{$name}{name} ".
+ 						"$version ".
+ 						"$installed ".
+@@ -6453,7 +6432,9 @@ sub listStatus {
+ 				"$localConfModules{$module}{required}"]);
+ 		}
+ 		# required, installed and not removed
+-		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
++		if ((($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) 
++			#&& ($localConfModules{$module}{installed} ne 'no')
++			) {
+ 			$noneRequired = 0;
+ 			$printIt = 1;
+ 			push(@arr,
+@@ -6465,7 +6446,6 @@ sub listStatus {
+ 		}
+ 	}
+ 	if ($printIt) {
+-		print "Selected installation mode: $mode\n";
+ 		print "Only showing fixes that are available for this hardware\n";
+ 		for my $row (@arr) {
+ 			format STDOUT =
+@@ -6539,18 +6519,13 @@ sub addToConfiguredModules {
+ 	my $status = shift;
+ 	$configuredModules{$module} = $status;
+ 	if ($status =~ /failed/) {
+-		printLog("failed to install $origConfModules{$module}{name}", 'L0');
++		printLog("failed to install $module", 'L0');
+ 	} elsif ($status =~ /success/) {
+-		printLog("succesfully installed $origConfModules{$module}{name}", 'L0');
++		printLog("succesfully installed $module", 'L0');
+ 	} elsif ($status =~ /removed/) {
+-		printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
+-		print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
+-		print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+-		print "or tomte will reinstall it again at the next start\n";
++		printLog("succesfully removed $module", 'L0');
+ 	} elsif ($status =~ /remove failed/) {
+-		printLog("failed to remove $origConfModules{$module}{name}", 'L0');
+-	} elsif ($status =~ /nothingToDo/) {
+-		printLog("nothing to do for $origConfModules{$module}{name}", 'L0');
++		printLog("failed to remove $module", 'L0');
+ 	}
+ }
+ 
+@@ -6639,8 +6614,6 @@ sub validModuleName {
+ # no		no			no			no			yes		.
+ # no		no			no			no			no		.
+ 
+-
+-
+ sub configureAllModules {
+ 	my $module;
+ 	my $exit_status;
+@@ -6661,6 +6634,7 @@ sub configureAllModules {
+ 
+ 
+ 
++
+ ###############################################################################
+ # configures a single module
+ # if not blocked, required and not installed
+@@ -6708,7 +6682,6 @@ sub removeSingleModule {
+ 	my $moduleName = shift;
+ 	my $module;
+ 	$module = getSubName($moduleName);
+-
+ 	if ($module eq "") {
+ 		printLog("wrong module name", 'TL');
+ 		return;
+@@ -6727,6 +6700,7 @@ sub removeSingleModule {
+ 
+ 
+ 
++
+ ###############################################################################
+ # reconfigures all modules if not blocked and if required even if it is
+ # already installed
+@@ -6771,11 +6745,9 @@ sub reconfigureSingleModule {
+ 	} else {
+ 		print "Module: $moduleName cannot be installed because:\n";
+ 	}
+-
+ 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+ 		print "- it is blocked (maybe use 'unblock')\n";
+ 	}
+-
+ 	if (($origConfModules{$module}{required} eq 'no') &&
+ 		($configuredModules{$module} ne 'remove failed') &&
+ 		($configuredModules{$module} ne 'removed')) {
+@@ -6785,7 +6757,6 @@ sub reconfigureSingleModule {
+ 
+ 
+ 
+-
+ ###############################################################################
+ # blocks a module
+ #
+@@ -6833,356 +6804,12 @@ sub unblock {
+ }
+ 
+ 
+-#TODO still neccessary?
+-###############################################################################
+-# blocks all modules
+-#
+-sub blockAllModules {
+-	my $module;
+-	foreach $module (keys %origConfModules) {
+-		if ($origConfModules{$module}{required} eq 'yes') {
+-			$origConfModules{$module}{blocked} = 'yes';
+-			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
+-		}
+-	}
+-}
+-
+-
+-
+-###############################################################################
+-# set configuration mode setMode('mode')
+-# AUTOMATIC: install/remove/update everything automatically
+-# UPDATES_ONLY: only update installed modules
+-# DONT_CONFIGURE: do not configure anything
+-#
+-sub setMode {
+-	my $requestedMode = shift;
+-	my $key;
+-
+-	$mode = checkMode();
+-	if ($mode eq $requestedMode) {
+-		printLog("Requested mode '$requestedMode' is already set", 'TL0');
+-	} else {
+-		foreach $key (keys %modeFile) {
+-			if ($key eq $requestedMode) {
+-				createFile($modeFile{$requestedMode}, '', 0);
+-				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
+-			} elsif (-e $modeFile{$key}) {
+-				unlink($modeFile{$key});
+-				printLog("removing superfluous modefile: $modeFile{$key}", 'TL2');
+-			}
+-		}
+-	}
+-}
+-
+-
+-
+-sub checkMode {
+-	my $tmpMode;
+-	my $countModes = 0;
+-	if (-e $modeFile{AUTOMATIC}) {
+-		++$countModes;
+-		$mode = 'AUTOMATIC';
+-	}
+-	if (-e $modeFile{UPDATES_ONLY}) {
+-		++$countModes;
+-		$mode = 'UPDATES_ONLY';
+-	}
+-	if (-e $modeFile{DONT_CONFIGURE}) {
+-		++$countModes;
+-		$mode = 'DONT_CONFIGURE';
+-	}
+-	if ($countModes == 0) {
+-		$mode = 'AUTOMATIC';
+-		printLog('No mode setting found, assuming AUTOMATIC', 'L2');
+-		$mode = 'AUTOMATIC';
+-	}
+-	if ($countModes == 1) {
+-		printLog("Found mode setting $mode", 'L2');
+-	}
+-	if ($countModes > 1) {
+-		printLog("More then one mode setting found, assuming $mode", 'L2');
+-	}
+-	return $mode;
+-}
+-
+-
+-
+-###############################################################################
+-# checks if the operation is allowed in this mode/command/module
+-# usage: checkModePermision(install|remove|update)
+-# returns 0 if not and 1 if allowed
+-sub checkModePermission {
+-	my $operation = shift;
+-	# this is a double check, just in case ...
+-
+-	#TODO debug
+-	printLog("checkmodepermission mode: $mode operation: $operation", 'TL2');
+-	if ($argValue{command} eq 'configure') {
+-		if ($argValue{module} eq 'all') {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (0);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-		} else {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-		}
+-	}
+-	if ($argValue{command} eq "reconfigure") {
+-		if ($argValue{module} eq 'all') {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (0);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-		} else {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-		}
+-	}
+-	if ($argValue{command} eq "remove") {
+-		if ($argValue{module} eq 'all') {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (0);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (0);
+-				}
+-				if ($operation eq 'update') {
+-					return (0);
+-				}
+-				if ($operation eq 'remove') {
+-					return (0);
+-				}
+-			}
+-		} else {
+-			if ($mode eq 'AUTOMATIC') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'UPDATES_ONLY') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-			if ($mode eq 'DONT_CONFIGURE') {
+-				if ($operation eq 'install') {
+-					return (1);
+-				}
+-				if ($operation eq 'update') {
+-					return (1);
+-				}
+-				if ($operation eq 'remove') {
+-					return (1);
+-				}
+-			}
+-		}
+-	}
+-
+-	#	if ($operation eq 'install') {
+-	#		if ($mode eq 'AUTOMATIC') {
+-	#			return (1);
+-	#		}
+-	#		if ($mode eq 'UPDATES_ONLY') {
+-	#			return (1);
+-	#		}
+-	#		if ($mode eq 'DONT_CONFIGURE') {
+-	#			return (0);
+-	#		}
+-	#	}
+-	#	if ($operation eq 'remove') {
+-	#		if ($mode eq 'AUTOMATIC') {
+-	#			return (1);
+-	#		}
+-	#		if ($mode eq 'UPDATES_ONLY') {
+-	#			return (1);
+-	#		}
+-	#		if ($mode eq 'DONT_CONFIGURE') {
+-	#			return (1);
+-	#		}
+-	#
+-	#	}
+-	#	if ($operation eq 'upgrade') {
+-	#		if ($mode eq 'AUTOMATIC') {
+-	#			return (0);
+-	#		}
+-	#		if ($mode eq 'UPDATES_ONLY') {
+-	#			return (1);
+-	#		}
+-	#		if ($mode eq 'DONT_CONFIGURE') {
+-	#			return (0);
+-	#		}
+-	#	}
+-
+-	# just to be safe return 0
+-	return (0);
+-}
+-
+-
+-
+ ###############################################################################
+ # configures a module, does no checks
+ #
+ sub configureModule {
+ 	my $module = shift;
+-	my $permission = checkModePermission('install');
+-	printLog("install module: $module permission: $permission", 'L2');
+-	if ($permission) {
+-		$module->($module, 'install');
+-	}
++	$module->($module, 'install');
+ }
+ 
+ 
+@@ -7191,11 +6818,7 @@ sub configureModule {
+ #
+ sub removeModule {
+ 	my $module = shift;
+-	my $permission = checkModePermission('remove');	
+-	printLog("remove module: $module permission: $permission", 'L2');
+-	if ($permission) {
+-		$module->($module, 'remove');
+-	}
++	$module->($module, 'remove');
+ }
+ 
+ 
+@@ -7205,11 +6828,7 @@ sub removeModule {
+ #
+ sub upgradeModule {
+ 	my $module = shift;
+-	my $permission = checkModePermission('upgrade');
+-	printLog("upgrade module: $module permission: $permission", 'L2');
+-	if ($permission) {
+-		$module->($module, 'upgrade');
+-	}
++	$module->($module, 'upgrade');
+ }
+ 
+ 
+@@ -7345,7 +6964,7 @@ sub listSuccess {
+ 		printNameDescriptionModules(@failedModules);
+ 	}
+ 	if (@nothingToDoModules) {
+-		print "\nNothing was done for the following modules:\n";
++		print "\nThe following modules were already installed:\n";
+ 		printNameDescriptionModules(@nothingToDoModules);
+ 	}
+ 	if (@failedPrograms) {
+@@ -7418,7 +7037,7 @@ sub printNameDescriptionPrograms {
+ ###############################################################################
+ # show description of module
+ #
+-sub moduleDescription {
++sub moduleDescription() {
+ 	my $moduleName = $argValue{module};
+ 	my $module;
+ 	if ($moduleName) {
+@@ -7496,20 +7115,14 @@ sub triesAlreadyDone() {
+ #
+ my $USAGE =<<USAGE;
+ tuxedo-tomte [COMMAND]
+-  list                           List all installable modules with detailed status
+-  modules                        List all available modules
+-  description MODULE             Shows the module description
+-  configure MODULE ...|all       Configure an unconfigured module
+-  reconfigure MODULE...|all      Reconfigure a configured module
+-  remove MODULE                  Remove a module from the system
+-  block MODULE ...|all           Deprecated, use 'fixed' instead
+-  unblock MODULE ... |all        Deprecated, use 'rolling' or 'updates' instead
+-  AUTOMATIC                      Activates automatic configuration
+-  UPDATES_ONLY                   Only updates will be installed automatically
+-  DONT_CONFIGURE                 Stops all automatic configuration
+-  help                           Prints this message
+-  
+-  more details can be found in the man page
++  list                        List all installable modules with detailed status
++  modules                     List all available modules
++  description MODULE          Shows the module description
++  configure MODULE ...|all    Configure an unconfigured module
++  reconfigure MODULE...|all   Reconfigure a configured module
++  block MODULE ...            Block a module
++  unblock MODULE ...          Unblock a module
++  help                        Prints this message
+ USAGE
+ 
+ 
+@@ -7572,7 +7185,6 @@ sub tuxedoDevice {
+ 
+ 
+ 
+-
+ ###############################################################################
+ ###############################################################################
+ # MAIN PROGRAM
+@@ -7589,7 +7201,7 @@ if (!isOSSupported()) {
+ }
+ 
+ # define for each argvalues procedures
+-# modify $USAGE if any modifications are made here
++# modify $USAGE if any modifications here
+ 
+ if (@ARGV != 0) {
+ 	my %options;
+@@ -7609,7 +7221,6 @@ if (@ARGV != 0) {
+ 		$LiveISO = 1;
+ 		initLogging();
+ 		printLog("starting Tomte in LiveISO mode", 'L0');
+-		setMode('AUTOMATIC');
+ 		prepareValues();
+ 		prerequisites();
+ 		configureAllModules();
+@@ -7619,37 +7230,24 @@ if (@ARGV != 0) {
+ 		createFile($tomteFinishedFile, 'finished', 0);
+ 	}
+ 
+-	# list
+ 	if ($argValue{command} eq "list") {
+ 		initLogging();
+-		checkMode();
+ 		prepareValues();
+ 		listStatus();
+-
+-	# modules
+ 	} elsif ($argValue{command} eq "modules") {
+ 		modulesList();
+-
+-	# printcompletefixeslist
+ 	} elsif ($argValue{command} eq "printcompletefixeslist") {
+ 		printTuxedoDevices();
+-
+-	# description
+ 	} elsif ($argValue{command} eq "description") {
+ 		moduleDescription();
+-
+-	# help
+ 	} elsif ($argValue{command} eq "help") {
+ 		help();
+-
+-	# FAI
+ 	} elsif ($argValue{command} eq "FAI") {
+ 		print "Starting tuxedo-tomte in FAI mode\n".
+ 				"This should not be used in a normal situation\n".
+ 				"only when installing a new system with FAI\n";
+ 		$FAI = 1;
+ 		initLogging();
+-		setMode('AUTOMATIC');
+ 		prepareValues();
+ 		prerequisitesFAI();
+ 		configureAllModules();
+@@ -7657,58 +7255,41 @@ if (@ARGV != 0) {
+ 		postConfigure();
+ 		listSuccess();
+ 		writeConfigFile();
+-
+-	# configure
+ 	} elsif ($argValue{command} eq "configure") {
+ 		# check if there is a second argument
+ 		if ($argValue{module} ne '') {
+ 			initLogging();
+-			checkMode();
+ 			prepareValues();
+ 			prerequisites();
+ 			if ($argValue{module} eq "all") {
+-				if ($mode eq 'DONT_CONFIGURE') {
+-					printLog("Mode DONT_CONFIGURE is set", 'TL0');
+-					printLog("exiting without changing anything", 'T0');
+-					exit (0);
+-				}
+ 				configureAllModules();
+ 				postConfigure();
+ 				listSuccess();
+ 				writeConfigFile();
+ 			} else {
+-				if ($mode eq 'DONT_CONFIGURE') {
+-					printLog("Mode DONT_CONFIGURE is set", 'TL0');
+-					printLog("exiting without changing anything", 'T0');
+-					exit (0);
+-				}
+ 				configureSingleModule($argValue{module});
+ 				postConfigure();
+ 				listSuccess();
+ 				writeConfigFile();
+ 			}
++			printLog('Tomte finished', 'L1');
+ 		} else {
+ 			print "Module name or \"all\" missing\n";
+ 		}
+-		printLog('Tomte finished', 'L1');
+-
+-	# remove
+ 	} elsif ($argValue{command} eq "remove") {
+ 		if ($argValue{module} ne '') {
+ 			initLogging();
+-			checkMode();
+ 			prepareValues();
+ 			prerequisites();
+ 			removeSingleModule($argValue{module});
+ 			postConfigure();
+ 			listSuccess();
+ 			writeConfigFile();
++			printLog('Tomte finished', 'L1');
+ 		} else {
+ 			print "Module name or \"all\" missing\n";
+ 		}
+-		printLog('Tomte finished', 'L1');
+-
+-	# reconfigure
++		print "remove, does nothing yet\n";
+ 	} elsif ($argValue{command} eq "reconfigure") {
+ 		# reconfigure interrupts repeated execution
+ 		if (-e $triesFile) {
+@@ -7717,37 +7298,23 @@ if (@ARGV != 0) {
+ 		}
+ 		if ($argValue{module} ne '') {
+ 			initLogging();
+-			checkMode();
+ 			prepareValues();
+ 			prerequisites();
+ 			if ($argValue{module} eq "all") {
+-				if ($mode eq 'DONT_CONFIGURE') {
+-					printLog("DONT_CONFIGURE is set", 'TL0');
+-					printLog("exiting without changing anything", 'T0');
+-					exit (0);
+-				}
+ 				reconfigureAllModules();
+ 				postConfigure();
+ 				listSuccess();
+ 				writeConfigFile();
+-			} else {
+-				if ($mode eq 'DONT_CONFIGURE') {
+-					printLog("DONT_CONFIGURE is set", 'TL0');
+-					printLog("exiting without changing anything", 'T0');
+-					exit (0);
+-				}
++			} else {	
+ 				reconfigureSingleModule($argValue{module});
+ 				postConfigure();
+ 				listSuccess();
+ 				writeConfigFile();
+ 			}
++			printLog('Tomte finished', 'L1');
+ 		} else {
+ 			print "Module name or \"all\" missing\n";
+ 		}
+-		printLog('Tomte finished', 'L1');
+-
+-	# blocking/unblocking should work in any mode
+-	# block
+ 	} elsif ($argValue{command} eq "block") {
+ 		if ($argValue{module} ne '') {
+ 			initLogging();
+@@ -7758,8 +7325,6 @@ if (@ARGV != 0) {
+ 		} else {
+ 			print "Module name missing\n";
+ 		}
+-
+-	# unblock
+ 	} elsif ($argValue{command} eq "unblock") {
+ 		if ($argValue{module} ne '') {
+ 			initLogging();
+@@ -7770,15 +7335,6 @@ if (@ARGV != 0) {
+ 		} else {
+ 			print "Module name missing\n";
+ 		}
+-
+-	# modes
+-	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
+-			($argValue{command} eq "AUTOMATIC") ||
+-			($argValue{command} eq "UPDATES_ONLY")) {
+-		initLogging();
+-		setMode($argValue{command});
+-		prepareValues();
+-		printLog('Tomte finished', 'L0');
+ 	} else {
+ 		print "Unknown command: $argValue{command}\n";
+ 		help();
