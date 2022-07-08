@@ -6910,14 +6910,19 @@ sub checkMode {
 
 ###############################################################################
 # checks if the operation is allowed in this mode/command/module
-# usage: checkModePermision(install|remove|update)
+# usage: checkModePermision(install|remove|update, MODULE)
 # returns 0 if not and 1 if allowed
 sub checkModePermission {
 	my $operation = shift;
+	my $module = shift;
 	# this is a double check, just in case ...
 
 	#TODO debug
-	printLog("checkmodepermission module: $argValue{module} mode: $mode operation: $operation", 'TL2');
+	printLog("checkmodepermission module parameter: $argValue{module} module: $module mode: $mode operation: $operation", 'TL2');
+	if ($origConfModules{$module}{required} eq 'prerequisite') {
+		# always permit if it is a prerequisite
+		return (1);
+	}
 	if ($argValue{command} eq 'configure') {
 		if ($argValue{module} eq 'all') {
 			if ($mode eq 'AUTOMATIC') {
@@ -7669,7 +7674,7 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'T0');
+					printLog("exiting without changing anything", 'TL0');
 					exit (0);
 				}
 				configureAllModules();
@@ -7679,7 +7684,7 @@ if (@ARGV != 0) {
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'T0');
+					printLog("exiting without changing anything", 'TL0');
 					exit (0);
 				}
 				configureSingleModule($argValue{module});
@@ -7723,7 +7728,7 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'T0');
+					printLog("exiting without changing anything", 'TL0');
 					exit (0);
 				}
 				reconfigureAllModules();
@@ -7733,7 +7738,7 @@ if (@ARGV != 0) {
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'T0');
+					printLog("exiting without changing anything", 'TL0');
 					exit (0);
 				}
 				reconfigureSingleModule($argValue{module});
