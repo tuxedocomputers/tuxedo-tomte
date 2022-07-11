@@ -6913,13 +6913,13 @@ sub checkMode {
 # usage: checkModePermision(install|remove|update, MODULE)
 # returns 0 if not and 1 if allowed
 sub checkModePermission {
-	my $operation = shift;
-	my $module = shift;
+	my ($operation, $module) = (@_);
 	# this is a double check, just in case ...
 
 	#TODO debug
 	printLog("checkmodepermission module parameter: $argValue{module} module: $module mode: $mode operation: $operation", 'TL2');
 	if ($origConfModules{$module}{required} eq 'prerequisite') {
+		printLog("module is prerequisite", 'L2');
 		# always permit if it is a prerequisite
 		return (1);
 	}
@@ -7183,7 +7183,7 @@ sub checkModePermission {
 #
 sub configureModule {
 	my $module = shift;
-	my $permission = checkModePermission('install');
+	my $permission = checkModePermission('install', $module);
 	printLog("install module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'install');
@@ -7196,7 +7196,7 @@ sub configureModule {
 #
 sub removeModule {
 	my $module = shift;
-	my $permission = checkModePermission('remove');	
+	my $permission = checkModePermission('remove', $module);
 	printLog("remove module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'remove');
@@ -7210,7 +7210,7 @@ sub removeModule {
 #
 sub upgradeModule {
 	my $module = shift;
-	my $permission = checkModePermission('upgrade');
+	my $permission = checkModePermission('upgrade', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'upgrade');
@@ -7674,8 +7674,7 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'TL0');
-					exit (0);
+					printLog("only prerequisite modules will be installed", 'TL0');
 				}
 				configureAllModules();
 				postConfigure();
@@ -7684,8 +7683,7 @@ if (@ARGV != 0) {
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'TL0');
-					exit (0);
+					printLog("only prerequisite modules will be installed", 'TL0');
 				}
 				configureSingleModule($argValue{module});
 				postConfigure();
@@ -7728,8 +7726,7 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'TL0');
-					exit (0);
+					printLog("only prerequisite modules will be installed", 'TL0');
 				}
 				reconfigureAllModules();
 				postConfigure();
@@ -7738,8 +7735,7 @@ if (@ARGV != 0) {
 			} else {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("exiting without changing anything", 'TL0');
-					exit (0);
+					printLog("only prerequisite modules will be installed", 'TL0');
 				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
