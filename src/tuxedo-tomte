@@ -6786,7 +6786,7 @@ sub reconfigureSingleModule {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
 
-	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
+	if ( ($localConfModules{$module}{blocked} eq 'yes') && ($origConfModules{$module}{required} ne 'prerequisite') ) {
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 

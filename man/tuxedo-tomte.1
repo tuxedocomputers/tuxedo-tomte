@@ -32,6 +32,7 @@ Configures the specified module or fix if possible\&. That means, it is not
 already installed, blocked and designed to fix something on this system\&.
 If \fBall\fR is used then all possible fixes will be installed\&.
 Does nothing if \fBDONT_CONFIGURE\fR is set\&.
+Requires administrator privileges\&.
 .RE
 .PP
 \fBreconfigure \fIMODULE\fR|\fIall\fR
@@ -41,6 +42,7 @@ It will not do anything if it is blocked or not designed to work on this
 system\&.
 If \fBall\fR is used then all possible fixes will be reconfigured\&.
 Does nothing if \fBDONT_CONFIGURE\fR is set\&.
+Requires administrator privileges\&.
 .RE
 .PP
 \fBblock \fIMODULE\fR|\fIall\fR
@@ -51,11 +53,13 @@ managed by the systems package manager\&.
 Modules marked as
 .B prerequisite
 can't be blocked\&.
+Requires administrator privileges\&.
 .RE
 .PP
 \fBunblock \fIMODULE\fR|\fIall\fR
 .RS 4
 Allows the module to be installed or upgraded if it is required by this system\&.
+Requires administrator privileges\&.
 .RE
 .PP
 \fBremove \fIMODULE\fR
@@ -68,10 +72,12 @@ After removing the module it should to be blocked with:
 .br
 or the module will be installed again automatically if the mode is set to
 AUTOMATIC\&.
+Requires administrator privileges\&.
 .RE
 .PP
 .SH "CONFIGURATION MODES"
 .RS 4
+Requires administrator privileges\&.
 There are three configuration modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE.
 The modes are set by creating an empty file with the name of the configuration
 mode in
@@ -112,9 +118,8 @@ installation might damage the system\&.
 .PP
 .SH "INSTALLATION WITHOUT MODIFICATIONS"
 .RS 4
-If creating the file /etc/tomte/MODE with the
-text: 'updates' or 'fixed' inside, Tomte will configure the TUXEDO
-repositories and continue as described above\&.
+If creating a file /etc/tomte/DONT_CONFIGURE and installing Tomte afterwards,
+Tomte will configure only the TUXEDO repositories and mirrors\&.
 To find out which fixes are available to the system:
 .br
       \fBtomte \fBlist\fP
