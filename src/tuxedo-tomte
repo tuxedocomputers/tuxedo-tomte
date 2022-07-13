@@ -6768,13 +6768,15 @@ sub reconfigureSingleModule {
 	my $moduleName = shift;
 	my $module;
 	$module = getSubName($moduleName);
+	printLog("reconfigureSingleModule: $moduleName", 'L2');
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
 		return;
 	}
 
-	if ( $localConfModules{$module}{blocked} eq 'no' &&
-		($origConfModules{$module}{required} eq 'yes' || $origConfModules{$module}{required} eq 'prerequisite')) {
+	if ($origConfModules{$module}{required} eq 'prerequisite') ||
+		(($localConfModules{$module}{blocked} eq 'no') && ($origConfModules{$module}{required} eq 'yes')) {
+
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
 			upgradeModule($module);
@@ -6806,6 +6808,7 @@ sub reconfigureSingleModule {
 sub block {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
+	printLog("block module: >$module<", 'L2');
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
@@ -6829,6 +6832,7 @@ sub block {
 sub unblock {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
+	printLog("unblock module: >$module<", 'L2');
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
@@ -7150,42 +7154,6 @@ sub checkModePermission {
 			}
 		}
 	}
-
-	#	if ($operation eq 'install') {
-	#		if ($mode eq 'AUTOMATIC') {
-	#			return (1);
-	#		}
-	#		if ($mode eq 'UPDATES_ONLY') {
-	#			return (1);
-	#		}
-	#		if ($mode eq 'DONT_CONFIGURE') {
-	#			return (0);
-	#		}
-	#	}
-	#	if ($operation eq 'remove') {
-	#		if ($mode eq 'AUTOMATIC') {
-	#			return (1);
-	#		}
-	#		if ($mode eq 'UPDATES_ONLY') {
-	#			return (1);
-	#		}
-	#		if ($mode eq 'DONT_CONFIGURE') {
-	#			return (1);
-	#		}
-	#
-	#	}
-	#	if ($operation eq 'upgrade') {
-	#		if ($mode eq 'AUTOMATIC') {
-	#			return (0);
-	#		}
-	#		if ($mode eq 'UPDATES_ONLY') {
-	#			return (1);
-	#		}
-	#		if ($mode eq 'DONT_CONFIGURE') {
-	#			return (0);
-	#		}
-	#	}
-
 	# just to be safe return 0
 	return (0);
 }
@@ -7198,7 +7166,7 @@ sub checkModePermission {
 sub configureModule {
 	my $module = shift;
 	my $permission = checkModePermission('install', $module);
-	printLog("install module: $module permission: $permission", 'L2');
+	printLog("configure module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'install');
 	}
