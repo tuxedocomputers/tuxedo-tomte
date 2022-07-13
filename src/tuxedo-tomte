@@ -6774,8 +6774,8 @@ sub reconfigureSingleModule {
 		return;
 	}
 
-	if ($origConfModules{$module}{required} eq 'prerequisite') ||
-		(($localConfModules{$module}{blocked} eq 'no') && ($origConfModules{$module}{required} eq 'yes')) {
+	if (($origConfModules{$module}{required} eq 'prerequisite') ||
+		(($localConfModules{$module}{blocked} eq 'no') && ($origConfModules{$module}{required} eq 'yes'))) {
 
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
