@@ -619,7 +619,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
+		fix => ['lightdmlogindcheckgraphicalfix', 'tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -2190,7 +2190,7 @@ sub checkRequirements {
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
 
-	if (($boardname =~ m/NV4XMB,ME,MZ/) && (-d '/etc/lightdm/')) {
+	if ((($boardname =~ m/NV4XMB,ME,MZ/) || ($boardname =~ m/PHxTQx1/)) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue', 'L1');
 	}
