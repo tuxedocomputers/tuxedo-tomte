@@ -48,12 +48,12 @@ Requires administrator privileges\&.
 \fBblock \fIMODULE\fR|\fIall\fR
 .RS 4
 Prevents the module from being installed\&.
-Already installed modules will not be upgraded except for packages which are
+Already installed modules will not be upgraded or deleted except for packages which are
 managed by the systems package manager\&.
+Requires administrator privileges\&.
 Modules marked as
 .B prerequisite
 can't be blocked\&.
-Requires administrator privileges\&.
 .RE
 .PP
 \fBunblock \fIMODULE\fR|\fIall\fR
@@ -101,7 +101,7 @@ before installing Tomte to avoid Tomte to make any unwanted changes to the
 system or to set Tomte on hold after having the configuration you want\&.
 .RE
 .PP
-.SH "FAI INSTALLATION"
+.SH "TUXEDO FAI INSTALLATION"
 .RS 4
 Everything will be installed automatically. After a FAI installation, the
 system should be ready to go. Fixes can be blocked afterwards if e.g. kernel
@@ -114,6 +114,8 @@ installed automatically\&.
 Everything will be installed automatically, it might take a few minutes till
 all is installed. Messages will appear on the desktop. Interrupting the
 installation might damage the system\&.
+If the files AUTOMATIC, UPDATES_ONLY or DONT_CONFIGURE are created in
+/etc/tomte/ then the installation will act accordingly.
 .RE
 .PP
 .SH "INSTALLATION WITHOUT MODIFICATIONS"
@@ -128,3 +130,36 @@ To find out which fixes are available to the system:
 Then to install a required fix:
 .br
       \fBtomte \fBconfigure \fIMODULE\fR
+.RE
+.PP
+.SH "Typical workflow"
+.RS 4
+Just install Tomte, it will take care of all the fixes your sustem requires
+and it also installs the TUXEDO kernel which brings all the required drivers\&.
+If you don't want Tomte to make any modifications on your system or you want
+to keep your specific kernel, you could create the file DONT_CONFIGURE in
+.BR /etc/tomte \&
+and Tomte will not make any modifications on the system, except for
+the required repositories and Debian mirrors\&.
+Afterwards you could list the required fixes with
+.br
+      \fBtomte \fBlist\fP
+.br
+
+block the fixes you don't want on your system with
+.br
+      \fBsudo \fBtomte \fBblock \fBMODULE\fP
+.br
+
+and set the Tomte installation mode to AUTOMATIC or UPDATES_ONLY with
+.br
+      \fBsudo \fBtomte \fBAUTOMATIC\fP
+.br
+
+or
+.br
+      \fBsudo \fBtomte \fBUPDATES_ONLY\fP
+.br
+
+Alternatively you could install the fixes you want manually by using
+      \fBsudo \fBtomte \fBconfigure \fBMODULE\fP
