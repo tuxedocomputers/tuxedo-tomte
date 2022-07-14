@@ -6707,8 +6707,10 @@ sub configureSingleModule {
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
 	}
-	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
-		print "Module $moduleName cannot be installed/removed because:\n";
+	if (($localConfModules{$module}{blocked} eq 'yes') &&
+   		($mode ne 'DONT_CONFIGURE') &&
+		($mode ne 'UPDATES_ONLY')) {
+		print "Module $moduleName cannot be installed/removed/updated because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 }
@@ -6788,7 +6790,10 @@ sub reconfigureSingleModule {
 		print "Module: $moduleName cannot be installed because:\n";
 	}
 
-	if ( ($localConfModules{$module}{blocked} eq 'yes') && ($origConfModules{$module}{required} ne 'prerequisite') ) {
+	if (($localConfModules{$module}{blocked} eq 'yes') &&
+		($origConfModules{$module}{required} ne 'prerequisite') &&
+   		($mode ne 'DONT_CONFIGURE') &&
+		($mode ne 'UPDATES_ONLY')) {
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 
@@ -6811,6 +6816,10 @@ sub block {
 	printLog("block module: >$module<", 'L2');
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
+		return;
+	}
+	if ($origConfModules{$module}{required} eq 'prerequisite') {
+		print "Module $moduleName is a prerequisite and can't be blocked\n";
 		return;
 	}
 	if ($localConfModules{$module}{blocked} eq 'yes') {
