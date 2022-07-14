@@ -2192,7 +2192,6 @@ sub checkRequirements {
 
 	if ((($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/) ||
-		($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/)) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog('detected lightdm-logind-check-graphical-fix issue', 'L1');
