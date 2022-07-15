@@ -7,7 +7,8 @@ tuxedo-tomte \- Manages fixes for TUXEDO notebooks
 .PP
 \fBtuxedo-tomte\fR
 is a little helper that provides services, updates and fixes for
-TUXEDO devices in the background\&. It does not send any information, telemetry
+.B TUXEDO
+devices in the background\&. It does not send any information, telemetry
 data or similar stuff out!
 .P
 Many but not all options require administrator privileges\&.
@@ -67,9 +68,10 @@ Requires administrator privileges\&.
 Removes the named module independent from mode
 (AUTOMATIC|UPGRADES_ONLY|DONT_CONFIGURE)\&.
 After removing the module it should to be blocked with:
-.br
-      \fBtomte \fBblock \fIMODULE\fP
-.br
+.RE
+.PP
+\fBtomte \fBblock \fIMODULE\fR
+.RS 4
 or the module will be installed again automatically if the mode is set to
 AUTOMATIC\&.
 Requires administrator privileges\&.
@@ -78,26 +80,49 @@ Requires administrator privileges\&.
 .SH "CONFIGURATION MODES"
 .RS 4
 Requires administrator privileges\&.
-There are three configuration modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE.
-The modes are set by creating an empty file with the name of the configuration
-mode in
+There are three configuration modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE\&.
+The modes are set by
+.IP
+\fBsudo tomte \fIMODE\fR
+.LP
+The modes can also be set manually by creating an empty file with the name of
+the configuration mode in
 .BR /etc/tomte/ \&
-The file may be created manually as well\&.
+as
+.IP
+\fBsudo touch /etc/tomte/AUTOMATIC\fP
+.LP
+or
+.IP
+\fBsudo touch /etc/tomte/UPDATES_ONLY\fP
+.LP
+or
+.IP
+\fBsudo touch /etc/tomte/DONT_CONFIGURE\fP
+.LP
 .RE
 .TP
 \fBAUTOMATIC\fR
 This is the default mode. Everything will be installed/updated/removed
-automatically by Tomte\&.
+automatically by
+.B Tomte\&.
 .RE
 .TP
 \fBUPDATES_ONLY\fR
-Only updates will be handled automatically by Tomte. No modules will be installed
-or removed without user intervention\&.
+Only updates will be handled automatically by
+.B Tomte.
+No modules will be installed or removed without user intervention\&.
 .RE
 .TP
 \fBDONT_CONFIGURE\fR
-Nothing will be configured by Tomte. Usefull if you want to create the file
-before installing Tomte to avoid Tomte to make any unwanted changes to the
+Nothing will be configured by
+.B Tomte.
+Usefull if you want to create the file
+before installing
+.B Tomte
+to avoid
+.B Tomte
+to make any unwanted changes to the
 system or to set Tomte on hold after having the configuration you want\&.
 .RE
 .PP
@@ -120,46 +145,86 @@ If the files AUTOMATIC, UPDATES_ONLY or DONT_CONFIGURE are created in
 .PP
 .SH "INSTALLATION WITHOUT MODIFICATIONS"
 .RS 4
-If creating a file /etc/tomte/DONT_CONFIGURE and installing Tomte afterwards,
-Tomte will configure only the TUXEDO repositories and mirrors\&.
-To find out which fixes are available to the system:
-.br
+If creating a file /etc/tomte/DONT_CONFIGURE and installing
+.B Tomte
+afterwards,
+.B Tomte
+will configure only the TUXEDO repositories and mirrors\&.
+To find out which fixes are available to the system
+.IP
       \fBtomte \fBlist\fP
-.br
-
-Then to install a required fix:
-.br
+.LP
+Then to install a required fix
+.IP
       \fBtomte \fBconfigure \fIMODULE\fR
+.LP
 .RE
 .PP
-.SH "Typical workflow"
+.SH "POSSIBLE WORKFLOW"
 .RS 4
-Just install Tomte, it will take care of all the fixes your sustem requires
-and it also installs the TUXEDO kernel which brings all the required drivers\&.
-If you don't want Tomte to make any modifications on your system or you want
+Just install
+.B Tomte
+, it will take care of all the fixes your system requires
+and it also installs the
+.B TUXEDO
+kernel which brings all the required drivers\&.
+
+If you don't want
+.B Tomte
+to make any modifications on your system or you want
 to keep your specific kernel, you could create the file DONT_CONFIGURE in
 .BR /etc/tomte \&
-and Tomte will not make any modifications on the system, except for
+and
+.B Tomte
+will not make any modifications on the system, except for
 the required repositories and Debian mirrors\&.
 Afterwards you could list the required fixes with
-.br
+.IP
       \fBtomte \fBlist\fP
-.br
-
+.LP
 block the fixes you don't want on your system with
-.br
-      \fBsudo \fBtomte \fBblock \fBMODULE\fP
-.br
-
-and set the Tomte installation mode to AUTOMATIC or UPDATES_ONLY with
-.br
+.IP
+      \fBsudo \fBtomte \fBblock \fIMODULE\fP
+.LP
+and set the
+.B Tomte
+installation mode to AUTOMATIC or UPDATES_ONLY with
+.IP
       \fBsudo \fBtomte \fBAUTOMATIC\fP
-.br
-
+.LP
 or
-.br
+.IP
       \fBsudo \fBtomte \fBUPDATES_ONLY\fP
-.br
-
-Alternatively you could install the fixes you want manually by using
-      \fBsudo \fBtomte \fBconfigure \fBMODULE\fP
+.LP
+Alternatively you could install the fixes you want manually by using:
+.IP
+      \fBsudo \fBtomte \fBconfigure \fIMODULE\fP
+.LP
+.RE
+.PP
+.SH "FILES"
+.TP
+/etc/tomte/tomte.cfg
+The
+.B Tomte
+configuration file.
+.TP
+/var/log/tomte/tomte.log
+The
+.B Tomte
+logfile.
+.TP
+/etc/tomte/DONT_CONFIGURE
+File, if present, inhibits
+.B Tomte
+to configure anything except for the requisite modules.
+.TP
+/etc/tomte/UPDATES_ONLY
+File, if present, makes
+.B Tomte
+to do updates only.
+.TP
+/etc/tomte/AUTOMATIC
+File, if present, lets
+.B Tomte
+to configure everything automatically.
