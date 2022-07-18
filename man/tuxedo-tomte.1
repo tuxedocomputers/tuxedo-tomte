@@ -48,7 +48,7 @@ Requires administrator privileges\&.
 .PP
 \fBblock \fIMODULE\fR|\fIall\fR
 .RS 4
-Prevents the module from being installed\&.
+Prevents the module from being installed or updated\&.
 Already installed modules will not be upgraded or deleted except for packages which are
 managed by the systems package manager\&.
 Requires administrator privileges\&.
@@ -65,14 +65,15 @@ Requires administrator privileges\&.
 .PP
 \fBremove \fIMODULE\fR
 .RS 4
-Removes the named module independent from mode
+Removes the named module independent from selected mode
 (AUTOMATIC|UPGRADES_ONLY|DONT_CONFIGURE)\&.
-After removing the module it should to be blocked with:
+After removing the module it should to be blocked with
 .RE
 .PP
 \fBtomte \fBblock \fIMODULE\fR
 .RS 4
-or the module will be installed again automatically if the mode is set to
+or the module will be installed again automatically if the chosen mode is set
+to
 AUTOMATIC\&.
 Requires administrator privileges\&.
 .RE
@@ -117,8 +118,7 @@ No modules will be installed or removed without user intervention\&.
 \fBDONT_CONFIGURE\fR
 Nothing will be configured by
 .B Tomte.
-Usefull if you want to create the file
-before installing
+Usefull if you want to create the file before installing
 .B Tomte
 to avoid
 .B Tomte
@@ -196,7 +196,7 @@ or
 .IP
       \fBsudo \fBtomte \fBUPDATES_ONLY\fP
 .LP
-Alternatively you could install the fixes you want manually by using:
+Alternatively you could install the fixes you want manually by using
 .IP
       \fBsudo \fBtomte \fBconfigure \fIMODULE\fP
 .LP
@@ -217,7 +217,7 @@ logfile.
 /etc/tomte/DONT_CONFIGURE
 File, if present, inhibits
 .B Tomte
-to configure anything except for the requisite modules.
+to configure anything except for the prerequisite modules.
 .TP
 /etc/tomte/UPDATES_ONLY
 File, if present, makes
