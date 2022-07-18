@@ -2,7 +2,8 @@
 .SH "NAME"
 tuxedo-tomte \- Verwaltet Lösungen für TUXEDO Notebooks
 .SH "ÜBERSICHT"
-\fBtuxedo-tomte\fR BEFEHL [NAME...]
+\fBtuxedo-tomte\fR <BEFEHL> [NAME...]
+\fBtomte\fR <BEFEHL> [NAME...]
 .SH "BESCHREIBUNG"
 .PP
 .I tuxedo-tomte
@@ -18,116 +19,149 @@ Folgende Optionen werden verstanden:
 .PP 
 \fBlist\fR
 .RS 4
-Listed alle verfügbaren Optionen mit Name, Version und ob diese aktiv,
+Listed alle verfügbaren Optionen auf mit Name, Version und ob diese aktiv,
 blockiert oder für das System notwendig sind\&.
 .RE
 .PP
-\fBdescription \fR\fIMODULE\fR
+\fBdescription \fR\fI<MODUL>\fR
 .RS 4
 Zeigt eine kleine Beschreibung für dieses Modul\&.
 .RE
 .PP
-\fBconfigure \fIMODULE\fR|\fIall\fR
+\fBconfigure \fI<MODUL>\fR|\fIall\fR
 .RS 4
-Konfiguriert das genannte Modul oder die Lösung wenn möglich\&.
+Konfiguriert das genannte Modul oder Lösung wenn möglich\&.
 Das bedeutet, wenn es nicht bereits installiert oder blockiert ist und für
 dieses System funktioniert\&.
+.P
 Falls \fBall\fR verwendet wird, werden alle Lösungen die für dieses System
-existieren, installiert\&.
+existieren installiert\&.
+.P
+Installierbare Module können mit
+.IP
+tomte list
+.LP
+angezeigt werden\&.
+.P
 Macht nichts wenn \fBDONT_CONFIGURE\fR aktiv ist\&.
+.P
 Benötigt Administrationsrechte\&.
 .RE
 .PP
-\fBreconfigure \fIMODULE\fR|\fIall\fR
+\fBreconfigure \fI<MODUL>\fR|\fIall\fR
 .RS 4
-Konfiguriert das genannte Module oder die Lösung sogar wenn diese bereits
+Konfiguriert das genannte Module oder Lösung sogar wenn diese bereits
 installiert war\&.
+.P
 Es macht nichts wenn das Modul blockiert oder nicht für dieses System
 konzipiert wurde\&.
+.P
 Wenn \fBall\fR verwendet wird, werden alle Lösungen installiert die möglich
 sind\&.
+.P
+Installierbare Module können mit
+.IP
+\fBtomte \fBlist\fR
+.LP
+angezeigt werden\&.
+.P
 Macht nichts wenn \fBDONT_CONFIGURE\fR aktiv ist\&.
+.P
 Benötigt Administrationsrechte\&.
 .RE
 .PP
-\fBblock \fIMODULE\fR|\fIall\fR
+\fBblock \fI<MODUL>\fR|\fIall\fR
 .RS 4
-Verhindert, dass das Modul installiert oder Aktualisiert wird\&.
-Bereits installierte Module werden nicht aktualisiert oder geloescht mit
-ausnahme der Pakete die vom Debian Paketmanagement System verwaltet werden\&.
+Verhindert, dass das Modul automatisch installiert oder aktualisiert wird\&.
+.P
+Bereits installierte Module werden nicht aktualisiert oder gelöscht mit
+Ausnahme der Pakete die vom Debian Paketmanagement System verwaltet werden\&.
+.P
 Benötigt Administrationsrechte\&.
-Module die gekennzeichnet wurden mit
+.P
+Module die als
 .B prerequisite
-können nicht blockiert werden\&.
+gekennzeichnet sind können nicht blockiert werden\&.
 .RE
 .PP
-\fBunblock \fIMODULE\fR|\fIall\fR
+\fBunblock \fI<MODUL>\fR|\fIall\fR
 .RS 4
 Erlaubt
 .B Tomte
-Module die von diesem System benötigt werden zu installieren oder zu
-aktualisieren\&.
+Module die von diesem System benötigt werden automatisch zu installieren oder
+zu aktualisieren\&.
+.P
 Benötigt Administrationsrechte\&.
 .RE
 .PP
-\fBremove \fIMODULE\fR
+\fBremove \fI<MODUL>\fR
 .RS 4
-Entfernt das genannte Module unabhaengig vom gewaehltem Modus
-(AUTOMATIC|UPGRADES_ONLY|DONT_CONFIGURE)\&.
+Entfernt das genannte Modul unabhaengig vom gewaehltem Modus
+(\fBAUTOMATIC\fR, \fBUPGRADES_ONLY\fR, \fBDONT_CONFIGURE\fR)\&.
+.P
 Nach entfernen des Moduls, sollte dieses blockiert werden mit
 .RE
 .PP
-\fBtomte \fBblock \fIMODULE\fR
+\fBtomte \fBblock \fI<MODUL>\fR
 .RS 4
-ansonsten wird es wieder automatisch installiert wenn der gewählte modus
-AUTOMATIC\&.
-ist.
+ansonsten wird es wieder automatisch installiert wenn der gewählte Modus
+.B AUTOMATIC
+ist\&.
+.P
 Benötigt Administrationsrechte\&.
+.P
+Im Moment können nur einige Module gelöscht werden\&.
 .RE
 .PP
-.SH "CONFIGURATION MODES"
+.SH "KONFIGURATIONS MODI"
 .RS 4
 Benötigt Administrationsrechte\&.
-Es gibt drei verschiedene Modi: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE\&.
+.P
+Es gibt drei verschiedene Modi: \fBAUTOMATIC\fR, \fBUPDATES_ONLY\fR und
+\fBDONT_CONFIGURE\fR\&.
+.P
 Diese Modi werden gesetzt über
 .IP
-\fBsudo tomte \fIMODE\fR
+\fBsudo tomte \fI<MODUS>\fR
 .LP
 Der Modus kann ebenfalls manuell über das erstellen einer leeren Datei mit dem
-Namen des gewünschten Modi unter dem Veryeichniss
+Namen des gewünschten Modus unter dem Verzeichniss
 .BR /etc/tomte/ \&
 z.B.
 .IP
 \fBsudo touch /etc/tomte/AUTOMATIC\fP
 .LP
-or
+oder
 .IP
 \fBsudo touch /etc/tomte/UPDATES_ONLY\fP
 .LP
-or
+oder
 .IP
 \fBsudo touch /etc/tomte/DONT_CONFIGURE\fP
 .LP
 .RE
 .TP
 \fBAUTOMATIC\fR
-Dies ist der Voreingestellte Modus. Alles wird automatisch
-installiert/aktualisiert/gelöscht über
+Dies ist der Voreingestellte Modus. Alles wird von
 .B Tomte\&.
+automatisch installiert/aktualisiert/gelöscht\&.
 .RE
 .TP
 \fBUPDATES_ONLY\fR
 Nur die Aktualisierungen werden über
 .B Tomte
 verarbeitet.
+.P
 Keine Module werden installiert oder gelöscht ohne Intervention des
 Benutzers\&.
 .RE
 .TP
 \fBDONT_CONFIGURE\fR
-Nichts wird von
+Nichts, ausser den Modulen die als
+.B prerequisite markiert sind, wird von
 .B Tomte.
 konfiguriert.
+.P
 Sinnvoll wenn die Datei z.B. vor der Installation von
 .B Tomte
 erstellt wird um zu vermeiden, dass
@@ -141,17 +175,18 @@ in einem bestimmten Konfigurationszustand einzufrieren\&.
 .SH "TUXEDO FAI INSTALLATION"
 .RS 4
 Alles wird automatisch installiert. Nach einer FAI-Installation ist das System
-betriebsbereit. Module können danach blockiert werden wenn z.B. keine
-Aktualisierungen der Kernel erwünscht ist. Falls neue Module nötig sind, werden
-diese automatisch installiert\&.
+betriebsbereit. Falls neue Module nötig sind, werden diese automatisch
+installiert\&.
 .RE
 .PP
 .SH "INSTALLATION AUF VANILLA SYSTEM"
 .RS 4
-Alles wird automatisch installiert, wahrscheinlich dauert es ein paar Minuten
-bis es fertig ist. Benachrichtigungen werden auf dem Bilschirm auftauchen.
+Alles wird automatisch installiert. Wahrscheinlich dauert es ein paar Minuten
+bis es fertig ist. Benachrichtigungen werden auf dem Bilschirm auftauchen\&.
+.P
 Die Installation zu unterbrechen könnte das System zerstören\&.
-Falls die Dateien AUTOMATIC, UPDATES_ONLY oder DONT_CONFIGURE unter
+.P
+Falls die Dateien \fBAUTOMATIC\fR, \fBUPDATES_ONLY\fR oder \fBDONT_CONFIGURE\fR unter
 /etc/tomte/ erstellt werden, wird
 .B Tomte
 entsprechend handeln.
@@ -159,18 +194,21 @@ entsprechend handeln.
 .PP
 .SH "INSTALLATION OHNE VERÄNDERUNGEN"
 .RS 4
-Falls die Datei /etc/tomte/DONT_CONFIGURE ertellt wird und danach
+Falls die Datei \fB/etc/tomte/DONT_CONFIGURE\fR ertellt wird und danach
 .B Tomte
 installiert wird,
 .B Tomte
-werden nur die Repositories und Spiegel erstellt (prerequisites)\&.
+werden nur die Repositories und Spiegel erstellt (
+.B prerequisites
+)\&.
+.P
 Zum rausfinden welche Module für das System vorgesehen sind
 .IP
       \fBtomte \fBlist\fP
 .LP
-Um dann ein Mdul zu installieren
+Um dann ein Modul zu installieren
 .IP
-      \fBtomte \fBconfigure \fIMODULE\fR
+      \fBtomte \fBconfigure \fI<MODUL>\fR
 .LP
 .RE
 .PP
@@ -178,16 +216,16 @@ Um dann ein Mdul zu installieren
 .RS 4
 Einfach
 .B Tomte
-installierent, es wird sich um alle Module die vom System benötigt werden
+installieren, es wird sich um alle Module die vom System benötigt werden
 kümmern und es wird ebenfalls den
 .B TUXEDO
 Kernel installieren der alle notwendigen Treiber mit liefert\&.
-
+.P
 Falls nicht erwünscht ist dass
 .B Tomte
 irgend welche Änderungen im System durchführt oder z.B. ein bestimmter Kernel
-im System bleiben soll, kann die Datei DONT_CONFIGURE in
-.BR /etc/tomte \&
+im System bleiben soll, kann die Datei \fBDONT_CONFIGURE\fR in
+.BR /etc/tomte/ \&
 erstellt werden.
 .B Tomte
 wird keine weitere Änderungen im System durchführen, außer den Repositories
@@ -198,7 +236,7 @@ Danach könnten die Notwendigen Module aufgelistet werden
 .LP
 die Module die nicht erwünscht sind blockieren
 .IP
-      \fBsudo \fBtomte \fBblock \fIMODULE\fP
+      \fBsudo \fBtomte \fBblock \fI<MODUL>\fP
 .LP
 und
 .B Tomte
@@ -212,7 +250,7 @@ oder
 .LP
 Alternativ können die erwünschten Module manuell installiert werden
 .IP
-      \fBsudo \fBtomte \fBconfigure \fIMODULE\fP
+      \fBsudo \fBtomte \fBconfigure \fI<MODUL>\fP
 .LP
 .RE
 .PP
@@ -231,7 +269,9 @@ Logdatei.
 /etc/tomte/DONT_CONFIGURE
 Datei, wenn vorhanden, verhindert dass
 .B Tomte
-irgendwas konfiguriert außer die Module die absolut notwendig sind (prerequisite).
+irgendwas konfiguriert außer die Module die absolut notwendig sind (
+.B prerequisite
+).
 .TP
 /etc/tomte/UPDATES_ONLY
 Datei, wenn vorhanden lässt
