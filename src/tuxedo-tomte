@@ -6878,6 +6878,23 @@ sub blockAllModules {
 
 
 
+#TODO still neccessary?
+###############################################################################
+# unblocks all modules
+#
+sub unblockAllModules {
+	my $module;
+	foreach $module (keys %origConfModules) {
+		if ($origConfModules{$module}{required} eq 'yes') {
+			$origConfModules{$module}{blocked} = 'no';
+			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
+		}
+	}
+}
+
+
+
+
 ###############################################################################
 # set configuration mode setMode('mode')
 # AUTOMATIC: install/remove/update everything automatically
@@ -7746,7 +7763,11 @@ if (@ARGV != 0) {
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
-			block($argValue{module});
+			if ($argValue{module} eq 'all') {
+				blockAllModules();
+			} else {
+				block($argValue{module});
+			}
 			writeConfigFile();
 			printLog('Tomte finished', 'L1');
 		} else {
@@ -7758,7 +7779,11 @@ if (@ARGV != 0) {
 		if ($argValue{module} ne '') {
 			initLogging();
 			prepareValues();
-			unblock($argValue{module});
+			if ($argValue{module} eq 'all') {
+				unblockAllModules();
+			} else {
+				unblock($argValue{module});
+			}
 			writeConfigFile();
 			printLog('Tomte finished', 'L1');
 		} else {
