@@ -2295,6 +2295,7 @@ sub i8042fix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2346,6 +2347,7 @@ sub i8042noauxfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2405,6 +2407,7 @@ sub nobootonbattery() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2464,6 +2467,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2669,6 +2673,7 @@ sub nokeyboardaftersuspendfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2720,6 +2725,7 @@ sub backlightfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2813,6 +2819,7 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2906,6 +2913,7 @@ sub tuxedomirrors() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -2963,6 +2971,7 @@ sub corefix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3016,6 +3025,7 @@ my $retval;
     }
     if ($action eq 'remove') {
         # not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
     }
 }
 
@@ -3067,6 +3077,7 @@ sub threegfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3120,6 +3131,7 @@ sub threegfix2() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3157,6 +3169,7 @@ sub tuxedotouchpadswitch() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -3259,6 +3272,7 @@ sub tuxedonvmefix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3299,6 +3313,7 @@ sub tuxedokeyboardite() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3349,6 +3364,7 @@ sub fingerprintreader() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3388,6 +3404,7 @@ sub tuxedomicfix1() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -3477,6 +3494,7 @@ sub tuxedorestoreaudiofix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3515,6 +3533,7 @@ sub kernelhwe2004() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3554,6 +3573,7 @@ sub kerneltuxedo2004edge() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3591,6 +3611,7 @@ sub kerneltuxedo2004next() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3629,6 +3650,7 @@ sub kerneltuxedo2004() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3666,6 +3688,7 @@ sub kerneltuxedo2204() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -3857,6 +3880,7 @@ sub nvidiadriver() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4002,6 +4026,7 @@ sub r8168dkms() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -4040,6 +4065,7 @@ sub tuxedooledbrt() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -4091,6 +4117,7 @@ sub apportfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4172,6 +4199,7 @@ sub amdgpubacklightauxoff() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4223,6 +4251,7 @@ sub i915disablepsrfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4279,6 +4308,7 @@ sub i915enablepsrfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4317,6 +4347,7 @@ sub tuxedopinfixtgldkms() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -4370,6 +4401,7 @@ sub thunderboltbootdelayfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4425,6 +4457,7 @@ sub lightdmlogindcheckgraphicalfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4481,6 +4514,7 @@ sub nvidiabacklightcontrolfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4536,6 +4570,7 @@ sub earlyloadbacklightcontrolfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
@@ -4634,6 +4669,7 @@ sub cardreaderfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
 
