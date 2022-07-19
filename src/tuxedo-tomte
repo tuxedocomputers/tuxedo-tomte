@@ -4119,27 +4119,7 @@ sub realtekr8125dkms() {
 		$origConfModules{$module}{required} = "no";
 	}
 	if ($action eq 'remove') {
-		# check before if the package is installed
-		if (isPackageInstalled($origConfModules{$module}{name})) {
-			if (removePackage($origConfModules{$module}{name})) {
-				addToConfiguredModules($module, "removed");
-				$origConfModules{$module}{installed} = "no";
-				$origConfModules{$module}{upgraded} = "yes";
-				$origConfModules{$module}{required} = "no";
-				$restartSystem = 1;
-			} else {
-				addToConfiguredModules($module, "remove failed");
-				$origConfModules{$module}{installed} = "remove failed";
-				$origConfModules{$module}{version} = $localConfModules{$module}{version};
-				$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
-			}
-		} else {
-			printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
-			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "yes";
-			$origConfModules{$module}{required} = "no";
-		}
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -4599,23 +4579,25 @@ sub r8125dkms() {
 	}
 
 	if ($action eq 'remove') {
-		my $counter = 0;
-		if( isPackageInstalled('tuxedo-r8125-dkms') ) {
-			if (!deinstallPackage('tuxedo-r8125-dkms')) {
-				$counter = $counter+1;
-			}
-		} else {
-			$counter = $counter+1;
-		}
-		if ($counter == 1) {
-			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-		} else {
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'remove failed');
-		}
+		#TODO debug
+		removeDebianModule($module, 1);
+		#		my $counter = 0;
+		#if( isPackageInstalled('tuxedo-r8125-dkms') ) {
+		#	if (!deinstallPackage('tuxedo-r8125-dkms')) {
+		#		$counter = $counter+1;
+		#	}
+		#} else {
+		#	$counter = $counter+1;
+		#}
+		#if ($counter == 1) {
+		#	$origConfModules{$module}{installed} = 'no';
+		#	$origConfModules{$module}{upgraded} = 'yes';
+		#	addToConfiguredModules($module, 'removed');
+		#} else {
+		#	$origConfModules{$module}{installed} = 'yes';
+		#	$origConfModules{$module}{upgraded} = 'no';
+		#	addToConfiguredModules($module, 'remove failed');
+		#}
 	}
 }
 
@@ -5584,6 +5566,41 @@ sub uninstallRemnantKernels {
 	}
 }
 
+
+
+###############################################################################
+# removes a module containing a debian pakage
+# removeDebianModule(module, restart)
+# module is the short modulename
+# if restart = 0 => don't restart
+# if restart = 1 => restart
+# checks if the package is installed
+#
+sub removeDebianModule {
+	my ($module, $restart) = (@_);
+	if (isPackageInstalled($origConfModules{$module}{name})) {
+		if (removePackage($origConfModules{$module}{name})) {
+			addToConfiguredModules($module, "removed");
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{required} = "no";
+			if ($restart) {
+				$restartSystem = 1;
+			}
+		} else {
+			addToConfiguredModules($module, "remove failed");
+			$origConfModules{$module}{installed} = "remove failed";
+			$origConfModules{$module}{version} = $localConfModules{$module}{version};
+			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+		}
+	} else {
+		printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
+		addToConfiguredModules($module, "nothingToDo");
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "yes";
+		$origConfModules{$module}{required} = "no";
+	}
+}
 
 
 
@@ -6710,6 +6727,7 @@ sub configureSingleModule {
 		$configuredModules{$module} = 'nothingToDo';
 	}
 	if (($localConfModules{$module}{blocked} eq 'yes') &&
+		($origConfModules{$module}{required} ne 'prerequisite') &&
    		($mode ne 'DONT_CONFIGURE') &&
 		($mode ne 'UPDATES_ONLY')) {
 		print "Module $moduleName cannot be installed/removed/updated because:\n";
@@ -6788,20 +6806,22 @@ sub reconfigureSingleModule {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
 		}
-	} else {
-		print "Module: $moduleName cannot be installed because:\n";
+	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
+		$configuredModules{$module} = 'nothingToDo';
 	}
 
 	if (($localConfModules{$module}{blocked} eq 'yes') &&
 		($origConfModules{$module}{required} ne 'prerequisite') &&
    		($mode ne 'DONT_CONFIGURE') &&
 		($mode ne 'UPDATES_ONLY')) {
+		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
 
 	if (($origConfModules{$module}{required} eq 'no') &&
 		($configuredModules{$module} ne 'remove failed') &&
 		($configuredModules{$module} ne 'removed')) {
+		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
 }
@@ -6862,14 +6882,15 @@ sub unblock {
 }
 
 
-#TODO still neccessary?
 ###############################################################################
 # blocks all modules
 #
 sub blockAllModules {
 	my $module;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{blocked} ne 'yes') &&
+			($origConfModules{$module}{required} ne 'prerequisite')) {
 			$origConfModules{$module}{blocked} = 'yes';
 			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
 		}
@@ -6878,16 +6899,16 @@ sub blockAllModules {
 
 
 
-#TODO still neccessary?
 ###############################################################################
 # unblocks all modules
 #
 sub unblockAllModules {
 	my $module;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{blocked} eq 'yes')) {
 			$origConfModules{$module}{blocked} = 'no';
-			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
+			printLog("unblocking module $origConfModules{$module}{name}", 'TL0');
 		}
 	}
 }
