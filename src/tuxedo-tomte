@@ -2555,21 +2555,22 @@ sub tuxedocontrolcenter() {
 		printLog("upgrade not necessary for packages, it is done by the package manager");
 	}
 	if ($action eq 'remove') {
-		if( isPackageInstalled($origConfModules{$module}{name}) ) {
-			if (!deinstallPackage($origConfModules{$module}{name})) {
-				$origConfModules{$module}{installed} = 'yes';
-				$origConfModules{$module}{upgraded} = 'no';
-				addToConfiguredModules($module, 'remove failed');
-			} else {
-				$origConfModules{$module}{installed} = 'no';
-				$origConfModules{$module}{upgraded} = 'no';
-				addToConfiguredModules($module, 'removed');
-			}
-		} else {
-			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'nothingToDo');
-		}
+		removeDebianModule($module, 1);
+		#		if( isPackageInstalled($origConfModules{$module}{name}) ) {
+		#			if (!deinstallPackage($origConfModules{$module}{name})) {
+		#		$origConfModules{$module}{installed} = 'yes';
+		#		$origConfModules{$module}{upgraded} = 'no';
+		#		addToConfiguredModules($module, 'remove failed');
+		#	} else {
+		#		$origConfModules{$module}{installed} = 'no';
+		#		$origConfModules{$module}{upgraded} = 'no';
+		#		addToConfiguredModules($module, 'removed');
+		#	}
+		#} else {
+		#	$origConfModules{$module}{installed} = 'no';
+		#	$origConfModules{$module}{upgraded} = 'no';
+		#	addToConfiguredModules($module, 'nothingToDo');
+		#}
 	}
 }
 
@@ -2605,7 +2606,7 @@ sub tuxedokeyboard() {
 		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -3422,7 +3423,7 @@ sub mesautils() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -3890,7 +3891,7 @@ sub cracklibruntime() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
+		removeDebianModule($module, 1);
 	}
 }
 
@@ -5087,6 +5088,8 @@ sub installPackage {
 		if ($retval == 0) {
 			printLog("failed to install $packageName", 'L0');
 			printLog("will try again later", 'L0');
+			# repair a possibly wrecked package manager
+			`dpkg --configure -a`;
 			startTomteDelayed();
 		}
 	}
@@ -5594,7 +5597,7 @@ sub removeDebianModule {
 			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
 		}
 	} else {
-		printLog("$origConfModules{$module}{name} is not installed, which is good", 'L1');
+		printLog("$origConfModules{$module}{name} is not installed, which is the desired result", 'TL0');
 		addToConfiguredModules($module, "nothingToDo");
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
@@ -6751,7 +6754,7 @@ sub removeSingleModule {
 	}
 
 	if ($localConfModules{$module}{blocked} eq 'no') {
-		printLog("removing module $module", 'TL');
+		printLog("removing module $moduleName", 'TL');
 		removeModule($module);
 	}	
 
@@ -6874,7 +6877,6 @@ sub unblock {
 	}
 	if ($localConfModules{$module}{blocked} eq 'yes') {
 		print "Unblocking module $moduleName\n";
-		print "$moduleName will be upgraded or installed after restart or next tuxedo-tomte configure or reconfigure\n";
 		$origConfModules{$module}{blocked} = 'no';
 		printLog("unblocking module $moduleName", 'L1');
 		return;
@@ -7393,7 +7395,7 @@ sub listSuccess {
 		printNameDescriptionModules(@removedModules);
 	}
 	if (! $successOrFailed) {
-		print "\nNothing has been configured\n";
+		print "\nNothing to do in post configuration\n";
 	}
 	if ($restartSystem == 1) {
 		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
