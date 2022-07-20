@@ -7054,6 +7054,14 @@ sub checkModePermission {
 		# always permit if it is a prerequisite
 		return (1);
 	}
+	# when FAI assume yes on all
+	if ($argValue{command} eq 'FAI') {
+		return (1);
+	}
+	# when Live ISO assume yes on all
+	if ($LiveISO == 1) {
+		return (1);
+	}
 	if ($argValue{command} eq 'configure') {
 		if ($argValue{module} eq 'all') {
 			if ($mode eq 'AUTOMATIC') {
