@@ -18,6 +18,8 @@
 
 use strict qw(vars subs);
 use warnings;
+use autodie;
+use 5.010;
 
 use File::Copy;
 
@@ -2516,16 +2518,18 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		printLog("removing $module", 'TL0');
-		unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
-		if (backupFile($fileName)) {
-			unlink($fileName);
-		} else {
-			printLog('can\'t remove fix, it seems to be gone already', 'TL1');
+		if (removeWarningMessage('')) {
+			printLog("removing $module", 'TL0');
+			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
+			if (backupFile($fileName)) {
+				unlink($fileName);
+			} else {
+				printLog('can\'t remove fix, it seems to be gone already', 'TL1');
+			}
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'removed');
 		}
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
 	}
 }
 
@@ -2559,7 +2563,9 @@ sub tuxedocontrolcenter() {
 		printLog("upgrade not necessary for packages, it is done by the package manager");
 	}
 	if ($action eq 'remove') {
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 		#		if( isPackageInstalled($origConfModules{$module}{name}) ) {
 		#			if (!deinstallPackage($origConfModules{$module}{name})) {
 		#		$origConfModules{$module}{installed} = 'yes';
@@ -2610,7 +2616,9 @@ sub tuxedokeyboard() {
 		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove') {
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -2819,7 +2827,7 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("This is a prerequisite, removal is not possible for this module", 'TL0');
 	}
 }
 
@@ -2913,7 +2921,7 @@ sub tuxedomirrors() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("This is a prerequisite and removal is not possible for this module", 'TL0');
 	}
 }
 
@@ -3168,8 +3176,9 @@ sub tuxedotouchpadswitch() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3403,8 +3412,9 @@ sub tuxedomicfix1() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3440,7 +3450,9 @@ sub mesautils() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3915,7 +3927,9 @@ sub cracklibruntime() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3966,29 +3980,31 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		my $counter = 0;
-		if( isPackageInstalled('amdgpu-dkms') ) {
-			if (!deinstallPackage('amdgpu-dkms')) {
+		if (removeWarningMessage('')) {
+			my $counter = 0;
+			if( isPackageInstalled('amdgpu-dkms') ) {
+				if (!deinstallPackage('amdgpu-dkms')) {
+					$counter = $counter+1;
+				}
+			} else {
 				$counter = $counter+1;
 			}
-		} else {
-			$counter = $counter+1;
-		}
-		if( isPackageInstalled('amdgpu-dkms-firmware') ) {
-			if (!deinstallPackage('amdgpu-dkms-firmware')) {
+			if( isPackageInstalled('amdgpu-dkms-firmware') ) {
+				if (!deinstallPackage('amdgpu-dkms-firmware')) {
+					$counter = $counter+1;
+				}
+			} else {
 				$counter = $counter+1;
 			}
-		} else {
-			$counter = $counter+1;
-		}
-		if ($counter == 2) {
-			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-		} else {
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'no';
-			addToConfiguredModules($module, 'remove failed');
+			if ($counter == 2) {
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
 		}
 	}
 }
@@ -4025,8 +4041,9 @@ sub r8168dkms() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -4064,8 +4081,9 @@ sub tuxedooledbrt() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -4147,7 +4165,9 @@ sub realtekr8125dkms() {
 		$origConfModules{$module}{required} = "no";
 	}
 	if ($action eq 'remove') {
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -4346,8 +4366,9 @@ sub tuxedopinfixtgldkms() {
 		printLog("upgrade not necessary for packages");
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -4616,7 +4637,9 @@ sub r8125dkms() {
 
 	if ($action eq 'remove') {
 		#TODO debug
-		removeDebianModule($module, 1);
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 		#		my $counter = 0;
 		#if( isPackageInstalled('tuxedo-r8125-dkms') ) {
 		#	if (!deinstallPackage('tuxedo-r8125-dkms')) {
@@ -6404,18 +6427,21 @@ sub findActiveEDIDs {
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
-				open(FILE, $enabledFile);
-				$enabledFileContent = <FILE>;
-				close(FILE);
+				#open(FH, $enabledFile);
+				open my $fh1, "<", $enabledFile;
+				$enabledFileContent = <$fh1>;
+				close($fh1);
 				if ($enabledFileContent =~ /enabled/) {
 					my $statusFile = "$path/status";
 					if ( -e $statusFile ) {
-						open(FILE2, $statusFile);
-						$statusFileContent = <FILE2>;
+						#open(FH2, $statusFile);
+						open my $fh2, "<", $statusFile;
+						$statusFileContent = $fh2;
 						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
 						}
+						close($fh2);
 					}
 				}
 			}
@@ -7285,6 +7311,50 @@ sub upgradeModule {
 		$module->($module, 'upgrade');
 	}
 }
+
+
+
+###############################################################################
+# remove warning message and confirmation
+# removeWarningMessage('message')
+# returns 1 if answered with y or Y
+# returns 0 otherwise
+# checks if in a valid tty => returns 1
+#
+sub removeWarningMessage {
+	my $message = shift;
+	my $answer;
+	if (!isatty()) {
+		return (1);
+	}
+	if ($message ne '') {
+		print "$message";
+	}
+	print "Are you sure you want to remove this module? (y/n) ";
+	chomp($answer = <STDIN>);
+	if (($answer eq 'y') || ($answer eq 'Y')) {
+		return (1);
+	} else {
+		return (0);
+	}
+}
+
+
+
+
+###############################################################################
+# checks if we are in a terminal
+# returns 1 if yes
+# returns 0 if not
+#
+sub isatty {
+	no autodie;
+	state $isatty = open(my $tty, '+<', '/dev/tty');
+	#TODO debug
+	printLog("isatty state: $isatty", 'TL2');
+	return $isatty;
+}
+
 
 
 
