@@ -870,8 +870,8 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'37' => {
-		model => ['InfinityBook S 17 Gen6'],
-		board_name => ['NS50_70MU'],
+		model => ['InfinityBook S 17 Gen6', 'InfinityBook S 15 Gen6'],
+		board_name => ['NS50_70MU', 'NS50MU'],
 		fix => ['i8042noauxfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
@@ -1963,7 +1963,8 @@ sub checkRequirements {
 	my $lsusb;
 
 	# check values for each module
-	if ($boardname =~ /NS50_70MU/) {
+	if (($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NS50MU/)) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
 		printLog('detected i8042.noaux-fix issue', 'L1');
 	}
