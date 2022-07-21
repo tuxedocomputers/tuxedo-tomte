@@ -969,16 +969,28 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'46' => {
-		model => ['TUXEDO InsanityBook v1', 'XP1507'],
+		model => ['TUXEDO InsanityBook v1'],
 		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
 		fix => ['backlightfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
-		display => '',
+		display => 'AUO Model 21229 Serial Number 808797180',
 		usb_device => '',
 	},
+	'47' => {
+		model => ['XP1507'],
+		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'AUO Model 21229 Serial Number 808797180',
+		usb_device => '',
+	},
+
 
 );
 
@@ -2073,6 +2085,20 @@ sub checkRequirements {
 			printLog('detected backlight-fix issue', 'L1');
 		}
 	}
+	if ($boardname =~ /P95_HR/) {
+		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('detected backlight-fix issue', 'L1');
+		}
+	}
+	if ($boardname =~ /P95_HP,HR,HQ/) {
+		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('detected backlight-fix issue', 'L1');
+		}
+	}
+
+
 
 
 	# get the BIOS version
