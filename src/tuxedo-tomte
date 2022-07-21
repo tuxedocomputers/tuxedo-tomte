@@ -968,6 +968,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'46' => {
+		model => ['TUXEDO InsanityBook v1', 'XP1507'],
+		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -2660,6 +2672,8 @@ sub nokeyboardaftersuspendfix() {
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
 # - DX1708
 # - P95_HP
+# - P95_HR
+# - P95_HP,HR,HQ
 #
 sub backlightfix() {
 	my $module = shift;
