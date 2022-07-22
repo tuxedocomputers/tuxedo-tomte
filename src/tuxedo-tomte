@@ -7810,6 +7810,7 @@ if (@ARGV != 0) {
 		listSuccess();
 		writeConfigFile();
 		createFile($tomteFinishedFile, 'finished', 0);
+		# the routine does not end here for testing purposes
 	}
 
 	# list
