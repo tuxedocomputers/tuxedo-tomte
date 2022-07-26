@@ -2296,11 +2296,11 @@ sub findPciDevice {
 sub i8042fix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i8042.nopnp");
+	my @kernelParameters = ("i8042.nopnp");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2318,7 +2318,7 @@ sub i8042fix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2336,7 +2336,9 @@ sub i8042fix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters(@kernelParameters);
+		}
 	}
 }
 
@@ -2348,11 +2350,11 @@ sub i8042fix() {
 sub i8042noauxfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i8042.noaux");
+	my @kernelParameters = ("i8042.noaux");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2370,7 +2372,7 @@ sub i8042noauxfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2468,11 +2470,11 @@ sub nobootonbattery() {
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("xhci_hcd.quirks=1073741824");
+	my @kernelParameters = ("xhci_hcd.quirks=1073741824");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2490,7 +2492,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2605,21 +2607,6 @@ sub tuxedocontrolcenter() {
 		if (removeWarningMessage('')) {
 			removeDebianModule($module, 1);
 		}
-		#		if( isPackageInstalled($origConfModules{$module}{name}) ) {
-		#			if (!deinstallPackage($origConfModules{$module}{name})) {
-		#		$origConfModules{$module}{installed} = 'yes';
-		#		$origConfModules{$module}{upgraded} = 'no';
-		#		addToConfiguredModules($module, 'remove failed');
-		#	} else {
-		#		$origConfModules{$module}{installed} = 'no';
-		#		$origConfModules{$module}{upgraded} = 'no';
-		#		addToConfiguredModules($module, 'removed');
-		#	}
-		#} else {
-		#	$origConfModules{$module}{installed} = 'no';
-		#	$origConfModules{$module}{upgraded} = 'no';
-		#	addToConfiguredModules($module, 'nothingToDo');
-		#}
 	}
 }
 
@@ -2681,11 +2668,11 @@ sub tuxedokeyboard() {
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
+	my @kernelParameters = ("i8042.reset", "i8042.nomux", "i8042.nopnp", "i8042.noloop");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2702,7 +2689,7 @@ sub nokeyboardaftersuspendfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2735,11 +2722,11 @@ sub nokeyboardaftersuspendfix() {
 sub backlightfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i915.enable_dpcd_backlight=1");
+	my @kernelParameters = ("i915.enable_dpcd_backlight=1");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2756,7 +2743,7 @@ sub backlightfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3034,11 +3021,11 @@ sub corefix() {
 sub elantechtouchpadfix() {
 my $module = shift;
 my $action = shift;
-my @kernel_parameters = ("psmouse.elantech_smbus=0");
+my @kernelParameters = ("psmouse.elantech_smbus=0");
 my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
         if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
@@ -3056,7 +3043,7 @@ my $retval;
     }
     if ($action eq 'upgrade') {
         printLog("upgrading $origConfModules{$module}{name}", 'L1');
-        $retval = insertGrub($module, \@kernel_parameters);
+        $retval = insertGrub($module, \@kernelParameters);
         if ($retval < 0) {
             $origConfModules{$module}{installed} = "failed";
             addToConfiguredModules($module, "failed");
@@ -4221,11 +4208,11 @@ sub realtekr8125dkms() {
 sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("amdgpu.backlight=0");
+	my @kernelParameters = ("amdgpu.backlight=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}");
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4242,7 +4229,7 @@ sub amdgpubacklightauxoff() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4273,11 +4260,11 @@ sub amdgpubacklightauxoff() {
 sub i915disablepsrfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i915.enable_psr=0");
+	my @kernelParameters = ("i915.enable_psr=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4294,7 +4281,7 @@ sub i915disablepsrfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4324,14 +4311,14 @@ sub i915disablepsrfix() {
 sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("i915.tuxedo_disable_psr2=1");
+	my @kernelParameters = ("i915.tuxedo_disable_psr2=1");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
 		}
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4351,7 +4338,7 @@ sub i915enablepsrfix() {
 		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
 			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
 		}
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4423,11 +4410,11 @@ sub tuxedopinfixtgldkms() {
 sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
+	my @kernelParameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4445,7 +4432,7 @@ sub thunderboltbootdelayfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4533,11 +4520,11 @@ sub lightdmlogindcheckgraphicalfix() {
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernel_parameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
+	my @kernelParameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4558,7 +4545,7 @@ sub nvidiabacklightcontrolfix() {
 		if (isTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0')) {
 			replaceTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0 NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0', ' nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0');
 		}
-		$retval = insertGrub($module, \@kernel_parameters);
+		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4681,23 +4668,6 @@ sub r8125dkms() {
 		if (removeWarningMessage('')) {
 			removeDebianModule($module, 1);
 		}
-		#		my $counter = 0;
-		#if( isPackageInstalled('tuxedo-r8125-dkms') ) {
-		#	if (!deinstallPackage('tuxedo-r8125-dkms')) {
-		#		$counter = $counter+1;
-		#	}
-		#} else {
-		#	$counter = $counter+1;
-		#}
-		#if ($counter == 1) {
-		#	$origConfModules{$module}{installed} = 'no';
-		#	$origConfModules{$module}{upgraded} = 'yes';
-		#	addToConfiguredModules($module, 'removed');
-		#} else {
-		#	$origConfModules{$module}{installed} = 'yes';
-		#	$origConfModules{$module}{upgraded} = 'no';
-		#	addToConfiguredModules($module, 'remove failed');
-		#}
 	}
 }
 
@@ -5707,6 +5677,23 @@ sub removeDebianModule {
 
 
 
+
+###############################################################################
+# removes kernel parameter from grub
+#
+sub removeKernelParameters {
+	my (@parameters) = @_;
+	printLog("removing kernel parameter: @parameters", 'L2');
+	if (isInGrub()) {
+		# remove
+	} else {
+		printLog("parameter is not in grub", 'L2');
+	}
+}
+
+
+
+
 ###############################################################################
 # creates file with content
 # createFile( filename, text, backup )
@@ -5985,7 +5972,7 @@ sub checkNetwork {
 
 ###############################################################################
 # inserts array values as kernel parameters if not present
-# example: my $retval = insertGrub(\@kernel_parameters);
+# example: my $retval = insertGrub(\@kernelParameters);
 # returns number of inserted parameters
 # return value of -1 means it failed
 #
