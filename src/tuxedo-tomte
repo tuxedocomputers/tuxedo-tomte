@@ -924,8 +924,8 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'37' => {
-		model => ['InfinityBook S 17 Gen6'],
-		board_name => ['NS50_70MU'],
+		model => ['InfinityBook S 17 Gen6', 'InfinityBook S 15 Gen6'],
+		board_name => ['NS50_70MU', 'NS50MU'],
 		fix => ['i8042noauxfix'],
 		flavour => ['18.04', '20.04'],
 		pci_id => '',
@@ -1022,6 +1022,30 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'46' => {
+		model => ['TUXEDO InsanityBook v1'],
+		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'AUO Model 21229 Serial Number 808797180',
+		usb_device => '',
+	},
+	'47' => {
+		model => ['XP1507'],
+		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		fix => ['backlightfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => 'AUO Model 21229 Serial Number 808797180',
+		usb_device => '',
+	},
+
+
 );
 
 
@@ -2017,7 +2041,8 @@ sub checkRequirements {
 	my $lsusb;
 
 	# check values for each module
-	if ($boardname =~ /NS50_70MU/) {
+	if (($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NS50MU/)) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
 		printLog('detected i8042.noaux-fix issue', 'L1');
 	}
@@ -2114,6 +2139,20 @@ sub checkRequirements {
 			printLog('detected backlight-fix issue', 'L1');
 		}
 	}
+	if ($boardname =~ /P95_HR/) {
+		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('detected backlight-fix issue', 'L1');
+		}
+	}
+	if ($boardname =~ /P95_HP,HR,HQ/) {
+		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
+			$origConfModules{backlightfix}{required} = 'yes';
+			printLog('detected backlight-fix issue', 'L1');
+		}
+	}
+
+
 
 
 	# get the BIOS version
@@ -2713,6 +2752,8 @@ sub nokeyboardaftersuspendfix() {
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
 # - DX1708
 # - P95_HP
+# - P95_HR
+# - P95_HP,HR,HQ
 #
 sub backlightfix() {
 	my $module = shift;
@@ -6381,14 +6422,15 @@ sub findActiveEDIDs {
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
-				open(FILE, $enabledFile);
-				$enabledFileContent = <FILE>;
-				close(FILE);
+				open(my $fh1, '<', $enabledFile);
+				$enabledFileContent = <$fh1>;
+				close($fh1);
 				if ($enabledFileContent =~ /enabled/) {
 					my $statusFile = "$path/status";
 					if ( -e $statusFile ) {
-						open(FILE2, $statusFile);
-						$statusFileContent = <FILE2>;
+						open(my $fh2, '<', $statusFile);
+						$statusFileContent = <$fh2>;
+						close($fh2);
 						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
