@@ -2339,9 +2339,9 @@ sub i8042fix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		if (removeWarningMessage('')) {
-			removeKernelParameters(@kernelParameters);
-		}
+		#if (removeWarningMessage('')) {
+		#	removeKernelParameters(@kernelParameters);
+		#}
 	}
 }
 
