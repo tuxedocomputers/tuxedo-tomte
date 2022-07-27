@@ -6455,14 +6455,15 @@ sub findActiveEDIDs {
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
-				open (my $fh1, "<", $enabledFile);
+				open(my $fh1, '<', $enabledFile);
 				$enabledFileContent = <$fh1>;
 				close($fh1);
 				if ($enabledFileContent =~ /enabled/) {
 					my $statusFile = "$path/status";
 					if ( -e $statusFile ) {
-						open (my $fh2, "<", $statusFile);
+						open(my $fh2, '<', $statusFile);
 						$statusFileContent = <$fh2>;
+						close($fh2);
 						if ($statusFileContent =~ /connected/) {
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
