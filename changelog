@@ -1,15 +1,19 @@
+tuxedo-tomte (2.6.10-1) UNRELEASED; urgency=medium
+
+  * added remove for all deb packages and message for all other modules
+  * added modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE
+  * added manpage in German
+  * added option remove for all modules with single debian packages
+  * added block and unblock for all modules at once
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 27 Jul 2022 10:21:11 +0200
+
 tuxedo-tomte (2.6.10) jammy; urgency=medium
 
   * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as InfinityBook S 15 Gen6
   * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames P95_HR and P95_HP,HR,HQ
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Jul 2022 15:12:35 +0200
-
-tuxedo-tomte (2.6.9-6) UNRELEASED; urgency=medium
-
-  * added remove for all deb packages and message for all other modules
-
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 26 Jul 2022 16:34:26 +0200
 
 tuxedo-tomte (2.6.9) jammy; urgency=medium
 
@@ -23,41 +27,6 @@ tuxedo-tomte (2.6.8) jammy; urgency=medium
   * added tuxedotouchpadswitch for TUXEDO Pulse Gen2 with boardname PF5LUXG
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 11 Jul 2022 16:55:51 +0200
-
-tuxedo-tomte (2.6.7-8) UNRELEASED; urgency=medium
-
-  * added modes: rolling, updates, fixes
-  * added info in manpage
-  * checkMode placed
-  * dontConfigure and modes for modules
-  * modified version, first upload of rework
-  * reworked modes and permission model
-  * adapted man page
-  * final permissions set
-  * test removal
-  * packing
-  * after packaging
-  * after debug
-  * after packaging
-  * added message for remove
-  * after packaging
-  * lots of little corrections
-  * temp
-  * complete change of control
-  * after packaging
-  * temporary safe
-  * update on modePermissions
-  * after packaging
-  * debug
-  * more debug
-  * after packaging
-  * error false module
-  * after packaging
-  * added prerequisite exception
-  * after packaging
-  * corrected prerequisites install
-
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 11 Jul 2022 14:48:12 +0200
 
 tuxedo-tomte (2.6.7) jammy; urgency=medium
 
