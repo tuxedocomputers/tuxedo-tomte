@@ -1821,6 +1821,9 @@ my %localConfModules = %origConfModules;
 my %configuredModules;
 
 
+###############################################################################
+# die if another instance is running
+#
 sub dieSingleton {
 	initLogging();
 	printLog('Another instance is already running, please wait till it is finished', 'TL0');
@@ -5683,13 +5686,36 @@ sub removeDebianModule {
 #
 sub removeKernelParameters {
 	my (@parameters) = @_;
-	printLog("removing kernel parameter: @parameters", 'L2');
-	if (isInGrub()) {
-		# remove
-	} else {
-		printLog("parameter is not in grub", 'L2');
+	my $parameter;
+	foreach $parameter (@parameters) {
+		printLog("removing kernel parameter: $parameter", 'L2');
+		if (isInGrub($parameter)) {
+			# remove
+		} else {
+			printLog("parameter is not in grub", 'L2');
+		}
 	}
 }
+
+
+
+###############################################################################
+# checks if kernel parameter is in grub file /etc/grub/
+# returns 1 if yes
+# returns 0 if no
+#
+sub isInGrub {
+	my $kernelParameter = shift;
+	my @lines;
+	my $FH;
+	open($FH, '<', $grubFile);
+	chomp(@lines = <$FH>);
+	foreach (@lines) {
+		if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT=""/) {
+		}
+	}
+}
+
 
 
 
@@ -6468,7 +6494,6 @@ sub findActiveEDIDs {
 							push @edidfile, "$path/edid";
 							$edidTrigger = 1;
 						}
-						close($fh2);
 					}
 				}
 			}
