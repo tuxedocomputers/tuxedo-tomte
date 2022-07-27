@@ -1,4 +1,4 @@
-tuxedo-tomte (2.6.10-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.10-4) UNRELEASED; urgency=medium
 
   * added remove for all deb packages and message for all other modules
   * added modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE
@@ -9,8 +9,10 @@ tuxedo-tomte (2.6.10-3) UNRELEASED; urgency=medium
   * changed debug to 0
   * after packaging
   * removed obsolete close of FH
+  * after packaging
+  * removing remove kernelparameter
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 27 Jul 2022 11:39:37 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 27 Jul 2022 13:09:48 +0200
 
 tuxedo-tomte (2.6.10) jammy; urgency=medium
 
