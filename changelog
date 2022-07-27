@@ -1,12 +1,14 @@
-tuxedo-tomte (2.6.10-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.10-2) UNRELEASED; urgency=medium
 
   * added remove for all deb packages and message for all other modules
   * added modes: AUTOMATIC/UPDATES_ONLY/DONT_CONFIGURE
   * added manpage in German
   * added option remove for all modules with single debian packages
   * added block and unblock for all modules at once
+  * after packaging
+  * changed debug to 0
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 27 Jul 2022 10:21:11 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 27 Jul 2022 10:28:09 +0200
 
 tuxedo-tomte (2.6.10) jammy; urgency=medium
 
