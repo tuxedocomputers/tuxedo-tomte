@@ -1839,10 +1839,7 @@ sub readFileReturnLines {
 	my $file = shift;
 	my $FH;
 	my @lines;
-	if (!-e $file) {
-		return;
-	}
-	if ( open($FH, "<", $file) ) {
+	if ( (-e $file) && open($FH, "<", $file) ) {
 		chomp(@lines = <$FH>);
 		close $FH;
 	} else {
@@ -1864,10 +1861,7 @@ sub readFileReturnLine {
 	my $file = shift;
 	my $FH;
 	my $line;
-	if (!-e $file) {
-		return;
-	}
-	if ( open($FH, "<", $file) ) {
+	if ( (-e $file) && open($FH, "<", $file) ) {
 		chomp($line = <$FH>);
 		close $FH;
 	} else {
@@ -1889,9 +1883,6 @@ sub readFileReturnLine {
 sub writeFile {
 	my $text = shift;
 	my $file = shift;
-	if (!-e $file) {
-		return (0);
-	}
 	open(FH, '>', $file) or return (0);
 	print FH $text;
 	close(FH);
@@ -1937,16 +1928,15 @@ sub readOSData {
 sub cpuBrand {
 	my $infos;
 	my $cpuinfo = '/proc/cpuinfo';
-	if (!-e $cpuinfo) {
-		return;
-	}
-	if ( open(FH, '<', '/proc/cpuinfo') ) {
+	if ( (-e $cpuinfo) && open(FH, '<', '/proc/cpuinfo') ) {
 		local $/;
 		$infos = <FH>;
 		close FH;
 		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
 			return ('AMD');
 		}
+	} else {
+		printLog("file $cpuinfo was not found", 'L0');
 	}
 	return ('Intel');
 }
@@ -4902,20 +4892,17 @@ sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
-	my $sourcesListDir = '/etc/apt/';
+	my $sourcesListFile = '/etc/apt/sources.list';
 	my $modified = 0;
 	# read all the lines
-	if (!-e $sourcesListDir."sources.list") {
-		return (0);
-	}
-	if (open($FHsource, "<", $sourcesListDir."sources.list")) {
+	if ( (-e $sourcesListFile) && open($FHsource, "<", $sourcesListFile)) {
 		chomp(@sourcelines = <$FHsource>);
 		close $FHsource;
 		# open for writing
-		if (!-e $sourcesListDir."sources.list") {
+		if (!-e $sourcesListFile) {
 			return (0);
 		}
-		if (open($FHsource, ">", $sourcesListDir."sources.list")) {
+		if (open($FHsource, ">", $sourcesListFile)) {
 			foreach $sourceline (@sourcelines) {
 				if (setComment(\$sourceline)) {
 					$modified = 1;
@@ -4924,7 +4911,11 @@ sub cleanSourcesList {
 				print $FHsource "$sourceline\n";
 			}
 			close $FHsource;
+		} else {
+			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0');
 		}
+	} else {
+		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0');
 	}
 	return ($modified);
 }
@@ -4943,10 +4934,7 @@ sub setComment {
 	my @repolines;
 	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$completeDistVersion}{name}.'.*$';
 	my $regExElementaryOS = '^deb.*mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt .* main restricted universe multiverse$';
-	if (!-e $reposList) {
-		return (0);
-	}
-	if (open($FH, '<', $reposList) ) {
+	if ( (-e $reposList) && open($FH, '<', $reposList) ) {
 		chomp(@repolines = <$FH>);
 		close $FH;
 	} else {
@@ -5731,14 +5719,15 @@ sub isInGrub {
 	my $kernelParameter = shift;
 	my @lines;
 	my $FH;
-	if (!-e $grubFile) {
-		return;
-	}
-	open($FH, '<', $grubFile);
-	chomp(@lines = <$FH>);
-	foreach (@lines) {
-		if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT=""/) {
+	if ( (-e $grubFile) && open($FH, '<', $grubFile) ) {
+		chomp(@lines = <$FH>);
+		foreach (@lines) {
+			if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT=""/) {
+				printLog("found grub line", 'L2');
+			}
 		}
+	} else {
+		printLog("grub file not found, this is bad and should not happen!!", 'L0');
 	}
 }
 
@@ -5755,9 +5744,6 @@ sub isInGrub {
 sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
-	if ((-e $fileName) && ($backup)) {
-		backupFile($fileName);
-	}
 	if ( open($FH, ">",$fileName) ) {
 		print $FH "$fileText";
 		close $FH;
@@ -5778,9 +5764,6 @@ sub appendFile {
 	my $fileName = shift;
 	my $fileText = shift;
 	my $FH;
-	if (!-e $fileName) {
-		return (0);
-	}
 	if ( open($FH, ">>",$fileName) ) {
 		print $FH "$fileText";
 		close $FH;
@@ -5845,10 +5828,7 @@ sub substituteLineInFile {
 	my @fileLines;
 	my $FH;
 
-	if (!-e $filename) {
-		return (-1);
-	}
-	if ( open($FH, "<", $filename) ) {
+	if ( (-e $filename) && open($FH, "<", $filename) ) {
 		while (<$FH>) {
 			push (@fileLines, $_);
 		}
@@ -5863,9 +5843,6 @@ sub substituteLineInFile {
 		if ( $_ =~ /^$origLine$/ ) {
 			$_ = "$substLine\n";
 		}
-	}
-	if (!-e $filename) {
-		return (-1);
 	}
 	if ( open($FH, ">", $filename) ) {
 		print $FH @fileLines;
@@ -5891,10 +5868,7 @@ sub substituteLineInFile {
 sub isLineInFile {
 	my $filename = shift;
 	my $match = shift;
-	if (!-e $filename) {
-		return (0);
-	}
-	if ( open(FH, '<', $filename) ) {
+	if ( (-e $filename) && open(FH, '<', $filename) ) {
 		while( <FH> ) {
 			if ( $_ =~ /^$match$/) {
 				return (1);
@@ -5917,10 +5891,7 @@ sub isLineInFile {
 sub isTextInFile {
 	my $filename = shift;
 	my $match = shift;
-	if (!-e $filename) {
-		return (0);
-	}
-	if ( open(FH, '<', $filename) ) {
+	if ( (-e $filename) && open(FH, '<', $filename) ) {
 		while( <FH> ) {
 			if ( $_ =~ /$match/) {
 				return (1);
@@ -5946,10 +5917,7 @@ sub replaceTextInFile {
 	my ($filename, $match, $replace) = @_;
 	my @lines;
 	my $found = 0;
-	if (!-e $filename) {
-		return (-1);
-	}
-	if ( open(FH, '<', $filename) ) {
+	if ( (-e $filename) && open(FH, '<', $filename) ) {
 		@lines = <FH>;
 		close(FH);
 		foreach(@lines) {
@@ -6057,10 +6025,7 @@ sub insertGrub {
     my $parameter;
 	my $inserted = 0;
 
-	if (!-e $grubFile) {
-		return (-1);
-	}
-    if ( open($grubFH, "<", $grubFile) ) {
+	if ( (-e $grubFile) && open($grubFH, "<", $grubFile) ) {
 		while (<$grubFH>) {
 	    	push (@grub_lines, $_);
 		}
@@ -6083,9 +6048,6 @@ sub insertGrub {
     }
 
 	# write the changes into grub config
-	if (!-e $grubFile) {
-		return (-1);
-	}
     if ( open($grubFH, ">", $grubFile) ) {
 		print $grubFH @grub_lines;
 		close ($grubFH);
@@ -6169,10 +6131,7 @@ sub messageDesktop {
 
 	my $dbusAddress;
 
-	if (!-e $environ) {
-		return (0);
-	}
-	if ( open(FH, "<", $environ) ) {
+	if ( (-e $environ) && open(FH, "<", $environ) ) {
 		$dbusAddress = do { local $/; <FH> };
 		close FH;
 	} else {
@@ -6249,9 +6208,6 @@ sub initLogging {
 	# check for logfile
 	if ( -f $logFile ) {
 		# append if logFile exists
-		if (!-e $logFile) {
-			return (0);
-		}
 		if ( open($LOGFILE, '>>', $logFile) )
 		{
 			$noLogFile = 0;
@@ -6270,9 +6226,6 @@ sub initLogging {
 		}
 	} else {
 		# create a new logFile
-		if (!-e $logFile) {
-			return (0);
-		}
 		if ( open($LOGFILE, '>'.$logFile) ) {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
@@ -6347,9 +6300,6 @@ sub printLog {
 		print "$message\n";
 	} elsif ($level <= $logLevel) {
 		if ((!$noLogFile) && ($type =~ /L/i)) {
-			if (!-e $logFile) {
-				return (0);
-			}
 			if (open($LOGFILE, '>>', $logFile) ) {
 				my $timestamp = getLoggingTime();
 				print $LOGFILE "$timestamp $message\n";
@@ -6373,10 +6323,7 @@ sub readConfigFile {
 	my %comp;
 	my $FH;
 	my $shortname;
-	if (!-e $configFile) {
-		return (0);
-	}
-	if ( open($FH, '<', $configFile) ) {
+	if ( (-e $configFile) && open($FH, '<', $configFile) ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
 			# ignore comments
@@ -6444,9 +6391,6 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
-	if (!-e $configFile) {
-		return (0);
-	}
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1');
 		print $FH "# name version installed blocked required hwid\n";
@@ -6553,9 +6497,6 @@ sub findActiveEDIDs {
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
-				if (!-e $enabledFile) {
-					return (0);
-				}
 				open(my $fh1, '<', $enabledFile);
 				$enabledFileContent = <$fh1>;
 				close($fh1);
@@ -6574,6 +6515,8 @@ sub findActiveEDIDs {
 						}
 					}
 				}
+			} else {
+				printLog("file $enabledFile not found", 'L2');
 			}
 		}
 	}
@@ -6595,10 +6538,7 @@ sub getEDIDData {
 	my $FH;
 	my $fileContent;
 	foreach ( @edidFiles ) {
-		if (!-e $_) {
-			return (0);
-		}
-		if ( open($FH, '<', $_) ) {
+		if ( (-e $_) && open($FH, '<', $_) ) {
 			$fileContent = do { local $/; <$FH> };
 			close $FH;
 			push @edidRefs, parse_edid($fileContent);
@@ -6625,10 +6565,14 @@ sub isDisplayPresent {
 	my $edidSearchString = shift;
 	my @edidRefs = getEDIDData();
 	my $edidInfo;
-	foreach my $edidData (@edidRefs) {
-		$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
-		if ($edidInfo =~ /$edidSearchString/) {
-			return (1);
+	if (@edidRefs == 0) {
+		return (0);
+	} else {
+		foreach my $edidData (@edidRefs) {
+			$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
+			if ($edidInfo =~ /$edidSearchString/) {
+				return (1);
+			}
 		}
 	}
 	printLog("edid string not found", 'L1');
