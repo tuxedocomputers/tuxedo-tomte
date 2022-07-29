@@ -57,7 +57,7 @@ if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
-open(our $file, '<', $0) or die $!;
+open(our $file, '<', $0) or die dieSingleton();
 flock $file, LOCK_EX|LOCK_NB or dieSingleton();
 
 
