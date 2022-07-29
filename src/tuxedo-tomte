@@ -56,15 +56,37 @@ if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
 if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
-use Fcntl qw(:flock);
+#use Fcntl qw(:flock);
 #TODO debug
-if (open(my $file, '<', $0)) {
-	print "not open ?!?!?!\n";
+#my $file;
+#if (open($file, '<', $0)) {
+#	print "not open ?!?!?!\n";
+#} else {
+#	print "is open, dying\n";
+#	dieSingleton();
+#}
+#flock $file, LOCK_EX|LOCK_NB or dieSingleton();
+
+use Fcntl ':flock';
+ 
+#TODO debug
+#die "Not able to open $0\n" unless (open ME, $0);
+my $opencond = (open ME, $0);
+print "opencond: $opencond\n";
+if (open ME, $0) {
+	print "could open $0, means, no other instance is running\n";
 } else {
-	print "is open, dying\n";
+	printLog("can't open $0", 'TL0');
+}
+#dieSingleton() unless(flock ME, LOCK_EX|LOCK_NB);
+my $scalflock = (flock ME, LOCK_EX|LOCK_NB);
+print "flock: $scalflock\n";
+if (flock ME, LOCK_EX|LOCK_NB) {
+	print "no other instance is running\n";
+} else {
+	print "die singleton\n";
 	dieSingleton();
 }
-flock $file, LOCK_EX|LOCK_NB or dieSingleton();
 
 
 my $grubFile = '/etc/default/grub';
@@ -6212,10 +6234,13 @@ sub initLogging {
 		}
 	}
 	# check for logfile
-	if ( -f $logFile ) {
+	if ( -e $logFile ) {
 		# append if logFile exists
+		#TODO debug
+		print "before opening\n";
 		if ( open($LOGFILE, '>>', $logFile) )
 		{
+			print "after opening\n";
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
