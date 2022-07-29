@@ -57,7 +57,13 @@ if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
 use Fcntl qw(:flock);
-open(our $file, '<', $0) or die dieSingleton();
+#TODO debug
+if (open(my $file, '<', $0)) {
+	print "not open ?!?!?!\n";
+} else {
+	print "is open, dying\n";
+	dieSingleton();
+}
 flock $file, LOCK_EX|LOCK_NB or dieSingleton();
 
 
