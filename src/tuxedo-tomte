@@ -6553,7 +6553,7 @@ sub findActiveEDIDs {
 		if ( -d $path ) {
 			my $enabledFile = "$path/enabled";
 			if ( -e $enabledFile ) {
-				if (!-e $enableFile) {
+				if (!-e $enabledFile) {
 					return (0);
 				}
 				open(my $fh1, '<', $enabledFile);
