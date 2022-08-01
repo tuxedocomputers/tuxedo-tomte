@@ -1853,8 +1853,7 @@ my %configuredModules;
 # die if another instance is running
 #
 sub dieSingleton {
-	initLogging();
-	printLog('Another instance is already running, please wait till it is finished', 'TL0');
+	print "Another instance is already running, please wait till it is finished\n";
 	exit (1);
 }
 
