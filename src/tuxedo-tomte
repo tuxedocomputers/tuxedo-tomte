@@ -56,32 +56,17 @@ if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
 if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
-#use Fcntl qw(:flock);
-#TODO debug
-#my $file;
-#if (open($file, '<', $0)) {
-#	print "not open ?!?!?!\n";
-#} else {
-#	print "is open, dying\n";
-#	dieSingleton();
-#}
-#flock $file, LOCK_EX|LOCK_NB or dieSingleton();
-
 use Fcntl ':flock';
  
 #TODO debug
-#die "Not able to open $0\n" unless (open ME, $0);
-my $opencond = (open ME, $0);
-print "opencond: $opencond\n";
-if (open ME, $0) {
+my $ME;
+if (open ($ME, '<', $0)) {
 	print "could open $0, means, no other instance is running\n";
 } else {
 	printLog("can't open $0", 'TL0');
 }
-#dieSingleton() unless(flock ME, LOCK_EX|LOCK_NB);
-my $scalflock = (flock ME, LOCK_EX|LOCK_NB);
 print "flock: $scalflock\n";
-if (flock ME, LOCK_EX|LOCK_NB) {
+if (flock $ME, LOCK_EX|LOCK_NB) {
 	print "no other instance is running\n";
 } else {
 	print "die singleton\n";
@@ -4698,7 +4683,6 @@ sub r8125dkms() {
 	}
 
 	if ($action eq 'remove') {
-		#TODO debug
 		if (removeWarningMessage('')) {
 			removeDebianModule($module, 1);
 		}
@@ -6235,11 +6219,8 @@ sub initLogging {
 	# check for logfile
 	if ( -e $logFile ) {
 		# append if logFile exists
-		#TODO debug
-		print "before opening\n";
 		if ( open($LOGFILE, '>>', $logFile) )
 		{
-			print "after opening\n";
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
@@ -6402,8 +6383,6 @@ sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
 	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
-		#TODO debug
-		printLog("valid configline: $line", 'L2');
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line", 'L0');
@@ -6454,8 +6433,6 @@ sub writeConfigFile {
 				}
 				unless(($origConfModules{$name}{installed} eq 'no') &&
 						($origConfModules{$name}{required} eq 'no')) {
-					#TODO debug
-					printLog("$origConfModules{$name}{name} v: $version i: $installed b: $origConfModules{$name}{blocked} r: $origConfModules{$name}{required} h: $hwid", 'L2');
 					print $FH "$origConfModules{$name}{name} ".
 						"$version ".
 						"$installed ".
@@ -6748,10 +6725,12 @@ sub addToConfiguredModules {
 	} elsif ($status =~ /success/) {
 		printLog("succesfully installed $origConfModules{$module}{name}", 'L0');
 	} elsif ($status =~ /removed/) {
-		printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
-		print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
-		print "\$ sudo tomte block $origConfModules{$module}{name}\n";
-		print "or tomte will reinstall it again at the next start\n";
+		if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
+			printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
+			print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
+			print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+			print "or tomte will reinstall it again at the next start\n";
+		}
 	} elsif ($status =~ /remove failed/) {
 		printLog("failed to remove $origConfModules{$module}{name}", 'L0');
 	} elsif ($status =~ /nothingToDo/) {
@@ -7154,8 +7133,6 @@ sub checkModePermission {
 	my ($operation, $module) = (@_);
 	# this is a double check, just in case ...
 
-	#TODO debug
-	printLog("checkmodepermission module parameter: $argValue{module} module: $module mode: $mode operation: $operation", 'TL2');
 	if ($origConfModules{$module}{required} eq 'prerequisite') {
 		printLog("module is prerequisite", 'L2');
 		# always permit if it is a prerequisite
@@ -7469,8 +7446,6 @@ sub isatty {
 		return (0);
 	}
 	state $isatty = open(my $tty, '+<', $ttyDevice);
-	#TODO debug
-	printLog("isatty state: $isatty", 'TL2');
 	return $isatty;
 }
 
@@ -7774,11 +7749,6 @@ tuxedo-tomte [COMMAND]
   
   more details can be found in the man page
 USAGE
-
-
-###############################################################################
-# TODO to be implemented in the very near future
-#  remove MODULE...|ALL        Remove a configured module
 
 
 
