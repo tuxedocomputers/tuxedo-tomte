@@ -8056,9 +8056,13 @@ if (@ARGV != 0) {
 }
 
 # interrupt repeated delayed execution if not necessary anymore
-if ($startLaterAgain == 0) {
+if (($startLaterAgain == 0) &&
+	($argValue{command} eq 'configure') &&
+	($argValue{command} eq 'reconfigure')) {
 	if (-e $triesFile) {
-		printLog('deleting triesFile', 'L2');
-		unlink($triesFile);
+		if (-w $triesFile) {
+			printLog('deleting triesFile', 'L2');
+			unlink($triesFile);
+		}
 	}
 }
