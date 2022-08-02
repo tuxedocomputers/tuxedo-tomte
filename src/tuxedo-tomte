@@ -60,16 +60,8 @@ use Fcntl ':flock';
  
 #TODO debug
 my $ME;
-if (open ($ME, '<', $0)) {
-	print "could open $0, means, no other instance is running\n";
-} else {
-	printLog("can't open $0", 'TL0');
-}
-print "flock: $scalflock\n";
-if (flock $ME, LOCK_EX|LOCK_NB) {
-	print "no other instance is running\n";
-} else {
-	print "die singleton\n";
+open ($ME, '<', $0);
+if (!(flock $ME, LOCK_EX|LOCK_NB)) {
 	dieSingleton();
 }
 
@@ -6190,7 +6182,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"list", "configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6829,7 +6821,10 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') ||
+			($origConfModules{$module}{required} eq 'prerequisite')) {
+			#TODO debug
+			print "required: $module\n";
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -7855,9 +7850,12 @@ if (@ARGV != 0) {
 
 	# list
 	if ($argValue{command} eq "list") {
-		initLogging();
 		checkMode();
-		prepareValues();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+		} else {
+			prepareValues();
+		}
 		listStatus();
 
 	# modules
