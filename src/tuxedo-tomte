@@ -58,7 +58,6 @@ if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 # make sure this is the only running instance
 use Fcntl ':flock';
  
-#TODO debug
 my $ME;
 open ($ME, '<', $0);
 if (!(flock $ME, LOCK_EX|LOCK_NB)) {
@@ -1189,7 +1188,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Adds the TUXEDO repositories',
+		description => 'Prerequisite! Adds the TUXEDO repositories',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1205,7 +1204,7 @@ my %origConfModules = (
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Adds TUXEDO maintained Ubuntu repositories',
+		description => 'Prerequisite! Adds TUXEDO maintained Ubuntu repositories',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -5725,7 +5724,7 @@ sub isInGrub {
 	if ( (-e $grubFile) && open($FH, '<', $grubFile) ) {
 		chomp(@lines = <$FH>);
 		foreach (@lines) {
-			if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT=""/) {
+			if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$kernelParameter( .*|)"/) {
 				printLog("found grub line", 'L2');
 			}
 		}
@@ -6823,8 +6822,6 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		if (($origConfModules{$module}{required} eq 'yes') ||
 			($origConfModules{$module}{required} eq 'prerequisite')) {
-			#TODO debug
-			print "required: $module\n";
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
