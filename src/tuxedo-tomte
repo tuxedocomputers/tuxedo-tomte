@@ -2345,10 +2345,9 @@ sub i8042fix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		#if (removeWarningMessage('')) {
-		#	removeKernelParameters(@kernelParameters);
-		#}
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -2399,8 +2398,9 @@ sub i8042noauxfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -2519,8 +2519,9 @@ sub amdxhcihcdusbquirksuspendfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -2716,8 +2717,9 @@ sub nokeyboardaftersuspendfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -2770,8 +2772,9 @@ sub backlightfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -3070,8 +3073,9 @@ my $retval;
         }
     }
     if ($action eq 'remove') {
-        # not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
     }
 }
 
@@ -4256,8 +4260,9 @@ sub amdgpubacklightauxoff() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -4308,8 +4313,9 @@ sub i915disablepsrfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -4365,8 +4371,9 @@ sub i915enablepsrfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -4459,8 +4466,9 @@ sub thunderboltbootdelayfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -4572,8 +4580,9 @@ sub nvidiabacklightcontrolfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
 	}
 }
 
@@ -5696,43 +5705,63 @@ sub removeDebianModule {
 
 ###############################################################################
 # removes kernel parameter from grub
+# removeKernelParameters($module, @kernelParamaters)
+# returns amount of parameters found
+# returns 0 if nothing found or changed
 #
 sub removeKernelParameters {
-	my (@parameters) = @_;
+	my ($module, @parameters) = @_;
 	my $parameter;
-	foreach $parameter (@parameters) {
-		printLog("removing kernel parameter: $parameter", 'L2');
-		if (isInGrub($parameter)) {
-			# remove
-		} else {
-			printLog("parameter is not in grub", 'L2');
-		}
-	}
-}
-
-
-
-###############################################################################
-# checks if kernel parameter is in grub file /etc/grub/
-# returns 1 if yes
-# returns 0 if no
-#
-sub isInGrub {
-	my $kernelParameter = shift;
-	my @lines;
-	my $FH;
-	if ( (-e $grubFile) && open($FH, '<', $grubFile) ) {
-		chomp(@lines = <$FH>);
-		foreach (@lines) {
-			if ($_ =~ /GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$kernelParameter( .*|)"/) {
-				printLog("found grub line", 'L2');
+	my $GF;
+	my @grubLines;
+	my $line;
+	my $counter = 0;
+	if ((-r $grubFile) && (open($GF, '<', $grubFile))) {
+		chomp(@grubLines = <$GF>);
+		close($GF);
+		if ((-w $grubFile) && (open($GF, '>', $grubFile))) {
+			foreach $line (@grubLines) {
+				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/) {
+					foreach $parameter (@parameters) {
+						printLog("removing kernel parameter: $parameter", 'L2');
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/) {
+							$line =~ s/$parameter//;
+							$line =~ s/ +/ /g;
+							$line =~ s/=" /="/;
+							$line =~ s/ "$/"/;
+							++$counter;
+						}
+					}
+				}
+				print $GF "$line\n";
 			}
+			close($GF);
+			addToConfiguredModules($module, "removed");
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "yes";
+			$origConfModules{$module}{required} = "no";
+			if ($counter > 0) {
+				$restartSystem = 1;
+			}
+			return ($counter);
+		} else {
+			printLog("could not open and write $grubFile", 'TL0');
+			addToConfiguredModules($module, "remove failed");
+			$origConfModules{$module}{installed} = "remove failed";
+			$origConfModules{$module}{version} = $localConfModules{$module}{version};
+			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+			return (0);
 		}
 	} else {
-		printLog("grub file not found, this is bad and should not happen!!", 'L0');
+		printLog("could not open and read $grubFile", 'TL0');
+		addToConfiguredModules($module, "remove failed");
+		$origConfModules{$module}{installed} = "remove failed";
+		$origConfModules{$module}{version} = $localConfModules{$module}{version};
+		$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+		return (0);
 	}
+	return (0);
 }
-
 
 
 
@@ -6021,7 +6050,7 @@ sub checkNetwork {
 #
 sub insertGrub {
     my $grubFH;
-    my @grub_lines;
+    my @grubLines;
 	my $module = shift;
     my $parameters = shift;
     my $parameter;
@@ -6029,7 +6058,7 @@ sub insertGrub {
 
 	if ( (-e $grubFile) && open($grubFH, "<", $grubFile) ) {
 		while (<$grubFH>) {
-	    	push (@grub_lines, $_);
+	    	push (@grubLines, $_);
 		}
 		close $grubFH;
     } else {
@@ -6038,7 +6067,7 @@ sub insertGrub {
 		return (-1);
     }
 
-    foreach( @grub_lines ) {
+    foreach( @grubLines ) {
 		# find the correct line
 		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/ ) {
 			foreach $parameter ( @{$parameters} ) {
@@ -6051,7 +6080,7 @@ sub insertGrub {
 
 	# write the changes into grub config
     if ( open($grubFH, ">", $grubFile) ) {
-		print $grubFH @grub_lines;
+		print $grubFH @grubLines;
 		close ($grubFH);
     } else {
 		printLog("Err: $!", 'L0');
