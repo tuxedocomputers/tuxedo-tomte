@@ -5741,7 +5741,7 @@ sub removeKernelParameters {
 			$origConfModules{$module}{upgraded} = "yes";
 			$origConfModules{$module}{required} = "no";
 			if ($counter > 0) {
-				$restartSystem = 1;
+				$postConfProgram{updateGrub}{trigger} = 1;
 			}
 			return ($counter);
 		} else {
