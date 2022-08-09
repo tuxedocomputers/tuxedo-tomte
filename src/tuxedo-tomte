@@ -33,8 +33,8 @@ use Data::Dumper;
 # logLevel:
 # 0 = normal
 # 1 = some debug
-# 2 = everything
-my $logLevel = 2;
+# 2 = lots of debug
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
