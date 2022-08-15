@@ -960,7 +960,7 @@ my %tuxedo_devices = (
 	'45' => {
 		model => ['TUXEDO Pulse 15 Gen2'],
 		board_name => ['PF5LUXG'],
-		fix => ['tuxedotouchpadswitch'],
+		fix => ['tuxedotouchpadswitch', 'samsungnvmefix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1763,6 +1763,23 @@ my %origConfModules = (
 		reconfigure => '',
 		restart => 'yes',
 	},
+	samsungnvmefix => {
+		name => 'samsung-nvme-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'fix for Samsung NVMe wake up from sleep',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+	},
+
 
 
 );
@@ -2260,6 +2277,10 @@ sub checkRequirements {
 		printLog('detected cardreader-fix issue', 'L1');
 	}
 
+	if ($boardname =~ m/PF5LUXG/) {
+		$origConfModules{samsungnvmefix}{required} = 'yes';
+		printLog('detected samsung-nvme-fix issue', 'L1');
+	}
 }
 
 
@@ -4679,6 +4700,50 @@ sub cardreaderfix() {
 }
 
 
+
+###############################################################################
+# Pulse gen 2 in combination with some Samsung SSDs do not wake up from sleep
+# This workaround allows suspend (s2idle) wake-up to function
+#
+sub samsungnvmefix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $fileName = '/lib/udev/rules.d/pulse1502-samsung-nvme.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval = createFile($fileName, $fileText, 1);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retval = createFile($fileName, $fileText, 1);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			$restartSystem = 1;
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+	}
+}
 
 
 
