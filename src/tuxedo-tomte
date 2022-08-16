@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2277,9 +2277,7 @@ sub checkRequirements {
 		printLog('detected cardreader-fix issue', 'L1');
 	}
 
-	#TODO debug/testing
-	if (($boardname =~ m/PF5LUXG/) ||
-	   ($boardname =~ m/NH5xAx/))	{
+	if ($boardname =~ m/PF5LUXG/)	{
 		$origConfModules{samsungnvmefix}{required} = 'yes';
 		printLog('detected samsung-nvme-fix issue', 'L1');
 	}
@@ -4711,7 +4709,7 @@ sub samsungnvmefix() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	my $fileName = '/lib/udev/rules.d/pulse1502-samsung-nvme.rules';
+	my $fileName = '/lib/udev/rules.d/99-pulse1502-samsung-nvme.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
@@ -4719,13 +4717,6 @@ sub samsungnvmefix() {
 	if ($action eq 'install') {
 		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-			#TODO debug
-			if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-				printLog("first line is in file", 'TL2');
-			}
-			if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-				printLog("second line is in file", 'TL2');
-			}
 			printLog("entries for samsungnvmefix are already present", 'TL2');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
