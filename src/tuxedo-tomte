@@ -4717,8 +4717,15 @@ sub samsungnvmefix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
 	if ($action eq 'install') {
-		if (isLineInFile($fileName, "SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"") &&
-			isLineInFile($fileName, "SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"")) {
+		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR{vendor}=="0x144d", ATTR{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
+			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR{vendor}=="0x144d", ATTR{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
+			#TODO debug
+			if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR{vendor}=="0x144d", ATTR{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
+				printLog("first line is in file", 'TL2');
+			}
+			if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR{vendor}=="0x144d", ATTR{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
+				printLog("second line is in file", 'TL2');
+			}
 			printLog("entries for samsungnvmefix are already present", 'TL2');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
