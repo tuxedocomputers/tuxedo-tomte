@@ -4717,16 +4717,24 @@ sub samsungnvmefix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
+		if (isLineInFile($fileName, "SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"") &&
+			isLineInFile($fileName, "SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x144d\", ATTR{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"")) {
+			printLog("entries for samsungnvmefix are already present", 'TL2');
+			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			$configuredModules{$module} = 'nothingToDo';
+		} else {
+			printLog("applying $origConfModules{$module}{name}", 'L1');
+			$retval = createFile($fileName, $fileText, 1);
+			if ($retval == 0) {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				$restartSystem = 1;
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -5742,7 +5750,7 @@ sub backupFile {
 
 
 ###############################################################################
-# checks if the line exists in the file
+# checks if the line exists in the files given as hash
 # 
 sub isLinePresent {
 	my $line = shift;
