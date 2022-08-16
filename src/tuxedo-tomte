@@ -32,7 +32,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = everything
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2277,7 +2277,9 @@ sub checkRequirements {
 		printLog('detected cardreader-fix issue', 'L1');
 	}
 
-	if ($boardname =~ m/PF5LUXG/) {
+	#TODO debug/testing
+	if (($boardname =~ m/PF5LUXG/) ||
+	   ($boardname =~ m/NH5xAx/))	{
 		$origConfModules{samsungnvmefix}{required} = 'yes';
 		printLog('detected samsung-nvme-fix issue', 'L1');
 	}
