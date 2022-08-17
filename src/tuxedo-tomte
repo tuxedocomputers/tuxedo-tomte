@@ -6821,6 +6821,7 @@ sub addToConfiguredModules {
 			printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
 			print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
 			print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+			print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
 			print "or tomte will reinstall it again at the next start\n";
 		}
 	} elsif ($status =~ /remove failed/) {
@@ -7826,15 +7827,16 @@ sub triesAlreadyDone() {
 # text to print for help
 #
 my $USAGE =<<USAGE;
-tuxedo-tomte [COMMAND]
+tuxedo-tomte <COMMAND> [NAME...]
+tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
   modules                        List all available modules
   description MODULE             Shows the module description
   configure MODULE ...|all       Configure an unconfigured module
   reconfigure MODULE...|all      Reconfigure a configured module
   remove MODULE                  Remove a module from the system
-  block MODULE ...|all           Deprecated, use 'fixed' instead
-  unblock MODULE ... |all        Deprecated, use 'rolling' or 'updates' instead
+  block MODULE ...|all           Blocks one or all modules
+  unblock MODULE ... |all        Unblocks one or all modules
   AUTOMATIC                      Activates automatic configuration
   UPDATES_ONLY                   Only updates will be installed automatically
   DONT_CONFIGURE                 Stops all automatic configuration
@@ -8005,7 +8007,7 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-			} else {
+			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -8014,6 +8016,8 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+			} else {
+				print "module $argValue{module} does not exist\n";
 			}
 		} else {
 			print "Module name or \"all\" missing\n";
@@ -8023,14 +8027,18 @@ if (@ARGV != 0) {
 	# remove
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
-			initLogging();
-			checkMode();
-			prepareValues();
-			prerequisites();
-			removeSingleModule($argValue{module});
-			postConfigure();
-			listSuccess();
-			writeConfigFile();
+			if (validModuleName($argValue{module}) ne '') {
+				initLogging();
+				checkMode();
+				prepareValues();
+				prerequisites();
+				removeSingleModule($argValue{module});
+				postConfigure();
+				listSuccess();
+				writeConfigFile();
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
@@ -8057,7 +8065,7 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-			} else {
+			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -8066,6 +8074,8 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+			} else {
+				print "module $argValue{module} does not exist\n";
 			}
 		} else {
 			print "Module name or \"all\" missing\n";
@@ -8080,11 +8090,15 @@ if (@ARGV != 0) {
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				blockAllModules();
-			} else {
+				writeConfigFile();
+				printLog('Tomte finished', 'L1');
+			} elsif (validModuleName($argValue{module}) ne '') {
 				block($argValue{module});
+				writeConfigFile();
+				printLog('Tomte finished', 'L1');
+			} else {
+				print "module $argValue{module} does not exist\n";
 			}
-			writeConfigFile();
-			printLog('Tomte finished', 'L1');
 		} else {
 			print "Module name missing\n";
 		}
@@ -8096,11 +8110,15 @@ if (@ARGV != 0) {
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				unblockAllModules();
-			} else {
+				writeConfigFile();
+				printLog('Tomte finished', 'L1');
+			} elsif (validModuleName($argValue{module}) ne '') {
 				unblock($argValue{module});
+				writeConfigFile();
+				printLog('Tomte finished', 'L1');
+			} else {
+				print "module $argValue{module} does not exist\n";
 			}
-			writeConfigFile();
-			printLog('Tomte finished', 'L1');
 		} else {
 			print "Module name missing\n";
 		}
