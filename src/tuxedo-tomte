@@ -7827,7 +7827,8 @@ sub triesAlreadyDone() {
 # text to print for help
 #
 my $USAGE =<<USAGE;
-tuxedo-tomte [COMMAND]
+tuxedo-tomte <COMMAND> [NAME...]
+tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
   modules                        List all available modules
   description MODULE             Shows the module description
