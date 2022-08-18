@@ -661,17 +661,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	'16' => {
-		model => ['TUXEDO InsanityBook 1501'],
-		board_name => ['P95_HP'],
-		fix => ['backlightfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'AUO Model 21229 Serial Number 808797180',
-		usb_device => '',
-	},
 	'17' => {
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
@@ -981,8 +970,8 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'46' => {
-		model => ['TUXEDO InsanityBook v1'],
-		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		model => ['TUXEDO InsanityBook 15 v1'],
+		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
 		fix => ['backlightfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
@@ -993,7 +982,7 @@ my %tuxedo_devices = (
 	},
 	'47' => {
 		model => ['XP1507'],
-		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
 		fix => ['backlightfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
@@ -1002,8 +991,6 @@ my %tuxedo_devices = (
 		display => 'AUO Model 21229 Serial Number 808797180',
 		usb_device => '',
 	},
-
-
 );
 
 
