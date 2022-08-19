@@ -6202,8 +6202,8 @@ sub messageDesktop {
 	my @whoLines = `who -u`;
 	my $environ = '/proc/$mPid/environ';
 
-	# don't message the desktop if LiveISO
-	if ($LiveISO) {
+	# don't message the desktop if LiveISO or FAI
+	if ($LiveISO || $FAI) {
 		return (0);
 	}
 
@@ -7223,8 +7223,8 @@ sub checkModePermission {
 	if ($argValue{command} eq 'FAI') {
 		return (1);
 	}
-	# when Live ISO assume yes on all
-	if ($LiveISO == 1) {
+	# when Live ISO or FAI assume yes on all
+	if ($LiveISO || $FAI) {
 		return (1);
 	}
 	if ($argValue{command} eq 'configure') {
@@ -7932,7 +7932,6 @@ if (@ARGV != 0) {
 		listSuccess();
 		writeConfigFile();
 		createFile($tomteFinishedFile, 'finished', 0);
-		# the routine does not end here for testing purposes
 	}
 
 	# list
@@ -7986,6 +7985,9 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -7994,6 +7996,9 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
