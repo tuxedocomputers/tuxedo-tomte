@@ -30,11 +30,12 @@ use Parse::EDID qw(parse_edid);
 
 # for debugging
 use Data::Dumper;
+#TODO debug
 # logLevel:
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4911,7 +4912,15 @@ sub createRepos {
 					}
 					# create file + line
 					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
-						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
+						#TODO debug
+						if ($repos{$completeDistVersion}{$key}{filename} eq '/etc/apt/sources.list.d/tuxedo-computers.list') {
+							createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n".
+								"deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu $supportedOS{$distribution}{versions}{$distributionVersion}{name} main".
+								"$_\n", 1);
+						} else {
+							createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
+						}
+				#TODO continue here
 						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $_", 'L0');
 						$firstEntry = 0;
@@ -4939,10 +4948,12 @@ sub addRepoKey {
 	my $output;
 	my $retval;
 	checkNetwork(10,10);
-	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
+	#TODO testing
+	#$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
+	$output = `wget -O - https://deb.tuxedocomputers.com/0x54840598.pub.asc | gpg --dearmor | tee -a /usr/share/keyrings/tuxedo-keyring.gpg 2>&1`;
 	$retval = $?;
-	if ($retval != 0) {
-		printLog("error when apt-key adv", 'L0');
+	if ($retval != 0) 
+		printLog("error when adding repo key", 'L0');
 		printLog("return value: $retval", 'L0');
 		printLog("could not add pub key for TUXEDO repos", 'L0');
 		return (0);
