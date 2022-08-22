@@ -1,4 +1,4 @@
-tuxedo-tomte (2.6.11-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.11-10) UNRELEASED; urgency=medium
 
   * added blocking features for installation and upgrade
   * after packaging
@@ -9,8 +9,11 @@ tuxedo-tomte (2.6.11-5) UNRELEASED; urgency=medium
   * removed and changed some Notebooks from DB
   * added create finiseh_file after configure all
   * after packaging
+  * after packaging
+  * added new key import for repos
+  * added check for signed-by in tuxedo-repos.list
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 19 Aug 2022 11:32:09 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 22 Aug 2022 16:40:37 +0200
 
 tuxedo-tomte (2.6.11) jammy; urgency=medium
 
