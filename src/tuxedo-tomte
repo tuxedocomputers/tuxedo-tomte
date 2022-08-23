@@ -4893,7 +4893,7 @@ sub createRepos {
 
 
 
-
+	#TODO debug
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
@@ -4932,10 +4932,12 @@ sub createRepos {
 	# TODO debug
 	print "signed-by flavour: $supportedOS{$distribution}{versions}{$distributionVersion}{name}\n";
 	my $tuxedoComputersListFile = '/etc/apt/sources.list.d/tuxedo-computers.list';
-	my $signedByText = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
+	my $signedByText = 'deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
 		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
+	my $signedByTextAppend = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
+		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main\n';
 	if (!isTextInFile($tuxedoComputersListFile, $signedByText)) {
-		appendFile($tuxedoComputersListFile, $signedByText);
+		appendFile($tuxedoComputersListFile, $signedByTextAppend);
 		$modified = 1;
 	}
 	return ($modified+1);
