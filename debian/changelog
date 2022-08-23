@@ -1,4 +1,4 @@
-tuxedo-tomte (2.6.11-10) UNRELEASED; urgency=medium
+tuxedo-tomte (2.6.11-11) UNRELEASED; urgency=medium
 
   * added blocking features for installation and upgrade
   * after packaging
@@ -12,8 +12,10 @@ tuxedo-tomte (2.6.11-10) UNRELEASED; urgency=medium
   * after packaging
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
+  * after packaging
+  * casting regex for sources list
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 22 Aug 2022 16:40:37 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 Aug 2022 11:42:08 +0200
 
 tuxedo-tomte (2.6.11) jammy; urgency=medium
 
