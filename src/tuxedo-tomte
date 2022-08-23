@@ -4935,9 +4935,9 @@ sub createRepos {
 	my $signedByText = 'deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
 		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
 	my $signedByTextAppend = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
-		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main\n';
+		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
 	if (!isTextInFile($tuxedoComputersListFile, $signedByText)) {
-		appendFile($tuxedoComputersListFile, $signedByTextAppend);
+		appendFile($tuxedoComputersListFile, "$signedByTextAppend\n");
 		$modified = 1;
 	}
 	return ($modified+1);
