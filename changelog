@@ -1,25 +1,9 @@
-tuxedo-tomte (2.6.11-13) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.0) jammy; urgency=medium
 
-  * added blocking features for installation and upgrade
-  * after packaging
-  * added message if wrong module name
-  * after packaging
-  * small change in help
-  * after packaging
-  * removed and changed some Notebooks from DB
-  * added create finiseh_file after configure all
-  * after packaging
-  * after packaging
-  * added new key import for repos
-  * added check for signed-by in tuxedo-repos.list
-  * after packaging
-  * casting regex for sources list
-  * after packaging
-  * refined sources entry
-  * after packaging
-  * remove debug
+  * added modes AUTOMATIC, UPDATES_ONLY and DONT_CONFIGURE
+  * added remove for all modules based on packages or kernel paramaters
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 Aug 2022 13:32:46 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 24 Aug 2022 08:10:04 +0200
 
 tuxedo-tomte (2.6.11) jammy; urgency=medium
 
@@ -29,8 +13,10 @@ tuxedo-tomte (2.6.11) jammy; urgency=medium
 
 tuxedo-tomte (2.6.10) jammy; urgency=medium
 
-  * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as InfinityBook S 15 Gen6
-  * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames P95_HR and P95_HP,HR,HQ
+  * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as
+    InfinityBook S 15 Gen6
+  * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames
+    P95_HR and P95_HP,HR,HQ
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Jul 2022 15:12:35 +0200
 
