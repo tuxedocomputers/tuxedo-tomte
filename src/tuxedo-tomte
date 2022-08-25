@@ -4929,19 +4929,20 @@ sub createRepos {
 	}
 	# check if signed-by in tuxedo-computers.list
 	# TODO debug
-	my $tuxedoComputersListFile = '/etc/apt/sources.list.d/tuxedo-computers.list';
-	my $signedByText = '^deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
-		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	my $signedByTextAppend = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
-		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	my $noSignedBy = 'deb https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
-		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	my $withSignedBy = 'deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
-		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	if(replaceTextInFile($tuxedoComputersListFile, $noSignedBy, $withSignedBy) {
-		printLog("line was replaced in $tuxedoComputersListFile", 'TL2');
-		$modified = 1;
-	}
+	#	my $tuxedoComputersListFile = '/etc/apt/sources.list.d/tuxedo-computers.list';
+	#	my $signedByText = '^deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
+	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
+	#	my $signedByTextAppend = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
+	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
+	#	my $noSignedBy = 'deb https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
+	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
+	#	my $withSignedBy = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
+	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
+	#	if(replaceTextInFile($tuxedoComputersListFile, $noSignedBy, $withSignedBy)) {
+	#		printLog("line was replaced in $tuxedoComputersListFile", 'TL2');
+	#		$modified = 1;
+#}
+
 	#if (!isTextInFile($tuxedoComputersListFile, $signedByText)) {
 	#	appendFile($tuxedoComputersListFile, "$signedByTextAppend\n");
 	#	$modified = 1;
