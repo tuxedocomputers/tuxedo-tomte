@@ -4927,19 +4927,6 @@ sub createRepos {
 			}
 		}
 	}
-	# install TUXEDO keyring for repositories
-	# TODO debug
-	unless (isPackageInstalled("tuxedo-archive-keyring")) {
-		printLog("TUXEDO keyring is not installed", 'TL2');
-		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		printLog("output from wget:\n$output", 'TL2');
-		$output = `pkcon -yp /tmp/install-local tuxedo-archive-keyring*`;
-		if (isPackageInstalled("tuxedo-archive-keyring*")) {
-			printLog("TUXEDO keyring installed successfully", 'TL2');
-		} else {
-			printLog("TUXEDO keyring installation failed", 'TL2');
-		}
-	}
 	return ($modified+1);
 }
 
@@ -4949,19 +4936,34 @@ sub createRepos {
 # add the repo key for TUXEDO repos
 #
 sub addRepoKey {
+	#TODO change!!!
 	my $output;
 	my $retval;
+	# install TUXEDO keyring for repositories
+	# TODO debug
 	checkNetwork(10,10);
-	$output = `wget -O - https://deb.tuxedocomputers.com/0x54840598.pub.asc | gpg --dearmor | tee -a /usr/share/keyrings/tuxedo-keyring.gpg 2>&1`;
-	$retval = $?;
-	if ($retval != 0) { 
-		printLog("error when adding repo key", 'L0');
-		printLog("return value: $retval", 'L0');
-		printLog("could not add pub key for TUXEDO repos", 'L0');
-		return (0);
-	} else {
-		printLog("add repo key output: $output", 'L2');
+	unless (isPackageInstalled("tuxedo-archive-keyring")) {
+		printLog("TUXEDO keyring is not installed", 'TL2');
+		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		printLog("output from wget:\n$output", 'TL2');
+		$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
+		if (isPackageInstalled("tuxedo-archive-keyring*")) {
+			printLog("TUXEDO keyring installed successfully", 'TL2');
+		} else {
+			printLog("TUXEDO keyring installation failed\n$output", 'TL2');
+		}
 	}
+
+	#	$output = `wget -O - https://deb.tuxedocomputers.com/0x54840598.pub.asc | gpg --dearmor | tee -a /usr/share/keyrings/tuxedo-keyring.gpg 2>&1`;
+	#	$retval = $?;
+	#	if ($retval != 0) { 
+	#		printLog("error when adding repo key", 'L0');
+	#		printLog("return value: $retval", 'L0');
+	#		printLog("could not add pub key for TUXEDO repos", 'L0');
+	#		return (0);
+	#	} else {
+	#		printLog("add repo key output: $output", 'L2');
+	#	}
 	return (1);
 }
 
