@@ -4927,26 +4927,17 @@ sub createRepos {
 			}
 		}
 	}
-	# check if signed-by in tuxedo-computers.list
+	# install TUXEDO keyring for repositories
 	# TODO debug
-	#	my $tuxedoComputersListFile = '/etc/apt/sources.list.d/tuxedo-computers.list';
-	#	my $signedByText = '^deb \[arch=amd64 signed-by=\/usr\/share\/keyrings\/tuxedo-keyring\.gpg] https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
-	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	#	my $signedByTextAppend = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
-	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	#	my $noSignedBy = 'deb https:\/\/deb\.tuxedocomputers\.com\/ubuntu '.
-	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	#	my $withSignedBy = 'deb [arch=amd64 signed-by=/usr/share/keyrings/tuxedo-keyring.gpg] https://deb.tuxedocomputers.com/ubuntu '.
-	#		$supportedOS{$distribution}{versions}{$distributionVersion}{name}.' main';
-	#	if(replaceTextInFile($tuxedoComputersListFile, $noSignedBy, $withSignedBy)) {
-	#		printLog("line was replaced in $tuxedoComputersListFile", 'TL2');
-	#		$modified = 1;
-#}
-
-	#if (!isTextInFile($tuxedoComputersListFile, $signedByText)) {
-	#	appendFile($tuxedoComputersListFile, "$signedByTextAppend\n");
-	#	$modified = 1;
-	#}
+	unless (isPackageInstalled("tuxedo-archive-keyring")) {
+		printLog("TUXEDO keyring is not installed", 'TL2');
+		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		if (installPackage("/tmp/tuxedo-archive-keyring*")) {
+			printLog("TUXEDO keyring installed successfully", 'TL2');
+		} else {
+			printLog("TUXEDO keyring installation failed", 'TL2');
+		}
+	}
 	return ($modified+1);
 }
 
