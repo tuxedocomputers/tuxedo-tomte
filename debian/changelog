@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.0-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.0-5) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -20,8 +20,10 @@ tuxedo-tomte (2.7.0-4) UNRELEASED; urgency=medium
   * modified signed-by to download and install deb package tuxedo-archive-keyring
   * after packaging
   * modified for local install
+  * after packaging
+  * repaired add keyring
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 25 Aug 2022 16:13:52 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 25 Aug 2022 16:42:52 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
