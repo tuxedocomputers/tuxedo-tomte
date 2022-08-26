@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.0-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.0-9) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -28,8 +28,10 @@ tuxedo-tomte (2.7.0-8) UNRELEASED; urgency=medium
   * removed debug
   * after packaging
   * add repo key even if nothing was done
+  * after packaging
+  * added unlink tomte_finished
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Aug 2022 11:26:24 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Aug 2022 11:37:55 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
