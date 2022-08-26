@@ -4957,11 +4957,16 @@ sub addRepoKey {
 		$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
 		#TODO debug
 		printLog("output pkcon: $output", 'TL2');
-		printLog("error code: $?", 'TL2');
+		my $errorCode = $?/256;
+		printLog("error code: $errorCode", 'TL2');
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
 			printLog("TUXEDO keyring installation failed\n$output", 'TL2');
+			$output = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+			$errCode = $?/256;
+			printLog("error code: $errCode", 'TL2');
+			printLog("output apt-get: $output", 'TL2');
 		}
 	}
 	return (1);
