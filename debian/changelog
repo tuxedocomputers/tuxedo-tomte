@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.0-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.0-13) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -36,8 +36,10 @@ tuxedo-tomte (2.7.0-12) UNRELEASED; urgency=medium
   * created fallback test with apt-get
   * after packaging
   * correction variable name
+  * after packaging
+  * replaced pkcon with apt-get
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Aug 2022 13:47:06 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Aug 2022 14:21:10 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
