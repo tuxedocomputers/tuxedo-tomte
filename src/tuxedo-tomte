@@ -2803,7 +2803,7 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2843,6 +2843,9 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2897,7 +2900,7 @@ sub tuxedomirrors() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2937,6 +2940,9 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4945,6 +4951,8 @@ sub addRepoKey {
 		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		printLog("output from wget:\n$output", 'TL2');
 		$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
+		#TODO debug
+		printLog("outpur pkcon: $output", 'TL2');
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
