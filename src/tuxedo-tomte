@@ -4945,14 +4945,19 @@ sub addRepoKey {
 	my $output;
 	my $retval;
 	# install TUXEDO keyring for repositories
+	# TODO debug
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'TL2');
 		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		printLog("output from wget:\n$output", 'TL2');
+		$output = `ls -l /tmp`;
+		printLog("output from ls -l /tmp:\n$output", 'TL2');
+
 		$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
 		#TODO debug
 		printLog("output pkcon: $output", 'TL2');
+		printLog("error code: $?", 'TL2');
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
