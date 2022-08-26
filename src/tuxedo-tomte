@@ -4952,7 +4952,7 @@ sub addRepoKey {
 		printLog("output from wget:\n$output", 'TL2');
 		$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
 		#TODO debug
-		printLog("outpur pkcon: $output", 'TL2');
+		printLog("output pkcon: $output", 'TL2');
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
@@ -7930,6 +7930,9 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
+		if (-e $tomteFinishedFile) {
+			unlink($tomteFinishedFile);
+		}
 		print "Starting tuxedo-tomte in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
@@ -7997,12 +8000,12 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
+				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
 				}
 				configureAllModules();
 				postConfigure();
@@ -8016,10 +8019,16 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8032,6 +8041,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			if (validModuleName($argValue{module}) ne '') {
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				initLogging();
 				checkMode();
 				prepareValues();
@@ -8040,6 +8052,9 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8065,19 +8080,31 @@ if (@ARGV != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
