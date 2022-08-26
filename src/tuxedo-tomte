@@ -27,6 +27,7 @@ use File::Copy;
 use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
+use Time::HiRes qw(usleep);
 
 # for debugging
 use Data::Dumper;
@@ -4944,30 +4945,28 @@ sub createRepos {
 sub addRepoKey {
 	my $output;
 	my $retval;
+	my $errorCode;
+	my $outputKey;
 	# install TUXEDO keyring for repositories
 	# TODO debug
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'TL2');
-		my $output = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		printLog("output from wget:\n$output", 'TL2');
-		$output = `ls -l /tmp`;
-		printLog("output from ls -l /tmp:\n$output", 'TL2');
-		sleep(1);
-			$output = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
-			my $errorCode = $?/256;
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		printLog("output from wget:\n$outputKey", 'TL2');
+		$outputKey = `ls -l /tmp`;
+		printLog("output from ls -l /tmp:\n$outputKey", 'TL2');
+		usleep(100);
+		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+		if ($errorCode != 0) {
+			$errorCode = $?/256;
 			printLog("error code: $errorCode", 'TL2');
-			printLog("output apt-get: $output", 'TL2');
-
-		#$output = `pkcon -yp install-local /tmp/tuxedo-archive-keyring*`;
-		#TODO debug
-		#printLog("output pkcon: $output", 'TL2');
-		#my $errorCode = $?/256;
-		#printLog("error code: $errorCode", 'TL2');
+			printLog("output apt-get: $outputKey", 'TL2');
+		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
-			printLog("TUXEDO keyring installation failed\n$output", 'TL2');
+			printLog("TUXEDO keyring installation failed\n$outputKey", 'TL2');
 		}
 	}
 	return (1);
