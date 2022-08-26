@@ -4954,7 +4954,7 @@ sub addRepoKey {
 		$output = `ls -l /tmp`;
 		printLog("output from ls -l /tmp:\n$output", 'TL2');
 			$output = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
-			$errorCode = $?/256;
+			my $errorCode = $?/256;
 			printLog("error code: $errorCode", 'TL2');
 			printLog("output apt-get: $output", 'TL2');
 
