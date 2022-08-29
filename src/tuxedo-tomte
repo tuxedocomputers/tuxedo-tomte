@@ -2801,6 +2801,24 @@ sub tuxedorepos() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be correctly set
+	# only http has to be replaced by https
+	if ($FAI) {
+		if (httpToHttps(\%tuxedo_repos)) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('repos set to https', 'L1');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('repos could not be replaced', 'L1');
+			return (0);
+		}
+	}
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
@@ -2896,6 +2914,15 @@ sub tuxedomirrors() {
 	my $retval3;
 	my $exitStatus;
 	my $output;
+
+	if ($FAI) {
+		httpToHttps(\%tuxedo_mirrors);
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "nothingToDo");
+		printLog('did no modifications on repos', 'L1');
+		return (1);
+	}
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -4948,25 +4975,21 @@ sub addRepoKey {
 	my $errorCode;
 	my $outputKey;
 	# install TUXEDO keyring for repositories
-	# TODO debug
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'TL2');
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		printLog("output from wget:\n$outputKey", 'TL2');
-		$outputKey = `ls -l /tmp`;
-		printLog("output from ls -l /tmp:\n$outputKey", 'TL2');
 		usleep(300000);
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
 		$errorCode = $?/256;
 		if ($errorCode != 0) {
-			printLog("error code: $errorCode", 'TL2');
-			printLog("output apt-get: $outputKey", 'TL2');
+			printLog("error code apt-get: $errorCode", 'L2');
+			printLog("output apt-get: $outputKey", 'L2');
 		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
 		} else {
-			printLog("TUXEDO keyring installation failed\n$outputKey", 'TL2');
+			printLog("TUXEDO keyring installation failed", 'TL2');
 		}
 	}
 	return (1);
@@ -5057,6 +5080,44 @@ sub setComment {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# replaces "http" with "https" in the files given by a %hash
+#
+sub httpToHttps {
+	my %repos = %{$_[0]};
+	my $key;
+	my $listFH;
+	my @lines;
+	#TODO debug
+	foreach $key (keys %{ $repos{$completeDistVersion} }) {
+		if ($key ne 'name') {
+			if (-e ${ $repos{$completeDistVersion}{$key}{filename} }) {
+				printLog("filename to change http: ${ $repos{$completeDistVersion}{$key}{filename} }");
+				if (open($listFH, '<', ${ $repos{$completeDistVersion}{$key}{filename} })) {
+					@lines = <$listFH>;
+					close ($listFH);
+					foreach (@lines) {
+						$_ =~ s/^deb http:/^deb https:/g;
+					}
+					if (open($listFH, '>', ${ $repos{$completeDistVersion}{$key}{filename} })) {
+						print $listFH @lines;
+					} else {
+						printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for writing", 'L0');
+						return (0);
+					}
+				} else {
+					printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for reading", 'L0');
+					return (0);
+				}
+			}
+		}
+	}
+	return (1);
+}
+
 
 
 
