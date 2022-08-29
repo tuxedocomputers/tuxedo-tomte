@@ -4956,7 +4956,7 @@ sub addRepoKey {
 		printLog("output from wget:\n$outputKey", 'TL2');
 		$outputKey = `ls -l /tmp`;
 		printLog("output from ls -l /tmp:\n$outputKey", 'TL2');
-		usleep(500000);
+		usleep(100000);
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
 		$errorCode = $?/256;
 		if ($errorCode != 0) {
@@ -5221,7 +5221,7 @@ sub isPackageInstalled {
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
+	printLog("searching for package: $package\nanswer: $retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
