@@ -5115,7 +5115,7 @@ sub httpToHttps {
 						if ($_ =~ /^deb http:/) {
 							printLog("replacing in line: $_", 'TL2');
 						}
-						$_ =~ s/^deb http:/^deb https:/g;
+						$_ =~ s/^deb http:/deb https:/g;
 					}
 					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
 						print $listFH @lines;
