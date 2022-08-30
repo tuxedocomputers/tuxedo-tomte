@@ -1987,17 +1987,17 @@ sub prerequisites {
 sub prerequisitesFAI {
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
-		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.pre`;
 		#TODO debug
 }
 
 sub postrequisitesFAI {
-		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
+	`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.postbefore`;
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
-		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.postafter`;
 }
 
 
