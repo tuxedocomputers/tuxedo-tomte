@@ -1988,6 +1988,7 @@ sub prerequisitesFAI {
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
+		#TODO debug
 }
 
 sub postrequisitesFAI {
@@ -7016,13 +7017,14 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
+		printLog("1module: $module FAI: $FAI", 'TL2');
 		if ((($origConfModules{$module}{required} eq 'yes') ||
 			($origConfModules{$module}{required} eq 'prerequisite')) && 
 			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				# TODO debug
-				printLog("module: $module FAI: $FAI", 'TL2');
+				printLog("2module: $module FAI: $FAI", 'TL2');
 				reconfigureSingleModule($origConfModules{$module}{name});
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
@@ -7114,6 +7116,8 @@ sub reconfigureAllModules {
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
 		if ($origConfModules{$module}{required} eq 'yes') {
+			#TODO debug
+			printLog("module: $module FAI: $FAI", 'TL2');
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
