@@ -7021,6 +7021,8 @@ sub configureAllModules {
 			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
+				# TODO debug
+				printLog("module: $module FAI: $FAI", 'TL2');
 				reconfigureSingleModule($origConfModules{$module}{name});
 			} else {
 				configureSingleModule($origConfModules{$module}{name});
