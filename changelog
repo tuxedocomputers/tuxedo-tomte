@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.0-30) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.0-31) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -72,8 +72,10 @@ tuxedo-tomte (2.7.0-30) UNRELEASED; urgency=medium
   * corrected replace
   * after packaging
   * added more debug
+  * after packaging
+  * removing prerequisite configuration from middle of FAI
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 30 Aug 2022 12:11:41 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 30 Aug 2022 15:12:19 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
