@@ -5105,10 +5105,10 @@ sub httpToHttps {
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		printLog("key: $key", 'TL2');
 		if ($key ne 'name') {
-			printLog("filename: ${ $repos{$completeDistVersion}{$key}{filename} }", 'TL2');
-			if (-e ${ $repos{$completeDistVersion}{$key}{filename} }) {
-				printLog("filename to change http: ${ $repos{$completeDistVersion}{$key}{filename} }");
-				if (open($listFH, '<', ${ $repos{$completeDistVersion}{$key}{filename} })) {
+			printLog("filename: $repos{$completeDistVersion}{$key}{filename}", 'TL2');
+			if (-e $repos{$completeDistVersion}{$key}{filename}) {
+				printLog("filename to change http: $repos{$completeDistVersion}{$key}{filename}");
+				if (open($listFH, '<', $repos{$completeDistVersion}{$key}{filename})) {
 					@lines = <$listFH>;
 					close ($listFH);
 					foreach (@lines) {
@@ -5117,15 +5117,15 @@ sub httpToHttps {
 						}
 						$_ =~ s/^deb http:/^deb https:/g;
 					}
-					if (open($listFH, '>', ${ $repos{$completeDistVersion}{$key}{filename} })) {
+					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
 						print $listFH @lines;
 						close($listFH);
 					} else {
-						printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for writing", 'TL0');
+						printLog("can't open $repos{$completeDistVersion}{$key}{filename} for writing", 'TL0');
 						return (0);
 					}
 				} else {
-					printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for reading", 'TL0');
+					printLog("can't open $repos{$completeDistVersion}{$key}{filename} for reading", 'TL0');
 					return (0);
 				}
 			}
