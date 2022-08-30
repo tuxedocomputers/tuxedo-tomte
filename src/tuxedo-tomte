@@ -1983,16 +1983,20 @@ sub prerequisites {
 	printLog("return from pkcon refresh: $output", 'L2');
 }
 
+#TODO debug
 sub prerequisitesFAI {
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
+		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
 }
 
 sub postrequisitesFAI {
+		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
+		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
 }
 
 
@@ -2803,7 +2807,10 @@ sub tuxedorepos() {
 
 	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https
+	# TODO debug
+	printLog("value for FAI: $FAI", 'TL2');
 	if ($FAI) {
+		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
 		if (httpToHttps(\%tuxedo_repos)) {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
@@ -2917,6 +2924,7 @@ sub tuxedomirrors() {
 
 	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https
+	printLog("value for FAI: $FAI", 'TL2');
 	if ($FAI) {
 		if (httpToHttps(\%tuxedo_mirrors)) {
 			$origConfModules{$module}{installed} = "yes";
