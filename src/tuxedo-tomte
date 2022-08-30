@@ -7016,8 +7016,9 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if (($origConfModules{$module}{required} eq 'yes') ||
-			($origConfModules{$module}{required} eq 'prerequisite')) {
+		if ((($origConfModules{$module}{required} eq 'yes') ||
+			($origConfModules{$module}{required} eq 'prerequisite')) && 
+			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
