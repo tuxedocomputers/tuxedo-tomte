@@ -5103,7 +5103,9 @@ sub httpToHttps {
 	my @lines;
 	#TODO debug
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
+		printLog("key: $key", 'L2');
 		if ($key ne 'name') {
+			printLog("filename: ${ $repos{$completeDistVersion}{$key}{filename} }", 'L2');
 			if (-e ${ $repos{$completeDistVersion}{$key}{filename} }) {
 				printLog("filename to change http: ${ $repos{$completeDistVersion}{$key}{filename} }");
 				if (open($listFH, '<', ${ $repos{$completeDistVersion}{$key}{filename} })) {
@@ -5117,6 +5119,7 @@ sub httpToHttps {
 					}
 					if (open($listFH, '>', ${ $repos{$completeDistVersion}{$key}{filename} })) {
 						print $listFH @lines;
+						close($listFH);
 					} else {
 						printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for writing", 'L0');
 						return (0);
