@@ -2801,20 +2801,20 @@ sub tuxedorepos() {
 	my $exitStatus;
 	my $output;
 
-	# if this is a FAI-installation all repos should be correctly set
+	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https
 	if ($FAI) {
 		if (httpToHttps(\%tuxedo_repos)) {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			printLog('repos set to https', 'L1');
+			printLog('tuxedo repos set to https', 'L1');
 			return (1);
 		} else {
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "no";
 			addToConfiguredModules($module, "failed");
-			printLog('repos could not be replaced', 'L1');
+			printLog('tuxedo repos could not be set to https', 'L1');
 			return (0);
 		}
 	}
@@ -2915,14 +2915,24 @@ sub tuxedomirrors() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be already set correctly
+	# only http has to be replaced by https
 	if ($FAI) {
-		httpToHttps(\%tuxedo_mirrors);
-		$origConfModules{$module}{installed} = "yes";
-		$origConfModules{$module}{upgraded} = "yes";
-		addToConfiguredModules($module, "nothingToDo");
-		printLog('did no modifications on repos', 'L1');
-		return (1);
+		if (httpToHttps(\%tuxedo_mirrors)) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('mirror repos set to https', 'L1');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('mirror repos could not be set to https', 'L1');
+			return (0);
+		}
 	}
+
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -5100,6 +5110,9 @@ sub httpToHttps {
 					@lines = <$listFH>;
 					close ($listFH);
 					foreach (@lines) {
+						if ($_ =~ /^deb http:/) {
+							printLog("replacing in line: $_", 'L2');
+						}
 						$_ =~ s/^deb http:/^deb https:/g;
 					}
 					if (open($listFH, '>', ${ $repos{$completeDistVersion}{$key}{filename} })) {
