@@ -2808,13 +2808,13 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			printLog('tuxedo repos set to https', 'L1');
+			printLog('tuxedo repos set to https', 'L0');
 			return (1);
 		} else {
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "no";
 			addToConfiguredModules($module, "failed");
-			printLog('tuxedo repos could not be set to https', 'L1');
+			printLog('tuxedo repos could not be set to https', 'L0');
 			return (0);
 		}
 	}
@@ -2922,13 +2922,13 @@ sub tuxedomirrors() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			printLog('mirror repos set to https', 'L1');
+			printLog('mirror repos set to https', 'L0');
 			return (1);
 		} else {
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "no";
 			addToConfiguredModules($module, "failed");
-			printLog('mirror repos could not be set to https', 'L1');
+			printLog('mirror repos could not be set to https', 'L0');
 			return (0);
 		}
 	}
@@ -5103,9 +5103,9 @@ sub httpToHttps {
 	my @lines;
 	#TODO debug
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
-		printLog("key: $key", 'L2');
+		printLog("key: $key", 'TL2');
 		if ($key ne 'name') {
-			printLog("filename: ${ $repos{$completeDistVersion}{$key}{filename} }", 'L2');
+			printLog("filename: ${ $repos{$completeDistVersion}{$key}{filename} }", 'TL2');
 			if (-e ${ $repos{$completeDistVersion}{$key}{filename} }) {
 				printLog("filename to change http: ${ $repos{$completeDistVersion}{$key}{filename} }");
 				if (open($listFH, '<', ${ $repos{$completeDistVersion}{$key}{filename} })) {
@@ -5113,7 +5113,7 @@ sub httpToHttps {
 					close ($listFH);
 					foreach (@lines) {
 						if ($_ =~ /^deb http:/) {
-							printLog("replacing in line: $_", 'L2');
+							printLog("replacing in line: $_", 'TL2');
 						}
 						$_ =~ s/^deb http:/^deb https:/g;
 					}
@@ -5121,11 +5121,11 @@ sub httpToHttps {
 						print $listFH @lines;
 						close($listFH);
 					} else {
-						printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for writing", 'L0');
+						printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for writing", 'TL0');
 						return (0);
 					}
 				} else {
-					printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for reading", 'L0');
+					printLog("can't open ${ $repos{$completeDistVersion}{$key}{filename} } for reading", 'TL0');
 					return (0);
 				}
 			}
