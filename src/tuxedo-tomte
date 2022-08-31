@@ -1983,21 +1983,16 @@ sub prerequisites {
 	printLog("return from pkcon refresh: $output", 'L2');
 }
 
-#TODO debug
 sub prerequisitesFAI {
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.pre`;
-		#TODO debug
 }
 
 sub postrequisitesFAI {
-	`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.postbefore`;
 	reconfigureSingleModule('tuxedo-repos');
 	reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.postafter`;
 }
 
 
@@ -2811,7 +2806,6 @@ sub tuxedorepos() {
 	# TODO debug
 	printLog("value for FAI: $FAI", 'TL2');
 	if ($FAI) {
-		`cat /etc/apt/sources.list.d/tuxedo-computers.list`;
 		if (httpToHttps(\%tuxedo_repos)) {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
@@ -4871,6 +4865,13 @@ sub createRepos {
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
+
+	# comment out if this subroutine should be tested
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb testdeb:')) {
+		printLog('testing environment detected, leaving repos as they are', 'TL2');
+		return (1);
+	}
+
 	if (!-d $sourcesListDir) {
 		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
 		# no apt directory, somethings fishy
@@ -5112,7 +5113,6 @@ sub httpToHttps {
 	my @lines;
 	#TODO debug
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
-		printLog("key: $key", 'TL2');
 		if ($key ne 'name') {
 			printLog("filename: $repos{$completeDistVersion}{$key}{filename}", 'TL2');
 			if (-e $repos{$completeDistVersion}{$key}{filename}) {
@@ -7017,17 +7017,13 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		printLog("1module: $module FAI: $FAI", 'TL2');
 		if ((($origConfModules{$module}{required} eq 'yes') ||
 			($origConfModules{$module}{required} eq 'prerequisite')) && 
 			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
-				# TODO debug
-				printLog("2module: $module FAI: $FAI", 'TL2');
 				reconfigureSingleModule($origConfModules{$module}{name});
 			} else {
-				printLog("3module: $module FAI: $FAI", 'TL2');
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
@@ -7117,8 +7113,6 @@ sub reconfigureAllModules {
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
 		if ($origConfModules{$module}{required} eq 'yes') {
-			#TODO debug
-			printLog("module: $module FAI: $FAI", 'TL2');
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
