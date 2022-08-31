@@ -4867,8 +4867,8 @@ sub createRepos {
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
 	# comment out if this subroutine should be tested
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb:') ||
-		isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors:')) {
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb:.*') ||
+		isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors:.*')) {
 		printLog('testing environment detected, leaving repos as they are', 'TL2');
 		return (1);
 	}
