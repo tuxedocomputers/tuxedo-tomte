@@ -4867,7 +4867,8 @@ sub createRepos {
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
 	# comment out if this subroutine should be tested
-	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb testdeb:')) {
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb:') ||
+		isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors:')) {
 		printLog('testing environment detected, leaving repos as they are', 'TL2');
 		return (1);
 	}
@@ -8081,19 +8082,12 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.1`;
 		prerequisitesFAI();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.2`;
 		configureAllModules();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.3`;
 		postrequisitesFAI();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.4`;
 		postConfigure();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.5`;
 		listSuccess();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.6`;
 		writeConfigFile();
-		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.7`;
 
 	# configure
 	} elsif ($argValue{command} eq "configure") {
