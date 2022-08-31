@@ -7027,6 +7027,7 @@ sub configureAllModules {
 				printLog("2module: $module FAI: $FAI", 'TL2');
 				reconfigureSingleModule($origConfModules{$module}{name});
 			} else {
+				printLog("3module: $module FAI: $FAI", 'TL2');
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
@@ -8086,12 +8087,19 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.1`;
 		prerequisitesFAI();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.2`;
 		configureAllModules();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.3`;
 		postrequisitesFAI();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.4`;
 		postConfigure();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.5`;
 		listSuccess();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.6`;
 		writeConfigFile();
+		`cp /etc/apt/sources.list.d/tuxedo-computers.list /etc/apt/sources.list.d/tuxedo-computers.list.7`;
 
 	# configure
 	} elsif ($argValue{command} eq "configure") {
