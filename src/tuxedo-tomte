@@ -4871,6 +4871,9 @@ sub createRepos {
 		isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors:.*')) {
 		printLog('testing environment detected, leaving repos as they are', 'TL2');
 		return (1);
+	} else {
+		#TODO debug
+		printLog('testing environment not detected', 'TL2');
 	}
 
 	if (!-d $sourcesListDir) {
@@ -6067,9 +6070,13 @@ sub substituteLineInFile {
 sub isLineInFile {
 	my $filename = shift;
 	my $match = shift;
+	#TODO debug
+	printLog("match: $match", 'TL2');
 	if ( (-e $filename) && open(FH, '<', $filename) ) {
 		while( <FH> ) {
+			printLog("line: $_", 'TL2');
 			if ( $_ =~ /^$match$/) {
+				printLog("match!!!!", 'TL2');
 				return (1);
 			}
 		}
