@@ -5083,11 +5083,9 @@ sub setComment {
 	}
 
 	# don't check if TUXEDO testmirrors included for testing purposes
-	foreach (@repolines) {
-		if ($_ =~ /testmirrors\.tuxedocomputers\.com/) {
-			printLog("found testmirror", 'TL2');
-			return (0);
-		}
+	if ($$repoline =~ /^deb https?:\/\/testmirrors\.tuxedocomputers\.com\/.*/) {
+		printLog("found testmirror, not changing it", 'TL2');
+		return (0);
 	}
 
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
