@@ -31,12 +31,11 @@ use Time::HiRes qw(usleep);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
 # logLevel:
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
