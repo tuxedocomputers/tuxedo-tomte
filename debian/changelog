@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.0-43) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.1-0) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -98,8 +98,12 @@ tuxedo-tomte (2.7.0-43) UNRELEASED; urgency=medium
   * dont remove testdeb
   * after packaging
   * cleaned up from debug
+  * after packaging
+  * after merge
+  * logic in FAI install
+  * added message for remove
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 01 Sep 2022 11:44:06 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 01 Sep 2022 14:21:38 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
