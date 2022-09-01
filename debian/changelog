@@ -1,3 +1,106 @@
+tuxedo-tomte (2.7.0-43) UNRELEASED; urgency=medium
+
+  * added new key import for repos
+  * added check for signed-by in tuxedo-repos.list
+  * packing
+  * after packaging
+  * casting regex for sources list
+  * packing
+  * after packaging
+  * refined sources entry
+  * packing
+  * after packaging
+  * remove debug
+  * packing
+  * after packaging
+  * after packaging
+  * after packaging
+  * replaced replacement with sub replace
+  * after packaging
+  * modified signed-by to download and install deb package tuxedo-archive-keyring
+  * after packaging
+  * modified for local install
+  * after packaging
+  * repaired add keyring
+  * after packaging
+  * added some debug
+  * after packaging
+  * removed debug
+  * after packaging
+  * add repo key even if nothing was done
+  * after packaging
+  * added unlink tomte_finished
+  * after packaging
+  * added debug
+  * after packaging
+  * created fallback test with apt-get
+  * after packaging
+  * correction variable name
+  * after packaging
+  * replaced pkcon with apt-get
+  * after packaging
+  * uninitialized variable
+  * after packaging
+  * added sleep
+  * after packaging
+  * reduced sleep
+  * after packaging
+  * rised sleep
+  * after packaging
+  * raised sleep
+  * after packaging
+  * raised sleep
+  * after packaging
+  * changed output order
+  * after packaging
+  * raised sleep
+  * after packaging
+  * new sleep
+  * after packaging
+  * new delay
+  * after packaging
+  * added replace http to https in FAI
+  * after packaging
+  * changed repo mirrors
+  * after packaging
+  * added debug
+  * after packaging
+  * modified debug
+  * after packaging
+  * changed variable casting
+  * after packaging
+  * corrected replace
+  * after packaging
+  * added more debug
+  * after packaging
+  * removing prerequisite configuration from middle of FAI
+  * after packaging
+  * some more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * added testdeb, ermoved debug
+  * after packaging
+  * removed debug
+  * after packaging
+  * refined regex
+  * after packaging
+  * added debug for regex
+  * after packaging
+  * changed regex
+  * after packaging
+  * added return to comment out for testmirrors
+  * after packaging
+  * dont remove testdeb
+  * after packaging
+  * cleaned up from debug
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 01 Sep 2022 11:44:06 +0200
+
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
   * added modes AUTOMATIC, UPDATES_ONLY and DONT_CONFIGURE

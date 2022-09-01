@@ -27,14 +27,16 @@ use File::Copy;
 use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
+use Time::HiRes qw(usleep);
 
 # for debugging
 use Data::Dumper;
+#TODO debug
 # logLevel:
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2799,10 +2801,28 @@ sub tuxedorepos() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be already set correctly
+	# only http has to be replaced by https
+	if ($FAI) {
+		if (httpToHttps(\%tuxedo_repos) >= 1) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('tuxedo repos set to https', 'L0');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('tuxedo repos could not be set to https', 'L0');
+			return (0);
+		}
+	}
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2842,6 +2862,9 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2892,11 +2915,31 @@ sub tuxedomirrors() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be already set correctly
+	# only http has to be replaced by https
+	printLog("value for FAI: $FAI", 'TL2');
+	if ($FAI) {
+		if (httpToHttps(\%tuxedo_mirrors)) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('mirror repos set to https', 'L0');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('mirror repos could not be set to https', 'L0');
+			return (0);
+		}
+	}
+
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2936,6 +2979,9 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4817,6 +4863,13 @@ sub createRepos {
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
+
+	# comment out if this subroutine should be tested
+	if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb https?:\/\/testdeb.*')) {
+		printLog('testing environment detected, leaving repos as they are', 'TL2');
+		return (1);
+	}
+
 	if (!-d $sourcesListDir) {
 		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
 		# no apt directory, somethings fishy
@@ -4892,7 +4945,6 @@ sub createRepos {
 
 
 
-
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
@@ -4938,14 +4990,25 @@ sub createRepos {
 sub addRepoKey {
 	my $output;
 	my $retval;
+	my $errorCode;
+	my $outputKey;
+	# install TUXEDO keyring for repositories
 	checkNetwork(10,10);
-	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
-	$retval = $?;
-	if ($retval != 0) {
-		printLog("error when apt-key adv", 'L0');
-		printLog("return value: $retval", 'L0');
-		printLog("could not add pub key for TUXEDO repos", 'L0');
-		return (0);
+	unless (isPackageInstalled("tuxedo-archive-keyring")) {
+		printLog("TUXEDO keyring is not installed", 'TL2');
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		usleep(300000);
+		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+		$errorCode = $?/256;
+		if ($errorCode != 0) {
+			printLog("error code apt-get: $errorCode", 'L2');
+			printLog("output apt-get: $outputKey", 'L2');
+		}
+		if (isPackageInstalled("tuxedo-archive-keyring")) {
+			printLog("TUXEDO keyring installed successfully", 'TL2');
+		} else {
+			printLog("TUXEDO keyring installation failed", 'TL2');
+		}
 	}
 	return (1);
 }
@@ -5012,6 +5075,13 @@ sub setComment {
 		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
+
+	# don't check if TUXEDO testmirrors included for testing purposes
+	if ($$repoline =~ /^deb https?:\/\/testmirrors\.tuxedocomputers\.com\/.*/) {
+		printLog("found testmirror, not changing it", 'TL2');
+		return (0);
+	}
+
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
@@ -5035,6 +5105,51 @@ sub setComment {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# replaces "http" with "https" in the files given by a %hash
+# returns 2 if something was changed
+# returns 1 if nothing was changed
+# returns 0 if there was an error
+#
+sub httpToHttps {
+	my %repos = %{$_[0]};
+	my $key;
+	my $listFH;
+	my @lines;
+	my $returnValue = 0;
+	foreach $key (keys %{ $repos{$completeDistVersion} }) {
+		if ($key ne 'name') {
+			if (-e $repos{$completeDistVersion}{$key}{filename}) {
+				if (open($listFH, '<', $repos{$completeDistVersion}{$key}{filename})) {
+					@lines = <$listFH>;
+					close ($listFH);
+					foreach (@lines) {
+						if ($_ =~ /^deb http:/) {
+							printLog("replacing in line: $_", 'TL2');
+							$_ =~ s/^deb http:/deb https:/g;
+							$returnValue = 2;
+						}
+					}
+					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
+						print $listFH @lines;
+						close($listFH);
+					} else {
+						printLog("can't open $repos{$completeDistVersion}{$key}{filename} for writing", 'TL0');
+						return (0);
+					}
+				} else {
+					printLog("can't open $repos{$completeDistVersion}{$key}{filename} for reading", 'TL0');
+					return (0);
+				}
+			}
+		}
+	}
+	return ($returnValue);
+}
+
 
 
 
@@ -5199,7 +5314,7 @@ sub isPackageInstalled {
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
+	printLog("searching for package: $package\nanswer: $retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
@@ -6909,8 +7024,9 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if (($origConfModules{$module}{required} eq 'yes') ||
-			($origConfModules{$module}{required} eq 'prerequisite')) {
+		if ((($origConfModules{$module}{required} eq 'yes') ||
+			($origConfModules{$module}{required} eq 'prerequisite')) && 
+			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -7918,6 +8034,9 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
+		if (-e $tomteFinishedFile) {
+			unlink($tomteFinishedFile);
+		}
 		print "Starting tuxedo-tomte in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
@@ -7985,12 +8104,12 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
+				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
 				}
 				configureAllModules();
 				postConfigure();
@@ -8004,10 +8123,16 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8020,6 +8145,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			if (validModuleName($argValue{module}) ne '') {
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				initLogging();
 				checkMode();
 				prepareValues();
@@ -8028,6 +8156,9 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8053,19 +8184,31 @@ if (@ARGV != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
