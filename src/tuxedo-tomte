@@ -7024,18 +7024,25 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ((($origConfModules{$module}{required} eq 'yes') ||
-			($origConfModules{$module}{required} eq 'prerequisite')) && 
-			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
-			if ($origConfModules{$module}{reconfigure} eq 'always') {
-				# reconfigure modules with 'always' every single time
-				reconfigureSingleModule($origConfModules{$module}{name});
-			} else {
-				configureSingleModule($origConfModules{$module}{name});
+		printLog("FAI: $FAI module: $module", 'TL2');
+		#TODO debug
+		if (!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors'))) {
+			printLog("required: $origConfModules{$module}{required} reconfigure: $origConfModules{$module}{reconfigure}", 'TL2');
+			if (($origConfModules{$module}{required} eq 'yes') ||
+				($origConfModules{$module}{required} eq 'prerequisite')) {
+				if ($origConfModules{$module}{reconfigure} eq 'always') {
+					# reconfigure modules with 'always' every single time
+					printLog("reconfigureSingleModule", 'TL2');
+					reconfigureSingleModule($origConfModules{$module}{name});
+				} else {
+					printLog("configureSingleModule", 'TL2');
+					configureSingleModule($origConfModules{$module}{name});
+				}
+			} elsif (($origConfModules{$module}{required} eq 'no') &&
+					(($localConfModules{$module}{installed} eq 'yes') ||
+					($localConfModules{$module}{installed} eq 'failed'))) {
+				removeSingleModule($origConfModules{$module}{name});
 			}
-		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
-			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
 }
