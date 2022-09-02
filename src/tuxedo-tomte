@@ -27,16 +27,17 @@ use File::Copy;
 use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
+
 use Time::HiRes qw(usleep);
+use Digest::MD5 qw(md5_hex);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
 # logLevel:
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4983,8 +4984,42 @@ sub createRepos {
 
 
 
+
 ###############################################################################
-# add the repo key for TUXEDO repos
+# checks if filenames md5sum corresponds to the given checksum
+# returns 1 if yes
+# returns 0 if not or something went wrong
+#
+sub compareMD5sum {
+	my ($filename, $givenHash) = (@_);
+	my $hashFile;
+	my $FH;
+	my $data;
+	if (-e $filename) {
+		if (open($FH, '<', $filename)) {
+			$data = <$FH>;
+			close $FH;
+			$hashFile = md5_hex($data);
+			if ($givenHash eq $hashFile) {
+				return (1);
+			} else {
+				return (0);
+			}
+		} else {
+			printLog ("could not open file $filename", 'L0');
+			return (0);
+		}
+	} else {
+		printLog ("file $filename does not exist", 'L0');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# checks if the repo key is installed by comparing to given md5 checksum
+# adds the repo key for TUXEDO repos if not present
 #
 sub addRepoKey {
 	my $output;
@@ -7022,26 +7057,18 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
-	#TODO debug
-	printLog("in configureAllModules", 'TL2');
 	print Dumper(\%origConfModules);
 	foreach $module (keys %origConfModules) {
-		printLog("FAI: $FAI module: $module", 'TL2');
-		#TODO debug
-		printLog("required: $origConfModules{$module}{required} reconfigure: $origConfModules{$module}{reconfigure}", 'TL2');
 		if ($origConfModules{$module}{required} eq 'yes') {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
-				printLog("reconfigureSingleModule", 'TL2');
 				reconfigureSingleModule($origConfModules{$module}{name});
 			} else {
-				printLog("configureSingleModule", 'TL2');
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
-			printLog("removeSingleModule", 'TL2');
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
@@ -8095,11 +8122,8 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
-		#TODO debug
 		prerequisitesFAI();
-		printLog("before configureAllModules", 'TL2');
 		configureAllModules();
-		printLog("after configureAllModules", 'TL2');
 		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
