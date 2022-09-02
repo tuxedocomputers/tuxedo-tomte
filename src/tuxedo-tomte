@@ -27,7 +27,9 @@ use File::Copy;
 use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
+
 use Time::HiRes qw(usleep);
+use Digest::MD5 qw(md5_hex);
 
 # for debugging
 use Data::Dumper;
@@ -2801,7 +2803,7 @@ sub tuxedorepos() {
 	my $output;
 
 	# if this is a FAI-installation all repos should be already set correctly
-	# only http has to be replaced by https
+	# only http has to be replaced by https in postrequisitesFAI
 	if ($FAI) {
 		if (httpToHttps(\%tuxedo_repos) >= 1) {
 			$origConfModules{$module}{installed} = "yes";
@@ -2916,7 +2918,6 @@ sub tuxedomirrors() {
 
 	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https
-	printLog("value for FAI: $FAI", 'TL2');
 	if ($FAI) {
 		if (httpToHttps(\%tuxedo_mirrors)) {
 			$origConfModules{$module}{installed} = "yes";
@@ -4983,8 +4984,42 @@ sub createRepos {
 
 
 
+
 ###############################################################################
-# add the repo key for TUXEDO repos
+# checks if filenames md5sum corresponds to the given checksum
+# returns 1 if yes
+# returns 0 if not or something went wrong
+#
+sub compareMD5sum {
+	my ($filename, $givenHash) = (@_);
+	my $hashFile;
+	my $FH;
+	my $data;
+	if (-e $filename) {
+		if (open($FH, '<', $filename)) {
+			$data = <$FH>;
+			close $FH;
+			$hashFile = md5_hex($data);
+			if ($givenHash eq $hashFile) {
+				return (1);
+			} else {
+				return (0);
+			}
+		} else {
+			printLog ("could not open file $filename", 'L0');
+			return (0);
+		}
+	} else {
+		printLog ("file $filename does not exist", 'L0');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# checks if the repo key is installed by comparing to given md5 checksum
+# adds the repo key for TUXEDO repos if not present
 #
 sub addRepoKey {
 	my $output;
@@ -7022,10 +7057,10 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
+	print Dumper(\%origConfModules);
 	foreach $module (keys %origConfModules) {
-		if ((($origConfModules{$module}{required} eq 'yes') ||
-			($origConfModules{$module}{required} eq 'prerequisite')) && 
-			(!$FAI && (($module eq 'tuxedorepos') || ($module eq 'tuxedomirrors')))) {
+		# prerequisites are automatically ommited (required=prerequisite)
+		if ($origConfModules{$module}{required} eq 'yes') {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -7033,7 +7068,8 @@ sub configureAllModules {
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+				(($localConfModules{$module}{installed} eq 'yes') ||
+				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
