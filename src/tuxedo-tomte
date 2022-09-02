@@ -7059,6 +7059,7 @@ sub configureAllModules {
 	my $exit_status;
 	print Dumper(\%origConfModules);
 	foreach $module (keys %origConfModules) {
+		# prerequisites are automatically ommited (required=prerequisite)
 		if ($origConfModules{$module}{required} eq 'yes') {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
