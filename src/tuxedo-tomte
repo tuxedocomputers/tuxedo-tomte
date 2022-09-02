@@ -2035,7 +2035,7 @@ sub prerequisites {
 		# basically the required repos
 		if (($origConfModules{$module}{order} eq 'first') &&
 			($origConfModules{$module}{blocked} eq 'no')) {
-			reconfigureSingleModule($module);
+			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
 	#reconfigureSingleModule('tuxedo-repos');
@@ -7117,7 +7117,6 @@ sub validModuleName {
 sub configureAllModules {
 	my $module;
 	my $exit_status;
-	print Dumper(\%origConfModules);
 	foreach $module (keys %origConfModules) {
 		# prerequisites are automatically ommited (required=prerequisite)
 		if ($origConfModules{$module}{required} eq 'yes') {
