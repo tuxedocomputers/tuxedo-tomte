@@ -3074,8 +3074,11 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("This is a prerequisite and removal is not possible for this module", 'TL0');
+		printLog("This removed the module from the list only, manual intervention is necessary to remove the respective repositories", 'TL0');
+		addToConfiguredModules($module, "removed");
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "yes";
+		$origConfModules{$module}{required} = "no";
 	}
 }
 
