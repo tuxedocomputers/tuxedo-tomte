@@ -4926,15 +4926,15 @@ sub createRepos {
 
 	#TODO debug
 	# comment out if this subroutine should be tested
-	if (exists ${ $repos{$completeDistVersion}{'deb'} }) {
+	if (exists $repos{$completeDistVersion}{'deb'}) {
 		printLog("deb repos detected", 'TL2');
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb https?:\/\/testdeb.*')) {
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
 			printLog('testing environment detected, leaving repos as they are', 'TL2');
 			return (1);
 		}
-	} elsif (exists ${ $repos{$completeDistVersion}{'mirrors'} }) {
+	} elsif (exists $repos{$completeDistVersion}{'mirrors'}) {
 		printLog("mirror repos detected", 'TL2');
-		if (isLineInFile('/etc/apt/sources.list', 'deb https?:\/\/testmirrors.*')) {
+		if (isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors.*')) {
 			printLog('testing environment detected, leaving repos as they are', 'TL2');
 			return (1);
 		}
@@ -7130,6 +7130,7 @@ sub configureAllModules {
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
 		# prerequisites are automatically ommited (required=prerequisite)
+		# they are done in prerequisite and postrequisite subroutines
 		if ($origConfModules{$module}{required} eq 'yes') {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
