@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.1-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.1-7) UNRELEASED; urgency=medium
 
   * added new key import for repos
   * added check for signed-by in tuxedo-repos.list
@@ -117,8 +117,10 @@ tuxedo-tomte (2.7.1-6) UNRELEASED; urgency=medium
   * modded regex for testmirror, changed hash for exist
   * after packaging
   * changed hash key
+  * after packaging
+  * added remove for mirrors
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Sep 2022 14:20:06 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Sep 2022 16:19:14 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
