@@ -33,12 +33,11 @@ use Digest::MD5 qw(md5_hex);
 
 # for debugging
 use Data::Dumper;
-#TODO debug
 # logLevel:
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2029,7 +2028,6 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	#TODO debug
 	my $module;
 	foreach $module (sort keys %origConfModules) {
 		# basically the required repos
@@ -2038,8 +2036,6 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	#reconfigureSingleModule('tuxedo-repos');
-	#reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `pkcon refresh`;
 	printLog("return from pkcon refresh: $output", 'L2');
 }
@@ -4927,8 +4923,6 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
-	#TODO debug
-	# comment out if this subroutine should be tested
 	if (exists $repos{$completeDistVersion}{deb}) {
 		printLog("deb repos detected", 'TL2');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
