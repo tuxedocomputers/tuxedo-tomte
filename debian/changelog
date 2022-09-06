@@ -1,128 +1,16 @@
-tuxedo-tomte (2.7.1-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.2) jammy; urgency=medium
 
-  * added new key import for repos
-  * added check for signed-by in tuxedo-repos.list
-  * packing
-  * after packaging
-  * casting regex for sources list
-  * packing
-  * after packaging
-  * refined sources entry
-  * packing
-  * after packaging
-  * remove debug
-  * packing
-  * after packaging
-  * after packaging
-  * after packaging
-  * replaced replacement with sub replace
-  * after packaging
-  * modified signed-by to download and install deb package tuxedo-archive-keyring
-  * after packaging
-  * modified for local install
-  * after packaging
-  * repaired add keyring
-  * after packaging
-  * added some debug
-  * after packaging
-  * removed debug
-  * after packaging
-  * add repo key even if nothing was done
-  * after packaging
-  * added unlink tomte_finished
-  * after packaging
-  * added debug
-  * after packaging
-  * created fallback test with apt-get
-  * after packaging
-  * correction variable name
-  * after packaging
-  * replaced pkcon with apt-get
-  * after packaging
-  * uninitialized variable
-  * after packaging
-  * added sleep
-  * after packaging
-  * reduced sleep
-  * after packaging
-  * rised sleep
-  * after packaging
-  * raised sleep
-  * after packaging
-  * raised sleep
-  * after packaging
-  * changed output order
-  * after packaging
-  * raised sleep
-  * after packaging
-  * new sleep
-  * after packaging
-  * new delay
-  * after packaging
-  * added replace http to https in FAI
-  * after packaging
-  * changed repo mirrors
-  * after packaging
-  * added debug
-  * after packaging
-  * modified debug
-  * after packaging
-  * changed variable casting
-  * after packaging
-  * corrected replace
-  * after packaging
-  * added more debug
-  * after packaging
-  * removing prerequisite configuration from middle of FAI
-  * after packaging
-  * some more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * added testdeb, ermoved debug
-  * after packaging
-  * removed debug
-  * after packaging
-  * refined regex
-  * after packaging
-  * added debug for regex
-  * after packaging
-  * changed regex
-  * after packaging
-  * added return to comment out for testmirrors
-  * after packaging
-  * dont remove testdeb
-  * after packaging
-  * cleaned up from debug
-  * after packaging
-  * after merge
-  * logic in FAI install
-  * added message for remove
-  * after packaging
-  * added debug
-  * after packaging
-  * removed prereq from normal config
-  * after packaging
-  * removed debug
-  * added note for prerequisites
-  * removed prerequisite for mirrors
-  * after packaging
-  * reconfigure with correct module name
-  * after packaging
-  * differentiate deb to mirror, uncomplete
-  * modded regex for testmirror, changed hash for exist
-  * after packaging
-  * changed hash key
-  * after packaging
-  * added remove for mirrors
-  * after packaging
-  * removed debug
+  * tuxedo-mirrors is not prerequisite anymore
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Sep 2022 08:36:39 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Sep 2022 13:40:50 +0200
+
+tuxedo-tomte (2.7.1) jammy; urgency=medium
+
+  * added automatic TUXEDO keyring installation for TUXEDO repositories
+    for installations on vanilla systems by installing the package
+    tuxedo-archive-keyring
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Sep 2022 12:00:42 +0200
 
 tuxedo-tomte (2.7.0) jammy; urgency=medium
 
