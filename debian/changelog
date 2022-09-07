@@ -1,12 +1,135 @@
-tuxedo-tomte (2.6.11-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.1-8) UNRELEASED; urgency=medium
 
-  * added blocking features for installation and upgrade
+  * added new key import for repos
+  * added check for signed-by in tuxedo-repos.list
+  * packing
   * after packaging
-  * added message if wrong module name
+  * casting regex for sources list
+  * packing
   * after packaging
-  * small change in help
+  * refined sources entry
+  * packing
+  * after packaging
+  * remove debug
+  * packing
+  * after packaging
+  * after packaging
+  * after packaging
+  * replaced replacement with sub replace
+  * after packaging
+  * modified signed-by to download and install deb package tuxedo-archive-keyring
+  * after packaging
+  * modified for local install
+  * after packaging
+  * repaired add keyring
+  * after packaging
+  * added some debug
+  * after packaging
+  * removed debug
+  * after packaging
+  * add repo key even if nothing was done
+  * after packaging
+  * added unlink tomte_finished
+  * after packaging
+  * added debug
+  * after packaging
+  * created fallback test with apt-get
+  * after packaging
+  * correction variable name
+  * after packaging
+  * replaced pkcon with apt-get
+  * after packaging
+  * uninitialized variable
+  * after packaging
+  * added sleep
+  * after packaging
+  * reduced sleep
+  * after packaging
+  * rised sleep
+  * after packaging
+  * raised sleep
+  * after packaging
+  * raised sleep
+  * after packaging
+  * changed output order
+  * after packaging
+  * raised sleep
+  * after packaging
+  * new sleep
+  * after packaging
+  * new delay
+  * after packaging
+  * added replace http to https in FAI
+  * after packaging
+  * changed repo mirrors
+  * after packaging
+  * added debug
+  * after packaging
+  * modified debug
+  * after packaging
+  * changed variable casting
+  * after packaging
+  * corrected replace
+  * after packaging
+  * added more debug
+  * after packaging
+  * removing prerequisite configuration from middle of FAI
+  * after packaging
+  * some more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * more debug
+  * after packaging
+  * added testdeb, ermoved debug
+  * after packaging
+  * removed debug
+  * after packaging
+  * refined regex
+  * after packaging
+  * added debug for regex
+  * after packaging
+  * changed regex
+  * after packaging
+  * added return to comment out for testmirrors
+  * after packaging
+  * dont remove testdeb
+  * after packaging
+  * cleaned up from debug
+  * after packaging
+  * after merge
+  * logic in FAI install
+  * added message for remove
+  * after packaging
+  * added debug
+  * after packaging
+  * removed prereq from normal config
+  * after packaging
+  * removed debug
+  * added note for prerequisites
+  * removed prerequisite for mirrors
+  * after packaging
+  * reconfigure with correct module name
+  * after packaging
+  * differentiate deb to mirror, uncomplete
+  * modded regex for testmirror, changed hash for exist
+  * after packaging
+  * changed hash key
+  * after packaging
+  * added remove for mirrors
+  * after packaging
+  * removed debug
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 Aug 2022 13:51:42 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Sep 2022 08:36:39 +0200
+
+tuxedo-tomte (2.7.0) jammy; urgency=medium
+
+  * added modes AUTOMATIC, UPDATES_ONLY and DONT_CONFIGURE
+  * added remove for all modules based on packages or kernel paramaters
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 24 Aug 2022 08:10:04 +0200
 
 tuxedo-tomte (2.6.11) jammy; urgency=medium
 
@@ -16,8 +139,10 @@ tuxedo-tomte (2.6.11) jammy; urgency=medium
 
 tuxedo-tomte (2.6.10) jammy; urgency=medium
 
-  * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as InfinityBook S 15 Gen6
-  * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames P95_HR and P95_HP,HR,HQ
+  * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as
+    InfinityBook S 15 Gen6
+  * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames
+    P95_HR and P95_HP,HR,HQ
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Jul 2022 15:12:35 +0200
 

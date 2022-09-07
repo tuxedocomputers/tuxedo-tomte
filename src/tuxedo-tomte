@@ -28,6 +28,9 @@ use FindBin qw($Bin);
 use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
 
+use Time::HiRes qw(usleep);
+use Digest::MD5 qw(md5_hex);
+
 # for debugging
 use Data::Dumper;
 # logLevel:
@@ -661,17 +664,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	'16' => {
-		model => ['TUXEDO InsanityBook 1501'],
-		board_name => ['P95_HP'],
-		fix => ['backlightfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'AUO Model 21229 Serial Number 808797180',
-		usb_device => '',
-	},
 	'17' => {
 		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
 		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
@@ -981,8 +973,8 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'46' => {
-		model => ['TUXEDO InsanityBook v1'],
-		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		model => ['TUXEDO InsanityBook 15 v1'],
+		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
 		fix => ['backlightfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
@@ -993,7 +985,7 @@ my %tuxedo_devices = (
 	},
 	'47' => {
 		model => ['XP1507'],
-		board_name => ['P95_HR', 'P95_HP,HR,HQ'],
+		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
 		fix => ['backlightfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
@@ -1002,8 +994,6 @@ my %tuxedo_devices = (
 		display => 'AUO Model 21229 Serial Number 808797180',
 		usb_device => '',
 	},
-
-
 );
 
 
@@ -1033,7 +1023,7 @@ my %tuxedo_devices = (
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
 #					'prerequisite' if essentially needed to be present before
-#					anything else
+#					anything else and always, non blockable
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
@@ -1049,6 +1039,10 @@ my %tuxedo_devices = (
 #					Tomte
 #	upgraded		if module was upgraded 'yes', else 'no'
 #	reconfigure		if set to 'always' will always reconfigure if fix detected
+#	restart			the system requires a restart after this module was
+#					installed or upgraded
+#	order			'first': has to be installed before anything else
+#					'last': has to be installed after anything else
 #
 my %origConfModules = (
 	i8042fix => {
@@ -1066,6 +1060,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -1082,6 +1077,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -1098,6 +1094,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -1114,6 +1111,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedocontrolcenter => {
 		name => 'tuxedo-control-center',
@@ -1130,6 +1128,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	tuxedokeyboard => {
 		name => 'tuxedo-keyboard',
@@ -1146,6 +1145,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	nokeyboardaftersuspendfix => {
 		name => 'no-keyboard-after-suspend-fix',
@@ -1162,6 +1162,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -1178,6 +1179,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -1194,22 +1196,24 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		order => 'first',
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
 		version => 4,
 		installed => 'no',
 		blocked => 'no',
-		required => 'prerequisite',
+		required => 'yes',
 		hwid => 1,
 		package => 'no',
 		fainame => '',
-		description => 'Prerequisite! Adds TUXEDO maintained Ubuntu repositories',
+		description => 'Adds TUXEDO maintained Ubuntu repositories',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
 		reconfigure => 'always',
 		restart => '',
+		order => 'first',
 	},
 	corefix => {
 		name => 'core-fix',
@@ -1226,6 +1230,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -1242,6 +1247,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	threegfix2 => {
 		name => 'threeg-fix2',
@@ -1258,6 +1264,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 
 	elantechtouchpadfix => {
@@ -1275,6 +1282,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -1291,6 +1299,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
@@ -1307,6 +1316,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedokeyboardite => {
 		name => 'tuxedo-keyboard-ite',
@@ -1323,6 +1333,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	fingerprintreader => {
 		name => 'fingerprint-reader',
@@ -1339,6 +1350,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	mesautils => {
 		name => 'mesa-utils',
@@ -1355,6 +1367,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	tuxedorestoreaudiofix => {
 		name => 'tuxedo-restore-audio-fix',
@@ -1371,6 +1384,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
@@ -1387,6 +1401,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	kerneltuxedo2004next => {
 		name => 'linux-tuxedo-20.04-next',
@@ -1403,6 +1418,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	kerneltuxedo2004 => {
 		name => 'linux-tuxedo-20.04',
@@ -1419,6 +1435,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	kernelgenerichwe2004 => {
 		name => 'linux-generic-hwe-20.04',
@@ -1435,6 +1452,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
@@ -1451,6 +1469,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	kerneltuxedo2204 => {
 		name => 'linux-tuxedo-22.04',
@@ -1467,6 +1486,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -1483,6 +1503,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -1499,6 +1520,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	# deprecated since 20220216
 	amdgpudkms => {
@@ -1516,6 +1538,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
@@ -1532,6 +1555,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	tuxedooledbrt => {
 		name => 'tuxedo-oled-brt',
@@ -1548,6 +1572,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	apportfix => {
 		name => 'apport-fix',
@@ -1564,6 +1589,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	# deprecated since 20220215
 	realtekr8125dkms => {
@@ -1581,6 +1607,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => '',
+		order => '',
 	},
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
@@ -1597,6 +1624,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	i915disablepsrfix => {
 		name => 'i915-disable-psr-fix',
@@ -1613,6 +1641,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	i915enablepsrfix => {
 		name => 'i915-enable-psr-fix',
@@ -1629,6 +1658,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedopinfixtgldkms => {
 		name => 'tuxedo-pinfix-tgl-dkms',
@@ -1645,6 +1675,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	tuxedomicfix1 => {
 		name => 'tuxedo-micfix1',
@@ -1661,6 +1692,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
@@ -1677,6 +1709,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	i8042noauxfix => {
 		name => 'i8042noaux-fix',
@@ -1693,6 +1726,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	lightdmlogindcheckgraphicalfix => {
 		name => 'lightdm-logind-check-graphical-fix',
@@ -1709,6 +1743,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'no',
+		order => '',
 	},
 	nvidiabacklightcontrolfix => {
 		name => 'nvidia-backlight-control-fix',
@@ -1725,6 +1760,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	earlyloadbacklightcontrolfix => {
 		name => 'early-load-backlight-control-fix',
@@ -1741,6 +1777,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => 'always',
 		restart => 'yes',
+		order => '',
 	},
 	r8125dkms => {
 		name => 'r8125-dkms',
@@ -1757,6 +1794,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	cardreaderfix => {
 		name => 'cardreader-fix',
@@ -1773,6 +1811,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 	samsungnvmefix => {
 		name => 'samsung-nvme-fix',
@@ -1789,6 +1828,7 @@ my %origConfModules = (
 		upgraded => '',
 		reconfigure => '',
 		restart => 'yes',
+		order => '',
 	},
 );
 
@@ -1988,8 +2028,14 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	reconfigureSingleModule('tuxedo-repos');
-	reconfigureSingleModule('tuxedo-mirrors');
+	my $module;
+	foreach $module (sort keys %origConfModules) {
+		# basically the required repos
+		if (($origConfModules{$module}{order} eq 'first') &&
+			($origConfModules{$module}{blocked} eq 'no')) {
+			reconfigureSingleModule($origConfModules{$module}{name});
+		}
+	}
 	my $output = `pkcon refresh`;
 	printLog("return from pkcon refresh: $output", 'L2');
 }
@@ -2812,10 +2858,28 @@ sub tuxedorepos() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be already set correctly
+	# only http has to be replaced by https in postrequisitesFAI
+	if ($FAI) {
+		if (httpToHttps(\%tuxedo_repos) >= 1) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('tuxedo repos set to https', 'L0');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('tuxedo repos could not be set to https', 'L0');
+			return (0);
+		}
+	}
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2855,6 +2919,9 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2905,11 +2972,30 @@ sub tuxedomirrors() {
 	my $exitStatus;
 	my $output;
 
+	# if this is a FAI-installation all repos should be already set correctly
+	# only http has to be replaced by https
+	if ($FAI) {
+		if (httpToHttps(\%tuxedo_mirrors)) {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			printLog('mirror repos set to https', 'L0');
+			return (1);
+		} else {
+			$origConfModules{$module}{installed} = "no";
+			$origConfModules{$module}{upgraded} = "no";
+			addToConfiguredModules($module, "failed");
+			printLog('mirror repos could not be set to https', 'L0');
+			return (0);
+		}
+	}
+
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		if ($retval == 2) {
+		if ($retval > 0) {
 			$retval2 = addRepoKey();
 		}
 		if (($retval == 0) && ($retval2 == 0)) {
@@ -2949,6 +3035,9 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
+		if ($retval > 0) {
+			$retval2 = addRepoKey();
+		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2981,8 +3070,11 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("This is a prerequisite and removal is not possible for this module", 'TL0');
+		printLog("This removed the module from the list only, manual intervention is necessary to remove the respective repositories", 'TL0');
+		addToConfiguredModules($module, "removed");
+		$origConfModules{$module}{installed} = "no";
+		$origConfModules{$module}{upgraded} = "yes";
+		$origConfModules{$module}{required} = "no";
 	}
 }
 
@@ -4830,6 +4922,21 @@ sub createRepos {
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
+
+	if (exists $repos{$completeDistVersion}{deb}) {
+		printLog("deb repos detected", 'TL2');
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
+			printLog('testing environment detected, leaving repos as they are', 'TL2');
+			return (1);
+		}
+	} elsif (exists $repos{$completeDistVersion}{mirrors}) {
+		printLog("mirror repos detected", 'TL2');
+		if (isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors.*')) {
+			printLog('testing environment detected, leaving repos as they are', 'TL2');
+			return (1);
+		}
+	}
+
 	if (!-d $sourcesListDir) {
 		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
 		# no apt directory, somethings fishy
@@ -4905,7 +5012,6 @@ sub createRepos {
 
 
 
-
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
@@ -4945,20 +5051,65 @@ sub createRepos {
 
 
 
+
 ###############################################################################
-# add the repo key for TUXEDO repos
+# checks if filenames md5sum corresponds to the given checksum
+# returns 1 if yes
+# returns 0 if not or something went wrong
+#
+sub compareMD5sum {
+	my ($filename, $givenHash) = (@_);
+	my $hashFile;
+	my $FH;
+	my $data;
+	if (-e $filename) {
+		if (open($FH, '<', $filename)) {
+			$data = <$FH>;
+			close $FH;
+			$hashFile = md5_hex($data);
+			if ($givenHash eq $hashFile) {
+				return (1);
+			} else {
+				return (0);
+			}
+		} else {
+			printLog ("could not open file $filename", 'L0');
+			return (0);
+		}
+	} else {
+		printLog ("file $filename does not exist", 'L0');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# checks if the repo key is installed by comparing to given md5 checksum
+# adds the repo key for TUXEDO repos if not present
 #
 sub addRepoKey {
 	my $output;
 	my $retval;
+	my $errorCode;
+	my $outputKey;
+	# install TUXEDO keyring for repositories
 	checkNetwork(10,10);
-	$output = `apt-key adv --fetch-keys https://deb.tuxedocomputers.com/0x54840598.pub.asc 2>&1`;
-	$retval = $?;
-	if ($retval != 0) {
-		printLog("error when apt-key adv", 'L0');
-		printLog("return value: $retval", 'L0');
-		printLog("could not add pub key for TUXEDO repos", 'L0');
-		return (0);
+	unless (isPackageInstalled("tuxedo-archive-keyring")) {
+		printLog("TUXEDO keyring is not installed", 'TL2');
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		usleep(300000);
+		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+		$errorCode = $?/256;
+		if ($errorCode != 0) {
+			printLog("error code apt-get: $errorCode", 'L2');
+			printLog("output apt-get: $outputKey", 'L2');
+		}
+		if (isPackageInstalled("tuxedo-archive-keyring")) {
+			printLog("TUXEDO keyring installed successfully", 'TL2');
+		} else {
+			printLog("TUXEDO keyring installation failed", 'TL2');
+		}
 	}
 	return (1);
 }
@@ -5025,6 +5176,13 @@ sub setComment {
 		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
 		return (0);
 	}
+
+	# don't check if TUXEDO testmirrors included for testing purposes
+	if ($$repoline =~ /^deb https?:\/\/testmirrors\.tuxedocomputers\.com\/.*/) {
+		printLog("found testmirror, not changing it", 'TL2');
+		return (0);
+	}
+
 	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
 		# this is a repo line
 		# if line matches some official debian country mirror & not tuxedo
@@ -5048,6 +5206,51 @@ sub setComment {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# replaces "http" with "https" in the files given by a %hash
+# returns 2 if something was changed
+# returns 1 if nothing was changed
+# returns 0 if there was an error
+#
+sub httpToHttps {
+	my %repos = %{$_[0]};
+	my $key;
+	my $listFH;
+	my @lines;
+	my $returnValue = 0;
+	foreach $key (keys %{ $repos{$completeDistVersion} }) {
+		if ($key ne 'name') {
+			if (-e $repos{$completeDistVersion}{$key}{filename}) {
+				if (open($listFH, '<', $repos{$completeDistVersion}{$key}{filename})) {
+					@lines = <$listFH>;
+					close ($listFH);
+					foreach (@lines) {
+						if ($_ =~ /^deb http:/) {
+							printLog("replacing in line: $_", 'TL2');
+							$_ =~ s/^deb http:/deb https:/g;
+							$returnValue = 2;
+						}
+					}
+					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
+						print $listFH @lines;
+						close($listFH);
+					} else {
+						printLog("can't open $repos{$completeDistVersion}{$key}{filename} for writing", 'TL0');
+						return (0);
+					}
+				} else {
+					printLog("can't open $repos{$completeDistVersion}{$key}{filename} for reading", 'TL0');
+					return (0);
+				}
+			}
+		}
+	}
+	return ($returnValue);
+}
+
 
 
 
@@ -5212,7 +5415,7 @@ sub isPackageInstalled {
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("searching for package: $package\nanswer:\n$retString", 'L2');
+	printLog("searching for package: $package\nanswer: $retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
@@ -6215,8 +6418,8 @@ sub messageDesktop {
 	my @whoLines = `who -u`;
 	my $environ = '/proc/$mPid/environ';
 
-	# don't message the desktop if LiveISO
-	if ($LiveISO) {
+	# don't message the desktop if LiveISO or FAI
+	if ($LiveISO || $FAI) {
 		return (0);
 	}
 
@@ -6922,8 +7125,9 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if (($origConfModules{$module}{required} eq 'yes') ||
-			($origConfModules{$module}{required} eq 'prerequisite')) {
+		# prerequisites are automatically ommited (required=prerequisite)
+		# they are done in prerequisite and postrequisite subroutines
+		if ($origConfModules{$module}{required} eq 'yes') {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -6931,7 +7135,8 @@ sub configureAllModules {
 				configureSingleModule($origConfModules{$module}{name});
 			}
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+				(($localConfModules{$module}{installed} eq 'yes') ||
+				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeSingleModule($origConfModules{$module}{name});
 		}
 	}
@@ -7236,8 +7441,8 @@ sub checkModePermission {
 	if ($argValue{command} eq 'FAI') {
 		return (1);
 	}
-	# when Live ISO assume yes on all
-	if ($LiveISO == 1) {
+	# when Live ISO or FAI assume yes on all
+	if ($LiveISO || $FAI) {
 		return (1);
 	}
 	if ($argValue{command} eq 'configure') {
@@ -7931,6 +8136,9 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
+		if (-e $tomteFinishedFile) {
+			unlink($tomteFinishedFile);
+		}
 		print "Starting tuxedo-tomte in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
@@ -7945,7 +8153,6 @@ if (@ARGV != 0) {
 		listSuccess();
 		writeConfigFile();
 		createFile($tomteFinishedFile, 'finished', 0);
-		# the routine does not end here for testing purposes
 	}
 
 	# list
@@ -8003,19 +8210,31 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				configureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8028,6 +8247,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			if (validModuleName($argValue{module}) ne '') {
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				initLogging();
 				checkMode();
 				prepareValues();
@@ -8036,6 +8258,9 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8061,19 +8286,31 @@ if (@ARGV != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
 				}
+				if (-e $tomteFinishedFile) {
+					unlink($tomteFinishedFile);
+				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
+				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
+					createFile($tomteFinishedFile, 'finished', 0);
+				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
