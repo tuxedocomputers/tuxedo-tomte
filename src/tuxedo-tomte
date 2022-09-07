@@ -1999,9 +1999,12 @@ sub releaseLock {
 #
 sub lockPackageManagement {
 	my $key;
+	printLog("begin locking all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		($lockFiles{$key}{'FH'}, $lockFiles{$key}{'number'}) = acquireLock($lockFiles{$key}{fileName});
+		printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
 	}
+	printLog("finished locking all files", 'TL2');
 }
 
 
@@ -2013,9 +2016,12 @@ sub lockPackageManagement {
 sub unlockPackageManagement {
 	my $key;
 	my $returnValue = 0;
+	printLog("begin unlock all files", 'TL2');
 	foreach $key (keys %lockFiles) {
+		printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
 		$returnValue += releaseLock($lockFiles{$key}{fileName}, $lockFiles{$key}{FH}, 3, $lockFiles{$key}{number});
 	}
+	printLog("finished unlock all files: $returnValue", 'TL2');
 	return ($returnValue);
 }
 
