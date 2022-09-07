@@ -1932,21 +1932,21 @@ sub acquireLock {
 	print "filename to lock: $fileName\n";
 	if (sysopen($FH, $fileName, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		print "acquiring lock: $fileName\n";
+		printLog("acquiring lock: $fileName", 'TL2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_SETLKW )) {
-			print "locking successfull\n";
+			printLog("locking successfull", 'TL2');
 			$num = <$FH> || 0;
 			return ($FH, $num);
 		} else {
-			print "failed to get write lock: $fileName: $fs->error\n";
+			printLog("failed to get write lock: $fileName: $fs->error", 'TL2');
 			return (0);
 		}
 	} else {
-		print "failed to open: $fileName: $!\n";
+		printLog("failed to open: $fileName: $!", 'TL2');
 		return (0);
 	}
 }
@@ -1961,35 +1961,35 @@ sub releaseLock {
 	my $FH = shift;
 	my $num = shift;
 	my $fs;
-	print "release: $fileName\n";
+	printLog("release: $fileName", 'TL2');
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
 				$fs = new File::FcntlLock;
 				$fs->l_type(F_UNLCK);
-				print "releasing lock: $fileName";
+				printLog("releasing lock: $fileName", "TL2");
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
-						print "file $fileName closed\n";
+						printLog("file $fileName closed", 'TL2');
 						return (1);
 					} else {
-						print "close failed: $fileName: $!\n";
+						printLog("close failed: $fileName: $!", 'TL2');
 						return (0);
 					}
 				} else {
-					print "unlock failed: $fileName: $fs->error\n";
+					printLog("unlock failed: $fileName: $fs->error", 'TL2');
 					return (0);
 				}
 			} else {
-				print "truncate failed: $fileName: $!";
+				printLog("truncate failed: $fileName: $!", 'TL2');
 				return (0);
 			}
 		} else {
-			print "write failed: $fileName: $!\n";
+			printLog("write failed: $fileName: $!", 'TL2');
 			return (0);
 		}
 	} else {
-		print "seek failed: $fileName: $!\n";
+		printLog("seek failed: $fileName: $!", 'TL2');
 		return (0);
 	}
 }
