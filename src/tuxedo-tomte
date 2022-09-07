@@ -21,6 +21,9 @@ use warnings;
 use autodie;
 use 5.010;
 
+use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
+use File::FcntlLock;
+
 use File::Copy;
 
 # for OLED backlight and edid decrypt
@@ -34,10 +37,11 @@ use Digest::MD5 qw(md5_hex);
 # for debugging
 use Data::Dumper;
 # logLevel:
+# TODO debug
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -136,6 +140,27 @@ my %postConfProgram = (
 		description => 'updates initramfs',
 	},
 );
+
+
+
+###############################################################################
+# files to lock to get package management priority
+#
+my %lockFiles = (
+	aptArchivesLock => {
+		fileName => '/var/cache/apt/archives/lock',
+	},
+	aptListsLock => {
+		fileName => '/var/lib/apt/lists/lock',
+	},
+	dpkgLock => {
+		fileName => '/var/lib/dpkg/lock',
+	},
+	dpkgLockFrontend => {
+		fileName => '/var/lib/dpkg/lock-frontend',
+	},
+);
+
 
 
 ###############################################################################
@@ -1834,6 +1859,9 @@ my %origConfModules = (
 
 
 
+###############################################################################
+# simple print out of all supported devices and fixes
+#
 sub printTuxedoDevices {
 	my $ID;
 	foreach $ID (keys %tuxedo_devices) {
@@ -1888,6 +1916,109 @@ sub dieSingleton {
 	print "Another instance is already running, please wait till it is finished\n";
 	exit (1);
 }
+
+
+
+###############################################################################
+# lock a file: acquireLock(filename)
+# returns the filehandle and a number if successfull
+# returns 0 if failed
+#
+sub acquireLock {
+	my $fileName = shift;
+	my $FH;
+	my $fs;
+	my $num;
+	print "filename to lock: $fileName\n";
+	if (sysopen($FH, $fileName, O_RDWR | O_CREAT)) {
+		$FH->autoflush(1);
+		print "acquiring lock: $fileName\n";
+		$fs = new File::FcntlLock;
+		$fs->l_type( F_WRLCK );
+		$fs->l_whence( SEEK_SET );
+		$fs->l_start( 0 );
+		if ($fs->lock( $FH, F_SETLKW )) {
+			print "locking successfull\n";
+			$num = <$FH> || 0;
+			return ($FH, $num);
+		} else {
+			print "failed to get write lock: $fileName: $fs->error\n";
+			return (0);
+		}
+	} else {
+		print "failed to open: $fileName: $!\n";
+		return (0);
+	}
+}
+
+###############################################################################
+# release lock: releaseLock(filename, filehandle, number)
+# returns 1 if successfull
+# returns 0 if failed
+#
+sub releaseLock {
+	my $fileName = shift;
+	my $FH = shift;
+	my $num = shift;
+	my $fs;
+	print "release: $fileName\n";
+	if (seek($FH, 0, SEEK_SET)) {
+		if (print $FH "$num\n") {
+			if (truncate($FH, tell($FH))) {
+				$fs = new File::FcntlLock;
+				$fs->l_type(F_UNLCK);
+				print "releasing lock: $fileName";
+				if ($fs->lock( $FH, F_SETLK )) {
+					if (close($FH)) {
+						print "file $fileName closed\n";
+						return (1);
+					} else {
+						print "close failed: $fileName: $!\n";
+						return (0);
+					}
+				} else {
+					print "unlock failed: $fileName: $fs->error\n";
+					return (0);
+				}
+			} else {
+				print "truncate failed: $fileName: $!";
+				return (0);
+			}
+		} else {
+			print "write failed: $fileName: $!\n";
+			return (0);
+		}
+	} else {
+		print "seek failed: $fileName: $!\n";
+		return (0);
+	}
+}
+
+###############################################################################
+# lock all files for package management
+#
+sub lockPackageManagement {
+	my $key;
+	foreach $key (keys %lockFiles) {
+		($lockFiles{$key}{'FH'}, $lockFiles{$key}{'number'}) = acquireLock($lockFiles{$key}{fileName});
+	}
+}
+
+
+
+
+###############################################################################
+# unlock all files for package management
+#
+sub unlockPackageManagement {
+	my $key;
+	my $returnValue = 0;
+	foreach $key (keys %lockFiles) {
+		$returnValue += releaseLock($lockFiles{$key}{fileName}, $lockFiles{$key}{FH}, 3, $lockFiles{$key}{number});
+	}
+	return ($returnValue);
+}
+
 
 ###############################################################################
 # reads a file and returns an array with the lines
@@ -2030,13 +2161,15 @@ sub isOSSupported {
 sub prerequisites {
 	my $module;
 	foreach $module (sort keys %origConfModules) {
-		# basically the required repos
+		# basically only for the required repos
 		if (($origConfModules{$module}{order} eq 'first') &&
 			($origConfModules{$module}{blocked} eq 'no')) {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
+	unlockPackageManagement();
 	my $output = `pkcon refresh`;
+	lockPackageManagement();
 	printLog("return from pkcon refresh: $output", 'L2');
 }
 
@@ -2898,7 +3031,9 @@ sub tuxedorepos() {
 				# installation
 				if (!$FAI) {
 					checkNetwork(10,10);
+					unlockPackageManagement();
 					$output = `pkcon refresh`;
+					lockPackageManagement();
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages', 'L0');
@@ -2937,7 +3072,9 @@ sub tuxedorepos() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				checkNetwork(10,10);
+				unlockPackageManagement();
 				$output = `pkcon refresh`;
+				lockPackageManagement();
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
 					printLog('failed: update packages', 'L0');
@@ -3014,7 +3151,9 @@ sub tuxedomirrors() {
 				# installation
 				if (!$FAI) {
 					checkNetwork(10,10);
+					unlockPackageManagement();
 					$output = `pkcon refresh`;
+					lockPackageManagement();
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
 						printLog('failed: update packages', 'L1');
@@ -3053,7 +3192,9 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				checkNetwork(10,10);
+				unlockPackageManagement();
 				$output = `pkcon refresh`;
+				lockPackageManagement();
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
 					printLog('failed: update packages', 'L0');
@@ -5099,7 +5240,9 @@ sub addRepoKey {
 		printLog("TUXEDO keyring is not installed", 'TL2');
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		usleep(300000);
+		unlockPackageManagement();
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+		lockPackageManagement();
 		$errorCode = $?/256;
 		if ($errorCode != 0) {
 			printLog("error code apt-get: $errorCode", 'L2');
@@ -5288,7 +5431,9 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
+		unlockPackageManagement();
 		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
+		lockPackageManagement();
 	}
 	my $deinstCounter = 0;
 
@@ -5302,7 +5447,9 @@ sub deinstExcept {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		unlockPackageManagement();
 		my $retText = `$deinstCmd`;
+		lockPackageManagement();
 		if ($? != 0) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
@@ -5357,6 +5504,7 @@ sub deinstallPackage {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
+		unlockPackageManagement();
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
@@ -5365,6 +5513,7 @@ sub deinstallPackage {
 			printLog('deinstallation of packages successful', 'L0');
 			return (0);
 		}
+		lockPackageManagement();
 	} else {
 		printLog('nothing to deinstall', 'L0');
 		return (0);
@@ -5388,6 +5537,7 @@ sub deinstallSinglePackage {
 	printLog("deinstalling: $deinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
+		unlockPackageManagement();
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
@@ -5396,6 +5546,7 @@ sub deinstallSinglePackage {
 			printLog('deinstallation of package successful', 'L0');
 			return (0);
 		}
+		lockPackageManagement();
 	} else {
 		printLog("package $deinst was not found", 'L0');
 	}
@@ -5438,28 +5589,34 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
+		unlockPackageManagement();
 		if ($logLevel > 1) {
 			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
 		} else {
 			$retval = `apt-get -y install $packageName`;
 		}
+		lockPackageManagement();
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
+		unlockPackageManagement();
 		if ($logLevel > 1) {
 			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 		} else {
 			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
 		}
+		lockPackageManagement();
 		printLog("return from pkcon:\n$retval", 'L2');
 		$retval = isPackageInstalled($packageName);
 		if ($retval == 0) {
 			printLog("failed to install $packageName", 'L0');
 			printLog("will try again later", 'L0');
-			# repair a possibly wrecked package manager
+			# repair a possibly wrecked package manager	
+			unlockPackageManagement();
 			`dpkg --configure -a`;
+			lockPackageManagement();
 			startTomteDelayed();
 		}
 	}
@@ -5477,7 +5634,9 @@ sub removePackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
+	unlockPackageManagement();
 	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
+	lockPackageManagement();
 	printLog("return from pkcon:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
@@ -5529,7 +5688,9 @@ sub installKernelFlavour {
 		$somethingDone = 0;
 	}
 	my $partialName;
+	unlockPackageManagement();
 	my $installCmd = 'apt-get install -yq ';
+	lockPackageManagement();
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
@@ -5568,12 +5729,16 @@ sub installKernelFlavour {
 	if ($packageMissing) {
 		messageLongInstall();
 		printLog("installing $flavour", 'L1');
+		unlockPackageManagement();
 		`apt-get update -q`;
 		$retString = `$installCmd`;
+		lockPackageManagement();
 		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
 			printLog("executing: make configure -a", 'L2');
+			unlockPackageManagement();
 			`dpkg --configure -a`;
+			lockPackageManagement();
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
 				$failed += 1;
@@ -5804,17 +5969,23 @@ sub uninstKernelFlavour {
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText, 1);
 			chmod 755, '/usr/bin/linux-check-removal';
+			unlockPackageManagement();
 			$retString = `$deinstString`;
+			lockPackageManagement();
 			if ($retString =~ /sudo dpkg --configure -a/) {
 				printLog("some packages are not configured", 'L2');
 				printLog("executing: dpkg --configure -a", 'L2');
+				unlockPackageManagement();
 				`dpkg --configure -a`;
+				lockPackageManagement();
 				if ($? != 0) {
 					printLog("configure -a failed!! exiting", 'L2');
 					$failed += 1;
 					return (0);
 				} else {
+					unlockPackageManagement();
 					$retString = `$deinstString`;
+					lockPackageManagement();
 				}
 			}
 			unlink '/usr/bin/linux-check-removal';
@@ -5822,7 +5993,9 @@ sub uninstKernelFlavour {
 			printLog("current kernel $kernelToDelete deinstalled", 'L0');
 		} else {
 			printLog("deinstallation command: $deinstString", 'L2');
+			unlockPackageManagement();
 			$retString = `$deinstString`;
+			lockPackageManagement();
 		}
 		printLog("return: $retString", 'L2');
 		if ($? != 0) {
@@ -5905,7 +6078,9 @@ sub uninstallRemnantKernels {
 	if (scalar(@removePackages) > 0) {
 		$deinstString .= join(' ', @removePackages).' 2>&1';
 		printLog("deinstallation command: $deinstString", 'L2');
+		unlockPackageManagement();
 		$retString = `$deinstString`;
+		lockPackageManagement();
 		printLog("deinstallation result: $retString", 'L2');
 		if ($? != 0) {
 			printLog("error: $?", 'L0');
@@ -8206,6 +8381,7 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				lockPackageManagement();
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -8221,6 +8397,7 @@ if (@ARGV != 0) {
 					createFile($tomteFinishedFile, 'finished', 0);
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
+				lockPackageManagement();
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -8247,6 +8424,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			if (validModuleName($argValue{module}) ne '') {
+				lockPackageManagement();
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
 				}
@@ -8282,6 +8460,7 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				lockPackageManagement();
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
@@ -8297,6 +8476,7 @@ if (@ARGV != 0) {
 					createFile($tomteFinishedFile, 'finished', 0);
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
+				lockPackageManagement();
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
