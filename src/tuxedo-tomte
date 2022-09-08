@@ -148,25 +148,25 @@ my %postConfProgram = (
 #
 my %lockFiles = (
 	aptArchivesLock => {
-		fileName => '/var/cache/apt/archives/lock',
+		filename => '/var/cache/apt/archives/lock',
 		FH => '',
 		number => '0',
 		locked => '0',
 	},
 	aptListsLock => {
-		fileName => '/var/lib/apt/lists/lock',
+		filename => '/var/lib/apt/lists/lock',
 		FH => '',
 		number => '0',
 		locked => '0',
 	},
 	dpkgLock => {
-		fileName => '/var/lib/dpkg/lock',
+		filename => '/var/lib/dpkg/lock',
 		FH => '',
 		number => '0',
 		locked => '0',
 	},
 	dpkgLockFrontend => {
-		fileName => '/var/lib/dpkg/lock-frontend',
+		filename => '/var/lib/dpkg/lock-frontend',
 		FH => '',
 		number => '0',
 		locked => '0',
@@ -1938,14 +1938,14 @@ sub dieSingleton {
 #
 sub acquireLock {
 	my $key = shift;
-	my $fileName = $lockFiles{$key}{filename};
+	my $filename = $lockFiles{$key}{filename};
 	my $FH;
 	my $fs;
 	my $num;
-	print "filename to lock: $fileName\n";
-	if (sysopen($FH, $fileName, O_RDWR | O_CREAT)) {
+	print "filename to lock: $filename\n";
+	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("acquiring lock: $fileName", 'TL2');
+		printLog("acquiring lock: $filename", 'TL2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
@@ -1959,11 +1959,11 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("failed to get write lock: $fileName: $fs->error", 'TL2');
+			printLog("failed to get write lock: $filename: $fs->error", 'TL2');
 			return (0);
 		}
 	} else {
-		printLog("failed to open: $fileName: $!", 'TL2');
+		printLog("failed to open: $filename: $!", 'TL2');
 		return (0);
 	}
 }
@@ -1975,40 +1975,40 @@ sub acquireLock {
 #
 sub releaseLock {
 	my $key = shift;
-	my $fileName = $lockFiles{$key}{filename};
+	my $filename = $lockFiles{$key}{filename};
 	my $FH = $lockFiles{$key}{FH};
 	my $num = $lockFiles{$key}{number};
 	my $fs;
-	printLog("release: $fileName", 'TL2');
+	printLog("release: $filename", 'TL2');
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
 				$fs = new File::FcntlLock;
 				$fs->l_type(F_UNLCK);
-				printLog("releasing lock: $fileName", "TL2");
+				printLog("releasing lock: $filename", "TL2");
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
 						$lockFiles{$key}{'locked'} = 0;
-						printLog("file $fileName closed", 'TL2');
+						printLog("file $filename closed", 'TL2');
 						return (1);
 					} else {
-						printLog("close failed: $fileName: $!", 'TL2');
+						printLog("close failed: $filename: $!", 'TL2');
 						return (0);
 					}
 				} else {
-					printLog("unlock failed: $fileName: $fs->error", 'TL2');
+					printLog("unlock failed: $filename: $fs->error", 'TL2');
 					return (0);
 				}
 			} else {
-				printLog("truncate failed: $fileName: $!", 'TL2');
+				printLog("truncate failed: $filename: $!", 'TL2');
 				return (0);
 			}
 		} else {
-			printLog("write failed: $fileName: $!", 'TL2');
+			printLog("write failed: $filename: $!", 'TL2');
 			return (0);
 		}
 	} else {
-		printLog("seek failed: $fileName: $!", 'TL2');
+		printLog("seek failed: $filename: $!", 'TL2');
 		return (0);
 	}
 }
@@ -2021,9 +2021,9 @@ sub lockPackageManagement {
 	printLog("begin locking all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if (acquireLock($key)) {
-			printLog("locked filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+			printLog("locked filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
 		} else {
-			printLog("locking $lockFiles{$key}{fileName} failed", 'TL2');
+			printLog("locking $lockFiles{$key}{filename} failed", 'TL2');
 		}
 	}
 	printLog("finished locking all files", 'TL2');
@@ -2041,7 +2041,7 @@ sub unlockPackageManagement {
 	printLog("begin unlock all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if ($lockFiles{$key}{locked}) {
-			printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+			printLog("filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
 			$returnValue += releaseLock($key);
 		} else {
 			printLog("$key undefined lock status", 'TL2');
@@ -2770,7 +2770,7 @@ sub amdgpuwithnvidiafix() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
+	my $filename = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
 	my $niceTime = getBackupFileTime();
 	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
 		"Section \"OutputClass\"\n".
@@ -2783,7 +2783,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = createFile($filename, $fileText, 1);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2804,8 +2804,8 @@ sub amdgpuwithnvidiafix() {
 		if (removeWarningMessage('')) {
 			printLog("removing $module", 'TL0');
 			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
-			if (backupFile($fileName)) {
-				unlink($fileName);
+			if (backupFile($filename)) {
+				unlink($filename);
 			} else {
 				printLog('can\'t remove fix, it seems to be gone already', 'TL1');
 			}
@@ -3375,8 +3375,8 @@ sub threegfix() {
 	my $action = shift;
 	my $retval1;
 	my $retval2;
-	my $fileName1 = '/etc/modprobe.d/huawei-me936.conf';
-	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $filename1 = '/etc/modprobe.d/huawei-me936.conf';
+	my $filename2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15bb\n";
@@ -3384,8 +3384,8 @@ sub threegfix() {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = createFile($filename1, $fileText1, 1);
+		$retval2 = createFile($filename2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3398,8 +3398,8 @@ sub threegfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = createFile($filename1, $fileText1, 1);
+		$retval2 = createFile($filename2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3429,8 +3429,8 @@ sub threegfix2() {
 	my $action = shift;
 	my $retval1;
 	my $retval2;
-	my $fileName1 = '/etc/modprobe.d/huawei-me906s.conf';
-	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $filename1 = '/etc/modprobe.d/huawei-me906s.conf';
+	my $filename2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15c1\n";
@@ -3438,8 +3438,8 @@ sub threegfix2() {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15c1\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"2\", ATTR{bConfigurationValue}=\"2\"";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = createFile($filename1, $fileText1, 1);
+		$retval2 = createFile($filename2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3452,8 +3452,8 @@ sub threegfix2() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = createFile($filename1, $fileText1, 1);
+		$retval2 = createFile($filename2, $fileText2, 1);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3794,7 +3794,7 @@ sub tuxedorestoreaudiofix() {
 	my $action = shift;
 	my $retval1;
 	my $retval2;
-	my $fileName = '/lib/systemd/system/restore-audiocards.service';
+	my $filename = '/lib/systemd/system/restore-audiocards.service';
 	my $fileText = "# added by tuxedo-tomte \n".
 		"[Unit]\n".
 		"Description=Rescan the PCI-Bus for missed audio cards\n".
@@ -3813,7 +3813,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName, $fileText, 1);
+		$retval1 = createFile($filename, $fileText, 1);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -4984,13 +4984,13 @@ sub cardreaderfix() {
 	my $module = shift;
 	my $action = shift;
 	my $retval1;
-	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
+	my $filename1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval1 = createFile($filename1, $fileText1, 1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5020,21 +5020,21 @@ sub samsungnvmefix() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	my $fileName = '/lib/udev/rules.d/99-pulse1502-samsung-nvme.rules';
+	my $filename = '/lib/udev/rules.d/99-pulse1502-samsung-nvme.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
 	if ($action eq 'install') {
-		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
-			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
+		if (isLineInFile($filename, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
+			isLineInFile($filename, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
 			printLog("entries for samsungnvmefix are already present", 'TL2');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
 			$configuredModules{$module} = 'nothingToDo';
 		} else {
 			printLog("applying $origConfModules{$module}{name}", 'L1');
-			$retval = createFile($fileName, $fileText, 1);
+			$retval = createFile($filename, $fileText, 1);
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5048,7 +5048,7 @@ sub samsungnvmefix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = createFile($filename, $fileText, 1);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -6255,15 +6255,15 @@ sub removeKernelParameters {
 # returns '1' if successfull, '0' if not
 # 
 sub createFile {
-	my ($fileName, $fileText, $backup) = @_;
+	my ($filename, $fileText, $backup) = @_;
 	my $FH;
-	if ( open($FH, ">",$fileName) ) {
+	if ( open($FH, ">",$filename) ) {
 		print $FH "$fileText";
 		close $FH;
 		return (1);
 	} else {
 		printLog("Err: $!", 'L0');
-		printLog("can't open $fileName for writing", 'TL0');
+		printLog("can't open $filename for writing", 'TL0');
 		return (0);
 	}
 }
@@ -6274,16 +6274,16 @@ sub createFile {
 # appends text to the file
 # 
 sub appendFile {
-	my $fileName = shift;
+	my $filename = shift;
 	my $fileText = shift;
 	my $FH;
-	if ( open($FH, ">>",$fileName) ) {
+	if ( open($FH, ">>",$filename) ) {
 		print $FH "$fileText";
 		close $FH;
 		return (1);
 	} else {
 		printLog("Err: $!", 'L0');
-		printLog("can't open $fileName for writing", 'TL0');
+		printLog("can't open $filename for writing", 'TL0');
 		return (0);
 	}
 }
@@ -6294,14 +6294,14 @@ sub appendFile {
 # backups file with timestamp
 # 
 sub backupFile {
-	my $fileName = shift;
-	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
-	if (copy($fileName, $backupFile)) {
-		printLog("created backup for $fileName", 'TL');
+	my $filename = shift;
+	my $backupFile = $filename.'_'.getBackupFileTime().'.bak';
+	if (copy($filename, $backupFile)) {
+		printLog("created backup for $filename", 'TL');
 		return (1);
 	} else {
 		printLog("Err: $!", 'L0');
-		printLog("can't create backup file for $fileName", 'TL0');
+		printLog("can't create backup file for $filename", 'TL0');
 		return (0);
 	}
 }
