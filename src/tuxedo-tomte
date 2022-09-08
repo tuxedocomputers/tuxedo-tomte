@@ -149,15 +149,27 @@ my %postConfProgram = (
 my %lockFiles = (
 	aptArchivesLock => {
 		fileName => '/var/cache/apt/archives/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
 	},
 	aptListsLock => {
 		fileName => '/var/lib/apt/lists/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
 	},
 	dpkgLock => {
 		fileName => '/var/lib/dpkg/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
 	},
 	dpkgLockFrontend => {
 		fileName => '/var/lib/dpkg/lock-frontend',
+		FH => '',
+		number => '0',
+		locked => '0',
 	},
 );
 
@@ -1925,7 +1937,8 @@ sub dieSingleton {
 # returns 0 if failed
 #
 sub acquireLock {
-	my $fileName = shift;
+	my $key = shift;
+	my $fileName = $lockFiles{$key}{filename};
 	my $FH;
 	my $fs;
 	my $num;
@@ -1940,8 +1953,12 @@ sub acquireLock {
 		if ($fs->lock( $FH, F_SETLKW )) {
 			printLog("locking successfull", 'TL2');
 			$num = <$FH> || 0;
-			return ($FH, $num);
+			$lockFiles{$key}{'FH'} = $FH;
+			$lockFiles{$key}{'number'} = $num;
+			$lockFiles{$key}{'locked'} = 1;
+			return (1);
 		} else {
+			$lockFiles{$key}{'locked'} = 0;
 			printLog("failed to get write lock: $fileName: $fs->error", 'TL2');
 			return (0);
 		}
@@ -1957,9 +1974,10 @@ sub acquireLock {
 # returns 0 if failed
 #
 sub releaseLock {
-	my $fileName = shift;
-	my $FH = shift;
-	my $num = shift;
+	my $key = shift;
+	my $fileName = $lockFiles{$key}{filename};
+	my $FH = $lockFiles{$key}{FH};
+	my $num = $lockFiles{$key}{number};
 	my $fs;
 	printLog("release: $fileName", 'TL2');
 	if (seek($FH, 0, SEEK_SET)) {
@@ -1970,6 +1988,7 @@ sub releaseLock {
 				printLog("releasing lock: $fileName", "TL2");
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
+						$lockFiles{$key}{'locked'} = 0;
 						printLog("file $fileName closed", 'TL2');
 						return (1);
 					} else {
@@ -2001,8 +2020,11 @@ sub lockPackageManagement {
 	my $key;
 	printLog("begin locking all files", 'TL2');
 	foreach $key (keys %lockFiles) {
-		($lockFiles{$key}{'FH'}, $lockFiles{$key}{'number'}) = acquireLock($lockFiles{$key}{fileName});
-		printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+		if (acquireLock($key)) {
+			printLog("locked filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+		} else {
+			printLog("locking $lockFiles{$key}{fileName} failed", 'TL2');
+		}
 	}
 	printLog("finished locking all files", 'TL2');
 }
@@ -2018,8 +2040,12 @@ sub unlockPackageManagement {
 	my $returnValue = 0;
 	printLog("begin unlock all files", 'TL2');
 	foreach $key (keys %lockFiles) {
-		printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
-		$returnValue += releaseLock($lockFiles{$key}{fileName}, $lockFiles{$key}{FH}, 3, $lockFiles{$key}{number});
+		if ($lockFiles{$key}{locked}) {
+			printLog("filename: $lockFiles{$key}{fileName} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+			$returnValue += releaseLock($key);
+		} else {
+			printLog("$key undefined lock status", 'TL2');
+		}
 	}
 	printLog("finished unlock all files: $returnValue", 'TL2');
 	return ($returnValue);
