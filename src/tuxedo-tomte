@@ -1969,7 +1969,7 @@ sub acquireLock {
 }
 
 ###############################################################################
-# release lock: releaseLock(filename, filehandle, number)
+# release lock: releaseLock(hashkey)
 # returns 1 if successfull
 # returns 0 if failed
 #
@@ -2037,16 +2037,18 @@ sub lockPackageManagement {
 
 
 ###############################################################################
-# unlock all files for package management
+# unlock all files for package management: unlockPackageManagement(reason)
+# reason is just a text string
 # does nothing if in FAI
 #
 sub unlockPackageManagement {
+	my $reason = shift;
 	my $key;
 	my $returnValue = 0;
 	if ($FAI) {
 		return (1);
 	}
-	printLog("begin unlock all files", 'TL2');
+	printLog("begin unlock all files for >$reason<", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if ($lockFiles{$key}{locked}) {
 			printLog("filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
@@ -2055,7 +2057,7 @@ sub unlockPackageManagement {
 			printLog("$key undefined lock status", 'TL2');
 		}
 	}
-	printLog("finished unlock all files: $returnValue", 'TL2');
+	printLog("finished unlock all files for >$reason<: $returnValue", 'TL2');
 	return ($returnValue);
 }
 
@@ -2207,7 +2209,7 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	unlockPackageManagement();
+	unlockPackageManagement('pkcon refresh');
 	my $output = `pkcon refresh`;
 	lockPackageManagement();
 	printLog("return from pkcon refresh: $output", 'L2');
@@ -3079,7 +3081,7 @@ sub tuxedorepos() {
 				# installation
 				if (!$FAI) {
 					checkNetwork(10,10);
-					unlockPackageManagement();
+					unlockPackageManagement('pkcon refresh');
 					$output = `pkcon refresh`;
 					lockPackageManagement();
 					$exitStatus = $?/256;
@@ -3120,7 +3122,7 @@ sub tuxedorepos() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				checkNetwork(10,10);
-				unlockPackageManagement();
+				unlockPackageManagement('pkcon refresh');
 				$output = `pkcon refresh`;
 				lockPackageManagement();
 				$exitStatus = $?/256;
@@ -3200,7 +3202,7 @@ sub tuxedomirrors() {
 				# installation
 				if (!$FAI) {
 					checkNetwork(10,10);
-					unlockPackageManagement();
+					unlockPackageManagement('pkcon refresh');
 					$output = `pkcon refresh`;
 					lockPackageManagement();
 					$exitStatus = $?/256;
@@ -3241,7 +3243,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				checkNetwork(10,10);
-				unlockPackageManagement();
+				unlockPackageManagement('pkcon refresh');
 				$output = `pkcon refresh`;
 				lockPackageManagement();
 				$exitStatus = $?/256;
@@ -5293,7 +5295,7 @@ sub addRepoKey {
 		printLog("TUXEDO keyring is not installed", 'TL2');
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		usleep(300000);
-		unlockPackageManagement();
+		unlockPackageManagement('apt-get keyring');
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
 		lockPackageManagement();
 		$errorCode = $?/256;
@@ -5484,7 +5486,7 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		unlockPackageManagement();
+		unlockPackageManagement('pkcon remove');
 		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
 		lockPackageManagement();
 	}
@@ -5500,7 +5502,7 @@ sub deinstExcept {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
 		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
-		unlockPackageManagement();
+		unlockPackageManagement('pkcon remove');
 		my $retText = `$deinstCmd`;
 		lockPackageManagement();
 		if ($? != 0) {
@@ -5557,7 +5559,7 @@ sub deinstallPackage {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
 		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
-		unlockPackageManagement();
+		unlockPackageManagement('pkcon remove');
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
@@ -5590,7 +5592,7 @@ sub deinstallSinglePackage {
 	printLog("deinstalling: $deinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
-		unlockPackageManagement();
+		unlockPackageManagement('pkcon deinst');
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
@@ -5642,7 +5644,7 @@ sub installPackage {
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		unlockPackageManagement();
+		unlockPackageManagement("pkcon apt-get install $packageName");
 		if ($logLevel > 1) {
 			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
 		} else {
@@ -5654,7 +5656,7 @@ sub installPackage {
 	} else {
 		printLog("install package $packageName", 'L0');
 		checkNetwork(10,10);
-		unlockPackageManagement();
+		unlockPackageManagement("pkcon install $packageName");
 		if ($logLevel > 1) {
 			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 		} else {
@@ -5667,7 +5669,7 @@ sub installPackage {
 			printLog("failed to install $packageName", 'L0');
 			printLog("will try again later", 'L0');
 			# repair a possibly wrecked package manager	
-			unlockPackageManagement();
+			unlockPackageManagement('dpkg configure');
 			`dpkg --configure -a`;
 			lockPackageManagement();
 			startTomteDelayed();
@@ -5687,7 +5689,7 @@ sub removePackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
-	unlockPackageManagement();
+	unlockPackageManagement("pkcon remove $packageName");
 	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
 	lockPackageManagement();
 	printLog("return from pkcon:\n$retval", 'L2');
@@ -5741,9 +5743,7 @@ sub installKernelFlavour {
 		$somethingDone = 0;
 	}
 	my $partialName;
-	unlockPackageManagement();
 	my $installCmd = 'apt-get install -yq ';
-	lockPackageManagement();
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
@@ -5783,14 +5783,14 @@ sub installKernelFlavour {
 	if ($packageMissing) {
 		messageLongInstall();
 		printLog("installing $flavour", 'L1');
-		unlockPackageManagement();
+		unlockPackageManagement('apt-get update and install kernel');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		lockPackageManagement();
 		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
 			printLog("executing: make configure -a", 'L2');
-			unlockPackageManagement();
+			unlockPackageManagement('dpkg configure');
 			`dpkg --configure -a`;
 			lockPackageManagement();
 			if ($? != 0) {
@@ -5799,7 +5799,9 @@ sub installKernelFlavour {
 				$failed += 1;
 				return (0);
 			} else {
+				unlockPackageManagement('apt-get install kernel');
 				$retString = `$installCmd`;
+				lockPackageManagement();
 			}
 		}
 		if ($? != 0) {
@@ -6025,13 +6027,13 @@ sub uninstKernelFlavour {
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText, 1);
 			chmod 755, '/usr/bin/linux-check-removal';
-			unlockPackageManagement();
+			unlockPackageManagement('apt-get remove kernel');
 			$retString = `$deinstString`;
 			lockPackageManagement();
 			if ($retString =~ /sudo dpkg --configure -a/) {
 				printLog("some packages are not configured", 'L2');
 				printLog("executing: dpkg --configure -a", 'L2');
-				unlockPackageManagement();
+				unlockPackageManagement('dpkg configure');
 				`dpkg --configure -a`;
 				lockPackageManagement();
 				if ($? != 0) {
@@ -6039,7 +6041,7 @@ sub uninstKernelFlavour {
 					$failed += 1;
 					return (0);
 				} else {
-					unlockPackageManagement();
+					unlockPackageManagement('apt-get remove kernel');
 					$retString = `$deinstString`;
 					lockPackageManagement();
 				}
@@ -6049,7 +6051,7 @@ sub uninstKernelFlavour {
 			printLog("current kernel $kernelToDelete deinstalled", 'L0');
 		} else {
 			printLog("deinstallation command: $deinstString", 'L2');
-			unlockPackageManagement();
+			unlockPackageManagement('apt-get remove kernel');
 			$retString = `$deinstString`;
 			lockPackageManagement();
 		}
@@ -6134,7 +6136,7 @@ sub uninstallRemnantKernels {
 	if (scalar(@removePackages) > 0) {
 		$deinstString .= join(' ', @removePackages).' 2>&1';
 		printLog("deinstallation command: $deinstString", 'L2');
-		unlockPackageManagement();
+		unlockPackageManagement('apt-get remove remnant kernel');
 		$retString = `$deinstString`;
 		lockPackageManagement();
 		printLog("deinstallation result: $retString", 'L2');
