@@ -2015,9 +2015,13 @@ sub releaseLock {
 
 ###############################################################################
 # lock all files for package management
+# does nothing if in FAI
 #
 sub lockPackageManagement {
 	my $key;
+	if ($FAI) {
+		return (1);
+	}
 	printLog("begin locking all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if (acquireLock($key)) {
@@ -2034,10 +2038,14 @@ sub lockPackageManagement {
 
 ###############################################################################
 # unlock all files for package management
+# does nothing if in FAI
 #
 sub unlockPackageManagement {
 	my $key;
 	my $returnValue = 0;
+	if ($FAI) {
+		return (1);
+	}
 	printLog("begin unlock all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if ($lockFiles{$key}{locked}) {
@@ -7343,17 +7351,19 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if ($origConfModules{$module}{required} eq 'yes') {
-			if ($origConfModules{$module}{reconfigure} eq 'always') {
-				# reconfigure modules with 'always' every single time
-				reconfigureSingleModule($origConfModules{$module}{name});
-			} else {
-				configureSingleModule($origConfModules{$module}{name});
-			}
-		} elsif (($origConfModules{$module}{required} eq 'no') &&
+		if ($origConfModules{$module}{order} ne 'first') {
+			if ($origConfModules{$module}{required} eq 'yes') {
+				if ($origConfModules{$module}{reconfigure} eq 'always') {
+					# reconfigure modules with 'always' every single time
+					reconfigureSingleModule($origConfModules{$module}{name});
+				} else {
+					configureSingleModule($origConfModules{$module}{name});
+				}
+			} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
-			removeSingleModule($origConfModules{$module}{name});
+				removeSingleModule($origConfModules{$module}{name});
+			}
 		}
 	}
 }
@@ -7437,11 +7447,13 @@ sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
-			reconfigureSingleModule($origConfModules{$module}{name});
-		} elsif (($origConfModules{$module}{required} eq 'no') &&
-				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
-			removeModule($module);
+		if ($origConfModules{$module}{order} ne 'first') {
+			if ($origConfModules{$module}{required} eq 'yes') {
+				reconfigureSingleModule($origConfModules{$module}{name});
+			} elsif (($origConfModules{$module}{required} eq 'no') &&
+					(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+				removeModule($module);
+			}
 		}
 	}
 }
