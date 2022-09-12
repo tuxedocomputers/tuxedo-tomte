@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.2-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.2-6) UNRELEASED; urgency=medium
 
   * added debug
   * after packaging
@@ -12,8 +12,10 @@ tuxedo-tomte (2.7.2-5) UNRELEASED; urgency=medium
   * corrected scalar names and position of locks
   * after packaging
   * moved https repo conversion to post FAI requisites, removed repos from FAI postrequisites
+  * after packaging
+  * removing module install if first from all modules installations
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Sep 2022 08:56:01 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Sep 2022 10:38:34 +0200
 
 tuxedo-tomte (2.7.2) jammy; urgency=medium
 
