@@ -4227,6 +4227,10 @@ sub nvidiadriver() {
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
 				printLog("$origConfModules{$module}{name} installation failed", 'L1');
+				printLog("old drivers removed: $oldDriversRemoved", 'L1');
+				printLog("package nvidia-driver: $packageNvidiaDriver", 'L1');
+				printLog("package mesa-utils: $packageMesaUtils", 'L1');
+				printLog("package nvidia-prime: $packageNvidiaPrime", 'L1');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -5747,6 +5751,7 @@ sub installKernelFlavour {
 	my $allPackagesInstalled = 1;
 	my @lines;
 	my $packageMissing = 0;
+	my $errorCode;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		$failed += 1;
@@ -5789,7 +5794,8 @@ sub installKernelFlavour {
 			`dpkg --configure -a`;
 			lockPackageManagement();
 			if ($? != 0) {
-				printLog("configure -a failed!! exiting", 'L0');
+				$errorCode = $?/256;
+				printLog("configure -a failed!! error code: $errorCode, exiting", 'L0');
 				$failed += 1;
 				return (0);
 			} else {
@@ -5797,8 +5803,9 @@ sub installKernelFlavour {
 			}
 		}
 		if ($? != 0) {
+			$errorCode = $?/256;
 			printLog("something went wrong while installing kernel packages", 'TL0');
-			printLog("error: $?", 'L0');
+			printLog("error: $errorCode", 'L0');
 			printLog("$retString", 'L0');
 		}
 	
@@ -8105,7 +8112,11 @@ sub listSuccess {
 	if (@failedModules) {
 		print "\nThe following modules have failed to be installed:\n";
 		if (triesAlreadyDone() <= $triesLimit) {
-			print "Tomte will try to install them again in a few minutes\n";
+			if ($FAI) {
+				print "Tomte will try to install them after reboot\n";
+			} else {
+				print "Tomte will try to install them again in a few minutes\n";
+			}
 		}
 		printNameDescriptionModules(@failedModules);
 	}
