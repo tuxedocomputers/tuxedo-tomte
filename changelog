@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.2-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.2-7) UNRELEASED; urgency=medium
 
   * added debug
   * after packaging
@@ -14,8 +14,10 @@ tuxedo-tomte (2.7.2-6) UNRELEASED; urgency=medium
   * moved https repo conversion to post FAI requisites, removed repos from FAI postrequisites
   * after packaging
   * removing module install if first from all modules installations
+  * after packaging
+  * changed error codes, nvidia install logs, some messages
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Sep 2022 10:38:34 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Sep 2022 13:08:27 +0200
 
 tuxedo-tomte (2.7.2) jammy; urgency=medium
 
