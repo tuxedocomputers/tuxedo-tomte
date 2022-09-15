@@ -994,6 +994,17 @@ my %tuxedo_devices = (
 		display => 'AUO Model 21229 Serial Number 808797180',
 		usb_device => '',
 	},
+	'48' => {
+		model => ['TUXEDO Stellaris Gen4 AMD'],
+		board_name => ['GMxRGxx'],
+		fix => ['tuxedokeyboardite', "tuxedotouchpadswitch"],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -2144,6 +2155,7 @@ sub checkRequirements {
 		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxMGxx/) ||
+		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /PF5LUXG/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
@@ -2207,7 +2219,8 @@ sub checkRequirements {
 		($boardname =~ /PCx0Dx_GN20/) ||
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxAGxx/) ||
-		($boardname =~ /GMxTGxx/)) {
+		($boardname =~ /GMxTGxx/) ||
+		($boardname =~ /GMxRGxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
 	}
