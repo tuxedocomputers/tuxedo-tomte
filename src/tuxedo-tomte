@@ -37,11 +37,10 @@ use Digest::MD5 qw(md5_hex);
 # for debugging
 use Data::Dumper;
 # logLevel:
-# TODO debug
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1942,16 +1941,15 @@ sub acquireLock {
 	my $FH;
 	my $fs;
 	my $num;
-	print "filename to lock: $filename\n";
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("acquiring lock: $filename", 'TL2');
+		printLog("acquiring lock: $filename", 'L2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_SETLKW )) {
-			printLog("locking successfull", 'TL2');
+			printLog("locking successfull", 'L2');
 			$num = <$FH> || 0;
 			$lockFiles{$key}{'FH'} = $FH;
 			$lockFiles{$key}{'number'} = $num;
@@ -1959,11 +1957,11 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("failed to get write lock: $filename: $fs->error", 'TL2');
+			printLog("failed to get write lock: $filename: $fs->error", 'L2');
 			return (0);
 		}
 	} else {
-		printLog("failed to open: $filename: $!", 'TL2');
+		printLog("failed to open: $filename: $!", 'L2');
 		return (0);
 	}
 }
@@ -1979,36 +1977,33 @@ sub releaseLock {
 	my $FH = $lockFiles{$key}{FH};
 	my $num = $lockFiles{$key}{number};
 	my $fs;
-	printLog("release: $filename", 'TL2');
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
 				$fs = new File::FcntlLock;
 				$fs->l_type(F_UNLCK);
-				printLog("releasing lock: $filename", "TL2");
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
 						$lockFiles{$key}{'locked'} = 0;
-						printLog("file $filename closed", 'TL2');
 						return (1);
 					} else {
-						printLog("close failed: $filename: $!", 'TL2');
+						printLog("close failed: $filename: $!", 'L2');
 						return (0);
 					}
 				} else {
-					printLog("unlock failed: $filename: $fs->error", 'TL2');
+					printLog("unlock failed: $filename: $fs->error", 'L2');
 					return (0);
 				}
 			} else {
-				printLog("truncate failed: $filename: $!", 'TL2');
+				printLog("truncate failed: $filename: $!", 'L2');
 				return (0);
 			}
 		} else {
-			printLog("write failed: $filename: $!", 'TL2');
+			printLog("write failed: $filename: $!", 'L2');
 			return (0);
 		}
 	} else {
-		printLog("seek failed: $filename: $!", 'TL2');
+		printLog("seek failed: $filename: $!", 'L2');
 		return (0);
 	}
 }
@@ -2022,15 +2017,14 @@ sub lockPackageManagement {
 	if ($FAI) {
 		return (1);
 	}
-	printLog("begin locking all files", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if (acquireLock($key)) {
-			printLog("locked filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
+			printLog("locked filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'L2');
 		} else {
-			printLog("locking $lockFiles{$key}{filename} failed", 'TL2');
+			printLog("locking $lockFiles{$key}{filename} failed", 'L2');
 		}
 	}
-	printLog("finished locking all files", 'TL2');
+	printLog("finished locking all files", 'L2');
 }
 
 
@@ -2048,16 +2042,14 @@ sub unlockPackageManagement {
 	if ($FAI) {
 		return (1);
 	}
-	printLog("begin unlock all files for >$reason<", 'TL2');
 	foreach $key (keys %lockFiles) {
 		if ($lockFiles{$key}{locked}) {
-			printLog("filename: $lockFiles{$key}{filename} filehandle: $lockFiles{$key}{'FH'} number: $lockFiles{$key}{'number'}", 'TL2');
 			$returnValue += releaseLock($key);
 		} else {
-			printLog("$key undefined lock status", 'TL2');
+			printLog("$key undefined lock status", 'L2');
 		}
 	}
-	printLog("finished unlock all files for >$reason<: $returnValue", 'TL2');
+	printLog("finished unlock all files for >$reason<: $returnValue", 'L2');
 	return ($returnValue);
 }
 
@@ -3040,25 +3032,6 @@ sub tuxedorepos() {
 	my $exitStatus;
 	my $output;
 
-	# if this is a FAI-installation all repos should be already set correctly
-	# only http has to be replaced by https in postrequisitesFAI
-	# TODO remove
-	#	if ($FAI) {
-	#		if (httpToHttps(\%tuxedo_repos) >= 1) {
-	#			$origConfModules{$module}{installed} = "yes";
-	#			$origConfModules{$module}{upgraded} = "yes";
-	#			addToConfiguredModules($module, "success");
-	#			printLog('tuxedo repos set to https', 'L0');
-	#			return (1);
-	#		} else {
-	#			$origConfModules{$module}{installed} = "no";
-	#			$origConfModules{$module}{upgraded} = "no";
-	#			addToConfiguredModules($module, "failed");
-	#			printLog('tuxedo repos could not be set to https', 'L0');
-	#			return (0);
-	#		}
-	#	}
-
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
@@ -3158,26 +3131,6 @@ sub tuxedomirrors() {
 	my $retval3;
 	my $exitStatus;
 	my $output;
-
-	# if this is a FAI-installation all repos should be already set correctly
-	# only http has to be replaced by https
-	# TODO remove
-	#	if ($FAI) {
-	#		if (httpToHttps(\%tuxedo_mirrors)) {
-	#			$origConfModules{$module}{installed} = "yes";
-	#			$origConfModules{$module}{upgraded} = "yes";
-	#			addToConfiguredModules($module, "success");
-	#			printLog('mirror repos set to https', 'L0');
-	#			return (1);
-	#		} else {
-	#			$origConfModules{$module}{installed} = "no";
-	#			$origConfModules{$module}{upgraded} = "no";
-	#			addToConfiguredModules($module, "failed");
-	#			printLog('mirror repos could not be set to https', 'L0');
-	#			return (0);
-	#		}
-	#	}
-
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
