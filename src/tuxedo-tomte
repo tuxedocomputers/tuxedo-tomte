@@ -1069,8 +1069,7 @@ my %tuxedo_devices = (
 #					or deinstall, 'undef' if unknown
 #   required		'yes' or 'no' the system requirements are met
 #					'undef' if unknown
-#					'prerequisite' if essentially needed to be present before
-#					anything else and always, non blockable
+#					'prerequisite' is not blockable
 #   hwid			the environment (HW or SW) are in a certain defined state
 #					rises if additional HW gets support
 #   package			'yes' or 'no', there is a deb or rpm package as a solution
