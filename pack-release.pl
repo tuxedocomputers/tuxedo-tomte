@@ -18,8 +18,8 @@ $branch =~ s/\s//g;
 
 print "on branch: $branch<\n\n";
 
-open my $fh, '<', './src/tuxedo-tomte';
-while (my $line = <$fh>) {
+open my $FH, '<', './src/tuxedo-tomte';
+while (my $line = <$FH>) {
 	if ($line =~ /#TODO/) {
 		print "#########################################\n";
 		print "#########################################\n";
@@ -35,6 +35,7 @@ while (my $line = <$fh>) {
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 	}
 }
+close ($FH);
 
 # get version number
 print "Old version:\n";
@@ -47,17 +48,34 @@ chomp($version);
 $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
 print "got version: $version\n";
 if ($version =~ /^\d+\.\d+\.\d+$/) {
-	open my $fh, '<', './src/tuxedo-tomte';
-	while (my $line = <$fh>) {
+	open my $FH, '<', './src/tuxedo-tomte';
+	while (my $line = <$FH>) {
 		if (($line =~ /^my \$logLevel = /) && ($line !~ /my \$logLevel = 0;/)) {
 			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 			print "\$loglevel not ZERO!!!\n";
 			print "for master releases loglevel must be '0'!!!\n";
 			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+			close ($FH);
 			exit (0);
 		}
 	}
 }
+# set version in sourcefile
+if (open (my $FHin, '<', './src/tuxedo-tomte')) {
+	open (my $FHout, '>', './src/tuxedo-tomte.tmp');
+	while (my $line = <$FHin>) {
+		if ($line =~ /^our \$VERSION = \'.*\';$/) {
+			$line = "our \$VERSION = '$version';\n";
+			print "found line changing\n";
+		}
+		print $FHout $line;
+	}
+	close ($FHin);
+	close ($FHout);
+	unlink ($FHin);
+	rename './src/tuxedo-tomte.tmp', './src/tuxedo-tomte';
+}
+
 $prefix = $package.'_'.$version;
 print "prefix: $prefix\n";
 sleep(2);

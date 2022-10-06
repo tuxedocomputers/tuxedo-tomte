@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+our $VERSION = '2.7.4';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -2220,7 +2221,9 @@ sub checkRequirements {
 		($boardname =~ /GMxZGxx/) ||
 		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxTGxx/) ||
-		($boardname =~ /GMxRGxx/)) {
+		($boardname =~ /GMxRGxx/) ||
+		($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /LAPQC71B/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
 	}
@@ -6532,7 +6535,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog('starting Tomte', 'L1');
+			printLog("starting Tomte $VERSION", 'L1');
 			if ($FAI) {
 				printLog('in FAI mode', 'L1');
 			}
@@ -6549,7 +6552,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog('starting Tomte', 'L1');
+			printLog("starting Tomte $VERSION", 'L1');
 			if ($FAI) {
 				printLog('in FAI mode', 'L1');
 			}
@@ -8069,6 +8072,7 @@ USAGE
 # prints help
 #
 sub help {
+	print "tuxedo-tomte $VERSION\n";
 	print "$USAGE\n";
 	exit 0;
 }
