@@ -52,20 +52,18 @@ chomp($version);
 $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
 print "got version: $version\n";
 if (($version =~ /^\d+\.\d+\.\d+$/) && ($debugMode != 0)) {
-		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-		print "\$loglevel not ZERO!!!\n";
-		print "for master releases loglevel must be '0'!!!\n";
-		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-		exit (0);
-	}
+	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	print "\$loglevel not ZERO!!!\n";
+	print "for master releases loglevel must be '0'!!!\n";
+	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	exit (0);
 }
 if (($version =~ /^\d+\.\d+\.\d+$/) && ($presentTODO != 0)) {
-		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-		print "\TODO's are present!!!\n";
-		print "for master releases no TODO's should be present at all!!!\n";
-		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-		exit (0);
-	}
+	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	print "TODO's are present!!!\n";
+	print "for master releases no TODO's should be present at all!!!\n";
+	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	exit (0);
 }
 
 # set version in sourcefile
