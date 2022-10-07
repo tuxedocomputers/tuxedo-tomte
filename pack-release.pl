@@ -13,6 +13,8 @@ my $version;
 my $changelog = "$cwd"."/debian/changelog";
 my $branch = `git symbolic-ref --short HEAD`;
 my $gbpConf = "$cwd"."/debian/gbp.conf";
+my $debugMode = 0;
+my $presentTODO = 0;
 $branch =~ s/\s//g;
 
 
@@ -26,6 +28,7 @@ while (my $line = <$FH>) {
 		print "     WARNING! '#TODO' in file!!!         \n";
 		print "#########################################\n";
 		print "#########################################\n";
+		$presentTODO = 1;
 	}
 	if (($line =~ /my \$logLevel =/) && ($line !~ /my \$logLevel = 0;/)) {
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
@@ -33,6 +36,7 @@ while (my $line = <$FH>) {
 		print "     WARNING! 'Debug level not ZERO!!!   \n";
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		$debugMode = 1;
 	}
 }
 close ($FH);
@@ -47,19 +51,23 @@ $version = <>;
 chomp($version);
 $version =~ /^\d+\.\d+\.\d+.*$/ || die "wrong version format\n";
 print "got version: $version\n";
-if ($version =~ /^\d+\.\d+\.\d+$/) {
-	open my $FH, '<', './src/tuxedo-tomte';
-	while (my $line = <$FH>) {
-		if (($line =~ /^my \$logLevel = /) && ($line !~ /my \$logLevel = 0;/)) {
-			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-			print "\$loglevel not ZERO!!!\n";
-			print "for master releases loglevel must be '0'!!!\n";
-			print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-			close ($FH);
-			exit (0);
-		}
+if (($version =~ /^\d+\.\d+\.\d+$/) && ($debugMode != 0)) {
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		print "\$loglevel not ZERO!!!\n";
+		print "for master releases loglevel must be '0'!!!\n";
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		exit (0);
 	}
 }
+if (($version =~ /^\d+\.\d+\.\d+$/) && ($presentTODO != 0)) {
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		print "\TODO's are present!!!\n";
+		print "for master releases no TODO's should be present at all!!!\n";
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+		exit (0);
+	}
+}
+
 # set version in sourcefile
 if (open (my $FHin, '<', './src/tuxedo-tomte')) {
 	open (my $FHout, '>', './src/tuxedo-tomte.tmp');
