@@ -5128,6 +5128,7 @@ sub addRepoKey {
 		printLog("dpkglock $outputKey", 'TL2');
 		$outputKey = `lsof /var/lib/dpkg/lock-frontend`;
 		printLog("lock-frontend $outputKey", 'TL2');
+
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
 		$errorCode = $?/256;
 		if ($errorCode != 0) {
