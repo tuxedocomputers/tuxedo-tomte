@@ -5120,6 +5120,14 @@ sub addRepoKey {
 		usleep(500000);
 		$outputKey = `ls -l /tmp`;
 		printLog("ls -l /tmp: $outputKey", 'TL2');
+		$outputKey = `lsof /var/cache/apt/archives/lock`;
+		printLog("archlock $outputKey", 'TL2');
+		$outputKey = `lsof /var/lib/apt/lists/lock`;
+		printLog("listslock $outputKey", 'TL2');
+		$outputKey = `lsof /var/lib/dpkg/lock`;
+		printLog("dpkglock $outputKey", 'TL2');
+		$outputKey = `lsof /var/lib/dpkg/lock-frontend`;
+		printLog("lock-frontend $outputKey", 'TL2');
 		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
 		$errorCode = $?/256;
 		if ($errorCode != 0) {
