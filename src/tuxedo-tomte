@@ -2896,7 +2896,7 @@ sub tuxedorepos() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
 		#TODO debug
-		printLog("retval createRepos: $retVal", 'TL2');
+		printLog("retval createRepos: $retval", 'TL2');
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3052,7 +3052,7 @@ sub tuxedomirrors() {
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
 		#TODO debug
-		printLog("retvalue createRepos: $retval", 'TL2');
+		printLog("retval createRepos: $retval", 'TL2');
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
