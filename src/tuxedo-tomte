@@ -38,7 +38,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2895,10 +2895,10 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		if ($retval > 0) {
-			$retval2 = addRepoKey();
-		}
-		if (($retval == 0) && ($retval2 == 0)) {
+		#TODO debug
+		print "retval createRepos: $retVal\n";
+		addRepoKey();
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2935,9 +2935,9 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
-		if ($retval > 0) {
-			$retval2 = addRepoKey();
-		}
+		#TODO debug
+		print "retval createRepos: $retval\n";
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3011,10 +3011,10 @@ sub tuxedomirrors() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		if ($retval > 0) {
-			$retval2 = addRepoKey();
-		}
-		if (($retval == 0) && ($retval2 == 0)) {
+		#TODO debug
+		print "retval createRepos: $retval\n";
+		addRepoKey();
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3051,9 +3051,9 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
-		if ($retval > 0) {
-			$retval2 = addRepoKey();
-		}
+		#TODO debug
+		print "retvalue createRepos: $retval\n";
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5103,6 +5103,7 @@ sub compareMD5sum {
 ###############################################################################
 # checks if the repo key is installed by comparing to given md5 checksum
 # adds the repo key for TUXEDO repos if not present
+# always returns 1
 #
 sub addRepoKey {
 	my $output;
