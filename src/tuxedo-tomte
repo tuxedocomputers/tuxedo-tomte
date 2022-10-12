@@ -1951,7 +1951,7 @@ sub isLocked {
 	my $num;
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		print("acquiring lock: $filename\n");
+		print("checking lock: $filename\n");
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
@@ -2996,8 +2996,7 @@ sub tuxedorepos() {
 		$retval = createRepos(\%tuxedo_repos);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		addRepoKey();
-		if ($retval == 0) {
+		if (($retval == 0) || (addRepoKey() != 1)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3036,8 +3035,7 @@ sub tuxedorepos() {
 		$retval = createRepos(\%tuxedo_repos);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		addRepoKey();
-		if ($retval == 0) {
+		if (($retval == 0) || (addRepoKey() != 1)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3112,8 +3110,7 @@ sub tuxedomirrors() {
 		$retval3 = cleanSourcesList();
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		addRepoKey();
-		if ($retval == 0) {
+		if (($retval == 0) || (addRepoKey() != 1)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3152,8 +3149,7 @@ sub tuxedomirrors() {
 		$retval = createRepos(\%tuxedo_mirrors);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		addRepoKey();
-		if ($retval == 0) {
+		if (($retval == 0) || (addRepoKey() != 1)) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -5202,7 +5198,8 @@ sub compareMD5sum {
 ###############################################################################
 # checks if the repo key is installed by comparing to given md5 checksum
 # adds the repo key for TUXEDO repos if not present
-# always returns 1
+# returns 1 if package is installed or was installed successfully
+# returns 0 if not
 #
 sub addRepoKey {
 	my $output;
@@ -5215,10 +5212,8 @@ sub addRepoKey {
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		#TODO wrong name
-		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedos-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		#TODO debug
-		while ($counter < 120) {
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		while ($counter < 30) {
 			$counter++;
 			$pmLocked = isPMlocked();
 			if ($pmLocked == 0) {
@@ -5232,15 +5227,17 @@ sub addRepoKey {
 					last;
 				}
 			} elsif ($pmLocked == -1) {
-				printLog("somethings wrong while looking for locks", 'L0');
+				printLog("something is wrong while looking for locks for keyring installation", 'L0');
 			}
 			printLog("problem installing keyring, trying again", 'L2');
 			sleep(1);
 		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
+			return (1);
 		} else {
-			printLog("TUXEDO keyring installation failed", 'TL2');
+			printLog("TUXEDO keyring installation failed", 'L0');
+			return (0);
 		}
 	}
 	return (1);
