@@ -22,6 +22,10 @@ use warnings;
 use autodie;
 use 5.010;
 
+# for file locking
+use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
+use File::FcntlLock;
+
 use File::Copy;
 
 # for OLED backlight and edid decrypt
@@ -61,7 +65,7 @@ if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
 use Fcntl ':flock';
- 
+
 my $ME;
 open ($ME, '<', $0);
 if (!(flock $ME, LOCK_EX|LOCK_NB)) {
@@ -115,6 +119,37 @@ printLog("sessionID: $sessionID", 'TL2');
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
+
+
+###############################################################################
+# files used by package manager utilities to lock package management
+#
+my %lockFiles = (
+	aptArchivesLock => {
+		filename => '/var/cache/apt/archives/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
+	},
+	aptListsLock => {
+		filename => '/var/lib/apt/lists/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
+	},
+	dpkgLock => {
+		filename => '/var/lib/dpkg/lock',
+		FH => '',
+		number => '0',
+		locked => '0',
+	},
+	dpkgLockFrontend => {
+		filename => '/var/lib/dpkg/lock-frontend',
+		FH => '',
+		number => '0',
+		locked => '0',
+	},
+);
 
 
 ###############################################################################
@@ -1900,6 +1935,70 @@ sub dieSingleton {
 	print "Another instance is already running, please wait till it is finished\n";
 	exit (1);
 }
+
+
+###############################################################################
+# checks if a given file is locked
+# returns 0 if it is not locked
+# returns 1 if it is locked
+# returns -1 if something went wrong
+#
+sub isLocked {
+	my $key = shift;
+	my $filename = $lockFiles{$key}{filename};
+	my $FH;
+	my $fs;
+	my $num;
+	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
+		$FH->autoflush(1);
+		print("acquiring lock: $filename\n");
+		$fs = new File::FcntlLock;
+		$fs->l_type( F_WRLCK );
+		$fs->l_whence( SEEK_SET );
+		$fs->l_start( 0 );
+		if ($fs->lock( $FH, F_GETLK )) {
+			unless ($fs->l_type() == F_UNLCK) {
+				return (1);
+			} else {
+				return (0);
+			}
+		} else {
+			printLog("failed to get lock information on: $filename error: $fs->error", 'L0');
+			return (-1);
+		}
+	} else {
+		printLog("failed to open: $filename", 'L0');
+		return (-1);
+	}
+}
+
+
+
+###############################################################################
+# checks if all required files for package management are unlocked
+# only use if it is not required to lock the files simultaneus or race
+# conditions will rise!!
+# returns 1 if any of the required files is locked
+# returns 0 if all of the required files are unlocked
+# returns -1 if something went wrong
+#
+sub isPMlocked {
+	my $key;
+	my $result;
+	foreach $key (keys %lockFiles) {
+		$result = isLocked($key);
+		if ($result == 1) {
+			return (1);
+		}
+		if ($result == -1) {
+			return (-1);
+		}
+	}
+	return (0);
+}
+
+
+
 
 ###############################################################################
 # reads a file and returns an array with the lines
@@ -5110,30 +5209,32 @@ sub addRepoKey {
 	my $retval;
 	my $errorCode;
 	my $outputKey;
+	my $counter = 0;
+	my $pmLocked;
 	# install TUXEDO keyring for repositories
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
-		printLog("TUXEDO keyring is not installed", 'TL2');
+		printLog("TUXEDO keyring is not installed", 'L2');
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		#TODO debug
-		printLog("from wget: $outputKey", 'TL2');
-		usleep(500000);
-		$outputKey = `ls -l /tmp`;
-		printLog("ls -l /tmp: $outputKey", 'TL2');
-		$outputKey = `lsof /var/cache/apt/archives/lock`;
-		printLog("archlock $outputKey", 'TL2');
-		$outputKey = `lsof /var/lib/apt/lists/lock`;
-		printLog("listslock $outputKey", 'TL2');
-		$outputKey = `lsof /var/lib/dpkg/lock`;
-		printLog("dpkglock $outputKey", 'TL2');
-		$outputKey = `lsof /var/lib/dpkg/lock-frontend`;
-		printLog("lock-frontend $outputKey", 'TL2');
-
-		$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
-		$errorCode = $?/256;
-		if ($errorCode != 0) {
-			printLog("error code apt-get: $errorCode", 'L2');
-			printLog("output apt-get: $outputKey", 'L2');
+		while ($counter < 120) {
+			$counter++;
+			$pmLocked = isPMlocked();
+			if ($pmLocked == 0) {
+				$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+				$errorCode = $?/256;
+				if ($errorCode != 0) {
+					printLog("error code apt-get: $errorCode", 'L2');
+					printLog("output apt-get: $outputKey", 'L2');
+				} else {
+					printLog("no errors installing keyrings", 'L2');
+					last;
+				}
+			} elsif ($pmLocked == -1) {
+				printLog("somethings wrong while looking for locks", 'L0');
+			}
+			printLog("problem installing keyring, trying again", 'L2');
+			sleep(1);
 		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
