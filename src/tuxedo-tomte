@@ -5215,7 +5215,8 @@ sub addRepoKey {
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		#TODO wrong name
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedos-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 		#TODO debug
 		while ($counter < 120) {
 			$counter++;
