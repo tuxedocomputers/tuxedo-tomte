@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.5-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.5-13) UNRELEASED; urgency=medium
 
   * after packaging
   * added check for debug or TODO inside source
@@ -23,8 +23,10 @@ tuxedo-tomte (2.7.5-12) UNRELEASED; urgency=medium
   * added handling for missing repoKey
   * after packaging
   * test for wrong name in wget
+  * after packaging
+  * tomte exit if no repokey
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 12 Oct 2022 16:05:59 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 13 Oct 2022 10:58:06 +0200
 
 tuxedo-tomte (2.7.5) jammy; urgency=medium
 
