@@ -2996,7 +2996,13 @@ sub tuxedorepos() {
 		$retval = createRepos(\%tuxedo_repos);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		if (($retval == 0) || (addRepoKey() != 1)) {
+		if (addRepoKey() != 1) {
+			printLog("repository key could not be installed!", 'TL0');
+			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
+			printLog("sudo tomte configure all", 'T0');
+			exit (0);
+		}
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3035,7 +3041,13 @@ sub tuxedorepos() {
 		$retval = createRepos(\%tuxedo_repos);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		if (($retval == 0) || (addRepoKey() != 1)) {
+		if (addRepoKey() != 1) {
+			printLog("repository key could not be installed!", 'TL0');
+			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
+			printLog("sudo tomte configure all", 'T0');
+			exit (0);
+		}
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3109,8 +3121,14 @@ sub tuxedomirrors() {
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
 		#TODO debug
-		printLog("retval createRepos: $retval", 'TL2');
-		if (($retval == 0) || (addRepoKey() != 1)) {
+		printLog("retval create Repos: $retval", 'TL2');
+		if (addRepoKey() != 1) {
+			printLog("repository key could not be installed!", 'TL0');
+			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
+			printLog("sudo tomte configure all", 'T0');
+			exit (0);
+		}
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3149,7 +3167,13 @@ sub tuxedomirrors() {
 		$retval = createRepos(\%tuxedo_mirrors);
 		#TODO debug
 		printLog("retval createRepos: $retval", 'TL2');
-		if (($retval == 0) || (addRepoKey() != 1)) {
+		if (addRepoKey() != 1) {
+			printLog("repository key could not be installed!", 'TL0');
+			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
+			printLog("sudo tomte configure all", 'T0');
+			exit (0);
+		}
+		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
