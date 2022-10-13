@@ -2998,8 +2998,9 @@ sub tuxedorepos() {
 		printLog("retval createRepos: $retval", 'TL2');
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
-			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
-			printLog("sudo tomte configure all", 'T0');
+			printLog("Tomte will try again after reboot or if startet manually with:", 'TL0');
+			printLog("sudo tomte configure all", 'T0L');
+			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
 			exit (0);
 		}
 		if ($retval == 0) {
@@ -3045,6 +3046,7 @@ sub tuxedorepos() {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
 			printLog("sudo tomte configure all", 'T0');
+			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
 			exit (0);
 		}
 		if ($retval == 0) {
@@ -3126,6 +3128,7 @@ sub tuxedomirrors() {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
 			printLog("sudo tomte configure all", 'T0');
+			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
 			exit (0);
 		}
 		if ($retval == 0) {
@@ -3171,6 +3174,7 @@ sub tuxedomirrors() {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
 			printLog("sudo tomte configure all", 'T0');
+			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
 			exit (0);
 		}
 		if ($retval == 0) {
