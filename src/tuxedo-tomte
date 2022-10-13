@@ -2994,8 +2994,6 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		#TODO debug
-		printLog("retval createRepos: $retval", 'TL2');
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'TL0');
@@ -3040,8 +3038,6 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
-		#TODO debug
-		printLog("retval createRepos: $retval", 'TL2');
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
@@ -3122,8 +3118,6 @@ sub tuxedomirrors() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		#TODO debug
-		printLog("retval create Repos: $retval", 'TL2');
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
@@ -3168,8 +3162,6 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
-		#TODO debug
-		printLog("retval createRepos: $retval", 'TL2');
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
@@ -5240,9 +5232,8 @@ sub addRepoKey {
 	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		#TODO wrong name
-		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedos-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		while ($counter < 30) {
+		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+		while ($counter < 60) {
 			$counter++;
 			$pmLocked = isPMlocked();
 			if ($pmLocked == 0) {
