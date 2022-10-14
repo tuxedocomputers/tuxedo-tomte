@@ -520,7 +520,6 @@ my %flavours = (
 
 
 ###############################################################################
-#
 # Each device has
 # - a unique ID
 # - one or more model names (array)
@@ -534,6 +533,7 @@ my %flavours = (
 # - USB device (if needed)
 # default kernels tuxedokernel2004 and tuxeookernel2204 are not listed
 # only kernels that deviate from the default are listed
+#
 my %tuxedo_devices = (
 	'1' => {
 		model => ['TUXEDO Aura 15 Gen1'],
@@ -2994,12 +2994,12 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
+		#TODO WIP
 		if (addRepoKey() != 1) {
 			printLog("repository key could not be installed!", 'TL0');
 			printLog("Tomte will try again after reboot or if startet manually with:", 'TL0');
 			printLog("sudo tomte configure all", 'T0L');
 			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
-			exit (0);
 		}
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3016,7 +3016,7 @@ sub tuxedorepos() {
 				# repo updates have to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork(10,10);
+					checkNetwork(1800, 2);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -3059,7 +3059,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork(10,10);
+				checkNetwork(1800, 2);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -3140,7 +3140,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork(10,10);
+					checkNetwork(1800, 2);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -3183,7 +3183,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork(10,10);
+				checkNetwork(1800, 2);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -5229,11 +5229,11 @@ sub addRepoKey {
 	my $counter = 0;
 	my $pmLocked;
 	# install TUXEDO keyring for repositories
-	checkNetwork(10,10);
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
+		checkNetwork(1800, 2);
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		while ($counter < 60) {
+		while ($counter < 30) {
 			$counter++;
 			$pmLocked = isPMlocked();
 			if ($pmLocked == 0) {
@@ -5250,7 +5250,7 @@ sub addRepoKey {
 				printLog("something is wrong while looking for locks for keyring installation", 'L0');
 			}
 			printLog("problem installing keyring, trying again", 'L2');
-			sleep(1);
+			sleep(2);
 		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
@@ -5596,7 +5596,7 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		checkNetwork(10,10);
+		checkNetwork(1800, 2);
 		if ($logLevel > 1) {
 			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 		} else {
@@ -6408,6 +6408,7 @@ sub replaceTextInFile {
 ###############################################################################
 # returns 1 if active interface found
 # returns 0 if none found
+#
 sub networkStatus {
 	my $dirHandle;
 	my $interfacesDir = '/sys/class/net';
@@ -6433,12 +6434,13 @@ sub networkStatus {
 # tries 'number of tries' times and waits in between for 'wait seconds' seconds
 # returns 1 if network is active
 # returns 0 if network not active
+#
 sub waitForNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
 	for ( my $i=1; $i<=$triesNbr; $i++ ) {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $triesNbr");
+		printLog("waiting for network: $i of $triesNbr", 'TL2');
 		sleep ($wait);
 	}
 	return (0);
@@ -6448,7 +6450,8 @@ sub waitForNetwork {
 
 
 ###############################################################################
-# waitForNetwork('number of tries', 'wait seconds')
+# checkForNetwork('number of tries', 'wait seconds')
+#
 sub checkNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
@@ -6458,7 +6461,7 @@ sub checkNetwork {
 			printLog('found network !', 'L1');
 		} else {
 			$networkSearchDone = 1;
-			printLog('no network found !! some fixes might not be applied correctly', 'L0');
+			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 		}
 	}
 }
@@ -7133,6 +7136,7 @@ sub transferConfigValues {
 ###############################################################################
 # returns 0 if no new version
 # returns 1 if new version
+#
 sub newVersion {
 	my $module = shift;
 	if ($localConfModules{$module}{version} < $origConfModules{$module}{version}) {
@@ -7146,6 +7150,7 @@ sub newVersion {
 ###############################################################################
 # returns 0 if no new hwid
 # returns 1 if new hwid
+#
 sub newHwid {
 	my $module = shift;
 	if ($localConfModules{$module}{hwid} < $origConfModules{$module}{hwid}) {
@@ -7267,8 +7272,6 @@ sub validModuleName {
 # no		no			no			yes			no		.
 # no		no			no			no			yes		.
 # no		no			no			no			no		.
-
-
 
 sub configureAllModules {
 	my $module;
@@ -7542,6 +7545,10 @@ sub setMode {
 
 
 
+###############################################################################
+# returns the mode configured as file in the configuration directory
+# 'AUTOMATIC', 'UPDATES_ONLY' or 'DONT_CONFIGURE'
+#
 sub checkMode {
 	my $tmpMode;
 	my $countModes = 0;
@@ -7577,6 +7584,7 @@ sub checkMode {
 # checks if the operation is allowed in this mode/command/module
 # usage: checkModePermision(install|remove|update, MODULE)
 # returns 0 if not and 1 if allowed
+#
 sub checkModePermission {
 	my ($operation, $module) = (@_);
 	# this is a double check, just in case ...
@@ -8256,6 +8264,8 @@ sub tuxedoDevice {
 
 
 
+###############################################################################
+###############################################################################
 ###############################################################################
 ###############################################################################
 # MAIN PROGRAM
