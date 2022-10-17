@@ -233,7 +233,7 @@ my %supportedOS = (
 	},
 	"Linux Mint" => {
 		versions => {
-			"20.2" => {
+			"20.3" => {
 				name => 'focal'
 			}
 		}
@@ -353,7 +353,7 @@ my %tuxedo_repos = (
 		},
 		name => 'jammy',
 	},
-    "Linux Mint 20.2" => {
+    "Linux Mint 20.3" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
@@ -454,7 +454,7 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
-    "Linux Mint 20.2" => {
+    "Linux Mint 20.3" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
@@ -542,7 +542,7 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
 		},
 	},
-	"20.2" => {
+	"20.3" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -2522,7 +2522,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.3/)) {
 		if (($boardname =~ m/X170KM-G/) ||
 			($boardname =~ m/PHxTxX1/) ||
 			($boardname =~ m/PH4TQx1/) ||
@@ -3888,7 +3888,7 @@ sub kernelhwe2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.3/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -3928,7 +3928,7 @@ sub kerneltuxedo2004edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.3/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -3966,7 +3966,7 @@ sub kerneltuxedo2004next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.3/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -4150,7 +4150,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.2/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/) || ($completeDistVersion =~ /Linux Mint 20.3/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
