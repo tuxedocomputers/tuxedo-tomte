@@ -52,6 +52,8 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 
+my $beginExecution = time();
+
 ###############################################################################
 # Argument values given to script
 #
