@@ -52,7 +52,6 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 
-my $beginExecution = time();
 
 ###############################################################################
 # Argument values given to script
@@ -94,9 +93,13 @@ my $completeDistVersion;
 my $FAI = 0;
 my $LiveISO = 0;
 my $networkSearchDone = 0;
+my $noNetwork = 0;
 my $triesFile = '/tmp/tomteTries';
-my $triesLimit = 3;
+my $triesLimit = 12;
 my $tomteFinishedFile = '/tmp/tomte_finished';
+my $longInstall = 0;
+my $restartSystem = 0;
+my $startLaterAgain = 0;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -118,9 +121,6 @@ my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 printLog("sessionID: $sessionID", 'TL2');
-my $longInstall = 0;
-my $restartSystem = 0;
-my $startLaterAgain = 0;
 
 
 ###############################################################################
@@ -3018,7 +3018,8 @@ sub tuxedorepos() {
 				# repo updates have to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork(1800, 2);
+					#TODO test
+					checkNetwork(1, 0);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -3061,7 +3062,8 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork(1800, 2);
+				# TODO test
+				checkNetwork(1, 0);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -3142,7 +3144,8 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					checkNetwork(1800, 2);
+					#TODO test
+					checkNetwork(1, 0);
 					$output = `pkcon refresh`;
 					$exitStatus = $?/256;
 					if ($exitStatus != 0) {
@@ -3185,7 +3188,8 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				checkNetwork(1800, 2);
+				# TODO test
+				checkNetwork(1, 0);
 				$output = `pkcon refresh`;
 				$exitStatus = $?/256;
 				if ($exitStatus != 0) {
@@ -5233,9 +5237,10 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		checkNetwork(1800, 2);
+		#TODO test
+		checkNetwork(1, 0);
 		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		while ($counter < 30) {
+		while ($counter < 15) {
 			$counter++;
 			$pmLocked = isPMlocked();
 			if ($pmLocked == 0) {
@@ -5252,7 +5257,7 @@ sub addRepoKey {
 				printLog("something is wrong while looking for locks for keyring installation", 'L0');
 			}
 			printLog("problem installing keyring, trying again", 'L2');
-			sleep(2);
+			sleep(1);
 		}
 		if (isPackageInstalled("tuxedo-archive-keyring")) {
 			printLog("TUXEDO keyring installed successfully", 'TL2');
@@ -5598,7 +5603,8 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		checkNetwork(1800, 2);
+		#TODO test
+		checkNetwork(1, 0);
 		if ($logLevel > 1) {
 			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 		} else {
@@ -6457,12 +6463,15 @@ sub waitForNetwork {
 sub checkNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
-	if ( (! $FAI) && (! $networkSearchDone) ) {
+	if ( (! $FAI) && (! $networkSearchDone) && ($noNetwork == 0)) {
 		if (waitForNetwork($triesNbr, $wait)) {
 			$networkSearchDone = 1;
+			$noNetwork = 0;
 			printLog('found network !', 'L1');
 		} else {
 			$networkSearchDone = 1;
+			$noNetwork = 1;
+			startTomteDelayed();
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 		}
 	}
@@ -7973,7 +7982,7 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		$retVal = system("systemd-run --on-active=1min tuxedo-tomte configure all >/dev/null 2>&1");
+		$retVal = system("systemd-run --on-active=5min tuxedo-tomte configure all >/dev/null 2>&1");
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
 		printLog("ret value: $retVal", 'L0');
 	}
