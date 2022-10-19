@@ -3,6 +3,7 @@ Section: perl
 Priority: optional
 Maintainer: E. Mohr <tux@tuxedocomputers.com>
 Build-Depends: debhelper (>= 10)
+Depends: libfile-fcntllock-perl
 Standards-Version: 4.1.2
 Homepage: https://www.tuxedocomputers.com
 
