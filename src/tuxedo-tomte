@@ -92,7 +92,6 @@ my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
 my $LiveISO = 0;
-my $networkSearchDone = 0;
 my $noNetwork = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
@@ -6421,20 +6420,19 @@ sub waitForNetwork {
 sub checkNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
-	if ( (! $FAI) && (! $networkSearchDone) && ($noNetwork == 0)) {
+	if ((! $FAI) && ($noNetwork == 0)) {
 		if (waitForNetwork($triesNbr, $wait)) {
-			$networkSearchDone = 1;
 			$noNetwork = 0;
 			printLog('found network !', 'L1');
 			return (1);
 		} else {
-			$networkSearchDone = 1;
 			$noNetwork = 1;
-			startTomteDelayed();
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
+			startTomteDelayed();
 			return (0);
 		}
 	}
+	return (0);
 }
 
 
