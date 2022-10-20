@@ -2972,8 +2972,6 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $retval2;
-	my $exitStatus;
-	my $output;
 
 	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https in postrequisitesFAI
@@ -2996,13 +2994,7 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
-		#TODO WIP
-		if (addRepoKey() != 1) {
-			printLog("repository key could not be installed!", 'TL0');
-			printLog("Tomte will try again after reboot or if startet manually with:", 'TL0');
-			printLog("sudo tomte configure all", 'T0L');
-			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
-		}
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3015,24 +3007,9 @@ sub tuxedorepos() {
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				# repo updates have to be immediate for possible later package
-				# installation
+				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					#TODO test
-					checkNetwork(1, 0);
-					$output = `pkcon refresh`;
-					$exitStatus = $?/256;
-					if ($exitStatus != 0) {
-						printLog('failed: update packages', 'L0');
-						printLog("returned error code: $exitStatus", 'L0');
-						if ($exitStatus == 7) {
-							printLog('possible network problems', 'L0');
-						}
-						addToConfiguredModules($module, "failed");
-					} else {
-						printLog("success: update packages", 'L1');
-						addToConfiguredModules($module, "success");
-					}
+					pkconRefresh($module);
 				}
 			}
 		}
@@ -3041,13 +3018,7 @@ sub tuxedorepos() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
-		if (addRepoKey() != 1) {
-			printLog("repository key could not be installed!", 'TL0');
-			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
-			printLog("sudo tomte configure all", 'T0');
-			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
-			exit (0);
-		}
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3062,26 +3033,11 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				# TODO test
-				checkNetwork(1, 0);
-				$output = `pkcon refresh`;
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages', 'L0');
-					printLog("returned error code: $exitStatus", 'L0');
-					if ($exitStatus == 7) {
-						printLog('possible network problems', 'L0');
-					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog('success: update packages', 'L1');
-					addToConfiguredModules($module, "success");
-				}
+				pkconRefresh($module);
 			}
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
 		printLog("This is a prerequisite, removal is not possible for this module", 'TL0');
 	}
 }
@@ -3096,8 +3052,6 @@ sub tuxedomirrors() {
 	my $retval;
 	my $retval2;
 	my $retval3;
-	my $exitStatus;
-	my $output;
 
 	# if this is a FAI-installation all repos should be already set correctly
 	# only http has to be replaced by https
@@ -3122,13 +3076,7 @@ sub tuxedomirrors() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList();
-		if (addRepoKey() != 1) {
-			printLog("repository key could not be installed!", 'TL0');
-			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
-			printLog("sudo tomte configure all", 'T0');
-			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
-			exit (0);
-		}
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3144,21 +3092,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					#TODO test
-					checkNetwork(1, 0);
-					$output = `pkcon refresh`;
-					$exitStatus = $?/256;
-					if ($exitStatus != 0) {
-						printLog('failed: update packages', 'L1');
-						printLog("returned error code: $exitStatus", 'L1');
-						if ($exitStatus == 7) {
-							printLog('possible network problems', 'L1');
-						}
-						addToConfiguredModules($module, "failed");
-					} else {
-						printLog("success: update packages", 'L1');
-						addToConfiguredModules($module, "success");
-					}
+					pkconRefresh($module);
 				}
 			}
 		}
@@ -3167,13 +3101,7 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
-		if (addRepoKey() != 1) {
-			printLog("repository key could not be installed!", 'TL0');
-			printLog("Tomte will try again after reboot or if startet manually with:", 'T0');
-			printLog("sudo tomte configure all", 'T0');
-			messageDesktop('TUXEDO Tomte could not install the repository keys', 'Tomte will try again after reboot or when activated manually with: sudo tomte configure all', 2, 'dialog-warning');
-			exit (0);
-		}
+		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3188,21 +3116,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				# TODO test
-				checkNetwork(1, 0);
-				$output = `pkcon refresh`;
-				$exitStatus = $?/256;
-				if ($exitStatus != 0) {
-					printLog('failed: update packages', 'L0');
-					printLog("returned error code: $exitStatus", 'L0');
-					if ($exitStatus == 7) {
-						printLog('possible network problems', 'L0');
-					}
-					addToConfiguredModules($module, "failed");
-				} else {
-					printLog('success: update packages', 'L1');
-					addToConfiguredModules($module, "success");
-				}
+				pkconRefresh($module);
 			}
 		}
 	}
@@ -5237,33 +5151,43 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		#TODO test
-		checkNetwork(1, 0);
-		$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
-		while ($counter < 15) {
-			$counter++;
-			$pmLocked = isPMlocked();
-			if ($pmLocked == 0) {
-				$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
-				$errorCode = $?/256;
-				if ($errorCode != 0) {
-					printLog("error code apt-get: $errorCode", 'L2');
-					printLog("output apt-get: $outputKey", 'L2');
-				} else {
-					printLog("no errors installing keyrings", 'L2');
-					last;
+		if (checkNetwork(1, 0)) {
+			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+			# wait a bit for package management to settle down
+			while ($counter < 15) {
+				$counter++;
+				$pmLocked = isPMlocked();
+				if ($pmLocked == 0) {
+					$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+					$errorCode = $?/256;
+					if ($errorCode != 0) {
+						printLog("error code apt-get: $errorCode", 'L2');
+						printLog("output apt-get: $outputKey", 'L2');
+					} else {
+						printLog("no errors installing keyrings", 'L2');
+						last;
+					}
+				} elsif ($pmLocked == -1) {
+					printLog("something is wrong while looking for locks for keyring installation", 'L0');
 				}
-			} elsif ($pmLocked == -1) {
-				printLog("something is wrong while looking for locks for keyring installation", 'L0');
+				printLog("problem installing keyring, trying again", 'L2');
+				sleep(1);
 			}
-			printLog("problem installing keyring, trying again", 'L2');
-			sleep(1);
-		}
-		if (isPackageInstalled("tuxedo-archive-keyring")) {
-			printLog("TUXEDO keyring installed successfully", 'TL2');
-			return (1);
+			if (isPackageInstalled("tuxedo-archive-keyring")) {
+				printLog("TUXEDO keyring installed successfully", 'TL2');
+				return (1);
+			} else {
+				printLog("The TUXEDO repository key could not be installed!", 'TL0');
+				printLog("Tomte will try again in few minutes or after reboot or if startet manually with:", 'TL0');
+				printLog("sudo tomte configure all", 'T0L');
+				startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+				return (0);
+			}
 		} else {
-			printLog("TUXEDO keyring installation failed", 'L0');
+			printLog("no network connection found! the TUXEDO repository keys can't be installed", 'TL0');
+			printLog("Tomte will try again in a few minutes or after reboot or if startet manually with:", 'TL0');
+			printLog("sudo tomte configure all", 'T0L');
+			startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
 			return (0);
 		}
 	}
@@ -5603,20 +5527,23 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		#TODO test
-		checkNetwork(1, 0);
-		if ($logLevel > 1) {
-			$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
+		if (checkNetwork(1, 0)) {
+			if ($logLevel > 1) {
+				$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
+			} else {
+				$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+			}
+			printLog("return from pkcon:\n$retval", 'L2');
+			$retval = isPackageInstalled($packageName);
+			if ($retval == 0) {
+				printLog("failed to install $packageName", 'L0');
+				printLog("will try again later", 'L0');
+				# repair a possibly wrecked package manager
+				`dpkg --configure -a`;
+				startTomteDelayed();
+			}
 		} else {
-			$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
-		}
-		printLog("return from pkcon:\n$retval", 'L2');
-		$retval = isPackageInstalled($packageName);
-		if ($retval == 0) {
-			printLog("failed to install $packageName", 'L0');
-			printLog("will try again later", 'L0');
-			# repair a possibly wrecked package manager
-			`dpkg --configure -a`;
+			printLog("no network connection found, can't install packages!!", 'TL0');
 			startTomteDelayed();
 		}
 	}
@@ -6197,6 +6124,35 @@ sub removeKernelParameters {
 
 
 
+###############################################################################
+# refreshes the package manager database
+# needs a module name to set the result pkconRefresh($module)
+#
+sub pkconRefresh {
+	my $pkconModule = shift;
+	my $output;
+	my $exitStatus;
+	if (checkNetwork(1, 0)) {
+		$output = `pkcon refresh`;
+		$exitStatus = $?/256;
+		if ($exitStatus != 0) {
+			printLog('failed: update packages', 'L0');
+			printLog("returned error code: $exitStatus", 'L0');
+			if ($exitStatus == 7) {
+				printLog('possible network problems', 'L0');
+			}
+			addToConfiguredModules($pkconModule, "failed");
+		} else {
+			printLog("success: update packages", 'L1');
+			addToConfiguredModules($pkconModule, "success");
+		}
+	} else {
+		printLog("no network available, repos could not be updated", 'TL0');
+		addToConfiguredModules($pkconModule, "failed");
+	}
+}
+
+
 
 ###############################################################################
 # creates file with content
@@ -6459,6 +6415,8 @@ sub waitForNetwork {
 
 ###############################################################################
 # checkForNetwork('number of tries', 'wait seconds')
+# returns 1 if found
+# returns 0 if not found
 #
 sub checkNetwork {
 	my $triesNbr = shift;
@@ -6468,11 +6426,13 @@ sub checkNetwork {
 			$networkSearchDone = 1;
 			$noNetwork = 0;
 			printLog('found network !', 'L1');
+			return (1);
 		} else {
 			$networkSearchDone = 1;
 			$noNetwork = 1;
 			startTomteDelayed();
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
+			return (0);
 		}
 	}
 }
@@ -7957,8 +7917,10 @@ sub postConfigure {
 
 ###############################################################################
 # starts the tuxedo-tomte service for delayed configuration
+# procedure accepts an optional message startTomteDelayed("message")
 #
 sub startTomteDelayed {
+	my $message = shift;
 	my $retVal;
 	$restartSystem = 0;
 	my $triesValue;
@@ -7972,8 +7934,12 @@ sub startTomteDelayed {
 				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
 				print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
 			} else {
-				messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
-				print "\nNot all the fixes could be installed\n";
+				if (defined($message)) {
+					messageDesktop('Tomte ready', $message, 2, 'dialog-warning');
+				} else {
+					messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+					print "\nNot all the fixes could be installed\n";
+				}
 			}
 			return (1);
 		} else {
