@@ -1051,7 +1051,7 @@ my %tuxedo_devices = (
 	'49' => {
 		model => ['TUXEDO InfinityBook 16 Gen7'],
 		board_name => ['PHxARX1_PHxAQF1', 'PH6AG01_PH6AQ71_PH6AQI1'],
-		fix => [''],
+		fix => ['tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2292,7 +2292,9 @@ sub checkRequirements {
 		($boardname =~ /GMxAGxx/) ||
 		($boardname =~ /GMxMGxx/) ||
 		($boardname =~ /GMxRGxx/) ||
-		($boardname =~ /PF5LUXG/))
+		($boardname =~ /PF5LUXG/) ||
+		($boardname =~ /PHxARX1_PHxAQF1/) ||
+		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('detected tuxedo-touchpad-switch issue', 'L1');
