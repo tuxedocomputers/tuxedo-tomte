@@ -19,7 +19,8 @@ our $VERSION = '2.7.6-3';
 
 use strict qw(vars subs);
 use warnings;
-use autodie;
+#TODO comment
+#use autodie;
 use 5.010;
 
 # for file locking
