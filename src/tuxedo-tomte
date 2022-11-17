@@ -491,6 +491,9 @@ my %flavours = (
 		"linux-tuxedo-22.04" => {
 			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
 		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
 	},
 	"6.1" => {
 		"linux-generic" => {
