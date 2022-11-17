@@ -1042,6 +1042,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'49' => {
+		model => ['TUXEDO InfinityBook 16 Gen7'],
+		board_name => ['PHxARX1_PHxAQF1', 'PH6AG01_PH6AQ71_PH6AQI1'],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'linux-tuxedo-22.04-edge',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1435,6 +1447,23 @@ my %origConfModules = (
 		order => '',
 	},
 	kerneltuxedo2004edge => {
+		name => 'linux-tuxedo-20.04-edge',
+		version => 3,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-20.04-edge',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
+	kerneltuxedo2204edge => {
 		name => 'linux-tuxedo-20.04-edge',
 		version => 3,
 		installed => 'no',
@@ -2413,8 +2442,14 @@ sub checkRequirements {
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-		printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
-		$origConfModules{kerneltuxedo2204}{required} = 'yes';
+		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
+			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
+			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
+			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
+		} else {
+			printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
+			$origConfModules{kerneltuxedo2204}{required} = 'yes';
+		}
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -3885,6 +3920,45 @@ sub kerneltuxedo2204() {
 			installKernelFlavour('linux-tuxedo-22.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				$restartSystem = 1;
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
+
+
+
+###############################################################################
+# kernel-tuxedo-22.04-edge
+#
+sub kerneltuxedo2204edge() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+			installKernelFlavour('linux-tuxedo-22.04-edge', $instFailed, $instDone);
+			if ($instFailed == 0) {
+				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
