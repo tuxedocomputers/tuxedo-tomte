@@ -5700,6 +5700,7 @@ sub installKernelFlavour {
 	my $allPackagesInstalled = 1;
 	my @lines;
 	my $packageMissing = 0;
+	my $exitStatus;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		$failed += 1;
@@ -5745,9 +5746,10 @@ sub installKernelFlavour {
 				$retString = `$installCmd`;
 			}
 		}
-		if ($? != 0) {
+		$exitStatus = $?/256;
+		if ($exitStatus != 0) {
 			printLog("something went wrong while installing kernel packages", 'TL0');
-			printLog("error: $?", 'L0');
+			printLog("error: $exitStatus", 'L0');
 			printLog("$retString", 'L0');
 		}
 	
