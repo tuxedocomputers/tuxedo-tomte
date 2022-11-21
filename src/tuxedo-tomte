@@ -2193,8 +2193,15 @@ sub prerequisitesFAI {
 }
 
 sub postrequisitesFAI {
-	reconfigureSingleModule('tuxedo-repos');
-	reconfigureSingleModule('tuxedo-mirrors');
+	#TODO change for repos
+	if (httpToHttps(\%tuxedo_repos)) {
+		printLog('TUXEDO debian repos set to https', 'L0');
+	}
+	if (httpToHttps(\%tuxedo_mirrors)) {
+		printLog('mirror repos set to https', 'L0');
+	}
+	#reconfigureSingleModule('tuxedo-repos');
+	#reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 }
@@ -3016,21 +3023,11 @@ sub tuxedorepos() {
 	my $retval2;
 
 	# if this is a FAI-installation all repos should be already set correctly
-	# only http has to be replaced by https in postrequisitesFAI
 	if ($FAI) {
-		if (httpToHttps(\%tuxedo_repos) >= 1) {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			printLog('tuxedo repos set to https', 'L0');
-			return (1);
-		} else {
-			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "no";
-			addToConfiguredModules($module, "failed");
-			printLog('tuxedo repos could not be set to https', 'L0');
-			return (0);
-		}
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
+		return (1);
 	}
 
 	if ($action eq 'install') {
@@ -3096,21 +3093,11 @@ sub tuxedomirrors() {
 	my $retval3;
 
 	# if this is a FAI-installation all repos should be already set correctly
-	# only http has to be replaced by https
 	if ($FAI) {
-		if (httpToHttps(\%tuxedo_mirrors)) {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			printLog('mirror repos set to https', 'L0');
-			return (1);
-		} else {
-			$origConfModules{$module}{installed} = "no";
-			$origConfModules{$module}{upgraded} = "no";
-			addToConfiguredModules($module, "failed");
-			printLog('mirror repos could not be set to https', 'L0');
-			return (0);
-		}
+		$origConfModules{$module}{installed} = "yes";
+		$origConfModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
+		return (1);
 	}
 
 
