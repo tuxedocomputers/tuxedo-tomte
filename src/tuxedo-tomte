@@ -2186,11 +2186,13 @@ sub prerequisites {
 }
 
 sub prerequisitesFAI {
+	printLog("starting prerequisites FAI", 'TL0');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 }
 
 sub postrequisitesFAI {
+	printLog("starting postrequisites FAI", 'TL0');
 	if (httpToHttps(\%tuxedo_repos)) {
 		printLog('TUXEDO debian repos set to https', 'L0');
 	}
