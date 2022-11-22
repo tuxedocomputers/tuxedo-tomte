@@ -19,8 +19,6 @@ our $VERSION = '2.7.6-7';
 
 use strict qw(vars subs);
 use warnings;
-#TODO comment
-#use autodie;
 use 5.010;
 
 # for file locking
@@ -43,7 +41,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2193,15 +2191,12 @@ sub prerequisitesFAI {
 }
 
 sub postrequisitesFAI {
-	#TODO change for repos
 	if (httpToHttps(\%tuxedo_repos)) {
 		printLog('TUXEDO debian repos set to https', 'L0');
 	}
 	if (httpToHttps(\%tuxedo_mirrors)) {
 		printLog('mirror repos set to https', 'L0');
 	}
-	#reconfigureSingleModule('tuxedo-repos');
-	#reconfigureSingleModule('tuxedo-mirrors');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 }
