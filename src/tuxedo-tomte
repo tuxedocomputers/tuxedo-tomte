@@ -2174,6 +2174,7 @@ sub isOSSupported {
 #
 sub prerequisites {
 	my $module;
+	printLog("starting prerequisites", 'L1');
 	foreach $module (sort keys %origConfModules) {
 		# basically the required repos
 		if (($origConfModules{$module}{order} eq 'first') &&
@@ -2183,12 +2184,14 @@ sub prerequisites {
 	}
 	my $output = `pkcon refresh`;
 	printLog("return from pkcon refresh: $output", 'L2');
+	printLog("ending prerequisites", 'L1');
 }
 
 sub prerequisitesFAI {
 	printLog("starting prerequisites FAI", 'TL0');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
+	printLog("ending prerequisites FAI", 'TL0');
 }
 
 sub postrequisitesFAI {
@@ -2201,6 +2204,7 @@ sub postrequisitesFAI {
 	}
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
+	printLog("ending postrequisites FAI", 'TL0');
 }
 
 
