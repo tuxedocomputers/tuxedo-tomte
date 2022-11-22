@@ -1933,6 +1933,7 @@ sub printTuxedoDevices {
 }
 
 
+
 sub printIfExistsNotUndefinedNotEmpty {
 	my $ID = shift;
 	my $type = shift;
@@ -7151,6 +7152,50 @@ sub listStatus {
 }
 
 
+
+
+sub printListMachinereadable {
+	my @arr;
+	my $module;
+	my $upgradeAvailable = '';
+
+	foreach $module (sort keys %localConfModules) {
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
+		}
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
+			# module is installed but should not be
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}"]);
+		}
+		# required, installed and not removed
+		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}$upgradeAvailable"]);
+		}
+	}
+	print "$mode\n";
+	for my $row (@arr) {
+		print join("\t", @{$row}) . "\n";
+	}
+}
+
+
+
+
+
 ###############################################################################
 # copies values from local configuration module into new configuration module
 # copies always 'blocked'
@@ -8379,6 +8424,10 @@ if (@ARGV != 0) {
 	# printcompletefixeslist
 	} elsif ($argValue{command} eq "printcompletefixeslist") {
 		printTuxedoDevices();
+
+	# listmachinereadable
+	} elsif ($argValue{command} eq "listmachinereadable") {
+		printListMachinereadable();
 
 	# description
 	} elsif ($argValue{command} eq "description") {
