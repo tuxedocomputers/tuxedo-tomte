@@ -7365,7 +7365,8 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{order} ne 'first') && ($origConfModules{$module}{order} ne 'last')) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -7454,12 +7455,14 @@ sub removeSingleModule {
 ###############################################################################
 # reconfigures all modules if not blocked and if required even if it is
 # already installed
+# ommits modules which are "prerequisite" or as order "first" or "last"
 #
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{order} ne 'first') && ($origConfModules{$module}{order} ne 'last')) {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
