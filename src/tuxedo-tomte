@@ -42,7 +42,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2227,7 +2227,7 @@ sub checkRequirements {
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
 		my $minKernelVersionFornoauxfix = '5.15.0-53';
-		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) == -1) {
+		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) <= 0) {
 			$origConfModules{i8042noauxfix}{required} = 'yes';
 			printLog('detected i8042.noaux-fix issue', 'L1');
 		}
@@ -2275,8 +2275,8 @@ sub checkRequirements {
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
-		my $minKernelVersionFornoauxfix = '5.15.0-53';
-		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) == -1) {
+		my $minKernelVersionFornkasf = '5.15.0-53';
+		if (version_compare($kernelRelease,$minKernelVersionFornkasf) <= 0) {
 			$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 			printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
 		}
