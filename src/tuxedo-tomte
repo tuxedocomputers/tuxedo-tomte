@@ -42,7 +42,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1111,8 +1111,9 @@ my %tuxedo_devices = (
 #
 my %origConfModules = (
 	i8042fix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'i8042-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1213,8 +1214,9 @@ my %origConfModules = (
 		order => '',
 	},
 	nokeyboardaftersuspendfix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'no-keyboard-after-suspend-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1604,8 +1606,8 @@ my %origConfModules = (
 		restart => '',
 		order => '',
 	},
-	# deprecated since 20220216
 	amdgpudkms => {
+	# deprecated since 20220216
 		name => 'amdgpu-dkms',
 		version => 1,
 		installed => 'no',
@@ -1673,8 +1675,8 @@ my %origConfModules = (
 		restart => '',
 		order => '',
 	},
-	# deprecated since 20220215
 	realtekr8125dkms => {
+	# deprecated since 20220215
 		name => 'realtek-r8125-dkms',
 		version => 2,
 		installed => 'no',
@@ -1794,8 +1796,9 @@ my %origConfModules = (
 		order => '',
 	},
 	i8042noauxfix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'i8042noaux-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2221,12 +2224,13 @@ sub checkRequirements {
 	my $lsusb;
 
 	# check values for each module
-	if ((($boardname =~ /NS50_70MU/) ||
-		($boardname =~ /NS50MU/)) &&
-	#TODO check for kernel version
-		()) {
-		$origConfModules{i8042noauxfix}{required} = 'yes';
-		printLog('detected i8042.noaux-fix issue', 'L1');
+	if (($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NS50MU/)) {
+		my $minKernelVersionFornoauxfix = '5.15.0-53';
+		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) == -1) {
+			$origConfModules{i8042noauxfix}{required} = 'yes';
+			printLog('detected i8042.noaux-fix issue', 'L1');
+		}
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
@@ -2270,10 +2274,12 @@ sub checkRequirements {
 		($boardname =~ /NS50MU/) ||
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
-	#TODO check for kernel version
 		($boardname =~ /X170KM-G/ )) {
-		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-		printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+		my $minKernelVersionFornoauxfix = '5.15.0-53';
+		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) == -1) {
+			$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+			printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+		}
 	}
 
 	if ($boardname =~ /X35R/) {
