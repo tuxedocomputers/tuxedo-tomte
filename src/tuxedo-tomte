@@ -34,6 +34,7 @@ use Parse::EDID qw(parse_edid);
 
 use Time::HiRes qw(usleep);
 use Digest::MD5 qw(md5_hex);
+use Dpkg::Version;
 
 # for debugging
 use Data::Dumper;
@@ -2220,8 +2221,10 @@ sub checkRequirements {
 	my $lsusb;
 
 	# check values for each module
-	if (($boardname =~ /NS50_70MU/) ||
-		($boardname =~ /NS50MU/)) {
+	if ((($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NS50MU/)) &&
+	#TODO check for kernel version
+		()) {
 		$origConfModules{i8042noauxfix}{required} = 'yes';
 		printLog('detected i8042.noaux-fix issue', 'L1');
 	}
@@ -2267,6 +2270,7 @@ sub checkRequirements {
 		($boardname =~ /NS50MU/) ||
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
+	#TODO check for kernel version
 		($boardname =~ /X170KM-G/ )) {
 		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 		printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
@@ -2532,6 +2536,7 @@ sub findPciDevice {
 ###############################################################################
 ###############################################################################
 ###############################################################################
+#
 # each configure one module from %confModules
 # they set 'installed' status and $postConfModule trigger
 #
