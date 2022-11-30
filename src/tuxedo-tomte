@@ -42,7 +42,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2227,13 +2227,9 @@ sub checkRequirements {
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
 		if ($FAI) {
-			#TODO debug
-			print "ENV classes: $ENV{classes}\n";
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
-			} else {
-				print "nkasf not detected\n";
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
@@ -2287,13 +2283,9 @@ sub checkRequirements {
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
 		if ($FAI) {
-			#TODO debug
-			print "ENV classes: $ENV{classes}\n";
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
-			} else {
-				print "nkasf not detected\n";
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
