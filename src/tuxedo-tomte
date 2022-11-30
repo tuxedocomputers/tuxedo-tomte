@@ -1010,7 +1010,7 @@ my %tuxedo_devices = (
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
-		kernel => '',
+		kernel => 'linux-tuxedo-22.04-edge',
 		display => '',
 		usb_device => '',
 	},
@@ -2470,7 +2470,8 @@ sub checkRequirements {
 		}
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
-			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
+			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
+			($boardname =~ m/PF5LUXG/)) {
 			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
 		} else {
