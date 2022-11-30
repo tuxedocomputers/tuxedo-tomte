@@ -2227,9 +2227,13 @@ sub checkRequirements {
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
 		if ($FAI) {
+			#TODO debug
+			print "ENV classes: $ENV{classes}\n";
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			} else {
+				print "nkasf not detected\n";
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
