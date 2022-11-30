@@ -2229,7 +2229,7 @@ sub checkRequirements {
 		if ($FAI) {
 			#TODO debug
 			print "ENV classes: $ENV{classes}\n";
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
 			} else {
@@ -2289,7 +2289,7 @@ sub checkRequirements {
 		if ($FAI) {
 			#TODO debug
 			print "ENV classes: $ENV{classes}\n";
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
 			} else {
