@@ -2284,6 +2284,9 @@ sub checkRequirements {
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
 		if ($FAI) {
+			foreach my $key (sort keys(%ENV)) {
+				print "ENV: $key:$ENV{$key}\n";
+			}
 			if (isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804') ||
 				isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804_LTS')) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
