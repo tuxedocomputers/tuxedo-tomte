@@ -2284,8 +2284,8 @@ sub checkRequirements {
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
 		if ($FAI) {
-			foreach my $key (sort keys(%ENV)) {
-				print "ENV: $key:$ENV{$key}\n";
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
+				print "#### found 18.04\n";
 			}
 			if (isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804') ||
 				isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804_LTS')) {
