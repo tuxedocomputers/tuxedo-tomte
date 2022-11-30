@@ -2227,10 +2227,9 @@ sub checkRequirements {
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
 		if ($FAI) {
-			if (isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804') ||
-				isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804_LTS')) {
-				$origConfModules{i8042noauxfix}{required} = 'yes';
-				printLog('detected i8042.noaux-fix issue', 'L1');
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
@@ -2285,10 +2284,6 @@ sub checkRequirements {
 		($boardname =~ /X170KM-G/ )) {
 		if ($FAI) {
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/) {
-				print "#### found 18.04\n";
-			}
-			if (isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804') ||
-				isLineInFile('/etc/fai/FAI_CLASSES', 'UBUNTU_1804_LTS')) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
 			}
