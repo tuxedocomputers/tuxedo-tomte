@@ -35,6 +35,7 @@ use Parse::EDID qw(parse_edid);
 use Time::HiRes qw(usleep);
 use Digest::MD5 qw(md5_hex);
 use Dpkg::Version;
+use JSON;
 
 # for debugging
 use Data::Dumper;
@@ -7180,9 +7181,12 @@ sub listStatus {
 
 
 sub printListMachinereadable {
-	my @arr;
 	my $module;
 	my $upgradeAvailable = '';
+	my %list;
+
+	$list{version} = $VERSION;
+	$list{mode} = $mode;
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
@@ -7194,27 +7198,29 @@ sub printListMachinereadable {
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}"]);
+			$list{$module} = {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => $localConfModules{$module}{required},
+			};
 		}
 		# required, installed and not removed
 		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}$upgradeAvailable"]);
+			$list{$module} = {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => "$localConfModules{$module}{required}$upgradeAvailable",
+			};
 		}
 	}
-	print "$mode\n";
-	for my $row (@arr) {
-		print join("\t", @{$row}) . "\n";
-	}
+	#TODO debug
+	my $jsonText = encode_json \%list;
+	print "list:\n";
+	print "$jsonText\n";
 }
 
 
