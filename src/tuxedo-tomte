@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.7-7';
+our $VERSION = '2.7.7-15';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -2226,10 +2226,17 @@ sub checkRequirements {
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
-		my $minKernelVersionFornoauxfix = '5.15.0-53';
-		if (version_compare($kernelRelease,$minKernelVersionFornoauxfix) == -1) {
-			$origConfModules{i8042noauxfix}{required} = 'yes';
-			printLog('detected i8042.noaux-fix issue', 'L1');
+		if ($FAI) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
+		} else {
+			my $minKernelVersionFornoauxfix = '5.15.0-53';
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+				$origConfModules{i8042noauxfix}{required} = 'yes';
+				printLog('detected i8042.noaux-fix issue', 'L1');
+			}
 		}
 	}
 
@@ -2275,10 +2282,17 @@ sub checkRequirements {
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
-		my $minKernelVersionFornkasf = '5.15.0-53';
-		if (version_compare($kernelRelease,$minKernelVersionFornkasf) == -1) {
-			$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-			printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+		if ($FAI) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
+		} else {
+			my $minKernelVersionFornoauxfix = '5.15.0-53';
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
 		}
 	}
 
