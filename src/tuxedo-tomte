@@ -5748,7 +5748,7 @@ sub installKernelFlavour {
 
 	if ($packageMissing) {
 		messageLongInstall();
-		printLog("installing $flavour", 'L1');
+		printLog("installing $flavour", 'TL0');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /dpkg --configure -a/) {
