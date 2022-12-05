@@ -8359,7 +8359,29 @@ sub prepareValues {
 	checkRequirements();
 	initConfigFile();
 	transferConfigValues();
+	reportPlannedChanges();
 }
+
+
+
+###############################################################################
+# report planned changes according to list of installed modules and modules yet
+# to be installed
+#
+sub reportPlannedChanges {
+	my $module;
+	foreach $module (sort keys %origConfModules) {
+		if ($origConfModules{$module}{required} eq 'yes') {
+			if (($localConfModules{$module}{installed} eq 'no') &&
+				($localConfModules{$module}{blocked} eq 'no') &&
+				(checkModePermission('install', $module))) {
+				printLog("module $module will be installed", 'L0');
+			}
+		}
+	}
+}
+
+
 
 
 ###############################################################################
