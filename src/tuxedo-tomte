@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.7-5';
+our $VERSION = '2.7.7-15';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -34,6 +34,8 @@ use Parse::EDID qw(parse_edid);
 
 use Time::HiRes qw(usleep);
 use Digest::MD5 qw(md5_hex);
+use Dpkg::Version;
+use JSON;
 
 # for debugging
 use Data::Dumper;
@@ -1110,8 +1112,9 @@ my %tuxedo_devices = (
 #
 my %origConfModules = (
 	i8042fix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'i8042-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1212,8 +1215,9 @@ my %origConfModules = (
 		order => '',
 	},
 	nokeyboardaftersuspendfix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'no-keyboard-after-suspend-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1603,8 +1607,8 @@ my %origConfModules = (
 		restart => '',
 		order => '',
 	},
-	# deprecated since 20220216
 	amdgpudkms => {
+	# deprecated since 20220216
 		name => 'amdgpu-dkms',
 		version => 1,
 		installed => 'no',
@@ -1672,8 +1676,8 @@ my %origConfModules = (
 		restart => '',
 		order => '',
 	},
-	# deprecated since 20220215
 	realtekr8125dkms => {
+	# deprecated since 20220215
 		name => 'realtek-r8125-dkms',
 		version => 2,
 		installed => 'no',
@@ -1793,8 +1797,9 @@ my %origConfModules = (
 		order => '',
 	},
 	i8042noauxfix => {
+	# obsolete since kernel 5.15.0-53
 		name => 'i8042noaux-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2222,8 +2227,18 @@ sub checkRequirements {
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
-		$origConfModules{i8042noauxfix}{required} = 'yes';
-		printLog('detected i8042.noaux-fix issue', 'L1');
+		if ($FAI) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
+		} else {
+			my $minKernelVersionFornoauxfix = '5.15.0-53';
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+				$origConfModules{i8042noauxfix}{required} = 'yes';
+				printLog('detected i8042.noaux-fix issue', 'L1');
+			}
+		}
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
@@ -2268,8 +2283,18 @@ sub checkRequirements {
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
-		$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-		printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+		if ($FAI) {
+			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
+		} else {
+			my $minKernelVersionFornoauxfix = '5.15.0-53';
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+			}
+		}
 	}
 
 	if ($boardname =~ /X35R/) {
@@ -2532,6 +2557,7 @@ sub findPciDevice {
 ###############################################################################
 ###############################################################################
 ###############################################################################
+#
 # each configure one module from %confModules
 # they set 'installed' status and $postConfModule trigger
 #
@@ -7155,9 +7181,12 @@ sub listStatus {
 
 
 sub printListMachinereadable {
-	my @arr;
 	my $module;
 	my $upgradeAvailable = '';
+	my %list;
+
+	$list{version} = $VERSION;
+	$list{mode} = $mode;
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
@@ -7169,27 +7198,29 @@ sub printListMachinereadable {
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}"]);
+			$list{$module} = {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => $localConfModules{$module}{required},
+			};
 		}
 		# required, installed and not removed
 		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}$upgradeAvailable"]);
+			$list{$module} = {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => "$localConfModules{$module}{required}$upgradeAvailable",
+			};
 		}
 	}
-	print "$mode\n";
-	for my $row (@arr) {
-		print join("\t", @{$row}) . "\n";
-	}
+	#TODO debug
+	my $jsonText = encode_json \%list;
+	print "list:\n";
+	print "$jsonText\n";
 }
 
 
@@ -7365,7 +7396,8 @@ sub configureAllModules {
 	foreach $module (keys %origConfModules) {
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{order} ne 'first') && ($origConfModules{$module}{order} ne 'last')) {
 			if ($origConfModules{$module}{reconfigure} eq 'always') {
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($origConfModules{$module}{name});
@@ -7454,12 +7486,14 @@ sub removeSingleModule {
 ###############################################################################
 # reconfigures all modules if not blocked and if required even if it is
 # already installed
+# ommits modules which are "prerequisite" or as order "first" or "last"
 #
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %origConfModules) {
-		if ($origConfModules{$module}{required} eq 'yes') {
+		if (($origConfModules{$module}{required} eq 'yes') &&
+			($origConfModules{$module}{order} ne 'first') && ($origConfModules{$module}{order} ne 'last')) {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		} elsif (($origConfModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
