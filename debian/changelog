@@ -1,35 +1,18 @@
-tuxedo-tomte (2.7.7-15) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.8) jammy; urgency=medium
 
-  * added printListMachinereadable
-  * added ommision of first and last modules in main process
-  * after packaging
-  * added Module Dpkg::Version
-  * added kernel dependency and compare for some fizes
-  * after packaging
-  * removed debug
-  * changed some conditions
-  * added check in FAI for some fixes
-  * after packaging
-  * test for env variables
-  * after packaging
-  * check for 1804 from classes var
-  * after packaging
-  * changed ENV classes
-  * after packaging
-  * added debug
-  * after packaging
-  * debug
-  * after packaging
-  * more debug
-  * after packaging
-  * added regex parameters
+  * added module dependency Dpkg::Version for kernel package version
+    comparision
+  * added kernel linux-tuxedo-22.04-edge to Pulse 15 Gen2 with boardname
+    PF5LUXG
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 30 Nov 2022 14:49:10 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Dec 2022 12:53:10 +0100
 
 tuxedo-tomte (2.7.7) jammy; urgency=medium
 
-  * added kerneltuxedo2204edge for TUXEDO InfinityBook 16 Gen7 with boardnames: PHxARX1_PHxAQF1 or PH6AG01_PH6AQ71_PH6AQI1
-  * added tuxedotouchpadswitch for TUXEDO InfinityBook 16 Gen7 with boardnames: PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
+  * added kerneltuxedo2204edge for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 or PH6AG01_PH6AQ71_PH6AQI1
+  * added tuxedotouchpadswitch for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
 
  -- E. Mohr <tux@tuxedocomputers.com>  Tue, 22 Nov 2022 11:47:58 +0100
 

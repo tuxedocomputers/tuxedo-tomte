@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.7-15';
+our $VERSION = '2.7.8';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -43,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1011,7 +1011,7 @@ my %tuxedo_devices = (
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
-		kernel => '',
+		kernel => 'linux-tuxedo-22.04-edge',
 		display => '',
 		usb_device => '',
 	},
@@ -2485,7 +2485,8 @@ sub checkRequirements {
 		}
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
-			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
+			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
+			($boardname =~ m/PF5LUXG/)) {
 			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
 		} else {
@@ -5748,7 +5749,7 @@ sub installKernelFlavour {
 
 	if ($packageMissing) {
 		messageLongInstall();
-		printLog("installing $flavour", 'L1');
+		printLog("installing $flavour", 'TL0');
 		`apt-get update -q`;
 		$retString = `$installCmd`;
 		if ($retString =~ /dpkg --configure -a/) {
@@ -7180,7 +7181,7 @@ sub listStatus {
 
 
 
-sub printListMachinereadable {
+sub printListJson {
 	my $module;
 	my $upgradeAvailable = '';
 	my %list;
@@ -8483,9 +8484,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "printcompletefixeslist") {
 		printTuxedoDevices();
 
-	# listmachinereadable
-	} elsif ($argValue{command} eq "listmachinereadable") {
-		printListMachinereadable();
+	# printListJSON
+	} elsif ($argValue{command} eq "listjson") {
+		printListJson();
 
 	# description
 	} elsif ($argValue{command} eq "description") {
@@ -8555,7 +8556,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# remove
 	} elsif ($argValue{command} eq "remove") {
@@ -8581,7 +8582,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# reconfigure
 	} elsif ($argValue{command} eq "reconfigure") {
@@ -8631,7 +8632,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# blocking/unblocking should work in any mode
 	# block
@@ -8646,7 +8647,7 @@ if (@ARGV != 0) {
 			} elsif (validModuleName($argValue{module}) ne '') {
 				block($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L0');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8666,7 +8667,7 @@ if (@ARGV != 0) {
 			} elsif (validModuleName($argValue{module}) ne '') {
 				unblock($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L0');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
