@@ -8548,7 +8548,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# remove
 	} elsif ($argValue{command} eq "remove") {
@@ -8574,7 +8574,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# reconfigure
 	} elsif ($argValue{command} eq "reconfigure") {
@@ -8624,7 +8624,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L1');
+		printLog('Tomte finished', 'L0');
 
 	# blocking/unblocking should work in any mode
 	# block
@@ -8639,7 +8639,7 @@ if (@ARGV != 0) {
 			} elsif (validModuleName($argValue{module}) ne '') {
 				block($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L0');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8659,7 +8659,7 @@ if (@ARGV != 0) {
 			} elsif (validModuleName($argValue{module}) ne '') {
 				unblock($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L0');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
