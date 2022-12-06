@@ -3942,7 +3942,7 @@ sub kerneltuxedo2204() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			printLog("before installKernelFlavour instfailed: $instFailed instdone: $instDone", 'TL2');
-			installKernelFlavour('linux-tuxedo-22.04', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			#TODO debug
 			printLog("after installKernelFalvour instfailed: $instFailed instdone: $instDone", 'TL2');
 			if ($instFailed == 0) {
