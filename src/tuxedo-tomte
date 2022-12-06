@@ -3786,7 +3786,7 @@ sub kernelhwe2004() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
+			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			}
@@ -3826,7 +3826,7 @@ sub kerneltuxedo2004edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			}
@@ -3864,7 +3864,7 @@ sub kerneltuxedo2004next() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			}
@@ -3903,7 +3903,7 @@ sub kerneltuxedo2004() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			}
@@ -3941,14 +3941,10 @@ sub kerneltuxedo2204() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			printLog("before installKernelFlavour instfailed: $instFailed instdone: $instDone", 'TL2');
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			#TODO debug
-			printLog("after installKernelFalvour instfailed: $instFailed instdone: $instDone", 'TL2');
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			}
-			printLog("before decisions instfailed: $instFailed instdone: $instDone", 'TL2');
 			if ($instFailed > 0) {
 				startTomteDelayed();
 				addToConfiguredModules($module, "failed");
@@ -3984,7 +3980,7 @@ sub kerneltuxedo2204edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			installKernelFlavour('linux-tuxedo-22.04-edge', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			}
@@ -7178,7 +7174,7 @@ sub listStatus {
 		}
 	}
 	if (-e $needsRestartFile) {
-		print "Some fixes need a system restart to be effective";
+		print "Some fixes need a system restart to be effective\n";
 	}
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
