@@ -97,6 +97,7 @@ my $LiveISO = 0;
 my $noNetwork = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
+my $needsRestartFile = '/tmp/needs_restart';
 my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
@@ -7172,7 +7173,8 @@ sub listStatus {
 			write;
 		}
 	}
-	if ($restartSystem) {
+	if (-e $needsRestartFile) {
+		print "Some fixes need a system restart to be effective";
 	}
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
@@ -8269,7 +8271,7 @@ sub modulesList() {
 #
 sub setRestartValues {
 	$restartSystem = 1;
-	createFile('/tmp/needs_reboot', 'Tomte: system has to be restarted', 0);
+	createFile($needsRestartFile, 'Tomte: system has to be restarted', 0);
 }
 
 
