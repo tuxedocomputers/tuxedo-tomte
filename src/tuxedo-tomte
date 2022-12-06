@@ -7181,7 +7181,7 @@ sub listStatus {
 
 
 
-sub printListJson {
+sub listStatusJson {
 	my $module;
 	my $upgradeAvailable = '';
 	my %list;
@@ -7220,7 +7220,6 @@ sub printListJson {
 	}
 	#TODO debug
 	my $jsonText = encode_json \%list;
-	print "list:\n";
 	print "$jsonText\n";
 }
 
@@ -8484,9 +8483,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "printcompletefixeslist") {
 		printTuxedoDevices();
 
-	# printListJSON
+	# listJSON
 	} elsif ($argValue{command} eq "listjson") {
-		printListJson();
+		listStatusJson();
 
 	# description
 	} elsif ($argValue{command} eq "description") {
