@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.8-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.8-6) UNRELEASED; urgency=medium
 
   * after packaging
   * added message for restart on terminal
@@ -9,8 +9,10 @@ tuxedo-tomte (2.7.8-5) UNRELEASED; urgency=medium
   * added debug for kernel install
   * after packaging
   * call by reference on kernel install
+  * after packaging
+  * changed all kernel installs to call by reference
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Dec 2022 14:38:49 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Dec 2022 15:09:56 +0100
 
 tuxedo-tomte (2.7.8) jammy; urgency=medium
 
