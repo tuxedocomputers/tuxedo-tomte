@@ -5705,8 +5705,8 @@ sub setAptMark {
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	#TODO debug
-	printLog("in installKernelFlavour begin: >$failed< >$somethingDone<", 'L0');
-	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
+	printLog("in installKernelFlavour begin: >${$failed}< >${$somethingDone}<", 'L0');
+	printLog("installKernelFlavour flavour: $flavour failed: ${$failed} somethingDone: ${$somethingDone}", 'TL2');
 	if (!(defined $failed)) {
 		$failed = 0;
 	}
