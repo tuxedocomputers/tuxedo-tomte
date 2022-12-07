@@ -5707,11 +5707,11 @@ sub installKernelFlavour {
 	#TODO debug
 	printLog("in installKernelFlavour begin: >${$failed}< >${$somethingDone}<", 'L0');
 	printLog("installKernelFlavour flavour: $flavour failed: ${$failed} somethingDone: ${$somethingDone}", 'TL2');
-	if (!(defined $failed)) {
-		$failed = 0;
+	if (!(defined ${$failed})) {
+		${$failed} = 0;
 	}
-	if (!(defined $somethingDone)) {
-		$somethingDone = 0;
+	if (!(defined ${$somethingDone})) {
+		${$somethingDone} = 0;
 	}
 	my $partialName;
 	my $installCmd = 'apt-get install -yq ';
@@ -5725,13 +5725,13 @@ sub installKernelFlavour {
 	my $exitStatus;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
-		$failed += 1;
+		${$failed} += 1;
 		return (0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
-		$failed += 1;
+		${$failed} += 1;
 		return (0);
 	}
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
@@ -5762,7 +5762,7 @@ sub installKernelFlavour {
 			`dpkg --configure -a`;
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
-				$failed += 1;
+				${$failed} += 1;
 				return (0);
 			} else {
 				$retString = `$installCmd`;
@@ -5785,7 +5785,7 @@ sub installKernelFlavour {
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
-				$somethingDone += 1;
+				${$somethingDone} += 1;
 			}
 		}
 		if ($allPackagesInstalled) {
@@ -5794,10 +5794,10 @@ sub installKernelFlavour {
 	}
 
 	if (!$allPackagesInstalled) {
-		$failed += 1;
+		${$failed} += 1;
 	}
-	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
-	printLog("in installKernelFlavour end: >$failed< >$somethingDone<", 'L0');
+	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2');
+	printLog("in installKernelFlavour end: >${$failed}< >${$somethingDone}<", 'L0');
 	return (1);
 }
 
