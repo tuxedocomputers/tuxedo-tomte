@@ -3941,9 +3941,7 @@ sub kerneltuxedo2204() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			printLog("before installKernelFlavour: >$instFailed< >$instDone<", 'L0');
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			printLog("after installKernelFlavour: >$instFailed< >$instDone<", 'L0');
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			}
@@ -5704,9 +5702,6 @@ sub setAptMark {
 #
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
-	#TODO debug
-	printLog("in installKernelFlavour begin: >${$failed}< >${$somethingDone}<", 'L0');
-	printLog("installKernelFlavour flavour: $flavour failed: ${$failed} somethingDone: ${$somethingDone}", 'TL2');
 	if (!(defined ${$failed})) {
 		${$failed} = 0;
 	}
@@ -5797,7 +5792,6 @@ sub installKernelFlavour {
 		${$failed} += 1;
 	}
 	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2');
-	printLog("in installKernelFlavour end: >${$failed}< >${$somethingDone}<", 'L0');
 	return (1);
 }
 
