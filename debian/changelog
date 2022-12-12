@@ -1,31 +1,11 @@
-tuxedo-tomte (2.7.8-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.9) jammy; urgency=medium
 
-  * after packaging
-  * added message for restart on terminal
-  * after packaging
-  * added subroutine for setting system restart values
-  * added message restart in list
-  * after packaging
-  * added debug for kernel install
-  * after packaging
-  * call by reference on kernel install
-  * after packaging
-  * changed all kernel installs to call by reference
-  * after packaging
-  * added some debug
-  * after packaging
-  * changed to variable adress
-  * after packaging
-  * call by ref in sub
-  * after packaging
-  * removed debug
-  * after packaging
-  * removed linux unsigned
+  * added message for restart on terminal when using 'list' and a restart is
+    necessary
+  * fixed erroneous failed kernel installation log message
   * changed repos from http to https for Elementary OS 6
-  * after packaging
-  * removed debug
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 08 Dec 2022 09:53:12 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Dec 2022 12:29:29 +0100
 
 tuxedo-tomte (2.7.8) jammy; urgency=medium
 
