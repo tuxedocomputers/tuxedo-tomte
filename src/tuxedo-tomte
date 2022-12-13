@@ -7202,17 +7202,17 @@ sub listStatusJson {
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
-			$list{$module} = {
+			push @{ $list{modules} }, {
 				name => $localConfModules{$module}{name},
 				version => $localConfModules{$module}{version},
 				installed => $localConfModules{$module}{installed},
 				blocked => $localConfModules{$module}{blocked},
-				required => $localConfModules{$module}{required},
+				required => "$localConfModules{$module}{required}$upgradeAvailable",
 			};
 		}
 		# required, installed and not removed
 		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
-			$list{$module} = {
+			push @{ $list{modules} }, {
 				name => $localConfModules{$module}{name},
 				version => $localConfModules{$module}{version},
 				installed => $localConfModules{$module}{installed},
@@ -7221,7 +7221,6 @@ sub listStatusJson {
 			};
 		}
 	}
-	#TODO debug
 	my $jsonText = encode_json \%list;
 	print "$jsonText\n";
 }
@@ -8499,6 +8498,12 @@ if (@ARGV != 0) {
 
 	# listJSON
 	} elsif ($argValue{command} eq "listjson") {
+		checkMode();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+		} else {
+			prepareValues();
+		}
 		listStatusJson();
 
 	# description
