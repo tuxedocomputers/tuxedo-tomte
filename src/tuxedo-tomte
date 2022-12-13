@@ -7191,6 +7191,12 @@ sub listStatusJson {
 
 	$list{version} = $VERSION;
 	$list{mode} = $mode;
+	if (-e $needsRestartFile) {
+		$list{restart} = 'yes';
+	} else {
+		$list{restart} = 'no';
+	}
+	
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
