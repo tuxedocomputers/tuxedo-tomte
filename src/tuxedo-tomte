@@ -105,7 +105,7 @@ my $startLaterAgain = 0;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
-my $lspciOutput = `lspci -vn`;
+my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname;
 $boardname = readFileReturnLine($boardnameFilename);
