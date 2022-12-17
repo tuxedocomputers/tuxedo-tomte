@@ -209,6 +209,9 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
+			"22.04" => {
+				name => 'jammy',
+			},
 		},
 	},
 	"TUXEDO_OS Plasma" => {
@@ -301,6 +304,13 @@ my %tuxedo_repos = (
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
 		name => 'focal',
+	},
+	"KDE neon 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
 	},
 	"TUXEDO_OS Plasma 20.04" => {
 		deb => {
@@ -397,6 +407,15 @@ my %tuxedo_mirrors = (
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => 'focal',
+	},
+	"KDE neon 22.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
 	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
@@ -2483,7 +2502,7 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
 		$origConfModules{kerneltuxedo2204}{required} = 'yes';
 	}
@@ -3989,7 +4008,7 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', $instFailed, $instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -4147,7 +4166,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
@@ -5125,7 +5144,7 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'KDE neon 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
