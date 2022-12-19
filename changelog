@@ -1,3 +1,12 @@
+tuxedo-tomte (2.7.9) jammy; urgency=medium
+
+  * added message for restart on terminal when using 'list' and a restart is
+    necessary
+  * fixed erroneous failed kernel installation log message
+  * changed repos from http to https for Elementary OS 6
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Dec 2022 12:29:29 +0100
+
 tuxedo-tomte (2.7.8) jammy; urgency=medium
 
   * added module dependency Dpkg::Version for kernel package version

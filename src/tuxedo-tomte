@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.8';
+our $VERSION = '2.7.9';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -97,6 +97,7 @@ my $LiveISO = 0;
 my $noNetwork = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
+my $needsRestartFile = '/tmp/needs_restart';
 my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
@@ -386,9 +387,9 @@ my %tuxedo_mirrors = (
 	"elementary OS 6.1" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
-			content => ['deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
-						'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
-						'deb http://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => '6.1 jolnir',
 	},
@@ -2820,7 +2821,7 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2897,7 +2898,7 @@ sub tuxedokeyboard() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3328,7 +3329,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3342,7 +3343,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'remove') {
@@ -3382,7 +3383,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3396,7 +3397,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'remove') {
@@ -3422,7 +3423,7 @@ sub tuxedotouchpadswitch() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3515,7 +3516,7 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						$restartSystem = 1;
+						setRestartValues();
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
 						printLog('nvme firmware was successfully updated', 'L0');
@@ -3564,7 +3565,7 @@ sub tuxedokeyboardite() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3655,7 +3656,7 @@ sub tuxedomicfix1() {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
@@ -3760,7 +3761,7 @@ sub tuxedorestoreaudiofix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3785,7 +3786,7 @@ sub kernelhwe2004() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-generic-hwe-20.04', $instFailed, $instDone);
+			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			}
@@ -3797,7 +3798,7 @@ sub kernelhwe2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3825,7 +3826,7 @@ sub kerneltuxedo2004edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-edge', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			}
@@ -3837,7 +3838,7 @@ sub kerneltuxedo2004edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3863,7 +3864,7 @@ sub kerneltuxedo2004next() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-next', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			}
@@ -3875,7 +3876,7 @@ sub kerneltuxedo2004next() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3902,7 +3903,7 @@ sub kerneltuxedo2004() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			}
@@ -3914,7 +3915,7 @@ sub kerneltuxedo2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3940,7 +3941,7 @@ sub kerneltuxedo2204() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			installKernelFlavour('linux-tuxedo-22.04', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			}
@@ -3952,7 +3953,7 @@ sub kerneltuxedo2204() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3979,7 +3980,7 @@ sub kerneltuxedo2204edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			installKernelFlavour('linux-tuxedo-22.04-edge', $instFailed, $instDone);
+			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			}
@@ -3991,7 +3992,7 @@ sub kerneltuxedo2204edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4076,7 +4077,7 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
+					setRestartValues();
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4127,7 +4128,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
+					setRestartValues();
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4178,7 +4179,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					$restartSystem = 1;
+					setRestartValues();
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4326,7 +4327,7 @@ sub r8168dkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4366,7 +4367,7 @@ sub tuxedooledbrt() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4654,7 +4655,7 @@ sub tuxedopinfixtgldkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4972,7 +4973,7 @@ sub cardreaderfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -5016,7 +5017,7 @@ sub samsungnvmefix() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			}
 		}
 	}
@@ -5030,7 +5031,7 @@ sub samsungnvmefix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			$restartSystem = 1;
+			setRestartValues();
 		}
 	}
 	if ($action eq 'remove') {
@@ -5701,12 +5702,11 @@ sub setAptMark {
 #
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
-	printLog("installKernelFlavour flavour: $flavour failed: $failed somethingDone: $somethingDone", 'TL2');
-	if (!(defined $failed)) {
-		$failed = 0;
+	if (!(defined ${$failed})) {
+		${$failed} = 0;
 	}
-	if (!(defined $somethingDone)) {
-		$somethingDone = 0;
+	if (!(defined ${$somethingDone})) {
+		${$somethingDone} = 0;
 	}
 	my $partialName;
 	my $installCmd = 'apt-get install -yq ';
@@ -5720,13 +5720,13 @@ sub installKernelFlavour {
 	my $exitStatus;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
-		$failed += 1;
+		${$failed} += 1;
 		return (0);
 	}
 	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
-		$failed += 1;
+		${$failed} += 1;
 		return (0);
 	}
 	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
@@ -5740,7 +5740,7 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $package (@lines) {
-		if (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/))) {
+		if (!($package =~ /linux-image-unsigned-.*/) && (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/)))) {
 			printLog("package missing: $package", 'L2');
 			$packageMissing = 1;
 		}
@@ -5757,7 +5757,7 @@ sub installKernelFlavour {
 			`dpkg --configure -a`;
 			if ($? != 0) {
 				printLog("configure -a failed!! exiting", 'L0');
-				$failed += 1;
+				${$failed} += 1;
 				return (0);
 			} else {
 				$retString = `$installCmd`;
@@ -5780,7 +5780,7 @@ sub installKernelFlavour {
 			} elsif ($_ =~ /.*\s[ih][i]/) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
-				$somethingDone += 1;
+				${$somethingDone} += 1;
 			}
 		}
 		if ($allPackagesInstalled) {
@@ -5789,9 +5789,9 @@ sub installKernelFlavour {
 	}
 
 	if (!$allPackagesInstalled) {
-		$failed += 1;
+		${$failed} += 1;
 	}
-	printLog("failed: $failed, somethingdone: $somethingDone", 'L2');
+	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2');
 	return (1);
 }
 
@@ -5981,7 +5981,7 @@ sub uninstKernelFlavour {
 		# circumvent Ubuntu failsafe for currently installed kernel
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel!", 'L2');
-			$restartSystem = 1;
+			setRestartValues();
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText, 1);
@@ -6140,7 +6140,7 @@ sub removeDebianModule {
 			$origConfModules{$module}{upgraded} = "yes";
 			$origConfModules{$module}{required} = "no";
 			if ($restart) {
-				$restartSystem = 1;
+				setRestartValues();
 			}
 		} else {
 			addToConfiguredModules($module, "remove failed");
@@ -7172,6 +7172,9 @@ sub listStatus {
 			write;
 		}
 	}
+	if (-e $needsRestartFile) {
+		print "Some fixes need a system restart to be effective\n";
+	}
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
 	}
@@ -8042,7 +8045,7 @@ sub postConfigure {
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}", 'L1');
 				postSetModulesState($sysProgram, "success");
-				$restartSystem = 1;
+				setRestartValues();
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0');
@@ -8259,6 +8262,17 @@ sub modulesList() {
 		print "$origConfModules{$module}{name}\n";
 	}
 }
+
+
+
+###############################################################################
+# sets values to restart the system
+#
+sub setRestartValues {
+	$restartSystem = 1;
+	createFile($needsRestartFile, 'Tomte: system has to be restarted', 0);
+}
+
 
 
 
