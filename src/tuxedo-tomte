@@ -1730,7 +1730,7 @@ my %origConfModules = (
 	},
 	i915enablepsrfix => {
 		name => 'i915-enable-psr-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2460,8 +2460,10 @@ sub checkRequirements {
 			printLog('detected amdgpu-backlight-aux-off issue', 'L1');
 		}
 	}
+	#TODO enable debug
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
+		($boardname =~ m/NH5xAx/) || #TODO
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue', 'L1');
@@ -4587,7 +4589,7 @@ sub i915disablepsrfix() {
 sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernelParameters = ("i915.tuxedo_disable_psr2=1");
+	my @kernelParameters = ("i915.tuxedo_disable_psr2=1", "i915.enable_psr=1");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -4798,7 +4800,8 @@ sub lightdmlogindcheckgraphicalfix() {
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernelParameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0 nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1 i915.enable_dpcd_backlight=0");
+	#TODO test this!!
+	my @kernelParameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0", "nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1", "i915.enable_dpcd_backlight=0");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
