@@ -2460,10 +2460,8 @@ sub checkRequirements {
 			printLog('detected amdgpu-backlight-aux-off issue', 'L1');
 		}
 	}
-	#TODO enable debug
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/NH5xAx/) || #TODO
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue', 'L1');
