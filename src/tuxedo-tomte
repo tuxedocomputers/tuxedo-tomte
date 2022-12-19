@@ -6636,7 +6636,8 @@ sub messageDesktop {
 	my $mPid = '';
 	my $mLine = '';
 	my @whoLines = `who -u`;
-	my $environ = '/proc/$mPid/environ';
+	my $environ = '';
+	my $dbusAddress;
 
 	# don't message the desktop if LiveISO or FAI
 	if ($LiveISO || $FAI) {
@@ -6655,8 +6656,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	my $dbusAddress;
-
+	$environ = "/proc/$mPid/environ";
 	if ( (-e $environ) && open(FH, "<", $environ) ) {
 		$dbusAddress = do { local $/; <FH> };
 		close FH;
