@@ -1575,7 +1575,7 @@ my %origConfModules = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -4025,7 +4025,7 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $output;
-	my $nvidiaDriver = 'nvidia-driver-510';
+	my $nvidiaDriver = 'tuxedo-nvidia-driver-525';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
