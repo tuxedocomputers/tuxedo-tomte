@@ -1,4 +1,4 @@
-tuxedo-tomte (2.7.9-15) UNRELEASED; urgency=medium
+tuxedo-tomte (2.7.9-18) UNRELEASED; urgency=medium
 
   * after packaging
   * redirect errors to null for lspci
@@ -8,8 +8,10 @@ tuxedo-tomte (2.7.9-15) UNRELEASED; urgency=medium
   * added i915.enable_psr=1 to i915enablepsrfix
   * after packaging
   * removed debug for i915enablepsrfix
+  * after packaging
+  * added debug for FAI testing
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 19 Dec 2022 15:37:43 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 19 Dec 2022 16:35:55 +0100
 
 tuxedo-tomte (2.7.9) jammy; urgency=medium
 
