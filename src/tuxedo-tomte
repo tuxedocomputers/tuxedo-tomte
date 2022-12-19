@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.9';
+our $VERSION = '2.7.9-10';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -105,7 +105,7 @@ my $startLaterAgain = 0;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
-my $lspciOutput = `lspci -vn`;
+my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname;
 $boardname = readFileReturnLine($boardnameFilename);
