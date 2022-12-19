@@ -7440,7 +7440,7 @@ sub configureSingleModule {
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1');
-		upgradeModule($module);
+		updateModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
 	}
@@ -7521,7 +7521,7 @@ sub reconfigureSingleModule {
 
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
-			upgradeModule($module);
+			updateModule($module);
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
@@ -7969,9 +7969,9 @@ sub removeModule {
 ###############################################################################
 # configures a module, does no checks
 #
-sub upgradeModule {
+sub updateModule {
 	my $module = shift;
-	my $permission = checkModePermission('upgrade', $module);
+	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'upgrade');
