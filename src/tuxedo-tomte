@@ -4026,7 +4026,7 @@ sub nvidiadriver() {
 	my $oldDriversRemoved;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
-	my $nvidiaDriver525 = 'tuxedo-nvidia-driver-525';
+	my $nvidiaDriver525 = 'nvidia-driver-525';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
