@@ -4071,7 +4071,9 @@ sub nvidiadriver() {
 			} else {
 				$packagePythonGtk2 = 1;
 			}
-	
+
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');	
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
