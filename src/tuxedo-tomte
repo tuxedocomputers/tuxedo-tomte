@@ -4025,19 +4025,20 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $output;
-	my $nvidiaDriver = 'tuxedo-nvidia-driver-525';
+	my $nvidiaDriver510 = 'nvidia-driver-510';
+	my $nvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4088,15 +4089,15 @@ sub nvidiadriver() {
 		
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4139,15 +4140,15 @@ sub nvidiadriver() {
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver525) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver525);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver525,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
