@@ -4143,12 +4143,13 @@ sub nvidiadriver() {
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver525) ) {
+			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
+			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver525);
+				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
 			} else {
-				setAptMark($nvidiaDriver525,'manual');
+				setAptMark($tuxedoNvidiaDriver525,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
