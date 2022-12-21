@@ -1,31 +1,9 @@
-tuxedo-tomte (2.7.9-27) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.0) jammy; urgency=medium
 
-  * after packaging
-  * redirect errors to null for lspci
-  * added debug
-  * after packaging
-  * moved mPid value
-  * added tuxedo-nvidia-driver-525 as default nvidia driver
-  * UNRELEASED
-  * after packaging
-  * changed upgrade to update
-  * after packaging
-  * after packaging
-  * added tuxedo-nvidia-driver-525 for 22.04 only
-  * after packaging
-  * changed from tuxedo to native nvidia driver
-  * after packaging
-  * added tuxedo-nvidia-driver
-  * after packaging
-  * added debug for nvidia
-  * after packaging
-  * added debug
-  * after packaging
-  * removed some debug
-  * after packaging
-  * removed debug
+  * added tuxedo-nvidia-driver-525 as default nvidia driver for 22.04 only
+  * repaired desktop messages
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Dec 2022 14:39:25 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Dec 2022 19:25:30 +0100
 
 tuxedo-tomte (2.7.9) jammy; urgency=medium
 
