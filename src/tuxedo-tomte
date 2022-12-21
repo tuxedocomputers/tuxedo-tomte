@@ -5484,9 +5484,12 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
-		#TODO debug
-		#$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
-		my $retText = `$deinstCmd`;
+		my $retText;
+		if ($FAI) {
+			$retText = `$deinstCmd`;
+		} else {
+			$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		}
 		if ($? != 0) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
