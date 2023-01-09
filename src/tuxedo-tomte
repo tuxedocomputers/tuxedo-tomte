@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.9-3';
+our $VERSION = '2.8.0';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -106,7 +106,7 @@ my $startLaterAgain = 0;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
-my $lspciOutput = `lspci -vn`;
+my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname;
 $boardname = readFileReturnLine($boardnameFilename);
@@ -1576,7 +1576,7 @@ my %origConfModules = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -4026,19 +4026,20 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $output;
-	my $nvidiaDriver = 'nvidia-driver-510';
+	my $nvidiaDriver510 = 'nvidia-driver-510';
+	my $nvidiaDriver525 = 'nvidia-driver-525';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4071,7 +4072,9 @@ sub nvidiadriver() {
 			} else {
 				$packagePythonGtk2 = 1;
 			}
-	
+
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4089,15 +4092,15 @@ sub nvidiadriver() {
 		
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4122,6 +4125,7 @@ sub nvidiadriver() {
 				}
 			}
 
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4140,15 +4144,16 @@ sub nvidiadriver() {
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
+			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($tuxedoNvidiaDriver525,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4173,6 +4178,7 @@ sub nvidiadriver() {
 				}
 			}
 
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -5479,8 +5485,12 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
-		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
-		my $retText = `$deinstCmd`;
+		my $retText;
+		if ($FAI) {
+			$retText = `$deinstCmd`;
+		} else {
+			$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		}
 		if ($? != 0) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
@@ -6637,7 +6647,8 @@ sub messageDesktop {
 	my $mPid = '';
 	my $mLine = '';
 	my @whoLines = `who -u`;
-	my $environ = '/proc/$mPid/environ';
+	my $environ = '';
+	my $dbusAddress;
 
 	# don't message the desktop if LiveISO or FAI
 	if ($LiveISO || $FAI) {
@@ -6656,8 +6667,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	my $dbusAddress;
-
+	$environ = "/proc/$mPid/environ";
 	if ( (-e $environ) && open(FH, "<", $environ) ) {
 		$dbusAddress = do { local $/; <FH> };
 		close FH;
@@ -7450,7 +7460,7 @@ sub configureSingleModule {
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1');
-		upgradeModule($module);
+		updateModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
 	}
@@ -7531,7 +7541,7 @@ sub reconfigureSingleModule {
 
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
-			upgradeModule($module);
+			updateModule($module);
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
@@ -7979,9 +7989,9 @@ sub removeModule {
 ###############################################################################
 # configures a module, does no checks
 #
-sub upgradeModule {
+sub updateModule {
 	my $module = shift;
-	my $permission = checkModePermission('upgrade', $module);
+	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'upgrade');
