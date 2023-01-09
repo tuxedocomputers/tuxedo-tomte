@@ -213,8 +213,6 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
-		},
-		versions => {
 			"22.04" => {
 				name => 'jammy',
 			},
@@ -315,14 +313,6 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		oibaf => {
-			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
-			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		graphics => {
-			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
-			content => ['deb https://graphics.tuxedocomputers.com/ubuntu jammy main'],
 		},
 		name => 'jammy',
 	},
@@ -5409,6 +5399,11 @@ sub setComment {
 				return (1);
 			}
 		}
+	} elsif( (($$repoline =~ m/^deb https:\/\/mirrors\.tuxedocomputers\.com\/ubuntu\/mirror/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/) ) ||
+	   (($$repoline =~ m/^deb https:\/\/deb.tuxedocomputers.com\/ubuntu/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/)) ) {
+		$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+		printLog("commented out: $$repoline", 'L0');
+		return (1);
 	} else {
 		# nothing has to be done
 		return (0);
