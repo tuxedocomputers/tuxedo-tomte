@@ -3584,8 +3584,9 @@ sub tuxedokeyboardite() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3635,8 +3636,32 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			my $counter = 0;
+			if( isPackageInstalled('fprintd') ) {
+				if (!deinstallPackage('fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if( isPackageInstalled('libpam-fprintd') ) {
+				if (!deinstallPackage('libpam-fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if ($counter == 2) {
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
+		}
 	}
 }
 
