@@ -5092,6 +5092,7 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
+	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$completeDistVersion}{deb}) {
 		printLog("deb repos detected", 'TL2');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
@@ -5105,6 +5106,22 @@ sub createRepos {
 			return (1);
 		}
 	}
+
+	#TODO debug Upgrade
+	if (exists $repos{$completeDistVersion}{deb}) {
+		printLog("deb repos detected", 'TL2');
+		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# deb https?:\/\/testdeb.*')) {
+			printLog('testing environment detected, leaving repos as they are', 'TL2');
+			return (1);
+		}
+	} elsif (exists $repos{$completeDistVersion}{mirrors}) {
+		printLog("mirror repos detected", 'TL2');
+		if (isLineInFile('/etc/apt/sources.list', '# deb https?:\/\/testmirrors.*')) {
+			printLog('testing environment detected, leaving repos as they are', 'TL2');
+			return (1);
+		}
+	}
+
 
 	if (!-d $sourcesListDir) {
 		printLog("no $sourcesListDir found (something's really wrong)", 'TL0');
