@@ -3065,6 +3065,8 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $retval2;
+	my $thirdPartyMirrorsFile = '/etc/update-manager/release-upgrades.d/tuxedo.cfg';
+	my $thirdPartyMirrorsFileText = '[ThirdPartyMirrors]\ntuxedo = https://deb.tuxedocomputers.com/ubuntu\n';
 
 	# if this is a FAI-installation all repos should be already set correctly
 	if ($FAI) {
@@ -3082,6 +3084,12 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
+			unless (-e $thirdPartyMirrorsFile) {
+				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+				unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+				}
+			}
 			if ($retval == 1) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
