@@ -1074,6 +1074,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'50' => {
+		model => ['TUXEDO Gemini 17 Gen1'],
+		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
+		fix => ['tuxedokeyboardite'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 
 );
 
@@ -2409,6 +2420,7 @@ sub checkRequirements {
 		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ /LAPQC71B/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
