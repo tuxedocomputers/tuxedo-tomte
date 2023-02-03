@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.0-9';
+our $VERSION = '2.8.0-24';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -214,6 +214,9 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
+			"22.04" => {
+				name => 'jammy',
+			},
 		},
 	},
 	"TUXEDO_OS Plasma" => {
@@ -307,6 +310,13 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"KDE neon 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
@@ -351,8 +361,6 @@ my %tuxedo_repos = (
 		},
 		name => 'jammy',
 	},
-
-
 );
 
 
@@ -403,6 +411,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
+	"KDE neon 22.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -439,7 +456,6 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
-
 );
 
 
@@ -522,7 +538,6 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
 		},
 	},
-
 );
 
 
@@ -1057,6 +1072,17 @@ my %tuxedo_devices = (
 		pci_id => '',
 		cpu => '',
 		kernel => 'linux-tuxedo-22.04-edge',
+		display => '',
+		usb_device => '',
+	},
+	'50' => {
+		model => ['TUXEDO Gemini 17 Gen1'],
+		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
+		fix => ['tuxedokeyboardite'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
 		display => '',
 		usb_device => '',
 	},
@@ -2395,6 +2421,7 @@ sub checkRequirements {
 		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ /LAPQC71B/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
@@ -2484,7 +2511,7 @@ sub checkRequirements {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
@@ -3051,6 +3078,8 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $retval2;
+	my $thirdPartyMirrorsFile = '/etc/update-manager/release-upgrades.d/tuxedo.cfg';
+	my $thirdPartyMirrorsFileText = "[ThirdPartyMirrors]\ntuxedo = https://deb.tuxedocomputers.com/ubuntu\n";
 
 	# if this is a FAI-installation all repos should be already set correctly
 	if ($FAI) {
@@ -3068,6 +3097,12 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
+			unless (-e $thirdPartyMirrorsFile) {
+				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+				unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+				}
+			}
 			if ($retval == 1) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3585,8 +3620,9 @@ sub tuxedokeyboardite() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3636,8 +3672,32 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			my $counter = 0;
+			if( isPackageInstalled('fprintd') ) {
+				if (!deinstallPackage('fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if( isPackageInstalled('libpam-fprintd') ) {
+				if (!deinstallPackage('libpam-fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if ($counter == 2) {
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
+		}
 	}
 }
 
@@ -3941,7 +4001,7 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -3980,7 +4040,7 @@ sub kerneltuxedo2204edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
@@ -4142,7 +4202,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
@@ -5078,6 +5138,7 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
+	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$completeDistVersion}{deb}) {
 		printLog("deb repos detected", 'TL2');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
@@ -5118,7 +5179,7 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'KDE neon 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
@@ -5255,7 +5316,7 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		if (checkNetwork(1, 0)) {
+		if (checkNetwork(5, 1)) {
 			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 			# wait a bit for package management to settle down
 			while ($counter < 15) {
@@ -5385,6 +5446,11 @@ sub setComment {
 				return (1);
 			}
 		}
+	} elsif( (($$repoline =~ m/^deb https:\/\/mirrors\.tuxedocomputers\.com\/ubuntu\/mirror/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/) ) ||
+	   (($$repoline =~ m/^deb https:\/\/deb.tuxedocomputers.com\/ubuntu/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/)) ) {
+		$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+		printLog("commented out: $$repoline", 'L0');
+		return (1);
 	} else {
 		# nothing has to be done
 		return (0);
