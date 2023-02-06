@@ -1078,7 +1078,7 @@ my %tuxedo_devices = (
 	'50' => {
 		model => ['TUXEDO Gemini 17 Gen1'],
 		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedokeyboardite'],
+		fix => ['tuxedokeyboardite', 'thunderboltbootdelayfix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2523,7 +2523,8 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ m/X170KM-G/) {
+	if (($boardname =~ m/X170KM-G/) ||
+	   ($boardname = ~ m/PD5x_7xPNP_PNR_PNN_PNT/))	{
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
