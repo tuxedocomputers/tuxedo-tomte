@@ -1082,7 +1082,7 @@ my %tuxedo_devices = (
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
-		kernel => '',
+		kernel => 'linux-tuxedo-22.04-next',
 		display => '',
 		usb_device => '',
 	},
@@ -1593,6 +1593,23 @@ my %origConfModules = (
 		package => 'no',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
+	kerneltuxedo2204 => {
+		name => 'linux-tuxedo-22.04-next',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-22.04-next',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2517,6 +2534,9 @@ sub checkRequirements {
 			($boardname =~ m/PF5LUXG/)) {
 			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
+		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2204}{required} = 'yes';
@@ -4067,6 +4087,46 @@ sub kerneltuxedo2204edge() {
 		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
+
+
+
+
+###############################################################################
+# kernel-tuxedo-22.04-next
+#
+sub kerneltuxedo2204next() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
+			if ($instFailed == 0) {
+				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				setRestartValues();
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
 
 
 
