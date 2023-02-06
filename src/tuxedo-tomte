@@ -1825,7 +1825,7 @@ my %origConfModules = (
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -4818,10 +4818,14 @@ sub tuxedopinfixtgldkms() {
 sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernelParameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
+	my @kernelParameters = ("modprobe.blacklist=thunderbolt");
+	#my @kernelParameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
+			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
+		}
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -4840,6 +4844,9 @@ sub thunderboltbootdelayfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
+			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
+		}
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
