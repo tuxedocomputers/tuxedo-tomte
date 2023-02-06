@@ -1600,7 +1600,7 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
-	kerneltuxedo2204 => {
+	kerneltuxedo2204next => {
 		name => 'linux-tuxedo-22.04-next',
 		version => 1,
 		installed => 'no',
@@ -2524,6 +2524,9 @@ sub checkRequirements {
 				($boardname =~ m/NL5xNU/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
+		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
