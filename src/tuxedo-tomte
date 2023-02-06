@@ -511,6 +511,9 @@ my %flavours = (
 		"linux-tuxedo-22.04-edge" => {
 			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
 		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
 	},
 	"6.1" => {
 		"linux-generic" => {
@@ -4819,7 +4822,6 @@ sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
 	my @kernelParameters = ("modprobe.blacklist=thunderbolt");
-	#my @kernelParameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
