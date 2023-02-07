@@ -2550,7 +2550,7 @@ sub checkRequirements {
 	}
 
 	if (($boardname =~ m/X170KM-G/) ||
-	   ($boardname = ~ m/PD5x_7xPNP_PNR_PNN_PNT/))	{
+	   ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
