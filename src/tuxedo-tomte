@@ -43,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -103,6 +103,7 @@ my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
+my $systemdDelay = 5;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -5774,7 +5775,7 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		if (checkNetwork(1, 0)) {
+		if (checkNetwork(10, 1)) {
 			if ($logLevel > 1) {
 				$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 			} else {
@@ -6380,7 +6381,7 @@ sub pkconRefresh {
 	my $pkconModule = shift;
 	my $output;
 	my $exitStatus;
-	if (checkNetwork(1, 0)) {
+	if (checkNetwork(10, 1)) {
 		$output = `pkcon refresh`;
 		$exitStatus = $?/256;
 		if ($exitStatus != 0) {
@@ -8254,7 +8255,13 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		$retVal = system("systemd-run --on-active=5min tuxedo-tomte configure all >/dev/null 2>&1");
+		if ($noNetwork == 1) {
+			$systemdDelay = 1;
+		} else {
+			$systemdDelay = 5;
+		}
+		my $systemctlCmd = "systemd-run --on-active=".$systemdDelay."min tuxedo-tomte configure all >/dev/null 2>&1";
+		$retVal = system($systemctlCmd);
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
 		printLog("ret value: $retVal", 'L0');
 	}
