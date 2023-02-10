@@ -8255,12 +8255,11 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		if ($noNetwork == 1) {
-			$systemdDelay = 1;
-		} else {
-			$systemdDelay = 5;
-		}
-		my $systemctlCmd = "systemd-run --on-active=".$systemdDelay."min tuxedo-tomte configure all >/dev/null 2>&1";
+		$systemdDelay = 1;
+		my $systemctlCmd = 'systemd-run --on-active='.$systemdDelay.'min tuxedo-tomte configure all >/dev/null 2>&1';
+
+		#TODO debug
+		printLog("systemctlCmd: $systemctlCmd", 'TL0');
 		$retVal = system($systemctlCmd);
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
 		printLog("ret value: $retVal", 'L0');
