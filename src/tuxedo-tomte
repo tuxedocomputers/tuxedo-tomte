@@ -8255,7 +8255,7 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		$systemdDelay = 60;
+		$systemdDelay = 30;
 		my $systemctlCmd = 'systemd-run --on-active="'.$systemdDelay.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
 
 		#TODO debug
