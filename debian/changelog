@@ -1,21 +1,80 @@
-tuxedo-tomte (2.7.4-2) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1-8) UNRELEASED; urgency=medium
 
   * after packaging
-  * after packaging
-  * after packaging
-  * debuglevel
+  * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 22 Sep 2022 14:51:23 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 15 Feb 2023 11:50:42 +0100
 
-tuxedo-tomte (2.7.3) jammy; urgency=medium
+tuxedo-tomte (2.8.1) jammy; urgency=medium
+
+  * added KDE neon 22.04
+  * added ThirdPartyMirrors file for upgrades to next LTS
+  * added remove for tuxedokeyboardite and fingerprintreader
+  * added Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT and
+  	tuxedokeyboardite
+  * JSON list output
+  * added libjson-perl to dependencies
+  * added thunderboltbootdelayfix for Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * added kerneltuxedo2204next for Gemini 17 Gen1 with boardname: PD5x_7xPNP_PNR_PNN_PNT
+  * changed kernel parameter for thunderboltbootdelayfix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 07 Feb 2023 14:09:50 +0100
+
+tuxedo-tomte (2.8.0) jammy; urgency=medium
+
+  * added tuxedo-nvidia-driver-525 as default nvidia driver for 22.04 only
+  * repaired desktop messages
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Dec 2022 19:25:30 +0100
+
+tuxedo-tomte (2.7.9) jammy; urgency=medium
+
+  * added message for restart on terminal when using 'list' and a restart is
+    necessary
+  * fixed erroneous failed kernel installation log message
+  * changed repos from http to https for Elementary OS 6
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Dec 2022 12:29:29 +0100
+
+tuxedo-tomte (2.7.8) jammy; urgency=medium
+
+  * added module dependency Dpkg::Version for kernel package version
+    comparision
+  * added kernel linux-tuxedo-22.04-edge to Pulse 15 Gen2 with boardname
+    PF5LUXG
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Dec 2022 12:53:10 +0100
+
+tuxedo-tomte (2.7.7) jammy; urgency=medium
+
+  * added kerneltuxedo2204edge for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 or PH6AG01_PH6AQ71_PH6AQI1
+  * added tuxedotouchpadswitch for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 22 Nov 2022 11:47:58 +0100
+
+tuxedo-tomte (2.7.6) jammy; urgency=medium
+
+  * added depends for necessary perl library
+  * changed network check handling and repository key install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 10 Nov 2022 09:48:24 +0100
+
+tuxedo-tomte (2.7.5) jammy; urgency=medium
+
+  * added tuxedokeyboardite for XMG Fusion 15 L19 with GTX1660Ti or RTX2070
+    with boardnames: LAPQC71A or LAPQC71B
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 07 Oct 2022 08:43:49 +0200
+
+tuxedo-tomte (2.7.4) jammy; urgency=medium
 
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
-  * added locking to reserve package management execution for Tomte
-  * moved https repo conversion to post FAI requisites, removed repo
-    installation from FAI postrequisites
+  * reggression for 2.7.3
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 19 Sep 2022 12:35:59 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Sep 2022 19:34:15 +0200
 
 tuxedo-tomte (2.7.2) jammy; urgency=medium
 
