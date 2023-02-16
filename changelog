@@ -1,9 +1,20 @@
-tuxedo-tomte (2.8.1-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1-9) UNRELEASED; urgency=medium
 
   * after packaging
   * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * added i915.enable_psr=1 to i915enablepsrfix
+  * packing
+  * after packaging
+  * removed debug for i915enablepsrfix
+  * packing
+  * after packaging
+  * added debug for FAI testing
+  * packing
+  * after packaging
+  * after packaging
+  * remove TODOs
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 15 Feb 2023 11:50:42 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 16 Feb 2023 17:02:33 +0100
 
 tuxedo-tomte (2.8.1) jammy; urgency=medium
 
