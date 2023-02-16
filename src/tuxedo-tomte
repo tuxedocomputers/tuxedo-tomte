@@ -96,6 +96,7 @@ my $completeDistVersion;
 my $FAI = 0;
 my $LiveISO = 0;
 my $noNetwork = 0;
+my $packagekitStatus = 0;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
@@ -5578,9 +5579,75 @@ sub httpToHttps {
 
 
 
+
+
 ###############################################################################
 # package handling
 #
+
+
+###############################################################################
+# get packagekit status from systemd getSystemStatus(sustemdmodule)
+# returns 'active', 'inactive' or '0' if no status could be retrieved
+#
+sub getSystemdStatus {
+	my $systemdModule = shift;
+	my $systemdCmd = "systemctl is-active $systemdModule";
+	my $systemdReturn = `$systemdCmd`;
+	if ($systemdReturn =~ /^active/) {
+		return 'active';
+	} elsif ($systemdReturn =~ /^inactive/) {
+		return 'inactive';
+	} else {
+		return (0);
+	}
+}
+
+
+
+
+###############################################################################
+# sends a command to the module by systemd
+# commandSystemdModule(command, module)
+# eg: mask --now, unmask, start, stop, enable, disable
+#
+sub commandSystemdModule {
+	my ($command, $systemdModule) = @_;
+	my $systemdCmd = "systemctl $command $systemdModule";
+	my $systemdReturn = `$systemdCmd`;
+}
+
+
+
+###############################################################################
+#
+sub deactivatePackagekit {
+	if (getSystemdStatus('packagekit') eq 'active') {
+		printLog("packagekit is active => deactivating ...", 'L2');
+		commandSystemdModule('mask --now', 'packagekit');
+		$packagekitStatus = 'inactive';
+	} else {
+		printLog("packagekit is already inactive", 'L2');
+	}
+}
+
+
+
+
+###############################################################################
+#
+sub activatePackagekit {
+	if (getSystemdStatus('packagekit') eq 'inactive') {
+		printLog("packagekit is inactive => activating ...", 'L2');
+		commandSystemdModule('unmask', 'packagekit');
+		$packagekitStatus = 'active';
+	} else {
+		printLog("packagekit is already active", 'L2');
+	}
+}
+
+
+
 
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
