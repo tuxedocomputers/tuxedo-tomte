@@ -2510,7 +2510,6 @@ sub checkRequirements {
 	}
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/NH5xAx/) || #TODO debug
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog('detected i915-enable-psr-fix issue', 'L1');
@@ -4939,7 +4938,6 @@ sub lightdmlogindcheckgraphicalfix() {
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
 	my $action = shift;
-	#TODO test this!!
 	my @kernelParameters = ("nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0", "nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1", "i915.enable_dpcd_backlight=0");
 	my $retval;
 	if ($action eq 'install') {
