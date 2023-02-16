@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.1';
+our $VERSION = '2.8.1-8';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1081,7 +1081,7 @@ my %tuxedo_devices = (
 	'50' => {
 		model => ['TUXEDO Gemini 17 Gen1'],
 		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedokeyboardite', 'thunderboltbootdelayfix'],
+		fix => ['tuxedokeyboardite'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1089,7 +1089,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
 );
 
 
@@ -1828,7 +1827,7 @@ my %origConfModules = (
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2549,8 +2548,7 @@ sub checkRequirements {
 		}
 	}
 
-	if (($boardname =~ m/X170KM-G/) ||
-	   ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
+	if ($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
@@ -4848,6 +4846,9 @@ sub thunderboltbootdelayfix() {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
 		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
 			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
+		}
+		if (isTextInFile('/etc/default/grub', 'modprobe.blacklist=thunderbolt')) {
+			replaceTextInFile('/etc/default/grub', 'modprobe.blacklist=thunderbolt', '');
 		}
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
