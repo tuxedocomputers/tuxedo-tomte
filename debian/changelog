@@ -1,17 +1,24 @@
-tuxedo-tomte (2.7.9-18) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1) jammy; urgency=medium
 
-  * after packaging
-  * redirect errors to null for lspci
-  * added debug
-  * after packaging
-  * moved mPid value
-  * added i915.enable_psr=1 to i915enablepsrfix
-  * after packaging
-  * removed debug for i915enablepsrfix
-  * after packaging
-  * added debug for FAI testing
+  * added KDE neon 22.04
+  * added ThirdPartyMirrors file for upgrades to next LTS
+  * added remove for tuxedokeyboardite and fingerprintreader
+  * added Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT and
+  	tuxedokeyboardite
+  * JSON list output
+  * added libjson-perl to dependencies
+  * added thunderboltbootdelayfix for Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * added kerneltuxedo2204next for Gemini 17 Gen1 with boardname: PD5x_7xPNP_PNR_PNN_PNT
+  * changed kernel parameter for thunderboltbootdelayfix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 19 Dec 2022 16:35:55 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 07 Feb 2023 14:09:50 +0100
+
+tuxedo-tomte (2.8.0) jammy; urgency=medium
+
+  * added tuxedo-nvidia-driver-525 as default nvidia driver for 22.04 only
+  * repaired desktop messages
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Dec 2022 19:25:30 +0100
 
 tuxedo-tomte (2.7.9) jammy; urgency=medium
 

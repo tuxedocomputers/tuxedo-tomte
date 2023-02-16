@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.7.9-18';
+our $VERSION = '2.8.1';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -35,6 +35,7 @@ use Parse::EDID qw(parse_edid);
 use Time::HiRes qw(usleep);
 use Digest::MD5 qw(md5_hex);
 use Dpkg::Version;
+use JSON;
 
 # for debugging
 use Data::Dumper;
@@ -42,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -213,6 +214,9 @@ my %supportedOS = (
 			"20.04" => {
 				name => 'focal',
 			},
+			"22.04" => {
+				name => 'jammy',
+			},
 		},
 	},
 	"TUXEDO_OS Plasma" => {
@@ -306,6 +310,13 @@ my %tuxedo_repos = (
 		},
 		name => 'focal',
 	},
+	"KDE neon 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
@@ -350,8 +361,6 @@ my %tuxedo_repos = (
 		},
 		name => 'jammy',
 	},
-
-
 );
 
 
@@ -402,6 +411,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'focal',
 	},
+	"KDE neon 22.04" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -438,7 +456,6 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
-
 );
 
 
@@ -494,6 +511,9 @@ my %flavours = (
 		"linux-tuxedo-22.04-edge" => {
 			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
 		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
 	},
 	"6.1" => {
 		"linux-generic" => {
@@ -521,7 +541,6 @@ my %flavours = (
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
 		},
 	},
-
 );
 
 
@@ -1059,6 +1078,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'50' => {
+		model => ['TUXEDO Gemini 17 Gen1'],
+		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
+		fix => ['tuxedokeyboardite', 'thunderboltbootdelayfix'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'linux-tuxedo-22.04-next',
+		display => '',
+		usb_device => '',
+	},
 
 );
 
@@ -1573,9 +1603,26 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
+	kerneltuxedo2204next => {
+		name => 'linux-tuxedo-22.04-next',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-22.04-next',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1781,7 +1828,7 @@ my %origConfModules = (
 	},
 	thunderboltbootdelayfix => {
 		name => 'thunderbolt-boot-delay-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2394,6 +2441,7 @@ sub checkRequirements {
 		($boardname =~ /GMxTGxx/) ||
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /LAPQC71A/) ||
+		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ /LAPQC71B/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
@@ -2480,23 +2528,30 @@ sub checkRequirements {
 				($boardname =~ m/NL5xNU/)) {
 			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
+		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
 			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
+		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
 			printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
 			$origConfModules{kerneltuxedo2204}{required} = 'yes';
 		}
 	}
 
-	if ($boardname =~ m/X170KM-G/) {
+	if (($boardname =~ m/X170KM-G/) ||
+	   ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
@@ -3051,6 +3106,8 @@ sub tuxedorepos() {
 	my $action = shift;
 	my $retval;
 	my $retval2;
+	my $thirdPartyMirrorsFile = '/etc/update-manager/release-upgrades.d/tuxedo.cfg';
+	my $thirdPartyMirrorsFileText = "[ThirdPartyMirrors]\ntuxedo = https://deb.tuxedocomputers.com/ubuntu\n";
 
 	# if this is a FAI-installation all repos should be already set correctly
 	if ($FAI) {
@@ -3068,6 +3125,12 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
+			unless (-e $thirdPartyMirrorsFile) {
+				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+				unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+				}
+			}
 			if ($retval == 1) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -3585,8 +3648,9 @@ sub tuxedokeyboardite() {
 		printLog("upgrade not necessary for packages", 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
 	}
 }
 
@@ -3636,8 +3700,32 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		if (removeWarningMessage('')) {
+			my $counter = 0;
+			if( isPackageInstalled('fprintd') ) {
+				if (!deinstallPackage('fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if( isPackageInstalled('libpam-fprintd') ) {
+				if (!deinstallPackage('libpam-fprintd')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if ($counter == 2) {
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$origConfModules{$module}{installed} = 'yes';
+				$origConfModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
+		}
 	}
 }
 
@@ -3941,7 +4029,7 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -3980,7 +4068,7 @@ sub kerneltuxedo2204edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
@@ -4011,6 +4099,46 @@ sub kerneltuxedo2204edge() {
 
 
 ###############################################################################
+# kernel-tuxedo-22.04-next
+#
+sub kerneltuxedo2204next() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
+			if ($instFailed == 0) {
+				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				setRestartValues();
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
+
+
+
+
+###############################################################################
 # nvidiadriver
 # installs TUXEDO approved nvidia drivers and removes all the other ones
 #
@@ -4026,19 +4154,20 @@ sub nvidiadriver() {
 	my $packagePythonGtk2;
 	my $oldDriversRemoved;
 	my $output;
-	my $nvidiaDriver = 'nvidia-driver-510';
+	my $nvidiaDriver510 = 'nvidia-driver-510';
+	my $nvidiaDriver525 = 'nvidia-driver-525';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4071,7 +4200,9 @@ sub nvidiadriver() {
 			} else {
 				$packagePythonGtk2 = 1;
 			}
-	
+
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4089,15 +4220,15 @@ sub nvidiadriver() {
 		
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4122,6 +4253,7 @@ sub nvidiadriver() {
 				}
 			}
 
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4138,17 +4270,18 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
 			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver) ) {
+			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
+			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver);
+				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
 			} else {
-				setAptMark($nvidiaDriver,'manual');
+				setAptMark($tuxedoNvidiaDriver525,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -4173,6 +4306,7 @@ sub nvidiadriver() {
 				}
 			}
 
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4688,10 +4822,13 @@ sub tuxedopinfixtgldkms() {
 sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernelParameters = ("thunderbolt.tuxedo_icm_driver_ready_timeout=2000");
+	my @kernelParameters = ("modprobe.blacklist=thunderbolt");
 	my $retval;
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
+			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
+		}
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -4710,6 +4847,9 @@ sub thunderboltbootdelayfix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
+			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
+		}
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -5073,6 +5213,7 @@ sub createRepos {
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
+	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$completeDistVersion}{deb}) {
 		printLog("deb repos detected", 'TL2');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
@@ -5113,7 +5254,7 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'KDE neon 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
@@ -5250,7 +5391,7 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		if (checkNetwork(1, 0)) {
+		if (checkNetwork(5, 1)) {
 			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 			# wait a bit for package management to settle down
 			while ($counter < 15) {
@@ -5380,6 +5521,11 @@ sub setComment {
 				return (1);
 			}
 		}
+	} elsif( (($$repoline =~ m/^deb https:\/\/mirrors\.tuxedocomputers\.com\/ubuntu\/mirror/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/) ) ||
+	   (($$repoline =~ m/^deb https:\/\/deb.tuxedocomputers.com\/ubuntu/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/)) ) {
+		$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
+		printLog("commented out: $$repoline", 'L0');
+		return (1);
 	} else {
 		# nothing has to be done
 		return (0);
@@ -5480,8 +5626,12 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
-		$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
-		my $retText = `$deinstCmd`;
+		my $retText;
+		if ($FAI) {
+			$retText = `$deinstCmd`;
+		} else {
+			$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+		}
 		if ($? != 0) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
@@ -7185,10 +7335,19 @@ sub listStatus {
 
 
 
-sub printListMachinereadable {
-	my @arr;
+sub listStatusJson {
 	my $module;
 	my $upgradeAvailable = '';
+	my %list;
+
+	$list{version} = $VERSION;
+	$list{mode} = $mode;
+	if (-e $needsRestartFile) {
+		$list{restart} = 'yes';
+	} else {
+		$list{restart} = 'no';
+	}
+	
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
@@ -7200,27 +7359,27 @@ sub printListMachinereadable {
 			($localConfModules{$module}{required} eq 'no') &&
 			($origConfModules{$module}{required} eq 'no')) {
 			# module is installed but should not be
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}"]);
+			push @{ $list{modules} }, {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => "$localConfModules{$module}{required}$upgradeAvailable",
+			};
 		}
 		# required, installed and not removed
 		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
-			push(@arr,
-				["$localConfModules{$module}{name}",
-				"$localConfModules{$module}{version}",
-				"$localConfModules{$module}{installed}",
-				"$localConfModules{$module}{blocked}",
-				"$localConfModules{$module}{required}$upgradeAvailable"]);
+			push @{ $list{modules} }, {
+				name => $localConfModules{$module}{name},
+				version => $localConfModules{$module}{version},
+				installed => $localConfModules{$module}{installed},
+				blocked => $localConfModules{$module}{blocked},
+				required => "$localConfModules{$module}{required}$upgradeAvailable",
+			};
 		}
 	}
-	print "$mode\n";
-	for my $row (@arr) {
-		print join("\t", @{$row}) . "\n";
-	}
+	my $jsonText = encode_json \%list;
+	print "$jsonText\n";
 }
 
 
@@ -7442,7 +7601,7 @@ sub configureSingleModule {
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1');
-		upgradeModule($module);
+		updateModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
 	}
@@ -7523,7 +7682,7 @@ sub reconfigureSingleModule {
 
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
 			printLog("upgrade module: $module", 'L1');
-			upgradeModule($module);
+			updateModule($module);
 		} else {
 			printLog("configure module: $module", 'L1');
 			configureModule($module);
@@ -7971,9 +8130,9 @@ sub removeModule {
 ###############################################################################
 # configures a module, does no checks
 #
-sub upgradeModule {
+sub updateModule {
 	my $module = shift;
-	my $permission = checkModePermission('upgrade', $module);
+	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2');
 	if ($permission) {
 		$module->($module, 'upgrade');
@@ -8356,6 +8515,7 @@ sub help {
 }
 
 
+
 ###############################################################################
 # checks if root and returns 1 if yes, otherwise 0
 #
@@ -8366,6 +8526,7 @@ sub isRoot {
 	}
 	return (1);
 }
+
 
 
 ###############################################################################
@@ -8492,9 +8653,15 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "printcompletefixeslist") {
 		printTuxedoDevices();
 
-	# listmachinereadable
-	} elsif ($argValue{command} eq "listmachinereadable") {
-		printListMachinereadable();
+	# listJSON
+	} elsif ($argValue{command} eq "listjson") {
+		checkMode();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+		} else {
+			prepareValues();
+		}
+		listStatusJson();
 
 	# description
 	} elsif ($argValue{command} eq "description") {
