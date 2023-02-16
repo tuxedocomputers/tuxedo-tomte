@@ -8590,7 +8590,7 @@ sub tuxedoDevice {
 # MAIN PROGRAM
 
 if (!tuxedoDevice()) {
-	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake';
+	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake\n';
 	exit (0);
 }
 
