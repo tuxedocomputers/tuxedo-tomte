@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.1-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1-9) UNRELEASED; urgency=medium
 
   * after packaging
   * changed delay time and wait for active network
@@ -11,8 +11,11 @@ tuxedo-tomte (2.8.1-8) UNRELEASED; urgency=medium
   * reduced transient timer to 30 seconds
   * added packagekit subroutines
   * refined systemd stop and starter
+  * after packaging
+  * added packagekiller to required sections
+  * added restore of original state packagekit at END
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 17 Feb 2023 13:55:46 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 17 Feb 2023 16:23:20 +0100
 
 tuxedo-tomte (2.8.1) jammy; urgency=medium
 
