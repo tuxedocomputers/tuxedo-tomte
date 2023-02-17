@@ -97,6 +97,7 @@ my $FAI = 0;
 my $LiveISO = 0;
 my $noNetwork = 0;
 my $packagekitStatus = 0;
+my $packagekitOriginalStatus = getSystemdStatus('packagekit');
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
@@ -5391,8 +5392,9 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		if (checkNetwork(5, 1)) {
+		if (checkNetwork(15, 1)) {
 			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < 15) {
 				$counter++;
@@ -5807,6 +5809,7 @@ sub deinstallSinglePackage {
 	printLog("deinstalling: $deinst", 'L0');
 	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
 	if (isPackageInstalled($deinst)) {
+		deactivatePackagekit();
 		if (system($pkconDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
@@ -5866,7 +5869,8 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		if (checkNetwork(10, 1)) {
+		if (checkNetwork(15, 1)) {
+			deactivatePackagekit();
 			if ($logLevel > 1) {
 				$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 			} else {
@@ -5900,6 +5904,7 @@ sub removePackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
+	deactivatePackagekit();
 	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
 	printLog("return from pkcon:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
