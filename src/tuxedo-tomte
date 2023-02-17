@@ -5620,14 +5620,28 @@ sub commandSystemdModule {
 
 
 ###############################################################################
+# sets the systemd module to inactive and masks it
+# returns 1 if successful, 0 if not
+# does nothing if packagekitStatus is set to "inactive"
 #
 sub deactivatePackagekit {
+	if ($packagekitStatus eq 'inactive') {
+		return (1);
+	}
 	if (getSystemdStatus('packagekit') eq 'active') {
 		printLog("packagekit is active => deactivating ...", 'L2');
 		commandSystemdModule('mask --now', 'packagekit');
-		$packagekitStatus = 'inactive';
+		if (getSystemdStatus('packagekit') eq 'inactive') {
+			$packagekitStatus = 'inactive';
+			return (1);
+		} else {
+			$packagekitStatus = 'active';
+			return (0);
+		}
 	} else {
+		$packagekitStatus = 'inactive';
 		printLog("packagekit is already inactive", 'L2');
+		return (1);
 	}
 }
 
@@ -5635,14 +5649,24 @@ sub deactivatePackagekit {
 
 
 ###############################################################################
+# sets the systemd module to active and unmasks it
+# returns 1 if successful, 0 if not
 #
 sub activatePackagekit {
 	if (getSystemdStatus('packagekit') eq 'inactive') {
 		printLog("packagekit is inactive => activating ...", 'L2');
 		commandSystemdModule('unmask', 'packagekit');
-		$packagekitStatus = 'active';
+		if (getSystemdStatus('packagekit') eq 'active') {
+			$packagekitStatus = 'active';
+			return (1);
+		} else {
+			$packagekitStatus = 'active';
+			return (0);
+		}
 	} else {
+		$packagekitStatus = 'active';
 		printLog("packagekit is already active", 'L2');
+		return (1);
 	}
 }
 
