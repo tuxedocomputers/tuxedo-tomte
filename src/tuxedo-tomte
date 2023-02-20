@@ -5599,7 +5599,7 @@ sub getSystemdState {
 	my $systemdModule = shift;
 	my $systemdCmd = "systemctl is-active $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
-	printLog("systemd returns: $systemdReturn", 'L2');
+	printLog("systemd return for $systemdModule: $systemdReturn", 'L2');
 	if ($systemdReturn =~ /^active/) {
 		return 'active';
 	} elsif ($systemdReturn =~ /^inactive/) {
@@ -9040,11 +9040,12 @@ if (($startLaterAgain == 0) &&
 }
 
 END {
-	my $packagekitEnabled = getSystemdEnabled();
+	my $packagekitEnabled = getSystemdEnabled('packagekit');
+	#TODO debug
+	printLog("packagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
 	if ($packagekitEnabled ne $packagekitOriginalEnabled) {
 		printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
 		if ($packagekitOriginalEnabled eq 'enabled') {
-			`systemctl unmask packagekit`;
 			commandSystemdModule('unmask', 'packagekit');
 		}
 	}
