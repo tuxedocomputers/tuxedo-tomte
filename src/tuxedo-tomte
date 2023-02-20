@@ -2239,8 +2239,10 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	my $output = `pkcon refresh`;
-	printLog("return from pkcon refresh: $output", 'L2');
+	#TODO
+	#my $output = `pkcon refresh`;
+	my $output = `apt-get update`;
+	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
 }
 
@@ -3144,7 +3146,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					pkconRefresh($module);
+					aptgetRefresh($module);
 				}
 			}
 		}
@@ -3168,7 +3170,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				pkconRefresh($module);
+				aptgetRefresh($module);
 			}
 		}
 	}
@@ -3217,7 +3219,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					pkconRefresh($module);
+					aptgetRefresh($module);
 				}
 			}
 		}
@@ -3241,7 +3243,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				pkconRefresh($module);
+				aptgetRefresh($module);
 			}
 		}
 	}
@@ -5721,7 +5723,9 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
+		#TODO pkcon
+		#$deinstCmd = $consoleLanguage.'pkcon -yp remove';
+		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	}
 	my $deinstCounter = 0;
 
@@ -5781,7 +5785,9 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
+	#TODO pkcon
+	#my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
+	my $pkconDeinst = $consoleLanguage.'apt-get -yq remove';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
@@ -5818,7 +5824,9 @@ sub deinstallPackage {
 #
 sub deinstallSinglePackage {
 	my $deinst = shift;
-	my $pkconDeinst = 'pkcon -yp remove';
+	#TODO
+	#my $pkconDeinst = 'pkcon -yp remove';
+	my $pkconDeinst = 'apt-get -yq remove';
 	my $retValue;
 
 	$pkconDeinst = $pkconDeinst.' '.$deinst;
@@ -5887,10 +5895,13 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		if (checkNetwork(15, 1)) {
 			deactivatePackagekit();
+			#TODO
 			if ($logLevel > 1) {
-				$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
+				#$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
+				$retval = `apt-get -yq install $packageName >>$logFile 2>&1`;
 			} else {
-				$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+				#$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+				$retval = `apt-get -yq install $packageName >/dev/null 2>&1`;
 			}
 			printLog("return from pkcon:\n$retval", 'L2');
 			$retval = isPackageInstalled($packageName);
@@ -5921,7 +5932,9 @@ sub removePackage {
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	deactivatePackagekit();
-	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
+	#TODO
+	#$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
+	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
 	printLog("return from pkcon:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
@@ -6511,6 +6524,37 @@ sub pkconRefresh {
 	} else {
 		printLog("no network available, repos could not be updated", 'TL0');
 		addToConfiguredModules($pkconModule, "failed");
+	}
+}
+
+
+
+###############################################################################
+# refreshes the package manager database
+# needs a module name to set the result aptgetRefresh($module)
+#
+sub aptgetRefresh {
+	my $aptgetModule = shift;
+	my $output;
+	my $exitStatus;
+	if (checkNetwork(10, 1)) {
+		deactivatePackagekit();
+		$output = `apt-get update`;
+		$exitStatus = $?/256;
+		if ($exitStatus != 0) {
+			printLog('failed: update packages', 'L0');
+			printLog("returned error code: $exitStatus", 'L0');
+			if ($exitStatus == 7) {
+				printLog('possible network problems', 'L0');
+			}
+			addToConfiguredModules($aptgetModule, "failed");
+		} else {
+			printLog("success: update packages", 'L1');
+			addToConfiguredModules($aptgetModule, "success");
+		}
+	} else {
+		printLog("no network available, repos could not be updated", 'TL0');
+		addToConfiguredModules($aptgetModule, "failed");
 	}
 }
 
