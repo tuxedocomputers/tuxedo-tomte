@@ -5597,6 +5597,9 @@ sub httpToHttps {
 #
 sub getSystemdState {
 	my $systemdModule = shift;
+	if ($FAI) {
+		return (0);
+	}
 	my $systemdCmd = "systemctl is-active $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
 	printLog("systemd return for $systemdModule: $systemdReturn", 'L2');
@@ -5617,6 +5620,9 @@ sub getSystemdState {
 #
 sub getSystemdEnabled {
 	my $systemdModule = shift;
+	if ($FAI) {
+		return (0);
+	}
 	my $systemdCmd = "systemctl is-enabled $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
 	printLog("systemd returns: $systemdReturn", 'L2');
@@ -5935,7 +5941,7 @@ sub removePackage {
 	#TODO
 	#$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
 	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
-	printLog("return from pkcon:\n$retval", 'L2');
+	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
 		printLog("failed to remove $packageName", 'L0');
@@ -9040,20 +9046,22 @@ if (($startLaterAgain == 0) &&
 }
 
 END {
-	my $packagekitEnabled = getSystemdEnabled('packagekit');
-	#TODO debug
-	printLog("packagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
-	if ($packagekitEnabled ne $packagekitOriginalEnabled) {
-		printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
-		if ($packagekitOriginalEnabled eq 'enabled') {
-			commandSystemdModule('unmask', 'packagekit');
+	if (!$FAI) {
+		my $packagekitEnabled = getSystemdEnabled('packagekit');
+		#TODO debug
+		printLog("packagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
+		if ($packagekitEnabled ne $packagekitOriginalEnabled) {
+			printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
+			if ($packagekitOriginalEnabled eq 'enabled') {
+				commandSystemdModule('unmask', 'packagekit');
+			}
 		}
-	}
-	if ($packagekitOriginalState ne $packagekitState)	{
-		printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
-		if ($packagekitOriginalState eq 'active') {
-			commandSystemdModule('enable', 'packagekit');
-		} else {
+		if ($packagekitOriginalState ne $packagekitState)	{
+			printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
+			if ($packagekitOriginalState eq 'active') {
+				commandSystemdModule('enable', 'packagekit');
+			} else {
+			}
 		}
 	}
 }
