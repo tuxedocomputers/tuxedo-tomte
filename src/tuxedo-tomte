@@ -2239,8 +2239,6 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	#TODO
-	#my $output = `pkcon refresh`;
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
@@ -5731,8 +5729,6 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		#TODO pkcon
-		#$deinstCmd = $consoleLanguage.'pkcon -yp remove';
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	}
 	my $deinstCounter = 0;
@@ -5793,22 +5789,20 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	#TODO pkcon
-	#my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
-	my $pkconDeinst = $consoleLanguage.'apt-get -yq remove';
+	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
 		if ($retHash{$deinstKey} =~ /i./) {
 			$deinstCounter++;
-			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
-			$deinstList = $deinstList.' '.$deinstKey;
+			$aptgetDeinst .= " $deinstKey";
+			$deinstList .= " $deinstKey";
 		}
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
-		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
-		if (system($pkconDeinst)) {
+		$aptgetDeinst = $aptgetDeinst.' >/dev/null 2>&1';
+		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
 			return (1);
@@ -5832,17 +5826,15 @@ sub deinstallPackage {
 #
 sub deinstallSinglePackage {
 	my $deinst = shift;
-	#TODO
-	#my $pkconDeinst = 'pkcon -yp remove';
-	my $pkconDeinst = 'apt-get -yq remove';
+	my $aptgetDeinst = 'apt-get -yq remove';
 	my $retValue;
 
-	$pkconDeinst = $pkconDeinst.' '.$deinst;
+	$aptgetDeinst .= " $deinst";
 	printLog("deinstalling: $deinst", 'L0');
-	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
+	$aptgetDeinst = " >/dev/null 2>&1";
 	if (isPackageInstalled($deinst)) {
 		deactivatePackagekit();
-		if (system($pkconDeinst)) {
+		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
 			return (1);
@@ -5882,7 +5874,7 @@ sub isPackageInstalled {
 
 
 ###############################################################################
-# installs a package by pkcon or apt-get
+# installs a package by apt-get
 # returns 1 if successful
 # returns 0 if package was not installed
 #
@@ -5903,15 +5895,12 @@ sub installPackage {
 		printLog("install package $packageName", 'L0');
 		if (checkNetwork(15, 1)) {
 			deactivatePackagekit();
-			#TODO
 			if ($logLevel > 1) {
-				#$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
 				$retval = `apt-get -yq install $packageName >>$logFile 2>&1`;
 			} else {
-				#$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
 				$retval = `apt-get -yq install $packageName >/dev/null 2>&1`;
 			}
-			printLog("return from pkcon:\n$retval", 'L2');
+			printLog("return from apt-get:\n$retval", 'L2');
 			$retval = isPackageInstalled($packageName);
 			if ($retval == 0) {
 				printLog("failed to install $packageName", 'L0');
@@ -5931,7 +5920,7 @@ sub installPackage {
 
 
 ###############################################################################
-# removes a package by pkcon or apt-get
+# removes a package by apt-get
 # returns 1 if successful or not installed
 # returns 0 if failed
 #
@@ -5940,8 +5929,6 @@ sub removePackage {
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	deactivatePackagekit();
-	#TODO
-	#$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
 	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
 	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
@@ -8421,12 +8408,12 @@ sub startTomteDelayed {
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
 		$systemdDelay = 30;
+		# This might not be completely reliable, specially when starting a fresh installed system
 		my $systemctlCmd = 'systemd-run --on-active="'.$systemdDelay.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
 
-		#TODO debug
 		printLog("systemctlCmd: $systemctlCmd", 'TL0');
-		$retVal = system($systemctlCmd);
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
+		$retVal = system($systemctlCmd);
 		printLog("ret value: $retVal", 'L0');
 	}
 	return (0);
@@ -9050,8 +9037,7 @@ if (($startLaterAgain == 0) &&
 END {
 	if (!$FAI) {
 		my $packagekitEnabled = getSystemdEnabled('packagekit');
-		#TODO debug
-		printLog("packagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
+		printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
 		if ($packagekitEnabled ne $packagekitOriginalEnabled) {
 			printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
 			if ($packagekitOriginalEnabled eq 'enabled') {
