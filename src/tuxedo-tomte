@@ -5602,6 +5602,7 @@ sub getSystemdState {
 	}
 	my $systemdCmd = "systemctl is-active $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
+	$systemdReturn =~ s/\s+//g;
 	printLog("systemd return for $systemdModule: $systemdReturn", 'L2');
 	if ($systemdReturn =~ /^active/) {
 		return 'active';
@@ -5625,6 +5626,7 @@ sub getSystemdEnabled {
 	}
 	my $systemdCmd = "systemctl is-enabled $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
+	$systemdReturn =~ s/\s+//g;
 	printLog("systemd returns: $systemdReturn", 'L2');
 	return ($systemdReturn);
 }
