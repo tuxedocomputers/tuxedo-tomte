@@ -5597,6 +5597,7 @@ sub getSystemdState {
 	my $systemdModule = shift;
 	my $systemdCmd = "systemctl is-active $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
+	printLog("systemd returns: $systemdReturn", 'L2');
 	if ($systemdReturn =~ /^active/) {
 		return 'active';
 	} elsif ($systemdReturn =~ /^inactive/) {
@@ -5616,6 +5617,7 @@ sub getSystemdEnabled {
 	my $systemdModule = shift;
 	my $systemdCmd = "systemctl is-enabled $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
+	printLog("systemd returns: $systemdReturn", 'L2');
 	return ($systemdReturn);
 }
 
@@ -5630,6 +5632,7 @@ sub commandSystemdModule {
 	my ($command, $systemdModule) = @_;
 	my $systemdCmd = "systemctl $command $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
+	printLog("systemd returns: $systemdReturn", 'L2');
 }
 
 
@@ -5646,12 +5649,12 @@ sub deactivatePackagekit {
 	if (getSystemdState('packagekit') eq 'active') {
 		printLog("packagekit is active => deactivating ...", 'L2');
 		commandSystemdModule('mask --now', 'packagekit');
-		if (getSystemdState('packagekit') eq 'inactive') {
-			$packagekitState = 'inactive';
-			return (1);
-		} else {
+		if (getSystemdState('packagekit') eq 'active') {
 			$packagekitState = 'active';
 			return (0);
+		} else {
+			$packagekitState = 'inactive';
+			return (1);
 		}
 	} else {
 		$packagekitState = 'inactive';
@@ -6491,6 +6494,7 @@ sub pkconRefresh {
 	my $output;
 	my $exitStatus;
 	if (checkNetwork(10, 1)) {
+		deactivatePackagekit();
 		$output = `pkcon refresh`;
 		$exitStatus = $?/256;
 		if ($exitStatus != 0) {
