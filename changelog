@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.1-10) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1-11) UNRELEASED; urgency=medium
 
   * after packaging
   * changed delay time and wait for active network
@@ -16,8 +16,10 @@ tuxedo-tomte (2.8.1-10) UNRELEASED; urgency=medium
   * added restore of original state packagekit at END
   * after packaging
   * minor changes systemd return values
+  * after packaging
+  * changed pkcon by apt-get
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Feb 2023 10:28:42 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Feb 2023 11:41:50 +0100
 
 tuxedo-tomte (2.8.1) jammy; urgency=medium
 
