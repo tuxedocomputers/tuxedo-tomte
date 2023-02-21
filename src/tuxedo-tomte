@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.2';
+our $VERSION = '2.8.2-1';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -9047,20 +9047,24 @@ if (($startLaterAgain == 0) &&
 }
 
 END {
-	if (!$FAI) {
-		my $packagekitEnabled = getSystemdEnabled('packagekit');
-		printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
-		if ($packagekitEnabled ne $packagekitOriginalEnabled) {
-			printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
-			if ($packagekitOriginalEnabled eq 'enabled') {
-				commandSystemdModule('unmask', 'packagekit');
+	my %options;
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	if ( exists $options{$argValue{command}} && isRoot() ) {
+		if (!$FAI) {
+			my $packagekitEnabled = getSystemdEnabled('packagekit');
+			printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
+			if ($packagekitEnabled ne $packagekitOriginalEnabled) {
+				printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
+				if ($packagekitOriginalEnabled eq 'enabled') {
+					commandSystemdModule('unmask', 'packagekit');
+				}
 			}
-		}
-		if ($packagekitOriginalState ne $packagekitState)	{
-			printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
-			if ($packagekitOriginalState eq 'active') {
-				commandSystemdModule('enable', 'packagekit');
-			} else {
+			if ($packagekitOriginalState ne $packagekitState)	{
+				printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
+				if ($packagekitOriginalState eq 'active') {
+					commandSystemdModule('enable', 'packagekit');
+				} else {
+				}
 			}
 		}
 	}
