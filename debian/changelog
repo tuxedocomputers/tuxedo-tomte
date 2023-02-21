@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.1-15) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.1-16) UNRELEASED; urgency=medium
 
   * after packaging
   * changed delay time and wait for active network
@@ -26,8 +26,10 @@ tuxedo-tomte (2.8.1-15) UNRELEASED; urgency=medium
   * removed empty chars from systemd return
   * after packaging
   * removed debug
+  * after packaging
+  * added retry and delay function for aptgetRefresh
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Feb 2023 08:00:54 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Feb 2023 08:58:40 +0100
 
 tuxedo-tomte (2.8.1) jammy; urgency=medium
 
