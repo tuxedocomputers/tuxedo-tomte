@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.1-9';
+our $VERSION = '2.8.1-16';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -43,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -96,6 +96,9 @@ my $completeDistVersion;
 my $FAI = 0;
 my $LiveISO = 0;
 my $noNetwork = 0;
+my $packagekitState = 0;
+my $packagekitOriginalState = getSystemdState('packagekit');
+my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
@@ -103,6 +106,7 @@ my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
+my $systemdDelay = 5;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -2234,8 +2238,8 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	my $output = `pkcon refresh`;
-	printLog("return from pkcon refresh: $output", 'L2');
+	my $output = `apt-get update`;
+	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
 }
 
@@ -3138,7 +3142,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					pkconRefresh($module);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3162,7 +3166,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				pkconRefresh($module);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -3211,7 +3215,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					pkconRefresh($module);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3235,7 +3239,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				pkconRefresh($module);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -5390,8 +5394,9 @@ sub addRepoKey {
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L2');
-		if (checkNetwork(5, 1)) {
+		if (checkNetwork(15, 1)) {
 			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < 15) {
 				$counter++;
@@ -5578,9 +5583,122 @@ sub httpToHttps {
 
 
 
+
+
 ###############################################################################
 # package handling
 #
+
+
+###############################################################################
+# get packagekit status from systemd getSystemStatus(systemdmodule)
+# returns 'active', 'inactive' or '0' if no status could be retrieved
+#
+sub getSystemdState {
+	my $systemdModule = shift;
+	if ($FAI) {
+		return (0);
+	}
+	my $systemdCmd = "systemctl is-active $systemdModule";
+	my $systemdReturn = `$systemdCmd`;
+	$systemdReturn =~ s/\s+//g;
+	printLog("systemd return for $systemdModule: $systemdReturn", 'L2');
+	if ($systemdReturn =~ /^active/) {
+		return 'active';
+	} elsif ($systemdReturn =~ /^inactive/) {
+		return 'inactive';
+	} else {
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# get packagekit is-enabled from systemd getSystemdEnabled(systemdmodule)
+# returns the value from 'systemctl is-enabled'
+#
+sub getSystemdEnabled {
+	my $systemdModule = shift;
+	if ($FAI) {
+		return (0);
+	}
+	my $systemdCmd = "systemctl is-enabled $systemdModule";
+	my $systemdReturn = `$systemdCmd`;
+	$systemdReturn =~ s/\s+//g;
+	printLog("systemd returns: $systemdReturn", 'L2');
+	return ($systemdReturn);
+}
+
+
+
+###############################################################################
+# sends a command to the module by systemd
+# commandSystemdModule(command, module)
+# eg: mask --now, unmask, start, stop, enable, disable
+#
+sub commandSystemdModule {
+	my ($command, $systemdModule) = @_;
+	my $systemdCmd = "systemctl $command $systemdModule";
+	my $systemdReturn = `$systemdCmd`;
+	printLog("systemd returns: $systemdReturn", 'L2');
+}
+
+
+
+###############################################################################
+# sets the systemd module to inactive and masks it
+# returns 1 if successful, 0 if not
+# does nothing if packagekitState is set to "inactive"
+#
+sub deactivatePackagekit {
+	if ($packagekitState eq 'inactive') {
+		return (1);
+	}
+	if (getSystemdState('packagekit') eq 'active') {
+		printLog("packagekit is active => deactivating ...", 'L2');
+		commandSystemdModule('mask --now', 'packagekit');
+		if (getSystemdState('packagekit') eq 'active') {
+			$packagekitState = 'active';
+			return (0);
+		} else {
+			$packagekitState = 'inactive';
+			return (1);
+		}
+	} else {
+		$packagekitState = 'inactive';
+		printLog("packagekit is already inactive", 'L2');
+		return (1);
+	}
+}
+
+
+
+
+###############################################################################
+# sets the systemd module to active and unmasks it
+# returns 1 if successful, 0 if not
+#
+sub activatePackagekit {
+	if (getSystemdState('packagekit') eq 'inactive') {
+		printLog("packagekit is inactive => activating ...", 'L2');
+		commandSystemdModule('unmask', 'packagekit');
+		if (getSystemdState('packagekit') eq 'active') {
+			$packagekitState = 'active';
+			return (1);
+		} else {
+			$packagekitState = 'active';
+			return (0);
+		}
+	} else {
+		$packagekitState = 'active';
+		printLog("packagekit is already active", 'L2');
+		return (1);
+	}
+}
+
+
+
 
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
@@ -5612,15 +5730,15 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		$deinstCmd = $consoleLanguage.'pkcon -yp remove';
+		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	}
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
-			$deinstCmd = $deinstCmd.' '.$deinstKey;
-			$deinstList = $deinstList.' '.$deinstKey;
+			$deinstCmd .= ' '.$deinstKey;
+			$deinstList .= ' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
@@ -5629,7 +5747,7 @@ sub deinstExcept {
 		if ($FAI) {
 			$retText = `$deinstCmd`;
 		} else {
-			$deinstCmd = $deinstCmd.' >/dev/null 2>&1';
+			$deinstCmd .= ' >/dev/null 2>&1';
 		}
 		if ($? != 0) {
 			$retValue = $?/256;
@@ -5672,20 +5790,20 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $pkconDeinst = $consoleLanguage.'pkcon -yp remove';
+	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
 		if ($retHash{$deinstKey} =~ /i./) {
 			$deinstCounter++;
-			$pkconDeinst = $pkconDeinst.' '.$deinstKey;
-			$deinstList = $deinstList.' '.$deinstKey;
+			$aptgetDeinst .= " $deinstKey";
+			$deinstList .= " $deinstKey";
 		}
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstalling: $deinstList", 'L0');
-		$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
-		if (system($pkconDeinst)) {
+		$aptgetDeinst .= ' >/dev/null 2>&1';
+		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
 			return (1);
@@ -5709,14 +5827,15 @@ sub deinstallPackage {
 #
 sub deinstallSinglePackage {
 	my $deinst = shift;
-	my $pkconDeinst = 'pkcon -yp remove';
+	my $aptgetDeinst = 'apt-get -yq remove';
 	my $retValue;
 
-	$pkconDeinst = $pkconDeinst.' '.$deinst;
+	$aptgetDeinst .= " $deinst";
 	printLog("deinstalling: $deinst", 'L0');
-	$pkconDeinst = $pkconDeinst.' >/dev/null 2>&1';
+	$aptgetDeinst .= " >/dev/null 2>&1";
 	if (isPackageInstalled($deinst)) {
-		if (system($pkconDeinst)) {
+		deactivatePackagekit();
+		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
 			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
 			return (1);
@@ -5756,7 +5875,7 @@ sub isPackageInstalled {
 
 
 ###############################################################################
-# installs a package by pkcon or apt-get
+# installs a package by apt-get
 # returns 1 if successful
 # returns 0 if package was not installed
 #
@@ -5775,13 +5894,14 @@ sub installPackage {
 		$retval = isPackageInstalled($packageName);
 	} else {
 		printLog("install package $packageName", 'L0');
-		if (checkNetwork(1, 0)) {
+		if (checkNetwork(15, 1)) {
+			deactivatePackagekit();
 			if ($logLevel > 1) {
-				$retval = `pkcon -yp install $packageName >>$logFile 2>&1`;
+				$retval = `apt-get -yq install $packageName >>$logFile 2>&1`;
 			} else {
-				$retval = `pkcon -yp install $packageName >/dev/null 2>&1`;
+				$retval = `apt-get -yq install $packageName >/dev/null 2>&1`;
 			}
-			printLog("return from pkcon:\n$retval", 'L2');
+			printLog("return from apt-get:\n$retval", 'L2');
 			$retval = isPackageInstalled($packageName);
 			if ($retval == 0) {
 				printLog("failed to install $packageName", 'L0');
@@ -5801,7 +5921,7 @@ sub installPackage {
 
 
 ###############################################################################
-# removes a package by pkcon or apt-get
+# removes a package by apt-get
 # returns 1 if successful or not installed
 # returns 0 if failed
 #
@@ -5809,8 +5929,9 @@ sub removePackage {
 	my $packageName = shift;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
-	$retval = `pkcon -yp remove $packageName >/dev/null 2>&1`;
-	printLog("return from pkcon:\n$retval", 'L2');
+	deactivatePackagekit();
+	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
+	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
 		printLog("failed to remove $packageName", 'L0');
@@ -6381,7 +6502,8 @@ sub pkconRefresh {
 	my $pkconModule = shift;
 	my $output;
 	my $exitStatus;
-	if (checkNetwork(1, 0)) {
+	if (checkNetwork(10, 1)) {
+		deactivatePackagekit();
 		$output = `pkcon refresh`;
 		$exitStatus = $?/256;
 		if ($exitStatus != 0) {
@@ -6398,6 +6520,48 @@ sub pkconRefresh {
 	} else {
 		printLog("no network available, repos could not be updated", 'TL0');
 		addToConfiguredModules($pkconModule, "failed");
+	}
+}
+
+
+
+###############################################################################
+# refreshes the package manager database
+# needs a module name to set the result and the amount of retries it should do
+# in case it fails the first time for some reason
+# aptgetRefresh($module, $retries)
+#
+sub aptgetRefresh {
+	my ($aptgetModule, $refreshTries) = @_;
+	my $output;
+	my $exitStatus = 1;
+	my $refreshTriesDone = 0;
+	my $refreshWait = 1;
+	if (checkNetwork(15, 1)) {
+		deactivatePackagekit();
+		while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
+			$output = `apt-get update`;
+			$exitStatus = $?/256;
+			if ($exitStatus != 0) {
+				printLog('failed: update packages', 'L0');
+				printLog("returned error code: $exitStatus", 'L0');
+				if ($exitStatus == 7) {
+					printLog('possible network problems', 'L0');
+				}
+				addToConfiguredModules($aptgetModule, "failed");
+				if ($refreshTriesDone <= $refreshTries) {
+					printLog("will try to refresh the repos again", 'L2');
+				}
+				$refreshTriesDone++;
+				sleep($refreshWait);
+			} else {
+				printLog("success: update packages", 'L1');
+				addToConfiguredModules($aptgetModule, "success");
+			}
+		}
+	} else {
+		printLog("no network available, repos could not be updated", 'TL0');
+		addToConfiguredModules($aptgetModule, "failed");
 	}
 }
 
@@ -8255,8 +8419,13 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		$retVal = system("systemd-run --on-active=5min tuxedo-tomte configure all >/dev/null 2>&1");
+		$systemdDelay = 30;
+		# This might not be completely reliable, specially when starting a fresh installed system
+		my $systemctlCmd = 'systemd-run --on-active="'.$systemdDelay.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
+
+		printLog("systemctlCmd: $systemctlCmd", 'TL0');
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
+		$retVal = system($systemctlCmd);
 		printLog("ret value: $retVal", 'L0');
 	}
 	return (0);
@@ -8873,6 +9042,26 @@ if (($startLaterAgain == 0) &&
 		if (-w $triesFile) {
 			printLog('deleting triesFile', 'L2');
 			unlink($triesFile);
+		}
+	}
+}
+
+END {
+	if (!$FAI) {
+		my $packagekitEnabled = getSystemdEnabled('packagekit');
+		printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
+		if ($packagekitEnabled ne $packagekitOriginalEnabled) {
+			printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
+			if ($packagekitOriginalEnabled eq 'enabled') {
+				commandSystemdModule('unmask', 'packagekit');
+			}
+		}
+		if ($packagekitOriginalState ne $packagekitState)	{
+			printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
+			if ($packagekitOriginalState eq 'active') {
+				commandSystemdModule('enable', 'packagekit');
+			} else {
+			}
 		}
 	}
 }
