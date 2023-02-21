@@ -3144,7 +3144,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					aptgetRefresh($module);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3168,7 +3168,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefresh($module);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -3217,7 +3217,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					aptgetRefresh($module);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3241,7 +3241,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefresh($module);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -6526,26 +6526,37 @@ sub pkconRefresh {
 
 ###############################################################################
 # refreshes the package manager database
-# needs a module name to set the result aptgetRefresh($module)
+# needs a module name to set the result and the amount of retries it should do
+# in case it fails the first time for some reason
+# aptgetRefresh($module, $retries)
 #
 sub aptgetRefresh {
-	my $aptgetModule = shift;
+	my ($aptgetModule, $refreshTries) = @_;
 	my $output;
-	my $exitStatus;
-	if (checkNetwork(10, 1)) {
+	my $exitStatus = 1;
+	my $refreshTriesDone = 0;
+	my $refreshWait = 1;
+	if (checkNetwork(15, 1)) {
 		deactivatePackagekit();
-		$output = `apt-get update`;
-		$exitStatus = $?/256;
-		if ($exitStatus != 0) {
-			printLog('failed: update packages', 'L0');
-			printLog("returned error code: $exitStatus", 'L0');
-			if ($exitStatus == 7) {
-				printLog('possible network problems', 'L0');
+		while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
+			$output = `apt-get update`;
+			$exitStatus = $?/256;
+			if ($exitStatus != 0) {
+				printLog('failed: update packages', 'L0');
+				printLog("returned error code: $exitStatus", 'L0');
+				if ($exitStatus == 7) {
+					printLog('possible network problems', 'L0');
+				}
+				addToConfiguredModules($aptgetModule, "failed");
+				if ($refreshTriesDone <= $refreshTries) {
+					printLog("will try to refresh the repos again", 'L2');
+				}
+				$refreshTriesDone++;
+				sleep($refreshWait);
+			} else {
+				printLog("success: update packages", 'L1');
+				addToConfiguredModules($aptgetModule, "success");
 			}
-			addToConfiguredModules($aptgetModule, "failed");
-		} else {
-			printLog("success: update packages", 'L1');
-			addToConfiguredModules($aptgetModule, "success");
 		}
 	} else {
 		printLog("no network available, repos could not be updated", 'TL0');
