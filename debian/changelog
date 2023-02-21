@@ -1,9 +1,14 @@
-tuxedo-tomte (2.8.1-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.2) jammy; urgency=medium
 
-  * after packaging
-  * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * changed wait time for active network and repository update
+  * reduced transient timer to 30 seconds
+  * added packagekit service subroutines
+  * replaced pkcon by apt-get
+  * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname
+    PD5x_7xPNP_PNR_PNN_PNT
+  * added kernel parameter i915.enable_psr=1 to i915enablepsrfix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 15 Feb 2023 11:50:42 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Feb 2023 10:30:24 +0100
 
 tuxedo-tomte (2.8.1) jammy; urgency=medium
 
@@ -70,6 +75,7 @@ tuxedo-tomte (2.7.5) jammy; urgency=medium
 
 tuxedo-tomte (2.7.4) jammy; urgency=medium
 
+>>>>>>> regression-lock-packagemanager
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
   * reggression for 2.7.3
