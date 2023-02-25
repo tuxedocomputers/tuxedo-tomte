@@ -43,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -9053,6 +9053,7 @@ END {
 	if ( exists $options{$argValue{command}} && isRoot() ) {
 		if (!$FAI) {
 			my $packagekitEnabled = getSystemdEnabled('packagekit');
+			$packagekitState = getSystemdState('packagekit');
 			printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
 			if ($packagekitEnabled ne $packagekitOriginalEnabled) {
 				printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
