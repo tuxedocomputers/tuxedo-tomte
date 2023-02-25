@@ -106,6 +106,7 @@ my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
+my $systemdDelay = 30;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
 
@@ -5656,7 +5657,9 @@ sub deactivatePackagekit {
 	}
 	if (getSystemdState('packagekit') eq 'active') {
 		printLog("packagekit is active => deactivating ...", 'L2');
-		commandSystemdModule('mask --now', 'packagekit');
+		# temporary disabling masking
+		commandSystemdModule('disable', 'packagekit');
+		#commandSystemdModule('mask --now', 'packagekit');
 		if (getSystemdState('packagekit') eq 'active') {
 			$packagekitState = 'active';
 			return (0);
@@ -8418,7 +8421,6 @@ sub startTomteDelayed {
 	}
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
-		$systemdDelay = 30;
 		# This might not be completely reliable, specially when starting a fresh installed system
 		my $systemctlCmd = 'systemd-run --on-active="'.$systemdDelay.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
 
@@ -9062,7 +9064,6 @@ END {
 				printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
 				if ($packagekitOriginalState eq 'active') {
 					commandSystemdModule('enable', 'packagekit');
-				} else {
 				}
 			}
 		}
