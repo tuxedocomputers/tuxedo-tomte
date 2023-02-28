@@ -1,7 +1,0 @@
-/var/log/tomte/tomte.log {
-	monthly
-	rotate 5
-	compress
-	create 644 root root
-	missingok
-}

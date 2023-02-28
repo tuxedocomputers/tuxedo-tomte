@@ -1,9 +1,0 @@
-[Unit]
-Description = Starts tuxedo-tomte after system start
-
-[Install]
-WantedBy = timers.target
-
-[Timer]
-OnBootSec = 3
-Unit = tuxedo-tomte.service
