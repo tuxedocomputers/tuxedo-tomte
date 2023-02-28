@@ -1,0 +1,28 @@
+#!/bin/sh
+# postrm script for tuxedo-tomte
+#
+
+#DEBHELPER#
+
+set -e
+
+case "$1" in
+	remove)
+	;;
+
+	purge)
+		rm -rf /etc/tomte
+	;;
+
+	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+	;;
+
+	*)
+		echo "postrm called with unknown argument \`$1'" >&2
+		exit 0
+	;;
+
+esac
+
+exit 0
+

@@ -1,0 +1,762 @@
+tuxedo-tomte (2.8.4) jammy; urgency=medium
+
+  * removed masking on systemd packagekit service
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Sat, 25 Feb 2023 14:01:28 +0100
+
+tuxedo-tomte (2.8.3) jammy; urgency=medium
+
+  * mended bug where unnecessary root permission was required
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Feb 2023 14:03:03 +0100
+
+tuxedo-tomte (2.8.2) jammy; urgency=medium
+
+  * changed wait time for active network and repository update
+  * reduced transient timer to 30 seconds
+  * added packagekit service subroutines
+  * replaced pkcon by apt-get
+  * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname
+    PD5x_7xPNP_PNR_PNN_PNT
+  * added kernel parameter i915.enable_psr=1 to i915enablepsrfix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Feb 2023 10:30:24 +0100
+
+tuxedo-tomte (2.8.1) jammy; urgency=medium
+
+  * added KDE neon 22.04
+  * added ThirdPartyMirrors file for upgrades to next LTS
+  * added remove for tuxedokeyboardite and fingerprintreader
+  * added Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT and
+  	tuxedokeyboardite
+  * JSON list output
+  * added libjson-perl to dependencies
+  * added thunderboltbootdelayfix for Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * added kerneltuxedo2204next for Gemini 17 Gen1 with boardname: PD5x_7xPNP_PNR_PNN_PNT
+  * changed kernel parameter for thunderboltbootdelayfix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 07 Feb 2023 14:09:50 +0100
+
+tuxedo-tomte (2.8.0) jammy; urgency=medium
+
+  * added tuxedo-nvidia-driver-525 as default nvidia driver for 22.04 only
+  * repaired desktop messages
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Dec 2022 19:25:30 +0100
+
+tuxedo-tomte (2.7.9) jammy; urgency=medium
+
+  * added message for restart on terminal when using 'list' and a restart is
+    necessary
+  * fixed erroneous failed kernel installation log message
+  * changed repos from http to https for Elementary OS 6
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Dec 2022 12:29:29 +0100
+
+tuxedo-tomte (2.7.8) jammy; urgency=medium
+
+  * added module dependency Dpkg::Version for kernel package version
+    comparision
+  * added kernel linux-tuxedo-22.04-edge to Pulse 15 Gen2 with boardname
+    PF5LUXG
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Dec 2022 12:53:10 +0100
+
+tuxedo-tomte (2.7.7) jammy; urgency=medium
+
+  * added kerneltuxedo2204edge for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 or PH6AG01_PH6AQ71_PH6AQI1
+  * added tuxedotouchpadswitch for TUXEDO InfinityBook 16 Gen7 with boardnames:
+    PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 22 Nov 2022 11:47:58 +0100
+
+tuxedo-tomte (2.7.6) jammy; urgency=medium
+
+  * added depends for necessary perl library
+  * changed network check handling and repository key install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 10 Nov 2022 09:48:24 +0100
+
+tuxedo-tomte (2.7.5) jammy; urgency=medium
+
+  * added tuxedokeyboardite for XMG Fusion 15 L19 with GTX1660Ti or RTX2070
+    with boardnames: LAPQC71A or LAPQC71B
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 07 Oct 2022 08:43:49 +0200
+
+tuxedo-tomte (2.7.4) jammy; urgency=medium
+
+>>>>>>> regression-lock-packagemanager
+  * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
+    Stellaris Gen4 AMD with boardname GMxRGxx
+  * reggression for 2.7.3
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Sep 2022 19:34:15 +0200
+
+tuxedo-tomte (2.7.2) jammy; urgency=medium
+
+  * tuxedo-mirrors is not prerequisite anymore
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Sep 2022 13:40:50 +0200
+
+tuxedo-tomte (2.7.1) jammy; urgency=medium
+
+  * added automatic TUXEDO keyring installation for TUXEDO repositories
+    for installations on vanilla systems by installing the package
+    tuxedo-archive-keyring
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Sep 2022 12:00:42 +0200
+
+tuxedo-tomte (2.7.0) jammy; urgency=medium
+
+  * added modes AUTOMATIC, UPDATES_ONLY and DONT_CONFIGURE
+  * added remove for all modules based on packages or kernel paramaters
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 24 Aug 2022 08:10:04 +0200
+
+tuxedo-tomte (2.6.11) jammy; urgency=medium
+
+  * added samsungnvmefix for TUXEDO Pulse 15 Gen2 with boardname PF5LUXG
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 16 Aug 2022 17:05:08 +0200
+
+tuxedo-tomte (2.6.10) jammy; urgency=medium
+
+  * added NS50MU same as NS50_70MU and InfinityBook S 17 Gen6 is same as
+    InfinityBook S 15 Gen6
+  * added backlightfix for TUXEDO InsanityBook v1 and XP1507 with boardnames
+    P95_HR and P95_HP,HR,HQ
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Jul 2022 15:12:35 +0200
+
+tuxedo-tomte (2.6.9) jammy; urgency=medium
+
+  * added lightdmlogindcheckgraphicalfix for InfinityBook Pro 15 Gen6 with
+    boardnames PHxTQx1, PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 14 Jul 2022 13:49:05 +0200
+
+tuxedo-tomte (2.6.8) jammy; urgency=medium
+
+  * added tuxedotouchpadswitch for TUXEDO Pulse Gen2 with boardname PF5LUXG
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 11 Jul 2022 16:55:51 +0200
+
+tuxedo-tomte (2.6.7) jammy; urgency=medium
+
+  * added NVIDIA driver 510
+  * added LC_message=C
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 23 Jun 2022 09:13:34 +0200
+
+tuxedo-tomte (2.6.6) jammy; urgency=medium
+
+  * added threegfix2 for Huawei ME906s
+  * added cardreaderfix for Realtek RTS522A PCI Express Card Reader
+  * added newest driver for Realtek RTL8125 2.5GbE Controller in module
+    r8125dkms with package tuxedo-r8125-dkms, replaces standard driver
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 02 Jun 2022 14:29:02 +0200
+
+tuxedo-tomte (2.6.4) jammy; urgency=medium
+
+  * added systemd wait for OEM completion in FAI installation
+  * set NVIDIA to 'on' when installing the drivers
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 16 May 2022 07:39:28 +0200
+
+tuxedo-tomte (2.6.3) jammy; urgency=medium
+
+  * removed remaining IDs for tuxedo-micfix1
+  * added TUXEDO_OS 22.04 as valid distribution
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 03 May 2022 17:44:53 +0200
+
+tuxedo-tomte (2.6.2) jammy; urgency=medium
+
+  * added tuxedokeyboardite for Stellaris Gen4 Intel with boardname GMxAGxx
+  * added tuxedotouchpadswitch for Stellaris Gen4 Intel with boardname GMxAGxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 29 Apr 2022 14:33:28 +0200
+
+tuxedo-tomte (2.6.1) focal; urgency=medium
+
+  * added kerneltuxedo2204 to all TUXEDO OS 22.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Apr 2022 12:48:18 +0200
+
+tuxedo-tomte (2.6.0) focal; urgency=medium
+
+  * added primeselectnvidia for InfinityBook Pro 14 Gen6 boardname PH4TQx1
+    PHxTQx1
+  * added 22.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Apr 2022 10:51:42 +0200
+
+tuxedo-tomte (2.5.35) focal; urgency=medium
+
+  * modified grub kernel parameter for nvidiabacklightcontrolfix
+  * added linux-tuxedo-2004-next for Aura 15 Gen2 with boardname NL5xNU
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 01 Apr 2022 16:20:38 +0200
+
+tuxedo-tomte (2.5.34) focal; urgency=medium
+
+  * changed kernel for Stellaris/Polaris 15/17 Gen3 AMD GMxZGxx to linux-tuxedo-20.04-next
+  * changed kernel for Stellaris/Polaris 15/17 Gen3 Intel GMxTGxx to linux-tuxedo-20.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 28 Mar 2022 16:47:41 +0200
+
+tuxedo-tomte (2.5.33) focal; urgency=medium
+
+  * Momentarily deactivate kernel deinstallation
+
+ -- Werner Sembach <wse@tuxedo.de>  Fri, 04 Mar 2022 19:12:52 +0100
+
+tuxedo-tomte (2.5.32) focal; urgency=medium
+
+  * Fix false success return of kernel installation and parsing of dpkg error
+
+ -- Werner Sembach <wse@tuxedo.de>  Mon, 28 Feb 2022 18:56:04 +0100
+
+tuxedo-tomte (2.5.31) focal; urgency=medium
+
+  * added subroutine to remove orphaned kernel images
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 25 Feb 2022 12:28:01 +0100
+
+tuxedo-tomte (2.5.30) focal; urgency=medium
+
+  * added remove obsolete package realtek-r8125-dkms
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 22 Feb 2022 17:22:05 +0100
+
+tuxedo-tomte (2.5.29) focal; urgency=medium
+
+  * changed Nvidia driver to 470
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 17 Feb 2022 16:30:31 +0100
+
+tuxedo-tomte (2.5.28) focal; urgency=medium
+
+  * removed amdgpu-dkms
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 15 Feb 2022 16:42:30 +0100
+
+tuxedo-tomte (2.5.27) focal; urgency=medium
+
+  * added LiveISO option
+  * removed realtek-r8125-dkms-fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 14 Feb 2022 12:32:21 +0100
+
+tuxedo-tomte (2.5.26) focal; urgency=medium
+
+  * removed nobootonbattery and grub entries
+  * added nvidiabacklightcontrolfix for TUXEDO Stellaris/Polaris Gen3 Intel with boardname GMxTGxx
+  * added earlyloadbacklightfix for TUXEDO Book XP14 Gen12 and TUXEDO InfinityBook Pro 14 Gen6, boardnames NV4XMB,ME,MZ and PHxTQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 07 Feb 2022 08:47:26 +0100
+
+tuxedo-tomte (2.5.25) focal; urgency=medium
+
+  * added support for locale other than English
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 17:26:07 +0100
+
+tuxedo-tomte (2.5.24) focal; urgency=medium
+
+  * added TUXEDO_OS Plasma 20.04
+  * removed Tomte first start from postinst as it is already started as service
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Jan 2022 12:45:43 +0100
+
+tuxedo-tomte (2.5.23) focal; urgency=medium
+
+  * added lightdmlogindcheckgraphicalfix for TUXEDO Book XP14 Gen12,
+    boardname NV4XMB,ME,MZ
+  * added i8042noauxfix for InfinityBook S 17 Gen6, boardname NS50_70MU
+  * added nokeyboardaftersuspendfix for XUX7 Gen.13 boardname X170KM-G
+  * added kernel linux-tuxedo-20.04-edge for InfinityBook Pro 14 Gen6
+    boardnames PHxTQx1 PHxTxX1 PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Jan 2022 13:06:15 +0100
+
+tuxedo-tomte (2.5.21) focal; urgency=medium
+
+  * added linux-tuxedo-20.04-next for Stellaris/Polaris Gen3 Intel with
+    boardname GMxTGxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 10 Jan 2022 10:44:25 +0100
+
+tuxedo-tomte (2.5.20) focal; urgency=medium
+
+  * added elementary OS 6.1
+  * added KDE neon
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 22 Dec 2021 17:36:34 +0100
+
+tuxedo-tomte (2.5.19) focal; urgency=medium
+
+  * added i8042 to XUX7 Gen13
+  * added thunderbolt-boot-delay-fix for X170KM-G
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 09 Dec 2021 19:37:11 +0100
+
+tuxedo-tomte (2.5.18) focal; urgency=medium
+
+  * added initLogging to singleton death
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Nov 2021 20:20:19 +0100
+
+tuxedo-tomte (2.5.15) focal; urgency=medium
+
+  * added linux-tuxedo-20.04-edge kernel for XUX713
+  * removed tuxedo-keyboard-ite from FAI install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 26 Nov 2021 18:21:35 +0100
+
+tuxedo-tomte (2.5.14) focal; urgency=medium
+
+  * moved micfix1 installation out of FAI
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 Nov 2021 13:24:55 +0100
+
+tuxedo-tomte (2.5.13) focal; urgency=medium
+
+  * added PHxTQx1 as alias to PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 08 Nov 2021 14:52:02 +0100
+
+tuxedo-tomte (2.5.12) focal; urgency=medium
+
+  * added some debug during FAI install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 05 Nov 2021 13:55:04 +0100
+
+tuxedo-tomte (2.5.11) focal; urgency=medium
+
+  * removed special kernel linux-tuxedo-20.04-edge for XUX713
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 03 Nov 2021 18:13:45 +0100
+
+tuxedo-tomte (2.5.10) focal; urgency=medium
+
+  * added XUX713 with boardname X170KM-G for kernel linux-tuxedo-20.04-edge
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 29 Oct 2021 16:09:07 +0200
+
+tuxedo-tomte (2.5.9) focal; urgency=medium
+
+  * added nokeyboardaftersuspendfix for TUXEDO Book BM15 Gen10 with
+    boardname NJ50_70CU
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 28 Oct 2021 15:06:59 +0200
+
+tuxedo-tomte (2.5.8) focal; urgency=medium
+
+  * recheck repos after first install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 12 Oct 2021 15:03:25 +0200
+
+tuxedo-tomte (2.5.7) focal; urgency=medium
+
+  * added no-keyboard-after-suspend-fix for Infinitybook S 15/17 Gen6,
+    boardname NS50_70MU
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 12 Oct 2021 09:57:50 +0200
+
+tuxedo-tomte (2.5.6) focal; urgency=medium
+
+  * added i915-disable-psr-fix for Infinitybook Pro 14 Gen6, boardname PH4TQx1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 11 Oct 2021 14:57:56 +0200
+
+tuxedo-tomte (2.5.5) focal; urgency=medium
+
+  * added XUX713 for tuxedo-keyboard-ite, X170KM-G
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Oct 2021 15:14:13 +0200
+
+tuxedo-tomte (2.5.4) focal; urgency=medium
+
+  * added link tomte for tuxedo-tomte
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Oct 2021 12:47:04 +0200
+
+tuxedo-tomte (2.5.3) focal; urgency=medium
+
+  * added PHxTxX1 for Infinitybook Pro 14 Gen6
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Oct 2021 09:32:02 +0200
+
+tuxedo-tomte (2.5.2) focal; urgency=medium
+
+  * added X170KM-G for XUX7 Gen13
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 07 Oct 2021 13:00:16 +0200
+
+tuxedo-tomte (2.5.1) focal; urgency=medium
+
+  * Stellaris now uses TUXEDO kernel
+  * all Ubuntu 20.04 now use TUXEDO kernel
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 15 Sep 2021 13:52:03 +0200
+
+tuxedo-tomte (2.4.27) focal; urgency=medium
+
+  * more managing of installed kernels, now removes known unused kernels
+  * added Stellaris/Polaris Intel gen 3 to tuxedotouchpadswitch
+
+ -- C. Sandberg <tux@tuxedocomputers.com>  Mon, 23 Aug 2021 17:36:10 +0200
+
+tuxedo-tomte (2.4.26) focal; urgency=medium
+
+  * FAI: Reorder repo modules install order
+
+ -- C. Sandberg <tux@tuxedocomputers.com>  Tue, 17 Aug 2021 12:32:39 +0200
+
+tuxedo-tomte (2.4.25) focal; urgency=medium
+
+  * added pinfix-tgl-dkms for GMxTGxx, Stellaris/Polaris 15 AMD Gen3
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 17:19:12 +0200
+
+tuxedo-tomte (2.4.21) focal; urgency=medium
+
+  * added amdgpu-dkms for GMxZGxx, Stellaris/Polaris 15 AMD Gen3
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 11 Aug 2021 10:28:11 +0200
+
+tuxedo-tomte (2.4.19) focal; urgency=medium
+
+  * added i915-disable-psr-fix for PHxTxX1, IBP1406
+  * added P95_HP for backlightfix, GTX1060
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Aug 2021 18:33:40 +0200
+
+tuxedo-tomte (2.4.15) focal; urgency=medium
+
+  * added BOE Model 2420 Serial Number 0 for GMxZGxx, Stellaris/Polaris 15 AMD
+    Gen3
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 28 Jul 2021 16:23:37 +0200
+
+tuxedo-tomte (2.4.14) focal; urgency=medium
+
+  * added limit for repeating Tomte configure all
+  * took away messages if retry
+  * added remove and kernel release dependency to amdgpu-dkms
+  * added exception for repos and mirrors: change if URLs as http to https
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 Jul 2021 11:23:16 +0200
+
+tuxedo-tomte (2.4.13) focal; urgency=medium
+
+  * changed mirrors address
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 07 Jul 2021 17:28:17 +0200
+
+tuxedo-tomte (2.4.12) focal; urgency=medium
+
+  * remove amdgpu-with-nvidia-fix added
+  * removed always install from amdgpuwithnvidiafix
+  * added amdgpu-dkms install exclusively for 20.04
+  * removed module opensuseip-fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 28 Jun 2021 07:46:06 +0200
+
+tuxedo-tomte (2.4.11) focal; urgency=medium
+
+  * added support for realtek-r8125-dkms
+  * added support for amdgpu-backlight-aux-off
+  * added bash shell completion
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Jun 2021 14:43:41 +0200
+
+tuxedo-tomte (2.4.10) focal; urgency=medium
+
+  * no reporting on desktop if only the default modules were configured
+  * no action if repos and mirrors were not changed
+  * added module opensuseip-fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 15 Jun 2021 14:43:28 +0200
+
+tuxedo-tomte (2.4.9) focal; urgency=medium
+
+  * restart required after OLED module install
+  * changes in deb mirrors
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 02 Jun 2021 22:19:12 +0200
+
+tuxedo-tomte (2.4.8) focal; urgency=medium
+
+  * added apport-fix
+  * added check for network connectivity if required by the fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 31 May 2021 08:47:38 +0200
+
+tuxedo-tomte (2.4.7) focal; urgency=medium
+
+  * added support for OLED brightness control for SDC Model 41001 Serial
+    Number 0
+  * repaired module description
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 May 2021 12:04:18 +0200
+
+tuxedo-tomte (2.4.6) focal; urgency=medium
+
+  * added nvme firmware upgrade to s5z42109
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 May 2021 09:51:40 +0200
+
+tuxedo-tomte (2.4.5) focal; urgency=medium
+
+  * added r8168-dkms installation for NHxxRZQ
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 07 May 2021 15:37:56 +0200
+
+tuxedo-tomte (2.4.4) focal; urgency=medium
+
+  * added EDUBOOK1502 for amd-xhci-hcd-usb-quirk-suspend-fix
+  * added EDUBOOK1502 for no-keyboard-after-suspend-fix
+  * added desktop messages
+  * added tuxedo-touchpad-switch for PHxTxX1, PH4TQx1, GMxNGxx, GMxZGxx, GMxMGxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 05 May 2021 16:34:45 +0200
+
+tuxedo-tomte (2.4.2) focal; urgency=medium
+
+  * added FAI stage
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 16:24:30 +0200
+
+tuxedo-tomte (2.4.0) focal; urgency=medium
+
+  * added amdgpu-dkms
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 29 Apr 2021 09:15:45 +0200
+
+tuxedo-tomte (2.3.9) focal; urgency=medium
+
+  * added tuxedo-keyboard-ite for XP1512/XP1712
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Apr 2021 11:40:50 +0200
+
+tuxedo-tomte (2.3.7) focal; urgency=medium
+
+  * added no-keyboard-after-suspend-fix for IBS15v6
+  * added micfix1 for XP1512 and XP1712
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 Apr 2021 13:53:47 +0200
+
+tuxedo-tomte (2.3.4) focal; urgency=medium
+
+  * separated repos into tuxedo-repos tuxedo-mirrors
+  * delete deprecated package linux-oem-20.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 30 Mar 2021 14:42:07 +0200
+
+tuxedo-tomte (2.3.3) focal; urgency=medium
+
+  * always check if grub entry present if module is required by the system
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 24 Mar 2021 10:40:51 +0100
+
+tuxedo-tomte (2.3.2) focal; urgency=medium
+
+  * added package cracklib-runtime
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 Mar 2021 09:24:24 +0100
+
+tuxedo-tomte (2.3.1) focal; urgency=medium
+
+  * added description in manpage for block and unblock
+  * added support for ITE Keyboard devices
+  * added nvme fix
+  * added support for fingerprintreader
+  * added tuxedo-micfix1
+  * added mesa-utils install
+  * added restore-audio-fix
+  * added nvidia drivers
+  * added installation of TUXEDO approved kernel
+  * tuxedo-repos will not be configured if blocked
+  * added TUXEDO device detection
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 Mar 2021 14:25:19 +0100
+
+tuxedo-tomte (2.2.2) focal; urgency=medium
+
+  * added N150CU InfinityBook Pro 15 v5
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 01 Mar 2021 12:16:09 +0100
+
+tuxedo-tomte (2.2.0) focal; urgency=medium
+
+  * added Uniwill touchpad LED support
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 25 Feb 2021 12:32:55 +0100
+
+tuxedo-tomte (2.1.9) focal; urgency=medium
+
+  * added Threeg ME936 support
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 15 Feb 2021 19:17:58 +0100
+
+tuxedo-tomte (2.1.8) focal; urgency=medium
+
+  * added update section for tuxedorepos
+  * delete old repos, create new
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 12 Feb 2021 16:52:38 +0100
+
+tuxedo-tomte (2.1.7) focal; urgency=medium
+
+  * added fix for Elantech touchpads on X35R
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 04 Feb 2021 10:59:36 +0100
+
+tuxedo-tomte (2.1.6) focal; urgency=medium
+
+  * modified tuxedo repo mirrors after migration
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 02 Feb 2021 11:52:25 +0100
+
+tuxedo-tomte (2.1.5) focal; urgency=medium
+
+  * changed bios version id
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Jan 2021 15:34:23 +0100
+
+tuxedo-tomte (2.1.0) focal; urgency=medium
+
+  * added services delayed installer
+  * added pkcon package installation
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Jan 2021 15:05:18 +0100
+
+tuxedo-tomte (2.0.16) focal; urgency=medium
+
+  * added core-fix for XA15 - BIOS version NH5xAx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 22 Dec 2020 10:17:53 +0100
+
+tuxedo-tomte (2.0.15) focal; urgency=medium
+
+  * added OS and Version recognition and exit if not in supported list
+  * adds tuxedo repos
+  * commenting out of old repos in sources.list
+  * added xhci_hcd quirks fix for AURA1501
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 14 Dec 2020 17:38:52 +0100
+
+tuxedo-tomte (2.0.14) focal; urgency=medium
+
+  [ Vinzenz Vietzke ]
+  * Switch description to make it more obvious what Tomte is and does
+
+  [ E. Mohr ]
+  * added systemd service and timer
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 25 Nov 2020 14:06:16 +0100
+
+tuxedo-tomte (2.0.13) focal; urgency=medium
+
+  * modified dependency to pre-dependency
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 24 Nov 2020 12:15:52 +0100
+
+tuxedo-tomte (2.0.12) focal; urgency=medium
+
+  * remodified display recognition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 19 Nov 2020 18:28:44 +0100
+
+tuxedo-tomte (2.0.11) focal; urgency=medium
+
+  * modified display recognition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 19 Nov 2020 16:11:19 +0100
+
+tuxedo-tomte (2.0.10) focal; urgency=medium
+
+  * added fix for backlight for DX1708
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 18 Nov 2020 15:44:46 +0100
+
+tuxedo-tomte (2.0.9) focal; urgency=medium
+
+  * changed blacklist to blocklist
+  * changed blacklisted to blocked
+  * added fix for InfinityBook Pro 14 v5
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 13:38:37 +0100
+
+tuxedo-tomte (2.0.8) focal; urgency=medium
+
+  * added some packages
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 09:24:56 +0100
+
+tuxedo-tomte (2.0.7) focal; urgency=medium
+
+  * added fix for XMG Fusion
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 30 Oct 2020 09:17:57 +0100
+
+tuxedo-tomte (2.0.6) focal; urgency=medium
+
+  * fixed package config problem
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 21 Oct 2020 14:57:49 +0200
+
+tuxedo-tomte (2.0.5) focal; urgency=medium
+
+  * added modules upgrade
+  * added package install code
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 20 Oct 2020 16:51:30 +0200
+
+tuxedo-tomte (2.0.4) focal; urgency=medium
+
+  * added board_name PB50_70DFx,DDx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Oct 2020 18:35:11 +0200
+
+tuxedo-tomte (2.0.3) focal; urgency=medium
+
+  * added no-keyboard-after-suspend-fix 
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 16 Oct 2020 16:37:20 +0200
+
+tuxedo-tomte (2.0.2) focal; urgency=medium
+
+  * modified amd-xhci-hcd-usb-quirk-suspend-fix
+  * added some barebones to amd-xhci-hcd-usb-quirk-suspend-fix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Oct 2020 14:32:50 +0200
+
+tuxedo-tomte (2.0.1) focal; urgency=medium
+
+  * configuration for amd-xhci-hcd-usb-quirk-suspend-fix
+  * added blacklisting, unblacklisting, reconfigure
+  * check always requirements
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 21 Sep 2020 16:05:18 +0200
+
+tuxedo-tomte (2.0.0) bionic; urgency=medium
+  
+  * configuration for i8042-fix.
+  * configuration for no-boot-on-battery-fix.
+  * grub writer module.
+  * configuration check module.
+  * man page.
+
+ -- E Mohr <tux@tuxedocomputers.com>  Thu, 04 Aug 2020 17:00:00 +0200
+
+tuxedo-tomte (1.0.0) bionic; urgency=medium
+
+  * Initial release.
+
+ -- E Mohr <tux@tuxedocomputers.com>  Fri, 28 Feb 2020 17:00:00 +0100
