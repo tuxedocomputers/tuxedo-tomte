@@ -6961,6 +6961,9 @@ sub messageDesktop {
 		return (0);
 	}
 
+	#TODO debug
+	printLog("whoLines: @whoLines", 'L2');
+
 	foreach $mLine (@whoLines) {
 		if ($mLine =~ /\(:\d+\)/) {
 			$mLine =~ /^(\w*).*\s(\d*)\s.*/;
@@ -6969,13 +6972,15 @@ sub messageDesktop {
 		}
 	}
 	if (($mUsername eq '') || ($mPid eq '')) {
-		printLog('No display for message output found', 'L1');
+		printLog('No display for message output found, no username or PID', 'L1');
 		return (0);
 	}
 
 	$environ = "/proc/$mPid/environ";
+	printLog("environ: >$environ<", 'L2');
 	if ( (-e $environ) && open(FH, "<", $environ) ) {
 		$dbusAddress = do { local $/; <FH> };
+		printLog("DBUS address raw: >$dbusAddress<", 'L2');
 		close FH;
 	} else {
 		printLog('No display for message output found', 'L1');
@@ -6984,8 +6989,9 @@ sub messageDesktop {
 	
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
+	printLog("DBUS address cleaned: >$dbusAddress<", 'L2');
 	if ($dbusAddress eq '') {
-		printLog('No display for message output found', 'L1');
+		printLog('No display for message output found, no DBUS address', 'L1');
 		return (0);
 	}
 
@@ -6994,7 +7000,7 @@ sub messageDesktop {
 	`$mCmd`;
 
 	if ($? != 0) {
-		printLog('No display for message output found', 'L1');
+		printLog("No display for message output found with command:\n$mCmd", 'L1');
 		return (0);
 	}
 	return (1);
