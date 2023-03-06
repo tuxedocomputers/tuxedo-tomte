@@ -2093,7 +2093,7 @@ sub dieSingleton {
 # returns 1 if it is locked
 # returns -1 if something went wrong
 #
-sub isLocked {
+sub acquireLock {
 	my $key = shift;
 	my $filename = $lockFiles{$key}{filename};
 	my $FH;
@@ -2779,8 +2779,7 @@ sub checkRequirements {
 		}
 	}
 
-	if (($boardname =~ m/X170KM-G/) ||
-	   ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
+	if (($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
 	}
