@@ -5058,7 +5058,7 @@ sub r8125dkms() {
 	my $action = shift;
 	my $wasInstalled = 1;
 	my $package_tuxedo_r8125_dkms;
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!$FAI)) {
 		# check if the package is already installed
 		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
 			messageLongInstall();
