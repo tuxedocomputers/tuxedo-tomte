@@ -2298,6 +2298,7 @@ sub checkRequirements {
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
 			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
 			installPackage('grub-efi-amd64-signed');
+			installPackage('shim-signed');
 		} else {
 			printLog("no earlier version of grub-efi-amd64-signed detected", '2');
 		}
