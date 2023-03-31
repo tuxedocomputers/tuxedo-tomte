@@ -5069,31 +5069,28 @@ sub earlyloadbacklightcontrolfix() {
 sub r8125dkms() {
 	my $module = shift;
 	my $action = shift;
-	my $wasInstalled = 1;
-	my $package_tuxedo_r8125_dkms;
 	if (($action eq 'install') && (!$FAI)) {
-		# check if the package is already installed
-		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
-			$wasInstalled = 0;
-			$package_tuxedo_r8125_dkms = installPackage('tuxedo-r8125-dkms');
-		} else {
-			$package_tuxedo_r8125_dkms = 1;
-		}
-
-		if( $package_tuxedo_r8125_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
-				addToConfiguredModules($module, "nothingToDo");
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues();
 			} else {
-				addToConfiguredModules($module, 'success');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
+			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 
 	if ($action eq 'upgrade') {
