@@ -1,21 +1,8 @@
-tuxedo-tomte (2.8.4-15) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.5) jammy; urgency=medium
 
-  * after packaging
-  * added installation of newer package version for grub-efi-amd64-signed
-  * after packaging
-  * after packaging
-  * temp grub-efi-amd64-signed fix only for focal systems
-  * after packaging
-  * moved tuxedo-r8125-dkms installation out of FAI into next boot
-  * activated debug
-  * after packaging
-  * simplified realtek subroutine
-  * after packaging
-  * removed not in FAI
-  * after packaging
-  * changed package name for realtek driver
+  * forcing installation of newer package version for grub-efi-amd64-signed
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 31 Mar 2023 16:53:58 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 31 Mar 2023 17:20:32 +0200
 
 tuxedo-tomte (2.8.4) jammy; urgency=medium
 
