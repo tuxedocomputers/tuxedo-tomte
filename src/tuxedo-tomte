@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.4-2';
+our $VERSION = '2.8.6';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1916,8 +1916,8 @@ my %origConfModules = (
 		order => '',
 	},
 	r8125dkms => {
-		name => 'r8125-dkms',
-		version => 1,
+		name => 'tuxedo-r8125-dkms',
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2458,6 +2458,19 @@ sub checkRequirements {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
 				printLog('detected i8042.noaux-fix issue', 'L1');
 			}
+		}
+	}
+
+	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
+	if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", '2');
+		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
+			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
+			installPackage('grub-efi-amd64-signed');
+			installPackage('shim-signed');
+		} else {
+			printLog("no earlier version of grub-efi-amd64-signed detected", '2');
 		}
 	}
 
@@ -5226,31 +5239,28 @@ sub earlyloadbacklightcontrolfix() {
 sub r8125dkms() {
 	my $module = shift;
 	my $action = shift;
-	my $wasInstalled = 1;
-	my $package_tuxedo_r8125_dkms;
 	if ($action eq 'install') {
-		# check if the package is already installed
-		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
-			$wasInstalled = 0;
-			$package_tuxedo_r8125_dkms = installPackage('tuxedo-r8125-dkms');
-		} else {
-			$package_tuxedo_r8125_dkms = 1;
-		}
-
-		if( $package_tuxedo_r8125_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
-				addToConfiguredModules($module, "nothingToDo");
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues();
 			} else {
-				addToConfiguredModules($module, 'success');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
+			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 
 	if ($action eq 'upgrade') {
