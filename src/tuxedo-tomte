@@ -109,9 +109,6 @@ my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my $kernelRelease = `uname -r`;
 $kernelRelease =~ s/[\n\r]//g;
-my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-#TODO debug
-printLog("grubEfiAmd64SignedVersion: $grubEfiAmd64SignedVersion", '2');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -2294,13 +2291,17 @@ sub checkRequirements {
 		}
 	}
 
-	# workaround for grub-efi-amd64-signed which does not get installed if not forced
-	printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", '2');
-	if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
-		printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
-		installPackage('grub-efi-amd64-signed');
-	} else {
-		printLog("no earlier version of grub-efi-amd64-signed detected", '2');
+	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
+	if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
+		#TODO debug
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", '2');
+		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
+			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
+			installPackage('grub-efi-amd64-signed');
+		} else {
+			printLog("no earlier version of grub-efi-amd64-signed detected", '2');
+		}
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
