@@ -5069,7 +5069,7 @@ sub earlyloadbacklightcontrolfix() {
 sub r8125dkms() {
 	my $module = shift;
 	my $action = shift;
-	if (($action eq 'install') && (!$FAI)) {
+	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
