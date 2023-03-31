@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.4-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.4-13) UNRELEASED; urgency=medium
 
   * after packaging
   * added installation of newer package version for grub-efi-amd64-signed
@@ -8,8 +8,10 @@ tuxedo-tomte (2.8.4-12) UNRELEASED; urgency=medium
   * after packaging
   * moved tuxedo-r8125-dkms installation out of FAI into next boot
   * activated debug
+  * after packaging
+  * simplified realtek subroutine
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 31 Mar 2023 14:23:51 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 31 Mar 2023 15:50:06 +0200
 
 tuxedo-tomte (2.8.4) jammy; urgency=medium
 
