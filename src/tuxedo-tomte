@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.4-2';
+our $VERSION = '2.8.6';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1974,8 +1974,8 @@ my %origConfModules = (
 		order => '',
 	},
 	r8125dkms => {
-		name => 'r8125-dkms',
-		version => 1,
+		name => 'tuxedo-r8125-dkms',
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2027,9 +2027,7 @@ my %origConfModules = (
 );
 
 
-###############################################################################
-# simple print out of all supported devices and fixes
-#
+
 sub printTuxedoDevices {
 	my $ID;
 	foreach $ID (keys %tuxedo_devices) {
@@ -2099,10 +2097,6 @@ sub isLocked {
 	my $FH;
 	my $fs;
 	my $num;
-	unless (-e $filename) {
-		printLog("$filename does not exist", 'L2');
-		return (0);
-	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
 		print("checking lock: $filename\n");
@@ -2112,10 +2106,8 @@ sub isLocked {
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_GETLK )) {
 			unless ($fs->l_type() == F_UNLCK) {
-				printLog("=> is locked", 'L2');
 				return (1);
 			} else {
-				printLog("=> is not locked", 'L2');
 				return (0);
 			}
 		} else {
@@ -2144,174 +2136,14 @@ sub isPMlocked {
 	foreach $key (keys %lockFiles) {
 		$result = isLocked($key);
 		if ($result == 1) {
-			printLog("one or more files are locked", 'L2');
 			return (1);
 		}
 		if ($result == -1) {
-			printLog("something went wrong while checking for file locks", 'L2');
 			return (-1);
 		}
 	}
-	printLog("all files are unlocked", 'L2');
 	return (0);
 }
-
-
-
-###############################################################################
-# locks a file acquireLock(filename) if the file was not locked by another
-# process already
-# returns 1 if file could be locked
-# returns 0 if file could not be locked
-#
-sub acquireLock {
-	my $key = shift;
-	my $filename = $lockFiles{$key}{filename};
-	my $FH;
-	my $fs;
-	my $num;
-	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
-		$FH->autoflush(1);
-		#TODO debug
-		printLog("acquiring lock: $filename", 'TL2');
-		$fs = new File::FcntlLock;
-		$fs->l_type( F_WRLCK );
-		$fs->l_whence( SEEK_SET );
-		$fs->l_start( 0 );
-		if ($fs->lock( $FH, F_SETLK )) {
-			printLog("locking successfull", 'TL2');
-			$num = <$FH> || 0;
-			$lockFiles{$key}{'FH'} = $FH;
-			$lockFiles{$key}{'number'} = $num;
-			$lockFiles{$key}{'locked'} = 1;
-			return (1);
-		} else {
-			$lockFiles{$key}{'locked'} = 0;
-			printLog("failed to get write lock: $filename: $fs->error", 'TL0');
-			return (0);
-		}
-	} else {
-		printLog("failed to open: $filename: $!", 'TL2');
-		return (0);
-	}
-}
-
-
-
-###############################################################################
-# releases the lock on ONE file
-# releaseLock(filename)
-# returns 1 if lock could be released
-# returns 0 if something went wrong
-#
-sub releaseLock {
-	my $key = shift;
-	my $filename = $lockFiles{$key}{filename};
-	my $FH = $lockFiles{$key}{FH};
-	my $num = $lockFiles{$key}{number};
-	my $fs;
-	#TODO debug
-	if (seek($FH, 0, SEEK_SET)) {
-		if (print $FH "$num\n") {
-			if (truncate($FH, tell($FH))) {
-				$fs = new File::FcntlLock;
-				$fs->l_type(F_UNLCK);
-				if ($fs->lock( $FH, F_SETLK )) {
-					if (close($FH)) {
-						$lockFiles{$key}{'locked'} = 0;
-						printLog("lock released on $filename", 'L2');
-						return (1);
-					} else {
-						printLog("close failed!: $filename: $!", 'TL2');
-						return (0);
-					}
-				} else {
-					printLog("unlock failed!: $filename: $fs->error", 'TL2');
-					return (0);
-				}
-			} else {
-				printLog("truncate failed!: $filename: $!", 'TL2');
-				return (0);
-			}
-		} else {
-			printLog("write failed!: $filename: $!", 'TL2');
-			return (0);
-		}
-	} else {
-		printLog("seek failed!: $filename: $!", 'TL2');
-		return (0);
-	}
-}
-
-
-
-###############################################################################
-# locks all packagemanagement files
-# it unlocks all files if some were locked by another process
-# returns 1 if all files could be locked
-# returns 0 if some could not be locked
-#
-sub lockPM {
-	my $key;
-	my $lockFilesHashSize = keys %lockFiles;
-	my $processedLockFiles = 0;
-
-	# in FAI it should never be necessary to lock any files
-	if ($FAI) {
-		return (1);
-	}
-	printLog("trying to lock all files for Tomte", 'L2');
-	foreach $key (keys %lockFiles) {
-		# stop if can't get lock
-		last if (acquireLock($key) != 1);
-		$processedLockFiles++;
-	}
-	if ($processedLockFiles < $lockFilesHashSize) {
-		#TODO
-		printLog("!!! some files are already locked! reverting all locks", 'TL2');
-		unlockPM('some files locked -> reverting');
-		return (0);
-	}
-	printLog("### all files locked for Tomte", 'L3');
-	return (1);
-}
-
-
-
-###############################################################################
-# unlocks all files from package management
-# only unlocks locks owned by itself!!
-# a reason for unlocking should be given as string, for logging purposes
-# unlockPM('reason')
-# returns 1 if unlocked
-# returns 0 if some could not be unlocked
-#
-sub unlockPM {
-	my $reason = shift;
-	my $key;
-	my $hashSize = keys %lockFiles;
-	my $countReleased = 0;
-	my $countToRelease = 0;
-	#TODO lots of debug
-	printLog("attempting to unlock all files for >$reason< ...", 'L2');
-	foreach $key (keys %lockFiles) {
-		printLog("is $key locked?: $lockFiles{$key}{locked}", 'L2');
-		if ($lockFiles{$key}{locked}) {
-			printLog("try to unlock", 'L2');
-			$countToRelease++;
-			$countReleased += releaseLock($key);
-			printLog("released $countReleased from $countToRelease", 'L2');
-		}
-	}
-	if ($countReleased == $countToRelease) {
-		printLog("OOO successfully released all locks for >$reason<", 'L2');
-		return (1);
-	} else {
-		printLog("XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L2');
-	}
-	return (0);
-}
-
 
 
 
@@ -2471,7 +2303,6 @@ sub prerequisites {
 
 sub prerequisitesFAI {
 	printLog("starting prerequisites FAI", 'TL0');
-	printLog("executing: apt-get update", 'L2');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending prerequisites FAI", 'TL0');
@@ -2485,7 +2316,6 @@ sub postrequisitesFAI {
 	if (httpToHttps(\%tuxedo_mirrors)) {
 		printLog('mirror repos set to https', 'L0');
 	}
-	printLog("executing: apt-get update", 'L2');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending postrequisites FAI", 'TL0');
@@ -2516,6 +2346,19 @@ sub checkRequirements {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
 				printLog('detected i8042.noaux-fix issue', 'L1');
 			}
+		}
+	}
+
+	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
+	if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", '2');
+		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
+			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
+			installPackage('grub-efi-amd64-signed');
+			installPackage('shim-signed');
+		} else {
+			printLog("no earlier version of grub-efi-amd64-signed detected", '2');
 		}
 	}
 
@@ -3370,7 +3213,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					aptgetRefreshModule($module, 3);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3394,7 +3237,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefreshModule($module, 3);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -3443,7 +3286,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					aptgetRefreshModule($module, 3);
+					aptgetRefresh($module, 3);
 				}
 			}
 		}
@@ -3467,7 +3310,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefreshModule($module, 3);
+				aptgetRefresh($module, 3);
 			}
 		}
 	}
@@ -5284,31 +5127,28 @@ sub earlyloadbacklightcontrolfix() {
 sub r8125dkms() {
 	my $module = shift;
 	my $action = shift;
-	my $wasInstalled = 1;
-	my $package_tuxedo_r8125_dkms;
 	if ($action eq 'install') {
-		# check if the package is already installed
-		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
-			$wasInstalled = 0;
-			$package_tuxedo_r8125_dkms = installPackage('tuxedo-r8125-dkms');
-		} else {
-			$package_tuxedo_r8125_dkms = 1;
-		}
-
-		if( $package_tuxedo_r8125_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
-				addToConfiguredModules($module, "nothingToDo");
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues();
 			} else {
-				addToConfiguredModules($module, 'success');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
+			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 
 	if ($action eq 'upgrade') {
@@ -6173,8 +6013,6 @@ sub removePackage {
 }
 
 
-
-
 ###############################################################################
 # sets mark to auto or manual
 # usage setAptMark('package_name','auto|manual')
@@ -6482,7 +6320,6 @@ sub uninstKernelFlavour {
 		$deinstString .= ' 2>&1';
 		printLog("uninstalling $kernelToDelete", 'L0');
 		printLog("deinstallation command: $deinstString", 'L2');
-
 		# circumvent Ubuntu failsafe for currently installed kernel
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel!", 'L2');
@@ -6555,42 +6392,6 @@ sub uninstKernelFlavour {
 		}
 	}
 	return (0);
-}
-
-
-
-###############################################################################
-# checks if it is the current kernel to be uninstalled and sets parameters to
-# uninstall
-# setCurrentKernelUninstallParameters($deinstString)
-# $deinstString is a string with kernel names to be uninstalled
-# returns 1 if current kernel was detected
-# returns 0 if current kernel was not detected
-#
-sub setCurrentKernelUninstallParameters {
-	my $deinstString = shift;
-	if ($deinstString =~ /$kernelRelease/) {
-		printLog("preparing to deinstall current kernel!", 'L2');
-		$restartSystem = 1;
-		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
-		my $fileText = "#!/bin/sh\nexit 0";
-		createFile('/usr/bin/linux-check-removal', $fileText, 1);
-		chmod 755, '/usr/bin/linux-check-removal';
-		return (1);
-	}
-	return (0);
-}
-
-
-
-
-###############################################################################
-# restores the parameters set to uninstall the current kernel
-#
-sub unsetCurrentKernelUninstallParameters {
-	printLog("resetting parameters to deinstall kernel to original settings", 'L2');
-	unlink '/usr/bin/linux-check-removal';
-	rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
 }
 
 
@@ -6764,20 +6565,31 @@ sub removeKernelParameters {
 
 
 ###############################################################################
-# setNoNetwork( 0 or 1 )
-# sets the network availability variable
-# 0 = network
-# 1 = no network
+# refreshes the package manager database
+# needs a module name to set the result pkconRefresh($module)
 #
-sub setNoNetwork {
-	my $value = shift;
-	if ($LiveISO) {
-		if ($value == 1) {
-			printLog("setting permanently for this session no network available", 'L0');
-			$noNetwork = 1;
+sub pkconRefresh {
+	my $pkconModule = shift;
+	my $output;
+	my $exitStatus;
+	if (checkNetwork(10, 1)) {
+		deactivatePackagekit();
+		$output = `pkcon refresh`;
+		$exitStatus = $?/256;
+		if ($exitStatus != 0) {
+			printLog('failed: update packages', 'L0');
+			printLog("returned error code: $exitStatus", 'L0');
+			if ($exitStatus == 7) {
+				printLog('possible network problems', 'L0');
+			}
+			addToConfiguredModules($pkconModule, "failed");
+		} else {
+			printLog("success: update packages", 'L1');
+			addToConfiguredModules($pkconModule, "success");
 		}
 	} else {
-		$noNetwork = $value;
+		printLog("no network available, repos could not be updated", 'TL0');
+		addToConfiguredModules($pkconModule, "failed");
 	}
 }
 
@@ -6787,9 +6599,9 @@ sub setNoNetwork {
 # refreshes the package manager database
 # needs a module name to set the result and the amount of retries it should do
 # in case it fails the first time for some reason
-# aptgetRefreshModule($module, $retries)
+# aptgetRefresh($module, $retries)
 #
-sub aptgetRefreshModule {
+sub aptgetRefresh {
 	my ($aptgetModule, $refreshTries) = @_;
 	my $output;
 	my $exitStatus = 1;
@@ -7094,11 +6906,11 @@ sub checkNetwork {
 	my $wait = shift;
 	if ((! $FAI) && ($noNetwork == 0)) {
 		if (waitForNetwork($triesNbr, $wait)) {
-			setNoNetwork(0);
+			$noNetwork = 0;
 			printLog('found network !', 'L1');
 			return (1);
 		} else {
-			setNoNetwork(1);
+			$noNetwork = 1;
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 			startTomteDelayed();
 			return (0);
@@ -7217,9 +7029,6 @@ sub messageDesktop {
 		return (0);
 	}
 
-	#TODO debug
-	printLog("whoLines: @whoLines", 'L2');
-
 	foreach $mLine (@whoLines) {
 		if ($mLine =~ /\(:\d+\)/) {
 			$mLine =~ /^(\w*).*\s(\d*)\s.*/;
@@ -7228,15 +7037,13 @@ sub messageDesktop {
 		}
 	}
 	if (($mUsername eq '') || ($mPid eq '')) {
-		printLog('No display for message output found, no username or PID', 'L1');
+		printLog('No display for message output found', 'L1');
 		return (0);
 	}
 
 	$environ = "/proc/$mPid/environ";
-	printLog("environ: >$environ<", 'L2');
 	if ( (-e $environ) && open(FH, "<", $environ) ) {
 		$dbusAddress = do { local $/; <FH> };
-		printLog("DBUS address raw: >$dbusAddress<", 'L2');
 		close FH;
 	} else {
 		printLog('No display for message output found', 'L1');
@@ -7245,9 +7052,8 @@ sub messageDesktop {
 	
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
-	printLog("DBUS address cleaned: >$dbusAddress<", 'L2');
 	if ($dbusAddress eq '') {
-		printLog('No display for message output found, no DBUS address', 'L1');
+		printLog('No display for message output found', 'L1');
 		return (0);
 	}
 
@@ -7256,7 +7062,7 @@ sub messageDesktop {
 	`$mCmd`;
 
 	if ($? != 0) {
-		printLog("No display for message output found with command:\n$mCmd", 'L1');
+		printLog('No display for message output found', 'L1');
 		return (0);
 	}
 	return (1);
