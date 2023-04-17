@@ -4184,6 +4184,7 @@ sub nvidiadriver() {
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
+	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -4300,16 +4301,18 @@ sub nvidiadriver() {
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
+			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
 
 			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
-			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
+			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
+			$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+			if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
+				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
 			} else {
-				setAptMark($tuxedoNvidiaDriver525,'manual');
+				setAptMark($tuxedoNvidiaDriver530,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('mesa-utils') ) {
