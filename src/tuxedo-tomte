@@ -590,7 +590,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms'],
+		fix => [''],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -2517,10 +2517,6 @@ sub checkRequirements {
 		printLog('detected nvidia-driver issue', 'L1');
 	}
 
-	if ($boardname =~ m/NHxxRZQ/) {
-		$origConfModules{r8168dkms}{required} = 'yes';
-		printLog('detected r8168-dkms issue', 'L1');
-	}
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
 		printLog('detected tuxedo-oled-brt issue', 'L1');
