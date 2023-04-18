@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.6-7';
+our $VERSION = '2.8.6-8';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -43,7 +43,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4174,13 +4174,13 @@ sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver;
-	my $packageMesaUtils;
-	my $packageNvidiaPrime;
-	my $packagePythonAppindicator;
-	my $packagePythonCairo;
-	my $packagePythonGtk2;
-	my $oldDriversRemoved;
+	my $packageNvidiaDriver = 0;
+	my $packageMesaUtils = 0;
+	my $packageNvidiaPrime = 0;
+	my $packagePythonAppindicator = 0;
+	my $packagePythonCairo = 0;
+	my $packagePythonGtk2 = 0;
+	my $oldDriversRemoved = 0;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
@@ -5894,8 +5894,11 @@ sub isPackageInRepo {
 	my $package = shift;
 	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
 	chop($returnFromSearch);
+	#TODO debugs
+	printLog("package: $package returnFromSearch: $returnFromSearch", '2');
 	if ($package eq $returnFromSearch) {
 		return (1);
+		printLog("package found", 'L2');
 	} else {
 		printLog("requested package can't be found in the repositories", 'L2');
 		return (0);
