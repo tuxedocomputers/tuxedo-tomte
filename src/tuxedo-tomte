@@ -5894,8 +5894,9 @@ sub isPackageInRepo {
 	my $package = shift;
 	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
 	chop($returnFromSearch);
+	$returnFromSearch =~ s/ .*//;
 	#TODO debugs
-	printLog("package: $package returnFromSearch: $returnFromSearch", '2');
+	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
 	if ($package eq $returnFromSearch) {
 		return (1);
 		printLog("package found", 'L2');
