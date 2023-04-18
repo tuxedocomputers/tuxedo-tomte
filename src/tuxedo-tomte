@@ -4300,21 +4300,28 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
-			$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
-			if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver530 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
+
+				# check if the package is already installed
+				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+				} else {
+					setAptMark($tuxedoNvidiaDriver530,'manual');
+					$packageNvidiaDriver = 1;
+				}
 			} else {
-				setAptMark($tuxedoNvidiaDriver530,'manual');
-				$packageNvidiaDriver = 1;
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver530  can't be found in the repositories", 'L0');
 			}
+
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
@@ -5877,6 +5884,23 @@ sub deinstallSinglePackage {
 	}
 }
 
+
+
+
+###############################################################################
+# Checks if the package is in any of the repositories
+#
+sub isPackageInRepo {
+	my $package = shift;
+	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
+	chop($returnFromSearch);
+	if ($package eq $returnFromSearch) {
+		return (1);
+	} else {
+		printLog("requested package can't be found in the repositories", 'L2');
+		return (0);
+	}
+}
 
 
 
