@@ -1019,7 +1019,7 @@ my %tuxedo_devices = (
 	'44' => {
 		model => ['all with Realtek RTL8125'],
 		board_name => [''],
-		fix => ['rtl8125dkms'],
+		fix => ['tuxedor8125dkms'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '10ec:8125',
 		cpu => '',
@@ -1741,7 +1741,7 @@ my %origConfModules = (
 	realtekr8125dkms => {
 	# deprecated since 20220215
 		name => 'realtek-r8125-dkms',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1927,7 +1927,7 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
-	r8125dkms => {
+	tuxedor8125dkms => {
 		name => 'tuxedo-r8125-dkms',
 		version => 2,
 		installed => 'no',
@@ -2604,8 +2604,8 @@ sub checkRequirements {
 
 	my @r8125Devices = ('10ec:8125');
 	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-		$origConfModules{r8125dkms}{required} = 'yes';
-		printLog('detected r8125dkms issue', 'L1');
+		$origConfModules{tuxedor8125dkms}{required} = 'yes';
+		printLog('detected tuxedor8125dkms issue', 'L1');
 	}
 
 	# if cardreader Realtek RTS522A found
@@ -5080,9 +5080,16 @@ sub earlyloadbacklightcontrolfix() {
 # Installs the newest driver for RTL8125 2.5GbE Controller
 # Solves some ethernet problems/hang/slow connection
 #
-sub r8125dkms() {
+sub tuxedor8125dkms() {
 	my $module = shift;
 	my $action = shift;
+
+	# ignore if FAI or LiveISO install
+	if ($FAI || $LiveISO) {
+		printLog("not installing $module in FAI or LiveISO", 'L0');
+		return (1);
+	}
+
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
