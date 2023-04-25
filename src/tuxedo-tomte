@@ -4610,6 +4610,7 @@ sub apportfix() {
 
 ###############################################################################
 # Removes Linux device driver if installed and in configuration list
+# package is obsolete !!!
 #
 sub realtekr8125dkms() {
 	my $module = shift;
@@ -4618,7 +4619,7 @@ sub realtekr8125dkms() {
 	if ($FAI || $LiveISO) {
 		return (1);
 	}
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!($FAI || $LiveISO))) {
 		printLog("package is obsolete", 'L1');
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "no";
@@ -5086,12 +5087,7 @@ sub tuxedor8125dkms() {
 	my $action = shift;
 
 	# ignore if FAI or LiveISO install
-	if ($FAI || $LiveISO) {
-		printLog("not installing $module in FAI or LiveISO", 'L0');
-		return (1);
-	}
-
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!($FAI || $LiveISO))) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
