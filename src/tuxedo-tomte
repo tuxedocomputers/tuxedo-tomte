@@ -3650,6 +3650,9 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
 	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
@@ -5087,6 +5090,9 @@ sub tuxedor8125dkms() {
 	my $action = shift;
 
 	# ignore if FAI or LiveISO install
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
 	if (($action eq 'install') && (!($FAI || $LiveISO))) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
@@ -5892,7 +5898,7 @@ sub isPackageInstalled {
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("searching for package: $package\nanswer: $retString", 'L2');
+	printLog("checking if $package is installed\nanswer: $retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
