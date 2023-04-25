@@ -2650,7 +2650,7 @@ sub checkRequirements {
 	}
 
 	# get vendor text from vendor ID:device ID
-	my @intelgenXIIIpowerctlfixDevices = ('2646:2263');
+	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
 	if ( findPciDevice($lspciOutput, @intelgenXIIIpowerctlfixDevices) ) {
 		$origConfModules{intelgenXIIIpowerctlfix}{required} = 'yes';
 		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1');
