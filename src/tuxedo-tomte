@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.7-3';
+our $VERSION = '2.8.7-6';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1105,7 +1105,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
+	'52' => {
+		model => ['all with kde-plasma >=5.25'],
+		board_name => [''],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
