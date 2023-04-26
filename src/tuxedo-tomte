@@ -2652,12 +2652,15 @@ sub checkRequirements {
 	# TODO check if this works and what happens if the package does not exist
 	# TODO debug
 	my $minKdePlasmaVersion = '5.25';
-	my $currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma-desktop`;
-	printLog("currentPlasmaVersion: $currentKdePlasmaVersion", 'L2');
-	my $versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
-	if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
-		$origConfModules{tuxedodgpurun}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+	my $currentKdePlasmaVersion = '';
+	$currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma-desktop`;
+	printLog("currentPlasmaVersion: >$currentKdePlasmaVersion<", 'L2');
+	if ($currentKdePlasmaVersion ne '') {
+		my $versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
+		if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
+			$origConfModules{tuxedodgpurun}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+		}
 	}
 }
 
