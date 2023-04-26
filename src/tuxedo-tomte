@@ -4131,7 +4131,7 @@ sub kerneltuxedo2204() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 22.1/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
