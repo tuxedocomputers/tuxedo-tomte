@@ -2649,7 +2649,6 @@ sub checkRequirements {
 		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1');
 	}
 
-	# TODO check if this works and what happens if the package does not exist
 	# TODO debug
 	my $minKdePlasmaVersion = '5.25';
 	my $currentKdePlasmaVersion = '';
@@ -2658,12 +2657,10 @@ sub checkRequirements {
 	printLog("currentPlasmaVersion: >$currentKdePlasmaVersion<", 'L2');
 	if ($currentKdePlasmaVersion ne '') {
 		$versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
-	} else {
-		$versionCompareResult = 1;
-	}
-	if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
-		$origConfModules{tuxedodgpurun}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+		if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
+			$origConfModules{tuxedodgpurun}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+		}
 	}
 }
 
