@@ -1106,7 +1106,7 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'52' => {
-		model => ['all with kde-plasma >=5.25'],
+		model => ['all with kde-plasma-dektop >=5.25'],
 		board_name => [''],
 		fix => [''],
 		flavour => ['22.04'],
@@ -2652,10 +2652,10 @@ sub checkRequirements {
 	# TODO check if this works and what happens if the package does not exist
 	# TODO debug
 	my $minKdePlasmaVersion = '5.25';
-	my $currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma`;
+	my $currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma-desktop`;
 	printLog("currentPlasmaVersion: $currentKdePlasmaVersion", 'L2');
-	if ( (version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion) == 1) ||
-		(version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion) == 0) ) {
+	my $versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
+	if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
 		$origConfModules{tuxedodgpurun}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
 	}
@@ -4273,7 +4273,7 @@ sub nvidiadriver() {
 			}
 
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4324,7 +4324,7 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4377,7 +4377,7 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
