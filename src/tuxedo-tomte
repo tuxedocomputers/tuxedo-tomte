@@ -2653,14 +2653,17 @@ sub checkRequirements {
 	# TODO debug
 	my $minKdePlasmaVersion = '5.25';
 	my $currentKdePlasmaVersion = '';
+	my $versionCompareResult;
 	$currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma-desktop`;
 	printLog("currentPlasmaVersion: >$currentKdePlasmaVersion<", 'L2');
 	if ($currentKdePlasmaVersion ne '') {
-		my $versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
-		if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
-			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
-		}
+		$versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
+	} else {
+		$versionCompareResult = 1;
+	}
+	if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
+		$origConfModules{tuxedodgpurun}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
 	}
 }
 
