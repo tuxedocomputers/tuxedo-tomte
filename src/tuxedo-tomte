@@ -224,6 +224,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"Linux Mint" => {
+		versions => {
+			"21.1" => {
+				name => 'vera',
+			},
+		},
+	},
 	"TUXEDO_OS Plasma" => {
 		versions => {
 			"20.04" => {
@@ -316,6 +323,13 @@ my %tuxedo_repos = (
 		name => 'focal',
 	},
 	"KDE neon 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
+	"Linux Mint 21.1" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
@@ -425,6 +439,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
+	"Linux Mint 21.1" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -464,7 +487,8 @@ my %tuxedo_mirrors = (
 );
 
 
-
+# add here the respective kernel meta-packages when a new release comes out
+#
 my %flavours = (
 	"18.04" => {
 		"linux-generic" => {
@@ -504,6 +528,23 @@ my %flavours = (
 		},
 	},
 	"22.04" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
+	},
+	"21.1" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -2305,7 +2346,11 @@ sub checkRequirements {
 	}
 
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Linux Mint 21.1/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
 		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", '2');
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
@@ -2547,7 +2592,11 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+		($completeDistVersion =~ /elementary OS 6.1/) ||
+		($completeDistVersion =~ /KDE neon 20.04/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 		if (($boardname =~ m/X170KM-G/) ||
 			($boardname =~ m/PHxTxX1/) ||
 			($boardname =~ m/PH4TQx1/) ||
@@ -2565,7 +2614,10 @@ sub checkRequirements {
 			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
@@ -3906,7 +3958,11 @@ sub kernelhwe2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -3946,7 +4002,11 @@ sub kerneltuxedo2004edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -3984,7 +4044,11 @@ sub kerneltuxedo2004next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -4023,7 +4087,11 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -4061,7 +4129,10 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 22.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -4100,7 +4171,10 @@ sub kerneltuxedo2204edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
@@ -4139,7 +4213,10 @@ sub kerneltuxedo2204next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
@@ -4250,7 +4327,11 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
+				($completeDistVersion =~ /elementary OS 6.1/) ||
+				($completeDistVersion =~ /KDE neon 20.04/) ||
+				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
@@ -4302,7 +4383,11 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+				($completeDistVersion =~ /KDE neon 22.04/) ||
+				($completeDistVersion =~ /Linux Mint 21.1/) ||
+				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
