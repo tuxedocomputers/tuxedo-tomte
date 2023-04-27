@@ -1,3 +1,24 @@
+tuxedo-tomte (2.8.8-1) UNRELEASED; urgency=medium
+
+  * added tuxedo-dgpu-run for systems with kde-plasma >= 5.25
+  * no restart for new module
+  * packing
+  * after packaging
+  * changed dgpu-run
+  * packing
+  * after packaging
+  * debug version_compare
+  * packing
+  * after packaging
+  * changed procedure check dgpu-run install
+  * changed behaviour no dgpu package found
+  * packing
+  * after packaging
+  * after packaging
+  * changed package to test against
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 11:26:22 +0200
+
 tuxedo-tomte (2.8.8) jammy; urgency=medium
 
   * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
