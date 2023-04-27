@@ -2521,8 +2521,14 @@ sub checkRequirements {
 	}
 
 	if ($boardname =~ m/NHxxRZQ/) {
-		$origConfModules{r8168dkms}{required} = 'yes';
-		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		my $kernelVersionWithR8169 = '6.1';
+		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
+			$origConfModules{r8168dkms}{required} = 'yes';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		} else {
+			$origConfModules{r8168dkms}{required} = 'no';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		}
 	}
 
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
