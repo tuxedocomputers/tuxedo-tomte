@@ -1,35 +1,10 @@
-tuxedo-tomte (2.8.7-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.8) jammy; urgency=medium
 
-  * packing
-  * after packaging
-  * packing
-  * after packaging
-  * changed module name and removed from FAI and LiveISO install
-  * packing
-  * after packaging
-  * version change
-  * packing
-  * after packaging
-  * some changes for debug
-  * packing
-  * after packaging
-  * after packaging
-  * after packaging
-  * changed response for r8125
-  * after packaging
-  * small changes in messages
-  * added tuxedo-dgpu-run for systems with kde-plasma >= 5.25
-  * no restart for new module
-  * after packaging
-  * after packaging
-  * changed dgpu-run
-  * after packaging
-  * debug version_compare
-  * after packaging
-  * changed procedure check dgpu-run install
-  * changed behaviour no dgpu package found
+  * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
+    installation
+  * added intel-gen13-powerctl-fix for Intel Gen13 devices
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Apr 2023 12:14:18 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 09:53:30 +0200
 
 tuxedo-tomte (2.8.7) jammy; urgency=medium
 
