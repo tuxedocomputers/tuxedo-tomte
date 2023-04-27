@@ -1126,6 +1126,7 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
 );
 
 
@@ -2675,25 +2676,26 @@ sub checkRequirements {
 		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1');
 	}
 
-	# TODO debug
-	my $minKdePlasmaVersion = '5.25';
-	my $currentKdePlasmaVersion = '';
-	my $versionCompareResult;
-	$currentKdePlasmaVersion = `dpkg-query  --showformat='\${Version}' --show kde-plasma-desktop`;
-	printLog("currentPlasmaVersion: >$currentKdePlasmaVersion<", 'L2');
-	if ($currentKdePlasmaVersion ne '') {
-		$versionCompareResult = version_compare($currentKdePlasmaVersion, $minKdePlasmaVersion);
-		if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
-			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
-		}
-	}
 
 	# get vendor text from vendor ID:device ID
 	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
 	if ( findPciDevice($lspciOutput, @intelgenXIIIpowerctlfixDevices) ) {
 		$origConfModules{intelgenXIIIpowerctlfix}{required} = 'yes';
 		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1');
+	}
+
+	# TODO debug
+	my $minKdePlasmaVersion = '5.25';
+	my $currentPlasmaDesktopVersion = '';
+	my $versionCompareResult;
+	$currentPlasmaDesktopVersion = `dpkg-query  --showformat='\${Version}' --show plasma-desktop`;
+	printLog("currentPlasmaVersion: >$currentPlasmaDesktopVersion<", 'L2');
+	if ($currentPlasmaDesktopVersion ne '') {
+		$versionCompareResult = version_compare($currentPlasmaDesktopVersion, $minKdePlasmaVersion);
+		if ( ($versionCompareResult == 1) || ($versionCompareResult == 0) ) {
+			$origConfModules{tuxedodgpurun}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+		}
 	}
 }
 
