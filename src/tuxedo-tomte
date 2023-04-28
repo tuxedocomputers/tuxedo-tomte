@@ -6078,7 +6078,7 @@ sub getPackageVersion {
 	$retString = `$cmd`;
 	my $retValue = $?/256;
 	printLog("version string for $package: $retString", 'L2');
-	$retValue =~ s/.*://;
+	$retString =~ s/.*://;
 	if ($retString ne '') {
 		printLog("package $package has version: $retString", 'L1');
 		return $retString;
