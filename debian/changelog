@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.8-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.8-4) UNRELEASED; urgency=medium
 
   * added tuxedo-dgpu-run for systems with kde-plasma >= 5.25
   * no restart for new module
@@ -20,8 +20,10 @@ tuxedo-tomte (2.8.8-3) UNRELEASED; urgency=medium
   * dgpu check logic changes
   * after packaging
   * created subroutine for version query and added variable to avoid desktop messages in the background
+  * after packaging
+  * removed debug
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Apr 2023 11:03:45 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Apr 2023 11:34:45 +0200
 
 tuxedo-tomte (2.8.8) jammy; urgency=medium
 
