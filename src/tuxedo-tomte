@@ -49,6 +49,7 @@ my $logLevel = 2;
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 $ENV{LC_MESSAGES} = 'C';
+$ENV{DEBIAN_FRONTEND} = 'noninteractive';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -2361,7 +2362,7 @@ sub checkRequirements {
 
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
 	if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
+		my $grubEfiAmd64SignedVersion = getPackageVersion('grub-efi-amd64-signed');
 		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2');
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
 			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
@@ -2688,10 +2689,11 @@ sub checkRequirements {
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaDesktopVersion = '';
 	my $versionCompareResult;
-	$currentPlasmaDesktopVersion = `dpkg-query  --showformat='\${Version}' --show plasma-desktop`;
+	$currentPlasmaDesktopVersion = getPackageVersion('plasma-desktop');
 	printLog("currentPlasmaVersion: >$currentPlasmaDesktopVersion<", 'L2');
 	if ($currentPlasmaDesktopVersion ne '') {
 		$versionCompareResult = version_compare($currentPlasmaDesktopVersion, $minPlasmaDesktopVersion);
+		printLog("VersioncompareResult: $versionCompareResult", 'L2');
 		unless ( $versionCompareResult == -1 ) {
 			$origConfModules{tuxedodgpurun}{required} = 'yes';
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
@@ -6065,6 +6067,29 @@ sub isPackageInstalled {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# returns the package version string or '0' if the return value from
+# dpkg-query was an empty string
+#
+sub getPackageVersion {
+	my $package = shift;
+	my $cmd = $consoleLanguage.'dpkg-query --showformat=\'${Version}\' --show '.$package.' 2>&1';
+	my $retString = '';
+	$retString = `$cmd`;
+	my $retValue = $?/256;
+	printLog("version string for $package: $retString", 'L2');
+	if ($retString ne '') {
+		printLog("package $package has version: $retString", 'L1');
+		return $retString;
+	} else {
+		printLog("package $package is probably not installed, can't get its version number", 'L1');
+		return (0);
+	}
+}
+
 
 
 
