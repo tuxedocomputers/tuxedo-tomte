@@ -2685,15 +2685,12 @@ sub checkRequirements {
 		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1');
 	}
 
-	# TODO debug
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaDesktopVersion = '';
 	my $versionCompareResult;
 	$currentPlasmaDesktopVersion = getPackageVersion('plasma-desktop');
-	printLog("currentPlasmaVersion: >$currentPlasmaDesktopVersion<", 'L2');
 	if ($currentPlasmaDesktopVersion ne '') {
 		$versionCompareResult = version_compare($currentPlasmaDesktopVersion, $minPlasmaDesktopVersion);
-		printLog("VersioncompareResult: $versionCompareResult", 'L2');
 		unless ( $versionCompareResult == -1 ) {
 			$origConfModules{tuxedodgpurun}{required} = 'yes';
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
@@ -6081,12 +6078,13 @@ sub getPackageVersion {
 	$retString = `$cmd`;
 	my $retValue = $?/256;
 	printLog("version string for $package: $retString", 'L2');
+	$retValue =~ s/.*://;
 	if ($retString ne '') {
 		printLog("package $package has version: $retString", 'L1');
 		return $retString;
 	} else {
 		printLog("package $package is probably not installed, can't get its version number", 'L1');
-		return (0);
+		return '';
 	}
 }
 
