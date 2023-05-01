@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.6';
+# do not edit manually as it will be overwritten while packaging
+our $VERSION = '2.8.7';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1186,6 +1187,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'51' => {
+		model => ['TUXEDO Stellaris 16 Gen5 Intel'],
+		board_name => ['GMxPXxx'],
+		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -2484,7 +2497,8 @@ sub checkRequirements {
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /PF5LUXG/) ||
 		($boardname =~ /PHxARX1_PHxAQF1/) ||
-		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/))
+		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
+		($boardname =~ /GMxPXxx/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog('detected tuxedo-touchpad-switch issue', 'L1');
@@ -2551,7 +2565,8 @@ sub checkRequirements {
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
-		($boardname =~ /LAPQC71B/)) {
+		($boardname =~ /LAPQC71B/) ||
+		($boardname =~ /GMxPXxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog('detected tuxedo-keyboard-ite issue', 'L1');
 	}
