@@ -6026,8 +6026,10 @@ sub removePackage {
 	#TODO debug
 	printLog("parameter: >$parameter<", 'L2');
 	if (undef($parameter)) {
+		printLog("parameter was undefined", 'L2');
 		$parameter = '';
 	}
+	printLog("command: apt-get -yq remove $parameter $packageName >/dev/null 2>&1", 'L2');
 	$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
 	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
