@@ -1,13 +1,16 @@
-tuxedo-tomte (2.8.7-3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.8-10) UNRELEASED; urgency=medium
 
-  * added tuxedo-keyboard-ite and tuxedo-touchpad-switch for TUXEDO Stellaris 16 Gen5 Intel with boardname GMxPXxx
-  * after packaging
   * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10 with boardname NHxxRZQ
-  * new version number for r8168dkms
-  * after packaging
-  * after packaging
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 25 Apr 2023 10:02:06 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 08 May 2023 11:07:00 +0200
+
+tuxedo-tomte (2.8.8) jammy; urgency=medium
+
+  * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
+    installation
+  * added intel-gen13-powerctl-fix for Intel Gen13 devices
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 09:53:30 +0200
 
 tuxedo-tomte (2.8.7) jammy; urgency=medium
 
