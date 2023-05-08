@@ -4560,7 +4560,7 @@ sub r8168dkms() {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage('')) {
-			removeDebianModule($module, 1);
+			removeDebianModule($module, 1, '--purge');
 		}
 	}
 }
@@ -5944,38 +5944,6 @@ sub deinstallPackage {
 
 
 
-###############################################################################
-# Deinstalls a package
-# returns 1 if the search for the packages failed or if the deinstallation was
-# unsuccessful
-# returns 0 if everything was ok, even if no package were found
-#
-sub deinstallSinglePackage {
-	my $deinst = shift;
-	my $aptgetDeinst = 'apt-get -yq remove';
-	my $retValue;
-
-	$aptgetDeinst .= " $deinst";
-	printLog("deinstalling: $deinst", 'L0');
-	$aptgetDeinst .= " >/dev/null 2>&1";
-	if (isPackageInstalled($deinst)) {
-		deactivatePackagekit();
-		if (system($aptgetDeinst)) {
-			$retValue = $?/256;
-			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
-			return (1);
-		} else {
-			printLog('deinstallation of package successful', 'L0');
-			return (0);
-		}
-	} else {
-		printLog("package $deinst was not found", 'L0');
-	}
-}
-
-
-
-
 
 ###############################################################################
 # Checks if the package is installed on the system
@@ -6051,11 +6019,16 @@ sub installPackage {
 # returns 0 if failed
 #
 sub removePackage {
-	my $packageName = shift;
+	my ($packageName, $parameter) = @_;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	deactivatePackagekit();
-	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
+	#TODO debug
+	printLog("parameter: >$parameter<", 'L2');
+	if (undef($parameter)) {
+		$parameter = '';
+	}
+	$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
 	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
@@ -6066,6 +6039,7 @@ sub removePackage {
 	}
 	return (1);
 }
+
 
 
 ###############################################################################
@@ -6529,9 +6503,9 @@ sub uninstallRemnantKernels {
 # checks if the package is installed
 #
 sub removeDebianModule {
-	my ($module, $restart) = (@_);
+	my ($module, $restart, $parameter) = (@_);
 	if (isPackageInstalled($origConfModules{$module}{name})) {
-		if (removePackage($origConfModules{$module}{name})) {
+		if (removePackage($origConfModules{$module}{name}, $parameter)) {
 			addToConfiguredModules($module, "removed");
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
