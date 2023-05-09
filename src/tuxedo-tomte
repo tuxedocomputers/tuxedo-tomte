@@ -1118,7 +1118,7 @@ my %tuxedo_devices = (
 	},
 	'53' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen8'],
-		board_name => ['PH4PRX1_PH6PRX1'],
+		board_name => ['PH4PRX1', 'PH6PRX1'],
 		fix => ['tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -2446,7 +2446,8 @@ sub checkRequirements {
 		($boardname =~ /PHxARX1_PHxAQF1/) ||
 		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
 		($boardname =~ /GMxPXxx/) ||
-		($boardname =~ /PH4PRX1_PH6PRX1/))
+		($boardname =~ /PH4PRX1/) ||
+		($boardname =~ /PH6PRX1/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
