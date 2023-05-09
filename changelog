@@ -1,18 +1,25 @@
-tuxedo-tomte (2.8.6-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.8-9) UNRELEASED; urgency=medium
 
-  * after packaging
-  * added tuxedo-keyboard-ite and tuxedo-touchpad-switch for TUXEDO Stellaris 16 Gen5 Intel with boardname GMxPXxx
-  * after packaging
-  * replacing Nvidia drivers with tuxedo-nvidia-driver-530
-  * after packaging
-  * after packaging
-  * after packaging
-  * added check for availability of new nvidia driver
-  * after packaging
-  * after packaging
-  * some regex for package name
+  * replacing Nvidia drivers with tuxedo-nvidia-driver-530 for systems with
+    jammy
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 18 Apr 2023 13:01:26 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 08 May 2023 13:01:26 +0200
+
+tuxedo-tomte (2.8.8) jammy; urgency=medium
+
+  * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
+    installation
+  * added intel-gen13-powerctl-fix for Intel Gen13 devices
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 09:53:30 +0200
+
+tuxedo-tomte (2.8.7) jammy; urgency=medium
+
+  * added tuxedo-keyboard-ite and tuxedo-touchpad-switch for
+    TUXEDO Stellaris 16 Gen5 Intel with boardname GMxPXxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 20 Apr 2023 07:52:20 +0200
+>>>>>>> current-release
 
 tuxedo-tomte (2.8.6) jammy; urgency=medium
 
