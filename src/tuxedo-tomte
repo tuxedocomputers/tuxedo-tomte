@@ -4545,6 +4545,9 @@ sub amdgpudkms() {
 sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
 	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
