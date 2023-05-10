@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.8-13';
+our $VERSION = '2.8.9';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -4227,16 +4227,17 @@ sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver;
-	my $packageMesaUtils;
-	my $packageNvidiaPrime;
-	my $packagePythonAppindicator;
-	my $packagePythonCairo;
-	my $packagePythonGtk2;
-	my $oldDriversRemoved;
+	my $packageNvidiaDriver = 0;
+	my $packageMesaUtils = 0;
+	my $packageNvidiaPrime = 0;
+	my $packagePythonAppindicator = 0;
+	my $packagePythonCairo = 0;
+	my $packagePythonGtk2 = 0;
+	my $oldDriversRemoved = 0;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
+	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -4352,19 +4353,28 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
-			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
+			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver530 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
+
+				# check if the package is already installed
+				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+				} else {
+					setAptMark($tuxedoNvidiaDriver530,'manual');
+					$packageNvidiaDriver = 1;
+				}
 			} else {
-				setAptMark($tuxedoNvidiaDriver525,'manual');
-				$packageNvidiaDriver = 1;
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver530  can't be found in the repositories", 'L0');
 			}
+
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
@@ -5946,6 +5956,26 @@ sub deinstallPackage {
 
 
 ###############################################################################
+# Checks if the package is in any of the repositories
+#
+sub isPackageInRepo {
+	my $package = shift;
+	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
+	chop($returnFromSearch);
+	$returnFromSearch =~ s/ .*//;
+	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
+	if ($package eq $returnFromSearch) {
+		return (1);
+		printLog("package found", 'L2');
+	} else {
+		printLog("requested package can't be found in the repositories", 'L2');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
 # Checks if the package is installed on the system
 # return 1 if yes
 # return 0 if no
@@ -6498,7 +6528,7 @@ sub uninstallRemnantKernels {
 
 ###############################################################################
 # removes a module containing a debian pakage
-# removeDebianModule(module, restart)
+# removeDebianModule(module, restart, parameters)
 # module is the short modulename
 # if restart = 0 => don't restart
 # if restart = 1 => restart
@@ -6506,8 +6536,10 @@ sub uninstallRemnantKernels {
 #
 sub removeDebianModule {
 	my ($module, $restart, $parameter) = (@_);
+	#TODO debug
+	printLog("removeDebianModule parameter: >$parameter<", 'L2');
 	if (isPackageInstalled($origConfModules{$module}{name})) {
-		if (removePackage($origConfModules{$module}{name}, $parameter)) {
+		if (removePackage($origConfModules{$module}{name}, "$parameter")) {
 			addToConfiguredModules($module, "removed");
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";

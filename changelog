@@ -1,13 +1,16 @@
-tuxedo-tomte (2.8.8-13) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-1) UNRELEASED; urgency=medium
 
-  * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10 with boardname NHxxRZQ
-  * added purge capability
-  * after packaging
-  * activated debug
-  * after packaging
-  * added debugs
+  * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
+    with boardname NHxxRZQ
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 08 May 2023 14:39:13 +0200
+
+tuxedo-tomte (2.8.9) jammy; urgency=medium
+
+  * replacing Nvidia drivers with tuxedo-nvidia-driver-530 for systems with
+    jammy
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 09 May 2023 14:00:31 +0200
 
 tuxedo-tomte (2.8.8) jammy; urgency=medium
 
@@ -120,7 +123,6 @@ tuxedo-tomte (2.7.5) jammy; urgency=medium
 
 tuxedo-tomte (2.7.4) jammy; urgency=medium
 
->>>>>>> regression-lock-packagemanager
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
   * reggression for 2.7.3
