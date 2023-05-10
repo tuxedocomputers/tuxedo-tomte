@@ -1,29 +1,30 @@
-tuxedo-tomte (2.8.7-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-5) UNRELEASED; urgency=medium
 
-  * packing
-  * after packaging
-  * packing
-  * after packaging
-  * changed module name and removed from FAI and LiveISO install
-  * packing
-  * after packaging
-  * version change
-  * packing
-  * after packaging
-  * some changes for debug
-  * packing
-  * after packaging
-  * after packaging
-  * after packaging
-  * changed response for r8125
-  * after packaging
-  * small changes in messages
-  * after packaging
+  * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
+    with boardname NHxxRZQ
+  * removed r8168 from FAI and LiveISO
   * added Linux Mint 21.1
-  * after packaging
-  * corrected small typo
 
  -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Apr 2023 16:59:02 +0200
+
+  * repaired FAI and dkms
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 May 2023 11:38:42 +0200
+
+tuxedo-tomte (2.8.9) jammy; urgency=medium
+
+  * replacing Nvidia drivers with tuxedo-nvidia-driver-530 for systems with
+    jammy
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 09 May 2023 14:00:31 +0200
+
+tuxedo-tomte (2.8.8) jammy; urgency=medium
+
+  * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
+    installation
+  * added intel-gen13-powerctl-fix for Intel Gen13 devices
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 09:53:30 +0200
 
 tuxedo-tomte (2.8.7) jammy; urgency=medium
 
@@ -128,7 +129,6 @@ tuxedo-tomte (2.7.5) jammy; urgency=medium
 
 tuxedo-tomte (2.7.4) jammy; urgency=medium
 
->>>>>>> regression-lock-packagemanager
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
   * reggression for 2.7.3
