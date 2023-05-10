@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.9-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-5) UNRELEASED; urgency=medium
 
   * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
     with boardname NHxxRZQ
@@ -7,8 +7,10 @@ tuxedo-tomte (2.8.9-4) UNRELEASED; urgency=medium
   * defined undef
   * after packaging
   * removed r8168 from FAI and LiveISO
+  * after packaging
+  * repaired FAI and dkms
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 May 2023 11:14:42 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 May 2023 11:38:42 +0200
 
 tuxedo-tomte (2.8.9) jammy; urgency=medium
 
