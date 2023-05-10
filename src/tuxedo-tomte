@@ -6055,7 +6055,7 @@ sub removePackage {
 	deactivatePackagekit();
 	#TODO debug
 	printLog("parameter: >$parameter<", 'L2');
-	if (undef($parameter)) {
+	if (!defined($parameter)) {
 		printLog("parameter was undefined", 'L2');
 		$parameter = '';
 	}
