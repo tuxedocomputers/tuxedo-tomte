@@ -1,32 +1,18 @@
-tuxedo-tomte (2.8.8-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-5) UNRELEASED; urgency=medium
 
   * added tuxedo-dgpu-run for systems with kde-plasma >= 5.25
-  * no restart for new module
-  * packing
-  * after packaging
-  * changed dgpu-run
-  * packing
-  * after packaging
-  * debug version_compare
-  * packing
-  * after packaging
-  * changed procedure check dgpu-run install
-  * changed behaviour no dgpu package found
-  * packing
-  * after packaging
-  * after packaging
-  * changed package to test against
-  * after packaging
-  * dgpu check logic changes
-  * after packaging
-  * created subroutine for version query and added variable to avoid desktop messages in the background
-  * after packaging
-  * removed debug
-  * after packaging
-  * wrong variable
-  * after packaging
+  * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
+    with boardname NHxxRZQ
+  * removed r8168 from FAI and LiveISO
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 28 Apr 2023 15:51:57 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 May 2023 11:38:42 +0200
+
+tuxedo-tomte (2.8.9) jammy; urgency=medium
+
+  * replacing Nvidia drivers with tuxedo-nvidia-driver-530 for systems with
+    jammy
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 09 May 2023 14:00:31 +0200
 
 tuxedo-tomte (2.8.8) jammy; urgency=medium
 
@@ -139,7 +125,6 @@ tuxedo-tomte (2.7.5) jammy; urgency=medium
 
 tuxedo-tomte (2.7.4) jammy; urgency=medium
 
->>>>>>> regression-lock-packagemanager
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
   * reggression for 2.7.3

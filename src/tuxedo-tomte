@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.8-6';
+our $VERSION = '2.8.9-5';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -592,7 +592,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms'],
+		fix => [''],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -1712,7 +1712,7 @@ my %origConfModules = (
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2473,18 +2473,21 @@ sub checkRequirements {
 			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HP/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HR/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
 			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HP,HR,HQ/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
@@ -2575,18 +2578,27 @@ sub checkRequirements {
 	}
 
 	if ($boardname =~ m/NHxxRZQ/) {
-		$origConfModules{r8168dkms}{required} = 'yes';
-		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		my $kernelVersionWithR8169 = '6.1';
+		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
+			$origConfModules{r8168dkms}{required} = 'yes';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		} else {
+			$origConfModules{r8168dkms}{required} = 'no';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		}
 	}
+
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
 	}
+
 	if (isPackageInstalled('apport')) {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
 	}
+
 	if (($boardname =~ m/GMxNGxx/) ||
 		($boardname =~ m/GMxZGxx/)) {
 		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
@@ -2595,6 +2607,7 @@ sub checkRequirements {
 			printLog("detected $origConfModules{amdgpubacklightauxoff}{name} issue", 'L1');
 		}
 	}
+
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
 		($boardname =~ m/PHxTQx1/)) {
@@ -4256,16 +4269,17 @@ sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver;
-	my $packageMesaUtils;
-	my $packageNvidiaPrime;
-	my $packagePythonAppindicator;
-	my $packagePythonCairo;
-	my $packagePythonGtk2;
-	my $oldDriversRemoved;
+	my $packageNvidiaDriver = 0;
+	my $packageMesaUtils = 0;
+	my $packageNvidiaPrime = 0;
+	my $packagePythonAppindicator = 0;
+	my $packagePythonCairo = 0;
+	my $packagePythonGtk2 = 0;
+	my $oldDriversRemoved = 0;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
+	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -4381,19 +4395,28 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
-			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
+			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver530 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
+
+				# check if the package is already installed
+				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+				} else {
+					setAptMark($tuxedoNvidiaDriver530,'manual');
+					$packageNvidiaDriver = 1;
+				}
 			} else {
-				setAptMark($tuxedoNvidiaDriver525,'manual');
-				$packageNvidiaDriver = 1;
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver530  can't be found in the repositories", 'L0');
 			}
+
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
@@ -4564,7 +4587,10 @@ sub amdgpudkms() {
 sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
+	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
@@ -4589,7 +4615,7 @@ sub r8168dkms() {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage('')) {
-			removeDebianModule($module, 1);
+			removeDebianModule($module, 1, '--purge');
 		}
 	}
 }
@@ -6012,36 +6038,24 @@ sub deinstallPackage {
 
 
 
-###############################################################################
-# Deinstalls a package
-# returns 1 if the search for the packages failed or if the deinstallation was
-# unsuccessful
-# returns 0 if everything was ok, even if no package were found
-#
-sub deinstallSinglePackage {
-	my $deinst = shift;
-	my $aptgetDeinst = 'apt-get -yq remove';
-	my $retValue;
 
-	$aptgetDeinst .= " $deinst";
-	printLog("deinstalling: $deinst", 'L0');
-	$aptgetDeinst .= " >/dev/null 2>&1";
-	if (isPackageInstalled($deinst)) {
-		deactivatePackagekit();
-		if (system($aptgetDeinst)) {
-			$retValue = $?/256;
-			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
-			return (1);
-		} else {
-			printLog('deinstallation of package successful', 'L0');
-			return (0);
-		}
+###############################################################################
+# Checks if the package is in any of the repositories
+#
+sub isPackageInRepo {
+	my $package = shift;
+	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
+	chop($returnFromSearch);
+	$returnFromSearch =~ s/ .*//;
+	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
+	if ($package eq $returnFromSearch) {
+		return (1);
+		printLog("package found", 'L2');
 	} else {
-		printLog("package $deinst was not found", 'L0');
+		printLog("requested package can't be found in the repositories", 'L2');
+		return (0);
 	}
 }
-
-
 
 
 
@@ -6143,11 +6157,16 @@ sub installPackage {
 # returns 0 if failed
 #
 sub removePackage {
-	my $packageName = shift;
+	my ($packageName, $parameter) = @_;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	deactivatePackagekit();
-	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
+	if (!defined($parameter)) {
+		printLog("parameter was undefined", 'L2');
+		$parameter = '';
+	}
+	printLog("command: apt-get -yq remove $parameter $packageName >/dev/null 2>&1", 'L2');
+	$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
 	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
@@ -6158,6 +6177,7 @@ sub removePackage {
 	}
 	return (1);
 }
+
 
 
 ###############################################################################
@@ -6614,16 +6634,16 @@ sub uninstallRemnantKernels {
 
 ###############################################################################
 # removes a module containing a debian pakage
-# removeDebianModule(module, restart)
+# removeDebianModule(module, restart, parameters)
 # module is the short modulename
 # if restart = 0 => don't restart
 # if restart = 1 => restart
 # checks if the package is installed
 #
 sub removeDebianModule {
-	my ($module, $restart) = (@_);
+	my ($module, $restart, $parameter) = (@_);
 	if (isPackageInstalled($origConfModules{$module}{name})) {
-		if (removePackage($origConfModules{$module}{name})) {
+		if (removePackage($origConfModules{$module}{name}, "$parameter")) {
 			addToConfiguredModules($module, "removed");
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
