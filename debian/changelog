@@ -1,12 +1,14 @@
-tuxedo-tomte (2.8.9-6) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-7) UNRELEASED; urgency=medium
 
   * added tuxedo-dgpu-run for systems with kde-plasma >= 5.25
   * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
     with boardname NHxxRZQ
   * removed r8168 from FAI and LiveISO
   * UNRELEASED
+  * after packaging
+  * changed check to kwin-common
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 11 May 2023 08:56:21 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 11 May 2023 12:36:38 +0200
 
 tuxedo-tomte (2.8.9) jammy; urgency=medium
 
