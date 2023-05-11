@@ -2699,11 +2699,11 @@ sub checkRequirements {
 	}
 
 	my $minPlasmaDesktopVersion = '5.25';
-	my $currentKwinCommonVersion = '';
+	my $currentPlasmaWorkspaceVersion = '';
 	my $versionCompareResult;
-	$currentKwinCommonVersion = getPackageVersion('kwin-common');
-	if ($currentKwinCommonVersion ne '') {
-		$versionCompareResult = version_compare($currentKwinCommonVersion, $minPlasmaDesktopVersion);
+	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+	if ($currentPlasmaWorkspaceVersion ne '') {
+		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
 		unless ( $versionCompareResult == -1 ) {
 			$origConfModules{tuxedodgpurun}{required} = 'yes';
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
