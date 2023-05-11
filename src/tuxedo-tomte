@@ -1118,7 +1118,7 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'53' => {
-		model => ['all with kde-plasma-dektop >=5.25'],
+		model => ['all with kde-plasma-desktop >=5.25'],
 		board_name => [''],
 		fix => [''],
 		flavour => ['22.04'],
@@ -2699,17 +2699,17 @@ sub checkRequirements {
 	}
 
 	my $minPlasmaDesktopVersion = '5.25';
-	my $currentPlasmaDesktopVersion = '';
+	my $currentKwinCommonVersion = '';
 	my $versionCompareResult;
-	$currentPlasmaDesktopVersion = getPackageVersion('plasma-desktop');
-	if ($currentPlasmaDesktopVersion ne '') {
-		$versionCompareResult = version_compare($currentPlasmaDesktopVersion, $minPlasmaDesktopVersion);
+	$currentKwinCommonVersion = getPackageVersion('kwin-common');
+	if ($currentKwinCommonVersion ne '') {
+		$versionCompareResult = version_compare($currentKwinCommonVersion, $minPlasmaDesktopVersion);
 		unless ( $versionCompareResult == -1 ) {
 			$origConfModules{tuxedodgpurun}{required} = 'yes';
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
 		}
 	} else {
-		printLog("plasma-desktop version could not be determined", 'L2');
+		printLog("kwin-common version could not be determined", 'L2');
 	}
 }
 
