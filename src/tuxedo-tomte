@@ -2761,7 +2761,7 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
 		}
 	} else {
-		printLog("kwin-common version could not be determined", 'L2');
+		printLog("plasma-workspace version could not be determined", 'L2');
 	}
 }
 
@@ -6180,7 +6180,7 @@ sub getPackageVersion {
 	my $retString = '';
 	$retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("version string for $package: $retString", 'L2');
+	printLog("version string for $package: $retString retValue: $retValue", 'L2');
 	$retString =~ s/.*://;
 	if ($retString ne '') {
 		printLog("package $package has version: $retString", 'L1');
