@@ -9378,7 +9378,7 @@ if (($startLaterAgain == 0) &&
 
 END {
 	#TODO debug
-	print "END:\n";
+	printLog("END:", 'TL2');
 
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
