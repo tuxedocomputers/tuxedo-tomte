@@ -1188,6 +1188,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		postconf => 'updateGrub',
@@ -1205,6 +1206,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
@@ -1222,6 +1224,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
 		postconf => 'updateGrub',
@@ -1239,6 +1242,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
 		postconf => '',
@@ -1256,6 +1260,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'TUXEDO Control Center Application',
 		postconf => '',
@@ -1273,6 +1278,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Keyboard & keyboard backlight driver for TUXEDO notebooks',
 		postconf => '',
@@ -1291,6 +1297,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 5,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem',
 		postconf => 'updateGrub',
@@ -1308,6 +1315,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight issues for DX1708, GTX1060 with AUO Model 12701 and 21229 displays',
 		postconf => 'updateGrub',
@@ -1325,6 +1333,7 @@ my %origConfModules = (
 		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Prerequisite! Adds the TUXEDO repositories',
 		postconf => '',
@@ -1342,6 +1351,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Adds TUXEDO maintained Ubuntu repositories',
 		postconf => '',
@@ -1359,6 +1369,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'ACPI mod for accurate cores recognition',
 		postconf => 'updateInitramfs',
@@ -1376,6 +1387,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Configuration needed to operate Huawei-ME936',
 		postconf => '',
@@ -1393,6 +1405,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Configuration needed to operate Huawei-ME906s',
 		postconf => '',
@@ -1411,6 +1424,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes non working Elantech touchpad',
 		postconf => 'updateGrub',
@@ -1428,6 +1442,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks',
 		postconf => '',
@@ -1445,6 +1460,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Removes sleep bug on Kingston A2000 NVME devices by updating the firmware',
 		postconf => '',
@@ -1462,6 +1478,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Keyboard back-light driver for ITE devices',
 		postconf => '',
@@ -1479,6 +1496,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Packages needed for fingerprint reader to work on certain TUXEDO notebooks',
 		postconf => '',
@@ -1496,6 +1514,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'The Mesa 3D Graphics Library',
 		postconf => '',
@@ -1513,6 +1532,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Systemd service which rescans for missing audio devices',
 		postconf => '',
@@ -1530,6 +1550,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-edge',
 		postconf => '',
@@ -1547,6 +1568,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04-edge',
 		postconf => '',
@@ -1564,6 +1586,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-next',
 		postconf => '',
@@ -1581,6 +1604,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
 		postconf => '',
@@ -1598,6 +1622,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-generic-hwe-20.04',
 		postconf => '',
@@ -1615,6 +1640,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-generic-hwe-20.04-edge',
 		postconf => '',
@@ -1632,6 +1658,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04',
 		postconf => '',
@@ -1649,6 +1676,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04-next',
 		postconf => '',
@@ -1666,6 +1694,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required Nvidia drivers',
 		postconf => '',
@@ -1683,6 +1712,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Builds password dictionary databases',
 		postconf => '',
@@ -1701,6 +1731,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 3,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Enables AMD GPU and display to share configuration information',
 		postconf => '',
@@ -1718,6 +1749,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Linux device driver for several Realtek Ethernet controllers',
 		postconf => '',
@@ -1735,6 +1767,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Workaround to control OLED display brightness using dbus and xrandr',
 		postconf => '',
@@ -1752,6 +1785,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Workaround for undefined problems with apport',
 		postconf => '',
@@ -1770,6 +1804,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Linux device driver for several Realtek Ethernet controllers [obsolete]',
 		postconf => '',
@@ -1787,6 +1822,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight control',
 		postconf => 'updateGrub',
@@ -1804,6 +1840,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes screen flickering when using some input devices',
 		postconf => 'updateGrub',
@@ -1821,6 +1858,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 3,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Provides better battery life',
 		postconf => 'updateGrub',
@@ -1838,6 +1876,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes unresponsive touchpad',
 		postconf => '',
@@ -1855,6 +1894,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Kernel audio module which fixes different issues with audio output',
 		postconf => '',
@@ -1872,6 +1912,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Solves kernel takes too long at loading thundebolt module at boot',
 		postconf => '',
@@ -1890,6 +1931,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for touchpad related issues',
 		postconf => 'updateGrub',
@@ -1907,6 +1949,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes lightdm starting before windowmanager',
 		postconf => '',
@@ -1924,6 +1967,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight control for Nvidia GPUs',
 		postconf => 'updateGrub',
@@ -1941,6 +1985,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'For backlight control working with Nvidia, the i915 needs to be loaded earlier',
 		postconf => 'updateGrub',
@@ -1958,6 +2003,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug',
 		postconf => '',
@@ -1975,6 +2021,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
 		postconf => '',
@@ -1992,6 +2039,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'fix for Samsung NVMe wake up from sleep',
 		postconf => '',
@@ -2009,6 +2057,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'sets power control to \'auto\' on PCI USB controller on Intel Gen13 devices',
 		postconf => '',
@@ -2026,6 +2075,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'commandline tool and KDE context menu entries to run programms on dGPU while in on-demand mode',
 		postconf => '',
@@ -7735,6 +7785,95 @@ sub listStatus {
 
 
 
+###############################################################################
+# print status from all modules in a nice formated output
+# uses the data from the local configuration file if available
+# else it checks the hardware
+#
+# used pattern:
+# installed and new module version equal (no update)
+# installed req. old    req. new    notes
+# no        no          no          ign
+# yes       no          no          installed but not required!
+# no        yes         no          ign
+# yes       yes         no          ign
+# no        no          yes         ign
+# yes       no          yes         ign
+# no        yes         yes         not inst. but required
+# yes       yes         yes         inst. and req.
+#
+# installed and new module version not equal (update?)
+# to be done in next version
+#
+sub listVersions {
+	my @arr = ( ['Name', 'Packageversion', 'Version', 'Installed', 'Blocked', 'Required'] );
+	my $module;
+	my $noneRequired = 1;
+	my $printIt = 0;
+	my $upgradeAvailable = '';
+
+	foreach $module (sort keys %localConfModules) {
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
+		}
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+			($origConfModules{$module}{package} eq 'yes')) {
+			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
+			if ($localConfModules{$module}{packageVersion} == '') {
+				$localConfModules{$module}{packageVersion} = 'unkwn';
+			}
+		}
+
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
+			# module is installed but should not be
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{packageVersion}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}"]);
+		}
+		# required, installed and not removed
+		if (($localConfModules{$module}{required} eq 'yes') ||  ($localConfModules{$module}{required} eq 'prerequisite')) {
+			$noneRequired = 0;
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{packageVersion}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}$upgradeAvailable"]);
+		}
+	}
+	if ($printIt) {
+		print "Selected installation mode: $mode\n";
+		print "Only showing fixes that are available for this hardware\n";
+		for my $row (@arr) {
+			format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
+			@$row
+.
+			write;
+		}
+	}
+	if (-e $needsRestartFile) {
+		print "Some fixes need a system restart to be effective\n";
+	}
+	if ($noneRequired) {
+		print "No fixes available for this system\n";
+	}
+}
+
+
+
+
 sub listStatusJson {
 	my $module;
 	my $upgradeAvailable = '';
@@ -9048,6 +9187,15 @@ if (@ARGV != 0) {
 			prepareValues();
 		}
 		listStatus();
+
+	} elsif ($argValue{command} eq "versions") {
+		checkMode();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+		} else {
+			prepareValues();
+		}
+		listVersions();
 
 	# modules
 	} elsif ($argValue{command} eq "modules") {
