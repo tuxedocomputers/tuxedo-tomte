@@ -1118,7 +1118,7 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'53' => {
-		model => ['all with kde-plasma-desktop >=5.25'],
+		model => ['all with plasma-workspace >=5.25'],
 		board_name => [''],
 		fix => [''],
 		flavour => ['22.04'],
