@@ -7829,7 +7829,7 @@ sub listVersions {
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($origConfModules{$module}{package} eq 'yes')) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
-			if ($localConfModules{$module}{packageVersion} == '') {
+			if ($localConfModules{$module}{packageVersion} eq '') {
 				$localConfModules{$module}{packageVersion} = 'unkwn';
 			}
 		}
