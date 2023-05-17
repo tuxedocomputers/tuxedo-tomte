@@ -21,6 +21,7 @@ our $VERSION = '2.8.9-11';
 use strict qw(vars subs);
 use warnings;
 use 5.010;
+no warnings qw/redefine/;	# for redefinition of 'format STDOUT ='
 
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
