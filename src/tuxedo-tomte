@@ -7820,7 +7820,10 @@ sub listVersions {
 			$upgradeAvailable = '';
 		}
 		$localConfModules{$module}{packageVersion} = '';
-		if (($module eq 'nvidiadriver') || ($module =~ /kernel.*/ )) {
+		if ($module eq 'nvidiadriver') {
+			$localConfModules{$module}{packageVersion} = getPackageVersion('nvidia-driver-*');
+		}
+		if ($module =~ /kernel.*/ ) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
