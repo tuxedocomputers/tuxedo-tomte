@@ -21,7 +21,6 @@ our $VERSION = '2.8.9-17';
 use strict qw(vars subs);
 use warnings;
 use 5.010;
-no warnings qw/redefine/;	# for redefinition of 'format STDOUT ='
 
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
@@ -7767,8 +7766,9 @@ sub listStatus {
 	if ($printIt) {
 		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTSTATI";
 		for my $row (@arr) {
-			format STDOUT =
+			format LISTSTATI =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
@@ -7819,6 +7819,7 @@ sub listVersions {
 		} else {
 			$upgradeAvailable = '';
 		}
+		$localConfModules{$module}{packageVersion} = '';
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($origConfModules{$module}{package} eq 'yes')) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
@@ -7856,9 +7857,10 @@ sub listVersions {
 	if ($printIt) {
 		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTVERSIONS";
 		for my $row (@arr) {
-			format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
+			format LISTVERSIONS =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
 			write;
