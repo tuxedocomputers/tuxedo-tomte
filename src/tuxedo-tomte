@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.9-15';
+our $VERSION = '2.8.9-22';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -5516,7 +5516,7 @@ sub intelgenXIIIpowerctlfix() {
 	my $retval1;
 	my $fileName1 = '/etc/udev/rules.d/99-intel-rpl-powerctl.rules';
 	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -7862,8 +7862,9 @@ sub listStatus {
 	if ($printIt) {
 		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTSTATI";
 		for my $row (@arr) {
-			format STDOUT =
+			format LISTSTATI =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
@@ -7880,6 +7881,7 @@ sub listStatus {
 
 
 
+
 ###############################################################################
 # print status from all modules in a nice formated output
 # uses the data from the local configuration file if available
@@ -7887,15 +7889,15 @@ sub listStatus {
 #
 # used pattern:
 # installed and new module version equal (no update)
-# installed	req. old	req. new	notes
-# no		no			no			ign
-# yes		no			no			installed but not required!
-# no		yes			no			ign
-# yes		yes			no			ign
-# no		no			yes			ign
-# yes		no			yes			ign
-# no		yes			yes			not inst. but required
-# yes		yes			yes			inst. and req.
+# installed req. old    req. new    notes
+# no        no          no          ign
+# yes       no          no          installed but not required!
+# no        yes         no          ign
+# yes       yes         no          ign
+# no        no          yes         ign
+# yes       no          yes         ign
+# no        yes         yes         not inst. but required
+# yes       yes         yes         inst. and req.
 #
 # installed and new module version not equal (update?)
 # to be done in next version
@@ -7913,10 +7915,17 @@ sub listVersions {
 		} else {
 			$upgradeAvailable = '';
 		}
+		$localConfModules{$module}{packageVersion} = '';
+		if ($module eq 'nvidiadriver') {
+			$localConfModules{$module}{packageVersion} = getPackageVersion('nvidia-driver-*');
+		}
+		if ($module =~ /kernel.*/ ) {
+			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
+		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($origConfModules{$module}{package} eq 'yes')) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
-			if ($localConfModules{$module}{packageVersion} == '') {
+			if ($localConfModules{$module}{packageVersion} eq '') {
 				$localConfModules{$module}{packageVersion} = 'unkwn';
 			}
 		}
@@ -7935,7 +7944,7 @@ sub listVersions {
 				"$localConfModules{$module}{required}"]);
 		}
 		# required, installed and not removed
-		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
+		if (($localConfModules{$module}{required} eq 'yes') ||  ($localConfModules{$module}{required} eq 'prerequisite')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
@@ -7950,9 +7959,10 @@ sub listVersions {
 	if ($printIt) {
 		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTVERSIONS";
 		for my $row (@arr) {
-			format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
+			format LISTVERSIONS =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
 			write;
@@ -7965,8 +7975,6 @@ sub listVersions {
 		print "No fixes available for this system\n";
 	}
 }
-
-
 
 
 
@@ -9231,7 +9239,7 @@ sub tuxedoDevice {
 # MAIN PROGRAM
 
 if (!tuxedoDevice()) {
-	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake\n';
+	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
 	exit (0);
 }
 
