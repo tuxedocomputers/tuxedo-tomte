@@ -1,11 +1,14 @@
-tuxedo-tomte (2.8.9-11) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.9-16) UNRELEASED; urgency=medium
 
   * added tuxedo-dgpu-run for systems with KDE Plasma >= 5.25
   * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
     with boardname NHxxRZQ
   * removed installation of r8168-dkms from FAI and LiveISO
+  * after packaging
+  * changed some description
+  * added additional device for samsungnvmefix
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 16 May 2023 08:44:30 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 May 2023 09:14:43 +0200
 
 tuxedo-tomte (2.8.9) jammy; urgency=medium
 
