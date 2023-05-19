@@ -9138,10 +9138,24 @@ sub tuxedoDevice {
 
 ###############################################################################
 # checks if this is a notebook
+# returns 1 if notebook or laptop was detected
+# returns 0 if no notebook or laptop was detected
+# returns 2 if there was an error
 #
-sub tuxedoDevice {
-	`dmidecode | grep -i "type: notebook"`;
-	`dmidecode | grep -i "type: laptop"`;
+sub isNotebook {
+	my $dmiOutput = '';
+	$dmiOutput = `dmidecode`;
+	if ($? == 0) {
+		if ($dmiOutput =~ /type: notebook/i) {
+			exit (0);
+		}
+		if ($dmiOutput =~ /type: laptop/i) {
+			exit (0);
+		}
+	} else {
+		exit (2);
+	}
+	exit (0);
 }
 
 
@@ -9154,8 +9168,13 @@ sub tuxedoDevice {
 ###############################################################################
 # MAIN PROGRAM
 
-if (isNotebook()) {
+if (isNotebook() == 1) {
 	print "Seems like this is a notebook ...\n";
+} elsif (isNotebook() == 0) {
+	print "Seems like this is a desktop computer\n";
+} else {
+	print "Something went wrong and I could not determine what this is ...\n";
+	exit (0);
 }
 
 if (!tuxedoDevice()) {
