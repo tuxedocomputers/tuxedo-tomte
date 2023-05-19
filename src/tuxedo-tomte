@@ -9136,6 +9136,16 @@ sub tuxedoDevice {
 
 
 
+###############################################################################
+# checks if this is a notebook
+#
+sub tuxedoDevice {
+	`dmidecode | grep -i "type: notebook"`;
+	`dmidecode | grep -i "type: laptop"`;
+}
+
+
+
 
 
 ###############################################################################
@@ -9143,6 +9153,10 @@ sub tuxedoDevice {
 ###############################################################################
 ###############################################################################
 # MAIN PROGRAM
+
+if (isNotebook()) {
+	print "Seems like this is a notebook ...\n";
+}
 
 if (!tuxedoDevice()) {
 	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
