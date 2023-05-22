@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.9-23';
+our $VERSION = '2.8.9-32';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -91,6 +91,7 @@ my %modeFile = (
 
 my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
+my $chassisType = 0;
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
@@ -1162,6 +1163,17 @@ my %tuxedo_devices = (
 		model => ['all with plasma-workspace >=5.25'],
 		board_name => [''],
 		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'54' => {
+		model => ['TUXEDO InfinityBook Pro 14 Gen8'],
+		board_name => ['PH4PRX1_PH6PRX1'],
+		fix => ['tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2556,7 +2568,8 @@ sub checkRequirements {
 		($boardname =~ /PF5LUXG/) ||
 		($boardname =~ /PHxARX1_PHxAQF1/) ||
 		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
-		($boardname =~ /GMxPXxx/))
+		($boardname =~ /GMxPXxx/) ||
+		($boardname =~ /PH4PRX1_PH6PRX1/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
@@ -9230,6 +9243,36 @@ sub tuxedoDevice {
 
 
 
+###############################################################################
+# checks if this is a notebook
+# returns 1 if notebook or laptop was detected
+# returns 0 if a desktop pc was detected
+# returns 2 if there was an error or nothing was detected
+#
+sub getChassisType {
+	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $chassisType;
+	my $FH;
+	if ((-e $fileName) && open($FH, "<", $fileName)) {
+		$chassisType = <$FH>;
+		$chassisType =~ s/\n//g;
+	}
+	if ($chassisType eq '3') { return (2); }
+	if ($chassisType eq '4') { return (2); }
+	if ($chassisType eq '6') { return (2); }
+	if ($chassisType eq '7') { return (2); }
+	if ($chassisType eq '8') { return (1); }
+	if ($chassisType eq '9') { return (1); }
+	if ($chassisType eq '10') { return (1); }
+	if ($chassisType eq '17') { return (2); }
+	if ($chassisType eq '34') { return (2); }
+	if ($chassisType eq '35') { return (2); }
+	if ($chassisType eq '36') { return (2); }
+	return (0);
+}
+
+
+
 
 
 ###############################################################################
@@ -9237,6 +9280,12 @@ sub tuxedoDevice {
 ###############################################################################
 ###############################################################################
 # MAIN PROGRAM
+
+$chassisType = getChassisType();
+if ($chassisType == 2) {
+	print "Something went wrong and I could not determine what type of system this might be ...\n";
+	exit (0);
+}
 
 if (!tuxedoDevice()) {
 	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
