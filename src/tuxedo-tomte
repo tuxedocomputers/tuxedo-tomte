@@ -9188,13 +9188,8 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
-#TODO debug
-if ($chassisType == 1) {
-	print "Seems like this is a notebook ...\n";
-} elsif ($chassisType == 0) {
-	print "Seems like this is a desktop computer\n";
-} else {
-	print "Something went wrong and I could not determine what this is ...\n";
+if ($chassisType == 2) {
+	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
 }
 
