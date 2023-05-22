@@ -9152,26 +9152,38 @@ sub tuxedoDevice {
 ###############################################################################
 # checks if this is a notebook
 # returns 1 if notebook or laptop was detected
-# returns 0 if no notebook or laptop was detected
-# returns 2 if there was an error
+# returns 0 if a desktop pc was detected
+# returns 2 if there was an error or nothing was detected
 #
 sub getChassisType {
-	my $dmiOutput = `dmidecode`;
+	my $dmiOutput = '';
+	my $dmiLine;
+	my $inChassisInfoBlock = 0;
+	$dmiOutput = `dmidecode`;
 	my @dmiOutputArray = split "\n", $dmiOutput;
-	foreach (@dmiOutputArray) {
-		
-	}
-	if ($? == 0) {
-		if ($dmiOutput =~ /type: notebook/i) {
-			exit (0);
+	foreach $dmiLine (@dmiOutputArray) {
+		if ($dmiLine =~ /^Chassis Information/i) {
+			$inChassisInfoBlock = 1;
+			next;
 		}
-		if ($dmiOutput =~ /type: laptop/i) {
-			exit (0);
+		#TODO debug
+		if ($inChassisInfoBlock) {
+			if ($dmiLine =~ /^\s.+\w/) {
+				if ($dmiLine =~ /type: (notebook|laptop)/i) {
+					print "notebook detected!!\n";
+					exit (1);
+				}
+				if ($dmiLine =~ /type: (desktop|low profile desktop|mini tower|tower|main server chassis|embedded pc|mini pc|stick pc)/i) {
+					print "desktop detected!!\n";
+					exit (0);
+				}
+			} else {
+				$inChassisInfoBlock = 0;
+				exit (2);
+			}
 		}
-	} else {
-		exit (2);
 	}
-	exit (0);
+	exit (2);
 }
 
 
