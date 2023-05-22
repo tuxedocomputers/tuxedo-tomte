@@ -9157,22 +9157,24 @@ sub tuxedoDevice {
 #
 sub getChassisType {
 	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $chassisType;
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
 		$chassisType = <$FH>;
+		$chassisType =~ s/\n//g;
 	}
-	$dmiOutput = `dmidecode -s chassis-type`;
-	#TODO debug
-	if ($dmiOutput =~ /(notebook|laptop)/i) {
-		print "notebook detected!!\n";
-		exit (1);
-	}
-	if ($dmiOutput =~ /(desktop|low profile desktop|mini tower|tower|main server chassis|embedded pc|mini pc|stick pc)/i) {
-		print "desktop detected!!\n";
-		exit (0);
-	}
-	print "no chassis detected\n";
-	exit (2);
+	if ($chassisType eq '3') { return (2); }
+	if ($chassisType eq '4') { return (2); }
+	if ($chassisType eq '6') { return (2); }
+	if ($chassisType eq '7') { return (2); }
+	if ($chassisType eq '8') { return (1); }
+	if ($chassisType eq '9') { return (1); }
+	if ($chassisType eq '10') { return (1); }
+	if ($chassisType eq '17') { return (2); }
+	if ($chassisType eq '34') { return (2); }
+	if ($chassisType eq '35') { return (2); }
+	if ($chassisType eq '36') { return (2); }
+	return (0);
 }
 
 
@@ -9186,6 +9188,7 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
+#TODO debug
 if ($chassisType == 1) {
 	print "Seems like this is a notebook ...\n";
 } elsif ($chassisType == 0) {
