@@ -9156,33 +9156,22 @@ sub tuxedoDevice {
 # returns 2 if there was an error or nothing was detected
 #
 sub getChassisType {
-	my $dmiOutput = '';
-	my $dmiLine;
-	my $inChassisInfoBlock = 0;
-	$dmiOutput = `dmidecode`;
-	my @dmiOutputArray = split "\n", $dmiOutput;
-	foreach $dmiLine (@dmiOutputArray) {
-		if ($dmiLine =~ /^Chassis Information/i) {
-			$inChassisInfoBlock = 1;
-			next;
-		}
-		#TODO debug
-		if ($inChassisInfoBlock) {
-			if ($dmiLine =~ /^\s.+\w/) {
-				if ($dmiLine =~ /type: (notebook|laptop)/i) {
-					print "notebook detected!!\n";
-					exit (1);
-				}
-				if ($dmiLine =~ /type: (desktop|low profile desktop|mini tower|tower|main server chassis|embedded pc|mini pc|stick pc)/i) {
-					print "desktop detected!!\n";
-					exit (0);
-				}
-			} else {
-				$inChassisInfoBlock = 0;
-				exit (2);
-			}
-		}
+	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $FH;
+	if ((-e $fileName) && open($FH, "<", $fileName)) {
+		$chassisType = <$FH>;
 	}
+	$dmiOutput = `dmidecode -s chassis-type`;
+	#TODO debug
+	if ($dmiOutput =~ /(notebook|laptop)/i) {
+		print "notebook detected!!\n";
+		exit (1);
+	}
+	if ($dmiOutput =~ /(desktop|low profile desktop|mini tower|tower|main server chassis|embedded pc|mini pc|stick pc)/i) {
+		print "desktop detected!!\n";
+		exit (0);
+	}
+	print "no chassis detected\n";
 	exit (2);
 }
 
