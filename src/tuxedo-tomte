@@ -1143,7 +1143,7 @@ my %tuxedo_devices = (
 	'55' => {
 		model => ['desktoppc'],
 		board_name => [''],
-		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'nvidiadriver', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2647,8 +2647,7 @@ sub checkRequirements {
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
-	if (($chassisType eq 'desktoppc') ||
-		($nvidiaDevice =~ /030[02]:/)) {
+	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1');
 	}
@@ -9189,7 +9188,7 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
-	return (0);
+	return ('0');
 }
 
 
@@ -9203,12 +9202,12 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
-if ($chassisType == 0) {
+if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
 }
 
-if (!tuxedoDevice()) {
+if ((!tuxedoDevice()) && ($chassisType eq 'notebook')) {
 	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
 	exit (0);
 }
