@@ -44,7 +44,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1140,6 +1140,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'55' => {
+		model => ['desktoppc'],
+		board_name => [''],
+		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'nvidiadriver', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -2635,7 +2647,8 @@ sub checkRequirements {
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
-	if ($nvidiaDevice =~ /030[02]:/) {
+	if (($chassisType eq 'desktoppc') ||
+		($nvidiaDevice =~ /030[02]:/)) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1');
 	}
@@ -2656,7 +2669,8 @@ sub checkRequirements {
 		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
 	}
 
-	if (isPackageInstalled('apport')) {
+	if (($chassisType eq 'desktoppc') ||
+		(isPackageInstalled('apport'))) {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
@@ -9152,29 +9166,29 @@ sub tuxedoDevice {
 
 ###############################################################################
 # checks if this is a notebook
-# returns 1 if notebook or laptop was detected
-# returns 0 if a desktop pc was detected
-# returns 2 if there was an error or nothing was detected
+# returns 'notebook' if a notebook was detected
+# returns 'desktoppc' if a desktop pc was detected
+# returns 0 if there was an error or nothing was detected
 #
 sub getChassisType {
 	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
-	my $chassisType;
+	my $chassisTypeNbr;
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
-		$chassisType = <$FH>;
-		$chassisType =~ s/\n//g;
+		$chassisTypeNbr = <$FH>;
+		$chassisTypeNbr =~ s/\n//g;
 	}
-	if ($chassisType eq '3') { return (2); }
-	if ($chassisType eq '4') { return (2); }
-	if ($chassisType eq '6') { return (2); }
-	if ($chassisType eq '7') { return (2); }
-	if ($chassisType eq '8') { return (1); }
-	if ($chassisType eq '9') { return (1); }
-	if ($chassisType eq '10') { return (1); }
-	if ($chassisType eq '17') { return (2); }
-	if ($chassisType eq '34') { return (2); }
-	if ($chassisType eq '35') { return (2); }
-	if ($chassisType eq '36') { return (2); }
+	if ($chassisTypeNbr eq '3') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '4') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '6') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '7') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '8') { return ('notebook'); }
+	if ($chassisTypeNbr eq '9') { return ('notebook'); }
+	if ($chassisTypeNbr eq '10') { return ('notebook'); }
+	if ($chassisTypeNbr eq '17') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
 	return (0);
 }
 
@@ -9189,7 +9203,7 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
-if ($chassisType == 2) {
+if ($chassisType == 0) {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
 }
