@@ -9055,6 +9055,7 @@ my $USAGE =<<USAGE;
 tuxedo-tomte <COMMAND> [NAME...]
 tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
+  versions                       Like 'list' but with version numbers
   modules                        List all available modules
   description MODULE             Shows the module description
   configure MODULE ...|all       Configure an unconfigured module
