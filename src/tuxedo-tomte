@@ -6438,7 +6438,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 				printLog("Accepted: $pkgString", 'L2');
 				$packageLine .= " $pkgString";
 				push @packages, $pkgString;
