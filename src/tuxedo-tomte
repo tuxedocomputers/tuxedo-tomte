@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.10-1';
+our $VERSION = '2.8.10-3';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -7840,6 +7840,8 @@ sub listVersions {
 	my $noneRequired = 1;
 	my $printIt = 0;
 	my $upgradeAvailable = '';
+
+	print "tuxedo-tomte $VERSION\n";
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
