@@ -7828,6 +7828,8 @@ sub listVersions {
 	my $printIt = 0;
 	my $upgradeAvailable = '';
 
+	print "tuxedo-tomte $VERSION\n";
+
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
