@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.10-4';
+our $VERSION = '2.8.10-11';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -6171,7 +6171,7 @@ sub getPackageVersion {
 	my $retValue = $?/256;
 	printLog("version string for $package: $retString", 'L2');
 	$retString =~ s/.*://;
-	if ($retString ne '') {
+	if (($retString ne '') && ($retValue == 0)) {
 		printLog("package $package has version: $retString", 'L1');
 		return $retString;
 	} else {
@@ -6451,7 +6451,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 				printLog("Accepted: $pkgString", 'L2');
 				$packageLine .= " $pkgString";
 				push @packages, $pkgString;
