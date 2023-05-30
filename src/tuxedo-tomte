@@ -6330,13 +6330,13 @@ sub installKernelFlavour {
 			unless ($package =~ /.*\s[ih][i]/) {
 				printLog("package missing: $package", 'L2');
 				$packageMissing = 1;
-				$installCmd += ' '.$package;
+				$installCmd .= ' '.$package;
 			}
 		}
 	}
 
 	if ($packageMissing) {
-		$installCmd += ' 2>&1';
+		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
 		`apt-get update -q`;
@@ -6366,7 +6366,7 @@ sub installKernelFlavour {
 		@lines = split /\n/, $retString;
 		my $line;
 		foreach $line (@lines) {
-			if (($line =~ /dpkg-query:/) && ($line =~ /^(.*\s[ih][i])/)) {
+			unless (($line =~ /dpkg-query:/) || ($line =~ /^(.*\s[ih][i])/)) {
 				printLog("$line", 'L2');
 				$allPackagesInstalled = 0;
 			} elsif ($line =~ /.*\s[ih][i]/) {
