@@ -6327,7 +6327,7 @@ sub installKernelFlavour {
 	@lines = split /\n/, $retString;
 	foreach $package (@lines) {
 		unless (($package =~ /linux-image-unsigned-.*/) || ($package =~ /dpkg-query:/)) {
-			unless ($package =~ /.*\s[ih][i]$/) {
+			unless ($package =~ /.*\s[ih][i]$/m) {
 				printLog("package missing: $package", 'L2');
 				$packageMissing = 1;
 				$installCmd += ' '.$package;
@@ -6366,10 +6366,10 @@ sub installKernelFlavour {
 		@lines = split /\n/, $retString;
 		my $line;
 		foreach $line (@lines) {
-			if (($line =~ /dpkg-query:/) && ($line =~ /^(.*\s[ih][i]$)/)) {
+			if (($line =~ /dpkg-query:/) && ($line =~ /^(.*\s[ih][i]$)/m)) {
 				printLog("$line", 'L2');
 				$allPackagesInstalled = 0;
-			} elsif ($line =~ /.*\s[ih][i]$/) {
+			} elsif ($line =~ /.*\s[ih][i]$/m) {
 				/(\S+)\s*(\S+)/;
 				printLog("$1 is installed", 'L2');
 				${$somethingDone} += 1;
