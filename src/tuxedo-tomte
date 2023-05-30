@@ -6296,7 +6296,7 @@ sub installKernelFlavour {
 		${$somethingDone} = 0;
 	}
 	my $partialName;
-	my $installCmd = 'apt-get install -yq ';
+	my $installCmd = 'apt-get install -yq';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
@@ -6328,6 +6328,7 @@ sub installKernelFlavour {
 	foreach $package (@lines) {
 		unless (($package =~ /linux-image-unsigned-.*/) || ($package =~ /dpkg-query:/)) {
 			unless ($package =~ /.*\s[ih][i]/) {
+				$package =~ s/\s.*//;
 				printLog("package missing: $package", 'L2');
 				$packageMissing = 1;
 				$installCmd .= ' '.$package;
@@ -6366,13 +6367,15 @@ sub installKernelFlavour {
 		@lines = split /\n/, $retString;
 		my $line;
 		foreach $line (@lines) {
-			unless (($line =~ /dpkg-query:/) || ($line =~ /^(.*\s[ih][i])/)) {
-				printLog("$line", 'L2');
-				$allPackagesInstalled = 0;
-			} elsif ($line =~ /.*\s[ih][i]/) {
-				/(\S+)\s*(\S+)/;
-				printLog("$1 is installed", 'L2');
-				${$somethingDone} += 1;
+			unless ($line =~ /dpkg-query:/) {
+				if ($line =~ /.*\s[ih][i]/) {
+					/(\S+)\s*(\S+)/;
+					printLog("$1 is installed", 'L2');
+					${$somethingDone} += 1;
+				} else {
+					printLog("failed: $line", 'L2');
+					$allPackagesInstalled = 0;
+				}
 			}
 		}
 		if ($allPackagesInstalled) {
