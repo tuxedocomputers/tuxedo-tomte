@@ -6383,8 +6383,8 @@ sub installKernelFlavour {
 				}
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
-						$package =~ s/\s.*//;
-						printLog("$package is installed", 'L2');
+						$line =~ s/\s.*//;
+						printLog("$line is installed", 'L2');
 						${$somethingDone} += 1;
 					} else {
 						printLog("failed: $line", 'L2');
