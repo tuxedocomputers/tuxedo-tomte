@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.9-32';
+our $VERSION = '2.8.11-12';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1181,6 +1181,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'55' => {
+		model => ['desktoppc'],
+		board_name => [''],
+		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -2701,7 +2713,8 @@ sub checkRequirements {
 		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
 	}
 
-	if (isPackageInstalled('apport')) {
+	if (($chassisType eq 'desktoppc') ||
+		(isPackageInstalled('apport'))) {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
@@ -3112,7 +3125,7 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3189,7 +3202,7 @@ sub tuxedokeyboard() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3628,7 +3641,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3642,7 +3655,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
@@ -3682,7 +3695,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3696,7 +3709,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
@@ -3722,7 +3735,7 @@ sub tuxedotouchpadswitch() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3815,7 +3828,7 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						setRestartValues();
+						setRestartValues($module);
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
 						printLog('nvme firmware was successfully updated', 'L0');
@@ -3867,7 +3880,7 @@ sub tuxedokeyboardite() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3983,7 +3996,7 @@ sub tuxedomicfix1() {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
@@ -4088,7 +4101,7 @@ sub tuxedorestoreaudiofix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -4129,7 +4142,7 @@ sub kernelhwe2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4173,7 +4186,7 @@ sub kerneltuxedo2004edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4215,7 +4228,7 @@ sub kerneltuxedo2004next() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4258,7 +4271,7 @@ sub kerneltuxedo2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4299,7 +4312,7 @@ sub kerneltuxedo2204() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4341,7 +4354,7 @@ sub kerneltuxedo2204edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4383,7 +4396,7 @@ sub kerneltuxedo2204next() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4473,7 +4486,7 @@ sub nvidiadriver() {
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4529,7 +4542,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4599,7 +4612,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4750,7 +4763,7 @@ sub r8168dkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4790,7 +4803,7 @@ sub tuxedooledbrt() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5079,7 +5092,7 @@ sub tuxedopinfixtgldkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5357,7 +5370,7 @@ sub tuxedor8125dkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5408,7 +5421,7 @@ sub cardreaderfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -5454,7 +5467,7 @@ sub samsungnvmefix() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			}
 		}
 	}
@@ -5468,7 +5481,7 @@ sub samsungnvmefix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
@@ -5493,7 +5506,7 @@ sub tuxedodgpurun() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5541,7 +5554,7 @@ sub intelgenXIIIpowerctlfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -6377,7 +6390,7 @@ sub installKernelFlavour {
 		${$somethingDone} = 0;
 	}
 	my $partialName;
-	my $installCmd = 'apt-get install -yq ';
+	my $installCmd = 'apt-get install -yq';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
@@ -6391,7 +6404,6 @@ sub installKernelFlavour {
 		${$failed} += 1;
 		return (0);
 	}
-	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
 		${$failed} += 1;
@@ -6408,16 +6420,30 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $package (@lines) {
-		if (!($package =~ /linux-image-unsigned-.*/) && (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/)))) {
-			printLog("package missing: $package", 'L2');
-			$packageMissing = 1;
+		unless ($package =~ /linux-image-unsigned-.*/) {
+			if ($package =~ /dpkg-query: /) {
+				$package =~ s/.*\s//;
+				printLog("package missing: $package", 'L2');
+				$packageMissing = 1;
+				$installCmd .= ' '.$package;
+			}
+			if ($package =~ /.*\s[uihrp][ncHUFWti]/) {
+				unless ($package =~ /.*\s[ih][i]/) {
+					$package =~ s/\s.*//;
+					printLog("package missing: $package", 'L2');
+					$packageMissing = 1;
+					$installCmd .= ' '.$package;
+				}
+			}
 		}
 	}
 
 	if ($packageMissing) {
+		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
 		`apt-get update -q`;
+		printLog("installation command: $installCmd", 'L2');
 		$retString = `$installCmd`;
 		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
@@ -6441,14 +6467,24 @@ sub installKernelFlavour {
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
-		foreach (@lines) {
-			if ($_ =~ /dpkg-query:/) {
-				printLog("$_", 'L2');
-				$allPackagesInstalled = 0;
-			} elsif ($_ =~ /.*\s[ih][i]/) {
-				/(\S+)\s*(\S+)/;
-				printLog("$1 is installed", 'L2');
-				${$somethingDone} += 1;
+		my $line;
+		foreach $line (@lines) {
+			unless ($line =~ /linux-image-unsigned-.*/) {
+				if ($line =~ /dpkg-query: /) {
+					$line =~ s/.*\s//;
+					printLog("package missing: $line", 'L2');
+					$allPackagesInstalled = 0;
+				}
+				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
+					if ($line =~ /.*\s[ih][i]/) {
+						$line =~ s/\s.*//;
+						printLog("$line is installed", 'L2');
+						${$somethingDone} += 1;
+					} else {
+						printLog("failed: $line", 'L2');
+						$allPackagesInstalled = 0;
+					}
+				}
 			}
 		}
 		if ($allPackagesInstalled) {
@@ -6532,7 +6568,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 				printLog("Accepted: $pkgString", 'L2');
 				$packageLine .= " $pkgString";
 				push @packages, $pkgString;
@@ -6548,7 +6584,7 @@ sub populateFlavourPackages {
 		foreach $line (@lines) {
 			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 				$pkgString = $1;
-				if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 					printLog("Accepted: $pkgString", 'L2');
 					push @packages, $pkgString;
 				}
@@ -6649,7 +6685,7 @@ sub uninstKernelFlavour {
 		# circumvent Ubuntu failsafe for currently installed kernel
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel!", 'L2');
-			setRestartValues();
+			setRestartValues($kernelToKeep);
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText, 1);
@@ -6808,7 +6844,7 @@ sub removeDebianModule {
 			$origConfModules{$module}{upgraded} = "yes";
 			$origConfModules{$module}{required} = "no";
 			if ($restart) {
-				setRestartValues();
+				setRestartValues($module);
 			}
 		} else {
 			addToConfiguredModules($module, "remove failed");
@@ -7922,6 +7958,8 @@ sub listVersions {
 	my $printIt = 0;
 	my $upgradeAvailable = '';
 
+	print "tuxedo-tomte $VERSION\n";
+
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
@@ -8863,7 +8901,7 @@ sub postConfigure {
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}", 'L1');
 				postSetModulesState($sysProgram, "success");
-				setRestartValues();
+				setRestartValues($sysProgram);
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0');
@@ -9091,7 +9129,9 @@ sub modulesList() {
 # sets values to restart the system
 #
 sub setRestartValues {
+	my $element = shift;
 	$restartSystem = 1;
+	printLog("setting restart for: $element", 'L2');
 	createFile($needsRestartFile, 'Tomte: system has to be restarted', 0);
 }
 
@@ -9149,6 +9189,7 @@ my $USAGE =<<USAGE;
 tuxedo-tomte <COMMAND> [NAME...]
 tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
+  versions                       Like 'list' but with version numbers
   modules                        List all available modules
   description MODULE             Shows the module description
   configure MODULE ...|all       Configure an unconfigured module
@@ -9245,30 +9286,30 @@ sub tuxedoDevice {
 
 ###############################################################################
 # checks if this is a notebook
-# returns 1 if notebook or laptop was detected
-# returns 0 if a desktop pc was detected
-# returns 2 if there was an error or nothing was detected
+# returns 'notebook' if a notebook was detected
+# returns 'desktoppc' if a desktop pc was detected
+# returns 0 if there was an error or nothing was detected
 #
 sub getChassisType {
 	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
-	my $chassisType;
+	my $chassisTypeNbr;
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
-		$chassisType = <$FH>;
-		$chassisType =~ s/\n//g;
+		$chassisTypeNbr = <$FH>;
+		$chassisTypeNbr =~ s/\n//g;
 	}
-	if ($chassisType eq '3') { return (2); }
-	if ($chassisType eq '4') { return (2); }
-	if ($chassisType eq '6') { return (2); }
-	if ($chassisType eq '7') { return (2); }
-	if ($chassisType eq '8') { return (1); }
-	if ($chassisType eq '9') { return (1); }
-	if ($chassisType eq '10') { return (1); }
-	if ($chassisType eq '17') { return (2); }
-	if ($chassisType eq '34') { return (2); }
-	if ($chassisType eq '35') { return (2); }
-	if ($chassisType eq '36') { return (2); }
-	return (0);
+	if ($chassisTypeNbr eq '3') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '4') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '6') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '7') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '8') { return ('notebook'); }
+	if ($chassisTypeNbr eq '9') { return ('notebook'); }
+	if ($chassisTypeNbr eq '10') { return ('notebook'); }
+	if ($chassisTypeNbr eq '17') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+	return ('0');
 }
 
 
@@ -9282,12 +9323,12 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
-if ($chassisType == 2) {
+if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
 }
 
-if (!tuxedoDevice()) {
+if ((!tuxedoDevice()) && ($chassisType eq 'notebook')) {
 	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
 	exit (0);
 }
