@@ -2785,7 +2785,7 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
 		}
 	} else {
-		printLog("kwin-common version could not be determined", 'L2');
+		printLog("plasma-workspace version could not be determined", 'L2');
 	}
 }
 
