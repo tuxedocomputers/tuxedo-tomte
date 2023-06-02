@@ -443,7 +443,7 @@ my %tuxedo_mirrors = (
 	},
 	"Linux Mint 21.1" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/official-package-repositories.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -3445,7 +3445,7 @@ sub tuxedomirrors() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
-		$retval3 = cleanSourcesList();
+		$retval3 = cleanSourcesList(%tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -5834,7 +5834,11 @@ sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
-	my $sourcesListFile = '/etc/apt/sources.list';
+	#TODO test
+	my $sourcesListFile = shift;
+	printLog(">>>> sourcefile!!!!: $sourcesListFile", 'L2');
+
+	#my $sourcesListFile = '/etc/apt/sources.list';
 	my $modified = 0;
 	# read all the lines
 	if ( (-e $sourcesListFile) && open($FHsource, "<", $sourcesListFile)) {
