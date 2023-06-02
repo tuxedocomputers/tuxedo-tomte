@@ -3445,7 +3445,7 @@ sub tuxedomirrors() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
-		$retval3 = cleanSourcesList(%tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
+		$retval3 = cleanSourcesList($tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
