@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.11-14';
+our $VERSION = '2.8.11-15';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -5834,12 +5834,18 @@ sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
-	#TODO test
 	my $sourcesListFile = shift;
-	printLog(">>>> sourcefile!!!!: $sourcesListFile", 'L2');
-
-	#my $sourcesListFile = '/etc/apt/sources.list';
 	my $modified = 0;
+
+	# set default value if undefined
+	if (defined $sourcesListFile) {
+		if ($sourcesListFile eq '') {
+			$sourcesListFile = '/etc/apt/sources.list';
+		}
+	} else {
+		$sourcesListFile = '/etc/apt/sources.list';
+	}
+
 	# read all the lines
 	if ( (-e $sourcesListFile) && open($FHsource, "<", $sourcesListFile)) {
 		chomp(@sourcelines = <$FHsource>);
@@ -9631,9 +9637,6 @@ if (($startLaterAgain == 0) &&
 }
 
 END {
-	#TODO debug
-	printLog("END:", 'TL2');
-
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
 	if ( exists $options{$argValue{command}} && isRoot() ) {
