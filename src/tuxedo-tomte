@@ -2031,9 +2031,9 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
-	tuxedor8125dkms => {
+	r8125dkms => {
 		name => 'tuxedo-r8125-dkms',
-		version => 3,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -5227,12 +5227,7 @@ sub earlyloadbacklightcontrolfix() {
 sub tuxedor8125dkms() {
 	my $module = shift;
 	my $action = shift;
-
-	# ignore if FAI or LiveISO install
-	if ($FAI || $LiveISO) {
-		printLog("$module can't be installed at this moment", 'TL0');
-	}
-	if (($action eq 'install') && (!($FAI || $LiveISO))) {
+	if ($action eq 'install') {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
