@@ -6587,7 +6587,6 @@ sub installKernelFlavour {
 		${$failed} += 1;
 		return (0);
 	}
-	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
 		${$failed} += 1;
