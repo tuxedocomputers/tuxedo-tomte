@@ -6273,6 +6273,7 @@ sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
@@ -6297,7 +6298,10 @@ sub deinstExcept {
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
+		#TODO debug
+		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2');
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+			if ($deinstKey =~ $except) { printLog("logic is true", 'L2');}
 			$deinstCounter++;
 			$deinstCmd .= ' '.$deinstKey;
 			$deinstList .= ' '.$deinstKey;
@@ -6340,6 +6344,7 @@ sub deinstallPackage {
 	my $deinstKey;
 	my $deinstList = '';
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	if ($retValue != 0) {
