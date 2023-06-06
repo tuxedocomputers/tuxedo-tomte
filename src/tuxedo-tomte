@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
-our $VERSION = '2.8.4';
+# do not edit manually as it will be overwritten while packaging
+our $VERSION = '2.8.12';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -48,6 +49,7 @@ my $logLevel = 0;
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 $ENV{LC_MESSAGES} = 'C';
+$ENV{DEBIAN_FRONTEND} = 'noninteractive';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -89,6 +91,7 @@ my %modeFile = (
 
 my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
+my $chassisType = 0;
 my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
@@ -223,6 +226,13 @@ my %supportedOS = (
 			},
 		},
 	},
+	"Linux Mint" => {
+		versions => {
+			"21.1" => {
+				name => 'vera',
+			},
+		},
+	},
 	"TUXEDO_OS Plasma" => {
 		versions => {
 			"20.04" => {
@@ -315,6 +325,13 @@ my %tuxedo_repos = (
 		name => 'focal',
 	},
 	"KDE neon 22.04" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
+	"Linux Mint 21.1" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
@@ -424,6 +441,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
+	"Linux Mint 21.1" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list.d/official-package-repositories.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -463,7 +489,8 @@ my %tuxedo_mirrors = (
 );
 
 
-
+# add here the respective kernel meta-packages when a new release comes out
+#
 my %flavours = (
 	"18.04" => {
 		"linux-generic" => {
@@ -503,6 +530,23 @@ my %flavours = (
 		},
 	},
 	"22.04" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
+	},
+	"21.1" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -590,7 +634,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms'],
+		fix => [''],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -1019,7 +1063,7 @@ my %tuxedo_devices = (
 	'44' => {
 		model => ['all with Realtek RTL8125'],
 		board_name => [''],
-		fix => ['rtl8125dkms'],
+		fix => ['tuxedor8125dkms'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '10ec:8125',
 		cpu => '',
@@ -1093,6 +1137,62 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'51' => {
+		model => ['TUXEDO Stellaris 16 Gen5 Intel'],
+		board_name => ['GMxPXxx'],
+		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'52' => {
+		model => ['all with Intel Gen13 PCI USB controller'],
+		board_name => [''],
+		fix => ['intelgenXIIIpowerctlfix'],
+		flavour => ['22.04'],
+		pci_id => '8086:1135',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'53' => {
+		model => ['all with plasma-workspace >=5.25'],
+		board_name => [''],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'54' => {
+		model => ['TUXEDO InfinityBook Pro 14 Gen8'],
+		board_name => ['PH4PRX1_PH6PRX1'],
+		fix => ['tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'55' => {
+		model => ['desktoppc'],
+		board_name => [''],
+		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -1153,6 +1253,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for no-keyboard-present after boot on XC1711',
 		postconf => 'updateGrub',
@@ -1170,6 +1271,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for no-boot-on-battery on BA15',
 		postconf => 'updateGrub',
@@ -1187,6 +1289,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
 		postconf => 'updateGrub',
@@ -1204,6 +1307,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
 		postconf => '',
@@ -1221,6 +1325,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'TUXEDO Control Center Application',
 		postconf => '',
@@ -1238,6 +1343,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Keyboard & keyboard backlight driver for TUXEDO notebooks',
 		postconf => '',
@@ -1256,6 +1362,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 5,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes no keyboard after suspend problem',
 		postconf => 'updateGrub',
@@ -1273,6 +1380,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight issues for DX1708, GTX1060 with AUO Model 12701 and 21229 displays',
 		postconf => 'updateGrub',
@@ -1290,6 +1398,7 @@ my %origConfModules = (
 		required => 'prerequisite',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Prerequisite! Adds the TUXEDO repositories',
 		postconf => '',
@@ -1307,6 +1416,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Adds TUXEDO maintained Ubuntu repositories',
 		postconf => '',
@@ -1324,6 +1434,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'ACPI mod for accurate cores recognition',
 		postconf => 'updateInitramfs',
@@ -1341,6 +1452,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Configuration needed to operate Huawei-ME936',
 		postconf => '',
@@ -1358,6 +1470,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Configuration needed to operate Huawei-ME906s',
 		postconf => '',
@@ -1376,6 +1489,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes non working Elantech touchpad',
 		postconf => 'updateGrub',
@@ -1393,6 +1507,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks',
 		postconf => '',
@@ -1410,6 +1525,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Removes sleep bug on Kingston A2000 NVME devices by updating the firmware',
 		postconf => '',
@@ -1427,6 +1543,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Keyboard back-light driver for ITE devices',
 		postconf => '',
@@ -1444,6 +1561,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Packages needed for fingerprint reader to work on certain TUXEDO notebooks',
 		postconf => '',
@@ -1461,6 +1579,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'The Mesa 3D Graphics Library',
 		postconf => '',
@@ -1478,6 +1597,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Systemd service which rescans for missing audio devices',
 		postconf => '',
@@ -1495,6 +1615,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-edge',
 		postconf => '',
@@ -1512,6 +1633,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04-edge',
 		postconf => '',
@@ -1529,6 +1651,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04-next',
 		postconf => '',
@@ -1546,6 +1669,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
 		postconf => '',
@@ -1563,6 +1687,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-generic-hwe-20.04',
 		postconf => '',
@@ -1580,6 +1705,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-generic-hwe-20.04-edge',
 		postconf => '',
@@ -1597,6 +1723,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04',
 		postconf => '',
@@ -1614,6 +1741,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04-next',
 		postconf => '',
@@ -1631,6 +1759,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required Nvidia drivers',
 		postconf => '',
@@ -1648,6 +1777,7 @@ my %origConfModules = (
 		required => 'yes',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Builds password dictionary databases',
 		postconf => '',
@@ -1666,6 +1796,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 3,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Enables AMD GPU and display to share configuration information',
 		postconf => '',
@@ -1677,12 +1808,13 @@ my %origConfModules = (
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Linux device driver for several Realtek Ethernet controllers',
 		postconf => '',
@@ -1700,6 +1832,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Workaround to control OLED display brightness using dbus and xrandr',
 		postconf => '',
@@ -1717,6 +1850,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Workaround for undefined problems with apport',
 		postconf => '',
@@ -1729,12 +1863,13 @@ my %origConfModules = (
 	realtekr8125dkms => {
 	# deprecated since 20220215
 		name => 'realtek-r8125-dkms',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Linux device driver for several Realtek Ethernet controllers [obsolete]',
 		postconf => '',
@@ -1752,6 +1887,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight control',
 		postconf => 'updateGrub',
@@ -1769,6 +1905,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes screen flickering when using some input devices',
 		postconf => 'updateGrub',
@@ -1786,6 +1923,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 3,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Provides better battery life',
 		postconf => 'updateGrub',
@@ -1803,6 +1941,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes unresponsive touchpad',
 		postconf => '',
@@ -1820,6 +1959,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 2,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Kernel audio module which fixes different issues with audio output',
 		postconf => '',
@@ -1837,6 +1977,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Solves kernel takes too long at loading thundebolt module at boot',
 		postconf => '',
@@ -1855,6 +1996,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fix for touchpad related issues',
 		postconf => 'updateGrub',
@@ -1872,6 +2014,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes lightdm starting before windowmanager',
 		postconf => '',
@@ -1889,6 +2032,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Fixes backlight control for Nvidia GPUs',
 		postconf => 'updateGrub',
@@ -1906,6 +2050,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'For backlight control working with Nvidia, the i915 needs to be loaded earlier',
 		postconf => 'updateGrub',
@@ -1915,14 +2060,15 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
-	r8125dkms => {
-		name => 'r8125-dkms',
-		version => 1,
+	tuxedor8125dkms => {
+		name => 'tuxedo-r8125-dkms',
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'yes',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug',
 		postconf => '',
@@ -1940,6 +2086,7 @@ my %origConfModules = (
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
 		postconf => '',
@@ -1951,12 +2098,13 @@ my %origConfModules = (
 	},
 	samsungnvmefix => {
 		name => 'samsung-nvme-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
 		hwid => 1,
 		package => 'no',
+		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'fix for Samsung NVMe wake up from sleep',
 		postconf => '',
@@ -1966,10 +2114,48 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
+	intelgenXIIIpowerctlfix => {
+		name => 'intel-gen13-powerctl-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'sets power control to \'auto\' on PCI USB controller on Intel Gen13 devices',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+		order => '',
+	},
+	tuxedodgpurun => {
+		name => 'tuxedo-dgpu-run',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'commandline tool and KDE context menu entries to run programms on dGPU while in on-demand mode',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'no',
+		order => '',
+	},
 );
 
 
-
+###############################################################################
+# simple print out of all supported devices and fixes
+#
 sub printTuxedoDevices {
 	my $ID;
 	foreach $ID (keys %tuxedo_devices) {
@@ -2039,6 +2225,10 @@ sub isLocked {
 	my $FH;
 	my $fs;
 	my $num;
+	unless (-e $filename) {
+		printLog("$filename does not exist", 'L2');
+		return (0);
+	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
 		print("checking lock: $filename\n");
@@ -2048,8 +2238,10 @@ sub isLocked {
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_GETLK )) {
 			unless ($fs->l_type() == F_UNLCK) {
+				printLog("=> is locked", 'L2');
 				return (1);
 			} else {
+				printLog("=> is not locked", 'L2');
 				return (0);
 			}
 		} else {
@@ -2078,14 +2270,174 @@ sub isPMlocked {
 	foreach $key (keys %lockFiles) {
 		$result = isLocked($key);
 		if ($result == 1) {
+			printLog("one or more files are locked", 'L2');
 			return (1);
 		}
 		if ($result == -1) {
+			printLog("something went wrong while checking for file locks", 'L2');
 			return (-1);
 		}
 	}
+	printLog("all files are unlocked", 'L2');
 	return (0);
 }
+
+
+
+###############################################################################
+# locks a file acquireLock(filename) if the file was not locked by another
+# process already
+# returns 1 if file could be locked
+# returns 0 if file could not be locked
+#
+sub acquireLock {
+	my $key = shift;
+	my $filename = $lockFiles{$key}{filename};
+	my $FH;
+	my $fs;
+	my $num;
+	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
+		$FH->autoflush(1);
+		#TODO debug
+		printLog("acquiring lock: $filename", 'TL2');
+		$fs = new File::FcntlLock;
+		$fs->l_type( F_WRLCK );
+		$fs->l_whence( SEEK_SET );
+		$fs->l_start( 0 );
+		if ($fs->lock( $FH, F_SETLK )) {
+			printLog("locking successfull", 'TL2');
+			$num = <$FH> || 0;
+			$lockFiles{$key}{'FH'} = $FH;
+			$lockFiles{$key}{'number'} = $num;
+			$lockFiles{$key}{'locked'} = 1;
+			return (1);
+		} else {
+			$lockFiles{$key}{'locked'} = 0;
+			printLog("failed to get write lock: $filename: $fs->error", 'TL0');
+			return (0);
+		}
+	} else {
+		printLog("failed to open: $filename: $!", 'TL2');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# releases the lock on ONE file
+# releaseLock(filename)
+# returns 1 if lock could be released
+# returns 0 if something went wrong
+#
+sub releaseLock {
+	my $key = shift;
+	my $filename = $lockFiles{$key}{filename};
+	my $FH = $lockFiles{$key}{FH};
+	my $num = $lockFiles{$key}{number};
+	my $fs;
+	#TODO debug
+	if (seek($FH, 0, SEEK_SET)) {
+		if (print $FH "$num\n") {
+			if (truncate($FH, tell($FH))) {
+				$fs = new File::FcntlLock;
+				$fs->l_type(F_UNLCK);
+				if ($fs->lock( $FH, F_SETLK )) {
+					if (close($FH)) {
+						$lockFiles{$key}{'locked'} = 0;
+						printLog("lock released on $filename", 'L2');
+						return (1);
+					} else {
+						printLog("close failed!: $filename: $!", 'TL2');
+						return (0);
+					}
+				} else {
+					printLog("unlock failed!: $filename: $fs->error", 'TL2');
+					return (0);
+				}
+			} else {
+				printLog("truncate failed!: $filename: $!", 'TL2');
+				return (0);
+			}
+		} else {
+			printLog("write failed!: $filename: $!", 'TL2');
+			return (0);
+		}
+	} else {
+		printLog("seek failed!: $filename: $!", 'TL2');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
+# locks all packagemanagement files
+# it unlocks all files if some were locked by another process
+# returns 1 if all files could be locked
+# returns 0 if some could not be locked
+#
+sub lockPM {
+	my $key;
+	my $lockFilesHashSize = keys %lockFiles;
+	my $processedLockFiles = 0;
+
+	# in FAI it should never be necessary to lock any files
+	if ($FAI) {
+		return (1);
+	}
+	printLog("trying to lock all files for Tomte", 'L2');
+	foreach $key (keys %lockFiles) {
+		# stop if can't get lock
+		last if (acquireLock($key) != 1);
+		$processedLockFiles++;
+	}
+	if ($processedLockFiles < $lockFilesHashSize) {
+		#TODO
+		printLog("!!! some files are already locked! reverting all locks", 'TL2');
+		unlockPM('some files locked -> reverting');
+		return (0);
+	}
+	printLog("### all files locked for Tomte", 'L3');
+	return (1);
+}
+
+
+
+###############################################################################
+# unlocks all files from package management
+# only unlocks locks owned by itself!!
+# a reason for unlocking should be given as string, for logging purposes
+# unlockPM('reason')
+# returns 1 if unlocked
+# returns 0 if some could not be unlocked
+#
+sub unlockPM {
+	my $reason = shift;
+	my $key;
+	my $hashSize = keys %lockFiles;
+	my $countReleased = 0;
+	my $countToRelease = 0;
+	#TODO lots of debug
+	printLog("attempting to unlock all files for >$reason< ...", 'L2');
+	foreach $key (keys %lockFiles) {
+		printLog("is $key locked?: $lockFiles{$key}{locked}", 'L2');
+		if ($lockFiles{$key}{locked}) {
+			printLog("try to unlock", 'L2');
+			$countToRelease++;
+			$countReleased += releaseLock($key);
+			printLog("released $countReleased from $countToRelease", 'L2');
+		}
+	}
+	if ($countReleased == $countToRelease) {
+		printLog("OOO successfully released all locks for >$reason<", 'L2');
+		return (1);
+	} else {
+		printLog("XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L2');
+	}
+	return (0);
+}
+
 
 
 
@@ -2245,6 +2597,7 @@ sub prerequisites {
 
 sub prerequisitesFAI {
 	printLog("starting prerequisites FAI", 'TL0');
+	printLog("executing: apt-get update", 'L2');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending prerequisites FAI", 'TL0');
@@ -2258,6 +2611,7 @@ sub postrequisitesFAI {
 	if (httpToHttps(\%tuxedo_mirrors)) {
 		printLog('mirror repos set to https', 'L0');
 	}
+	printLog("executing: apt-get update", 'L2');
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending postrequisites FAI", 'TL0');
@@ -2280,20 +2634,37 @@ sub checkRequirements {
 		if ($FAI) {
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
-				printLog('detected i8042.noaux-fix issue', 'L1');
+				printLog("detected $origConfModules{i8042noauxfix}{name} issue", 'L1');
 			}
+		}
+	}
+
+	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
+	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Linux Mint 21.1/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2');
+		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
+			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
+			installPackage('grub-efi-amd64-signed');
+			installPackage('shim-signed');
+		} else {
+			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2');
 		}
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
-		printLog('detected no-boot-on-battery issue', 'L1');
+		printLog("detected $origConfModules{nobootonbattery}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ /POLARIS1501A1650TI/) ||
@@ -2306,7 +2677,7 @@ sub checkRequirements {
 		($boardname =~ /EDUBOOK1502/) ||
   		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
-		printLog('detected amd-xhci-hcd-usb-quirk-suspend-fix issue', 'L1');
+		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
@@ -2315,7 +2686,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1501A2060/)) {
 		if ($distributionVersion =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-			printLog('detected amd-gpu-with-nvidia-fix issue', 'L1');
+			printLog("detected $origConfModules{amdgpuwithnvidiafix}{name} issue", 'L1');
 		}
 	}
 
@@ -2336,20 +2707,20 @@ sub checkRequirements {
 		if ($FAI) {
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog('detected no-keyboard-after-suspend-fix issue', 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
 			}
 		}
 	}
 
 	if ($boardname =~ /X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
-		printLog('detected elantech-touchpad-fix issue', 'L1');
+		printLog("detected $origConfModules{elantechtouchpadfix}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ /LAPQC71A/) ||
@@ -2378,34 +2749,39 @@ sub checkRequirements {
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /PF5LUXG/) ||
 		($boardname =~ /PHxARX1_PHxAQF1/) ||
-		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/))
+		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
+		($boardname =~ /GMxPXxx/) ||
+		($boardname =~ /PH4PRX1_PH6PRX1/))
 	{
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog('detected tuxedo-touchpad-switch issue', 'L1');
+		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
 	}
 
 	if ($boardname =~ /N8xEJEK/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('detected backlight-fix issue', 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HP/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('detected backlight-fix issue', 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HR/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('detected backlight-fix issue', 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
+
 	if ($boardname =~ /P95_HP,HR,HQ/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog('detected backlight-fix issue', 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
 		}
 	}
 
@@ -2419,21 +2795,21 @@ sub checkRequirements {
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname =~ /NH5xAx/) {
 		$origConfModules{corefix}{required} = 'yes';
-		printLog('detected core-fix issue', 'L1');
+		printLog("detected $origConfModules{corefix}{name} issue", 'L1');
 	}
 
 	# if Threeg Huawei ME936 device found
 	$lsusb = `lsusb -d 12d1:15bb`;
 	if ($lsusb =~ /ME936/) {
 		$origConfModules{threegfix}{required} = 'yes';
-		printLog('detected threeg-fix issue', 'L1');
+		printLog("detected $origConfModules{threegfix}{name} issue", 'L1');
 	}
 
 	# if Threeg Huawei ME906s device found
 	$lsusb = `lsusb -d 12d1:15c1`;
 	if ($lsusb =~ /huawei/i) {
 		$origConfModules{threegfix2}{required} = 'yes';
-		printLog('detected threeg-fix2 issue', 'L1');
+		printLog("detected $origConfModules{threegfix2}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -2445,16 +2821,17 @@ sub checkRequirements {
 		($boardname =~ /GMxRGxx/) ||
 		($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
-		($boardname =~ /LAPQC71B/)) {
+		($boardname =~ /LAPQC71B/) ||
+		($boardname =~ /GMxPXxx/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
-		printLog('detected tuxedo-keyboard-ite issue', 'L1');
+		printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 	}
 
 	# get vendor text from vendor ID:device ID
 	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
-		printLog('detected tuxedo-nvme-fix issue', 'L1');
+		printLog("detected $origConfModules{tuxedonvmefix}{name} issue", 'L1');
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -2467,7 +2844,7 @@ sub checkRequirements {
 		qr/1c7a:0603/);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog('detected fingerprint-reader issue', 'L1');
+		printLog("detected $origConfModules{fingerprintreader}{name} issue", 'L1');
 		last;
 	}
 
@@ -2475,122 +2852,162 @@ sub checkRequirements {
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog('detected tuxedo-micfix1 issue', 'L1');
+		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1');
 	}
 
 	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
-		printLog('detected tuxedo-restore-audio-fix issue', 'L1');
+		printLog("detected $origConfModules{tuxedorestoreaudiofix}{name} issue", 'L1');
 	}
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
-		printLog('detected nvidia-driver issue', 'L1');
+		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1');
 	}
 
 	if ($boardname =~ m/NHxxRZQ/) {
-		$origConfModules{r8168dkms}{required} = 'yes';
-		printLog('detected r8168-dkms issue', 'L1');
+		my $kernelVersionWithR8169 = '6.1';
+		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
+			$origConfModules{r8168dkms}{required} = 'yes';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		} else {
+			$origConfModules{r8168dkms}{required} = 'no';
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		}
 	}
+
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
-		printLog('detected tuxedo-oled-brt issue', 'L1');
+		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
 	}
-	if (isPackageInstalled('apport')) {
+
+	if (($chassisType eq 'desktoppc') ||
+		(isPackageInstalled('apport'))) {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
-		printLog('detected apport-fix issue', 'L1');
+		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
 	}
+
 	if (($boardname =~ m/GMxNGxx/) ||
 		($boardname =~ m/GMxZGxx/)) {
 		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
 			isDisplayPresent("BOE Model 2420 Serial Number 0")) {
 			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
-			printLog('detected amdgpu-backlight-aux-off issue', 'L1');
+			printLog("detected $origConfModules{amdgpubacklightauxoff}{name} issue", 'L1');
 		}
 	}
+
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
-		printLog('detected i915-enable-psr-fix issue', 'L1');
+		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1');
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+	if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+		($completeDistVersion =~ /elementary OS 6.1/) ||
+		($completeDistVersion =~ /KDE neon 20.04/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 		if (($boardname =~ m/X170KM-G/) ||
 			($boardname =~ m/PHxTxX1/) ||
 			($boardname =~ m/PH4TQx1/) ||
 			($boardname =~ m/PHxTQx1/)) {
-			printLog('kernel linux-tuxedo-20.04-edge should be installed', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2004edge}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
 		} elsif (($boardname =~ m/GMxZGxx/) ||
 				($boardname =~ m/NL5xNU/)) {
-			printLog('kernel linux-tuxedo-20.04-next should be installed', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2004next}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
 		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
-			printLog('kernel linux-tuxedo-20.04 will be default', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
-			printLog('kernel linux-tuxedo-22.04-edge will be default', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204edge}{name} will be default", 'L1');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
 		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog('kernel linux-tuxedo-22.04-next should be installed', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
-			printLog('kernel linux-tuxedo-22.04 will be default', 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1');
 			$origConfModules{kerneltuxedo2204}{required} = 'yes';
 		}
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
-		printLog('detected thunderbolt-boot-delay-fix issue', 'L1');
+		printLog("detected $origConfModules{thunderboltbootdelayfix}{name} issue", 'L1');
 	}
 
 	if ((($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/) ||
 		($boardname =~ m/PH4TQx1/)) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
-		printLog('detected lightdm-logind-check-graphical-fix issue', 'L1');
+		printLog("detected $origConfModules{lightdmlogindcheckgraphicalfix}{name} issue", 'L1');
 	}
 
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
-		printLog('detected nvidia-backlight-control-fix issue', 'L1');
+		printLog("detected $origConfModules{nvidiabacklightcontrolfix}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
-		printLog('detected early-load-backlight-control-fix issue', 'L1');
+		printLog("detected $origConfModules{earlyloadbacklightcontrolfix}{name} issue", 'L1');
 	}
 
 	my @r8125Devices = ('10ec:8125');
 	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-		$origConfModules{r8125dkms}{required} = 'yes';
-		printLog('detected r8125dkms issue', 'L1');
+		$origConfModules{tuxedor8125dkms}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedor8125dkms}{name} issue", 'L1');
 	}
 
 	# if cardreader Realtek RTS522A found
 	my @cardreaderDevices = (qr/10ec:522a/); 
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$origConfModules{cardreaderfix}{required} = 'yes';
-		printLog('detected cardreader-fix issue', 'L1');
+		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1');
 	}
 
 	if ($boardname =~ m/PF5LUXG/)	{
 		$origConfModules{samsungnvmefix}{required} = 'yes';
-		printLog('detected samsung-nvme-fix issue', 'L1');
+		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1');
+	}
+
+
+	# get vendor text from vendor ID:device ID
+	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
+	if ( findPciDevice($lspciOutput, @intelgenXIIIpowerctlfixDevices) ) {
+		$origConfModules{intelgenXIIIpowerctlfix}{required} = 'yes';
+		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1');
+	}
+
+	my $minPlasmaDesktopVersion = '5.25';
+	my $currentPlasmaWorkspaceVersion = '';
+	my $versionCompareResult;
+	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+	if ($currentPlasmaWorkspaceVersion ne '') {
+		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+		unless ( $versionCompareResult == -1 ) {
+			$origConfModules{tuxedodgpurun}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+		}
+	} else {
+		printLog("plasma-workspace version could not be determined", 'L2');
 	}
 }
 
@@ -2859,7 +3276,7 @@ sub amdgpuwithnvidiafix() {
 	my $retval;
 	my $fileName = '/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf';
 	my $niceTime = getBackupFileTime();
-	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"Section \"OutputClass\"\n".
 		"\tIdentifier \"nvidia\"\n".
     	"\tMatchDriver \"nvidia-drm\"\n".
@@ -2878,7 +3295,7 @@ sub amdgpuwithnvidiafix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -2955,7 +3372,7 @@ sub tuxedokeyboard() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3142,7 +3559,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# repo updates have to be immediate for package installation
 				if (!$FAI) {
-					aptgetRefresh($module, 3);
+					aptgetRefreshModule($module, 3);
 				}
 			}
 		}
@@ -3166,7 +3583,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefresh($module, 3);
+				aptgetRefreshModule($module, 3);
 			}
 		}
 	}
@@ -3198,7 +3615,7 @@ sub tuxedomirrors() {
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
-		$retval3 = cleanSourcesList();
+		$retval3 = cleanSourcesList($tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3215,7 +3632,7 @@ sub tuxedomirrors() {
 				# update of repos has to be immediate for possible later package
 				# installation
 				if (!$FAI) {
-					aptgetRefresh($module, 3);
+					aptgetRefreshModule($module, 3);
 				}
 			}
 		}
@@ -3239,7 +3656,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{upgraded} = "yes";
 				# update of repos has to be immediate for possible later package
 				# installation
-				aptgetRefresh($module, 3);
+				aptgetRefreshModule($module, 3);
 			}
 		}
 	}
@@ -3379,9 +3796,9 @@ sub threegfix() {
 	my $fileName1 = '/etc/modprobe.d/huawei-me936.conf';
 	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15bb\n";
-	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -3394,7 +3811,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3408,7 +3825,7 @@ sub threegfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
@@ -3433,9 +3850,9 @@ sub threegfix2() {
 	my $fileName1 = '/etc/modprobe.d/huawei-me906s.conf';
 	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15c1\n";
-	my $fileText2 = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15c1\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"2\", ATTR{bConfigurationValue}=\"2\"";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -3448,7 +3865,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3462,7 +3879,7 @@ sub threegfix2() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
@@ -3488,7 +3905,7 @@ sub tuxedotouchpadswitch() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3581,7 +3998,7 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						setRestartValues();
+						setRestartValues($module);
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
 						printLog('nvme firmware was successfully updated', 'L0');
@@ -3622,6 +4039,9 @@ sub tuxedonvmefix() {
 sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
 	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
@@ -3630,7 +4050,7 @@ sub tuxedokeyboardite() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3746,7 +4166,7 @@ sub tuxedomicfix1() {
 				$origConfModules{$module}{installed} = 'yes';
 				$origConfModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
@@ -3821,7 +4241,7 @@ sub tuxedorestoreaudiofix() {
 	my $retval1;
 	my $retval2;
 	my $fileName = '/lib/systemd/system/restore-audiocards.service';
-	my $fileText = "# added by tuxedo-tomte \n".
+	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! \n".
 		"[Unit]\n".
 		"Description=Rescan the PCI-Bus for missed audio cards\n".
 		"After=alsa-restore.service\n".
@@ -3851,7 +4271,7 @@ sub tuxedorestoreaudiofix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -3875,7 +4295,11 @@ sub kernelhwe2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -3888,7 +4312,7 @@ sub kernelhwe2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3915,7 +4339,11 @@ sub kerneltuxedo2004edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -3928,7 +4356,7 @@ sub kerneltuxedo2004edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3953,7 +4381,11 @@ sub kerneltuxedo2004next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -3966,7 +4398,7 @@ sub kerneltuxedo2004next() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -3992,7 +4424,11 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -4005,7 +4441,7 @@ sub kerneltuxedo2004() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4030,7 +4466,10 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -4043,7 +4482,7 @@ sub kerneltuxedo2204() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4069,7 +4508,10 @@ sub kerneltuxedo2204edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
@@ -4082,7 +4524,7 @@ sub kerneltuxedo2204edge() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4108,7 +4550,10 @@ sub kerneltuxedo2204next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
@@ -4121,7 +4566,7 @@ sub kerneltuxedo2204next() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
 				$origConfModules{$module}{installed} = "yes";
@@ -4147,16 +4592,17 @@ sub nvidiadriver() {
 	my $module = shift;
 	my $action = shift;
 	my $wasInstalled = 1;
-	my $packageNvidiaDriver;
-	my $packageMesaUtils;
-	my $packageNvidiaPrime;
-	my $packagePythonAppindicator;
-	my $packagePythonCairo;
-	my $packagePythonGtk2;
-	my $oldDriversRemoved;
+	my $packageNvidiaDriver = 0;
+	my $packageMesaUtils = 0;
+	my $packageNvidiaPrime = 0;
+	my $packagePythonAppindicator = 0;
+	my $packagePythonCairo = 0;
+	my $packagePythonGtk2 = 0;
+	my $oldDriversRemoved = 0;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
+	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			# deinstall other nvidia drivers
@@ -4203,14 +4649,14 @@ sub nvidiadriver() {
 			}
 
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4219,7 +4665,11 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) || ($completeDistVersion =~ /elementary OS 6.1/) || ($completeDistVersion =~ /KDE neon 20.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) || ($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
+				($completeDistVersion =~ /elementary OS 6.1/) ||
+				($completeDistVersion =~ /KDE neon 20.04/) ||
+				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
 
@@ -4254,7 +4704,7 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4262,7 +4712,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4271,20 +4721,37 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) || ($completeDistVersion =~ /KDE neon 22.04/) || ($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) || ($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+				($completeDistVersion =~ /KDE neon 22.04/) ||
+				($completeDistVersion =~ /Linux Mint 21.1/) ||
+				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			# deinstall other nvidia drivers
 			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
 
 			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
-			if( ! isPackageInstalled($tuxedoNvidiaDriver525) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver525);
+			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver530 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
+
+				# check if the package is already installed
+				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+				} else {
+					setAptMark($tuxedoNvidiaDriver530,'manual');
+					$packageNvidiaDriver = 1;
+				}
 			} else {
-				setAptMark($tuxedoNvidiaDriver525,'manual');
-				$packageNvidiaDriver = 1;
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver530  can't be found in the repositories", 'L0');
 			}
+
 			if( ! isPackageInstalled('mesa-utils') ) {
 				$wasInstalled = 0;
 				$packageMesaUtils = installPackage('mesa-utils');
@@ -4307,7 +4774,7 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'TL2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
@@ -4315,7 +4782,7 @@ sub nvidiadriver() {
 				} else {
 					printLog("installed $origConfModules{$module}{name}", 'L1');
 					addToConfiguredModules($module, "success");
-					setRestartValues();
+					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -4455,7 +4922,10 @@ sub amdgpudkms() {
 sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'install') {
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
+	if (($action eq 'install') && (!$FAI)) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($origConfModules{$module}{name})) {
 			messageLongInstall();
@@ -4463,7 +4933,7 @@ sub r8168dkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4480,7 +4950,7 @@ sub r8168dkms() {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage('')) {
-			removeDebianModule($module, 1);
+			removeDebianModule($module, 1, '--purge');
 		}
 	}
 }
@@ -4503,7 +4973,7 @@ sub tuxedooledbrt() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -4582,6 +5052,7 @@ sub apportfix() {
 
 ###############################################################################
 # Removes Linux device driver if installed and in configuration list
+# package is obsolete !!!
 #
 sub realtekr8125dkms() {
 	my $module = shift;
@@ -4590,7 +5061,7 @@ sub realtekr8125dkms() {
 	if ($FAI || $LiveISO) {
 		return (1);
 	}
-	if ($action eq 'install') {
+	if (($action eq 'install') && (!($FAI || $LiveISO))) {
 		printLog("package is obsolete", 'L1');
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "no";
@@ -4791,7 +5262,7 @@ sub tuxedopinfixtgldkms() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			} else {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5053,34 +5524,36 @@ sub earlyloadbacklightcontrolfix() {
 # Installs the newest driver for RTL8125 2.5GbE Controller
 # Solves some ethernet problems/hang/slow connection
 #
-sub r8125dkms() {
+sub tuxedor8125dkms() {
 	my $module = shift;
 	my $action = shift;
-	my $wasInstalled = 1;
-	my $package_tuxedo_r8125_dkms;
-	if ($action eq 'install') {
-		# check if the package is already installed
-		if( ! isPackageInstalled('tuxedo-r8125-dkms') ) {
-			messageLongInstall();
-			$wasInstalled = 0;
-			$package_tuxedo_r8125_dkms = installPackage('tuxedo-r8125-dkms');
-		} else {
-			$package_tuxedo_r8125_dkms = 1;
-		}
 
-		if( $package_tuxedo_r8125_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
-				addToConfiguredModules($module, "nothingToDo");
+	# ignore if FAI or LiveISO install
+	if ($FAI || $LiveISO) {
+		printLog("$module can't be installed at this moment", 'TL0');
+	}
+	if (($action eq 'install') && (!($FAI || $LiveISO))) {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues($module);
 			} else {
-				addToConfiguredModules($module, 'success');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
 		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
+			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
+	} else {
+		$origConfModules{$module}{installed} = 'failed';
+		addToConfiguredModules($module, 'failed');
 	}
 
 	if ($action eq 'upgrade') {
@@ -5106,7 +5579,7 @@ sub cardreaderfix() {
 	my $retval1;
 	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
 	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
@@ -5118,7 +5591,7 @@ sub cardreaderfix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'upgrade') {
@@ -5142,12 +5615,14 @@ sub samsungnvmefix() {
 	my $retval;
 	my $fileName = '/lib/udev/rules.d/99-pulse1502-samsung-nvme.rules';
 	my $niceTime = getBackupFileTime();
-	my $fileText = "# added by tuxedo-tomte ".$niceTime."\n".
+	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80c\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
 	if ($action eq 'install') {
 		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
-			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
+			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
+			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80c", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
 			printLog("entries for samsungnvmefix are already present", 'TL2');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
@@ -5162,7 +5637,7 @@ sub samsungnvmefix() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
-				setRestartValues();
+				setRestartValues($module);
 			}
 		}
 	}
@@ -5176,13 +5651,92 @@ sub samsungnvmefix() {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
-			setRestartValues();
+			setRestartValues($module);
 		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
 }
+
+
+
+###############################################################################
+# Commandline tool and KDE context menu entries to run programms on dGPU while
+# in on-demand mode
+#
+sub tuxedodgpurun() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		# check before if the package is already installed
+		if (! isPackageInstalled($origConfModules{$module}{name})) {
+			messageLongInstall();
+			if (installPackage($origConfModules{$module}{name})) {
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues($module);
+			} else {
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+		} else {
+			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrade not necessary for packages");
+	}
+	if ($action eq 'remove') {
+		if (removeWarningMessage('')) {
+			removeDebianModule($module, 1);
+		}
+	}
+}
+
+
+
+
+###############################################################################
+# Fixes power control problems with Intel Gen13 devices
+# Manually sets power control to 'auto' to allow sleeping when not in use
+# - if PCI USB device 0x8086:0x1135 detected
+#
+sub intelgenXIIIpowerctlfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval1;
+	my $fileName1 = '/etc/udev/rules.d/99-intel-rpl-powerctl.rules';
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
+		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		if ($retval1 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
+
 
 
 
@@ -5450,8 +6004,18 @@ sub cleanSourcesList {
 	my $FHsource;
 	my @sourcelines;
 	my $sourceline;
-	my $sourcesListFile = '/etc/apt/sources.list';
+	my $sourcesListFile = shift;
 	my $modified = 0;
+
+	# set default value if undefined
+	if (defined $sourcesListFile) {
+		if ($sourcesListFile eq '') {
+			$sourcesListFile = '/etc/apt/sources.list';
+		}
+	} else {
+		$sourcesListFile = '/etc/apt/sources.list';
+	}
+
 	# read all the lines
 	if ( (-e $sourcesListFile) && open($FHsource, "<", $sourcesListFile)) {
 		chomp(@sourcelines = <$FHsource>);
@@ -5821,32 +6385,22 @@ sub deinstallPackage {
 
 
 
-###############################################################################
-# Deinstalls a package
-# returns 1 if the search for the packages failed or if the deinstallation was
-# unsuccessful
-# returns 0 if everything was ok, even if no package were found
-#
-sub deinstallSinglePackage {
-	my $deinst = shift;
-	my $aptgetDeinst = 'apt-get -yq remove';
-	my $retValue;
 
-	$aptgetDeinst .= " $deinst";
-	printLog("deinstalling: $deinst", 'L0');
-	$aptgetDeinst .= " >/dev/null 2>&1";
-	if (isPackageInstalled($deinst)) {
-		deactivatePackagekit();
-		if (system($aptgetDeinst)) {
-			$retValue = $?/256;
-			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
-			return (1);
-		} else {
-			printLog('deinstallation of package successful', 'L0');
-			return (0);
-		}
+###############################################################################
+# Checks if the package is in any of the repositories
+#
+sub isPackageInRepo {
+	my $package = shift;
+	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
+	chop($returnFromSearch);
+	$returnFromSearch =~ s/ .*//;
+	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
+	if ($package eq $returnFromSearch) {
+		return (1);
+		printLog("package found", 'L2');
 	} else {
-		printLog("package $deinst was not found", 'L0');
+		printLog("requested package can't be found in the repositories", 'L2');
+		return (0);
 	}
 }
 
@@ -5864,7 +6418,7 @@ sub isPackageInstalled {
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
-	printLog("searching for package: $package\nanswer: $retString", 'L2');
+	printLog("checking if $package is installed\nanswer: $retString", 'L2');
 	if ($retString =~ m/^[ih][i]\s$/) {
 		printLog("package $package is installed: $retString", 'L1');
 		return (1);
@@ -5873,6 +6427,35 @@ sub isPackageInstalled {
 		return (0);
 	}
 }
+
+
+
+###############################################################################
+# returns the package version string or '0' if the return value from
+# dpkg-query was an empty string
+#
+sub getPackageVersion {
+	my $package = shift;
+	my $cmd = $consoleLanguage.'dpkg-query --showformat=\'${Version}\' --show '.$package.' 2>&1';
+	my $retString = '';
+	$retString = `$cmd`;
+	my $retValue = $?/256;
+	printLog("version string for $package: $retString retValue: $retValue", 'L2');
+	if ($retValue == 0) {
+		$retString =~ s/.*://;
+		if ($retString ne '') {
+			printLog("package $package has version: $retString", 'L1');
+			return $retString;
+		} else {
+			printLog("package $package is probably not installed, can't get its version number", 'L1');
+			return '';
+		}
+	} else {
+		printLog("package $package is probably not installed, can't get its version number", 'L1');
+		return '';
+	}
+}
+
 
 
 
@@ -5928,11 +6511,16 @@ sub installPackage {
 # returns 0 if failed
 #
 sub removePackage {
-	my $packageName = shift;
+	my ($packageName, $parameter) = @_;
 	my $retval;
 	printLog("remove package $packageName", 'TL0');
 	deactivatePackagekit();
-	$retval = `apt-get -yq remove $packageName >/dev/null 2>&1`;
+	if (!defined($parameter)) {
+		printLog("parameter was undefined", 'L2');
+		$parameter = '';
+	}
+	printLog("command: apt-get -yq remove $parameter $packageName >/dev/null 2>&1", 'L2');
+	$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
 	printLog("return from apt-get:\n$retval", 'L2');
 	$retval = isPackageInstalled($packageName);
 	if ($retval == 1) {
@@ -5943,6 +6531,8 @@ sub removePackage {
 	}
 	return (1);
 }
+
+
 
 
 ###############################################################################
@@ -5983,7 +6573,7 @@ sub installKernelFlavour {
 		${$somethingDone} = 0;
 	}
 	my $partialName;
-	my $installCmd = 'apt-get install -yq ';
+	my $installCmd = 'apt-get install -yq';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
 	my $testCmd2 = $testCmd;
 	my $retString;
@@ -5997,7 +6587,6 @@ sub installKernelFlavour {
 		${$failed} += 1;
 		return (0);
 	}
-	$installCmd = $installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}.' 2>&1';
 	if (!populateFlavourPackages("$flavour")) {
 		printLog("no packages found for kernel $flavour while installing, this is not good", 'L0');
 		${$failed} += 1;
@@ -6014,16 +6603,30 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $package (@lines) {
-		if (!($package =~ /linux-image-unsigned-.*/) && (($package =~ /dpkg-query:/) || (!($package =~ /.*\s[ih][i]/)))) {
-			printLog("package missing: $package", 'L2');
-			$packageMissing = 1;
+		unless ($package =~ /linux-image-unsigned-.*/) {
+			if ($package =~ /dpkg-query: /) {
+				$package =~ s/.*\s//;
+				printLog("package missing: $package", 'L2');
+				$packageMissing = 1;
+				$installCmd .= ' '.$package;
+			}
+			if ($package =~ /.*\s[uihrp][ncHUFWti]/) {
+				unless ($package =~ /.*\s[ih][i]/) {
+					$package =~ s/\s.*//;
+					printLog("package missing: $package", 'L2');
+					$packageMissing = 1;
+					$installCmd .= ' '.$package;
+				}
+			}
 		}
 	}
 
 	if ($packageMissing) {
+		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
 		`apt-get update -q`;
+		printLog("installation command: $installCmd", 'L2');
 		$retString = `$installCmd`;
 		if ($retString =~ /dpkg --configure -a/) {
 			printLog("some packages are not configured", 'L2');
@@ -6047,14 +6650,24 @@ sub installKernelFlavour {
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
-		foreach (@lines) {
-			if ($_ =~ /dpkg-query:/) {
-				printLog("$_", 'L2');
-				$allPackagesInstalled = 0;
-			} elsif ($_ =~ /.*\s[ih][i]/) {
-				/(\S+)\s*(\S+)/;
-				printLog("$1 is installed", 'L2');
-				${$somethingDone} += 1;
+		my $line;
+		foreach $line (@lines) {
+			unless ($line =~ /linux-image-unsigned-.*/) {
+				if ($line =~ /dpkg-query: /) {
+					$line =~ s/.*\s//;
+					printLog("package missing: $line", 'L2');
+					$allPackagesInstalled = 0;
+				}
+				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
+					if ($line =~ /.*\s[ih][i]/) {
+						$line =~ s/\s.*//;
+						printLog("$line is installed", 'L2');
+						${$somethingDone} += 1;
+					} else {
+						printLog("failed: $line", 'L2');
+						$allPackagesInstalled = 0;
+					}
+				}
 			}
 		}
 		if ($allPackagesInstalled) {
@@ -6138,7 +6751,7 @@ sub populateFlavourPackages {
 	foreach $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 			$pkgString = $1;
-			if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+			if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 				printLog("Accepted: $pkgString", 'L2');
 				$packageLine .= " $pkgString";
 				push @packages, $pkgString;
@@ -6154,7 +6767,7 @@ sub populateFlavourPackages {
 		foreach $line (@lines) {
 			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
 				$pkgString = $1;
-				if ($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) {
+				if (($pkgString =~ /^linux-.*(?:image|headers|modules)-.*/) && (!($pkgString =~ /unsigned/))) {
 					printLog("Accepted: $pkgString", 'L2');
 					push @packages, $pkgString;
 				}
@@ -6252,10 +6865,11 @@ sub uninstKernelFlavour {
 		$deinstString .= ' 2>&1';
 		printLog("uninstalling $kernelToDelete", 'L0');
 		printLog("deinstallation command: $deinstString", 'L2');
+
 		# circumvent Ubuntu failsafe for currently installed kernel
 		if ($deinstString =~ /$kernelRelease/) {
 			printLog("deinstalling current kernel!", 'L2');
-			setRestartValues();
+			setRestartValues($kernelToKeep);
 			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 			my $fileText = "#!/bin/sh\nexit 0";
 			createFile('/usr/bin/linux-check-removal', $fileText, 1);
@@ -6324,6 +6938,42 @@ sub uninstKernelFlavour {
 		}
 	}
 	return (0);
+}
+
+
+
+###############################################################################
+# checks if it is the current kernel to be uninstalled and sets parameters to
+# uninstall
+# setCurrentKernelUninstallParameters($deinstString)
+# $deinstString is a string with kernel names to be uninstalled
+# returns 1 if current kernel was detected
+# returns 0 if current kernel was not detected
+#
+sub setCurrentKernelUninstallParameters {
+	my $deinstString = shift;
+	if ($deinstString =~ /$kernelRelease/) {
+		printLog("preparing to deinstall current kernel!", 'L2');
+		$restartSystem = 1;
+		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
+		my $fileText = "#!/bin/sh\nexit 0";
+		createFile('/usr/bin/linux-check-removal', $fileText, 1);
+		chmod 755, '/usr/bin/linux-check-removal';
+		return (1);
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
+# restores the parameters set to uninstall the current kernel
+#
+sub unsetCurrentKernelUninstallParameters {
+	printLog("resetting parameters to deinstall kernel to original settings", 'L2');
+	unlink '/usr/bin/linux-check-removal';
+	rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
 }
 
 
@@ -6399,22 +7049,22 @@ sub uninstallRemnantKernels {
 
 ###############################################################################
 # removes a module containing a debian pakage
-# removeDebianModule(module, restart)
+# removeDebianModule(module, restart, parameters)
 # module is the short modulename
 # if restart = 0 => don't restart
 # if restart = 1 => restart
 # checks if the package is installed
 #
 sub removeDebianModule {
-	my ($module, $restart) = (@_);
+	my ($module, $restart, $parameter) = (@_);
 	if (isPackageInstalled($origConfModules{$module}{name})) {
-		if (removePackage($origConfModules{$module}{name})) {
+		if (removePackage($origConfModules{$module}{name}, "$parameter")) {
 			addToConfiguredModules($module, "removed");
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
 			$origConfModules{$module}{required} = "no";
 			if ($restart) {
-				setRestartValues();
+				setRestartValues($module);
 			}
 		} else {
 			addToConfiguredModules($module, "remove failed");
@@ -6527,13 +7177,34 @@ sub pkconRefresh {
 
 
 
+
+###############################################################################
+# setNoNetwork( 0 or 1 )
+# sets the network availability variable
+# 0 = network
+# 1 = no network
+#
+sub setNoNetwork {
+	my $value = shift;
+	if ($LiveISO) {
+		if ($value == 1) {
+			printLog("setting permanently for this session no network available", 'L0');
+			$noNetwork = 1;
+		}
+	} else {
+		$noNetwork = $value;
+	}
+}
+
+
+
 ###############################################################################
 # refreshes the package manager database
 # needs a module name to set the result and the amount of retries it should do
 # in case it fails the first time for some reason
-# aptgetRefresh($module, $retries)
+# aptgetRefreshModule($module, $retries)
 #
-sub aptgetRefresh {
+sub aptgetRefreshModule {
 	my ($aptgetModule, $refreshTries) = @_;
 	my $output;
 	my $exitStatus = 1;
@@ -6838,11 +7509,11 @@ sub checkNetwork {
 	my $wait = shift;
 	if ((! $FAI) && ($noNetwork == 0)) {
 		if (waitForNetwork($triesNbr, $wait)) {
-			$noNetwork = 0;
+			setNoNetwork(0);
 			printLog('found network !', 'L1');
 			return (1);
 		} else {
-			$noNetwork = 1;
+			setNoNetwork(1);
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 			startTomteDelayed();
 			return (0);
@@ -6969,7 +7640,7 @@ sub messageDesktop {
 		}
 	}
 	if (($mUsername eq '') || ($mPid eq '')) {
-		printLog('No display for message output found', 'L1');
+		printLog('No display for message output found, no username or PID', 'L1');
 		return (0);
 	}
 
@@ -6985,7 +7656,7 @@ sub messageDesktop {
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
-		printLog('No display for message output found', 'L1');
+		printLog('No display for message output found, no DBUS address', 'L1');
 		return (0);
 	}
 
@@ -6994,7 +7665,7 @@ sub messageDesktop {
 	`$mCmd`;
 
 	if ($? != 0) {
-		printLog('No display for message output found', 'L1');
+		printLog("No display for message output found with command:\n$mCmd", 'L1');
 		return (0);
 	}
 	return (1);
@@ -7481,9 +8152,109 @@ sub listStatus {
 	if ($printIt) {
 		print "Selected installation mode: $mode\n";
 		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTSTATI";
 		for my $row (@arr) {
-			format STDOUT =
+			format LISTSTATI =
 @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
+			@$row
+.
+			write;
+		}
+	}
+	if (-e $needsRestartFile) {
+		print "Some fixes need a system restart to be effective\n";
+	}
+	if ($noneRequired) {
+		print "No fixes available for this system\n";
+	}
+}
+
+
+
+
+###############################################################################
+# print status from all modules in a nice formated output
+# uses the data from the local configuration file if available
+# else it checks the hardware
+#
+# used pattern:
+# installed and new module version equal (no update)
+# installed req. old    req. new    notes
+# no        no          no          ign
+# yes       no          no          installed but not required!
+# no        yes         no          ign
+# yes       yes         no          ign
+# no        no          yes         ign
+# yes       no          yes         ign
+# no        yes         yes         not inst. but required
+# yes       yes         yes         inst. and req.
+#
+# installed and new module version not equal (update?)
+# to be done in next version
+#
+sub listVersions {
+	my @arr = ( ['Name', 'Packageversion', 'Version', 'Installed', 'Blocked', 'Required'] );
+	my $module;
+	my $noneRequired = 1;
+	my $printIt = 0;
+	my $upgradeAvailable = '';
+
+	print "tuxedo-tomte $VERSION\n";
+
+	foreach $module (sort keys %localConfModules) {
+		if($origConfModules{$module}{upgrade} eq 'yes') {
+			$upgradeAvailable = ' - upgrade available';
+		} else {
+			$upgradeAvailable = '';
+		}
+		$localConfModules{$module}{packageVersion} = '';
+		if ($module eq 'nvidiadriver') {
+			$localConfModules{$module}{packageVersion} = getPackageVersion('nvidia-driver-*');
+		}
+		if ($module =~ /kernel.*/ ) {
+			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
+		}
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+			($origConfModules{$module}{package} eq 'yes')) {
+			$localConfModules{$module}{packageVersion} = getPackageVersion($origConfModules{$module}{name});
+			if ($localConfModules{$module}{packageVersion} eq '') {
+				$localConfModules{$module}{packageVersion} = 'unkwn';
+			}
+		}
+
+		if (($localConfModules{$module}{installed} eq 'yes') &&
+			($localConfModules{$module}{required} eq 'no') &&
+			($origConfModules{$module}{required} eq 'no')) {
+			# module is installed but should not be
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{packageVersion}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}"]);
+		}
+		# required, installed and not removed
+		if (($localConfModules{$module}{required} eq 'yes') ||  ($localConfModules{$module}{required} eq 'prerequisite')) {
+			$noneRequired = 0;
+			$printIt = 1;
+			push(@arr,
+				["$localConfModules{$module}{name}",
+				"$localConfModules{$module}{packageVersion}",
+				"$localConfModules{$module}{version}",
+				"$localConfModules{$module}{installed}",
+				"$localConfModules{$module}{blocked}",
+				"$localConfModules{$module}{required}$upgradeAvailable"]);
+		}
+	}
+	if ($printIt) {
+		print "Selected installation mode: $mode\n";
+		print "Only showing fixes that are available for this hardware\n";
+		$~ = "LISTVERSIONS";
+		for my $row (@arr) {
+			format LISTVERSIONS =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<< @<<<<<<< @<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<
 			@$row
 .
 			write;
@@ -8371,7 +9142,7 @@ sub postConfigure {
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgram{$sysProgram}{command}", 'L1');
 				postSetModulesState($sysProgram, "success");
-				setRestartValues();
+				setRestartValues($sysProgram);
 			} else {
 				$postConfTrigger = 1;
 				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0');
@@ -8599,7 +9370,9 @@ sub modulesList() {
 # sets values to restart the system
 #
 sub setRestartValues {
+	my $element = shift;
 	$restartSystem = 1;
+	printLog("setting restart for: $element", 'L2');
 	createFile($needsRestartFile, 'Tomte: system has to be restarted', 0);
 }
 
@@ -8657,6 +9430,7 @@ my $USAGE =<<USAGE;
 tuxedo-tomte <COMMAND> [NAME...]
 tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
+  versions                       Like 'list' but with version numbers
   modules                        List all available modules
   description MODULE             Shows the module description
   configure MODULE ...|all       Configure an unconfigured module
@@ -8751,6 +9525,36 @@ sub tuxedoDevice {
 
 
 
+###############################################################################
+# checks if this is a notebook
+# returns 'notebook' if a notebook was detected
+# returns 'desktoppc' if a desktop pc was detected
+# returns 0 if there was an error or nothing was detected
+#
+sub getChassisType {
+	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $chassisTypeNbr;
+	my $FH;
+	if ((-e $fileName) && open($FH, "<", $fileName)) {
+		$chassisTypeNbr = <$FH>;
+		$chassisTypeNbr =~ s/\n//g;
+	}
+	if ($chassisTypeNbr eq '3') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '4') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '6') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '7') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '8') { return ('notebook'); }
+	if ($chassisTypeNbr eq '9') { return ('notebook'); }
+	if ($chassisTypeNbr eq '10') { return ('notebook'); }
+	if ($chassisTypeNbr eq '17') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
+	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+	return ('0');
+}
+
+
+
 
 
 ###############################################################################
@@ -8759,8 +9563,14 @@ sub tuxedoDevice {
 ###############################################################################
 # MAIN PROGRAM
 
-if (!tuxedoDevice()) {
-	print 'It seems that this is not a TUXEDO device. Please contact us if this is a mistake\n';
+$chassisType = getChassisType();
+if ($chassisType eq '0') {
+	print "Something went wrong and I could not determine what type of system this might be ...\n";
+	exit (0);
+}
+
+if ((!tuxedoDevice()) && ($chassisType eq 'notebook')) {
+	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
 	exit (0);
 }
 
@@ -8813,6 +9623,16 @@ if (@ARGV != 0) {
 			prepareValues();
 		}
 		listStatus();
+
+	# versions
+	} elsif ($argValue{command} eq "versions") {
+		checkMode();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+		} else {
+			prepareValues();
+		}
+		listVersions();
 
 	# modules
 	} elsif ($argValue{command} eq "modules") {
