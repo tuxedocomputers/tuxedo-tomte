@@ -2298,7 +2298,6 @@ sub acquireLock {
 	my $num;
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		#TODO debug
 		printLog("acquiring lock: $filename", 'TL2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
@@ -2336,7 +2335,6 @@ sub releaseLock {
 	my $FH = $lockFiles{$key}{FH};
 	my $num = $lockFiles{$key}{number};
 	my $fs;
-	#TODO debug
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
@@ -2393,7 +2391,6 @@ sub lockPM {
 		$processedLockFiles++;
 	}
 	if ($processedLockFiles < $lockFilesHashSize) {
-		#TODO
 		printLog("!!! some files are already locked! reverting all locks", 'TL2');
 		unlockPM('some files locked -> reverting');
 		return (0);
@@ -2418,7 +2415,6 @@ sub unlockPM {
 	my $hashSize = keys %lockFiles;
 	my $countReleased = 0;
 	my $countToRelease = 0;
-	#TODO lots of debug
 	printLog("attempting to unlock all files for >$reason< ...", 'L2');
 	foreach $key (keys %lockFiles) {
 		printLog("is $key locked?: $lockFiles{$key}{locked}", 'L2');
