@@ -4601,8 +4601,10 @@ sub nvidiadriver() {
 	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4666,8 +4668,10 @@ sub nvidiadriver() {
 				($completeDistVersion =~ /KDE neon 20.04/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4722,10 +4726,6 @@ sub nvidiadriver() {
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
 
@@ -4734,8 +4734,9 @@ sub nvidiadriver() {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
 
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
 				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
