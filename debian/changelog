@@ -1,3 +1,66 @@
+tuxedo-tomte (2.8.12-1) UNRELEASED; urgency=medium
+
+  * removed some debug
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Jun 2023 08:48:25 +0200
+
+tuxedo-tomte (2.8.12) jammy; urgency=medium
+
+  * added Linux Mint 21.1
+  * repaired constant reboot message on focal
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Jun 2023 09:34:32 +0200
+
+tuxedo-tomte (2.8.11) jammy; urgency=medium
+
+  * added support for desktop-pc
+  * resolved problem with gnome and plasma
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 25 May 2023 14:12:26 +0200
+
+tuxedo-tomte (2.8.10) jammy; urgency=medium
+
+  * added tuxedo-dgpu-run for systems with KDE Plasma >= 5.25
+  * removed r8168-dkms from TUXEDO Book BC15 Gen10 and TUXEDO Book BC17 Gen10
+    with boardname NHxxRZQ
+  * removed installation of r8168-dkms from FAI and LiveISO
+  * added device 0x144d:0xa80c for samsungnvmefix
+  * added tuxedtouchpadswitch for TUXEDO InfinityBook Pro 14 Gen8 with
+    boardname: PH4PRX1_PH6PRX1
+  * added notebook/desktop recognition
+  * added option 'versions' to list version numbers
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 May 2023 09:37:10 +0200
+
+tuxedo-tomte (2.8.9) jammy; urgency=medium
+
+  * replacing Nvidia drivers with tuxedo-nvidia-driver-530 for systems with
+    jammy
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 09 May 2023 14:00:31 +0200
+
+tuxedo-tomte (2.8.8) jammy; urgency=medium
+
+  * changed module name and removed tuxedo-r8125-dkms from FAI and LiveISO
+    installation
+  * added intel-gen13-powerctl-fix for Intel Gen13 devices
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Apr 2023 09:53:30 +0200
+
+tuxedo-tomte (2.8.7) jammy; urgency=medium
+
+  * added tuxedo-keyboard-ite and tuxedo-touchpad-switch for
+    TUXEDO Stellaris 16 Gen5 Intel with boardname GMxPXxx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 20 Apr 2023 07:52:20 +0200
+
+tuxedo-tomte (2.8.6) jammy; urgency=medium
+
+  * forcing installation of newer package version for grub-efi-amd64-signed
+    and shim-signed
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 31 Mar 2023 17:37:17 +0200
+
 tuxedo-tomte (2.8.4) jammy; urgency=medium
 
   * removed masking on systemd packagekit service
@@ -87,7 +150,6 @@ tuxedo-tomte (2.7.5) jammy; urgency=medium
 
 tuxedo-tomte (2.7.4) jammy; urgency=medium
 
->>>>>>> regression-lock-packagemanager
   * added tuxedokeyboardite and tuxedotouchpadswitch for TUXEDO
     Stellaris Gen4 AMD with boardname GMxRGxx
   * reggression for 2.7.3
