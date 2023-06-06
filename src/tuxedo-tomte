@@ -6382,21 +6382,6 @@ sub deinstallPackage {
 
 
 
-<<<<<<< HEAD
-	$aptgetDeinst .= " $deinst";
-	printLog("deinstalling single package: $deinst", 'L0');
-	$aptgetDeinst .= " >/dev/null 2>&1";
-	if (isPackageInstalled($deinst)) {
-		deactivatePackagekit();
-		if (system($aptgetDeinst)) {
-			$retValue = $?/256;
-			printLog("failed to deinstall package, retvalue: $retValue", 'L0');
-			return (1);
-		} else {
-			printLog('deinstallation of package successful', 'L0');
-			return (0);
-		}
-=======
 ###############################################################################
 # Checks if the package is in any of the repositories
 #
@@ -6409,7 +6394,6 @@ sub isPackageInRepo {
 	if ($package eq $returnFromSearch) {
 		return (1);
 		printLog("package found", 'L2');
->>>>>>> e9d0857f41873c8fea6d9c57e0bf142a80bd8687
 	} else {
 		printLog("requested package can't be found in the repositories", 'L2');
 		return (0);
