@@ -6299,13 +6299,7 @@ sub deinstExcept {
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
-		#TODO debug
 		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2');
-		if ($deinstKey =~ $except) {
-			printLog("logic is true", 'L2');
-		} else {
-			printLog("logic is false", 'L2');
-		}
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
 			$deinstCmd .= ' '.$deinstKey;
