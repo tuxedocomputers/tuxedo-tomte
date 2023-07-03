@@ -2503,6 +2503,30 @@ sub writeFile {
 
 
 
+
+###############################################################################
+# removes a line of text from given file
+# returns 1 if successfull
+# returns 0 if not successfull
+#
+sub removeLineFromFile {
+	my ($removeLine, $file) = @_;
+	my $FH;
+	my $line;
+	my @lines;
+	open($FH, '<', $file) or return (0);
+	@lines = <$FH>;
+	close($FH);
+	open($FH, '>', $file);
+	foreach $line (@lines) {
+		if ($line !~ /$removeLine/) {
+			print($FH $line);
+		}
+	}
+}
+
+
+
 ###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
@@ -5795,6 +5819,7 @@ sub createRepos {
 		mkdir($sourcesListDirD);
 	}
 
+	# read content from sources.list into hash
 	if (-e $sourcesFileName) {
 		$repoHash{$sourcesFileName} = [readFileReturnLines($sourcesFileName)];
 	}
@@ -5862,12 +5887,18 @@ sub createRepos {
 
 	my $firstEntry;
 	my $sourcesListBackedup = 0;
+	my $repo1 = '';
+	my $repo2 = '';
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
 			$firstEntry = 1;
-			foreach (@{ $repos{$completeDistVersion}{$key}{content} }) {
-				if (!isLinePresent($_, %repoHash)) {
+			foreach $repo1 (@{ $repos{$completeDistVersion}{$key}{content} }) {
+				$repo2 = $repo1;
+				$repo2 =~ s/(deb https:\/\/.*\/\w+)( .*)/$1\/$2/gm;
+				#TODO debug
+				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
+				if (!(isLinePresent($repo1, %repoHash))) {
 					# make backup if file exists and is first entry into file
 					if ( (-s $repos{$completeDistVersion}{$key}{filename}) && ($firstEntry == 1) ) {
 						backupFile($repos{$completeDistVersion}{$key}{filename});
@@ -5880,16 +5911,20 @@ sub createRepos {
 					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
 						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
 						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-						printLog("added: $_", 'L0');
+						printLog("added: $repo1", 'L0');
 						$firstEntry = 0;
 						$modified = 1;
 					# or append line
 					} else {
 						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
 						printLog("append file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-						printLog("added: $_", 'L0');
+						printLog("added: $repo1", 'L0');
 						$modified = 1;
 					}
+				}
+				if (isLinePresent($repo2, %repoHash)) {
+					removeLineFromFile($repo2, $repoHash{});
+					#TODO from files?
 				}
 			}
 		}
