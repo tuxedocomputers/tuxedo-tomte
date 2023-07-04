@@ -2509,6 +2509,28 @@ sub writeFile {
 # returns 1 if successfull
 # returns 0 if not successfull
 #
+sub removeLineFromFiles {
+	my $searchLine = shift;
+	my (%hash) = @_;
+	my $filenameKey;
+	my $line;
+	foreach $filenameKey (keys %hash) {
+		foreach $line (@{ $hash{$filenameKey} }) {
+			if ($searchLine eq $line) {
+				return removeLineFromFile($searchLine, $filenameKey);
+			}
+		}
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# removes a line of text from given file
+# returns 1 if successfull
+# returns 0 if not successfull
+#
 sub removeLineFromFile {
 	my ($removeLine, $file) = @_;
 	my $FH;
@@ -2517,12 +2539,14 @@ sub removeLineFromFile {
 	open($FH, '<', $file) or return (0);
 	@lines = <$FH>;
 	close($FH);
-	open($FH, '>', $file);
+	open($FH, '>', $file) or return (0);
 	foreach $line (@lines) {
 		if ($line !~ /$removeLine/) {
 			print($FH $line);
 		}
 	}
+	close($FH);
+	return (1);
 }
 
 
@@ -5894,10 +5918,6 @@ sub createRepos {
 		if ($key ne 'name') {
 			$firstEntry = 1;
 			foreach $repo1 (@{ $repos{$completeDistVersion}{$key}{content} }) {
-				$repo2 = $repo1;
-				$repo2 =~ s/(deb https:\/\/.*\/\w+)( .*)/$1\/$2/gm;
-				#TODO debug
-				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
 				if (!(isLinePresent($repo1, %repoHash))) {
 					# make backup if file exists and is first entry into file
 					if ( (-s $repos{$completeDistVersion}{$key}{filename}) && ($firstEntry == 1) ) {
@@ -5922,9 +5942,13 @@ sub createRepos {
 						$modified = 1;
 					}
 				}
+				# construct repo with '/' ending in URL
+				$repo2 = $repo1;
+				$repo2 =~ s/(deb https:\/\/.*\/\w+)( .*)/$1\/$2/gm;
+				#TODO debug
+				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
 				if (isLinePresent($repo2, %repoHash)) {
-					removeLineFromFile($repo2, $repoHash{});
-					#TODO from files?
+					removeLineFromFiles($repo2, %repoHash);
 				}
 			}
 		}
@@ -7339,12 +7363,13 @@ sub backupFile {
 # checks if the line exists in the files given as hash
 # 
 sub isLinePresent {
-	my $line = shift;
+	my $searchLine = shift;
 	my (%hash) = @_;
 	my $filenameKey;
+	my $line;
 	foreach $filenameKey (keys %hash) {
-		foreach (@{ $hash{$filenameKey} }) {
-			if ($line eq $_) {
+		foreach $line (@{ $hash{$filenameKey} }) {
+			if ($searchLine eq $line) {
 				return (1);
 			}
 		}
