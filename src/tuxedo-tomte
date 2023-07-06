@@ -4667,6 +4667,9 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
 				($completeDistVersion =~ /elementary OS 6.1/) ||
 				($completeDistVersion =~ /KDE neon 20.04/) ||
@@ -4725,6 +4728,10 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
