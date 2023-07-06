@@ -1,4 +1,4 @@
-tuxedo-tomte (2.8.12-8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.8.12-10) UNRELEASED; urgency=medium
 
   * removed some debug
   * after packaging
@@ -14,8 +14,424 @@ tuxedo-tomte (2.8.12-8) UNRELEASED; urgency=medium
   * after packaging
   * more nvidia debug
   * after packaging
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * debuglevel
+  * packing
+  * after packaging
+  * added tuxedokeyboardite for XMG Fusion 15 L19 with GTX1660Ti or RTX2070 with boardnames: LAPQC71A or LAPQC71B
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added check for debug or TODO inside source
+  * repaired check for debug and TODO
+  * debug for repokey
+  * packing
+  * after packaging
+  * added debug for logs
+  * packing
+  * after packaging
+  * typo
+  * packing
+  * after packaging
+  * changed delay for keys
+  * packing
+  * after packaging
+  * more debug
+  * packing
+  * after packaging
+  * more debug
+  * packing
+  * after packaging
+  * before checkout
+  * added lock check for keyring install
+  * packing
+  * after packaging
+  * test wrong name
+  * packing
+  * after packaging
+  * added handling for missing repoKey
+  * packing
+  * after packaging
+  * test for wrong name in wget
+  * packing
+  * after packaging
+  * tomte exit if no repokey
+  * packing
+  * after packaging
+  * added desktop messages
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * trying to set reasonable delay settings
+  * before merge
+  * changed delay for network and PM
+  * packing
+  * after packaging
+  * added depends for perl library
+  * packing
+  * after packaging
+  * changed depends
+  * packing
+  * after packaging
+  * changed network check handling and repoKey install
+  * packing
+  * after packaging
+  * changed return networkSearch
+  * packing
+  * after packaging
+  * loglevel to 0
+  * packing
+  * after packaging
+  * added kerneltuxedo2204edge for InfinityBook 16 Gen7 with boardnames: PHxARX1_PHxAQF1 or PH6AG01_PH6AQ71_PH6AQI1
+  * packing
+  * after packaging
+  * changed values for kernel module
+  * packing
+  * after packaging
+  * added debug
+  * packing
+  * after packaging
+  * rem autodie
+  * packing
+  * after packaging
+  * added kernel flavour
+  * packing
+  * after packaging
+  * before merge
+  * added tuxedotouchpadswitch for TUXEDO InfinityBook 16 Gen7 with boardnames: PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
+  * packing
+  * after packaging
+  * moved http modifications in FAI to the end
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * added some log data
+  * more debug
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added Pro to last added device
+  * added printListMachinereadable
+  * packing
+  * after packaging
+  * added ommision of first and last modules in main process
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added Module Dpkg::Version
+  * added kernel dependency and compare for some fizes
+  * packing
+  * after packaging
+  * removed debug
+  * changed some conditions
+  * added check in FAI for some fixes
+  * packing
+  * after packaging
+  * test for env variables
+  * packing
+  * after packaging
+  * check for 1804 from classes var
+  * packing
+  * after packaging
+  * changed ENV classes
+  * packing
+  * after packaging
+  * added debug
+  * packing
+  * after packaging
+  * debug
+  * packing
+  * after packaging
+  * more debug
+  * packing
+  * after packaging
+  * added regex parameters
+  * packing
+  * after packaging
+  * removed debug
+  * added kernel linux-tuxedo-22.04-edge to Pulse 15 Gen2 with boardname PF5LUXG
+  * after merge with 232
+  * packing
+  * after packaging
+  * removed test
+  * first try JSON list output
+  * added report for installs to commit for logfile
+  * added report for modules to be installed
+  * packing
+  * after packaging
+  * finished in logfile always
+  * added message kernel install
+  * activated debug
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added libjson-perl to dependencies
+  * packing
+  * after packaging
+  * changed repos from http to https for Elementary OS 6
+  * added message for restart on terminal
+  * added debug
+  * minor changes in formating output
+  * packing
+  * after packaging
+  * added subroutine for setting system restart values
+  * added message restart in list
+  * packing
+  * after packaging
+  * added debug for kernel install
+  * packing
+  * after packaging
+  * call by reference on kernel install
+  * packing
+  * after packaging
+  * changed all kernel installs to call by reference
+  * packing
+  * after packaging
+  * added some debug
+  * packing
+  * after packaging
+  * changed to variable adress
+  * packing
+  * after packaging
+  * call by ref in sub
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * removed linux unsigned
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * remove debug
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * repaired wrong list and changed JSON format
+  * packing
+  * after packaging
+  * added restart info on listjson
+  * packing
+  * after packaging
+  * redirect errors to null for lspci
+  * packing
+  * after packaging
+  * moved mPid value
+  * added i915.enable_psr=1 to i915enablepsrfix
+  * packing
+  * after packaging
+  * removed debug for i915enablepsrfix
+  * packing
+  * after packaging
+  * added tuxedo-nvidia-driver-525 as default nvidia driver
+  * packing
+  * packing
+  * after packaging
+  * changed upgrade to update
+  * packing
+  * after packaging
+  * added debug for FAI testing
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added tuxedo-nvidia-driver-525 for 22.04 only
+  * packing
+  * after packaging
+  * changed from tuxedo to native nvidia driver
+  * packing
+  * after packaging
+  * added tuxedo-nvidia-driver
+  * packing
+  * after packaging
+  * added debug for nvidia
+  * packing
+  * after packaging
+  * added debug
+  * packing
+  * after packaging
+  * removed some debug
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added KDE neon 22.04
+  * packing
+  * after packaging
+  * changed repos
+  * packing
+  * after packaging
+  * added remove old repos
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added remove for tuxedokeyboardite and fingerprintreader
+  * packing
+  * after packaging
+  * added debug uncomment test repos if they were there before
+  * packing
+  * after packaging
+  * removed debug
+  * added ThirdPartyMirrors file for upgrades to next LTS
+  * packing
+  * after packaging
+  * typo
+  * packing
+  * after packaging
+  * added Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT and tuxedokeyboardite
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added debug
+  * packing
+  * after packaging
+  * added thunderboltbootdelayfix for Gemini 17 Gen1 with boradname PD5x_7xPNP_PNR_PNN_PNT
+  * packing
+  * after packaging
+  * added kernel linuxtuxedo2204next to Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * added kerneltuxedo2204next for Gemini 17 Gen1 with boardname: PD5x_7xPNP_PNR_PNN_PNT
+  * changed kernel parameter for thunderboltbootdelayfix
+  * packing
+  * after packaging
+  * added missing kernel flavour
+  * packing
+  * after packaging
+  * removed error as space in operator
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * changed delay time and wait for active network
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * changed wait time for reTomte to 1min
+  * packing
+  * after packaging
+  * changed transient timer
+  * packing
+  * after packaging
+  * reduced transient timer to 30 seconds
+  * removed thunderboltbootdelayfix from Gemini 17 Gen1 with boardname PD5x_7xPNP_PNR_PNN_PNT
+  * packing
+  * after packaging
+  * added packagekit subroutines
+  * remove TODOs
+  * packing
+  * after packaging
+  * corrected missing newline character
+  * copied from regression
+  * changes
+  * refined systemd stop and starter
+  * packing
+  * after packaging
+  * added packagekiller to required sections
+  * added restore of original state packagekit at END
+  * packing
+  * after packaging
+  * minor changes systemd return values
+  * packing
+  * after packaging
+  * changed pkcon by apt-get
+  * packing
+  * after packaging
+  * modified systemd statuses at END
+  * packing
+  * after packaging
+  * removed systemd check from FAI
+  * packing
+  * after packaging
+  * removed empty chars from systemd return
+  * packing
+  * after packaging
+  * removed debug
+  * packing
+  * after packaging
+  * added retry and delay function for aptgetRefresh
+  * packing
+  * after packaging
+  * missing string append sign
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * removed mask from systemd packagekit service
+  * packing
+  * after packaging
+  * added debug and systemdState at END
+  * packing
+  * after packaging
+  * after merge with 256
+  * packing
+  * after packaging
+  * merged some parts to 177
+  * more merging
+  * finished merge with 177
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added installation of newer package version for grub-efi-amd64-signed
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * temp grub-efi-amd64-signed fix only for focal systems
+  * packing
+  * after packaging
+  * moved tuxedo-r8125-dkms installation out of FAI into next boot
+  * activated debug
+  * packing
+  * after packaging
+  * simplified realtek subroutine
+  * packing
+  * after packaging
+  * removed not in FAI
+  * packing
+  * after packaging
+  * changed package name for realtek driver
+  * packing
+  * after packaging
+  * packing
+  * after packaging
+  * added shim-sign
+  * packing
+  * after packaging
+  * after atomic merge with current
+  * after more merging with current
+  * removed testscript
+  * after packaging
+  * removed some debug
+  * minor cosmetics
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Jun 2023 21:30:55 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 06 Jul 2023 08:24:26 +0200
 
 tuxedo-tomte (2.8.12) jammy; urgency=medium
 
