@@ -6324,6 +6324,7 @@ sub deinstExcept {
 			$retText = `$deinstCmd`;
 		} else {
 			$deinstCmd .= ' >/dev/null 2>&1';
+			$retText = `$deinstCmd`;
 		}
 		if ($? != 0) {
 			$retValue = $?/256;
