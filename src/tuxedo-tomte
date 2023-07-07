@@ -6408,10 +6408,10 @@ sub isPackageInRepo {
 	$returnFromSearch =~ s/ .*//;
 	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
 	if ($package eq $returnFromSearch) {
+		printLog("package $package found in repos", 'L2');
 		return (1);
-		printLog("package found", 'L2');
 	} else {
-		printLog("requested package can't be found in the repositories", 'L2');
+		printLog("package $package can't be found in the repositories", 'L2');
 		return (0);
 	}
 }
