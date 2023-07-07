@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.12';
+our $VERSION = '2.8.12-16';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -44,7 +44,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -4605,8 +4605,10 @@ sub nvidiadriver() {
 	my $nvidiaDriver530 = 'nvidia-driver-530';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4665,13 +4667,18 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
 				($completeDistVersion =~ /elementary OS 6.1/) ||
 				($completeDistVersion =~ /KDE neon 20.04/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4721,15 +4728,15 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
 
@@ -4738,8 +4745,9 @@ sub nvidiadriver() {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
 
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
 				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
@@ -6277,6 +6285,7 @@ sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
@@ -6301,6 +6310,7 @@ sub deinstExcept {
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
+		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2');
 		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
 			$deinstCounter++;
 			$deinstCmd .= ' '.$deinstKey;
@@ -6308,12 +6318,13 @@ sub deinstExcept {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstList", 'L0');
+		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0');
 		my $retText;
 		if ($FAI) {
 			$retText = `$deinstCmd`;
 		} else {
 			$deinstCmd .= ' >/dev/null 2>&1';
+			$retText = `$deinstCmd`;
 		}
 		if ($? != 0) {
 			$retValue = $?/256;
@@ -6344,6 +6355,7 @@ sub deinstallPackage {
 	my $deinstKey;
 	my $deinstList = '';
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	if ($retValue != 0) {
@@ -6367,7 +6379,7 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstList", 'L0');
+		printLog("deinstalling package: $deinstList", 'L0');
 		$aptgetDeinst .= ' >/dev/null 2>&1';
 		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
