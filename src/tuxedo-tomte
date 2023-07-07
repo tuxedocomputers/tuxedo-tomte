@@ -6281,6 +6281,8 @@ sub activatePackagekit {
 # unsuccessful
 # returns 1 if everything was ok, even if no packages were found
 #
+# !!!!! WARNING !!!! this is mostly adapted for the nvidia installation module
+#
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
@@ -6301,6 +6303,7 @@ sub deinstExcept {
 		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
+	my @exceptDependencies = getPackageDependencies($except);
 
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
@@ -6311,7 +6314,16 @@ sub deinstExcept {
 
 	foreach $deinstKey (keys %retHash) {
 		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2');
-		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+		#TOD debug
+		if (grep( /^$deinstKey$/, @exceptDependencies)) {
+			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2');
+		} else {
+			printLog("grep: $deinstKey not found in dependencies, delete!", 'L2');
+		}
+		# check if it is installed/not excempt/not a dependency of the excemp
+		if (($retHash{$deinstKey} =~ /i./) &&
+			!($deinstKey =~ $except) &&
+			!(grep( /^$deinstKey$/, @exceptDependencies ))) {
 			$deinstCounter++;
 			$deinstCmd .= ' '.$deinstKey;
 			$deinstList .= ' '.$deinstKey;
@@ -6340,6 +6352,35 @@ sub deinstExcept {
 		return (1);
 	}
 }
+
+
+
+
+###############################################################################
+# Finds all dependencies for a given package and returns them in an array
+#
+sub getPackageDependencies {
+	my $package = shift;
+	my $result;
+	my @lines;
+	my $line;
+	my $pkgString;
+	my @packages;
+	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
+	$result = `$searchCmd`;
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$pkgString = $1;
+			printLog("found dependency: $pkgString", 'L2');
+			push @packages, $pkgString;
+		}
+	}
+	return @packages;
+}
+
+
+
 
 
 
