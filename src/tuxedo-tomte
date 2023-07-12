@@ -9481,6 +9481,7 @@ my $USAGE =<<USAGE;
 tuxedo-tomte <COMMAND> [NAME...]
 tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
+  status                         Same as 'list'
   versions                       Like 'list' but with version numbers
   modules                        List all available modules
   description MODULE             Shows the module description
@@ -9666,10 +9667,10 @@ if (@ARGV != 0) {
 	}
 
 	# list
-	if ($argValue{command} eq "list") {
+	if (($argValue{command} eq "list") || ($argValue{command} eq "status")) {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
@@ -9679,7 +9680,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "versions") {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
@@ -9697,7 +9698,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "listjson") {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
