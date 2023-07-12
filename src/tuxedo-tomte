@@ -9601,6 +9601,12 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+	my $returnHostnamectl = `hostnamectl`;
+	if (isLineInFile('Chassis: vm')) {
+		# TODO debug
+		printLog("chassis is desktoppc", 'L2');
+		return ('desktoppc');
+	}
 	return ('0');
 }
 
