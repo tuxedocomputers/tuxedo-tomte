@@ -1118,7 +1118,7 @@ my %tuxedo_devices = (
 	'49' => {
 		model => ['TUXEDO InfinityBook Pro 16 Gen7'],
 		board_name => ['PHxARX1_PHxAQF1', 'PH6AG01_PH6AQ71_PH6AQI1'],
-		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix'],
+		fix => ['tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2897,9 +2897,7 @@ sub checkRequirements {
 
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/) ||
-		($boardname =~ m/PHxARX1_PHxAQF1/) ||
-		($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
+		($boardname =~ m/PHxTQx1/) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1');
 	}
