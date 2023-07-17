@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.8.12';
+our $VERSION = '2.9.1-5';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -44,7 +44,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1118,7 +1118,7 @@ my %tuxedo_devices = (
 	'49' => {
 		model => ['TUXEDO InfinityBook Pro 16 Gen7'],
 		board_name => ['PHxARX1_PHxAQF1', 'PH6AG01_PH6AQ71_PH6AQI1'],
-		fix => ['tuxedotouchpadswitch'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1189,6 +1189,17 @@ my %tuxedo_devices = (
 		pci_id => '',
 		cpu => '',
 		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'56' => {
+		model => ['TUXEDO InfinityBook Pro 14 Gen7'],
+		board_name => ['PHxARX1_PHxAQF1'],
+		fix => ['tuxedotouchpadswitch', 'i915enablepsrfix'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'linux-tuxedo-22.04-edge',
 		display => '',
 		usb_device => '',
 	},
@@ -1753,7 +1764,7 @@ my %origConfModules = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 4,
+		version => 5,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2298,7 +2309,6 @@ sub acquireLock {
 	my $num;
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		#TODO debug
 		printLog("acquiring lock: $filename", 'TL2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
@@ -2336,7 +2346,6 @@ sub releaseLock {
 	my $FH = $lockFiles{$key}{FH};
 	my $num = $lockFiles{$key}{number};
 	my $fs;
-	#TODO debug
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
@@ -2393,7 +2402,6 @@ sub lockPM {
 		$processedLockFiles++;
 	}
 	if ($processedLockFiles < $lockFilesHashSize) {
-		#TODO
 		printLog("!!! some files are already locked! reverting all locks", 'TL2');
 		unlockPM('some files locked -> reverting');
 		return (0);
@@ -2418,7 +2426,6 @@ sub unlockPM {
 	my $hashSize = keys %lockFiles;
 	my $countReleased = 0;
 	my $countToRelease = 0;
-	#TODO lots of debug
 	printLog("attempting to unlock all files for >$reason< ...", 'L2');
 	foreach $key (keys %lockFiles) {
 		printLog("is $key locked?: $lockFiles{$key}{locked}", 'L2');
@@ -2949,7 +2956,9 @@ sub checkRequirements {
 
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/)) {
+		($boardname =~ m/PHxTQx1/) ||
+		($boardname =~ m/PHxARX1_PHxAQF1/) ||
+		($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1');
 	}
@@ -4651,10 +4660,13 @@ sub nvidiadriver() {
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver525 = 'nvidia-driver-525';
 	my $nvidiaDriver530 = 'nvidia-driver-530';
+	my $nvidiaDriver535 = 'nvidia-driver-535';
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4713,13 +4725,18 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 		
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
 				($completeDistVersion =~ /elementary OS 6.1/) ||
 				($completeDistVersion =~ /KDE neon 20.04/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			if (isPackageInRepo($nvidiaDriver510)) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
+			}
 
 			# check if the package is already installed
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
@@ -4769,35 +4786,37 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
+
+
+
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			# deinstall other nvidia drivers
-			$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver525);
-
-			# check if the package is already installed
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
+			my $tuxedoNvidiaDriver535 = 'tuxedo-nvidia-driver-535';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver530 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver535 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver530);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver535);
 
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver535);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				$oldDriversRemoved = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver530);
-				if( ! isPackageInstalled($tuxedoNvidiaDriver530) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver535) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver530);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver535);
 				} else {
-					setAptMark($tuxedoNvidiaDriver530,'manual');
+					setAptMark($tuxedoNvidiaDriver535,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver530  can't be found in the repositories", 'L0');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver535  can't be found in the repositories", 'L0');
 			}
 
 			if( ! isPackageInstalled('mesa-utils') ) {
@@ -6332,10 +6351,13 @@ sub activatePackagekit {
 # unsuccessful
 # returns 1 if everything was ok, even if no packages were found
 #
+# !!!!! WARNING !!!! this is mostly adapted to the nvidia installation module
+#
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
@@ -6351,6 +6373,7 @@ sub deinstExcept {
 		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
+	my @exceptDependencies = getPackageDependencies($except);
 
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
@@ -6360,19 +6383,30 @@ sub deinstExcept {
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
-		if (($retHash{$deinstKey} =~ /i./) && !($deinstKey =~ $except)) {
+		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2');
+		# usefull for debug
+		if (grep( /^$deinstKey$/, @exceptDependencies)) {
+			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2');
+		} else {
+			printLog("grep: $deinstKey not found in dependencies, delete!", 'L2');
+		}
+		# check if it is installed/not exempt/not a dependency of the exemp
+		if (($retHash{$deinstKey} =~ /i./) &&
+			!($deinstKey =~ $except) &&
+			!(grep( /^$deinstKey$/, @exceptDependencies ))) {
 			$deinstCounter++;
 			$deinstCmd .= ' '.$deinstKey;
 			$deinstList .= ' '.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstList", 'L0');
+		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0');
 		my $retText;
 		if ($FAI) {
 			$retText = `$deinstCmd`;
 		} else {
 			$deinstCmd .= ' >/dev/null 2>&1';
+			$retText = `$deinstCmd`;
 		}
 		if ($? != 0) {
 			$retValue = $?/256;
@@ -6391,6 +6425,35 @@ sub deinstExcept {
 
 
 
+
+###############################################################################
+# Finds all dependencies for a given package and returns them in an array
+#
+sub getPackageDependencies {
+	my $package = shift;
+	my $result;
+	my @lines;
+	my $line;
+	my $pkgString;
+	my @packages;
+	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
+	$result = `$searchCmd`;
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$pkgString = $1;
+			printLog("found dependency: $pkgString", 'L2');
+			push @packages, $pkgString;
+		}
+	}
+	return @packages;
+}
+
+
+
+
+
+
 ###############################################################################
 # Deinstalls all packages beginning with a given string
 # uses '*' at end of package name to be searched
@@ -6403,6 +6466,7 @@ sub deinstallPackage {
 	my $deinstKey;
 	my $deinstList = '';
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
 	my $retValue = $?/256;
 	if ($retValue != 0) {
@@ -6426,7 +6490,7 @@ sub deinstallPackage {
 		}
 	}
 	if ($deinstCounter != 0) {
-		printLog("deinstalling: $deinstList", 'L0');
+		printLog("deinstalling package: $deinstList", 'L0');
 		$aptgetDeinst .= ' >/dev/null 2>&1';
 		if (system($aptgetDeinst)) {
 			$retValue = $?/256;
@@ -6455,10 +6519,10 @@ sub isPackageInRepo {
 	$returnFromSearch =~ s/ .*//;
 	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2');
 	if ($package eq $returnFromSearch) {
+		printLog("package $package found in repos", 'L2');
 		return (1);
-		printLog("package found", 'L2');
 	} else {
-		printLog("requested package can't be found in the repositories", 'L2');
+		printLog("package $package can't be found in the repositories", 'L2');
 		return (0);
 	}
 }
@@ -9490,6 +9554,7 @@ my $USAGE =<<USAGE;
 tuxedo-tomte <COMMAND> [NAME...]
 tomte <COMMAND> [NAME...]
   list                           List all installable modules with detailed status
+  status                         Same as 'list'
   versions                       Like 'list' but with version numbers
   modules                        List all available modules
   description MODULE             Shows the module description
@@ -9610,6 +9675,12 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+	my $returnHostnamectl = `hostnamectl`;
+	if ($returnHostnamectl =~ /^\s+Chassis: vm/gm) {
+		printLog("chassis is a virtual machine", 'TL2');
+		printLog("machine will be treated as desktoppc", 'TL2');
+		return ('desktoppc');
+	}
 	return ('0');
 }
 
@@ -9624,6 +9695,7 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
+printLog("chassistype will be: $chassisType", 'TL2');
 if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
@@ -9675,10 +9747,10 @@ if (@ARGV != 0) {
 	}
 
 	# list
-	if ($argValue{command} eq "list") {
+	if (($argValue{command} eq "list") || ($argValue{command} eq "status")) {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
@@ -9688,7 +9760,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "versions") {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
@@ -9706,7 +9778,7 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "listjson") {
 		checkMode();
 		if (!-e $configFile) {
-			print "no config file present yet, please use 'sudo tomte list' to initialize one\n";
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
 			prepareValues();
 		}
