@@ -9603,9 +9603,9 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
 	my $returnHostnamectl = `hostnamectl`;
-	if (isLineInFile('Chassis: vm')) {
-		# TODO debug
-		printLog("chassis is desktoppc", 'L2');
+	if ($returnHostnamectl =~ /^\s+Chassis: vm/gm) {
+		printLog("chassis is a virtual machine", 'TL2');
+		printLog("machine will be treated as desktoppc", 'TL2');
 		return ('desktoppc');
 	}
 	return ('0');
@@ -9622,6 +9622,7 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
+printLog("chassistype will be: $chassisType", 'TL2');
 if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
