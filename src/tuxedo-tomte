@@ -231,6 +231,9 @@ my %supportedOS = (
 			"21.1" => {
 				name => 'vera',
 			},
+			"21.2" => {
+				name => 'victoria',
+			},
 		},
 	},
 	"TUXEDO_OS Plasma" => {
@@ -332,6 +335,13 @@ my %tuxedo_repos = (
 		name => 'jammy',
 	},
 	"Linux Mint 21.1" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => 'jammy',
+	},
+	"Linux Mint 21.2" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
@@ -450,6 +460,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
+	"Linux Mint 21.2" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list.d/official-package-repositories.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list',
@@ -547,6 +566,23 @@ my %flavours = (
 		},
 	},
 	"21.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
+	},
+	"21.2" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
