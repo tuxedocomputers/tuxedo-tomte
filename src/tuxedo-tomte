@@ -5948,14 +5948,14 @@ sub createRepos {
 					}
 					# create file + line
 					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
-						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$_\n", 1);
+						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$repo1\n", 1);
 						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $repo1", 'L0');
 						$firstEntry = 0;
 						$modified = 1;
 					# or append line
 					} else {
-						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$_\n");
+						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$repo1\n");
 						printLog("append file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 						printLog("added: $repo1", 'L0');
 						$modified = 1;
@@ -5967,6 +5967,7 @@ sub createRepos {
 				#TODO debug
 				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
 				if (isLinePresent($repo2, %repoHash)) {
+					printLog("removing line from repolist: $repo2", 'L2');
 					removeLineFromFiles($repo2, %repoHash);
 				}
 			}
