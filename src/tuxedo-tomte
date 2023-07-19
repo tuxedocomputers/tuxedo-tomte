@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.9.1-9';
+our $VERSION = '2.9.1-10';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -4829,6 +4829,7 @@ sub nvidiadriver() {
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
+				($completeDistVersion =~ /Linux Mint 21.2/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
