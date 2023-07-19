@@ -5964,7 +5964,6 @@ sub createRepos {
 				# construct repo with '/' ending in URL
 				$repo2 = $repo1;
 				$repo2 =~ s/(deb https:\/\/.*\/\w+)( .*)/$1\/$2/gm;
-				#TODO debug
 				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
 				if (isLinePresent($repo2, %repoHash)) {
 					printLog("removing line from repolist: $repo2", 'L2');
