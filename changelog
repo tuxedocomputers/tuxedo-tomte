@@ -1,21 +1,14 @@
-tuxedo-tomte (2.9.1-10) UNRELEASED; urgency=medium
+tuxedo-tomte (2.9.1-11) UNRELEASED; urgency=medium
 
-  * added alias status for list
-  * added VM recognition
+  * added command line option "status" as alias for "list"
+  * added support for VM's
   * added i915enablepsrfix for TUXEDO InfinityBook Pro 14 Gen7 and TUXEDO
     InfinityBook Pro 16 Gen7 with boardnames: PHxARX1_PHxAQF1 and
     PH6AG01_PH6AQ71_PH6AQI1
-  * corrected nvidia install versions and checking
-  * upgrade to tuxedo-nvidia-driver-535
-  * after packaging
-  * after packaging
-  * corrected wrong variable name from foreach
-  * after packaging
-  * removed debug
-  * adding Mint 21.2, first steps
-  * after packaging
+  * added support for Mint 21.2
+  * added remove duplicate TUXEDO repository entry if URL ends with "/"
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 19 Jul 2023 21:35:46 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 20 Jul 2023 07:29:09 +0200
 
 tuxedo-tomte (2.9.1) jammy; urgency=medium
 
