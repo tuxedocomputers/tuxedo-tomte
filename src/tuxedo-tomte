@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.10.1';
+our $VERSION = '2.10.1-1';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -3636,10 +3636,15 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			unless (-e $thirdPartyMirrorsFile) {
-				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-				unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
-					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
+			# Mint uses mintUpdate instead
+			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
+			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+				unless (-e $thirdPartyMirrorsFile) {
+					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+					}
 				}
 			}
 			if ($retval == 1) {
@@ -3666,6 +3671,18 @@ sub tuxedorepos() {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
+			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
+			# Mint uses mintUpdate instead
+			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
+			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+				unless (-e $thirdPartyMirrorsFile) {
+					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+					}
+				}
+			}
+
 			if ($retval == 1) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -5916,7 +5933,12 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') && ($completeDistVersion ne 'Ubuntu 22.04') && ($completeDistVersion ne 'KDE neon 22.04') && ($completeDistVersion ne 'TUXEDO OS 22.04')) {
+	if (($completeDistVersion ne 'TUXEDO_OS 22.04') &&
+		($completeDistVersion ne 'Ubuntu 22.04') &&
+		($completeDistVersion ne 'KDE neon 22.04') &&
+		($completeDistVersion ne 'TUXEDO OS 22.04') &&
+		($completeDistVersion ne 'Linux Mint 21.1') &&
+		($completeDistVersion ne 'Linux Mint 21.2')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
