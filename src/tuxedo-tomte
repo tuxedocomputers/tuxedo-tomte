@@ -2681,8 +2681,8 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
-	# wait max. 3 sec. as Mint takes some time to get network
-	checkNetwork(3,1);
+	# wait max. 10 sec. as it takes some time to get network
+	checkNetwork(10,1);
 
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
