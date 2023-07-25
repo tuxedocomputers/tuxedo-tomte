@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.10.1-3';
+our $VERSION = '2.10.1-4';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -2683,6 +2683,9 @@ sub prerequisites {
 	}
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
+	#TODO debug
+	$output = `nslookup mirrors.tuxedocomputers.com`;
+	printLog("return from nslookup: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
 }
 
