@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.10.1-6';
+our $VERSION = '2.10.1-9';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -2683,6 +2683,7 @@ sub prerequisites {
 	}
 	# wait max. 3 sec. as Mint takes some time to get network
 	checkNetwork(3,1);
+
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
@@ -9345,7 +9346,7 @@ sub postConfigure {
 
 
 ###############################################################################
-# starts the tuxedo-tomte service for delayed configuration
+# STarts the tuxedo-tomte service for delayed configuration
 # procedure accepts an optional message startTomteDelayed("message")
 #
 sub startTomteDelayed {
@@ -9353,6 +9354,12 @@ sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
 	my $triesValue;
+
+	if ($LiveISO) {
+		printLog("not starting Tomte delayed as this is a live ISO", 'L0');
+		return (0);
+	}
+
 	printLog("start later again: $startLaterAgain", 'L2');
 	if ($startLaterAgain != 1) {
 		$triesValue = tries($triesLimit);
