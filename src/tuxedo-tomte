@@ -2681,12 +2681,10 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
+	# wait max. 3 sec. as Mint takes some time to get network
 	checkNetwork(3,1);
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
-	#TODO debug
-	$output = `nslookup mirrors.tuxedocomputers.com`;
-	printLog("return from nslookup: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
 }
 
