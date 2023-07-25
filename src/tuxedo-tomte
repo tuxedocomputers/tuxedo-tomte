@@ -2683,8 +2683,6 @@ sub prerequisites {
 	}
 	# wait max. 3 sec. as Mint takes some time to get network
 	checkNetwork(3,1);
-	#TODO debug
-	printLog("prerequisites after checkNetwork", 'L0');
 
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
@@ -7704,9 +7702,6 @@ sub checkNetwork {
 			setNoNetwork(1);
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 			startTomteDelayed();
-			#TODO debug
-			printLog("checkNetwork after start delayed", 'L0');
-
 			return (0);
 		}
 	}
@@ -9359,6 +9354,12 @@ sub startTomteDelayed {
 	my $retVal;
 	$restartSystem = 0;
 	my $triesValue;
+
+	if ($LiveISO) {
+		printLog("not starting Tomte delayed as this is a live ISO", 'L0');
+		return (0);
+	}
+
 	printLog("start later again: $startLaterAgain", 'L2');
 	if ($startLaterAgain != 1) {
 		$triesValue = tries($triesLimit);
@@ -9391,8 +9392,6 @@ sub startTomteDelayed {
 		$retVal = system($systemctlCmd);
 		printLog("ret value: $retVal", 'L0');
 	}
-	#TODO debug
-	printLog("before exiting startTomteDelayed", 'L0');
 	return (0);
 }
 
