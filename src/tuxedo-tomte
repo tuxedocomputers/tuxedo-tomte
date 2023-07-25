@@ -2683,6 +2683,9 @@ sub prerequisites {
 	}
 	# wait max. 3 sec. as Mint takes some time to get network
 	checkNetwork(3,1);
+	#TODO debug
+	printLog("prerequisites after checkNetwork", 'L0');
+
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
@@ -7701,6 +7704,9 @@ sub checkNetwork {
 			setNoNetwork(1);
 			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
 			startTomteDelayed();
+			#TODO debug
+			printLog("checkNetwork after start delayed", 'L0');
+
 			return (0);
 		}
 	}
@@ -9345,7 +9351,7 @@ sub postConfigure {
 
 
 ###############################################################################
-# starts the tuxedo-tomte service for delayed configuration
+# STarts the tuxedo-tomte service for delayed configuration
 # procedure accepts an optional message startTomteDelayed("message")
 #
 sub startTomteDelayed {
@@ -9385,6 +9391,8 @@ sub startTomteDelayed {
 		$retVal = system($systemctlCmd);
 		printLog("ret value: $retVal", 'L0');
 	}
+	#TODO debug
+	printLog("before exiting startTomteDelayed", 'L0');
 	return (0);
 }
 
