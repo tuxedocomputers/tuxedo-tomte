@@ -2681,6 +2681,7 @@ sub prerequisites {
 			reconfigureSingleModule($origConfModules{$module}{name});
 		}
 	}
+	checkNetwork(3,1);
 	my $output = `apt-get update`;
 	printLog("return from apt-get update: $output", 'L2');
 	#TODO debug
@@ -7686,7 +7687,7 @@ sub waitForNetwork {
 
 
 ###############################################################################
-# checkForNetwork('number of tries', 'wait seconds')
+# checkNetwork('number of tries', 'wait seconds')
 # returns 1 if found
 # returns 0 if not found
 #
