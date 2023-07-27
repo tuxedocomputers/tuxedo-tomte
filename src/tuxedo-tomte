@@ -2995,9 +2995,7 @@ sub checkRequirements {
 
 	if (($boardname =~ m/PHxTxX1/) ||
 		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/) ||
-		($boardname =~ m/PHxARX1_PHxAQF1/) ||
-		($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/)) {
+		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
 		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1');
 	}
