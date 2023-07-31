@@ -1239,7 +1239,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
+	'57' => {
+		model => ['TUXEDO Gemini 15 Gen1'],
+		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
+		fix => ['tuxedokeyboardite', 'acpibacklightvideofix'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'linux-tuxedo-22.04-next',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
