@@ -111,6 +111,13 @@ my $restartSystem = 0;
 my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my $kernelRelease = `uname -r`;
+#TODO debug
+print("kernelrelease p: $kernelRelease\n");
+printLog("kernelrelease: $kernelRelease", 'L2');
+my $kernelReleaseChroot = `chroot uname -r`;
+print("kernelrelease p chroot: $kernelReleaseChroot\n");
+printLog("kernelrelease chroot: $kernelReleaseChroot", 'L2');
+
 $kernelRelease =~ s/[\n\r]//g;
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
