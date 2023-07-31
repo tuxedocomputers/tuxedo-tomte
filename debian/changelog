@@ -1,9 +1,17 @@
-tuxedo-tomte (2.10.2-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.11.0) jammy; urgency=medium
 
-  * after packaging
-  * temp. removed psrfix from PHxARX1_PHxAQF1 and PH6AG01_PH6AQ71_PH6AQI1
+  * added acpibacklightvideofix for TUXEDO Gemini 15 Gen1 and TUXEDO Gemini 17
+    Gen1 with boardname: PD5x_7xPNP_PNR_PNN_PNT
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Jul 2023 07:33:42 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 31 Jul 2023 14:35:07 +0200
+
+tuxedo-tomte (2.10.3) jammy; urgency=medium
+
+  * removed i915enablepsrfix from TUXEDO InfinityBook Pro 14 Gen7 and TUXEDO
+    InfinityBook Pro 16 Gen7 with boardnames: PHxARX1_PHxAQF1 and
+    PH6AG01_PH6AQ71_PH6AQI1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 27 Jul 2023 07:38:23 +0200
 
 tuxedo-tomte (2.10.2) jammy; urgency=medium
 
