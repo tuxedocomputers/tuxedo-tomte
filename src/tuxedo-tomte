@@ -1165,7 +1165,7 @@ my %tuxedo_devices = (
 	'50' => {
 		model => ['TUXEDO Gemini 17 Gen1'],
 		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedokeyboardite'],
+		fix => ['tuxedokeyboardite', 'acpibacklightvideofix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2197,6 +2197,24 @@ my %origConfModules = (
 		restart => 'no',
 		order => '',
 	},
+	acpibacklightvideofix => {
+		name => 'acpi-backlight-video-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'Fixes boot delays/freezes in Nvidia modes',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
 );
 
 
@@ -3103,6 +3121,12 @@ sub checkRequirements {
 	} else {
 		printLog("plasma-workspace version could not be determined", 'L2');
 	}
+
+	if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)	{
+		$origConfModules{acpibacklightvideofix}{required} = 'yes';
+		printLog("detected $origConfModules{acpibacklightvideofix}{name} issue", 'L1');
+	}
+
 }
 
 
@@ -5860,6 +5884,56 @@ sub intelgenXIIIpowerctlfix() {
 
 
 
+###############################################################################
+# Boot delays/freezes in nvidia modes
+#
+sub acpibacklightvideofix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernelParameters = ("acpi_backlight=video");
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval = insertGrub($module, \@kernelParameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed");
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retval = insertGrub($module, \@kernelParameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
+	}
+}
 
 
 
