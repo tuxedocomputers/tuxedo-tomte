@@ -114,7 +114,7 @@ my $kernelRelease = `uname -r`;
 #TODO debug
 print("kernelrelease p: $kernelRelease\n");
 printLog("kernelrelease: $kernelRelease", 'L2');
-my $kernelReleaseChroot = `chroot uname -r`;
+my $kernelReleaseChroot = `chroot $target/mnt uname -r`;
 print("kernelrelease p chroot: $kernelReleaseChroot\n");
 printLog("kernelrelease chroot: $kernelReleaseChroot", 'L2');
 
