@@ -110,6 +110,8 @@ my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
 my $systemdDelay = 30;
+
+# TODO get current FAI kernel version from dpkg or kernel version
 my $kernelRelease = `uname -r`;
 #TODO debug
 print("kernelrelease p:\n$kernelRelease\n");
