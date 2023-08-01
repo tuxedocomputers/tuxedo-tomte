@@ -117,6 +117,14 @@ printLog("kernelrelease: $kernelRelease", 'L2');
 my $kernelReleaseChroot = `chroot /target uname -r`;
 print("kernelrelease p chroot: $kernelReleaseChroot\n");
 printLog("kernelrelease chroot: $kernelReleaseChroot", 'L2');
+my $directories = `ls -al`;
+print("directories p: $directories\n");
+printLog("directories: $directories", 'L2');
+my $searchCmd = 'dpkg-query -f \'${Status} ${Package} ${Version}\n\' -W \'linux-image-*\'';
+my $dpkgkernel = `$searchCmd`;
+print "linux-image p: $directories";
+printLog("linux-image: $directories", 'L2');
+
 
 $kernelRelease =~ s/[\n\r]//g;
 
