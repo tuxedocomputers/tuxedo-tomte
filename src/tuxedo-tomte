@@ -112,18 +112,18 @@ my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my $kernelRelease = `uname -r`;
 #TODO debug
-print("kernelrelease p: $kernelRelease\n");
+print("kernelrelease p:\n$kernelRelease\n");
 printLog("kernelrelease: $kernelRelease", 'L2');
 my $kernelReleaseChroot = `chroot /target uname -r`;
-print("kernelrelease p chroot: $kernelReleaseChroot\n");
+print("kernelrelease p chroot:\n$kernelReleaseChroot\n");
 printLog("kernelrelease chroot: $kernelReleaseChroot", 'L2');
 my $directories = `ls -al`;
-print("directories p: $directories\n");
+print("directories p:\n$directories\n");
 printLog("directories: $directories", 'L2');
 my $searchCmd = 'dpkg-query -f \'${Status} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 my $dpkgkernel = `$searchCmd`;
-print "linux-image p: $directories";
-printLog("linux-image: $directories", 'L2');
+print "linux-image p:\n$dpkgkernel\n";
+printLog("linux-image: $dpkgkernel", 'L2');
 
 
 $kernelRelease =~ s/[\n\r]//g;
@@ -9895,7 +9895,7 @@ if (@ARGV != 0) {
 		if (-e $tomteFinishedFile) {
 			unlink($tomteFinishedFile);
 		}
-		print "Starting tuxedo-tomte in LiveISO mode\n".
+		print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
 		$LiveISO = 1;
@@ -9959,7 +9959,7 @@ if (@ARGV != 0) {
 
 	# FAI
 	} elsif ($argValue{command} eq "FAI") {
-		print "Starting tuxedo-tomte in FAI mode\n".
+		print "Starting tuxedo-tomte $VERSION in FAI mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 		$FAI = 1;
