@@ -10171,4 +10171,7 @@ END {
 			}
 		}
 	}
+	if ($FAI || $LiveISO) {
+		createFile($tomteFinishedFile, 'finished', 0);
+	}
 }
