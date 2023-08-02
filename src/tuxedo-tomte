@@ -3074,6 +3074,7 @@ sub checkRequirements {
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /Linux Mint 21.2/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
