@@ -118,23 +118,20 @@ my $systemdDelay = 30;
 # if in FAI it should check which is the installed
 # kernel package version on target
 my $kernelRelease;
-#TODO debug
 if ($FAI) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
-	print "linux-image p:\n$dpkgkernel\n";
 	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
 	my $hashSize = keys %kernelHash;
 	if ($hashSize != 0) {
-		print Dumper(\%kernelHash);
 		my $firstkey = (sort(keys %kernelHash))[0];
-		print ("first value: $kernelHash{$firstkey}\n");
 		$kernelRelease = $kernelHash{$firstkey};
 	}
 } else {
 	$kernelRelease = `uname -r`;
 }
 $kernelRelease =~ s/[\n\r]//g;
+printLog("detected kernel version: $kernelRelease", 'L2');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
