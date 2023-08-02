@@ -97,7 +97,7 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
-if ($argValue{command} == 'FAI') {
+if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
 }
 my $LiveISO = 0;
