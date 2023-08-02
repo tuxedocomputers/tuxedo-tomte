@@ -97,6 +97,9 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
+if ($argValue{command} == 'FAI') {
+	$FAI = 1;
+}
 my $LiveISO = 0;
 my $noNetwork = 0;
 my $packagekitState = 0;
