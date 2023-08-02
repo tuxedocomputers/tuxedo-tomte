@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.11.0';
+our $VERSION = '2.11.0-10';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -97,6 +97,9 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
+if ($argValue{command} eq 'FAI') {
+	$FAI = 1;
+}
 my $LiveISO = 0;
 my $noNetwork = 0;
 my $packagekitState = 0;
@@ -110,8 +113,25 @@ my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
 my $systemdDelay = 30;
-my $kernelRelease = `uname -r`;
+
+# get current kernel version
+# if in FAI it should check which is the installed
+# kernel package version on target
+my $kernelRelease;
+if ($FAI) {
+	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
+	my $dpkgkernel = `$searchCmd`;
+	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
+	my $hashSize = keys %kernelHash;
+	if ($hashSize != 0) {
+		my $firstkey = (sort(keys %kernelHash))[0];
+		$kernelRelease = $kernelHash{$firstkey};
+	}
+} else {
+	$kernelRelease = `uname -r`;
+}
 $kernelRelease =~ s/[\n\r]//g;
+printLog("detected kernel version: $kernelRelease", 'L2');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -3054,6 +3074,7 @@ sub checkRequirements {
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /Linux Mint 21.2/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
@@ -9880,7 +9901,7 @@ if (@ARGV != 0) {
 		if (-e $tomteFinishedFile) {
 			unlink($tomteFinishedFile);
 		}
-		print "Starting tuxedo-tomte in LiveISO mode\n".
+		print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with LiveISO\n";
 		$LiveISO = 1;
@@ -9944,7 +9965,7 @@ if (@ARGV != 0) {
 
 	# FAI
 	} elsif ($argValue{command} eq "FAI") {
-		print "Starting tuxedo-tomte in FAI mode\n".
+		print "Starting tuxedo-tomte $VERSION in FAI mode\n".
 				"This should not be used in a normal situation\n".
 				"only when installing a new system with FAI\n";
 		$FAI = 1;
