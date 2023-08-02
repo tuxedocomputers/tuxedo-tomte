@@ -114,32 +114,26 @@ my $restartSystem = 0;
 my $startLaterAgain = 0;
 my $systemdDelay = 30;
 
-# TODO get current FAI kernel version from dpkg or kernel version
-my $kernelRelease = `uname -r`;
+# get current kernel version
+# if in FAI it should check which is the installed
+# kernel package version on target
+my $kernelRelease;
 #TODO debug
-print("kernelrelease p:\n$kernelRelease\n");
-printLog("kernelrelease: $kernelRelease", 'L2');
-my $kernelReleaseChroot = `chroot /target uname -r`;
-print("kernelrelease p chroot:\n$kernelReleaseChroot\n");
-printLog("kernelrelease chroot: $kernelReleaseChroot", 'L2');
-my $directories = `ls -al`;
-print("directories p:\n$directories\n");
-printLog("directories: $directories", 'L2');
 if ($FAI) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
 	print "linux-image p:\n$dpkgkernel\n";
-	printLog("linux-image: $dpkgkernel", 'L2');
 	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
 	my $hashSize = keys %kernelHash;
-	print "hashsize: $hashSize\n";
 	if ($hashSize != 0) {
 		print Dumper(\%kernelHash);
 		my $firstkey = (sort(keys %kernelHash))[0];
 		print ("first value: $kernelHash{$firstkey}\n");
+		$kernelRelease = $kernelHash{$firstkey};
 	}
+} else {
+	$kernelRelease = `uname -r`;
 }
-
 $kernelRelease =~ s/[\n\r]//g;
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
