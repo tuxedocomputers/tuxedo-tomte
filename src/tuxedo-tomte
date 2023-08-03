@@ -58,7 +58,7 @@ my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 
 my $configFileIni = '/etc/tomte/config.ini';
-my $config;
+my $config = 0;
 if (-x $configFileIni) {
 	$config = Config::Tiny->read( $configFileIni, 'utf8' );
 }
@@ -104,6 +104,7 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
+my $afterFAI = 0;
 if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
 }
@@ -8199,6 +8200,13 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
+	#TODO debug
+	if ((-x $configFileIni) && ($config != 0)) {
+		if ($FAI) {
+			$config->{installation} -> {FAI} = 'after reboot';
+			$config->write($configFileIni);
+		}
+	}
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1');
 		print $FH "# name version installed blocked required hwid\n";
