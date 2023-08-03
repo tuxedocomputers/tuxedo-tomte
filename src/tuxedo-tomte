@@ -28,6 +28,8 @@ use File::FcntlLock;
 
 use File::Copy;
 
+use Config::Tiny;
+
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
 use lib "$Bin/.";
@@ -55,6 +57,11 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 
+my $configFileIni = '/etc/tomte/config.ini';
+my $config;
+if (-x $configFileIni) {
+	$config = Config::Tiny->read( $configFileIni, 'utf8' );
+}
 
 ###############################################################################
 # Argument values given to script
