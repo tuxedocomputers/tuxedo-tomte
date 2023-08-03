@@ -1523,7 +1523,7 @@ my %origConfModules = (
 	},
 	threegfix => {
 		name => 'threeg-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1541,7 +1541,7 @@ my %origConfModules = (
 	},
 	threegfix2 => {
 		name => 'threeg-fix2',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -3960,7 +3960,7 @@ sub threegfix() {
 	my $retval1;
 	my $retval2;
 	my $fileName1 = '/etc/modprobe.d/huawei-me936.conf';
-	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15bb\n";
@@ -4014,7 +4014,7 @@ sub threegfix2() {
 	my $retval1;
 	my $retval2;
 	my $fileName1 = '/etc/modprobe.d/huawei-me906s.conf';
-	my $fileName2 = '/lib/udev/rules.d/77-mm-huawei-configuration.rules';
+	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
 	my $niceTime = getBackupFileTime();
 	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"options usbserial vendor=0x12d1 product=0x15c1\n";
