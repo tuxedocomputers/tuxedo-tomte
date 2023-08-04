@@ -9846,7 +9846,7 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
-	my $hostnactlCmd = $consoleLanguage.'hostnamectl';
+	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
 	my $returnHostnamectl = `$hostnamectlCmd`;
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gm) {
 		printLog("chassis is a virtual machine", 'TL2');
@@ -9899,7 +9899,7 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
-		if (-e $tomteFinishedFile) 
+		if (-e $tomteFinishedFile) { 
 			unlink($tomteFinishedFile);
 		}
 		print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
