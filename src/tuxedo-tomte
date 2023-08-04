@@ -84,6 +84,7 @@ my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $configFile = $configDir.'tomte.cfg';
 my $configIniFile = $configDir.'config.ini';
+my $configIniValues;
 
 my %modeFile = (
 	DONT_CONFIGURE => $configDir.'DONT_CONFIGURE',
@@ -8120,6 +8121,18 @@ sub printLog {
 
 
 ###############################################################################
+# reads config values from configIniFile
+#
+sub readConfigIniValues {
+	if (-e $configIniFile) {
+		$configIniValues = Config::Tiny->new;
+		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
+	}
+}
+
+
+
+###############################################################################
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
 # returns '0' if configfile can not be read, else returns '1'
@@ -8196,10 +8209,10 @@ sub writeConfigFile {
 	my $hwid;
 	
 	#TODO debug
-	if ((-x $configIniFile) && ($config != 0)) {
+	if ((-x $configIniFile) && ($configIniValues != 0)) {
 		if ($FAI) {
-			$config->{installation} -> {FAI} = 'after reboot';
-			$config->write($configIniFile);
+			$configIniValues->{installation} -> {FAI} = 'after reboot';
+			$configIniValues->write($configIniFile);
 		}
 	}
 
