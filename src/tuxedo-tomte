@@ -28,8 +28,6 @@ use File::FcntlLock;
 
 use File::Copy;
 
-use Config::Tiny;
-
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
 use lib "$Bin/.";
@@ -56,12 +54,6 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
-
-my $configFileIni = '/etc/tomte/config.ini';
-my $config = 0;
-if (-x $configFileIni) {
-	$config = Config::Tiny->read( $configFileIni, 'utf8' );
-}
 
 ###############################################################################
 # Argument values given to script
@@ -104,7 +96,6 @@ my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
 my $FAI = 0;
-my $afterFAI = 0;
 if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
 }
@@ -8200,13 +8191,6 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
-	#TODO debug
-	if ((-x $configFileIni) && ($config != 0)) {
-		if ($FAI) {
-			$config->{installation} -> {FAI} = 'after reboot';
-			$config->write($configFileIni);
-		}
-	}
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1');
 		print $FH "# name version installed blocked required hwid\n";
@@ -8256,6 +8240,7 @@ sub writeConfigFile {
 		exit (0);
 	}
 }
+
 
 
 ###############################################################################
@@ -9861,7 +9846,8 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
-	my $returnHostnamectl = `hostnamectl`;
+	my $hostnactlCmd = $consoleLanguage.'hostnamectl';
+	my $returnHostnamectl = `$hostnamectlCmd`;
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gm) {
 		printLog("chassis is a virtual machine", 'TL2');
 		printLog("machine will be treated as desktoppc", 'TL2');
@@ -9913,7 +9899,7 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
-		if (-e $tomteFinishedFile) {
+		if (-e $tomteFinishedFile) 
 			unlink($tomteFinishedFile);
 		}
 		print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
@@ -10210,6 +10196,6 @@ END {
 	if ($FAI || $LiveISO) {
 		createFile($tomteFinishedFile, 'finished', 0);
 		#TODO debug
-		printLog("finished written", 'TL2');
+		printLog("wrote finished file", 'TL2');
 	}
 }
