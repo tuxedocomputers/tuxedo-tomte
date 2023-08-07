@@ -10259,5 +10259,7 @@ END {
 		printLog("after FAI installation detected, this should be the OEM stage", 'L2');
 		delete $configIniValues->{installation};
 		writeConfigIniFile();
+		createFile($tomteFinishedFile, 'finished', 0);
+		printLog("finished written", 'TL2');
 	}
 }
