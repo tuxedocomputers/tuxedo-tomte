@@ -8122,12 +8122,16 @@ sub printLog {
 
 ###############################################################################
 # reads config values from configIniFile
+# returns 1 if file exists
+# retuns 0 if file does not exist
 #
 sub readConfigIniValues {
 	if (-e $configIniFile) {
 		$configIniValues = Config::Tiny->new;
 		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
+		return (1);
 	}
+	return (0);
 }
 
 
@@ -8141,6 +8145,7 @@ sub readConfigFile {
 	my %comp;
 	my $FH;
 	my $shortname;
+	readConfigIniValues();
 	if ( (-e $configFile) && open($FH, '<', $configFile) ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
@@ -8204,10 +8209,6 @@ sub validConfigLine {
 # over writes file with known config data if it exists
 #
 sub writeConfigIniFile {
-	#TODO test what happens if $configIniValue = 0 or not set
-	$configIniValues->{TEST} -> {first} = 'test';
-	$configIniValues->{TEST} -> {second} = 'test';
-	$configIniValues->{TEST2} -> {first} = 'test2';
 	if ($configIniValues->write($configIniFile, 'utf8')) {
 		printLog("$configIniFile  successfully written", 'L2');
 		return (1);
@@ -8228,7 +8229,6 @@ sub writeConfigFile {
 	my $version;
 	my $hwid;
 	
-	#TODO debug
 	if ($FAI) {
 		$configIniValues->{installation} -> {FAI} = 'after FAI installation';
 	}
@@ -8286,9 +8286,10 @@ sub writeConfigFile {
 
 
 
-###############################################################################                                                                                                              
+############################################################################### 
 # check if config directory exists
 # if not creates a new directory
+# if that is not possible, exits (!!!)
 #
 sub initConfigDir {
 	# create configDir if it does not exist
@@ -8296,11 +8297,11 @@ sub initConfigDir {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir", 'TL0');
+			printLog("could not create $configDir, that's really bad!!", 'TL0');
 			exit (0);
 		}
 	}
-	exit (1);
+	return (1);
 }
 
 
@@ -8312,16 +8313,8 @@ sub initConfigDir {
 #
 sub initConfigFile {
 	# create configDir if it does not exist
-	# TODO check return value
-	# initConfigDir();
-	unless ( -d $configDir ) {
-		mkdir($configDir, 0755);
-		unless ( -d $configDir ) {
-			$noConfigFile = 1;
-			printLog("could not create $configDir", 'TL0');
-			exit (0);
-		}
-	}
+	initConfigDir();
+
 	# read config file
 	if ( -f $configFile ) {
 		$noConfigFile = 0;
@@ -10261,5 +10254,10 @@ END {
 		createFile($tomteFinishedFile, 'finished', 0);
 		#TODO debug
 		printLog("finished written", 'TL2');
+	} elsif (!$FAI && ($configIniValues->{installation}->{FAI} eq 'after FAI installation')) {
+		#TODO debug
+		printLog("after FAI installation detected, this should be the OEM stage", 'L2');
+		delete $configIniValues->{installation};
+		writeConfigIniFile();
 	}
 }
