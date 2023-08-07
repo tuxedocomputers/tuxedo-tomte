@@ -8205,6 +8205,9 @@ sub validConfigLine {
 #
 sub writeConfigIniFile {
 	#TODO test what happens if $configIniValue = 0 or not set
+	$configIniValues->{TEST} -> {first} = 'test';
+	$configIniValues->{TEST} -> {second} = 'test';
+	$configIniValues->{TEST2} -> {first} = 'test2';
 	if ($configIniValues->write($configIniFile, 'utf8')) {
 		printLog("$configIniFile  successfully written", 'L2');
 		return (1);
