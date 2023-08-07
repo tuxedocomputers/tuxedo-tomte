@@ -10252,14 +10252,19 @@ END {
 	}
 	if ($FAI || $LiveISO) {
 		createFile($tomteFinishedFile, 'finished', 0);
-		#TODO debug
 		printLog("finished written", 'TL2');
 	} elsif (!$FAI && ($configIniValues->{installation}->{FAI} eq 'after FAI installation')) {
-		#TODO debug
-		printLog("after FAI installation detected, this should be the OEM stage", 'L2');
-		delete $configIniValues->{installation};
-		writeConfigIniFile();
+		# this happens when in OEM stage after a FAI installation,
+		# if the OEM stage gets interrupted by a reboot or shutdown
+		# then this is futile and the system might get stuck in OEM configuration stage,
+		# this just makes sure OEM stage might continue even if Tomte gets stuck and
+		# crashes for some reason
+		# if you reboot the system after a FAI installation in OEM, please,
+		# just make a new FAI installation! to make sure everything is proper
+		printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
 		createFile($tomteFinishedFile, 'finished', 0);
 		printLog("finished written", 'TL2');
+		delete $configIniValues->{installation};
+		writeConfigIniFile();
 	}
 }
