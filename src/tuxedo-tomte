@@ -82,7 +82,8 @@ my $grubFile = '/etc/default/grub';
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
-my $configFile = $configDir.'tomte.cfg';
+my $oldConfigFile = $configDir.'tomte.cfg';
+my $configFile = $configDir.'modules.cfg';
 my $configIniFile = $configDir.'config.ini';
 my $configIniValues = Config::Tiny->new;
 
@@ -8137,6 +8138,19 @@ sub readConfigIniValues {
 
 
 ###############################################################################
+# renames the old config file name to a new name
+#
+sub renameOldConfigFile {
+	if (-e $oldConfigFile) {
+		rename($oldConfigFile, $configFile);
+	}
+}
+
+
+
+
+
+###############################################################################
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
 # returns '0' if configfile can not be read, else returns '1'
@@ -8145,6 +8159,7 @@ sub readConfigFile {
 	my %comp;
 	my $FH;
 	my $shortname;
+	renameOldConfigFile();
 	readConfigIniValues();
 	if ( (-e $configFile) && open($FH, '<', $configFile) ) {
 		while ( my $line=<$FH> ) {
@@ -8234,6 +8249,7 @@ sub writeConfigFile {
 	}
 	writeConfigIniFile();
 
+	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1');
 		print $FH "# name version installed blocked required hwid\n";
@@ -8316,6 +8332,7 @@ sub initConfigFile {
 	initConfigDir();
 
 	# read config file
+	renameOldConfigFile();
 	if ( -f $configFile ) {
 		$noConfigFile = 0;
 		readConfigFile();
@@ -9978,6 +9995,7 @@ if (@ARGV != 0) {
 	# list
 	if (($argValue{command} eq "list") || ($argValue{command} eq "status")) {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
@@ -9988,6 +10006,7 @@ if (@ARGV != 0) {
 	# versions
 	} elsif ($argValue{command} eq "versions") {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
@@ -10006,6 +10025,7 @@ if (@ARGV != 0) {
 	# listJSON
 	} elsif ($argValue{command} eq "listjson") {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
