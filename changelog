@@ -1,4 +1,4 @@
-tuxedo-tomte (2.11.1-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.11.1-5) UNRELEASED; urgency=medium
 
   * added check for kernel package in FAI
   * write tomte_finished always at exit if FAI or LiveISO
@@ -7,8 +7,9 @@ tuxedo-tomte (2.11.1-4) UNRELEASED; urgency=medium
   * adding new configfile using Config::Tiny
   * added ini file
   * added libconfig-tiny-perl dependency for config ini file
+  * UNRELEASED
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 09 Aug 2023 13:14:47 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 09 Aug 2023 16:26:50 +0200
 
 tuxedo-tomte (2.11.0) jammy; urgency=medium
 
