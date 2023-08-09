@@ -37,6 +37,7 @@ use Time::HiRes qw(usleep);
 use Digest::MD5 qw(md5_hex);
 use Dpkg::Version;
 use JSON;
+use Config::Tiny;
 
 # for debugging
 use Data::Dumper;
@@ -80,7 +81,10 @@ my $grubFile = '/etc/default/grub';
 my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
 my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
-my $configFile = $configDir.'tomte.cfg';
+my $oldConfigFile = $configDir.'tomte.cfg';
+my $configFile = $configDir.'modules.cfg';
+my $configIniFile = $configDir.'config.ini';
+my $configIniValues = Config::Tiny->new;
 
 my %modeFile = (
 	DONT_CONFIGURE => $configDir.'DONT_CONFIGURE',
@@ -8117,6 +8121,35 @@ sub printLog {
 
 
 ###############################################################################
+# reads config values from configIniFile
+# returns 1 if file exists
+# retuns 0 if file does not exist
+#
+sub readConfigIniValues {
+	if (-e $configIniFile) {
+		$configIniValues = Config::Tiny->new;
+		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
+		return (1);
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# renames the old config file name to a new name
+#
+sub renameOldConfigFile {
+	if (-e $oldConfigFile) {
+		rename($oldConfigFile, $configFile);
+	}
+}
+
+
+
+
+
+###############################################################################
 # fills global variable %localConfModules with data from $configFile
 # if there is no configFile then it is left empty
 # returns '0' if configfile can not be read, else returns '1'
@@ -8125,6 +8158,8 @@ sub readConfigFile {
 	my %comp;
 	my $FH;
 	my $shortname;
+	renameOldConfigFile();
+	readConfigIniValues();
 	if ( (-e $configFile) && open($FH, '<', $configFile) ) {
 		while ( my $line=<$FH> ) {
 			chomp $line;
@@ -8184,6 +8219,22 @@ sub validConfigLine {
 
 
 ###############################################################################
+# creates $configIniFile if it does not exist
+# over writes file with known config data if it exists
+#
+sub writeConfigIniFile {
+	if ($configIniValues->write($configIniFile, 'utf8')) {
+		printLog("$configIniFile successfully written", 'L2');
+		return (1);
+	} else {
+		printLog("problems writing $configIniFile", 'L2');
+		return (0);
+	}
+}
+
+
+
+###############################################################################
 # overwrites $configFile with data from $origConfModules if it does not exist
 #
 sub writeConfigFile {
@@ -8191,6 +8242,13 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
+	
+	if ($FAI) {
+		$configIniValues->{installation} -> {FAI} = 'first reboot after FAI';
+	}
+	writeConfigIniFile();
+
+	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1');
 		print $FH "# name version installed blocked required hwid\n";
@@ -8243,6 +8301,26 @@ sub writeConfigFile {
 
 
 
+############################################################################### 
+# check if config directory exists
+# if not creates a new directory
+# if that is not possible, exits (!!!)
+#
+sub initConfigDir {
+	# create configDir if it does not exist
+	unless ( -d $configDir ) {
+		mkdir($configDir, 0755);
+		unless ( -d $configDir ) {
+			$noConfigFile = 1;
+			printLog("could not create $configDir, that's really bad!!", 'TL0');
+			exit (0);
+		}
+	}
+	return (1);
+}
+
+
+
 ###############################################################################
 # check if config file and directory exists
 # loads the config or if non existent
@@ -8250,15 +8328,10 @@ sub writeConfigFile {
 #
 sub initConfigFile {
 	# create configDir if it does not exist
-	unless ( -d $configDir ) {
-		mkdir($configDir, 0755);
-		unless ( -d $configDir ) {
-			$noConfigFile = 1;
-			printLog("could not create $configDir", 'TL0');
-			exit (0);
-		}
-	}
+	initConfigDir();
+
 	# read config file
+	renameOldConfigFile();
 	if ( -f $configFile ) {
 		$noConfigFile = 0;
 		readConfigFile();
@@ -9921,6 +9994,7 @@ if (@ARGV != 0) {
 	# list
 	if (($argValue{command} eq "list") || ($argValue{command} eq "status")) {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
@@ -9931,6 +10005,7 @@ if (@ARGV != 0) {
 	# versions
 	} elsif ($argValue{command} eq "versions") {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
@@ -9949,6 +10024,7 @@ if (@ARGV != 0) {
 	# listJSON
 	} elsif ($argValue{command} eq "listjson") {
 		checkMode();
+		renameOldConfigFile();
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
@@ -10195,7 +10271,19 @@ END {
 	}
 	if ($FAI || $LiveISO) {
 		createFile($tomteFinishedFile, 'finished', 0);
-		#TODO debug
 		printLog("wrote finished file", 'TL2');
+	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
+		# this happens when in OEM stage after a FAI installation,
+		# if the OEM stage gets interrupted by a reboot or shutdown
+		# then this is futile and the system might get stuck in OEM configuration stage,
+		# this just makes sure OEM stage might continue even if Tomte gets stuck and
+		# crashes for some reason
+		# if you reboot the system after a FAI installation in OEM, please,
+		# just make a new FAI installation! to make sure everything is proper
+		printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
+		createFile($tomteFinishedFile, 'finished', 0);
+		printLog("finished written", 'TL2');
+		delete $configIniValues->{installation};
+		writeConfigIniFile();
 	}
 }
