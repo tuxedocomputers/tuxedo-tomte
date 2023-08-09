@@ -8225,7 +8225,7 @@ sub validConfigLine {
 #
 sub writeConfigIniFile {
 	if ($configIniValues->write($configIniFile, 'utf8')) {
-		printLog("$configIniFile  successfully written", 'L2');
+		printLog("$configIniFile successfully written", 'L2');
 		return (1);
 	} else {
 		printLog("problems writing $configIniFile", 'L2');
