@@ -1,14 +1,13 @@
 tuxedo-tomte (2.12.0-1) UNRELEASED; urgency=medium
 
-  * added check for kernel package in FAI
-  * write tomte_finished always at exit if FAI or LiveISO
-  * added linux Mint 21.2 to kernel edge
-  * changed directory for configuration files for threeg and threeg2 to /etc instead of /lib
-  * adding new configfile using Config::Tiny
-  * added ini file
-  * added libconfig-tiny-perl dependency for config ini file
-  * UNRELEASED
-  * after packaging
+  * changed directory for configuration files for threeg and threeg2 to /etc
+    instead of /lib
+  * improved recognition for installed kernel in FAI
+  * improved recognition for Tomte ending for FAI and LiveISO in OEM stage
+  * added kernel linux-tuxedo-22.04-edge to Mint 21.2
+  * added new configuration file config.ini
+  * changed name of configuration file tomte.cfg to modules.cfg
+  * added libconfig-tiny-perl dependency
 
  -- E. Mohr <tux@tuxedocomputers.com>  Thu, 10 Aug 2023 12:40:04 +0200
 
