@@ -10303,7 +10303,7 @@ END {
 		$psOutput = `ps -axf`;
 		printLog("ps output: $psOutput", 'L2');
 
-		if ($calamaresProcesses == 0) {
+		if ($calamaresProcesses =~ /0/gm) {
 			printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
 			delete $configIniValues->{installation};
 			writeConfigIniFile();
