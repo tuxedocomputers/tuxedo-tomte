@@ -1,4 +1,4 @@
-tuxedo-tomte (2.12.2-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.12.2-2) UNRELEASED; urgency=medium
 
   * changed directory for configuration files for threeg and threeg2 to /etc
     instead of /lib
@@ -10,8 +10,10 @@ tuxedo-tomte (2.12.2-1) UNRELEASED; urgency=medium
   * added libconfig-tiny-perl dependency
   * after packaging
   * added debug
+  * after packaging
+  * added check for calamares running
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 31 Aug 2023 08:38:03 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 31 Aug 2023 10:21:38 +0200
 
 tuxedo-tomte (2.11.0) jammy; urgency=medium
 
