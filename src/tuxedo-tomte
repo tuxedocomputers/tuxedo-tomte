@@ -10291,7 +10291,7 @@ END {
 
 		printLog("calamares processes found: $calamaresProcesses", 'L2');
 		printLog("first boot out of OEM, setting second reboot flag", 'L2');
-		$configIniValues->{installation} = 'second reboot after FAI';
+		$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
 		writeConfigIniFile();
 	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
 		printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
