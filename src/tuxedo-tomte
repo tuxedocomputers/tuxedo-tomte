@@ -10283,7 +10283,12 @@ END {
 		printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
 		createFile($tomteFinishedFile, 'finished', 0);
 		printLog("finished written", 'TL2');
-		delete $configIniValues->{installation};
-		writeConfigIniFile();
+		my $calamaresProcesses = `pgrep -c calamares`;
+		printLog("calamares processes found: $calamaresProcesses", 'L2');
+		if ($calamaresProcesses == 0) {
+			printLog("first boot out of OEM, deleting flag in config", 'L2');
+			delete $configIniValues->{installation};
+			writeConfigIniFile();
+		}
 	}
 }
