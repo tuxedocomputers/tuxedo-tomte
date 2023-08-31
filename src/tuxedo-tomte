@@ -45,7 +45,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -8995,6 +8995,10 @@ sub reconfigureSingleModule {
 		($mode ne 'UPDATES_ONLY')) {
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
+		if ($LiveISO) {
+			print "this block has probably been set by the distribution maintainer\n";
+			print "as it does not make much sense to install this module at this stage\n";
+		}
 	}
 
 	if (($origConfModules{$module}{required} eq 'no') &&
@@ -9947,7 +9951,7 @@ if ($chassisType eq '0') {
 }
 
 if ((!tuxedoDevice()) && ($chassisType eq 'notebook')) {
-	print "It seems that this is not a TUXEDO device. Please contact us if this is a mistake.\n";
+	print "It seems that this is not a TUXEDO device. Please contact TUXEDO Computers if this is a mistake.\n";
 	exit (0);
 }
 
@@ -10261,7 +10265,7 @@ END {
 					commandSystemdModule('unmask', 'packagekit');
 				}
 			}
-			if ($packagekitOriginalState ne $packagekitState)	{
+			if ($packagekitOriginalState ne $packagekitState) {
 				printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
 				if ($packagekitOriginalState eq 'active') {
 					commandSystemdModule('enable', 'packagekit');
