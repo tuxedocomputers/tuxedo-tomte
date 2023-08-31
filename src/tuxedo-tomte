@@ -10284,6 +10284,10 @@ END {
 		createFile($tomteFinishedFile, 'finished', 0);
 		printLog("finished written", 'TL2');
 		my $calamaresProcesses = `pgrep -c calamares`;
+		#TODO debug
+		my $psOutput;
+		$psOutput = `ps -axf`;
+		printLog("ps output: $psOutput", 'L2');
 		printLog("calamares processes found: $calamaresProcesses", 'L2');
 		if ($calamaresProcesses == 0) {
 			printLog("first boot out of OEM, deleting flag in config", 'L2');
