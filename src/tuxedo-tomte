@@ -10320,5 +10320,10 @@ END {
 				writeConfigIniFile();
 			}
 		}
+	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
+		createFile($tomteFinishedFile, 'finished', 0);
+		printLog("finished written", 'TL2');
+		delete $configIniValues->{installation};
+		writeConfigIniFile();
 	}
 }
