@@ -1,4 +1,4 @@
-tuxedo-tomte (2.12.2-7) UNRELEASED; urgency=medium
+tuxedo-tomte (2.12.2-8) UNRELEASED; urgency=medium
 
   * changed directory for configuration files for threeg and threeg2 to /etc
     instead of /lib
@@ -23,8 +23,10 @@ tuxedo-tomte (2.12.2-7) UNRELEASED; urgency=medium
   * removed tomte delayed excecution during OEM
   * after packaging
   * finished file only on TUXEDO OS
+  * after packaging
+  * remove config line from all other dist after FAI
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Sep 2023 20:36:53 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Sep 2023 21:39:31 +0200
 
 tuxedo-tomte (2.11.0) jammy; urgency=medium
 
