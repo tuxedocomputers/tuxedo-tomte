@@ -8244,7 +8244,7 @@ sub writeConfigFile {
 	my $hwid;
 	
 	if ($FAI) {
-		$configIniValues->{installation} -> {FAI} = 'first reboot after FAI';
+		$configIniValues->{installation}->{FAI} = 'first reboot after FAI';
 	}
 	writeConfigIniFile();
 
@@ -9533,6 +9533,16 @@ sub startTomteDelayed {
 
 	if ($LiveISO) {
 		printLog("not starting Tomte delayed as this is a live ISO", 'L0');
+		return (0);
+	}
+	if ($FAI) {
+		printLog("not starting Tomte delayed as this is a FAI installation", 'L0');
+		return (0);
+	}
+	if (defined($configIniValues->{installation}->{FAI}) &&
+		(($configIniValues->{installation}->{FAI} eq 'first reboot after FAI') ||
+		($configIniValues->{installation}->{FAI} eq 'second reboot after FAI'))) {
+		printLog("not starting Tomte delayed as this is in OEM configuration", 'L0');
 		return (0);
 	}
 
