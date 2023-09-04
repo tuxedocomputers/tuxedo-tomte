@@ -10279,44 +10279,46 @@ END {
 			}
 		}
 	}
-	if ($FAI || $LiveISO) {
-		createFile($tomteFinishedFile, 'finished', 0);
-		printLog("wrote finished file", 'TL2');
-	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
-		# this happens when in OEM stage after a FAI installation,
-		# if the OEM stage gets interrupted by a reboot or shutdown
-		# then this is futile and the system might get stuck in OEM configuration stage,
-		# this just makes sure OEM stage might continue even if Tomte gets stuck and
-		# crashes for some reason
-		# if you reboot the system after a FAI installation in OEM, please,
-		# just make a new FAI installation! to make sure everything is proper
-		printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
-		createFile($tomteFinishedFile, 'finished', 0);
-		printLog("finished written", 'TL2');
-		my $calamaresProcesses = `pgrep -c calamares`;
-		#TODO debug
-		my $psOutput;
-		$psOutput = `ps -axf`;
-		printLog("ps output: $psOutput", 'L2');
+	if ($distribution eq 'TUXEDO OS') {
+		if ($FAI || $LiveISO) {
+			createFile($tomteFinishedFile, 'finished', 0);
+			printLog("wrote finished file", 'TL2');
+		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
+			# this happens when in OEM stage after a FAI installation,
+			# if the OEM stage gets interrupted by a reboot or shutdown
+			# then this is futile and the system might get stuck in OEM configuration stage,
+			# this just makes sure OEM stage might continue even if Tomte gets stuck and
+			# crashes for some reason
+			# if you reboot the system after a FAI installation in OEM, please,
+			# just make a new FAI installation! to make sure everything is proper
+			printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
+			createFile($tomteFinishedFile, 'finished', 0);
+			printLog("finished written", 'TL2');
+			my $calamaresProcesses = `pgrep -c calamares`;
+			#TODO debug
+			my $psOutput;
+			$psOutput = `ps -axf`;
+			printLog("ps output: $psOutput", 'L2');
 
-		printLog("calamares processes found: $calamaresProcesses", 'L2');
-		printLog("first boot out of OEM, setting second reboot flag", 'L2');
-		$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
-		writeConfigIniFile();
-	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
-		printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
-		createFile($tomteFinishedFile, 'finished', 0);
-		printLog("finished written", 'TL2');
-		my $calamaresProcesses = `pgrep -c calamares`;
-		#TODO debug
-		my $psOutput;
-		$psOutput = `ps -axf`;
-		printLog("ps output: $psOutput", 'L2');
-
-		if ($calamaresProcesses =~ /0/gm) {
-			printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
-			delete $configIniValues->{installation};
+			printLog("calamares processes found: $calamaresProcesses", 'L2');
+			printLog("first boot out of OEM, setting second reboot flag", 'L2');
+			$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
 			writeConfigIniFile();
+		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
+			printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
+			createFile($tomteFinishedFile, 'finished', 0);
+			printLog("finished written", 'TL2');
+			my $calamaresProcesses = `pgrep -c calamares`;
+			#TODO debug
+			my $psOutput;
+			$psOutput = `ps -axf`;
+			printLog("ps output: $psOutput", 'L2');
+
+			if ($calamaresProcesses =~ /0/gm) {
+				printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
+				delete $configIniValues->{installation};
+				writeConfigIniFile();
+			}
 		}
 	}
 }
