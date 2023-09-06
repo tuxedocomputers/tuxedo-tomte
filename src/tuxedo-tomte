@@ -92,6 +92,7 @@ my %modeFile = (
 	AUTOMATIC => $configDir.'AUTOMATIC',
 );
 
+my $runningAsRoot = 0;
 my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $chassisType = 0;
@@ -9840,12 +9841,15 @@ sub help {
 
 ###############################################################################
 # checks if root and returns 1 if yes, otherwise 0
+# also sets a global variable
 #
 sub isRoot {
 	# check if root
 	if( $> != 0 ) {
+		$runningAsRoot = 0;
 		return (0);
 	}
+	$runningAsRoot = 1;
 	return (1);
 }
 
@@ -10250,7 +10254,7 @@ if (($startLaterAgain == 0) &&
 END {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
-	if ( exists $options{$argValue{command}} && isRoot() ) {
+	if ( exists $options{$argValue{command}} && $runningAsRoot ) {
 		if (!$FAI) {
 			my $packagekitEnabled = getSystemdEnabled('packagekit');
 			$packagekitState = getSystemdState('packagekit');
@@ -10269,38 +10273,40 @@ END {
 			}
 		}
 	}
-	if ($distribution eq 'TUXEDO OS') {
-		if ($FAI || $LiveISO) {
-			# do nothing special for now
-		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
-			# this happens when in OEM stage after a FAI installation,
-			# if the OEM stage gets interrupted by a reboot or shutdown
-			# then this is futile and the system might get stuck in OEM configuration stage,
-			# this just makes sure OEM stage might continue even if Tomte gets stuck and
-			# crashes for some reason
-			# if you reboot the system after a FAI installation in OEM, please,
-			# just make a new FAI installation! to make sure everything is proper
-			printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
-			my $calamaresProcesses = `pgrep -c calamares`;
-			printLog("calamares processes found: $calamaresProcesses", 'L2');
-			printLog("first boot out of OEM, setting second reboot flag", 'L2');
-			$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
-			writeConfigIniFile();
-		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
-			printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
-			my $calamaresProcesses = `pgrep -c calamares`;
-			if ($calamaresProcesses =~ /0/gm) {
-				printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
-				delete $configIniValues->{installation};
+	if ($runningAsRoot) {
+		if ($distribution eq 'TUXEDO OS') {
+			if ($FAI || $LiveISO) {
+				# do nothing special for now
+			} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
+				# this happens when in OEM stage after a FAI installation,
+				# if the OEM stage gets interrupted by a reboot or shutdown
+				# then this is futile and the system might get stuck in OEM configuration stage,
+				# this just makes sure OEM stage might continue even if Tomte gets stuck and
+				# crashes for some reason
+				# if you reboot the system after a FAI installation in OEM, please,
+				# just make a new FAI installation! to make sure everything is proper
+				printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
+				my $calamaresProcesses = `pgrep -c calamares`;
+				printLog("calamares processes found: $calamaresProcesses", 'L2');
+				printLog("first boot out of OEM, setting second reboot flag", 'L2');
+				$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
 				writeConfigIniFile();
+			} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
+				printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
+				my $calamaresProcesses = `pgrep -c calamares`;
+				if ($calamaresProcesses =~ /0/gm) {
+					printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
+					delete $configIniValues->{installation};
+					writeConfigIniFile();
+				}
 			}
+		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
+			delete $configIniValues->{installation};
+			writeConfigIniFile();
 		}
-	} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
-		delete $configIniValues->{installation};
-		writeConfigIniFile();
-	}
-	# just to be sure, always write the tomte_finished file
-	if (createFile($tomteFinishedFile, 'finished', 0)) {
-		printLog("created $tomteFinishedFile", 'TL2');
+		# just to be sure, always write the tomte_finished file
+		if (createFile($tomteFinishedFile, 'finished', 0)) {
+			printLog("created $tomteFinishedFile", 'TL2');
+		}
 	}
 }
