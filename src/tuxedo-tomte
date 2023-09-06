@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.12.2-11';
+our $VERSION = '2.12.2-12';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -9982,23 +9982,7 @@ if (@ARGV != 0) {
 	# check whether it is a LiveISO installation
 	# checks if directory /fll exists
 	if ((-d '/fll') && isTextInFile('/proc/cmdline', 'fll')) {
-		if (-e $tomteFinishedFile) { 
-			unlink($tomteFinishedFile);
-		}
-		print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
-				"This should not be used in a normal situation\n".
-				"only when installing a new system with LiveISO\n";
 		$LiveISO = 1;
-		initLogging();
-		printLog("starting Tomte in LiveISO mode", 'L0');
-		setMode('AUTOMATIC');
-		prepareValues();
-		prerequisites();
-		configureAllModules();
-		postConfigure();
-		listSuccess();
-		writeConfigFile();
-		createFile($tomteFinishedFile, 'finished', 0);
 	}
 
 	# list
@@ -10075,6 +10059,12 @@ if (@ARGV != 0) {
 			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
+				if ($LiveISO) {
+					printLog("starting Tomte in LiveISO mode", 'L0');
+					print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
+					"This should not be used in a normal situation\n".
+					"only when installing a new system with LiveISO\n";
+				}
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0');
 					printLog("only prerequisite modules will be installed", 'TL0');
