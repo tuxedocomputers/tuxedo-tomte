@@ -1,4 +1,4 @@
-tuxedo-tomte (2.12.2-13) UNRELEASED; urgency=medium
+tuxedo-tomte (2.12.3) jammy; urgency=medium
 
   * changed directory for configuration files for threeg and threeg2 to /etc
     instead of /lib
@@ -8,34 +8,9 @@ tuxedo-tomte (2.12.2-13) UNRELEASED; urgency=medium
   * added new configuration file config.ini
   * changed name of configuration file tomte.cfg to modules.cfg
   * added libconfig-tiny-perl dependency
-  * after packaging
-  * added debug
-  * after packaging
-  * added check for calamares running
-  * after packaging
-  * added debug for ps
-  * after packaging
-  * added third stage after OEM
-  * after packaging
-  * corrected variable for config file
-  * after packaging
-  * changed eq to regex
-  * removed tomte delayed excecution during OEM
-  * after packaging
-  * finished file only on TUXEDO OS
-  * after packaging
-  * remove config line from all other dist after FAI
-  * after packaging
-  * moved finished file creation
-  * after packaging
-  * moved it back
-  * after packaging
-  * removed debug
-  * after packaging
-  * after packaging
-  * added check for runningasroot at END
+  * added check for OEM installer running
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 06 Sep 2023 14:15:08 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 07 Sep 2023 09:01:02 +0200
 
 tuxedo-tomte (2.11.0) jammy; urgency=medium
 
