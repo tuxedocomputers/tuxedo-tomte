@@ -8536,6 +8536,9 @@ sub listStatus {
 	}
 	if (-e $needsRestartFile) {
 		print "Some fixes need a system restart to be effective\n";
+		if ($LiveISO) {
+			print "As this is a LiveISO, restarting will not make sense\n";
+		}
 	}
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
@@ -8635,6 +8638,9 @@ sub listVersions {
 	}
 	if (-e $needsRestartFile) {
 		print "Some fixes need a system restart to be effective\n";
+		if ($LiveISO) {
+			print "As this is a LiveISO, restarting will not make sense\n";
+		}
 	}
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
@@ -10322,7 +10328,7 @@ END {
 		}
 		# just to be sure, always write the tomte_finished file
 		if (createFile($tomteFinishedFile, 'finished', 0)) {
-			printLog("created $tomteFinishedFile", 'TL2');
+			printLog("created $tomteFinishedFile", 'L2');
 		}
 	}
 }
