@@ -6223,15 +6223,19 @@ sub addRepoKey {
 				return (1);
 			} else {
 				printLog("The TUXEDO repository key could not be installed!", 'TL0');
-				printLog("Tomte will try again in few minutes or after reboot or if startet manually with:", 'TL0');
-				printLog("sudo tomte configure all", 'T0L');
+				unless ($LiveISO) {
+					printLog("Tomte will try again in few minutes or after reboot or if startet manually with:", 'TL0');
+					printLog("sudo tomte configure all", 'T0L');
+				}
 				startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
 				return (0);
 			}
 		} else {
 			printLog("no network connection found! the TUXEDO repository keys can't be installed", 'TL0');
-			printLog("Tomte will try again in a few minutes or after reboot or if startet manually with:", 'TL0');
-			printLog("sudo tomte configure all", 'T0L');
+			unless ($LiveISO) {
+				printLog("Tomte will try again in a few minutes or after reboot or if startet manually with:", 'TL0');
+				printLog("sudo tomte configure all", 'T0L');
+			}
 			startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
 			return (0);
 		}
@@ -9642,7 +9646,9 @@ sub listSuccess {
 	if (@failedModules) {
 		print "\nThe following modules have failed to be installed:\n";
 		if (triesAlreadyDone() <= $triesLimit) {
-			print "Tomte will try to install them again in a few minutes\n";
+			unless ($LiveISO) {
+				print "Tomte will try to install them again in a few minutes\n";
+			}
 		}
 		printNameDescriptionModules(@failedModules);
 	}
