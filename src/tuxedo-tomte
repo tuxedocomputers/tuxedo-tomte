@@ -2735,8 +2735,8 @@ sub prerequisites {
 	}
 	# wait max. 10 sec. as it takes some time to get network
 	checkNetwork(10,1);
-
-	my $output = `apt-get update`;
+	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
+	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'L2');
 	printLog("ending prerequisites", 'L1');
 }
@@ -2744,7 +2744,8 @@ sub prerequisites {
 sub prerequisitesFAI {
 	printLog("starting prerequisites FAI", 'TL0');
 	printLog("executing: apt-get update", 'L2');
-	my $output = `apt-get update`;
+	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
+	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending prerequisites FAI", 'TL0');
 }
@@ -2758,7 +2759,8 @@ sub postrequisitesFAI {
 		printLog('mirror repos set to https', 'L0');
 	}
 	printLog("executing: apt-get update", 'L2');
-	my $output = `apt-get update`;
+	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
+	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending postrequisites FAI", 'TL0');
 }
@@ -6203,7 +6205,8 @@ sub addRepoKey {
 				$counter++;
 				$pmLocked = isPMlocked();
 				if ($pmLocked == 0) {
-					$outputKey = `apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring*`;
+					my $command = $consoleLanguage.'apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring* 2>/dev/null';
+					$outputKey = `$command`;
 					$errorCode = $?/256;
 					if ($errorCode != 0) {
 						printLog("error code apt-get: $errorCode", 'L2');
@@ -6551,7 +6554,7 @@ sub deinstExcept {
 	if ($FAI) {
 		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
 	} else {
-		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
+		$deinstCmd = $consoleLanguage.'apt-get -yq remove 2>/dev/null';
 	}
 	my $deinstCounter = 0;
 
@@ -6652,7 +6655,7 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove';
+	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove 2>/dev/null';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
@@ -6767,9 +6770,11 @@ sub installPackage {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
 		if ($logLevel > 1) {
-			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
+			my $command = $consoleLanguage.'apt-get -o Debug::pkgDPkgProgressReporting=true -y install '.$packageName.' 2>/dev/null';
+			$retval = `$command`;
 		} else {
-			$retval = `apt-get -y install $packageName`;
+			my $command = $consoleLanguage.'apt-get -y install '.$packageName.' 2>/dev/null';
+			$retval = `$command`;
 		}
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
@@ -7509,7 +7514,8 @@ sub aptgetRefreshModule {
 	if (checkNetwork(15, 1)) {
 		deactivatePackagekit();
 		while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
-			$output = `apt-get update`;
+			my $command = $consoleLanguage.'apt-get update 2>/dev/null';
+			$output = `$command`;
 			$exitStatus = $?/256;
 			if ($exitStatus != 0) {
 				printLog('failed: update packages', 'L0');
