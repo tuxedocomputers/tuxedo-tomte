@@ -771,7 +771,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'kerneltuxedo2004edge', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
+		fix => ['tuxedokeyboardite', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04', '22.04'],
 		pci_id => '1558:7715',
 		cpu => '',
@@ -804,7 +804,7 @@ my %tuxedo_devices = (
 	'13' => {
 		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
 		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['lightdmlogindcheckgraphicalfix', 'tuxedotouchpadswitch', 'i915enablepsrfix', 'kerneltuxedo2004edge', 'earlyloadbacklightcontrolfix'],
+		fix => ['lightdmlogindcheckgraphicalfix', 'tuxedotouchpadswitch', 'i915enablepsrfix', 'earlyloadbacklightcontrolfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1d05:1132',
 		cpu => '',
@@ -925,7 +925,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff', 'kerneltuxedo2004next'],
+		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1688,24 +1688,6 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
-	kerneltuxedo2004edge => {
-		name => 'linux-tuxedo-20.04-edge',
-		version => 3,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 2,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => '',
-		description => 'Required kernel version linux-tuxedo-20.04-edge',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => 'always',
-		restart => 'yes',
-		order => '',
-	},
 	kerneltuxedo2204edge => {
 		name => 'linux-tuxedo-22.04-edge',
 		version => 1,
@@ -1717,24 +1699,6 @@ my %origConfModules = (
 		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-22.04-edge',
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => 'always',
-		restart => 'yes',
-		order => '',
-	},
-	kerneltuxedo2004next => {
-		name => 'linux-tuxedo-20.04-next',
-		version => 3,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => '',
-		description => 'Required kernel version linux-tuxedo-20.04-next',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -3060,17 +3024,7 @@ sub checkRequirements {
 		($completeDistVersion =~ /KDE neon 20.04/) ||
 		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 		($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-		if (($boardname =~ m/X170KM-G/) ||
-			($boardname =~ m/PHxTxX1/) ||
-			($boardname =~ m/PH4TQx1/) ||
-			($boardname =~ m/PHxTQx1/)) {
-			printLog("kernel $origConfModules{kerneltuxedo2004edge}{name} should be installed", 'L1');
-			$origConfModules{kerneltuxedo2004edge}{required} = 'yes';
-		} elsif (($boardname =~ m/GMxZGxx/) ||
-				($boardname =~ m/NL5xNU/)) {
-			printLog("kernel $origConfModules{kerneltuxedo2004next}{name} should be installed", 'L1');
-			$origConfModules{kerneltuxedo2004next}{required} = 'yes';
-		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+		if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
 			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
@@ -4497,93 +4451,6 @@ sub kernelhwe2004() {
 		printLog("remove is not implemented yet for this module", 'TL0');
 	}
 }
-
-
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-edge
-#
-sub kerneltuxedo2004edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-next
-#
-sub kerneltuxedo2004next() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
 
 
 
