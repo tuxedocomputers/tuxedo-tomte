@@ -2015,6 +2015,7 @@ my %origConfModules = (
 		order => '',
 	},
 	tuxedopinfixtgldkms => {
+		# obsolete
 		name => 'tuxedo-pinfix-tgl-dkms',
 		version => 1,
 		installed => 'no',
@@ -5433,6 +5434,8 @@ sub i915enablepsrfix() {
 ###############################################################################
 # Fixes unresponsive touchpad 
 # - GMxTGxx
+#
+# obsolete
 #
 sub tuxedopinfixtgldkms() {
 	my $module = shift;
