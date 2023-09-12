@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.12.3-3';
+our $VERSION = '2.12.3-4';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1717,6 +1717,42 @@ my %origConfModules = (
 		packageVersion => 'unkwn',
 		fainame => '',
 		description => 'Required kernel version linux-tuxedo-20.04',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
+	kerneltuxedo2004edge => {
+		name => 'linux-tuxedo-20.04-edge',
+		version => 3,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-20.04-edge',
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
+	kerneltuxedo2004next => {
+		name => 'linux-tuxedo-20.04-next',
+		version => 3,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'Required kernel version linux-tuxedo-20.04-next',
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -4454,6 +4490,95 @@ sub kernelhwe2004() {
 
 
 
+
+###############################################################################
+# kernel-tuxedo-20.04-edge
+#
+sub kerneltuxedo2004edge() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
+			if ($instFailed == 0) {
+				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				setRestartValues($module);
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
+
+
+
+
+###############################################################################
+# kernel-tuxedo-20.04-next
+#
+sub kerneltuxedo2004next() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
+			if ($instFailed == 0) {
+				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
+			}
+			if ($instFailed > 0) {
+				startTomteDelayed();
+				addToConfiguredModules($module, "failed");
+				$origConfModules{$module}{installed} = "failed";
+			} elsif ($instDone > 0) {
+				addToConfiguredModules($module, "success");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+				setRestartValues($module);
+			} else {
+				addToConfiguredModules($module, "nothingToDo");
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0');
+	}
+}
+
+
+
+
+
 ###############################################################################
 # kernel-tuxedo-20.04
 #
@@ -4471,6 +4596,12 @@ sub kerneltuxedo2004() {
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
+				if ($localConfModules{'kerneltuxedo2004edge'}{installed} eq 'yes') {
+					removePackage('linux-tuxedo-20.04-edge');
+				}
+				if ($localConfModules{'kerneltuxedo2004next'}{installed} eq 'yes') {
+					removePackage('linux-tuxedo-20.04-next');
+				}
 			}
 			if ($instFailed > 0) {
 				startTomteDelayed();
