@@ -1275,8 +1275,8 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'58' => {
-		model => ['TUXEDO Aura 15 Gen3'],
-		board_name => ['NL45PU2', 'NL57PU'],
+		model => ['TUXEDO Aura 14 Gen3'],
+		board_name => ['NL45PU2'],
 		fix => ['r8168dkms'],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -1285,7 +1285,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
+	'59' => {
+		model => ['TUXEDO Aura 15 Gen3'],
+		board_name => ['NL57PU'],
+		fix => ['r8168dkms'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -3028,17 +3038,19 @@ sub checkRequirements {
 		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1');
 	}
 
-	if (($boardname =~ m/NHxxRZQ/) ||
-		($boardname =~ m/NL45PU2/) ||
-		($boardname =~ m/NL57PU/))	{
-		my $kernelVersionWithR8168 = '6.1';
-		if (version_compare($kernelVersionWithR8168, $kernelRelease) == 1) {
+	if ($boardname =~ m/NHxxRZQ/)	{
+		# starting at kernel version 6.1 driver r8169 is included and supports the present device
+		my $kernelVersionWithR8169 = '6.1';
+		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
 			$origConfModules{r8168dkms}{required} = 'yes';
 			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
-		} else {
-			$origConfModules{r8168dkms}{required} = 'no';
-			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
 		}
+	}
+
+	if (($boardname =~ m/NL45PU2/) ||
+		($boardname =~ m/NL57PU/))	{
+		$origConfModules{r8168dkms}{required} = 'yes';
+		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
 	}
 
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
