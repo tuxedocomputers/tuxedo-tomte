@@ -1,4 +1,4 @@
-tuxedo-tomte (2.12.3-2) UNRELEASED; urgency=medium
+tuxedo-tomte (2.12.3-5) UNRELEASED; urgency=medium
 
   * activated debug
   * before push
@@ -7,8 +7,13 @@ tuxedo-tomte (2.12.3-2) UNRELEASED; urgency=medium
   * sending error messages to null on apt-get update
   * after packaging
   * some prints to console
+  * after packaging
+  * changed description for mesa-utils
+  * obsolete comment for tuxedopinfixtgldkmswq
+  * added r8168dkms to TUXEDO Aura Gen3 with boardnames: NL45PU2 and NL57PU
+  * r8168 driver for Aura
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Sep 2023 13:10:16 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 13 Sep 2023 09:50:52 +0200
 
 tuxedo-tomte (2.12.3) jammy; urgency=medium
 
