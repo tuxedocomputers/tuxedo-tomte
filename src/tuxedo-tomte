@@ -5130,6 +5130,10 @@ sub amdgpudkms() {
 sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
+
+	# TODO activating verbose mode for DKMS debugging
+	appendFile('/etc/dkms/framework.conf', "verbose='1'");
+
 	if ($LiveISO) {
 		printLog("$module can't be installed at this moment", 'TL0');
 	}
