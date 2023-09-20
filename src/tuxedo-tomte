@@ -5172,7 +5172,7 @@ sub r8168dkms() {
 
 	# remove now superfluous entry for r8168dkms installation in FAI
 	if ($FAI && ($origConfModules{r8168dkms}{installed} eq 'yes')) {
-		printLog('substitute in dkms file', 'TL2');
+		printLog('substitute "verbose" in dkms file', 'TL2');
 		substituteLineInFile('/etc/dkms/framework.conf', "verbose=\"1\"\n", '');
 	}
 }
