@@ -5135,11 +5135,8 @@ sub r8168dkms() {
 
 	# TODO activating verbose mode for DKMS debugging
 	if ($FAI) {
-		appendFile('/etc/dkms/framework.conf', "verbose='1'\n");
+		appendFile('/etc/dkms/framework.conf', "verbose=\"1\"\n");
 		printLog('append into dkms file', 'TL2');
-	} else {
-		printLog('substitute in dkms file', 'TL2');
-		substituteLineInFile('/etc/dkms/framework.conf', "verbose='1'\n", '');
 	}
 
 	if ($LiveISO) {
@@ -10370,6 +10367,14 @@ END {
 			}
 		} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'first reboot after FAI')) {
 			delete $configIniValues->{installation};
+
+			# TODO TESTING
+			# remove now superfluous entry for r8168dkms installation in FAI
+			if ($localConfModules{r8168dkms}{installed} eq 'yes') {
+				printLog('substitute in dkms file', 'TL2');
+				substituteLineInFile('/etc/dkms/framework.conf', "verbose=\"1\"\n", '');
+			}
+			
 			writeConfigIniFile();
 		}
 		# just to be sure, always write the tomte_finished file
