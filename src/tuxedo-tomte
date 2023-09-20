@@ -45,7 +45,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -3047,9 +3047,7 @@ sub checkRequirements {
 		}
 	}
 
-	# TODO added my system for testing
 	if (($boardname =~ m/NL45PU2/) ||
-		($boardname =~ m/TRINITY1501I/) ||
 		($boardname =~ m/NL57PU/))	{
 		$origConfModules{r8168dkms}{required} = 'yes';
 		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
@@ -5133,7 +5131,8 @@ sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
 
-	# TODO activating verbose mode for DKMS debugging
+	# activating verbose mode for DKMS for FAI as it might cause the package
+	# manager to freeze otherwise
 	if ($FAI) {
 		appendFile('/etc/dkms/framework.conf', "verbose=\"1\"\n");
 		printLog('append into dkms file', 'TL2');
@@ -5170,7 +5169,7 @@ sub r8168dkms() {
 			removeDebianModule($module, 1, '--purge');
 		}
 	}
-	# TODO TESTING
+
 	# remove now superfluous entry for r8168dkms installation in FAI
 	if ($FAI && ($origConfModules{r8168dkms}{installed} eq 'yes')) {
 		printLog('substitute in dkms file', 'TL2');
