@@ -1,32 +1,12 @@
-tuxedo-tomte (2.12.3-22) UNRELEASED; urgency=medium
+tuxedo-tomte (2.13.0) jammy; urgency=medium
 
-  * removed two 2004 kernels
-  * after packaging
-  * activated debug
-  * before push
-  * after packaging
-  * removed some messages from LiveISO
+  * removed two superfluous 20.04 kernels edge and next
+  * cleaned up some system and console messages in LiveISO
   * sending error messages to null on apt-get update
-  * after packaging
-  * some prints to console
-  * after packaging
   * changed description for mesa-utils
-  * obsolete comment for tuxedopinfixtgldkmswq
   * added r8168dkms to TUXEDO Aura Gen3 with boardnames: NL45PU2 and NL57PU
-  * r8168 driver for Aura
-  * after packaging
-  * removed blocking r8168 from FAI and LiveISO
-  * added debug for dkms
-  * after packaging
-  * more debug for dkms
-  * after packaging
-  * after packaging
-  * added remove dkms verbose from file
-  * after packaging
-  * changed r8168 dkms remove location
-  * changed dkms verbose delete to end of r8168 module
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Sep 2023 14:53:31 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Sep 2023 20:03:18 +0200
 
 tuxedo-tomte (2.12.3) jammy; urgency=medium
 
