@@ -694,7 +694,7 @@ my %tuxedo_devices = (
 	'3' => {
 		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
 		board_name => ['NHxxRZQ'],
-		fix => [''],
+		fix => ['r8168dkms'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '1558:8562',
 		cpu => '',
@@ -1911,7 +1911,7 @@ my %origConfModules = (
 	},
 	r8168dkms => {
 		name => 'r8168-dkms',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -3047,7 +3047,9 @@ sub checkRequirements {
 		}
 	}
 
+	# TODO added my system for testing
 	if (($boardname =~ m/NL45PU2/) ||
+		($boardname =~ m/TRINITY1501I/) ||
 		($boardname =~ m/NL57PU/))	{
 		$origConfModules{r8168dkms}{required} = 'yes';
 		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
@@ -5132,7 +5134,13 @@ sub r8168dkms() {
 	my $action = shift;
 
 	# TODO activating verbose mode for DKMS debugging
-	appendFile("/etc/dkms/framework.conf", "verbose='1'\n");
+	if ($FAI) {
+		appendFile('/etc/dkms/framework.conf', "verbose='1'\n");
+		printLog('append into dkms file', 'TL2');
+	} else {
+		printLog('substitute in dkms file', 'TL2');
+		substituteLineInFile('/etc/dkms/framework.conf', "verbose='1'\n", '');
+	}
 
 	if ($LiveISO) {
 		printLog("$module can't be installed at this moment", 'TL0');
@@ -5882,9 +5890,6 @@ sub samsungnvmefix() {
 sub tuxedodgpurun() {
 	my $module = shift;
 	my $action = shift;
-
-	# TODO activating verbose mode for DKMS debugging
-	appendFile("/etc/dkms/framework.conf", "verbose='1'\n");
 
 	if ($action eq 'install') {
 		# check before if the package is already installed
@@ -7670,6 +7675,7 @@ sub substituteLineInFile {
 	my $substLine = shift;
 	my @fileLines;
 	my $FH;
+	my $foundLine = 0;
 
 	if ( (-e $filename) && open($FH, "<", $filename) ) {
 		while (<$FH>) {
@@ -7685,7 +7691,12 @@ sub substituteLineInFile {
 	foreach( @fileLines ) {
 		if ( $_ =~ /^$origLine$/ ) {
 			$_ = "$substLine\n";
+			$foundLine = 1;
 		}
+	}
+	unless($foundLine) {
+		printLog("line not found in $filename", 'L2');
+		return (-1);
 	}
 	if ( open($FH, ">", $filename) ) {
 		print $FH @fileLines;
