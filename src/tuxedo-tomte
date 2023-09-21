@@ -6581,6 +6581,64 @@ sub activatePackagekit {
 
 
 ###############################################################################
+# add's, upgrades or deletes entries into the grub file /etc/default/grub
+# grubModuleEdit( module, install|upgrade|remove, kernelParameter|... );
+#
+sub grubModuleEdit {
+	my ($module, $action, @kernelParameters) = @_;
+	my $retVal;
+	if ($LiveISO) {
+		printLog("not changing grub for $module as this is a LiveISO", 'L0');
+		return (0);
+	}
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retVal = insertGrub($module, \@kernelParameters);
+		if ($retVal < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retVal > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retVal = insertGrub($module, \@kernelParameters);
+		if ($retVal < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retVal > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
+	}
+}
+
+
+
+
+
+###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
 # second parameter
 # returns 0 if the search for the packages failed or if the deinstallation was
