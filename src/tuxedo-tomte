@@ -1231,9 +1231,9 @@ my %tuxedo_devices = (
 		usb_device => '',
 	},
 	'54' => {
-		model => ['TUXEDO InfinityBook Pro 14 Gen8'],
-		board_name => ['PH4PRX1_PH6PRX1'],
-		fix => ['tuxedotouchpadswitch'],
+		model => ['TUXEDO InfinityBook Pro 14/16 Gen8'],
+		board_name => ['PH4PRX1_PH6PRX1', 'PH4PG31', 'PH6PG01_PH6PG71'],
+		fix => ['tuxedotouchpadswitch', 'disablegucfix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2272,6 +2272,24 @@ my %origConfModules = (
 		restart => 'yes',
 		order => '',
 	},
+	disablegucfix => {
+		name => 'disable-guc-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => 'Disables GuC submission on Intel iGPU while keeping HuC',
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+	},
 );
 
 
@@ -2922,8 +2940,9 @@ sub checkRequirements {
 		($boardname =~ /PHxARX1_PHxAQF1/) ||
 		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
 		($boardname =~ /GMxPXxx/) ||
-		($boardname =~ /PH4PRX1_PH6PRX1/))
-	{
+		($boardname =~ /PH4PRX1_PH6PRX1/) ||
+		($boardname =~ /PH4PG31/) ||
+		($boardname =~ /PH6PG01_PH6PG71/)) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
 	}
@@ -3179,6 +3198,12 @@ sub checkRequirements {
 	if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)	{
 		$origConfModules{acpibacklightvideofix}{required} = 'yes';
 		printLog("detected $origConfModules{acpibacklightvideofix}{name} issue", 'L1');
+	}
+	if (($boardname =~ /PH4PRX1_PH6PRX1/) ||
+   		($boardname =~ /PH4PG31/) ||
+		($boardname =~ /PH6PG01_PH6PG71/)) {
+		$origConfModules{disablegucfix}{required} = 'yes';
+		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
 
 }
@@ -6031,6 +6056,65 @@ sub acpibacklightvideofix() {
 		}
 	}
 }
+
+
+
+###############################################################################
+# disabled GuC submission while keeping HuC on Intel iGPU 
+#
+sub disablegucfix() {
+	my $module = shift;
+	my $action = shift;
+	my @kernelParameters = ('i915.enable_guc=2');
+	my $retval;
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval = insertGrub($module, \@kernelParameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retval = insertGrub($module, \@kernelParameters);
+		if ($retval < 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			if ($retval > 0) {
+				$postConfProgram{updateGrub}{trigger} = 1;
+				addToConfiguredModules($module, "success");
+			} else {
+				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				addToConfiguredModules($module, "nothingToDo");
+			}
+		}
+	}
+	if ($action eq 'remove') {
+		if (removeWarningMessage('')) {
+			removeKernelParameters($module, @kernelParameters);
+		}
+	}
+}
+
+
+
+
+
+
 
 
 
