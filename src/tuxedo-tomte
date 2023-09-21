@@ -3201,6 +3201,11 @@ sub findPciDevice {
 }
 
 
+
+
+
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -3208,6 +3213,15 @@ sub findPciDevice {
 # each configure one module from %confModules
 # they set 'installed' status and $postConfModule trigger
 #
+###############################################################################
+###############################################################################
+###############################################################################
+
+
+
+
+
+###############################################################################
 # for keyboard not present on boot
 #
 sub i8042fix() {
@@ -5412,6 +5426,7 @@ sub i915disablepsrfix() {
 
 ###############################################################################
 # Provides better battery life
+# adds two parameters and deletes an old one in case it is present
 #
 sub i915enablepsrfix() {
 	my $module = shift;
@@ -5514,6 +5529,7 @@ sub tuxedopinfixtgldkms() {
 # for reducing the timeout on loading the thunderbolt kernel module when
 # booting the system
 # - X170KM-G
+# adds some parameters and deletes one if found
 #
 sub thunderboltbootdelayfix() {
 	my $module = shift;
@@ -5634,6 +5650,8 @@ sub lightdmlogindcheckgraphicalfix() {
 # For functioning backlight control on Nvidia GPU's
 #
 # - GMxTGxx
+#
+# removes some old parameters if present
 #
 sub nvidiabacklightcontrolfix() {
 	my $module = shift;
