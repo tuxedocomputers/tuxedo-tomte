@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.14.0-15';
+our $VERSION = '2.14.0-20';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1793,7 +1793,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2004 => {
 		name => 'linux-tuxedo-20.04',
@@ -1814,7 +1814,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2004edge => {
 		name => 'linux-tuxedo-20.04-edge',
@@ -1835,7 +1835,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2004next => {
 		name => 'linux-tuxedo-20.04-next',
@@ -1856,7 +1856,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kernelgenerichwe2004 => {
 		name => 'linux-generic-hwe-20.04',
@@ -1877,7 +1877,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kernelgenerichwe2004edge => {
 		name => 'linux-generic-hwe-20.04-edge',
@@ -1898,7 +1898,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2204 => {
 		name => 'linux-tuxedo-22.04',
@@ -1919,7 +1919,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2204next => {
 		name => 'linux-tuxedo-22.04-next',
@@ -1940,7 +1940,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
@@ -1961,7 +1961,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'yes',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	cracklibruntime => {
 		name => 'cracklib-runtime',
@@ -8485,6 +8485,13 @@ sub configureSingleModule {
 	$module = getSubName($moduleName);
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
+		return;
+	}
+
+	# check if in LiveISO and exit from subroutine if module should not be
+	# installed
+	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
+		printLog("Module: $module will not be installed as this is a LiveISO", 'L0');
 		return;
 	}
 
