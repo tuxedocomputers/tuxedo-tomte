@@ -117,6 +117,8 @@ my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
 my $systemdDelay = 30;
+my @availableDebianPackages;
+my %packageHash;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -155,6 +157,8 @@ my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 printLog("sessionID: $sessionID", 'TL2');
+
+
 
 
 ###############################################################################
@@ -1343,12 +1347,14 @@ my %tuxedo_devices = (
 #	reconfigure		if set to 'always' will always reconfigure if fix detected
 #	restart			the system requires a restart after this module was
 #					installed or upgraded
-#	order			'first': has to be installed before anything else
-#					'last': has to be installed after anything else
-#	dkms			'yes': it is a dkms package
-#					'no': it is not a dkms package
-#	FAI				'yes': should be installed during FAI
-#					'no': should not be installed in FAI
+#	order			'first':	has to be installed before anything else
+#					'last':		has to be installed after anything else
+#	dkms			'yes':	it is a dkms package
+#					'no':	it is not a dkms package
+#	FAI				'yes':	should be installed during FAI
+#					'no':	should not be installed in FAI
+#	LiveISO			'yes':	should be installed in LiveISO
+#					'no':	should not be installed in LiveISO
 #
 my %origConfModules = (
 	i8042fix => {
@@ -3957,6 +3963,7 @@ sub tuxedonvmefix() {
 	my %nvmeDevice;
 	my $nvmeDir;
 	my $output;
+	my $retValue = 0;
 	my $fwVersion = 'S5Z42109';
 	my $nvmeUpdateSuccess = 0;
 	my $nvmeFWPackageWasInstalled = 0;
@@ -4001,7 +4008,8 @@ sub tuxedonvmefix() {
 					if (installPackage('a2000-s5z42109')) {
 						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L1');
 						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
-						if ($? != 0) {
+						$retValue = $?/256;
+						if ($retValue != 0) {
 							printLog('firmware could not be uploaded!', 'L0');
 							printLog($output);
 							$origConfModules{$module}{installed} = "failed";
@@ -4010,7 +4018,8 @@ sub tuxedonvmefix() {
 						}
 						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}");
 						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
-						if ($? != 0) {
+						$retValue = $?/256;
+						if ($retValue != 0) {
 							printLog('firmware could not be activated');
 							printLog($output);
 							$origConfModules{$module}{installed} = "failed";
@@ -4542,6 +4551,7 @@ sub nvidiadriver() {
 	my $nvidiaDriver525 = 'nvidia-driver-525';
 	my $nvidiaDriver530 = 'nvidia-driver-530';
 	my $nvidiaDriver535 = 'nvidia-driver-535';
+
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
 			if (isPackageInRepo($nvidiaDriver510)) {
@@ -6077,8 +6087,8 @@ sub deinstExcept {
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	printLog("$searchCmd", 'L2');
 	my $retString = `$searchCmd`;
-	printLog("first result for $deinst:\n$retString", 'L2');
 	my $retValue = $?/256;
+	printLog("first result for $deinst:\n$retString", 'L2');
 	my $deinstCmd;
 	my $deinstKey;
 	my $deinstList ='';
@@ -6126,8 +6136,8 @@ sub deinstExcept {
 			$deinstCmd .= ' >/dev/null 2>&1';
 			$retText = `$deinstCmd`;
 		}
-		if ($? != 0) {
-			$retValue = $?/256;
+		$retValue = $?/256;
+		if ($retValue != 0) {
 			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
 			printLog("retText: $retText", 'L0');
 			return (0);
@@ -6250,6 +6260,45 @@ sub isPackageInRepo {
 
 
 ###############################################################################
+# Deinstalls a package
+# returns 1 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 0 if everything was ok, even if no package were found
+#
+sub deinstallSinglePackage {
+	my $deinst = shift;
+	my $aptgetDeinst = 'apt-get -yq remove';
+	my $retValue;
+
+	$aptgetDeinst .= " $deinst";
+	printLog("deinstalling: $deinst", 'L0');
+	$aptgetDeinst .= " >/dev/null 2>&1";
+	if (isPackageInstalled($deinst)) {
+		deactivatePackagekit();
+		if (unlockPM("$aptgetDeinst") && (isPMlocked() == 0)) {
+			if (system($aptgetDeinst)) {
+				$retValue = $?/256;
+				lockPM();
+				printLog("failed to deinstall package, retvalue: $retValue", 'L0');
+				return (1);
+			} else {
+				printLog('deinstallation of package successful', 'L0');
+				return (0);
+			}
+		} else {
+			printLog("package deinstallation failed!! Could not get package manager lock", 'L2');
+			return (0);
+		}
+	} else {
+		printLog("package $deinst was not found", 'L0');
+	}
+}
+
+
+
+
+
+###############################################################################
 # Checks if the package is installed on the system
 # return 1 if yes
 # return 0 if no
@@ -6268,6 +6317,58 @@ sub isPackageInstalled {
 		return (0);
 	}
 }
+
+
+
+
+###############################################################################
+# checks if packages given by an array are installed
+# @notInstalledPackages = arePackagesInstalled( @packages )
+# returns all packages that are not installed
+#
+sub arePackagesInstalled {
+	my @packages = @_;
+	my $queryHead = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\\n\'";
+	my $queryTail = " 2>&1";
+	my $packageQuery = $queryHead;
+	my $package;
+	my $line;
+	my @lines;
+	my $retLines;
+	my $retValue;
+	my @packagesNotInstalled;
+
+	if (scalar(@packages) == 0) {
+		return ('');
+	}
+	foreach $package (@packages) {
+		$packageQuery .= " $package";
+	}
+
+	$packageQuery .= $queryTail;
+	$retLines = `$packageQuery`;
+	$retValue = $?/256;
+	printLog("are packages installed retLines: $retLines retValue $retValue", 'L2');
+	@lines = split /\n/, $retLines;
+	foreach $line (@lines) {
+		# find packages that are not installed
+		if ($line =~ /dpkg-query:/) {
+			$line =~ /.*matching\s(\S+)/;
+			setPackageInstallStatus( $1, 'not installed' );
+			push( @packagesNotInstalled, $1 );
+		# find not completely installed or removed packages
+		} else {
+			$line =~ /(\S+)\s*(\S+)/;
+			setPackageInstallStatus( $1, $2 );
+			# only insert packages to be installed to array
+			if ($2 =~ /[uihrp][ncHUFWt]/) {
+				push( @packagesNotInstalled, $1 );
+			}
+		}
+	}
+	return ( @packagesNotInstalled );
+}
+
 
 
 
@@ -6345,6 +6446,131 @@ sub installPackage {
 	}
 	return $retval;
 }
+
+
+
+
+###############################################################################
+# installs a list of packages
+# returns 0 if all packages have been installed or were installed already
+# returns the number of packages which did not install successfully or are not
+# installed afterwards
+# tries to install al found packages, does not exit even if some could not be
+# found on the repos
+#
+sub installPackages {
+	my @packages = @_;
+	my $package;
+	my $retLines;
+	my $retValue;
+	my @packagesToInstall;
+	my @packagesNotInstalled;
+	my @packagesNotFound;
+	my @packagesToAskFor;
+	my $installCommand;
+
+	if (scalar(@packages) == 0) {
+		printLog("got no packages to install ...", 'L0');
+		return (0);
+	}
+
+	# put requested packages into hash list
+	# only put installable packages into array list ... to install them later
+	foreach $package (@packages) {
+		setPackageInstallStatus( $package, 'unknown' );
+		if (isPackageAvailable($package)) {
+			setPackageInstallStatus( $package, 'available' );
+			push( @packagesToAskFor, $package );
+		} else {
+			# unavailable = not found locally or in any repos
+			setPackageInstallStatus( $package, 'unavailable' );
+		}
+	}
+
+	# build install package command
+	@packagesToInstall = arePackagesInstalled( @packagesToAskFor );
+
+	if (scalar(@packagesToInstall) == 0) {
+		printLog("nothing has to be installed", 'L2');
+		return (0);
+	}
+
+	if ($FAI) {
+		$installCommand = "apt-get -o Debug::pkgDPkgProgressReporting=true -y install @packagesToInstall >> $logFile 2>&1";
+		printLog("install command: $installCommand", 'TL0');
+		$retLines = `$installCommand`;
+		$retValue = $?/256;
+		printLog("retLines: $retLines retValue: $retValue", 'L2');
+	} elsif (!($LiveISO && $noNetwork)) {
+		messageLongInstall();
+		if ($logLevel > 1) {
+			$installCommand = "apt-get -o Debug::pkgDPkgProgressReporting=true -y install @packagesToInstall >> $logFile 2>&1";
+		} else {
+			$installCommand = "apt-get -yq install @packagesToInstall >/dev/null 2>&1";
+		}
+		if (checkNetwork(10, 1)) {
+			deactivatePackagekit();
+			if (unlockPM( $installCommand ) && (isPMlocked() == 0)) {
+				printLog("install package @packagesToInstall", 'L0');
+				$retLines = `$installCommand`;
+				$retValue = $?/256;
+				printLog("return from apt-get:\n$retLines", 'L2');
+			} else {
+				printLog("failed to get package management lock to install @packagesToInstall!!", 'L2');
+				startTomteDelayed();
+				return (0);
+			}
+		} else {
+			printLog("no network connection found, can't install packages!!", 'TL0');
+			startTomteDelayed();
+		}
+	}
+
+	# check if all has been installed
+	@packagesNotInstalled = arePackagesInstalled( @packagesToInstall );
+	lockPM();
+
+	printLog("not installed: @packagesNotInstalled", 'L2');
+	# return number of not installed packages
+	return (scalar(@packagesNotInstalled));
+}
+
+
+
+
+###############################################################################
+# fills the hash value with all the available packages
+#
+sub initAvailablePackagesList {
+	@availableDebianPackages = `apt-cache pkgnames`;
+	chomp(@availableDebianPackages);
+}
+
+
+
+
+###############################################################################
+# isPackageAvailable( $package ) where package might be a regular expression !!
+#
+sub isPackageAvailable {
+	my $package = shift;
+	if ( grep( /^$package$/, @availableDebianPackages ) ) {
+		return (1);
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# setPackageInstallStatus( package, status )
+# sets the installation status of a package and writes it into the hash
+#
+sub setPackageInstallStatus {
+	my ($package, $status) = @_;
+	$packageHash{$package} = $status;
+}
+
 
 
 
@@ -6653,6 +6879,7 @@ sub uniq {
 sub uninstKernelFlavour {
 	my ($kernelToDelete, $kernelToKeep, $failed, $somethingWasDone) = @_;
 	my $retString;
+	my $retValue = 0;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
 	my @lines;
 	my %pkgsHash;
@@ -6830,6 +7057,7 @@ sub uninstallRemnantKernels {
 	my ($kernelToKeep, $failed, $somethingWasDone) = @_;
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-image-* linux-modules-* 2>&1";
 	my $retString;
+	my $retValue = 0;
 	my @lines;
 	my @removePackages;
 	my $package;
@@ -7508,6 +7736,7 @@ sub messageDesktop {
 	my $body = shift;
 	my $urgency = shift;
 	my $icon = shift;
+	my $retValue = 0;
 
 	my $mUsername = '';
 	my $mPid = '';
@@ -7552,6 +7781,7 @@ sub messageDesktop {
 	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
+	$retValue = $?/256;
 
 	if ($? != 0) {
 		printLog("No display for message output found with command:\n$mCmd", 'L1');
