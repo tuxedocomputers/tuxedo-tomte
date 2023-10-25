@@ -1371,7 +1371,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
@@ -1392,7 +1392,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	amdxhcihcdusbquirksuspendfix => {
 		name => 'amd-xhci-hcd-usb-quirk-suspend-fix',
@@ -1413,7 +1413,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	amdgpuwithnvidiafix => {
 		name => 'amd-gpu-with-nvidia-fix',
@@ -1498,7 +1498,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	backlightfix => {
 		name => 'backlight-fix',
@@ -1519,7 +1519,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
@@ -1582,7 +1582,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -1646,7 +1646,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	tuxedotouchpadswitch => {
 		name => 'tuxedo-touchpad-switch',
@@ -2110,7 +2110,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	i915disablepsrfix => {
 		name => 'i915-disable-psr-fix',
@@ -2131,7 +2131,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	i915enablepsrfix => {
 		name => 'i915-enable-psr-fix',
@@ -2152,7 +2152,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	tuxedopinfixtgldkms => {
 		# obsolete
@@ -2238,7 +2238,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	lightdmlogindcheckgraphicalfix => {
 		name => 'lightdm-logind-check-graphical-fix',
@@ -2280,7 +2280,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	earlyloadbacklightcontrolfix => {
 		name => 'early-load-backlight-control-fix',
@@ -2301,7 +2301,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	tuxedor8125dkms => {
 		name => 'tuxedo-r8125-dkms',
@@ -2427,7 +2427,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 	disablegucfix => {
 		name => 'disable-guc-fix',
@@ -2448,7 +2448,7 @@ my %origConfModules = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'yes',
+		LiveISO => 'no',
 	},
 );
 
@@ -6029,7 +6029,6 @@ sub setDkmsVerbose {
 	my ( $module, $value ) = @_;
 	my $dkmsFile = '/etc/dkms/framework.conf';
 	my $result;
-	#TODO debug
 	my $output;
 	if ($value == 1) {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
@@ -8490,11 +8489,10 @@ sub configureSingleModule {
 
 	# check if in LiveISO and exit from subroutine if module should not be
 	# installed
-	# TODO debug
-	printLog("LiveISO: $LiveISO", 'L2');
-	printLog("confModule value: $origConfModules{$module}{LiveISO}", 'L2');
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
 		printLog("Module: $module will not be installed as this is a LiveISO", 'L0');
+		addToConfiguredModules($module, 'nothingToDo');
+		$localConfModules{$module}{installed} = 'LiveISO';
 		return;
 	}
 
@@ -8590,6 +8588,8 @@ sub reconfigureSingleModule {
 	}
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
 		printLog("Module: $module will not be reconfigured as this is a LiveISO", 'L0');
+		addToConfiguredModules($module, 'nothingToDo');
+		$localConfModules{$module}{installed} = 'LiveISO';
 		return;
 	}
 
