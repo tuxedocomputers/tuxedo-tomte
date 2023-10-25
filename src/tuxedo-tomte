@@ -8490,6 +8490,9 @@ sub configureSingleModule {
 
 	# check if in LiveISO and exit from subroutine if module should not be
 	# installed
+	# TODO debug
+	printLog("LiveISO: $LiveISO", 'L2');
+	printLog("confModule value: $origConfModules{$module}{LiveISO}", 'L2');
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
 		printLog("Module: $module will not be installed as this is a LiveISO", 'L0');
 		return;
