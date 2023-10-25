@@ -1,21 +1,14 @@
-tuxedo-tomte (2.14.0-23) UNRELEASED; urgency=medium
+tuxedo-tomte (2.14.0-24) UNRELEASED; urgency=medium
 
-  * after packaging
-  * merge from 302
-  * after packaging
-  * after packaging
-  * after packaging
-  * added debug
-  * after packaging
-  * added LiveISO exception to reconfigure
-  * after packaging
-  * changed list entries
+  * added kernel and Nvidia update in LiveISO blocked
+  * added 'verbose' parameter for DKMS packages installation in FAI
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 25 Oct 2023 09:01:40 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 25 Oct 2023 11:57:54 +0200
 
 tuxedo-tomte (2.14.0) jammy; urgency=medium
 
-  * added disablegucfix for TUXEDO InfinityBook 14/16 Gen8 with boardnames: PH4PRX1_PH6PRX1, PH4PG31, PH6PG01_PH6PG71
+  * added disablegucfix for TUXEDO InfinityBook 14/16 Gen8 with boardnames:
+    PH4PRX1_PH6PRX1, PH4PG31, PH6PG01_PH6PG71
 
  -- E. Mohr <tux@tuxedocomputers.com>  Mon, 25 Sep 2023 09:18:14 +0200
 
