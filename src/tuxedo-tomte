@@ -8482,6 +8482,7 @@ sub configureSingleModule {
 	my $moduleName = shift;
 	my $module;
 	$module = getSubName($moduleName);
+
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
 		return;
@@ -8582,10 +8583,14 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	printLog("reconfigureSingleModule: $moduleName", 'L2');
+
 	if ($module eq "") {
 		printLog("wrong module name", 'TL');
 		return;
 	}
+
+	# check if in LiveISO and exit from subroutine if module should not be
+	# installed
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
 		printLog("Module: $module will not be reconfigured as this is a LiveISO", 'L0');
 		addToConfiguredModules($module, 'nothingToDo');
