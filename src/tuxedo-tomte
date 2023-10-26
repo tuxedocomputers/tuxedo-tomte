@@ -5604,11 +5604,11 @@ sub addRepoKey {
 			# wait a bit for package management to settle down
 			while ($counter < 15) {
 				$counter++;
-				$pmLocked = isPMlocked();
-				if ($pmLocked == 0) {
-					my $command = $consoleLanguage.'apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring* 2>/dev/null';
+				my $command = $consoleLanguage.'apt-get -y --allow-unauthenticated install /tmp/tuxedo-archive-keyring* 2>/dev/null';
+				if (unlockPM("$command") && (isPMlocked() == 0)) {
 					$outputKey = `$command`;
 					$errorCode = $?/256;
+					lockPM();
 					if ($errorCode != 0) {
 						printLog("error code apt-get: $errorCode", 'L2');
 						printLog("output apt-get: $outputKey", 'L2');
@@ -5616,7 +5616,7 @@ sub addRepoKey {
 						printLog("no errors installing keyrings", 'L2');
 						last;
 					}
-				} elsif ($pmLocked == -1) {
+				} else {
 					printLog("something is wrong while looking for locks for keyring installation", 'L0');
 				}
 				printLog("problem installing keyring, trying again", 'L2');
@@ -6044,9 +6044,7 @@ sub setDkmsVerbose {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			unless (isLineInFile( $dkmsFile, 'verbose="1"' )) {
 				$result = appendFile( $dkmsFile, "verbose=\"1\"\n" );
-				printLog("append into dkms file for $module", 'L2');
-				$output =`cat /etc/dkms/framework.conf`;
-				printLog($output, 'TL2');
+				printLog("append verbose into dkms file for $module", 'L2');
 				return ($result);
 			} else {
 				printLog("line verbose is already in $dkmsFile", 'L2');
@@ -6057,10 +6055,8 @@ sub setDkmsVerbose {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2');
 			$result = substituteLineInFile( $dkmsFile, "verbose=\"1\"", '' );
-			$output = `cat /etc/dkms/framework.conf`;
-			printLog($output, 'TL2');
 			if ($result >= 0) {
-				printLog("substitution successful", 'L2');
+				printLog("verbose DKMS substitution successful", 'L2');
 				return (1);
 			}
 		}
@@ -6189,7 +6185,7 @@ sub getPackageDependencies {
 # unsuccessful
 # returns 0 if everything was ok, even if no packages were found
 #
-sub deinstallPackage {
+sub deinstallPackages {
 	my $deinst = shift;
 	my $deinstKey;
 	my $deinstList = '';
@@ -6207,7 +6203,7 @@ sub deinstallPackage {
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 
-	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove 2>/dev/null';
+	my $aptgetDeinst = $consoleLanguage.'apt-get -yq remove';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
@@ -6220,13 +6216,20 @@ sub deinstallPackage {
 	if ($deinstCounter != 0) {
 		printLog("deinstalling package: $deinstList", 'L0');
 		$aptgetDeinst .= ' >/dev/null 2>&1';
-		if (system($aptgetDeinst)) {
-			$retValue = $?/256;
-			printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
-			return (1);
+		deactivatePackagekit();
+		if (unlockPM("$aptgetDeinst") && (isPMlocked() == 0)) {
+			if (system($aptgetDeinst)) {
+				$retValue = $?/256;
+				lockPM();
+				printLog("failed to deinstall packages, retvalue: $retValue", 'L0');
+				return (1);
+			} else {
+				printLog('deinstallation of packages successful', 'L0');
+				return (0);
+			}
 		} else {
-			printLog('deinstallation of packages successful', 'L0');
-			return (0);
+			printLog('could not get lock to deinstall packages', 'L0');
+			return (1);
 		}
 	} else {
 		printLog('nothing to deinstall', 'L0');
@@ -6409,40 +6412,58 @@ sub getPackageVersion {
 sub installPackage {
 	my $packageName = shift;
 	my $retval;
+	if (isPackageInstalled($packageName)) {
+		return (1);
+	}
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
 		if ($logLevel > 1) {
-			my $command = $consoleLanguage.'apt-get -o Debug::pkgDPkgProgressReporting=true -y install '.$packageName.' 2>/dev/null';
-			$retval = `$command`;
+			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -y install $packageName`;
 		} else {
-			my $command = $consoleLanguage.'apt-get -y install '.$packageName.' 2>/dev/null';
-			$retval = `$command`;
+			$retval = `apt-get -y install $packageName`;
 		}
 		printLog("return from apt-get:\n$retval", 'TL2');
 		$retval = isPackageInstalled($packageName);
-	} else {
+	} elsif (!($LiveISO && $noNetwork)) {
+		messageLongInstall();
 		printLog("install package $packageName", 'L0');
-		if (checkNetwork(15, 1)) {
+		if (checkNetwork(10, 1)) {
 			deactivatePackagekit();
-			if ($logLevel > 1) {
-				$retval = `apt-get -yq install $packageName >>$logFile 2>&1`;
+			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
+				if ($logLevel > 1) {
+					$retval = `apt-get -yq install $packageName >>$logFile 2>&1`;
+				} else {
+					$retval = `apt-get -yq install $packageName >/dev/null 2>&1`;
+				}
+				lockPM();
+				printLog("return from apt-get:\n$retval", 'L2');
+				$retval = isPackageInstalled($packageName);
+				if ($retval == 0) {
+					printLog("failed to install $packageName", 'L0');
+					printLog("will try again later", 'L0');
+					# repair a possibly wrecked package manager
+					if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+						`dpkg --configure -a`;
+						lockPM();
+						startTomteDelayed();
+					} else {
+						printLog('Could not repair package management, will try again later', 'L0');
+						startTomteDelayed();
+					}
+				}
 			} else {
-				$retval = `apt-get -yq install $packageName >/dev/null 2>&1`;
-			}
-			printLog("return from apt-get:\n$retval", 'L2');
-			$retval = isPackageInstalled($packageName);
-			if ($retval == 0) {
-				printLog("failed to install $packageName", 'L0');
-				printLog("will try again later", 'L0');
-				# repair a possibly wrecked package manager
-				`dpkg --configure -a`;
+				printLog("failed to get package management lock to install $packageName!!", 'L2');
 				startTomteDelayed();
+				return (0);
 			}
 		} else {
 			printLog("no network connection found, can't install packages!!", 'TL0');
 			startTomteDelayed();
 		}
+	} else {
+		printLog("not installing package $packageName because no network detected", 'L0');
+		startTomteDelayed();
 	}
 	return $retval;
 }
@@ -6588,13 +6609,19 @@ sub removePackage {
 		printLog("parameter was undefined", 'L2');
 		$parameter = '';
 	}
-	printLog("command: apt-get -yq remove $parameter $packageName >/dev/null 2>&1", 'L2');
-	$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
-	printLog("return from apt-get:\n$retval", 'L2');
-	$retval = isPackageInstalled($packageName);
-	if ($retval == 1) {
-		printLog("failed to remove $packageName", 'L0');
-		printLog("will try again later", 'L0');
+	if (unlockPM("apt-get -yq remove $parameter $packageName") && (isPMlocked() == 0)) {
+		$retval = `apt-get -yq remove $parameter $packageName >/dev/null 2>&1`;
+		lockPM();
+		printLog("return from apt-get:\n$retval", 'L2');
+		$retval = isPackageInstalled($packageName);
+		if ($retval == 1) {
+			printLog("failed to remove $packageName", 'L0');
+			printLog("will try again later", 'L0');
+			startTomteDelayed();
+			return (0);
+		}
+	} else {
+		printLog("locks for package management could not be unlocked!!", 'L2');
 		startTomteDelayed();
 		return (0);
 	}
@@ -6650,7 +6677,7 @@ sub installKernelFlavour {
 	my $allPackagesInstalled = 1;
 	my @lines;
 	my $packageMissing = 0;
-	my $exitStatus;
+	my $exitStatus = 1;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		${$failed} += 1;
@@ -6694,26 +6721,45 @@ sub installKernelFlavour {
 		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
-		`apt-get update -q`;
-		printLog("installation command: $installCmd", 'L2');
-		$retString = `$installCmd`;
-		if ($retString =~ /dpkg --configure -a/) {
-			printLog("some packages are not configured", 'L2');
-			printLog("executing: make configure -a", 'L2');
-			`dpkg --configure -a`;
-			if ($? != 0) {
-				printLog("configure -a failed!! exiting", 'L0');
-				${$failed} += 1;
-				return (0);
-			} else {
-				$retString = `$installCmd`;
+		deactivatePackagekit();
+		if (unlockPM('apt-get update -q and dpkg --configure -a') && (isPMlocked() == 0)) {
+			`apt-get update -q`;
+			printLog("installation command: $installCmd", 'L2');
+			$retString = `$installCmd`;
+			if ($retString =~ /dpkg --configure -a/) {
+				lockPM();
+				printLog("some packages are not configured", 'L2');
+				printLog("executing: make configure -a", 'L2');
+				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+					$exitStatus = 1;
+					`dpkg --configure -a`;
+					$exitStatus = $?/256;
+					lockPM();
+					if ($exitStatus != 0) {
+						printLog("configure -a failed!! exiting", 'L0');
+						${$failed} += 1;
+						return (0);
+					} else {
+						if (unlockPM("$installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}") && (isPMlocked() == 0)) {
+							$exitStatus = 1;
+							$retString = `$installCmd`;
+							$exitStatus = $?/256;
+							lockPM();
+						} else {
+							printLog("repeated installation failed!!", 'L2');
+						}
+					}
+				} else {
+					printLog("can't repair package management, can't get locks", 'L2');
+				}
+				if ($exitStatus != 0) {
+					printLog("something went wrong while installing kernel packages", 'TL0');
+					printLog("error: $exitStatus", 'L0');
+					printLog("$retString", 'L0');
+				}
 			}
-		}
-		$exitStatus = $?/256;
-		if ($exitStatus != 0) {
-			printLog("something went wrong while installing kernel packages", 'TL0');
-			printLog("error: $exitStatus", 'L0');
-			printLog("$retString", 'L0');
+		} else {
+			printLog("failed get locks to update and configure package management", 'L2');
 		}
 	
 		$retString = `$testCmd`;
@@ -6886,6 +6932,7 @@ sub uninstKernelFlavour {
 	my $deinstString = $consoleLanguage.'apt-get remove -yq --purge';
 	my $package;
 	my $kernelModuleName;
+	my $currentKernelUninstall = 0;
 
 	# find installed packages
 	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
@@ -6937,36 +6984,61 @@ sub uninstKernelFlavour {
 		printLog("deinstallation command: $deinstString", 'L2');
 
 		# circumvent Ubuntu failsafe for currently installed kernel
-		if ($deinstString =~ /$kernelRelease/) {
-			printLog("deinstalling current kernel!", 'L2');
-			setRestartValues($kernelToKeep);
-			rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
-			my $fileText = "#!/bin/sh\nexit 0";
-			createFile('/usr/bin/linux-check-removal', $fileText, 1);
-			chmod 755, '/usr/bin/linux-check-removal';
+		if (setCurrentKernelUninstallParameters($deinstString)) {
+			$currentKernelUninstall = 1;
+		}
+
+		deactivatePackagekit();
+		if (unlockPM("deinst current Kernel: $deinstString") && (isPMlocked() == 0)) {
 			$retString = `$deinstString`;
+			lockPM();
 			if ($retString =~ /sudo dpkg --configure -a/) {
-				printLog("some packages are not configured", 'L2');
-				printLog("executing: dpkg --configure -a", 'L2');
-				`dpkg --configure -a`;
-				if ($? != 0) {
-					printLog("configure -a failed!! exiting", 'L2');
-					$failed += 1;
-					return (0);
+				printLog("some packages are not completely configured!!", 'L0');
+				printLog("executing: dpkg --configure -a", 'L0');
+				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+					`dpkg --configure -a`;
+					$retValue = $?/256;
+					lockPM();
+					if ($retValue != 0) {
+						printLog("configure -a failed!! exiting", 'L0');
+						$failed += 1;
+						startTomteDelayed();
+						$failed += 1;
+						$somethingWasDone += 1;
+						return (0);
+					} else {
+						if (unlockPM("second try: $deinstString") && (isPMlocked() == 0)) {
+							$retString = `$deinstString`;
+							lockPM();
+						} else {
+							printLog("second uninstall of current kernel failed, can't get lock", 'L2');
+							startTomteDelayed();
+							$failed += 1;
+							return (0);
+						}
+					}
 				} else {
-					$retString = `$deinstString`;
+					printLog("can't repair package management, can't get locks", 'L2');
+					startTomteDelayed();
+					$failed += 1;
+					$somethingWasDone += 1;
+					return (0);
 				}
 			}
-			unlink '/usr/bin/linux-check-removal';
-			rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-			printLog("current kernel $kernelToDelete deinstalled", 'L0');
 		} else {
-			printLog("deinstallation command: $deinstString", 'L2');
-			$retString = `$deinstString`;
+			printLog("can't deinstall current kernel, can't get locks", 'L2');
+			startTomteDelayed();
+			$failed += 1;
+			return (0);
 		}
+		if ($currentKernelUninstall) {
+			unsetCurrentKernelUninstallParameters();
+			printLog("current kernel $kernelToDelete deinstalled", 'L0');
+		}
+
 		printLog("return: $retString", 'L2');
-		if ($? != 0) {
-			printLog("error: $?", 'L0');
+		if ($retValue != 0) {
+			printLog("error: $retValue", 'L0');
 		} else {
 			printLog('no error from deinstall', 'L1');
 		}
@@ -7082,22 +7154,31 @@ sub uninstallRemnantKernels {
 	if (scalar(@removePackages) > 0) {
 		$deinstString .= join(' ', @removePackages).' 2>&1';
 		printLog("deinstallation command: $deinstString", 'L2');
-		$retString = `$deinstString`;
-		printLog("deinstallation result: $retString", 'L2');
-		if ($? != 0) {
-			printLog("error: $?", 'L0');
-		} else {
-			printLog('no error from deinstall', 'L1');
-		}
-		# check whether packages have been deinstalled
-		foreach $package (@removePackages) {
-			printLog("test package: $package", 'L2');
-			if (isPackageInstalled($package)) {
-				printLog("unwanted package $package is still installed", 'L0');
-				$failed += 1;
+		deactivatePackagekit();
+		if (unlockPM("deinstString: $deinstString") && (isPMlocked() == 0)) {
+			$retString = `$deinstString`;
+			$retValue = $?/256;
+			lockPM();
+			printLog("deinstallation result: $retString", 'L2');
+			if ($retValue != 0) {
+				printLog("error: $retValue", 'L0');
 			} else {
-				$somethingWasDone += 1;
+				printLog('no error from deinstall', 'L1');
 			}
+			# check whether packages have been deinstalled
+			foreach $package (@removePackages) {
+				printLog("test package: $package", 'L2');
+				if (isPackageInstalled($package)) {
+					printLog("unwanted package $package is still installed", 'L0');
+					$failed += 1;
+				} else {
+					$somethingWasDone += 1;
+				}
+			}
+		} else {
+			printLog("could not uninstall kernel from remnant kernels uninstall, could not get locks", 'L2');
+			$failed += 1;
+			$somethingWasDone = 1;
 		}
 		if (($failed == 0) && ($somethingWasDone > 0)) {
 			printLog("all remnant kernel packages uninstalled", 'L0');
@@ -7217,37 +7298,6 @@ sub removeKernelParameters {
 
 
 
-###############################################################################
-# refreshes the package manager database
-# needs a module name to set the result pkconRefresh($module)
-#
-sub pkconRefresh {
-	my $pkconModule = shift;
-	my $output;
-	my $exitStatus;
-	if (checkNetwork(10, 1)) {
-		deactivatePackagekit();
-		$output = `pkcon refresh`;
-		$exitStatus = $?/256;
-		if ($exitStatus != 0) {
-			printLog('failed: update packages', 'L0');
-			printLog("returned error code: $exitStatus", 'L0');
-			if ($exitStatus == 7) {
-				printLog('possible network problems', 'L0');
-			}
-			addToConfiguredModules($pkconModule, "failed");
-		} else {
-			printLog("success: update packages", 'L1');
-			addToConfiguredModules($pkconModule, "success");
-		}
-	} else {
-		printLog("no network available, repos could not be updated", 'TL0');
-		addToConfiguredModules($pkconModule, "failed");
-	}
-}
-
-
-
 
 ###############################################################################
 # setNoNetwork( 0 or 1 )
@@ -7281,32 +7331,48 @@ sub aptgetRefreshModule {
 	my $exitStatus = 1;
 	my $refreshTriesDone = 0;
 	my $refreshWait = 1;
-	if (checkNetwork(15, 1)) {
-		deactivatePackagekit();
-		while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
-			my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-			$output = `$command`;
-			$exitStatus = $?/256;
-			if ($exitStatus != 0) {
-				printLog('failed: update packages', 'L0');
-				printLog("returned error code: $exitStatus", 'L0');
-				if ($exitStatus == 7) {
-					printLog('possible network problems', 'L0');
+	unless($LiveISO && $noNetwork) {
+		if (checkNetwork(15, 1)) {
+			deactivatePackagekit();
+			while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
+				my $command = $consoleLanguage.'apt-get update 2>/dev/null';
+				if(unlockPM($command) && (isPMlocked() == 0)) {
+					$output = `$command`;
+					$exitStatus = $?/256;
+					initAvailablePackagesList();
+					lockPM();
+					if ($exitStatus != 0) {
+						printLog('failed: update packages', 'L0');
+						printLog("output: $output error code: $exitStatus", 'L0');
+						if ($exitStatus == 7) {
+							printLog('possible network problems', 'L0');
+						}
+						addToConfiguredModules($aptgetModule, "failed");
+						if ($refreshTriesDone <= $refreshTries) {
+							printLog("will try to refresh the repos again", 'L2');
+						}
+						$refreshTriesDone++;
+						sleep($refreshWait);
+					} else {
+						printLog("success: update packages", 'L1');
+						addToConfiguredModules($aptgetModule, "success");
+					}
+				} else {
+					printLog("failed to get package management lock to update package management for >$aptgetModule<", 'L2');
+					startTomteDelayed();
+					return(0);
 				}
-				addToConfiguredModules($aptgetModule, "failed");
-				if ($refreshTriesDone <= $refreshTries) {
-					printLog("will try to refresh the repos again", 'L2');
-				}
-				$refreshTriesDone++;
-				sleep($refreshWait);
-			} else {
-				printLog("success: update packages", 'L1');
-				addToConfiguredModules($aptgetModule, "success");
 			}
+		} else {
+			printLog("no network available, repos could not be updated", 'TL0');
+			addToConfiguredModules($aptgetModule, "failed");
+			setNoNetwork(1);
+			return (0);
 		}
 	} else {
-		printLog("no network available, repos could not be updated", 'TL0');
-		addToConfiguredModules($aptgetModule, "failed");
+		printLog("not refreshing package management DB as no network available", 'L0');
+		setNoNetwork(1);
+		return (0);
 	}
 }
 
@@ -9718,6 +9784,7 @@ sub isRoot {
 #
 sub prepareValues {
 	checkRequirements();
+	initAvailablePackagesList();
 	initConfigFile();
 	transferConfigValues();
 	reportPlannedChanges();
