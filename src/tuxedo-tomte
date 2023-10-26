@@ -3968,7 +3968,7 @@ sub tuxedonvmefix() {
 	my $nvmeUpdateSuccess = 0;
 	my $nvmeFWPackageWasInstalled = 0;
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
-		if (! deinstallPackage('tuxedo-nvme-fix')) {
+		if (! deinstallSinglePackage('tuxedo-nvme-fix')) {
 			printLog('obsolete package tuxedo-nvme-fix was successfully removed', 'L0');
 		} else {
 			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time', 'L0');
@@ -4049,7 +4049,7 @@ sub tuxedonvmefix() {
 			addToConfiguredModules($module, "nothingToDo");
 		}
 		if (! $nvmeFWPackageWasInstalled) {
-			deinstallPackage('a2000-s5z42109');
+			deinstallSinglePackage('a2000-s5z42109');
 		}
 	}
 	if ($action eq 'remove') {
@@ -4119,14 +4119,14 @@ sub fingerprintreader() {
 		if (removeWarningMessage('')) {
 			my $counter = 0;
 			if( isPackageInstalled('fprintd') ) {
-				if (!deinstallPackage('fprintd')) {
+				if (!deinstallSinglePackage('fprintd')) {
 					$counter = $counter+1;
 				}
 			} else {
 				$counter = $counter+1;
 			}
 			if( isPackageInstalled('libpam-fprintd') ) {
-				if (!deinstallPackage('libpam-fprintd')) {
+				if (!deinstallSinglePackage('libpam-fprintd')) {
 					$counter = $counter+1;
 				}
 			} else {
@@ -4823,14 +4823,14 @@ sub amdgpudkms() {
 		if (removeWarningMessage('')) {
 			my $counter = 0;
 			if( isPackageInstalled('amdgpu-dkms') ) {
-				if (!deinstallPackage('amdgpu-dkms')) {
+				if (!deinstallSinglePackage('amdgpu-dkms')) {
 					$counter = $counter+1;
 				}
 			} else {
 				$counter = $counter+1;
 			}
 			if( isPackageInstalled('amdgpu-dkms-firmware') ) {
-				if (!deinstallPackage('amdgpu-dkms-firmware')) {
+				if (!deinstallSinglePackage('amdgpu-dkms-firmware')) {
 					$counter = $counter+1;
 				}
 			} else {
