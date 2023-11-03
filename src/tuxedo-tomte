@@ -39,6 +39,10 @@ use Dpkg::Version;
 use JSON;
 use Config::Tiny;
 
+# for Translations
+use Locale::TextDomain ('Translations', '../translations/locales');
+use Locale::TextDomain qw(Translations);
+
 # for debugging
 use Data::Dumper;
 # logLevel:
@@ -2913,7 +2917,9 @@ sub cpuBrand {
 sub isOSSupported {
 	if (($distribution =~ /elementary OS/) && ($distributionVersion < 6.1)) {
 		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
-		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning');
+		# Translation
+		# messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning');
+		messageDesktop(__('this version of elementary OS is not supported, please make an update'), __('this version of elementary OS is not supported, please make an update'), 2, 'dialog-warning');
 		return (0);
 	}
 	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
@@ -5631,7 +5637,9 @@ sub addRepoKey {
 					printLog("Tomte will try again in few minutes or after reboot or if startet manually with:", 'TL0');
 					printLog("sudo tomte configure all", 'T0L');
 				}
-				startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+				# Translation
+				# startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+				startTomteDelayed(__("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all"));
 				return (0);
 			}
 		} else {
@@ -5640,7 +5648,9 @@ sub addRepoKey {
 				printLog("Tomte will try again in a few minutes or after reboot or if startet manually with:", 'TL0');
 				printLog("sudo tomte configure all", 'T0L');
 			}
-			startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+			# Translation
+			# startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+			startTomteDelayed(__("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
 			return (0);
 		}
 	}
@@ -7864,7 +7874,9 @@ sub messageDesktop {
 #
 sub messageLongInstall {
 	if (($longInstall == 0) && (triesAlreadyDone() < 1)) {
-		if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
+		# Translation
+		# if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
+		if (messageDesktop(__('TUXEDO Tomte is installing fixes'),__('Please do not restart or shutdown the system.'), 2, 'dialog-warning')) {
 			$longInstall = 1;
 		}
 	}
@@ -9476,13 +9488,19 @@ sub startTomteDelayed {
 			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
 			$startLaterAgain = 1;
 			if ($restartSystem) {
-				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				# Translation
+				# messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
 				print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
 			} else {
 				if (defined($message)) {
-					messageDesktop('Tomte ready', $message, 2, 'dialog-warning');
+					# Translation
+					# messageDesktop('Tomte ready', $message, 2, 'dialog-warning');
+					messageDesktop(__('Tomte ready'), $message, 2, 'dialog-warning');
 				} else {
-					messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+					# Translation
+					# messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+					messageDesktop(__('Tomte ready'), __('Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
 					print "\nNot all the fixes could be installed\n";
 				}
 			}
@@ -9582,10 +9600,14 @@ sub listSuccess {
 		print "\nNothing to do in post configuration\n";
 	}
 	if ($restartSystem == 1) {
-		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+		# Translation
+		# messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+		messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect.'), 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
 	} elsif ( configuredModulesExceptDefault(@successModules) ) {
-		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+		# Translation
+		# messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+		messageDesktop(__('TUXEDO Tomte ready'), __('TUXEDO Tomte finished applying all the required fixes available for this system.'), 1, 'dialog-information');
 	}
 }
 
