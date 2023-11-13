@@ -4,6 +4,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 
+# Desktop Messages (PopUps)
 msgid "this version of elementary OS is not supported, please make an update"
 msgstr "this version of elementary OS is not supported, please make an update"
 
@@ -36,3 +37,171 @@ msgstr "TUXEDO Tomte ready"
 
 msgid "TUXEDO Tomte finished applying all the required fixes available for this system."
 msgstr "TUXEDO Tomte finished applying all the required fixes available for this system."
+
+
+
+
+
+# Config Descriptions
+msgid "updateGrub_description"
+msgstr "reconfigures grub according to grub file"
+
+msgid "updateInitramfs_description"
+msgstr "updates initramfs"
+
+msgid "i8042fix_description"
+msgstr "Fix for no-keyboard-present after boot on XC1711"
+
+msgid "nobootonbattery_description"
+msgstr "Fix for no-boot-on-battery on BA15"
+
+msgid "amdxhcihcdusbquirksuspendfix_description"
+msgstr "Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend"
+
+msgid "amdgpuwithnvidiafix_description"
+msgstr "Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select"
+
+msgid "tuxedocontrolcenter_description"
+msgstr "TUXEDO Control Center Application"
+
+msgid "tuxedokeyboard_description"
+msgstr "Keyboard & keyboard backlight driver for TUXEDO notebooks"
+
+msgid "nokeyboardaftersuspendfix_description"
+msgstr "Fixes no keyboard after suspend problem"
+
+msgid "backlightfix_description"
+msgstr "Fixes backlight issues for DX1708, GTX1060 with AUO Model 12701 and 21229 displays"
+
+msgid "tuxedorepos_description"
+msgstr "Prerequisite! Adds the TUXEDO repositories"
+
+msgid "tuxedomirrors_description"
+msgstr "Adds TUXEDO maintained Ubuntu repositories"
+
+msgid "corefix_description"
+msgstr "ACPI mod for accurate cores recognition"
+
+msgid "threegfix_description"
+msgstr "Configuration needed to operate Huawei-ME936"
+
+msgid "threegfix2_description"
+msgstr "Configuration needed to operate Huawei-ME906s"
+
+msgid "elantechtouchpadfix_description"
+msgstr "Fixes non working Elantech touchpad"
+
+msgid "tuxedotouchpadswitch_description"
+msgstr "Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks"
+
+msgid "tuxedonvmefix_description"
+msgstr "Removes sleep bug on Kingston A2000 NVME devices by updating the firmware"
+
+msgid "tuxedokeyboardite_description"
+msgstr "Keyboard back-light driver for ITE devices"
+
+msgid "fingerprintreader_description"
+msgstr "Packages needed for fingerprint reader to work on certain TUXEDO notebooks"
+
+msgid "mesautils_description"
+msgstr "Provides symlinks to several native utilities provided by Mesa"
+
+msgid "tuxedorestoreaudiofix_description"
+msgstr "Systemd service which rescans for missing audio devices"
+
+msgid "kerneltuxedo2204edge_description"
+msgstr "Required kernel version linux-tuxedo-22.04-edge"
+
+msgid "kerneltuxedo2004_description"
+msgstr "Required kernel version linux-tuxedo-20.04"
+
+msgid "kerneltuxedo2004edge_description"
+msgstr "Required kernel version linux-tuxedo-20.04-edge"
+
+msgid "kerneltuxedo2004next_description"
+msgstr "Required kernel version linux-tuxedo-20.04-next"
+
+msgid "kernelgenerichwe2004_description"
+msgstr "Required kernel version linux-generic-hwe-20.04"
+
+msgid "kernelgenerichwe2004edge_description"
+msgstr "Required kernel version linux-generic-hwe-20.04-edge"
+
+msgid "kerneltuxedo2204_description"
+msgstr "Required kernel version linux-tuxedo-22.04"
+
+msgid "kerneltuxedo2204next_description"
+msgstr "Required kernel version linux-tuxedo-22.04-next"
+
+msgid "nvidiadriver_description"
+msgstr "Required Nvidia drivers"
+
+msgid "cracklibruntime_description"
+msgstr "Builds password dictionary databases"
+
+msgid "amdgpudkms_description"
+msgstr "Enables AMD GPU and display to share configuration information"
+
+msgid "r8168dkms_description"
+msgstr "Linux device driver for several Realtek Ethernet controllers"
+
+msgid "tuxedooledbrt_description"
+msgstr "Workaround to control OLED display brightness using dbus and xrandr"
+
+msgid "apportfix_description"
+msgstr "Workaround for undefined problems with apport"
+
+msgid "realtekr8125dkms_description"
+msgstr "Linux device driver for several Realtek Ethernet controllers [obsolete]"
+
+msgid "amdgpubacklightauxoff_description"
+msgstr "Fixes backlight control"
+
+msgid "i915disablepsrfix_description"
+msgstr "Fixes screen flickering when using some input devices"
+
+msgid "i915enablepsrfix_description"
+msgstr "Provides better battery life"
+
+msgid "tuxedopinfixtgldkms_description"
+msgstr "Fixes unresponsive touchpad"
+
+msgid "tuxedomicfix1_description"
+msgstr "Kernel audio module which fixes different issues with audio output"
+
+msgid "thunderboltbootdelayfix_description"
+msgstr "Solves kernel takes too long at loading thundebolt module at boot"
+
+msgid "i8042noauxfix_description"
+msgstr "Fix for touchpad related issues"
+
+msgid "lightdmlogindcheckgraphicalfix_description"
+msgstr "Fixes lightdm starting before windowmanager"
+
+msgid "nvidiabacklightcontrolfix_description"
+msgstr "Fixes backlight control for Nvidia GPUs"
+
+msgid "earlyloadbacklightcontrolfix_description"
+msgstr "For backlight control working with Nvidia, the i915 needs to be loaded earlier"
+
+msgid "tuxedor8125dkms_description"
+msgstr "Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug"
+
+msgid "cardreaderfix_description"
+msgstr "udev rule which inhibits power idle state for cardreader RTS522A"
+
+msgid "samsungnvmefix_description"
+msgstr "fix for Samsung NVMe wake up from sleep"
+
+msgid "intelgenXIIIpowerctlfix_description"
+msgstr "sets power control to 'auto' on PCI USB controller on Intel Gen13 devices"
+
+msgid "tuxedodgpurun_description"
+msgstr "commandline tool and KDE context menu entries to run programms on dGPU while in on-demand mode"
+
+msgid "acpibacklightvideofix_description"
+msgstr "Fixes boot delays/freezes in Nvidia modes"
+
+msgid "disablegucfix_description"
+msgstr "Disables GuC submission on Intel iGPU while keeping HuC"
+
