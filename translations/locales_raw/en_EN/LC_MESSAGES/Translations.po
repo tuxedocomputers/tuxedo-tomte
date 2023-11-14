@@ -39,6 +39,59 @@ msgid "TUXEDO Tomte finished applying all the required fixes available for this 
 msgstr "TUXEDO Tomte finished applying all the required fixes available for this system."
 
 
+# Help Strings
+
+msgid "HELP_tuxedo-tomte"
+msgstr "tuxedo-tomte <COMMAND> [NAME...]"
+
+msgid "HELP_tomte"
+msgstr "tomte <COMMAND> [NAME...]"
+
+msgid "HELP_list"
+msgstr "  list                           List all installable modules with detailed status"
+
+msgid "HELP_status"
+msgstr "  status                         Same as 'list'"
+
+msgid "HELP_versions"
+msgstr "  versions                       Like 'list' but with version numbers"
+
+msgid "HELP_modules"
+msgstr "  modules                        List all available modules"
+
+msgid "HELP_description_MODULE"
+msgstr "  description MODULE             Shows the module description"
+
+msgid "HELP_configure_MODULE"
+msgstr "  configure MODULE ...|all       Configure an unconfigured module"
+
+msgid "HELP_reconfigure_MODULE"
+msgstr "  reconfigure MODULE...|all      Reconfigure a configured module"
+
+msgid "HELP_remove_MODULE"
+msgstr "  remove MODULE                  Remove a module from the system"
+
+msgid "HELP_block_MODULE"
+msgstr "  block MODULE ...|all           Blocks one or all modules"
+
+msgid "HELP_unblock_MODULE"
+msgstr "  unblock MODULE ... |all        Unblocks one or all modules"
+
+msgid "HELP_AUTOMATIC"
+msgstr "  AUTOMATIC                      Activates automatic configuration"
+
+msgid "HELP_UPDATES_ONLY"
+msgstr "  UPDATES_ONLY                   Only updates will be installed automatically"
+
+msgid "HELP_DONT_CONFIGURE"
+msgstr "  DONT_CONFIGURE                 Stops all automatic configuration"
+
+msgid "HELP_help"
+msgstr "  help                           Prints this message"
+
+msgid "HELP_footer"
+msgstr "  more details can be found in the man page"
+
 
 
 

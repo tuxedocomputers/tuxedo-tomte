@@ -59,6 +59,7 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+check_and_set_locale();
 
 ###############################################################################
 # Argument values given to script
@@ -161,7 +162,6 @@ my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 printLog("sessionID: $sessionID", 'TL2');
-
 
 
 
@@ -2520,6 +2520,41 @@ my %configuredModules;
 sub dieSingleton {
 	print "Another instance is already running, please wait till it is finished\n";
 	exit (1);
+}
+
+
+sub check_and_set_locale {
+    my $default_locale = "en_EN";
+
+    # Check if either LANG or LANGUAGE is set
+    if (defined $ENV{'LANG'} || defined $ENV{'LANGUAGE'}) {
+		# allow manual override of LANGUAGE environment variable
+        my $lang = (length $ENV{'LANGUAGE'} > 0) ? $ENV{'LANGUAGE'} : $ENV{'LANG'};
+
+        # Split the language code from the full locale using dot as the delimiter
+        my ($language_code) = (split /\./, $lang)[0] // $lang;
+
+        if ($language_code) {
+            # Construct the path based on the detected language code
+            my $locale_path = "../translations/locales/$language_code";
+
+            # Check if the directory exists
+            if (-d $locale_path) {
+                printLog("Locale directory exists: $locale_path", "L1");
+            } else {
+                printLog("Locale directory does not exist. Setting to default: $default_locale", "L1");
+                $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+            }
+        } else {
+            printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1");
+            printLog("Setting both to default: $default_locale", "L1");
+            $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+        }
+    } else {
+        # Neither LANG nor LANGUAGE is set. Setting both to default
+        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
+        $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+    }
 }
 
 
@@ -9731,37 +9766,27 @@ sub triesAlreadyDone() {
 
 
 ###############################################################################
-# text to print for help
-#
-my $USAGE =<<USAGE;
-tuxedo-tomte <COMMAND> [NAME...]
-tomte <COMMAND> [NAME...]
-  list                           List all installable modules with detailed status
-  status                         Same as 'list'
-  versions                       Like 'list' but with version numbers
-  modules                        List all available modules
-  description MODULE             Shows the module description
-  configure MODULE ...|all       Configure an unconfigured module
-  reconfigure MODULE...|all      Reconfigure a configured module
-  remove MODULE                  Remove a module from the system
-  block MODULE ...|all           Blocks one or all modules
-  unblock MODULE ... |all        Unblocks one or all modules
-  AUTOMATIC                      Activates automatic configuration
-  UPDATES_ONLY                   Only updates will be installed automatically
-  DONT_CONFIGURE                 Stops all automatic configuration
-  help                           Prints this message
-  
-  more details can be found in the man page
-USAGE
-
-
-
-###############################################################################
 # prints help
 #
 sub help {
 	print "tuxedo-tomte $VERSION\n";
-	print "$USAGE\n";
+	print __('HELP_tuxedo-tomte'), "\n", __('HELP_tomte'). "\n";
+	print __('HELP_list'), "\n";
+	print __('HELP_status'), "\n";
+	print __('HELP_versions'), "\n";
+	print __('HELP_modules'), "\n";
+	print __('HELP_description_MODULE'), "\n";
+	print __('HELP_configure_MODULE'), "\n";
+	print __('HELP_reconfigure_MODULE'), "\n";
+	print __('HELP_remove_MODULE'), "\n";
+	print __('HELP_block_MODULE'), "\n";
+	print __('HELP_unblock_MODULE'), "\n";
+	print __('HELP_AUTOMATIC'), "\n";
+	print __('HELP_UPDATES_ONLY'), "\n";
+	print __('HELP_DONT_CONFIGURE'), "\n";
+	print __('HELP_help'), "\n";
+	print "\n\n";
+	print __('HELP_footer'), "\n";
 	exit 0;
 }
 

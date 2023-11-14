@@ -39,6 +39,59 @@ msgid "TUXEDO Tomte finished applying all the required fixes available for this 
 msgstr "TUXEDO Tomte hat alle erforderlichen Fixes für dieses System erfolgreich angewendet."
 
 
+# Help Strings
+
+msgid "HELP_tuxedo-tomte"
+msgstr "tuxedo-tomte <BEFEHL> [NAME...]"
+
+msgid "HELP_tomte"
+msgstr "tomte <BEFEHL> [NAME...]"
+
+msgid "HELP_list"
+msgstr "  list                           Zeigt alle installierbaren Module mit detailliertem Status"
+
+msgid "HELP_status"
+msgstr "  status                         Gleich wie 'list'"
+
+msgid "HELP_versions"
+msgstr "  versions                       Wie 'list', aber mit Versionsnummern"
+
+msgid "HELP_modules"
+msgstr "  modules                        Zeigt alle verfügbaren Module an"
+
+msgid "HELP_description_MODULE"
+msgstr "  description MODULE             Zeigt die Modulbeschreibung an"
+
+msgid "HELP_configure_MODULE"
+msgstr "  configure MODULE ...|all       Konfiguriert ein noch nicht konfiguriertes Modul"
+
+msgid "HELP_reconfigure_MODULE"
+msgstr "  reconfigure MODULE...|all      Rekonfiguriert ein bereits konfiguriertes Modul"
+
+msgid "HELP_remove_MODULE"
+msgstr "  remove MODULE                  Entfernt ein Modul aus dem System"
+
+msgid "HELP_block_MODULE"
+msgstr "  block MODULE ...|all           Blockiert ein oder alle Module"
+
+msgid "HELP_unblock_MODULE"
+msgstr "  unblock MODULE ... |all        Entblockiert ein oder alle Module"
+
+msgid "HELP_AUTOMATIC"
+msgstr "  AUTOMATISCH                    Aktiviert automatische Konfiguration"
+
+msgid "HELP_UPDATES_ONLY"
+msgstr "  NUR_UPDATES                    Nur Updates werden automatisch installiert"
+
+msgid "HELP_DONT_CONFIGURE"
+msgstr "  NICHT_KONFIGURIEREN            Stoppt alle automatischen Konfigurationen"
+
+msgid "HELP_help"
+msgstr "  help                           Zeigt diese Nachricht an"
+
+msgid "HELP_footer"
+msgstr "  Weitere Details finden Sie in der Manpage"
+
 
 
 

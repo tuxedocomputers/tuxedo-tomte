@@ -44,7 +44,7 @@ find({ wanted => \&load_msg_ids_from_directories, no_chdir => 1 }, $start_direct
 my %tomte_msgids;
 
 # Open the tomte file
-open my $tomte_file, '<', '../src/tuxedo-tomte' or die "Couldn't open input file: $!";
+open my $tomte_file, '<', 'src/tuxedo-tomte' or die "Couldn't open input file: $!";
 
 # Process each line in the input file
 while (my $line = <$tomte_file>) {
