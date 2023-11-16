@@ -1,3 +1,14 @@
+tuxedo-tomte (2.15.0-testmultilanguage) UNRELEASED; urgency=medium
+
+  * Added Language Capabilities and Added Functionality for German PopUps
+  * Added a script to compare translations between the tomte main file and 
+    the regarding translations. 
+  * Added translations for all module descriptions EN/DE
+  * Added two-digit LANGUAGE environment variable as valid.
+  * Added dependency for libintl-perl to debian/control
+
+ -- M. Arnold <tux@tuxedocomputers.com>  Thu, 16 Nov 2023 09:14:10 +0100
+
 tuxedo-tomte (2.15.0) jammy; urgency=medium
 
   * added kernel and Nvidia update in LiveISO blocked
