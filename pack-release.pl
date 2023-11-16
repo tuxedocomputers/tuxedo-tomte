@@ -75,7 +75,6 @@ print "\nDo you wish to compile the translations based on these informations?\n"
 my $returnValue = <>;
 system("perl translations/compile_translation_files.pl");
 
-exit();
 # set version in sourcefile
 if (open (my $FHin, '<', './src/tuxedo-tomte')) {
 	open (my $FHout, '>', './src/tuxedo-tomte.tmp');
