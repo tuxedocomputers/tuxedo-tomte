@@ -27,6 +27,7 @@ use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
 use File::FcntlLock;
 
 use File::Copy;
+use File::Find;
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -2535,11 +2536,30 @@ sub check_and_set_locale {
         my ($language_code) = (split /\./, $lang)[0] // $lang;
 
         if ($language_code) {
-            # Construct the path based on the detected language code
-            my $locale_path = "../translations/locales/$language_code";
+            # Directory where the existing translations can be found
+            my $locale_base_path = "../translations/locales";
+
+            my $found_folder = 0;
+
+			# Create a closure for the find_path subroutine
+			my $find_path_closure = sub {
+				if (-d && /^$language_code/i) {
+					$found_folder = $_;
+					$File::Find::name = '';  # Resets the path to ensure exiting of find()
+				}
+			};
+
+			# Verzeichnis durchsuchen
+			find($find_path_closure, $locale_base_path);
+
+			my $locale_path = $locale_base_path . '/' . $found_folder;
 
             # Check if the directory exists
-            if (-d $locale_path) {
+            if ($found_folder ne 0) {
+				if($language_code ne $found_folder){
+					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+				}
+
                 printLog("Locale directory exists: $locale_path", "L1");
             } else {
                 printLog("Locale directory does not exist. Setting to default: $default_locale", "L1");
