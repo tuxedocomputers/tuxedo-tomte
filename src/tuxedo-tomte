@@ -4421,6 +4421,12 @@ sub kerneltuxedo2204() {
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+
+			# cleanup kernel in /boot partition || delete first old ones to ensure successful installation
+			checkAndDeleteLastTuxedoKernel();
+
+
+
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -6629,7 +6635,7 @@ sub populateFlavourPackages {
 				}
 			}
 		}
-		@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
+		@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniqInArray(@packages);
 		printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'L2');
 	} else {
 		printLog("empty package list for kernel $flavour while populating list, this should not happen!", 'L0');
@@ -6644,10 +6650,201 @@ sub populateFlavourPackages {
 # receives an array
 # returns an array where all values are unique
 #
-sub uniq {
+sub uniqInArray {
 	my %seen;
 	return grep { !$seen{$_}++ } @_;
 }
+
+
+
+###############################################################################
+# accepts a kernel version and returns an array with all dependant packages
+# found for linux-image-$version-tuxedo, linux-headres-$version-tuxedo and
+# linux-modules-extra-$version-tuxedo
+# returns an empty string if nothing was found or the version entry is wrong
+sub populateKernelPackages {
+	my $version = shift;
+	if ($version =~ /\s/) {
+		printLog("something is wrong with the kernel version number", 'L0');
+		return '';
+	}
+	my @rootPackages = ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	my @packages;
+	my @packagesUnique;
+	my $packageLine;
+	my $packageString;
+	my $searchCommand;
+	my $result;
+	my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+	my $line;
+	my @lines;
+	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
+	printLog("first searchcommand: $searchCommand", 'L2');
+	$result = `$searchCommand`;
+	printLog("first result:\n$result", 'L2');
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$packageString = $1;
+			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+				printLog("Accepted: $packageString", 'L2');
+				$packageLine .= " $packageString";
+				push @packages, $packageString;
+			}
+		}
+	}
+	if (@packages) {
+		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
+		printLog("second searchcommand: $searchCommand", 'L2');
+		$result = `$searchCommand`;
+		printLog("second result:\n$result", 'L2');
+		@lines = split /\n/, $result;
+		foreach $line (@lines) {
+			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+				$packageString = $1;
+				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+					printLog("Accepted: $packageString", 'L2');
+					push @packages, $packageString;
+				}
+			}
+		}
+	}
+	$searchCommand = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '."linux-modules-extra-$version-tuxedo".' 2>&1';
+	$result = `$searchCommand`;
+	if ($result =~ m/^[uihrp][HUFWti]\s$/) {
+		push @packages, "linux-modules-extra-$version-tuxedo";
+	}
+	push @packages, ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	@packagesUnique = uniqInArray(@packages);
+	printLog("kernel packages found: @packagesUnique", 'L2');
+
+	# safety check: something went wrong if we got more than 20 packages for removal
+	if (scalar(@packagesUnique) < 20) {
+		return (@packagesUnique);
+	} else {
+		return '';
+	}
+}
+
+
+
+###############################################################################
+# deletes the oldest TUXEDO kernel by version
+# returns 0 if nothing was done
+# returns 1 if some kernel was deleted
+sub checkAndDeleteLastTuxedoKernel {
+	my $DH;
+	my %fileListInitrd;
+	my %fileListVmlinuz;
+	my $fileSize;
+	my $version;
+	my $file;
+	my $purgeCommand;
+	my $bootDir = '/boot';
+
+	my $bootPartition = `df $bootDir --output=avail,target`;
+	if ($bootPartition =~ / \/boot$/gm) {
+		printLog("separate $bootDir partition found", 'L2');
+	} else {
+		printLog("NO separate $bootDir partition found => quitting deleteKernel", 'L2');
+		return (0);
+	}
+
+	my $fsAvail;
+	if ($bootPartition =~ m/(\d+)/) {
+		$fsAvail = $1;
+		printLog("available space on $bootDir: $fsAvail", 'L2');
+	}
+	if ($fsAvail < 250000) {
+		printLog("not enough space, will try to delete some kernel", 'L2');
+	} else {
+		printLog("enough space => exiting", 'L2');
+		return (0);
+	}
+
+	if (opendir($DH,$bootDir)) {
+		while ($file = readdir($DH)) {
+			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
+				printLog("found file: $file", 'L2');
+				$fileSize = -s "$bootDir/$file";
+				printLog("size: $fileSize", 'L2');
+				if (($fileSize) > 1000000) {
+					printLog("filesize accepted into hash", 'L2');
+					$fileListInitrd{$1} = $fileSize;
+				}
+			}
+			if ($file =~ /vmlinuz-(.*)-tuxedo/) {
+				printLog("found file: $file", 'L2');
+				$fileSize = -s "$bootDir/$file";
+				printLog("size: $fileSize", 'L2');
+				if (($fileSize) > 1000000) {
+					printLog("filesize accepted into hash", 'L2');
+					$fileListVmlinuz{$1} = $fileSize;
+				}
+			}
+		}
+	} else {
+		printLog("could not open $bootDir", 'L2');
+		return (0);
+	}
+
+	my @fileListResult;
+	foreach $version (keys %fileListInitrd) {
+		if (exists $fileListVmlinuz{$version}) {
+			printLog("matching vmlinuz found with version: $version", 'L2');
+			push (@fileListResult, $version);
+		}
+	}
+
+	printLog("all found versions: @fileListResult", 'L2');
+
+	my $keepKernels = 3;
+	if (scalar(@fileListResult) > $keepKernels) {
+		printLog("more than $keepKernels kernels found, will delete the oldest one", 'L2');
+		@fileListResult = sort { version_compare($b, $a) } @fileListResult;
+		printLog("sorted filelist: @fileListResult", 'L2');
+		$version = '';
+		$version = $fileListResult[-1];
+		my $currentKernelVersion = `uname -r`;
+		$currentKernelVersion =~ s/-tuxedo$//;
+		if ($version ne $currentKernelVersion) {
+			printLog("not current running kernel => trying to delete version: $version", 'L2');
+			# get all related kernel packages
+			my @packageList = populateKernelPackages($fileListResult[-1]);
+			# purge package
+			$purgeCommand = "apt-get purge --assume-yes @packageList";
+			printLog("purge command: $purgeCommand", 'L2');
+			my $result;
+			my $error;
+			if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+				$result = `$purgeCommand`;
+				$error = $?;
+				lockPM();
+				printLog("result: $result\nerror: $error", 'L2');
+
+				# check for success: is there more free space on /boot now?
+				my $newBootPartition = `df $bootDir --output=avail,target`;
+				if ($newBootPartition =~ / \/boot$/gm) {
+					if ($newBootPartition =~ m/(\d+)/) {
+						my $newFsAvail = $1;
+						my $fsDiff = $newFsAvail - $fsAvail;
+						printLog("free available space on $bootDir: $newFsAvail; difference: $fsDiff", 'L2');
+					}
+				}
+
+			} else {
+				printLog("could not remove the kernel as package management is busy", 'L2');
+			}
+		} else {
+			printLog("kernel version to delete is the same as the one currently running => abort", 'L2');
+			return (0);
+		}
+	} else {
+		printLog("less than 4 kernels present => nothing to do", 'L2');
+		return (0);
+	}
+}
+
 
 
 
