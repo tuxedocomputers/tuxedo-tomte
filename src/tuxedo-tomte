@@ -6811,7 +6811,7 @@ sub checkAndDeleteLastTuxedoKernel {
 		$version = $fileListResult[-1];
 		my $currentKernelVersion = `uname -r`;
 		$currentKernelVersion =~ s/-tuxedo$//;
-		if ($version ne $currentKernelVersion) {
+		if (! ($currentKernelVersion =~ /$version/)) {
 			printLog("not current running kernel => trying to delete version: $version", 'L2');
 			# get all related kernel packages
 			my @packageList = populateKernelPackages($fileListResult[-1]);
