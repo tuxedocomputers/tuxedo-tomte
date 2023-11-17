@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.15.0';
+our $VERSION = '2.15.1';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1289,6 +1289,17 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Aura 15 Gen3'],
 		board_name => ['NL57PU'],
 		fix => ['r8168dkms'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'60' => {
+		model => ['TUXEDO Stellaris 16 Gen5 AMD'],
+		board_name => ['GM6XGxX'],
+		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -3102,7 +3113,8 @@ sub checkRequirements {
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /PH4PRX1_PH6PRX1/) ||
 		($boardname =~ /PH4PG31/) ||
-		($boardname =~ /PH6PG01_PH6PG71/)) {
+		($boardname =~ /PH6PG01_PH6PG71/) ||
+		($boardname =~ /GM6XGxX/)) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
 	}
@@ -3172,7 +3184,8 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ /LAPQC71B/) ||
-		($boardname =~ /GMxPXxx/)) {
+		($boardname =~ /GMxPXxx/) ||
+		($boardname =~ /GM6XGxX/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 	}
