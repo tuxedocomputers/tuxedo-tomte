@@ -6754,7 +6754,11 @@ sub checkAndDeleteLastTuxedoKernel {
 	if ($bootPartition =~ m/(\d+)/) {
 		$fsAvail = $1;
 		printLog("available space on $bootDir: $fsAvail", 'L2');
+	} else {
+		printLog("available bytes not found (expected a number) => exiting", 'L2');
+		return (0);
 	}
+
 	if ($fsAvail < 250000) {
 		printLog("not enough space, will try to delete some kernel", 'L2');
 	} else {
