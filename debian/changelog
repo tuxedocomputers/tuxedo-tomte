@@ -1,3 +1,28 @@
+tuxedo-tomte (2.16.2-1) UNRELEASED; urgency=medium
+
+  * after packaging
+  * atomic merge with 177
+  * changed sub name
+  * after merge with 177
+  * after merge with nextRelease-ma
+  * modified changelog
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 14:41:15 +0100
+
+tuxedo-tomte (2.16.2) jammy; urgency=medium
+
+  * added removal of old unused kernels for linux-tuxedo-22.04 if boot
+    partition is full
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 13:09:39 +0100
+
+tuxedo-tomte (2.15.1) jammy; urgency=medium
+
+  * Added GM6XGxX (Stellaris 16 Gen5 AMD) with tuxedo-keyboard-ite and 
+    tuxedo-touchpad-switch.
+
+ -- M. Arnold <tux@tuxedocomputers.com>  Thu, 16 Nov 2023 11:39:03 +0100
+
 tuxedo-tomte (2.15.0) jammy; urgency=medium
 
   * added kernel and Nvidia update in LiveISO blocked
