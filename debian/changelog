@@ -1,4 +1,4 @@
-tuxedo-tomte (2.16.0-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.16.0-2) UNRELEASED; urgency=medium
 
   [ M. Arnold ]
   * after packaging
@@ -7,8 +7,10 @@ tuxedo-tomte (2.16.0-1) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * added timeout for dpkg and added kernel delete to 20.04 modules
+  * after packaging
+  * removed kernel delete for 20.04
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 12:06:30 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 12:40:47 +0100
 
 tuxedo-tomte (2.16.0) jammy; urgency=medium
 
