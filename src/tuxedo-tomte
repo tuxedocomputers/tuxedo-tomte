@@ -4292,10 +4292,6 @@ sub kerneltuxedo2004edge() {
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 
-			# cleanup kernel in /boot partition || delete first old ones to
-			# ensure successful installation
-			checkAndDeleteLastTuxedoKernel();
-
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -4341,10 +4337,6 @@ sub kerneltuxedo2004next() {
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 
-			# cleanup kernel in /boot partition || delete first old ones to
-			# ensure successful installation
-			checkAndDeleteLastTuxedoKernel();
-
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -4389,10 +4381,6 @@ sub kerneltuxedo2004() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
-
-			# cleanup kernel in /boot partition || delete first old ones to
-			# ensure successful installation
-			checkAndDeleteLastTuxedoKernel();
 
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
