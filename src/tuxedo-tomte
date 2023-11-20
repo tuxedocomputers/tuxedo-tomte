@@ -4244,10 +4244,6 @@ sub kernelhwe2004() {
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
 
-			# cleanup kernel in /boot partition || delete first old ones to
-			# ensure successful installation
-			checkAndDeleteLastTuxedoKernel();
-
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
