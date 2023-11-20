@@ -4243,6 +4243,11 @@ sub kernelhwe2004() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# cleanup kernel in /boot partition || delete first old ones to
+			# ensure successful installation
+			checkAndDeleteLastTuxedoKernel();
+
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -4286,6 +4291,11 @@ sub kerneltuxedo2004edge() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# cleanup kernel in /boot partition || delete first old ones to
+			# ensure successful installation
+			checkAndDeleteLastTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -4330,6 +4340,11 @@ sub kerneltuxedo2004next() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# cleanup kernel in /boot partition || delete first old ones to
+			# ensure successful installation
+			checkAndDeleteLastTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -4374,6 +4389,11 @@ sub kerneltuxedo2004() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# cleanup kernel in /boot partition || delete first old ones to
+			# ensure successful installation
+			checkAndDeleteLastTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -4422,10 +4442,9 @@ sub kerneltuxedo2204() {
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 
-			# cleanup kernel in /boot partition || delete first old ones to ensure successful installation
+			# cleanup kernel in /boot partition || delete first old ones to
+			# ensure successful installation
 			checkAndDeleteLastTuxedoKernel();
-
-
 
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -6816,7 +6835,7 @@ sub checkAndDeleteLastTuxedoKernel {
 			# get all related kernel packages
 			my @packageList = populateKernelPackages($fileListResult[-1]);
 			# purge package
-			$purgeCommand = "apt-get purge --assume-yes @packageList";
+			$purgeCommand = "apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList";
 			printLog("purge command: $purgeCommand", 'L2');
 			my $result;
 			my $error;
