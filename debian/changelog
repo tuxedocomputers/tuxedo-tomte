@@ -1,3 +1,15 @@
+tuxedo-tomte (2.16.0-1) UNRELEASED; urgency=medium
+
+  [ M. Arnold ]
+  * after packaging
+  * Handling unvalid df output
+  * Bugfix deletes last kernel if last kernel is running
+
+  [ E. Mohr ]
+  * added timeout for dpkg and added kernel delete to 20.04 modules
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 12:06:30 +0100
+
 tuxedo-tomte (2.16.0) jammy; urgency=medium
 
   * added removal of old unused kernels for linux-tuxedo-22.04 if boot
