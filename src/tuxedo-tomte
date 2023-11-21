@@ -243,6 +243,9 @@ my %supportedOS = (
 			"6.1" => {
 				name => 'jolnir',
 			},
+			"7.1" => {
+				name => 'horus',
+			},
 		},
 	},
 	"KDE neon" => {
@@ -340,6 +343,13 @@ my %tuxedo_repos = (
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
 		name => '6.1 jolnir',
+	},
+	"elementary OS 7.1" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => '7.1 horus',
 	},
 	"KDE neon 20.04" => {
 		deb => {
@@ -461,6 +471,15 @@ my %tuxedo_mirrors = (
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => '6.1 jolnir',
+	},
+	"elementary OS 7.1" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => '7.1 horus',
 	},
 	"KDE neon 20.04" => {
 		mirrors => {
@@ -652,6 +671,23 @@ my %flavours = (
 		},
 		"linux-tuxedo-20.04-next" => {
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
+		},
+	},
+	"7.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
 		},
 	},
 );
@@ -2923,13 +2959,14 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if (($distribution =~ /elementary OS/) && ($distributionVersion < 6.1)) {
-		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
-		messageDesktop('this version of elementary OS is not supported, please make an update','this version of elementary OS is not supported, please make an update', 2, 'dialog-warning');
-		return (0);
-	}
 	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
 		return (1);
+	} elsif (exists($supportedOS{$distribution})) {
+		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
+		messageDesktop("This OS version is not supported",
+						"The version $distributionVersion of $distribution is not supported.",
+						2, 'dialog-warning');
+		return (0);
 	}
 	printLog("This OS is not supported", 'TL0');
 	printLog("distribution: >$distribution<", 'TL1');
@@ -3015,6 +3052,7 @@ sub checkRequirements {
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
 	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
 		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Elementary OS 7.1/) ||
 		($completeDistVersion =~ /Linux Mint 21.1/) ||
 		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
@@ -3294,6 +3332,7 @@ sub checkRequirements {
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /Linux Mint 21.2/) ||
@@ -4444,6 +4483,7 @@ sub kerneltuxedo2204() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
@@ -4490,6 +4530,7 @@ sub kerneltuxedo2204edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
@@ -4536,6 +4577,7 @@ sub kerneltuxedo2204next() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
@@ -4724,6 +4766,7 @@ sub nvidiadriver() {
 
 
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+				($completeDistVersion =~ /elementary OS 7.1/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /Linux Mint 21.2/) ||
@@ -5490,6 +5533,7 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	if (($completeDistVersion ne 'TUXEDO_OS 22.04') &&
 		($completeDistVersion ne 'Ubuntu 22.04') &&
+		($completeDistVersion ne 'elementary OS 7.1') &&
 		($completeDistVersion ne 'KDE neon 22.04') &&
 		($completeDistVersion ne 'TUXEDO OS 22.04') &&
 		($completeDistVersion ne 'Linux Mint 21.1') &&
