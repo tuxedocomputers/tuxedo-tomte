@@ -4435,9 +4435,8 @@ sub kerneltuxedo2204() {
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 
-			# cleanup kernel in /boot partition || delete first old ones to
-			# ensure successful installation
-			checkAndDeleteLastTuxedoKernel();
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
 
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -7007,7 +7006,7 @@ sub populateKernelPackages {
 # deletes the oldest TUXEDO kernel by version
 # returns 0 if nothing was done
 # returns 1 if some kernel was deleted
-sub checkAndDeleteLastTuxedoKernel {
+sub checkAndDeleteOldestTuxedoKernel {
 	my $DH;
 	my %fileListInitrd;
 	my %fileListVmlinuz;
