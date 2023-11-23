@@ -7126,15 +7126,16 @@ sub checkAndDeleteOldestTuxedoKernel {
 					if ($newBootPartition =~ m/(\d+)/) {
 						my $newFsAvail = $1;
 						my $fsDiff = $newFsAvail - $fsAvail;
-						printLog("free available space on $bootDir: $newFsAvail; difference: $fsDiff", 'L2');
+						my $freedMB = int($fsDiff / 1024);
+						printLog("successfully removed old kernel $version; freed $freedMB MB of disk space", 'L0');
 					}
 				}
 
 			} else {
-				printLog("could not remove the kernel as package management is busy", 'L2');
+				printLog("could not remove the kernel $version as package management is busy", 'L0');
 			}
 		} else {
-			printLog("kernel version to delete is the same as the one currently running => abort", 'L2');
+			printLog("kernel version ($version) to delete is the same as the one currently running => abort", 'L0');
 			return (0);
 		}
 	} else {
