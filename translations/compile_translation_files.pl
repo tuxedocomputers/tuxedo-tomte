@@ -7,8 +7,8 @@ use File::Path qw(make_path remove_tree);
 
 my $script_directory = $RealBin;
 
-my $source_directory = $script_directory . '/locales_raw';
-my $destination_directory =  $script_directory . '/locales';
+my $source_directory = $script_directory . '/locale_raw';
+my $destination_directory =  $script_directory . '/locale';
 
 sub compile_po_file_to_mo_file {
 	my $po_file = $_;
@@ -18,7 +18,7 @@ sub compile_po_file_to_mo_file {
 
 		my $relative_path = $File::Find::dir;
 		$relative_path =~ s/\Q$source_directory//;
-		my $dest_path = "$destination_directory/$relative_path";
+		my $dest_path = "$destination_directory$relative_path";
 		make_path($dest_path);
 
 		system("msgfmt --output-file=$dest_path/$mo_file $File::Find::name");

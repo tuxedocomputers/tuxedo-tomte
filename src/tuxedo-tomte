@@ -60,7 +60,7 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
-check_and_set_locale();
+checkAndSetLocale();
 
 ###############################################################################
 # Argument values given to script
@@ -2524,8 +2524,8 @@ sub dieSingleton {
 }
 
 
-sub check_and_set_locale {
-    my $default_locale = "en_EN";
+sub checkAndSetLocale {
+    my $default_locale = "en";
 
     # Check if either LANG or LANGUAGE is set
     if (defined $ENV{'LANG'} || defined $ENV{'LANGUAGE'}) {
@@ -2533,26 +2533,12 @@ sub check_and_set_locale {
         my $lang = (length $ENV{'LANGUAGE'} > 0) ? $ENV{'LANGUAGE'} : $ENV{'LANG'};
 
         # Split the language code from the full locale using dot as the delimiter
-        my ($language_code) = (split /\./, $lang)[0] // $lang;
+        # a $lang could be de, de_DE or de_DE.UTF8
+        my $language_code = (split /\./, $lang)[0] // $lang;
 
+		# $language_code is now de or de_DE
         if ($language_code) {
-            # Directory where the existing translations can be found
-            my $locale_base_path = "../translations/locales";
-
-            my $found_folder = 0;
-
-			# Create a closure for the find_path subroutine
-			my $find_path_closure = sub {
-				if (-d && /^$language_code/i) {
-					$found_folder = $_;
-					$File::Find::name = '';  # Resets the path to ensure exiting of find()
-				}
-			};
-
-			# Verzeichnis durchsuchen
-			find($find_path_closure, $locale_base_path);
-
-			my $locale_path = $locale_base_path . '/' . $found_folder;
+			my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
 
             # Check if the directory exists
             if ($found_folder ne 0) {
@@ -2560,10 +2546,29 @@ sub check_and_set_locale {
 					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
 				}
 
-                printLog("Locale directory exists: $locale_path", "L1");
+                printLog("Found Tomte locale file in: $locale_path", "L1");
             } else {
-                printLog("Locale directory does not exist. Setting to default: $default_locale", "L1");
-                $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+				if(length $language_code eq 2){
+					# already searched possible endings and didn't found
+					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+				} else {
+					# reduce de_DE to de to search broader
+					$language_code = (split /_/, $language_code)[0];
+					my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
+
+					# Check if the directory exists
+					if ($found_folder ne 0) {
+						if($language_code ne $found_folder){
+							$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+						}
+
+						printLog("Found Tomte locale file in: $locale_path", "L1");
+					} else {
+						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+						$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+					}
+				}
             }
         } else {
             printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1");
@@ -2575,6 +2580,28 @@ sub check_and_set_locale {
         printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
         $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
     }
+}
+
+sub getMatchingLocaleForLang {
+	my $lang = shift;
+	# Directory where the existing translations can be found
+	my $locale_base_path = "/usr/share/locale";
+
+	my $found_folder = 0;
+
+	# Create a closure for the find_path subroutine
+	my $find_path_closure = sub {
+		if (-e && /^($lang.*)\/LC_MESSAGES\/tomte\.mo/i) {
+			$found_folder = $1;
+			$File::Find::name = '';  # Resets the path to ensure exiting of find()
+		}
+	};
+
+	# Verzeichnis durchsuchen
+	find($find_path_closure, $locale_base_path);
+
+	my $locale_path = $locale_base_path . '/' . $found_folder;
+	return($found_folder, $locale_path);
 }
 
 

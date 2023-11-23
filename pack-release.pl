@@ -72,8 +72,41 @@ print "\n";
 system("perl translations/check_translations.pl");
 
 print "\nDo you wish to compile the translations based on these informations?\n";
-my $returnValue = <>;
+my $returnValue = <>; #proceeds with enter
 system("perl translations/compile_translation_files.pl");
+
+
+# generate language files installation information
+if (open (my $installFile, '<', './debian/install')) {
+	open (my $tmpInstallFile, '>', './debian/install.tmp');
+	while (my $line = <$installFile>) {
+		if ($line =~ /^translations\/locale\//) {
+			continue;
+		}
+		print $tmpInstallFile $line;
+	}
+
+	my $localeDir = './translations/locale';
+	opendir(my $dh, $localeDir) or die "Could not open directory '$localeDir': $!";
+	# Iterate through each file in the directory
+	while (my $file = readdir($dh)) {
+		# Check if the file name ends with ".mo"
+		if ($file =~ /\.mo$/) {
+			my $lang = $1;
+			# Print the install expression for each language file in debian/install
+			print "/locale/$file /usr/share/locale/$lang/LC_MESSAGES/tomte.mo\n";
+		}
+	}
+	closedir($dh);
+
+	close ($installFile);
+	close ($tmpInstallFile);
+	unlink ($installFile);
+	rename './debian/install.tmp', './debian/install';
+}
+
+
+
 
 # set version in sourcefile
 if (open (my $FHin, '<', './src/tuxedo-tomte')) {

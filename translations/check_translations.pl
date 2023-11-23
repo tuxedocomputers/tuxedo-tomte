@@ -10,9 +10,8 @@ my %msgids;
 
 # Specify the directory to start the search
 my $script_directory = $RealBin;
-my $start_directory = $script_directory . '/locales_raw/';
-my $lower_directory = '/LC_MESSAGES/';
-my $defaultLanguage = 'en_EN';
+my $start_directory = $script_directory . '/locale_raw/';
+my $defaultLanguage = 'en';
 
 
 # Define the subroutine to be executed for each file
@@ -21,7 +20,7 @@ sub load_msg_ids_from_directories {
 
     # Skip directories
     return if -d $file_path;
-    return unless $file_path =~ /$start_directory(.*)$lower_directory/;
+    return unless $file_path =~ /$start_directory(.*)\.po/;
 
     my $language_code = $1;
 
