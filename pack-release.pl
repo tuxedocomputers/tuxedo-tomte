@@ -94,7 +94,7 @@ if (open (my $installFile, '<', './debian/install')) {
 		if ($file =~ /\.mo$/) {
 			my $lang = $1;
 			# Print the install expression for each language file in debian/install
-			print "/locale/$file /usr/share/locale/$lang/LC_MESSAGES/tomte.mo\n";
+			print $tmpInstallFile "/locale/$file /usr/share/locale/$lang/LC_MESSAGES/tomte.mo\n";
 		}
 	}
 	closedir($dh);
