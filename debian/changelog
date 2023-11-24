@@ -1,4 +1,4 @@
-tuxedo-tomte (2.15.0-testmultilanguage3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.15.0-testmultilanguage4) UNRELEASED; urgency=medium
 
   [ M. Arnold ]
   * Added Language Capabilities and Added Functionality for German PopUps
@@ -15,8 +15,10 @@ tuxedo-tomte (2.15.0-testmultilanguage3) UNRELEASED; urgency=medium
   * Added a code to automatically add language files to the debian/install file Changed install location to /usr/share/locale Simplified folder structure in ./translations
   * after packaging
   * Fixed print to file instead of print to terminal
+  * after packaging
+  * fixed path for locales
 
- -- Maximilian Arnod <tux@tuxedocomputers.com>  Fri, 24 Nov 2023 11:19:33 +0100
+ -- Maximilian Arnod <tux@tuxedocomputers.com>  Fri, 24 Nov 2023 11:21:31 +0100
 
 tuxedo-tomte (2.15.0) jammy; urgency=medium
 
