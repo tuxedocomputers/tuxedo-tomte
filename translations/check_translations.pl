@@ -48,7 +48,11 @@ open my $tomte_file, '<', 'src/tuxedo-tomte' or die "Couldn't open input file: $
 # Process each line in the input file
 while (my $line = <$tomte_file>) {
     # Find all text between __(' and ')
-    my @matches = $line =~ /__\((.*?)(,|\))/g;
+    my @matches;
+    push @matches, $line =~ /__\((.*?)\)/g;
+    push @matches, $line =~ /__x\((.*?),/g;
+    push @matches, $line =~ /__n\((.*?),/g;
+    push @matches, $line =~ /__nx\((.*?),/g;
 
     # If at least one text was found, process them
     if (@matches) {
@@ -56,7 +60,7 @@ while (my $line = <$tomte_file>) {
             $match =~ s/^.(.*).$/$1/;  # Remove the first and last quotation marks
 
             # Check if this msgid is unique, then write it to the output
-            if (!$tomte_msgids{$match} && $match ne ',' && $match ne ')') {
+            if (!$tomte_msgids{$match}) {
                 $tomte_msgids{$match} = 1;  # Mark as seen
                 # print "Tomte: $match\n";
             }
