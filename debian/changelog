@@ -1,33 +1,48 @@
-tuxedo-tomte (2.15.0-testmultilanguage8) UNRELEASED; urgency=medium
+tuxedo-tomte (2.16.2-testmultilanguage) UNRELEASED; urgency=medium
 
   [ M. Arnold ]
   * Added Language Capabilities and Added Functionality for German PopUps
-  * Added a script to compare translations between the tomte main file and 
-    the regarding translations. 
+  * Added a script to compare translations between the tomte main file and
+    the regarding translations.
   * Added translations for all module descriptions EN/DE
   * Added two-digit LANGUAGE environment variable as valid.
   * Added dependency for libintl-perl to debian/control
-
-  [ Maximilian Arnold ]
-  * after packaging
-
-  [ M. Arnold ]
   * Added a code to automatically add language files to the debian/install file Changed install location to /usr/share/locale Simplified folder structure in ./translations
-  * after packaging
-  * Fixed print to file instead of print to terminal
-  * after packaging
-  * fixed path for locales
-  * after packaging
-  * fixed path for locales2
-  * fixed path for locales3
-  * after packaging
-  * packing
-  * after packaging
-  * after packaging
-  * after packaging
-  * Removed testing debugging
 
- -- Maximilian Arnod <tux@tuxedocomputers.com>  Fri, 24 Nov 2023 12:47:08 +0100
+  [ E. Mohr ]
+  * after packaging
+  * atomic merge with 177
+  * changed sub name
+  * after merge with 177
+  * after merge with nextRelease-ma
+  * modified changelog
+  * after packaging
+
+  [ G. Gottleuber ]
+  * bugfix: missing link for german tomte manual page
+  * fix spelling and groff format
+
+  [M. Arnold]
+  * Adding support for Elementary OS 7.1
+  * Changed lookup for isOSSupported to be automatic based on config.
+  * Added default EMAIL as Environment variable
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 21 Nov 2023 20:09:57 +0100
+
+tuxedo-tomte (2.16.2) jammy; urgency=medium
+
+  * added removal of old unused kernels for linux-tuxedo-22.04 if boot
+    partition is full
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 20 Nov 2023 13:09:39 +0100
+
+tuxedo-tomte (2.15.1) jammy; urgency=medium
+
+  * Added GM6XGxX (Stellaris 16 Gen5 AMD) with tuxedo-keyboard-ite and 
+    tuxedo-touchpad-switch.
+
+ -- M. Arnold <tux@tuxedocomputers.com>  Thu, 16 Nov 2023 11:39:03 +0100
+>>>>>>> nextRelease
 
 tuxedo-tomte (2.15.0) jammy; urgency=medium
 

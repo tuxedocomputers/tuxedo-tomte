@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.15.0-testmultilanguage8';
+our $VERSION = '2.16.2-testmultilanguage';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -51,6 +51,7 @@ use Data::Dumper;
 # 1 = some debug
 # 2 = lots of debug
 my $logLevel = 0;
+$logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -247,6 +248,9 @@ my %supportedOS = (
 			"6.1" => {
 				name => 'jolnir',
 			},
+			"7.1" => {
+				name => 'horus',
+			},
 		},
 	},
 	"KDE neon" => {
@@ -344,6 +348,13 @@ my %tuxedo_repos = (
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
 		},
 		name => '6.1 jolnir',
+	},
+	"elementary OS 7.1" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		name => '7.1 horus',
 	},
 	"KDE neon 20.04" => {
 		deb => {
@@ -465,6 +476,15 @@ my %tuxedo_mirrors = (
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
 		},
 		name => '6.1 jolnir',
+	},
+	"elementary OS 7.1" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => '7.1 horus',
 	},
 	"KDE neon 20.04" => {
 		mirrors => {
@@ -656,6 +676,23 @@ my %flavours = (
 		},
 		"linux-tuxedo-20.04-next" => {
 			installPackages => 'linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next',
+		},
+	},
+	"7.1" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
 		},
 	},
 );
@@ -1298,6 +1335,17 @@ my %tuxedo_devices = (
 		model => ['TUXEDO Aura 15 Gen3'],
 		board_name => ['NL57PU'],
 		fix => ['r8168dkms'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'60' => {
+		model => ['TUXEDO Stellaris 16 Gen5 AMD'],
+		board_name => ['GM6XGxX'],
+		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2997,13 +3045,14 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if (($distribution =~ /elementary OS/) && ($distributionVersion < 6.1)) {
-		printLog("this version of elementary OS is not supported, please make an update", 'TL0');
-		messageDesktop(__('this version of elementary OS is not supported, please make an update'), __('this version of elementary OS is not supported, please make an update'), 2, 'dialog-warning');
-		return (0);
-	}
 	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
 		return (1);
+	} elsif (exists($supportedOS{$distribution})) {
+		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
+		messageDesktop(__("This OS version is not supported"),
+						__("The version $distributionVersion of $distribution is not supported."),
+						2, 'dialog-warning');
+		return (0);
 	}
 	printLog("This OS is not supported", 'TL0');
 	printLog("distribution: >$distribution<", 'TL1');
@@ -3089,6 +3138,7 @@ sub checkRequirements {
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
 	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
 		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Elementary OS 7.1/) ||
 		($completeDistVersion =~ /Linux Mint 21.1/) ||
 		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
@@ -3194,7 +3244,8 @@ sub checkRequirements {
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /PH4PRX1_PH6PRX1/) ||
 		($boardname =~ /PH4PG31/) ||
-		($boardname =~ /PH6PG01_PH6PG71/)) {
+		($boardname =~ /PH6PG01_PH6PG71/) ||
+		($boardname =~ /GM6XGxX/)) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
 	}
@@ -3264,7 +3315,8 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71A/) ||
 		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ /LAPQC71B/) ||
-		($boardname =~ /GMxPXxx/)) {
+		($boardname =~ /GMxPXxx/) ||
+		($boardname =~ /GM6XGxX/)) {
 		$origConfModules{tuxedokeyboardite}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 	}
@@ -3366,6 +3418,7 @@ sub checkRequirements {
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /Linux Mint 21.2/) ||
@@ -4325,6 +4378,10 @@ sub kernelhwe2004() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
@@ -4368,6 +4425,10 @@ sub kerneltuxedo2004edge() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
@@ -4412,6 +4473,10 @@ sub kerneltuxedo2004next() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
@@ -4456,6 +4521,10 @@ sub kerneltuxedo2004() {
 			($completeDistVersion =~ /KDE neon 20.04/) ||
 			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
@@ -4500,9 +4569,14 @@ sub kerneltuxedo2204() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
@@ -4542,9 +4616,14 @@ sub kerneltuxedo2204edge() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
@@ -4584,9 +4663,14 @@ sub kerneltuxedo2204next() {
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+
+			# clean up oldest tuxedo kernel in /boot (if not used)
+			checkAndDeleteOldestTuxedoKernel();
+
 			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
 				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
@@ -4768,6 +4852,7 @@ sub nvidiadriver() {
 
 
 		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
+				($completeDistVersion =~ /elementary OS 7.1/) ||
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /Linux Mint 21.2/) ||
@@ -5534,6 +5619,7 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	if (($completeDistVersion ne 'TUXEDO_OS 22.04') &&
 		($completeDistVersion ne 'Ubuntu 22.04') &&
+		($completeDistVersion ne 'elementary OS 7.1') &&
 		($completeDistVersion ne 'KDE neon 22.04') &&
 		($completeDistVersion ne 'TUXEDO OS 22.04') &&
 		($completeDistVersion ne 'Linux Mint 21.1') &&
@@ -6974,7 +7060,7 @@ sub populateFlavourPackages {
 				}
 			}
 		}
-		@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniq(@packages);
+		@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniqInArray(@packages);
 		printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'L2');
 	} else {
 		printLog("empty package list for kernel $flavour while populating list, this should not happen!", 'L0');
@@ -6989,10 +7075,206 @@ sub populateFlavourPackages {
 # receives an array
 # returns an array where all values are unique
 #
-sub uniq {
+sub uniqInArray {
 	my %seen;
 	return grep { !$seen{$_}++ } @_;
 }
+
+
+
+###############################################################################
+# accepts a kernel version and returns an array with all dependant packages
+# found for linux-image-$version-tuxedo, linux-headres-$version-tuxedo and
+# linux-modules-extra-$version-tuxedo
+# returns an empty string if nothing was found or the version entry is wrong
+sub populateKernelPackages {
+	my $version = shift;
+	if ($version =~ /\s/) {
+		printLog("something is wrong with the kernel version number", 'L0');
+		return '';
+	}
+	my @rootPackages = ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	my @packages;
+	my @packagesUnique;
+	my $packageLine;
+	my $packageString;
+	my $searchCommand;
+	my $result;
+	my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+	my $line;
+	my @lines;
+	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
+	printLog("first searchcommand: $searchCommand", 'L2');
+	$result = `$searchCommand`;
+	printLog("first result:\n$result", 'L2');
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$packageString = $1;
+			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+				printLog("Accepted: $packageString", 'L2');
+				$packageLine .= " $packageString";
+				push @packages, $packageString;
+			}
+		}
+	}
+	if (@packages) {
+		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
+		printLog("second searchcommand: $searchCommand", 'L2');
+		$result = `$searchCommand`;
+		printLog("second result:\n$result", 'L2');
+		@lines = split /\n/, $result;
+		foreach $line (@lines) {
+			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+				$packageString = $1;
+				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+					printLog("Accepted: $packageString", 'L2');
+					push @packages, $packageString;
+				}
+			}
+		}
+	}
+	$searchCommand = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '."linux-modules-extra-$version-tuxedo".' 2>&1';
+	$result = `$searchCommand`;
+	if ($result =~ m/^[uihrp][HUFWti]\s$/) {
+		push @packages, "linux-modules-extra-$version-tuxedo";
+	}
+	push @packages, ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	@packagesUnique = uniqInArray(@packages);
+	printLog("kernel packages found: @packagesUnique", 'L2');
+
+	# safety check: something went wrong if we got more than 20 packages for removal
+	if (scalar(@packagesUnique) < 20) {
+		return (@packagesUnique);
+	} else {
+		return '';
+	}
+}
+
+
+
+###############################################################################
+# deletes the oldest TUXEDO kernel by version
+# returns 0 if nothing was done
+# returns 1 if some kernel was deleted
+sub checkAndDeleteOldestTuxedoKernel {
+	my $DH;
+	my %fileListInitrd;
+	my %fileListVmlinuz;
+	my $fileSize;
+	my $version;
+	my $file;
+	my $purgeCommand;
+	my $bootDir = '/boot';
+
+	my $bootPartition = `df $bootDir --output=avail,target`;
+	if ($bootPartition =~ / \/boot$/gm) {
+		printLog("separate $bootDir partition found", 'L2');
+	} else {
+		printLog("NO separate $bootDir partition found => quitting deleteKernel", 'L2');
+		return (0);
+	}
+
+	my $fsAvail;
+	if ($bootPartition =~ m/(\d+)/) {
+		$fsAvail = $1;
+		printLog("available space on $bootDir: $fsAvail", 'L2');
+	} else {
+		printLog("available bytes not found (expected a number) => exiting", 'L2');
+		return (0);
+	}
+
+	if ($fsAvail < 250000) {
+		printLog("not enough space, will try to delete some kernel", 'L2');
+	} else {
+		printLog("enough space => exiting", 'L2');
+		return (0);
+	}
+
+	if (opendir($DH,$bootDir)) {
+		while ($file = readdir($DH)) {
+			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
+				printLog("found file: $file", 'L2');
+				$fileSize = -s "$bootDir/$file";
+				printLog("size: $fileSize", 'L2');
+				if (($fileSize) > 1000000) {
+					printLog("filesize accepted into hash", 'L2');
+					$fileListInitrd{$1} = $fileSize;
+				}
+			}
+			if ($file =~ /vmlinuz-(.*)-tuxedo/) {
+				printLog("found file: $file", 'L2');
+				$fileSize = -s "$bootDir/$file";
+				printLog("size: $fileSize", 'L2');
+				if (($fileSize) > 1000000) {
+					printLog("filesize accepted into hash", 'L2');
+					$fileListVmlinuz{$1} = $fileSize;
+				}
+			}
+		}
+	} else {
+		printLog("could not open $bootDir", 'L2');
+		return (0);
+	}
+
+	my @fileListResult;
+	foreach $version (keys %fileListInitrd) {
+		if (exists $fileListVmlinuz{$version}) {
+			printLog("matching vmlinuz found with version: $version", 'L2');
+			push (@fileListResult, $version);
+		}
+	}
+
+	printLog("all found versions: @fileListResult", 'L2');
+
+	my $keepKernels = 3;
+	if (scalar(@fileListResult) > $keepKernels) {
+		printLog("more than $keepKernels kernels found, will delete the oldest one", 'L2');
+		@fileListResult = sort { version_compare($b, $a) } @fileListResult;
+		printLog("sorted filelist: @fileListResult", 'L2');
+		$version = '';
+		$version = $fileListResult[-1];
+		my $currentKernelVersion = `uname -r`;
+		$currentKernelVersion =~ s/-tuxedo$//;
+		if (! ($currentKernelVersion =~ /$version/)) {
+			printLog("not current running kernel => trying to delete version: $version", 'L2');
+			# get all related kernel packages
+			my @packageList = populateKernelPackages($fileListResult[-1]);
+			# purge package
+			$purgeCommand = "apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList";
+			printLog("purge command: $purgeCommand", 'L2');
+			my $result;
+			my $error;
+			if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+				$result = `$purgeCommand`;
+				$error = $?;
+				lockPM();
+				printLog("result: $result\nerror: $error", 'L2');
+
+				# check for success: is there more free space on /boot now?
+				my $newBootPartition = `df $bootDir --output=avail,target`;
+				if ($newBootPartition =~ / \/boot$/gm) {
+					if ($newBootPartition =~ m/(\d+)/) {
+						my $newFsAvail = $1;
+						my $fsDiff = $newFsAvail - $fsAvail;
+						my $freedMB = int($fsDiff / 1024);
+						printLog("successfully removed old kernel $version; freed $freedMB MB of disk space", 'L0');
+					}
+				}
+
+			} else {
+				printLog("could not remove the kernel $version as package management is busy", 'L0');
+			}
+		} else {
+			printLog("kernel version ($version) to delete is the same as the one currently running => abort", 'L0');
+			return (0);
+		}
+	} else {
+		printLog("less than 4 kernels present => nothing to do", 'L2');
+		return (0);
+	}
+}
+
 
 
 
@@ -7935,7 +8217,7 @@ sub messageDesktop {
 	`$mCmd`;
 	$retValue = $?/256;
 
-	if ($? != 0) {
+	if ($retValue != 0) {
 		printLog("No display for message output found with command:\n$mCmd", 'L1');
 		return (0);
 	}
@@ -10076,6 +10358,21 @@ if (@ARGV != 0) {
 				}
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
+				}
+				# Update Tuxedo Tomte to ensure current version
+				if (! ($LiveISO or $FAI)){
+					if (unlockPM("apt-get -yq install tuxedo-tomte") && (isPMlocked() == 0)) {
+						my $retval;
+						if ($logLevel > 1) {
+							$retval = `apt-get -yq install tuxedo-tomte >>$logFile 2>&1`;
+						} else {
+							$retval = `apt-get -yq install tuxedo-tomte >/dev/null 2>&1`;
+						}
+						lockPM();
+						printLog("return from apt-get:\n$retval", 'L2');
+					} else {
+						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1');
+					}
 				}
 				configureAllModules();
 				postConfigure();
