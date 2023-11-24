@@ -3050,7 +3050,8 @@ sub isOSSupported {
 	} elsif (exists($supportedOS{$distribution})) {
 		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
 		messageDesktop(__("This OS version is not supported"),
-						__("The version $distributionVersion of $distribution is not supported."),
+						__("The version {version} of {distribution} is not supported.",
+								("version" => $distributionVersion, "distribution" => $distribution)),
 						2, 'dialog-warning');
 		return (0);
 	}

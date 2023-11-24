@@ -22,11 +22,11 @@ TextDomain uses the Locale. Just using `LANGUAGE=de_DE perl tuxedo-tomte` manual
 Use these as examples in perl:
 
 ```perl
-print translate("You have one apple.", "You have %d apples.", 0), "\n";
-print translate("You have one apple.", "You have %d apples.", 1), "\n";
-print translate("You have one apple.", "You have %d apples.", 2), "\n";
-print translate("You have one apple."), "\n";
-print translate("You have apples of brand {brand}.", ("brand" => "Evelina")), "\n";
+print __("You have one apple.", "You have %d apples.", 0), "\n";
+print __("You have one apple.", "You have %d apples.", 1), "\n";
+print __("You have one apple.", "You have %d apples.", 2), "\n";
+print __("You have one apple."), "\n";
+print __("You have apples of brand {brand}.", ("brand" => "Evelina")), "\n";
 ```
 
 
