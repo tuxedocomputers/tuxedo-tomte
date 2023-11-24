@@ -91,7 +91,7 @@ if (open (my $installFile, '<', './debian/install')) {
 	# Iterate through each file in the directory
 	while (my $file = readdir($dh)) {
 		# Check if the file name ends with ".mo"
-		if ($file =~ /\.mo$/) {
+		if ($file =~ /(.*)\.mo$/) {
 			my $lang = $1;
 			# Print the install expression for each language file in debian/install
 			print $tmpInstallFile "translations/locale/$file /usr/share/locale/$lang/LC_MESSAGES/tomte.mo\n";
