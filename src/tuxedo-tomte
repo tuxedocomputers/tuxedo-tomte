@@ -50,7 +50,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2578,12 +2578,11 @@ sub checkAndSetLocale {
         printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
         $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
     }
-    print
 }
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
-	print "Trying Matching Language for: ", $lang, "\n";
+	printLog("Trying Matching Language for: ", $lang, "\n", "L1");
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
@@ -2595,11 +2594,11 @@ sub getMatchingLocaleForLang {
 	foreach my $path (@files) {
 		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
 		$found_language = $path =~ s/$locale_base_path\///ir;
-		print "Found valid Tomte locale file in $locale_base_path/$found_language.\n";
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1");
 		last;
 	}
 	unless ($found_language) {
-		print "Found no valid Tomte locale file in $locale_base_path/$lang.\n";
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1");
 	}
 
 	return ($found_language, "$locale_base_path/$found_language");
@@ -8092,9 +8091,9 @@ sub printLog {
 				close $LOGFILE;
 			}
 		}
-		# if ($type =~ /T/i) {
+		if ($type =~ /T/i) {
 			print "$message\n";
-		# }
+		}
 	}
 }
 
