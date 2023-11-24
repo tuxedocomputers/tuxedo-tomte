@@ -13,15 +13,13 @@ my $destination_directory =  $script_directory . '/locale';
 sub compile_po_file_to_mo_file {
 	my $po_file = $_;
 	if ($po_file =~ /\.po$/) {
-		my $mo_file = $po_file;
-		$mo_file =~ s/\.po$/.mo/;
+		my $mo_file_base = $po_file;
+		$mo_file_base =~ s/\.po$//;
 
-		my $relative_path = $File::Find::dir;
-		$relative_path =~ s/\Q$source_directory//;
-		my $dest_path = "$destination_directory$relative_path";
+		my $dest_path = "$destination_directory/$mo_file_base/LC_MESSAGES";
 		make_path($dest_path);
 
-		system("msgfmt --output-file=$dest_path/$mo_file $File::Find::name");
+		system("msgfmt --output-file=$dest_path/tomte.mo $File::Find::name");
 	}
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.15.0-testmultilanguage5';
+our $VERSION = '2.15.0-testmultilanguage6';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -41,8 +41,8 @@ use JSON;
 use Config::Tiny;
 
 # for Translations
-use Locale::TextDomain ('Translations', '../translations/locales');
-use Locale::TextDomain qw(Translations);
+use Locale::TextDomain ('tomte', '/usr/share/locale');
+use Locale::TextDomain qw(tomte);
 
 # for debugging
 use Data::Dumper;
@@ -50,7 +50,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -2542,9 +2542,7 @@ sub checkAndSetLocale {
 
             # Check if the directory exists
             if ($found_folder ne 0) {
-				if($language_code ne $found_folder){
-					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
-				}
+				$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
 
                 printLog("Found Tomte locale file in: $locale_path", "L1");
             } else {
@@ -2580,28 +2578,31 @@ sub checkAndSetLocale {
         printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
         $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
     }
+    print
 }
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
+	print "Trying Matching Language for: ", $lang, "\n";
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
-	my $found_folder = 0;
+	my $found_language = 0;
+	my $locale_path = 0;
 
-	# Create a closure for the find_path subroutine
-	my $find_path_closure = sub {
-		if (-e && /^($lang.*)\/LC_MESSAGES\/tomte\.mo/i) {
-			$found_folder = $1;
-			$File::Find::name = '';  # Resets the path to ensure exiting of find()
-		}
-	};
+	my @files = glob($locale_base_path . "/" . $lang . "*/LC_MESSAGES/tomte.mo");
 
-	# Verzeichnis durchsuchen
-	find($find_path_closure, $locale_base_path);
+	foreach my $path (@files) {
+		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
+		$found_language = $path =~ s/$locale_base_path\///ir;
+		print "Found valid Tomte locale file in $locale_base_path/$found_language.\n";
+		last;
+	}
+	unless ($found_language) {
+		print "Found no valid Tomte locale file in $locale_base_path/$lang.\n";
+	}
 
-	my $locale_path = $locale_base_path . '/' . $found_folder;
-	return($found_folder, $locale_path);
+	return ($found_language, "$locale_base_path/$found_language");
 }
 
 
@@ -8091,9 +8092,9 @@ sub printLog {
 				close $LOGFILE;
 			}
 		}
-		if ($type =~ /T/i) {
+		# if ($type =~ /T/i) {
 			print "$message\n";
-		}
+		# }
 	}
 }
 
