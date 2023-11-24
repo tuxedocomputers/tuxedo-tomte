@@ -86,16 +86,16 @@ if (open (my $installFile, '<', './debian/install')) {
 		print $tmpInstallFile $line;
 	}
 
-	my $localeDir = './translations/locale';
-	opendir(my $dh, $localeDir) or die "Could not open directory '$localeDir': $!";
+	my $localeDir = 'translations/locale';
+	opendir(my $dh, "./" . $localeDir) or die "Could not open directory '$localeDir': $!";
 	# Iterate through each file in the directory
 	while (my $langDir = readdir($dh)) {
 		next if $langDir =~ /^\./; # Skip hidden directories
 		my $langDirPath = "$localeDir/$langDir/LC_MESSAGES";
 
 		# Check if it's a directory and not a file
-		if (-d $langDirPath) {
-			opendir(my $langDH, $langDirPath) or die "Could not open directory '$langDirPath': $!";
+		if (-d "./" . $langDirPath) {
+			opendir(my $langDH, "./" . $langDirPath) or die "Could not open directory '$langDirPath': $!";
 
 			# Iterate through each file in the language directory
 			while (my $file = readdir($langDH)) {
