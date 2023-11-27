@@ -115,10 +115,9 @@ Entfernt das genannte Modul unabhaengig vom gewaehltem Modus
 (\fBAUTOMATIC\fR, \fBUPGRADES_ONLY\fR, \fBDONT_CONFIGURE\fR)\&.
 .P
 Nach Entfernen des Moduls, sollte dieses blockiert werden mit
-.RE
-.PP
+.IP
 \fBtomte \fBblock \fI<MODUL>\fR
-.RS 4
+.LP
 ansonsten wird es wieder automatisch installiert wenn der gewählte Modus
 .B AUTOMATIC
 ist\&.
@@ -235,12 +234,12 @@ Kernel installieren, der alle notwendigen Treiber mit liefert\&.
 .P
 Falls nicht erwünscht ist, dass
 .B Tomte
-irgend welche Änderungen im System durchführt oder z.B. ein bestimmter Kernel
+irgendwelche Änderungen im System durchführt oder z.B. ein bestimmter Kernel
 im System bleiben soll, kann die Datei \fBDONT_CONFIGURE\fR in
 .BR /etc/tomte/ \&
 erstellt werden.
 .B Tomte
-wird keine weitere Änderungen im System durchführen, außer den Repositories
+wird dann keine weiteren Änderungen im System durchführen, außer den Repositories
 und den Debian Pakete Spiegel\&.
 Danach könnten die notwendigen Module aufgelistet werden
 .IP

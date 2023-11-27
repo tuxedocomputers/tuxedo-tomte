@@ -1,3 +1,16 @@
+tuxedo-tomte (2.16.2-2) UNRELEASED; urgency=medium
+
+  [ G. Gottleuber ]
+  * added removal of old unused kernels for for linux-tuxedo-20.04,
+    linux-tuxedo-20.04-next, linux-tuxedo-20.04-edge, linux-generic-hwe-20.04,
+    linux-tuxedo-22.04-edge, linux-tuxedo-22.04-next
+  * bugfix: missing link for german tomte manual page
+
+  [M. Arnold]
+  * Adding support for Elementary OS 7.1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 Nov 2023 09:34:57 +0100
+
 tuxedo-tomte (2.16.2) jammy; urgency=medium
 
   * added removal of old unused kernels for linux-tuxedo-22.04 if boot

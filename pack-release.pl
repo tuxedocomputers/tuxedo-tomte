@@ -7,6 +7,7 @@ use Data::Dumper qw(Dumper);
 
 my $cwd = getcwd();
 print "cwd $cwd\n";
+$ENV{'EMAIL'} //= 'tux@tuxedocomputers.com'; # set to default email if environment variable is not given
 my $package = 'tuxedo-tomte';
 my $prefix;
 my $version;
