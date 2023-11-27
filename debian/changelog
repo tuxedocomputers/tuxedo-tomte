@@ -1,3 +1,32 @@
+tuxedo-tomte (2.17.0-1) UNRELEASED; urgency=medium
+
+  [ E. Mohr ]
+  * atomic merge with 177
+  * changed sub name
+  * after merge with 177
+  * after merge with nextRelease-ma
+  * modified changelog
+  * packing
+  * after packaging
+  * merged with manpage-fix-ggo
+
+  [ G. Gottleuber ]
+  * better sub name, better comment
+  * added kernel clean up function to all kernel management modules
+  * abbr. name
+  * kernel clean up: log success or failure with L0
+
+  [ Maximilian Arnold ]
+  * Added "tomte self update" when calling "configure all" (on startup) Added LOGLEVEL as environment variable
+
+  [ Vinzenz Vietzke ]
+  * Adding support for Elementary OS 7.1 Changed lookup for isOSSupported to be automatic based on config. Added default EMAIL tux@tuxedocomputers.com as environment variable in pack-release.pl
+
+  [ emohrtuxedo ]
+  * after packaging
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 27 Nov 2023 12:27:26 +0100
+
 tuxedo-tomte (2.17.0) jammy; urgency=medium
 
   [ G. Gottleuber ]
