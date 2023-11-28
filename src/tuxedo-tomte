@@ -6866,6 +6866,17 @@ sub installKernelFlavour {
 						$line =~ s/\s.*//;
 						printLog("$line is installed", 'L2');
 						${$somethingDone} += 1;
+						unless ($line =~ /$flavour/) {
+							`$consoleLanguage apt-mark showauto $line`;
+							if(`$consoleLanguage apt-mark showauto $package` =~ /$package/) {
+								`$consoleLanguage apt-mark auto $line`;
+								`$consoleLanguage apt-mark showauto $line`;
+							} else {
+								printLog("nothing to be apt-marked", 'TL2');
+							}
+						} else {
+							printLog("$line will not be apt-marked", 'TL2');
+						}
 					} else {
 						printLog("failed: $line", 'L2');
 						$allPackagesInstalled = 0;
