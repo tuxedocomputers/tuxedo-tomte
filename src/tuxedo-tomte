@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.17.0-1';
+our $VERSION = '2.17.0-2';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -6804,6 +6804,8 @@ sub installKernelFlavour {
 	}
 
 	if ($packageMissing) {
+		# install the meta packages as well in case there is a new version
+		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
 		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
