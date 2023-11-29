@@ -1,4 +1,4 @@
-tuxedo-tomte (2.17.0-4) UNRELEASED; urgency=medium
+tuxedo-tomte (2.17.0-5) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * atomic merge with 177
@@ -29,7 +29,11 @@ tuxedo-tomte (2.17.0-4) UNRELEASED; urgency=medium
   * added apt-marked for kernel packages
   * after packaging
 
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 28 Nov 2023 19:32:23 +0100
+  [ E. Mohr ]
+  * after packaging
+  * installs kernel meta packages always
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 29 Nov 2023 20:48:37 +0100
 
 tuxedo-tomte (2.17.0) jammy; urgency=medium
 
