@@ -6757,7 +6757,7 @@ sub installKernelFlavour {
 		${$somethingDone} = 0;
 	}
 		#TODO debug
-		printLog("somethingDone before meta: ${somethingDone}", 'L2');
+		printLog("somethingDone before meta: ${$somethingDone}", 'L2');
 	my $partialName;
 	my $installCmd = 'apt-get install -yq';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
@@ -6808,7 +6808,7 @@ sub installKernelFlavour {
 	}
 
 		#TODO debug
-		printLog("somethingDone before packageMissing: ${somethingDone}", 'L2');
+		printLog("somethingDone before packageMissing: ${$somethingDone}", 'L2');
 
 	if ($packageMissing) {
 		# install the meta packages as well in case there is a new version
@@ -6896,7 +6896,7 @@ sub installKernelFlavour {
 		}
 	} else {
 		#TODO debug
-		printLog("somethingDone before meta: ${somethingDone}", 'L2');
+		printLog("somethingDone before meta: ${$somethingDone}", 'L2');
 		$installCmd = 'apt-get install -yq';
 		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
 		$installCmd .= ' 2>&1';
@@ -6914,7 +6914,7 @@ sub installKernelFlavour {
 		}
 	}
 		#TODO debug
-		printLog("somethingDone after meta: ${somethingDone}", 'L2');
+		printLog("somethingDone after meta: ${$somethingDone}", 'L2');
 
 	if (!$allPackagesInstalled) {
 		${$failed} += 1;
