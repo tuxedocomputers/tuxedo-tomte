@@ -32,8 +32,12 @@ tuxedo-tomte (2.17.0-5) UNRELEASED; urgency=medium
   [ E. Mohr ]
   * after packaging
   * installs kernel meta packages always
+  * after packaging
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 29 Nov 2023 20:48:37 +0100
+  [ emohrtuxedo ]
+  * moved meta install to constant install
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 30 Nov 2023 09:17:21 +0100
 
 tuxedo-tomte (2.17.0) jammy; urgency=medium
 
