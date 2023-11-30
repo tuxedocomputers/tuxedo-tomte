@@ -6728,13 +6728,29 @@ sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
 	if ( `$consoleLanguage apt-mark showauto $package` =~ /$package/ ) {
-		printLog("package is set to auto, changing to manual now", 'L1');
-		$retVal = `$consoleLanguage apt-mark manual $package`;
+		if ($mark eq 'manual') {
+			printLog("package is set to auto, changing to manual now", 'L1');
+			$retVal = `$consoleLanguage apt-mark manual $package`;
+			if ($retVal =~ /was already/) {
+				return (0);
+			} else {
+				return (1);
+			}
+		} else {
+			printLog("package is already set to auto", 'L1');
+			return (0);
+		}
+	} elsif ($mark eq 'auto') {
+		printLog("package is set to manual, changing to auto now", 'L1');
+		$retVal = `$consoleLanguage apt-mark auto $package`;
 		if ($retVal =~ /was already/) {
 			return (0);
 		} else {
 			return (1);
 		}
+	} else {
+		printLog("package is already set to manual", 'L1');
+		return (0);
 	}
 	return (0);
 }
@@ -6802,10 +6818,15 @@ sub installKernelFlavour {
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
+				} else {
+					unless ($package =~ /$flavour/) {
+						setAptMark($package, 'auto');
+					}
 				}
 			}
 		}
 	}
+
 
 		#TODO debug
 		printLog("somethingDone before packageMissing: ${$somethingDone}", 'L2');
@@ -6871,19 +6892,11 @@ sub installKernelFlavour {
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
+						unless ($line =~ /$flavour/) {
+							setAptMark($line, 'auto');
+						}
 						printLog("$line is installed", 'L2');
 						${$somethingDone} += 1;
-						unless ($line =~ /$flavour/) {
-							`$consoleLanguage apt-mark showauto $line`;
-							if(`$consoleLanguage apt-mark showauto $package` =~ /$package/) {
-								`$consoleLanguage apt-mark auto $line`;
-								`$consoleLanguage apt-mark showauto $line`;
-							} else {
-								printLog("nothing to be apt-marked", 'TL2');
-							}
-						} else {
-							printLog("$line will not be apt-marked", 'TL2');
-						}
 					} else {
 						printLog("failed: $line", 'L2');
 						$allPackagesInstalled = 0;
