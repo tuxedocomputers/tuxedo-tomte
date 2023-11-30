@@ -6803,12 +6803,11 @@ sub installKernelFlavour {
 		}
 	}
 
+	if ($packageMissing) {
 		# install the meta packages as well in case there is a new version
 		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
 		$installCmd .= ' 2>&1';
-		if ($packageMissing) {
-			messageLongInstall();
-		}
+		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
 		deactivatePackagekit();
 		if (unlockPM('apt-get update -q and dpkg --configure -a') && (isPMlocked() == 0)) {
@@ -6888,6 +6887,23 @@ sub installKernelFlavour {
 		if ($allPackagesInstalled) {
 			printLog("kernel $flavour was installed correctly", 'L0');
 		}
+	} else {
+		$installCmd = 'apt-get install -yq';
+		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
+		$installCmd .= ' 2>&1';
+		printLog("install kernel metapackages", 'L2');
+		printLog("install command: $installCmd", 'L2');
+		if (unlockPM("$installCmd") && (isPMlocked() == 0)) {
+			$retString = `$installCmd`;
+			$exitStatus = $?/256;
+			lockPM();
+			printLog("return from install:\n$retString", 'L2');
+			if ($exitStatus != 0) {
+				printLog("installation of kernel meta packages failed !!!", 'L0');
+				${$failed} += 1;
+			}
+		}
+	}
 
 	if (!$allPackagesInstalled) {
 		${$failed} += 1;
