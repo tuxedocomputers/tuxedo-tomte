@@ -6729,7 +6729,7 @@ sub setAptMark {
 	my $retVal;
 	if ( `$consoleLanguage apt-mark showauto $package` =~ /$package/ ) {
 		if ($mark eq 'manual') {
-			printLog("package is set to auto, changing to manual now", 'L1');
+			printLog("package $package is set to auto, changing to manual now", 'L1');
 			$retVal = `$consoleLanguage apt-mark manual $package`;
 			if ($retVal =~ /was already/) {
 				return (0);
@@ -6737,11 +6737,11 @@ sub setAptMark {
 				return (1);
 			}
 		} else {
-			printLog("package is already set to auto", 'L1');
+			printLog("package $package is already set to auto", 'L1');
 			return (0);
 		}
 	} elsif ($mark eq 'auto') {
-		printLog("package is set to manual, changing to auto now", 'L1');
+		printLog("package $package is set to manual, changing to auto now", 'L1');
 		$retVal = `$consoleLanguage apt-mark auto $package`;
 		if ($retVal =~ /was already/) {
 			return (0);
@@ -6749,7 +6749,7 @@ sub setAptMark {
 			return (1);
 		}
 	} else {
-		printLog("package is already set to manual", 'L1');
+		printLog("package $package is already set to manual", 'L1');
 		return (0);
 	}
 	return (0);
