@@ -1,0 +1,262 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=3; plural=n<1 ? 0 : (n>1 ? 2 : 1);\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+
+# Desktop Messages (PopUps)
+msgid "This OS version is not supported"
+msgstr "Diese Version des Betriebssystems wird nicht unterstützt"
+
+msgid "The version {version} of {distribution} is not supported."
+msgstr "Die Version {version} von {distribution} wird nicht unterstützt."
+
+msgid "Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all"
+msgstr "Tomte wird in wenigen Minuten erneut versuchen oder nach einem Neustart oder bei manueller Aktivierung mit: sudo tomte configure all."
+
+msgid "TUXEDO Tomte is installing fixes"
+msgstr "TUXEDO Tomte installiert Fixes."
+
+msgid "Please do not restart or shutdown the system."
+msgstr "Bitte starten Sie das System nicht neu oder fahren Sie es nicht herunter."
+
+msgid "Restart required"
+msgstr "Neustart erforderlich"
+
+msgid "Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated"
+msgstr "Bitte starten Sie das System neu, damit die Änderungen wirksam werden. Tomte konnte nicht alle Fixes installieren und wird es beim nächsten Aktivieren erneut versuchen."
+
+msgid "Tomte ready"
+msgstr "Tomte bereit"
+
+msgid "Tomte could not install all the fixes and will try again the next time it is activated"
+msgstr "Tomte konnte nicht alle Fixes installieren und wird es beim nächsten Aktivieren erneut versuchen."
+
+msgid "Please restart the system for the changes to take effect."
+msgstr "Bitte starten Sie das System neu, damit die Änderungen wirksam werden."
+
+msgid "TUXEDO Tomte ready"
+msgstr "TUXEDO Tomte bereit"
+
+msgid "TUXEDO Tomte finished applying all the required fixes available for this system."
+msgstr "TUXEDO Tomte hat alle erforderlichen Fixes für dieses System erfolgreich angewendet."
+
+
+# Help Strings
+
+msgid "HELP_tuxedo-tomte"
+msgstr "tuxedo-tomte <BEFEHL> [NAME...]"
+
+msgid "HELP_tomte"
+msgstr "tomte <BEFEHL> [NAME...]"
+
+msgid "HELP_list"
+msgstr "  list                           Zeigt alle installierbaren Module mit detailliertem Status"
+
+msgid "HELP_status"
+msgstr "  status                         Gleich wie 'list'"
+
+msgid "HELP_versions"
+msgstr "  versions                       Wie 'list', aber mit Versionsnummern"
+
+msgid "HELP_modules"
+msgstr "  modules                        Zeigt alle verfügbaren Module an"
+
+msgid "HELP_description_MODULE"
+msgstr "  description MODULE             Zeigt die Modulbeschreibung an"
+
+msgid "HELP_configure_MODULE"
+msgstr "  configure MODULE ...|all       Konfiguriert ein noch nicht konfiguriertes Modul"
+
+msgid "HELP_reconfigure_MODULE"
+msgstr "  reconfigure MODULE...|all      Rekonfiguriert ein bereits konfiguriertes Modul"
+
+msgid "HELP_remove_MODULE"
+msgstr "  remove MODULE                  Entfernt ein Modul aus dem System"
+
+msgid "HELP_block_MODULE"
+msgstr "  block MODULE ...|all           Blockiert ein oder alle Module"
+
+msgid "HELP_unblock_MODULE"
+msgstr "  unblock MODULE ... |all        Entblockiert ein oder alle Module"
+
+msgid "HELP_AUTOMATIC"
+msgstr "  AUTOMATISCH                    Aktiviert automatische Konfiguration"
+
+msgid "HELP_UPDATES_ONLY"
+msgstr "  NUR_UPDATES                    Nur Updates werden automatisch installiert"
+
+msgid "HELP_DONT_CONFIGURE"
+msgstr "  NICHT_KONFIGURIEREN            Stoppt alle automatischen Konfigurationen"
+
+msgid "HELP_help"
+msgstr "  help                           Zeigt diese Nachricht an"
+
+msgid "HELP_footer"
+msgstr "  Weitere Details finden Sie in der Manpage"
+
+
+
+
+# Config Descriptions
+msgid "updateGrub_description"
+msgstr "konfiguriert Grub gemäß der Grub-Datei neu"
+
+msgid "updateInitramfs_description"
+msgstr "aktualisiert initramfs"
+
+msgid "i8042fix_description"
+msgstr "Fix für keine-Tastatur-vorhanden nach dem Booten auf XC1711"
+
+msgid "nobootonbattery_description"
+msgstr "Fix für Kein-Boot-im-Batteriebetrieb auf BA15"
+
+msgid "amdxhcihcdusbquirksuspendfix_description"
+msgstr "Fix für einige AMD-Geräte, bei denen der xhci_hcd-Treiber einen sofortigen Ausstieg aus dem Ruhezustand verursacht, wenn er in den Ruhezustand versetzt wird"
+
+msgid "amdgpuwithnvidiafix_description"
+msgstr "Ermöglicht die Aktivierung der dedizierten NVIDIA-Grafik auf Geräten mit integrierter AMD-Grafik. Ermöglicht auch das Umschalten zwischen beiden mit prime-select"
+
+msgid "tuxedocontrolcenter_description"
+msgstr "TUXEDO Control Center-Anwendung"
+
+msgid "tuxedokeyboard_description"
+msgstr "Treiber für Tastatur & Tastaturbeleuchtung für TUXEDO-Notebooks"
+
+msgid "nokeyboardaftersuspendfix_description"
+msgstr "Behebt das Problem, dass die Tastatur nach dem Ruhezustand nicht funktioniert"
+
+msgid "backlightfix_description"
+msgstr "Behebt Hintergrundbeleuchtungsprobleme für DX1708, GTX1060 mit AUO-Modell 12701 und 21229-Displays"
+
+msgid "tuxedorepos_description"
+msgstr "Voraussetzung! Fügt die TUXEDO-Repositories hinzu"
+
+msgid "tuxedomirrors_description"
+msgstr "Fügt von TUXEDO gewartete Ubuntu-Repositories hinzu"
+
+msgid "corefix_description"
+msgstr "ACPI-Mod für eine genaue Erkennung der Kerne"
+
+msgid "threegfix_description"
+msgstr "Konfiguration erforderlich für den Betrieb von Huawei-ME936"
+
+msgid "threegfix2_description"
+msgstr "Konfiguration erforderlich für den Betrieb von Huawei-ME906s"
+
+msgid "elantechtouchpadfix_description"
+msgstr "Behebt das Problem, dass das Elantech-Touchpad nicht funktioniert"
+
+msgid "tuxedotouchpadswitch_description"
+msgstr "Fügt die Hardwareaktivierung/deaktivierung für Touchpads mit LED-Anzeige auf verschiedenen TUXEDO-Notebooks hinzu"
+
+msgid "tuxedonvmefix_description"
+msgstr "Entfernt den Sleep-Bug auf Kingston A2000 NVME-Geräten durch ein Firmware-Update"
+
+msgid "tuxedokeyboardite_description"
+msgstr "Treiber für die Tastaturbeleuchtung für ITE-Geräte"
+
+msgid "fingerprintreader_description"
+msgstr "Pakete, die für den Betrieb des Fingerabdrucklesers auf bestimmten TUXEDO-Notebooks benötigt werden"
+
+msgid "mesautils_description"
+msgstr "Bietet Symlinks zu mehreren von Mesa bereitgestellten nativen Dienstprogrammen"
+
+msgid "tuxedorestoreaudiofix_description"
+msgstr "Systemd-Dienst, der nach fehlenden Audiogeräten sucht"
+
+msgid "kerneltuxedo2204edge_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kerneltuxedo2004_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kerneltuxedo2004edge_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kerneltuxedo2004next_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kernelgenerichwe2004_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kernelgenerichwe2004edge_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kerneltuxedo2204_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "kerneltuxedo2204next_description"
+msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
+
+msgid "nvidiadriver_description"
+msgstr "Erforderliche Nvidia-Treiber"
+
+msgid "cracklibruntime_description"
+msgstr "Erstellt Passwortwörterbuchdatenbanken"
+
+msgid "amdgpudkms_description"
+msgstr "Ermöglicht es der AMD-GPU und dem Display, Konfigurationsinformationen zu teilen"
+
+msgid "r8168dkms_description"
+msgstr "Linux-Gerätetreiber für mehrere Realtek-Ethernet-Controller"
+
+msgid "tuxedooledbrt_description"
+msgstr "Workaround zur Steuerung der OLED-Displayhelligkeit mit dbus und xrandr"
+
+msgid "apportfix_description"
+msgstr "Workaround für undefinierte Probleme mit Apport"
+
+msgid "realtekr8125dkms_description"
+msgstr "Linux-Gerätetreiber für mehrere Realtek-Ethernet-Controller [veraltet]"
+
+msgid "amdgpubacklightauxoff_description"
+msgstr "Behebt die Hintergrundbeleuchtungssteuerung"
+
+msgid "i915disablepsrfix_description"
+msgstr "Behebt Bildschirmflackern bei Verwendung einiger Eingabegeräte"
+
+msgid "i915enablepsrfix_description"
+msgstr "Bietet eine bessere Akkulaufzeit"
+
+msgid "tuxedopinfixtgldkms_description"
+msgstr "Behebt das nicht reagierende Touchpad"
+
+msgid "tuxedomicfix1_description"
+msgstr "Kernel-Audiomodul, das verschiedene Probleme mit der Audioausgabe behebt"
+
+msgid "thunderboltbootdelayfix_description"
+msgstr "Löst das Problem, dass der Kernel beim Laden des Thunderbolt-Moduls beim Booten zu lange dauert"
+
+msgid "i8042noauxfix_description"
+msgstr "Fix für Probleme im Zusammenhang mit dem Touchpad"
+
+msgid "lightdmlogindcheckgraphicalfix_description"
+msgstr "Behebt das Problem, dass lightdm vor dem Windowmanager gestartet wird"
+
+msgid "nvidiabacklightcontrolfix_description"
+msgstr "Behebt die Hintergrundbeleuchtungssteuerung für Nvidia-GPUs"
+
+msgid "earlyloadbacklightcontrolfix_description"
+msgstr "Für eine funktionierende Hintergrundbeleuchtungssteuerung mit Nvidia muss der i915 früher geladen werden"
+
+msgid "tuxedor8125dkms_description"
+msgstr "Neuster Treiber für RTL8125 2.5GbE-Controller, behebt Ethernet-Bug"
+
+msgid "cardreaderfix_description"
+msgstr "udev-Regel, die den Stromsparzustand für den Kartenleser RTS522A unterbindet"
+
+msgid "samsungnvmefix_description"
+msgstr "Fix für das Aufwachen von Samsung NVMe aus dem Ruhezustand"
+
+msgid "intelgenXIIIpowerctlfix_description"
+msgstr "setzt die Stromsteuerung auf 'auto' am PCI-USB-Controller auf Intel Gen13-Geräten"
+
+msgid "tuxedodgpurun_description"
+msgstr "Befehlszeilentool und KDE-Kontextmenüeinträge zum Ausführen von Programmen auf der dGPU im On-Demand-Modus"
+
+msgid "acpibacklightvideofix_description"
+msgstr "Behebt Bootverzögerungen/Einfrierungen im Nvidia-Modus"
+
+msgid "disablegucfix_description"
+msgstr "Deaktiviert GuC-Übermittlung auf Intel iGPU und behält HuC bei"
