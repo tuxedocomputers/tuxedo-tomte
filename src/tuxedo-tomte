@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.16.2-testmultilanguage3';
+our $VERSION = '2.17.0-testmultilanguage';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -7182,13 +7182,6 @@ sub checkAndDeleteOldestTuxedoKernel {
 		printLog("available space on $bootDir: $fsAvail", 'L2');
 	} else {
 		printLog("available bytes not found (expected a number) => exiting", 'L2');
-		return (0);
-	}
-
-	if ($fsAvail < 250000) {
-		printLog("not enough space, will try to delete some kernel", 'L2');
-	} else {
-		printLog("enough space => exiting", 'L2');
 		return (0);
 	}
 

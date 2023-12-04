@@ -1,4 +1,4 @@
-tuxedo-tomte (2.16.2-testmultilanguage3) UNRELEASED; urgency=medium
+tuxedo-tomte (2.17.0-testmultilanguage) UNRELEASED; urgency=medium
 
   [ M. Arnold ]
   * Added Language Capabilities and Added Functionality for German PopUps
@@ -8,6 +8,8 @@ tuxedo-tomte (2.16.2-testmultilanguage3) UNRELEASED; urgency=medium
   * Added two-digit LANGUAGE environment variable as valid.
   * Added dependency for libintl-perl to debian/control
   * Added a code to automatically add language files to the debian/install file Changed install location to /usr/share/locale Simplified folder structure in ./translations
+  * Added default EMAIL as Environment variable
+  * Following issue 315 changing descriptions for kernels
 
   [ E. Mohr ]
   * after packaging
@@ -18,17 +20,18 @@ tuxedo-tomte (2.16.2-testmultilanguage3) UNRELEASED; urgency=medium
   * modified changelog
   * after packaging
 
+tuxedo-tomte (2.17.0) jammy; urgency=medium
+
   [ G. Gottleuber ]
+  * added removal of old unused kernels for for linux-tuxedo-20.04,
+    linux-tuxedo-20.04-next, linux-tuxedo-20.04-edge, linux-generic-hwe-20.04,
+    linux-tuxedo-22.04-edge, linux-tuxedo-22.04-next
   * bugfix: missing link for german tomte manual page
-  * fix spelling and groff format
 
   [M. Arnold]
   * Adding support for Elementary OS 7.1
-  * Changed lookup for isOSSupported to be automatic based on config.
-  * Added default EMAIL as Environment variable
-  * Following issue 315 changing descriptions for kernels
 
- -- Maximilian Arnod <tux@tuxedocomputers.com>  Fri, 24 Nov 2023 16:05:17 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 27 Nov 2023 09:37:09 +0100
 
 tuxedo-tomte (2.16.2) jammy; urgency=medium
 
