@@ -2510,6 +2510,27 @@ my %origConfModules = (
 		FAI => 'yes',
 		LiveISO => 'no',
 	},
+	tuxedodrivers => {
+		name => 'tuxedo-drivers',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'yes',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('tuxedodrivers_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => '',
+		order => '',
+		dkms => 'yes',
+		FAI => 'yes',
+		LiveISO => 'yes',
+	},
 );
 
 
@@ -4363,6 +4384,17 @@ sub tuxedorestoreaudiofix() {
 	}
 }
 
+
+
+
+###############################################################################
+# tuxedo-drivers
+#
+sub tuxedodrivers() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+}
 
 
 
