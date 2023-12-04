@@ -67,61 +67,6 @@ if (($version =~ /^\d+\.\d+\.\d+$/) && ($presentTODO != 0)) {
 	exit (0);
 }
 
-
-# translations check
-print "\n";
-system("perl translations/check_translations.pl");
-
-print "\nDo you wish to compile the translations based on these informations?\n";
-my $returnValue = <>; #proceeds with enter
-system("perl translations/compile_translation_files.pl");
-
-
-# generate language files installation information
-if (open (my $installFile, '<', './debian/install')) {
-	open (my $tmpInstallFile, '>', './debian/install.tmp');
-	while (my $line = <$installFile>) {
-		if ($line =~ /^translations\/locale\//) {
-			next;
-		}
-		print $tmpInstallFile $line;
-	}
-
-	my $localeDir = 'translations/locale';
-	opendir(my $dh, "./" . $localeDir) or die "Could not open directory '$localeDir': $!";
-	# Iterate through each file in the directory
-	while (my $langDir = readdir($dh)) {
-		next if $langDir =~ /^\./; # Skip hidden directories
-		my $langDirPath = "$localeDir/$langDir/LC_MESSAGES";
-
-		# Check if it's a directory and not a file
-		if (-d "./" . $langDirPath) {
-			opendir(my $langDH, "./" . $langDirPath) or die "Could not open directory '$langDirPath': $!";
-
-			# Iterate through each file in the language directory
-			while (my $file = readdir($langDH)) {
-				# Check if the file name ends with ".mo"
-				if ($file =~ /(.*)\.mo$/) {
-					my $lang = $1;
-					# Print the install expression for each language file in debian/install
-					print $tmpInstallFile "$langDirPath/$file /usr/share/locale/$langDir/LC_MESSAGES\n";
-				}
-			}
-
-			closedir($langDH);
-		}
-	}
-	closedir($dh);
-
-	close ($installFile);
-	close ($tmpInstallFile);
-	unlink ($installFile);
-	rename './debian/install.tmp', './debian/install';
-}
-
-
-
-
 # set version in sourcefile
 if (open (my $FHin, '<', './src/tuxedo-tomte')) {
 	open (my $FHout, '>', './src/tuxedo-tomte.tmp');
