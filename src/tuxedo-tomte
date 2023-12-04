@@ -7098,13 +7098,6 @@ sub checkAndDeleteOldestTuxedoKernel {
 		return (0);
 	}
 
-	if ($fsAvail < 250000) {
-		printLog("not enough space, will try to delete some kernel", 'L2');
-	} else {
-		printLog("enough space => exiting", 'L2');
-		return (0);
-	}
-
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
 			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
