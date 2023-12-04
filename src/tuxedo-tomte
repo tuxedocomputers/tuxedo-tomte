@@ -27,6 +27,7 @@ use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
 use File::FcntlLock;
 
 use File::Copy;
+use File::Find;
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -38,6 +39,10 @@ use Digest::MD5 qw(md5_hex);
 use Dpkg::Version;
 use JSON;
 use Config::Tiny;
+
+# for Translations
+use Locale::TextDomain ('tomte', '/usr/share/locale');
+use Locale::TextDomain qw(tomte);
 
 # for debugging
 use Data::Dumper;
@@ -56,6 +61,7 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+checkAndSetLocale();
 
 ###############################################################################
 # Argument values given to script
@@ -204,13 +210,13 @@ my %postConfProgram = (
 		command => 'update-grub',
 		trigger => 0,
 		status => 'undef',
-		description => 'reconfigures grub according to grub file',
+		description => __('updateGrub_description'),
 	},
 	updateInitramfs => {
 		command => 'update-initramfs -u -k all',
 		trigger => 0,
 		status => 'undef',
-		description => 'updates initramfs',
+		description => __('updateInitramfs_description'),
 	},
 );
 
@@ -1416,7 +1422,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fix for no-keyboard-present after boot on XC1711',
+		description => __('i8042fix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1437,7 +1443,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fix for no-boot-on-battery on BA15',
+		description => __('nobootonbattery_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1458,7 +1464,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fix for some AMD devices where the xhci_hcd driver causes a jump out of suspend immediately on entering suspend',
+		description => __('amdxhcihcdusbquirksuspendfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1479,7 +1485,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Enables activation of discrete NVIDIA graphics on devices with built-in AMD graphics. Also enables switching between both with prime-select',
+		description => __('amdgpuwithnvidiafix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1500,7 +1506,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'TUXEDO Control Center Application',
+		description => __('tuxedocontrolcenter_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1521,7 +1527,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Keyboard & keyboard backlight driver for TUXEDO notebooks',
+		description => __('tuxedokeyboard_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1543,7 +1549,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes no keyboard after suspend problem',
+		description => __('nokeyboardaftersuspendfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1564,7 +1570,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes backlight issues for DX1708, GTX1060 with AUO Model 12701 and 21229 displays',
+		description => __('backlightfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1585,7 +1591,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Prerequisite! Adds the TUXEDO repositories',
+		description => __('tuxedorepos_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1606,7 +1612,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Adds TUXEDO maintained Ubuntu repositories',
+		description => __('tuxedomirrors_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1627,7 +1633,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'ACPI mod for accurate cores recognition',
+		description => __('corefix_description'),
 		postconf => 'updateInitramfs',
 		upgrade => '',
 		upgraded => '',
@@ -1648,7 +1654,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Configuration needed to operate Huawei-ME936',
+		description => __('threegfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1669,7 +1675,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Configuration needed to operate Huawei-ME906s',
+		description => __('threegfix2_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1691,7 +1697,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes non working Elantech touchpad',
+		description => __('elantechtouchpadfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -1712,7 +1718,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks',
+		description => __('tuxedotouchpadswitch_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1733,7 +1739,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Removes sleep bug on Kingston A2000 NVME devices by updating the firmware',
+		description => __('tuxedonvmefix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1754,7 +1760,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Keyboard back-light driver for ITE devices',
+		description => __('tuxedokeyboardite_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1775,7 +1781,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Packages needed for fingerprint reader to work on certain TUXEDO notebooks',
+		description => __('fingerprintreader_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1796,7 +1802,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Provides symlinks to several native utilities provided by Mesa',
+		description => __('mesautils_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1817,7 +1823,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Systemd service which rescans for missing audio devices',
+		description => __('tuxedorestoreaudiofix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1838,7 +1844,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-22.04-edge',
+		description => __('kerneltuxedo2204edge_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1859,7 +1865,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-20.04',
+		description => __('kerneltuxedo2004_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1880,7 +1886,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-20.04-edge',
+		description => __('kerneltuxedo2004edge_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1901,7 +1907,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-20.04-next',
+		description => __('kerneltuxedo2004next_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1922,7 +1928,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-generic-hwe-20.04',
+		description => __('kernelgenerichwe2004_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1943,7 +1949,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-generic-hwe-20.04-edge',
+		description => __('kernelgenerichwe2004edge_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1964,7 +1970,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-22.04',
+		description => __('kerneltuxedo2204_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -1985,7 +1991,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required kernel version linux-tuxedo-22.04-next',
+		description => __('kerneltuxedo2204next_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2006,7 +2012,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Required Nvidia drivers',
+		description => __('nvidiadriver_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2027,7 +2033,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Builds password dictionary databases',
+		description => __('cracklibruntime_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2049,7 +2055,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Enables AMD GPU and display to share configuration information',
+		description => __('amdgpudkms_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2070,7 +2076,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Linux device driver for several Realtek Ethernet controllers',
+		description => __('r8168dkms_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2091,7 +2097,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Workaround to control OLED display brightness using dbus and xrandr',
+		description => __('tuxedooledbrt_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2112,7 +2118,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Workaround for undefined problems with apport',
+		description => __('apportfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2134,7 +2140,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Linux device driver for several Realtek Ethernet controllers [obsolete]',
+		description => __('realtekr8125dkms_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2155,7 +2161,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes backlight control',
+		description => __('amdgpubacklightauxoff_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2176,7 +2182,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes screen flickering when using some input devices',
+		description => __('i915disablepsrfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2197,7 +2203,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Provides better battery life',
+		description => __('i915enablepsrfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2219,7 +2225,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes unresponsive touchpad',
+		description => __('tuxedopinfixtgldkms_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2240,7 +2246,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Kernel audio module which fixes different issues with audio output',
+		description => __('tuxedomicfix1_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2261,7 +2267,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Solves kernel takes too long at loading thundebolt module at boot',
+		description => __('thunderboltbootdelayfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2283,7 +2289,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fix for touchpad related issues',
+		description => __('i8042noauxfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2304,7 +2310,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes lightdm starting before windowmanager',
+		description => __('lightdmlogindcheckgraphicalfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2325,7 +2331,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes backlight control for Nvidia GPUs',
+		description => __('nvidiabacklightcontrolfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2346,7 +2352,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'For backlight control working with Nvidia, the i915 needs to be loaded earlier',
+		description => __('earlyloadbacklightcontrolfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2367,7 +2373,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug',
+		description => __('tuxedor8125dkms_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2388,7 +2394,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'udev rule which inhibits power idle state for cardreader RTS522A',
+		description => __('cardreaderfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2409,7 +2415,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'fix for Samsung NVMe wake up from sleep',
+		description => __('samsungnvmefix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2430,7 +2436,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'sets power control to \'auto\' on PCI USB controller on Intel Gen13 devices',
+		description => __('intelgenXIIIpowerctlfix_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2451,7 +2457,7 @@ my %origConfModules = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'commandline tool and KDE context menu entries to run programms on dGPU while in on-demand mode',
+		description => __('tuxedodgpurun_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -2472,7 +2478,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Fixes boot delays/freezes in Nvidia modes',
+		description => __('acpibacklightvideofix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2493,7 +2499,7 @@ my %origConfModules = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => '',
-		description => 'Disables GuC submission on Intel iGPU while keeping HuC',
+		description => __('disablegucfix_description'),
 		postconf => 'updateGrub',
 		upgrade => '',
 		upgraded => '',
@@ -2564,6 +2570,87 @@ my %configuredModules;
 sub dieSingleton {
 	print "Another instance is already running, please wait till it is finished\n";
 	exit (1);
+}
+
+
+sub checkAndSetLocale {
+    my $default_locale = "en";
+
+    # Check if either LANG or LANGUAGE is set
+    if (defined $ENV{'LANG'} || defined $ENV{'LANGUAGE'}) {
+		# allow manual override of LANGUAGE environment variable
+        my $lang = (length $ENV{'LANGUAGE'} > 0) ? $ENV{'LANGUAGE'} : $ENV{'LANG'};
+
+        # Split the language code from the full locale using dot as the delimiter
+        # a $lang could be de, de_DE or de_DE.UTF8
+        my $language_code = (split /\./, $lang)[0] // $lang;
+
+		# $language_code is now de or de_DE
+        if ($language_code) {
+			my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
+
+            # Check if the directory exists
+            if ($found_folder ne 0) {
+				$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+
+                printLog("Found Tomte locale file in: $locale_path", "L1");
+            } else {
+				if(length $language_code eq 2){
+					# already searched possible endings and didn't found
+					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+				} else {
+					# reduce de_DE to de to search broader
+					$language_code = (split /_/, $language_code)[0];
+					my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
+
+					# Check if the directory exists
+					if ($found_folder ne 0) {
+						if($language_code ne $found_folder){
+							$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+						}
+
+						printLog("Found Tomte locale file in: $locale_path", "L1");
+					} else {
+						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+						$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+					}
+				}
+            }
+        } else {
+            printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1");
+            printLog("Setting both to default: $default_locale", "L1");
+            $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+        }
+    } else {
+        # Neither LANG nor LANGUAGE is set. Setting both to default
+        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
+        $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+    }
+}
+
+sub getMatchingLocaleForLang {
+	my $lang = shift;
+	printLog("Trying Matching Language for: ", $lang, "\n", "L1");
+	# Directory where the existing translations can be found
+	my $locale_base_path = "/usr/share/locale";
+
+	my $found_language = 0;
+	my $locale_path = 0;
+
+	my @files = glob($locale_base_path . "/" . $lang . "*/LC_MESSAGES/tomte.mo");
+
+	foreach my $path (@files) {
+		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
+		$found_language = $path =~ s/$locale_base_path\///ir;
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1");
+		last;
+	}
+	unless ($found_language) {
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1");
+	}
+
+	return ($found_language, "$locale_base_path/$found_language");
 }
 
 
@@ -2963,9 +3050,10 @@ sub isOSSupported {
 		return (1);
 	} elsif (exists($supportedOS{$distribution})) {
 		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
-		messageDesktop("This OS version is not supported",
-						"The version $distributionVersion of $distribution is not supported.",
-						2, 'dialog-warning');
+		messageDesktop(__("This OS version is not supported"),
+						__x("The version {version} of {distribution} is not supported.",
+								("version" => $distributionVersion, "distribution" => $distribution)),
+								2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0');
@@ -5717,7 +5805,7 @@ sub addRepoKey {
 					printLog("Tomte will try again in few minutes or after reboot or if startet manually with:", 'TL0');
 					printLog("sudo tomte configure all", 'T0L');
 				}
-				startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+				startTomteDelayed(__("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all"));
 				return (0);
 			}
 		} else {
@@ -5726,7 +5814,7 @@ sub addRepoKey {
 				printLog("Tomte will try again in a few minutes or after reboot or if startet manually with:", 'TL0');
 				printLog("sudo tomte configure all", 'T0L');
 			}
-			startTomteDelayed("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all");
+			startTomteDelayed(__("Tomte will try again in a few minutes or after reboot or when activated manually with: sudo tomte configure all"));
 			return (0);
 		}
 	}
@@ -8139,7 +8227,7 @@ sub messageDesktop {
 #
 sub messageLongInstall {
 	if (($longInstall == 0) && (triesAlreadyDone() < 1)) {
-		if (messageDesktop('TUXEDO Tomte is installing fixes','Please do not restart or shutdown the system.', 2, 'dialog-warning')) {
+		if (messageDesktop(__('TUXEDO Tomte is installing fixes'),__('Please do not restart or shutdown the system.'), 2, 'dialog-warning')) {
 			$longInstall = 1;
 		}
 	}
@@ -9751,13 +9839,13 @@ sub startTomteDelayed {
 			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
 			$startLaterAgain = 1;
 			if ($restartSystem) {
-				messageDesktop('Restart required', 'Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+				messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
 				print "\nPlease restart the system for the changes to take effect, not all the fixes could be installed\n";
 			} else {
 				if (defined($message)) {
-					messageDesktop('Tomte ready', $message, 2, 'dialog-warning');
+					messageDesktop(__('Tomte ready'), $message, 2, 'dialog-warning');
 				} else {
-					messageDesktop('Tomte ready', 'Tomte could not install all the fixes and will try again the next time it is activated', 2, 'dialog-warning');
+					messageDesktop(__('Tomte ready'), __('Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
 					print "\nNot all the fixes could be installed\n";
 				}
 			}
@@ -9857,10 +9945,10 @@ sub listSuccess {
 		print "\nNothing to do in post configuration\n";
 	}
 	if ($restartSystem == 1) {
-		messageDesktop('Restart required', 'Please restart the system for the changes to take effect.', 2, 'dialog-warning');
+		messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect.'), 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
 	} elsif ( configuredModulesExceptDefault(@successModules) ) {
-		messageDesktop('TUXEDO Tomte ready', 'TUXEDO Tomte finished applying all the required fixes available for this system.', 1, 'dialog-information');
+		messageDesktop(__('TUXEDO Tomte ready'), __('TUXEDO Tomte finished applying all the required fixes available for this system.'), 1, 'dialog-information');
 	}
 }
 
@@ -10002,37 +10090,27 @@ sub triesAlreadyDone() {
 
 
 ###############################################################################
-# text to print for help
-#
-my $USAGE =<<USAGE;
-tuxedo-tomte <COMMAND> [NAME...]
-tomte <COMMAND> [NAME...]
-  list                           List all installable modules with detailed status
-  status                         Same as 'list'
-  versions                       Like 'list' but with version numbers
-  modules                        List all available modules
-  description MODULE             Shows the module description
-  configure MODULE ...|all       Configure an unconfigured module
-  reconfigure MODULE...|all      Reconfigure a configured module
-  remove MODULE                  Remove a module from the system
-  block MODULE ...|all           Blocks one or all modules
-  unblock MODULE ... |all        Unblocks one or all modules
-  AUTOMATIC                      Activates automatic configuration
-  UPDATES_ONLY                   Only updates will be installed automatically
-  DONT_CONFIGURE                 Stops all automatic configuration
-  help                           Prints this message
-  
-  more details can be found in the man page
-USAGE
-
-
-
-###############################################################################
 # prints help
 #
 sub help {
 	print "tuxedo-tomte $VERSION\n";
-	print "$USAGE\n";
+	print __('HELP_tuxedo-tomte'), "\n", __('HELP_tomte'). "\n";
+	print __('HELP_list'), "\n";
+	print __('HELP_status'), "\n";
+	print __('HELP_versions'), "\n";
+	print __('HELP_modules'), "\n";
+	print __('HELP_description_MODULE'), "\n";
+	print __('HELP_configure_MODULE'), "\n";
+	print __('HELP_reconfigure_MODULE'), "\n";
+	print __('HELP_remove_MODULE'), "\n";
+	print __('HELP_block_MODULE'), "\n";
+	print __('HELP_unblock_MODULE'), "\n";
+	print __('HELP_AUTOMATIC'), "\n";
+	print __('HELP_UPDATES_ONLY'), "\n";
+	print __('HELP_DONT_CONFIGURE'), "\n";
+	print __('HELP_help'), "\n";
+	print "\n\n";
+	print __('HELP_footer'), "\n";
 	exit 0;
 }
 
