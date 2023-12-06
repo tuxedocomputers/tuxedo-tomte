@@ -3352,6 +3352,7 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
+		#TODO check if those Ubuntu versions are really the correct ones
 		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
 			($completeDistVersion =~ /elementary OS 7.1/) ||
 			($completeDistVersion =~ /KDE neon 22.04/) ||
@@ -3360,6 +3361,9 @@ sub checkRequirements {
 			($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			$origConfModules{tuxedodrivers}{required} = 'yes';
+			#TODO remove tuxedokeyboard and tuxedokeyboardite from the system
+			# only after successfull installation of tuxedodrivers
+			# add removal in tuxedodrivers module
 			printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
 			$origConfModules{tuxedokeyboardite}{required} = 'no';
 			printLog("removing obsolete $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
