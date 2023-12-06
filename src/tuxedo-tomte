@@ -1353,6 +1353,18 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'61' => {
+		model => ['all notebooks'],
+		board_name => [''],
+		fix => ['tuxedokeyboard'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+
 );
 
 
@@ -3011,6 +3023,10 @@ sub removeLineFromFile {
 ###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
+# e.g.:
+# $distribution = 'Ubuntu'
+# $distributionVersion = '22.04'
+# $completeDistVersion = 'Ubuntu 22.04'
 #
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
@@ -3300,9 +3316,6 @@ sub checkRequirements {
 		}
 	}
 
-
-
-
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
@@ -3339,12 +3352,40 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		$origConfModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
-		$origConfModules{tuxedokeyboardite}{required} = 'no';
-		printLog("removing obsolete $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
-		$origConfModules{tuxedokeyboard}{required} = 'no';
-		printLog("removing obsolete $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+			($completeDistVersion =~ /elementary OS 7.1/) ||
+			($completeDistVersion =~ /KDE neon 22.04/) ||
+			($completeDistVersion =~ /Linux Mint 21.1/) ||
+			($completeDistVersion =~ /Linux Mint 21.2/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+			$origConfModules{tuxedodrivers}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
+			$origConfModules{tuxedokeyboardite}{required} = 'no';
+			printLog("removing obsolete $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+			$origConfModules{tuxedokeyboard}{required} = 'no';
+			printLog("removing obsolete $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+		} elsif (($completeDistVersion =~ /Ubuntu 18.04/) ||
+			($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+			$origConfModules{tuxedokeyboardite}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+		}
+	}
+	#TODO check whether desktoppc also require this
+	# all notebooks require this
+	if ( ($chassisType eq 'notebook') &&
+		(($completeDistVersion =~ /Ubuntu 18.04/) ||
+		($completeDistVersion =~ /Ubuntu 20.04/) ||
+		($completeDistVersion =~ /elementary OS 6.1/) ||
+		($completeDistVersion =~ /KDE neon 20.04/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
+		$origConfModules{tuxedokeyboard}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -3536,7 +3577,6 @@ sub checkRequirements {
 		$origConfModules{disablegucfix}{required} = 'yes';
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
-
 }
 
 
