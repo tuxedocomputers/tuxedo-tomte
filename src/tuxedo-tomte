@@ -1364,7 +1364,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-
+	'62' => {
+		model => ['all notebooks'],
+		board_name => [''],
+		fix => ['tuxedodrivers'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -3340,6 +3350,20 @@ sub checkRequirements {
 		printLog("detected $origConfModules{threegfix2}{name} issue", 'L1');
 	}
 
+	#TODO check whether desktoppc also require this
+	# all notebooks require this
+	if ( ($chassisType eq 'notebook') &&
+		(($completeDistVersion =~ /Ubuntu 18.04/) ||
+		($completeDistVersion =~ /Ubuntu 20.04/) ||
+		($completeDistVersion =~ /elementary OS 6.1/) ||
+		($completeDistVersion =~ /KDE neon 20.04/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
+		$origConfModules{tuxedokeyboard}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+	}
+
+	#TODO are tuxedokeyboard and tuxedokeyboardite exclusive?
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
@@ -3352,24 +3376,7 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		#TODO check if those Ubuntu versions are really the correct ones
-		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-			($completeDistVersion =~ /elementary OS 7.1/) ||
-			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 21.1/) ||
-			($completeDistVersion =~ /Linux Mint 21.2/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
-			$origConfModules{tuxedodrivers}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
-			#TODO remove tuxedokeyboard and tuxedokeyboardite from the system
-			# only after successfull installation of tuxedodrivers
-			# add removal in tuxedodrivers module
-			$origConfModules{tuxedokeyboardite}{required} = 'no';
-			printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
-			$origConfModules{tuxedokeyboard}{required} = 'no';
-			printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1');
-		} elsif (($completeDistVersion =~ /Ubuntu 18.04/) ||
+		if (($completeDistVersion =~ /Ubuntu 18.04/) ||
 			($completeDistVersion =~ /Ubuntu 20.04/) ||
 			($completeDistVersion =~ /elementary OS 6.1/) ||
 			($completeDistVersion =~ /KDE neon 20.04/) ||
@@ -3379,17 +3386,24 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 		}
 	}
-	#TODO check whether desktoppc also require this
-	# all notebooks require this
-	if ( ($chassisType eq 'notebook') &&
-		(($completeDistVersion =~ /Ubuntu 18.04/) ||
-		($completeDistVersion =~ /Ubuntu 20.04/) ||
-		($completeDistVersion =~ /elementary OS 6.1/) ||
-		($completeDistVersion =~ /KDE neon 20.04/) ||
-		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
-		$origConfModules{tuxedokeyboard}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+
+	#TODO check if those Ubuntu versions are really the correct ones
+	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+		($completeDistVersion =~ /elementary OS 7.1/) ||
+		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Linux Mint 21.1/) ||
+		($completeDistVersion =~ /Linux Mint 21.2/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		$origConfModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
+		#TODO remove tuxedokeyboard and tuxedokeyboardite from the system
+		# only after successfull installation of tuxedodrivers
+		# add removal in tuxedodrivers module
+		$origConfModules{tuxedokeyboardite}{required} = 'no';
+		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
+		$origConfModules{tuxedokeyboard}{required} = 'no';
+		printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -3726,7 +3740,7 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage('amd-gpu-with-nvidia-fix')) {
 			printLog("removing $module", 'TL0');
 			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
 			if (backupFile($fileName)) {
@@ -4325,7 +4339,7 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage('fingerprint-reader')) {
 			my $counter = 0;
 			if( isPackageInstalled('fprintd') ) {
 				if (!deinstallSinglePackage('fprintd')) {
@@ -5075,7 +5089,7 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage('amdgpu-dkms')) {
 			my $counter = 0;
 			if( isPackageInstalled('amdgpu-dkms') ) {
 				if (!deinstallSinglePackage('amdgpu-dkms')) {
@@ -5616,7 +5630,7 @@ sub disablegucfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage('disable-guc-fix')) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
@@ -6225,7 +6239,7 @@ sub grubModuleEdit {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage($origConfModules{$module}{name})) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
