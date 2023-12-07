@@ -3361,10 +3361,10 @@ sub checkRequirements {
 			($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			$origConfModules{tuxedodrivers}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
 			#TODO remove tuxedokeyboard and tuxedokeyboardite from the system
 			# only after successfull installation of tuxedodrivers
 			# add removal in tuxedodrivers module
-			printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
 			$origConfModules{tuxedokeyboardite}{required} = 'no';
 			printLog("removing obsolete $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 			$origConfModules{tuxedokeyboard}{required} = 'no';
@@ -4440,7 +4440,10 @@ sub tuxedorestoreaudiofix() {
 sub tuxedodrivers() {
 	my $module = shift;
 	my $action = shift;
-	debianPackageModule( $module, $action );
+	if (debianPackageModule( $module, $action ) && ($action eq 'install')) {
+		debianPackageModule( 'tuxedokeyboard', 'remove' );
+		debianPackageModule( 'tuxedokeyboardite', 'remove');
+	}
 }
 
 
@@ -6235,9 +6238,12 @@ sub grubModuleEdit {
 ###############################################################################
 # add's, upgrades or deletes debian packages
 # debianPackageModule( module, install|upgrade|remove );
+# returns 1 if successfull
+# returns 0 if not succesfull
 #
 sub debianPackageModule {
 	my ($module, $action) = @_;
+	my $success = 0;
 
 	if ($action eq 'install') {
 		# check before if the package is already installed
@@ -6255,9 +6261,11 @@ sub debianPackageModule {
 				if ($origConfModules{$module}{restart} eq 'yes') {
 					setRestartValues($module);
 				}
+				$success = 1;
 			} else {
 				$origConfModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
+				$success = 0;
 			}
 
 			# remove verbose line if it was set above
@@ -6268,16 +6276,19 @@ sub debianPackageModule {
 			addToConfiguredModules($module, 'nothingToDo');
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'yes';
+			$success = 1;
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
+		$success = 0;
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage('')) {
-			removeDebianModule($module, 1);
+			$success = removeDebianModule($module, 1);
 		}
 	}
+	return $success;
 }
 
 
@@ -7648,9 +7659,12 @@ sub uninstallRemnantKernels {
 # if restart = 0 => don't restart
 # if restart = 1 => restart
 # checks if the package is installed
+# returns 1 if successfull
+# returns 0 if not successfull
 #
 sub removeDebianModule {
 	my ($module, $restart, $parameter) = (@_);
+	my $success = 0;
 	if (isPackageInstalled($origConfModules{$module}{name})) {
 		if (removePackage($origConfModules{$module}{name}, "$parameter")) {
 			addToConfiguredModules($module, "removed");
@@ -7660,11 +7674,13 @@ sub removeDebianModule {
 			if ($restart) {
 				setRestartValues($module);
 			}
+			$success = 1;
 		} else {
 			addToConfiguredModules($module, "remove failed");
 			$origConfModules{$module}{installed} = "remove failed";
 			$origConfModules{$module}{version} = $localConfModules{$module}{version};
 			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+			$success = 0;
 		}
 	} else {
 		printLog("$origConfModules{$module}{name} is not installed, which is the desired result", 'TL0');
@@ -7672,7 +7688,9 @@ sub removeDebianModule {
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
 		$origConfModules{$module}{required} = "no";
+		$success = 1;
 	}
+	return $success;
 }
 
 
