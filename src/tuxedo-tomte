@@ -6285,7 +6285,7 @@ sub debianPackageModule {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage('')) {
-			$success = removeDebianModule($module, 1);
+			$success = removeDebianModule($module, 1, '');
 		}
 	}
 	return $success;
