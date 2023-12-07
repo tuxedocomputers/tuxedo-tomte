@@ -3366,9 +3366,9 @@ sub checkRequirements {
 			# only after successfull installation of tuxedodrivers
 			# add removal in tuxedodrivers module
 			$origConfModules{tuxedokeyboardite}{required} = 'no';
-			printLog("removing obsolete $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+			printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
 			$origConfModules{tuxedokeyboard}{required} = 'no';
-			printLog("removing obsolete $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+			printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1');
 		} elsif (($completeDistVersion =~ /Ubuntu 18.04/) ||
 			($completeDistVersion =~ /Ubuntu 20.04/) ||
 			($completeDistVersion =~ /elementary OS 6.1/) ||
