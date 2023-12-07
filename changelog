@@ -1,4 +1,4 @@
-tuxedo-tomte (2.18.1-5) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-6) UNRELEASED; urgency=medium
 
   * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
   * after packaging
@@ -10,8 +10,13 @@ tuxedo-tomte (2.18.1-5) UNRELEASED; urgency=medium
   * UNRELEASED
   * after packaging
   * added remove tuxedokeyboard
+  * after packaging
+  * added tuxedokeyboard tuxedokeyboardite tuxedodrivers to respective flavours
+  * some TODO information
+  * added remove old transitional packages
+  * changed wording for some remove messages
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Dec 2023 21:26:53 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 07 Dec 2023 12:06:16 +0100
 
 tuxedo-tomte (2.18.1) jammy; urgency=medium
 
