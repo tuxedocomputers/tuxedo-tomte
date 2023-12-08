@@ -1,62 +1,35 @@
-tuxedo-tomte (2.17.0-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-13) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
-  * atomic merge with 177
-  * changed sub name
-  * after merge with 177
-  * after merge with nextRelease-ma
-  * modified changelog
-  * packing
-  * after packaging
-  * merged with manpage-fix-ggo
+  * removed mesautils
 
   [ G. Gottleuber ]
-  * better sub name, better comment
-  * added kernel clean up function to all kernel management modules
-  * abbr. name
-  * kernel clean up: log success or failure with L0
+  * kernel clean up: removed /boot partition condition
 
-  [ Maximilian Arnold ]
-  * Added "tomte self update" when calling "configure all" (on startup) Added LOGLEVEL as environment variable
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Dec 2023 20:43:14 +0100
 
-  [ Vinzenz Vietzke ]
-  * Adding support for Elementary OS 7.1 Changed lookup for isOSSupported to be automatic based on config. Added default EMAIL tux@tuxedocomputers.com as environment variable in pack-release.pl
+tuxedo-tomte (2.18.1) jammy; urgency=medium
 
-  [ emohrtuxedo ]
-  * after packaging
-  * after packaging
-  * after packaging
-  * added apt-marked for kernel packages
-  * after packaging
+  [ G. Gottleuber ]
+  * Kernel clean up: removed 250MB condition
 
-  [ E. Mohr ]
-  * after packaging
-  * installs kernel meta packages always
-  * after packaging
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Dec 2023 15:58:02 +0100
 
-  [ emohrtuxedo ]
-  * moved meta install to constant install
-  * debugs
-  * after packaging
-  * after packaging
-  * corrected variable names
-  * after packaging
-  * adding and configuering apt-mark
-  * after packaging
+tuxedo-tomte (2.18.0) jammy; urgency=medium
 
-  [ E. Mohr ]
-  * some debug
-  * after packaging
-  * added multiline regex
-  * after packaging
-  * more debug
+  [ M. Arnold ]
+  * Added Language Capabilities and Added Functionality for German PopUps
+  * Added translations for all module descriptions EN/DE
+  * Added two-digit LANGUAGE environment variable as valid.
+  * Added dependency for libintl-perl to debian/control
+  * Changed descriptions for kernels
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 30 Nov 2023 15:42:39 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Dec 2023 15:32:41 +0100
 
 tuxedo-tomte (2.17.0) jammy; urgency=medium
 
   [ G. Gottleuber ]
-  * added removal of old unused kernels for for linux-tuxedo-20.04,
+  * added removal of old unused kernels for linux-tuxedo-20.04,
     linux-tuxedo-20.04-next, linux-tuxedo-20.04-edge, linux-generic-hwe-20.04,
     linux-tuxedo-22.04-edge, linux-tuxedo-22.04-next
   * bugfix: missing link for german tomte manual page
