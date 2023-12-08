@@ -1,13 +1,18 @@
-tuxedo-tomte (2.18.1-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-13) UNRELEASED; urgency=medium
 
+  [ E. Mohr ]
   * after packaging
   * removed mesautils
   * after packaging
   * removed mesautils from translations
   * after packaging
   * activate debug
+  * after packaging
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Dec 2023 13:30:07 +0100
+  [ G. Gottleuber ]
+  * kernel clean up: removed /boot partition condition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Dec 2023 20:43:14 +0100
 
 tuxedo-tomte (2.18.1) jammy; urgency=medium
 
