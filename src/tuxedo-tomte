@@ -7168,23 +7168,6 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $purgeCommand;
 	my $bootDir = '/boot';
 
-	my $bootPartition = `df $bootDir --output=avail,target`;
-	if ($bootPartition =~ / \/boot$/gm) {
-		printLog("separate $bootDir partition found", 'L2');
-	} else {
-		printLog("NO separate $bootDir partition found => quitting deleteKernel", 'L2');
-		return (0);
-	}
-
-	my $fsAvail;
-	if ($bootPartition =~ m/(\d+)/) {
-		$fsAvail = $1;
-		printLog("available space on $bootDir: $fsAvail", 'L2');
-	} else {
-		printLog("available bytes not found (expected a number) => exiting", 'L2');
-		return (0);
-	}
-
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
 			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
@@ -7245,16 +7228,8 @@ sub checkAndDeleteOldestTuxedoKernel {
 				lockPM();
 				printLog("result: $result\nerror: $error", 'L2');
 
-				# check for success: is there more free space on /boot now?
-				my $newBootPartition = `df $bootDir --output=avail,target`;
-				if ($newBootPartition =~ / \/boot$/gm) {
-					if ($newBootPartition =~ m/(\d+)/) {
-						my $newFsAvail = $1;
-						my $fsDiff = $newFsAvail - $fsAvail;
-						my $freedMB = int($fsDiff / 1024);
-						printLog("successfully removed old kernel $version; freed $freedMB MB of disk space", 'L0');
-					}
-				}
+				# log success
+				printLog("successfully removed old kernel $version", 'L0');
 
 			} else {
 				printLog("could not remove the kernel $version as package management is busy", 'L0');
