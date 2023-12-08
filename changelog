@@ -1,28 +1,21 @@
-tuxedo-tomte (2.18.1-9) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-13) UNRELEASED; urgency=medium
 
+  [ E. Mohr ]
   * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
-  * after packaging
   * changed description for tuxedodrivers
-  * after packaging
-  * added debug
-  * after packaging
-  * debug
-  * UNRELEASED
-  * after packaging
   * added remove tuxedokeyboard
   * after packaging
-  * added tuxedokeyboard tuxedokeyboardite tuxedodrivers to respective flavours
-  * some TODO information
-  * added remove old transitional packages
-  * changed wording for some remove messages
+  * removed mesautils
   * after packaging
-  * removed requirement for tuxedo-keyboard
+  * removed mesautils from translations
   * after packaging
-  * added missing parameter
+  * activate debug
   * after packaging
-  * changed keyboard and drivers add and remove conditions
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 07 Dec 2023 20:13:16 +0100
+  [ G. Gottleuber ]
+  * kernel clean up: removed /boot partition condition
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 08 Dec 2023 20:43:14 +0100
 
 tuxedo-tomte (2.18.1) jammy; urgency=medium
 

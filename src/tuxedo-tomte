@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.18.1-9';
+our $VERSION = '2.18.1-13';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1290,7 +1290,7 @@ my %tuxedo_devices = (
 	'55' => {
 		model => ['desktoppc'],
 		board_name => [''],
-		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'mesautils', 'tuxedocontrolcenter', 'tuxedodrivers', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1803,27 +1803,6 @@ my %origConfModules = (
 		packageVersion => 'unkwn',
 		fainame => '',
 		description => __('fingerprintreader_description'),
-		postconf => '',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => '',
-		restart => '',
-		order => '',
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'yes',
-	},
-	mesautils => {
-		name => 'mesa-utils',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'yes',
-		hwid => 1,
-		package => 'yes',
-		packageVersion => 'unkwn',
-		fainame => '',
-		description => __('mesautils_description'),
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
@@ -4383,17 +4362,6 @@ sub tuxedomicfix1() {
 
 
 ###############################################################################
-# Mesa-utils
-#
-sub mesautils() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-}
-
-
-
-###############################################################################
 # Rescans the pci bus to reactivate missing audio device
 # - N350TW
 #
@@ -4808,7 +4776,6 @@ sub nvidiadriver() {
 	my $action = shift;
 	my $wasInstalled = 1;
 	my $packageNvidiaDriver = 0;
-	my $packageMesaUtils = 0;
 	my $packageNvidiaPrime = 0;
 	my $packagePythonAppindicator = 0;
 	my $packagePythonCairo = 0;
@@ -4836,12 +4803,6 @@ sub nvidiadriver() {
 				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
-			if( ! isPackageInstalled('mesa-utils') ) {
-				$wasInstalled = 0;
-				$packageMesaUtils = installPackage('mesa-utils');
-			} else {
-				$packageMesaUtils = 1;
-			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
@@ -4868,8 +4829,8 @@ sub nvidiadriver() {
 			}
 
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -4906,12 +4867,6 @@ sub nvidiadriver() {
 				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
-			if( ! isPackageInstalled('mesa-utils') ) {
-				$wasInstalled = 0;
-				$packageMesaUtils = installPackage('mesa-utils');
-			} else {
-				$packageMesaUtils = 1;
-			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
@@ -4928,8 +4883,8 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -4982,12 +4937,6 @@ sub nvidiadriver() {
 				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver535  can't be found in the repositories", 'L0');
 			}
 
-			if( ! isPackageInstalled('mesa-utils') ) {
-				$wasInstalled = 0;
-				$packageMesaUtils = installPackage('mesa-utils');
-			} else {
-				$packageMesaUtils = 1;
-			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
 				$packageNvidiaPrime = installPackage('nvidia-prime');
@@ -5004,8 +4953,8 @@ sub nvidiadriver() {
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageMesaUtils: $packageMesaUtils packageNvidiaPrime: $packageNvidiaPrime", 'L2');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageMesaUtils && $packageNvidiaPrime ) {
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1');
 					addToConfiguredModules($module, "nothingToDo");
@@ -7273,23 +7222,6 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $purgeCommand;
 	my $bootDir = '/boot';
 
-	my $bootPartition = `df $bootDir --output=avail,target`;
-	if ($bootPartition =~ / \/boot$/gm) {
-		printLog("separate $bootDir partition found", 'L2');
-	} else {
-		printLog("NO separate $bootDir partition found => quitting deleteKernel", 'L2');
-		return (0);
-	}
-
-	my $fsAvail;
-	if ($bootPartition =~ m/(\d+)/) {
-		$fsAvail = $1;
-		printLog("available space on $bootDir: $fsAvail", 'L2');
-	} else {
-		printLog("available bytes not found (expected a number) => exiting", 'L2');
-		return (0);
-	}
-
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
 			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
@@ -7350,16 +7282,8 @@ sub checkAndDeleteOldestTuxedoKernel {
 				lockPM();
 				printLog("result: $result\nerror: $error", 'L2');
 
-				# check for success: is there more free space on /boot now?
-				my $newBootPartition = `df $bootDir --output=avail,target`;
-				if ($newBootPartition =~ / \/boot$/gm) {
-					if ($newBootPartition =~ m/(\d+)/) {
-						my $newFsAvail = $1;
-						my $fsDiff = $newFsAvail - $fsAvail;
-						my $freedMB = int($fsDiff / 1024);
-						printLog("successfully removed old kernel $version; freed $freedMB MB of disk space", 'L0');
-					}
-				}
+				# log success
+				printLog("successfully removed old kernel $version", 'L0');
 
 			} else {
 				printLog("could not remove the kernel $version as package management is busy", 'L0');
