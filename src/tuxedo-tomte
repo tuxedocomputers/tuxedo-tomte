@@ -4453,8 +4453,12 @@ sub tuxedodrivers() {
 	my $module = shift;
 	my $action = shift;
 	if (debianPackageModule( $module, $action ) && ($action eq 'install')) {
-		debianPackageModule( 'tuxedokeyboard', 'remove' );
-		debianPackageModule( 'tuxedokeyboardite', 'remove');
+		if (isPackageInstalled('tuxedo-keyboard')) {
+			debianPackageModule( 'tuxedokeyboard', 'remove' );
+		}
+		if (isPackageInstalled('tuxedo-keyboard-ite')) {
+			debianPackageModule( 'tuxedokeyboardite', 'remove');
+		}
 	}
 }
 
