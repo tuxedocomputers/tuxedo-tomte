@@ -335,7 +335,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -384,7 +384,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -396,7 +396,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -408,7 +408,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -435,7 +435,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -462,7 +462,7 @@ my %tuxedo_repos = (
 		# TODO temp testing
 		staging => {
 			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
