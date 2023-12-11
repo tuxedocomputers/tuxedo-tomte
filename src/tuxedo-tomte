@@ -3360,6 +3360,7 @@ sub checkRequirements {
 	}
 
 	#TODO check whether desktoppc also require this
+	printLog("completeDistVersion: $completeDistVersion", 'TL2');
 	# all notebooks require this
 	if ( ($chassisType eq 'notebook') &&
 		(($completeDistVersion =~ /Ubuntu 18.04/) ||
