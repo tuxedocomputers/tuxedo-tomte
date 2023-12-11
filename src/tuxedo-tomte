@@ -3749,7 +3749,7 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('amd-gpu-with-nvidia-fix')) {
+		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
 			printLog("removing $module", 'TL0');
 			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
 			if (backupFile($fileName)) {
@@ -4348,7 +4348,7 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('fingerprint-reader')) {
+		if (removeWarningMessage("fingerprint-reader\n")) {
 			my $counter = 0;
 			if( isPackageInstalled('fprintd') ) {
 				if (!deinstallSinglePackage('fprintd')) {
@@ -5068,7 +5068,7 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('amdgpu-dkms')) {
+		if (removeWarningMessage("amdgpu-dkms\n")) {
 			my $counter = 0;
 			if( isPackageInstalled('amdgpu-dkms') ) {
 				if (!deinstallSinglePackage('amdgpu-dkms')) {
@@ -5609,7 +5609,7 @@ sub disablegucfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('disable-guc-fix')) {
+		if (removeWarningMessage("disable-guc-fix\n")) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
@@ -6218,7 +6218,7 @@ sub grubModuleEdit {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage($origConfModules{$module}{name})) {
+		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
@@ -6277,7 +6277,7 @@ sub debianPackageModule {
 		$success = 0;
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
 			$success = removeDebianModule($module, 1, '');
 		}
 	}
