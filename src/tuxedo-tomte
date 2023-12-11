@@ -332,6 +332,11 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+		},
 		name => 'jammy',
 	},
 	"elementary OS 6.1" => {
@@ -376,6 +381,11 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+		},
 		name => 'jammy',
 	},
 	"Linux Mint 21.1" => {
@@ -383,12 +393,22 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+		},
 		name => 'jammy',
 	},
 	"Linux Mint 21.2" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -412,6 +432,11 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
+		},
 		name => 'jammy',
 	},
 	"TUXEDO OS 20.04" => {
@@ -433,6 +458,11 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+		},
+		# TODO temp testing
+		staging => {
+			filename => '/etc/apt/sources.list.d/staging.list',
+			content => ['deb https://staging.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
