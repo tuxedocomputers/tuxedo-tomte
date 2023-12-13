@@ -6879,6 +6879,9 @@ sub installKernelFlavour {
 					$installCmd .= ' '.$package;
 				} else {
 					unless ($package =~ /$flavour/) {
+						$package =~ /^(.*?)\s/;
+						#TODO debug
+						printLog("package: $package", 'L2');
 						setAptMark($package, 'auto');
 					}
 				}
@@ -6953,6 +6956,9 @@ sub installKernelFlavour {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
 						unless ($line =~ /$flavour/) {
+							$line =~ /^(.*?)\s/;
+							#TODO debug
+							printLog("line: $line", 'L2');
 							setAptMark($line, 'auto');
 						}
 						printLog("$line is installed", 'L2');
