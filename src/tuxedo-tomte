@@ -6884,6 +6884,7 @@ sub installKernelFlavour {
 			`apt-get update -q`;
 			printLog("installation command: $installCmd", 'L2');
 			$retString = `$installCmd`;
+			printLog("retString: $retString", 'TL2');
 			if ($retString =~ /dpkg --configure -a/) {
 				lockPM();
 				printLog("some packages are not configured", 'L2');
