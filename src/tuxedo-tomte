@@ -6758,43 +6758,47 @@ sub removePackage {
 ###############################################################################
 # sets mark to auto or manual
 # usage setAptMark('package_name','auto|manual')
-# returns 1 if set 0 if not
+# returns 1 if set
+# returns 0 if not
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
-	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	#TODO debug
 	printLog("mark: $mark", 'L2');
 	printLog("retVal: $retVal", 'L2');
-	if ( $retVal =~ /$package/mg ) {
-		printLog("package is in retVal as $mark", 'L2');
-		if ($mark eq 'manual') {
-			printLog("package $package is set to auto, changing to manual now", 'L1');
-			$retVal = `$consoleLanguage apt-mark manual $package`;
-			if ($retVal =~ /was already/mg) {
-				return (0);
-			} else {
-				return (1);
-			}
-		} else {
-			printLog("package $package is already set to auto", 'L1');
-			return (0);
-		}
-	} elsif ($mark eq 'auto') {
-		printLog("package is in retVal as $mark", 'L2');
-		printLog("package $package is set to manual, changing to auto now", 'L1');
+	if ( getAptMark($package) && ($mark eq 'manual') ) {
+		printLog("package $package is set to auto, changing to manual now", 'L1');
+		$retVal = `$consoleLanguage apt-mark manual $package`;
+	} elsif ( (!getAptMark($package)) && ($mark eq 'auto') ) {
+		printLog("package $package is set to \"manual\", changing to auto now", 'L1');
 		$retVal = `$consoleLanguage apt-mark auto $package`;
-		if ($retVal =~ /was already/mg) {
-			return (0);
-		} else {
-			return (1);
-		}
-	} else {
-		printLog("package $package is already set to manual", 'L1');
-		return (0);
+	}
+	if (getAptMark($package) && ($mark eq 'auto')) {
+		return (1);
+	}
+	if ((!getAptMark($package)) && $mark eq 'manual') {
+		return (1);
 	}
 	return (0);
+}
+
+
+
+
+###############################################################################
+# gets apt-mark auto or manual
+# returns 1 if auto
+# returns 0 if manual
+#
+sub getAptMark {
+	my ($package) = @_;
+	my $retVal;
+	$retVal = `$consoleLanguage apt-mark showauto $package`;
+	if ( $retVal =~ /$package/mg ) {
+		return (1);
+	} else {
+		return (0);
+	}
 }
 
 
