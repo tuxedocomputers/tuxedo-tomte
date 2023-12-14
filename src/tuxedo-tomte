@@ -6841,6 +6841,7 @@ sub installKernelFlavour {
 	my $package;
 	my $allPackagesInstalled = 1;
 	my @lines;
+	my $line;
 	my $packageMissing = 0;
 	my $exitStatus = 1;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
@@ -6863,23 +6864,24 @@ sub installKernelFlavour {
 	$retString = `$testCmd2`;
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
-	foreach $package (@lines) {
+	foreach $line (@lines) {
+		$package = $line =~ s/\s.*//;
+		#TODO debug
+		printLog("package from line: $package", 'TL2');
 		unless ($package =~ /linux-image-unsigned-.*/) {
-			if ($package =~ /dpkg-query: /) {
-				$package =~ s/.*\s//;
-				printLog("package missing: $package", 'L2');
+			if ($line =~ /dpkg-query: /) {
+				$line =~ s/.*\s//;
+				printLog("package missing: $line", 'L2');
 				$packageMissing = 1;
 				$installCmd .= ' '.$package;
 			}
-			if ($package =~ /.*\s[uihrp][ncHUFWti]/) {
-				unless ($package =~ /.*\s[ih][i]/) {
-					$package =~ s/\s.*//;
+			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
+				unless ($line =~ /.*\s[ih][i]/) {
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
 				} else {
 					unless ($package =~ /$flavour/) {
-						$package =~ /^(.*?)\s/;
 						#TODO debug
 						printLog("package: $package", 'L2');
 						setAptMark($package, 'auto');
@@ -6944,27 +6946,29 @@ sub installKernelFlavour {
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
-		my $line;
+		$line = '';
 		foreach $line (@lines) {
-			unless ($line =~ /linux-image-unsigned-.*/) {
+			$package = $line =~ s/\s.*//;
+		#TODO debug
+		printLog("package from line: $package", 'TL2');
+			unless ($package =~ /linux-image-unsigned-.*/) {
 				if ($line =~ /dpkg-query: /) {
 					$line =~ s/.*\s//;
-					printLog("package missing: $line", 'L2');
+					printLog("package missing: $package", 'L2');
 					$allPackagesInstalled = 0;
 				}
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
 						unless ($line =~ /$flavour/) {
-							$line =~ /^(.*?)\s/;
 							#TODO debug
-							printLog("line: $line", 'L2');
-							setAptMark($line, 'auto');
+							printLog("package: $package", 'L2');
+							setAptMark($package, 'auto');
 						}
-						printLog("$line is installed", 'L2');
+						printLog("$package is installed", 'L2');
 						${$somethingDone} += 1;
 					} else {
-						printLog("failed: $line", 'L2');
+						printLog("failed: $package", 'L2');
 						$allPackagesInstalled = 0;
 					}
 				}
