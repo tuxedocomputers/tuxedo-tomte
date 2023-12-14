@@ -4559,8 +4559,6 @@ sub kerneltuxedo2204() {
 				addToConfiguredModules($module, "success");
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
-				#TODO debug
-				printLog("before setRestartValues, instDone: $instDone", 'L2');
 				setRestartValues($module);
 			} else {
 				addToConfiguredModules($module, "nothingToDo");
@@ -6765,20 +6763,16 @@ sub removePackage {
 sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
-	printLog("desired mark: $mark", 'L2');
-	#TODO debug
 	getAptMark($package);
 	if ( getAptMark($package) && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1');
 		$retVal = `$consoleLanguage apt-mark manual $package`;
 		printLog("result: $retVal", 'L2');
-		#TODO debug
 		getAptMark($package);
 	} elsif ( (!getAptMark($package)) && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1');
 		$retVal = `$consoleLanguage apt-mark auto $package`;
 		printLog("result: $retVal", 'L2');
-		#TODO debug
 		getAptMark($package);
 	}
 	if (getAptMark($package) && ($mark eq 'auto')) {
@@ -6832,8 +6826,6 @@ sub installKernelFlavour {
 	if (!(defined ${$somethingDone})) {
 		${$somethingDone} = 0;
 	}
-		#TODO debug
-		printLog("somethingDone before meta: ${$somethingDone}", 'L2');
 	my $partialName;
 	my $installCmd = 'apt-get install -yq';
 	my $testCmd = "dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\'";
@@ -6867,8 +6859,6 @@ sub installKernelFlavour {
 	@lines = split /\n/, $retString;
 	foreach $line (@lines) {
 		($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
-		#TODO debug
-		printLog("package from line: $package", 'TL2');
 		unless ($package =~ /linux-image-unsigned-.*/) {
 			if ($line =~ /dpkg-query: /) {
 				$line =~ s/.*\s//;
@@ -6883,18 +6873,12 @@ sub installKernelFlavour {
 					$installCmd .= ' '.$package;
 				} else {
 					unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
-						#TODO debug
-						printLog("package: $package", 'L2');
 						setAptMark($package, 'auto');
 					}
 				}
 			}
 		}
 	}
-
-
-		#TODO debug
-		printLog("somethingDone before packageMissing: ${$somethingDone}", 'L2');
 
 	if ($packageMissing) {
 		# install the meta packages as well in case there is a new version
@@ -6949,9 +6933,7 @@ sub installKernelFlavour {
 		@lines = split /\n/, $retString;
 		$line = '';
 		foreach $line (@lines) {
-		($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
-		#TODO debug
-		printLog("package from line: $package", 'TL2');
+			($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
 			unless ($package =~ /linux-image-unsigned-.*/) {
 				if ($line =~ /dpkg-query: /) {
 					$line =~ s/.*\s//;
@@ -6962,8 +6944,6 @@ sub installKernelFlavour {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
 						unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
-							#TODO debug
-							printLog("package: $package", 'L2');
 							setAptMark($package, 'auto');
 						}
 						printLog("$package is installed", 'L2');
@@ -6979,8 +6959,6 @@ sub installKernelFlavour {
 			printLog("kernel $flavour was installed correctly", 'L0');
 		}
 	} else {
-		#TODO debug
-		printLog("somethingDone before meta: ${$somethingDone}", 'L2');
 		$installCmd = 'apt-get install -yq';
 		$installCmd .= " $flavour";
 		$installCmd .= ' 2>&1';
@@ -6997,8 +6975,6 @@ sub installKernelFlavour {
 			}
 		}
 	}
-		#TODO debug
-		printLog("somethingDone after meta: ${$somethingDone}", 'L2');
 
 	if (!$allPackagesInstalled) {
 		${$failed} += 1;
