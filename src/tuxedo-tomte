@@ -6865,7 +6865,7 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $line (@lines) {
-		$package = $line =~ s/\s.*//;
+		($package) = $line =~ s/^(\w+)//;
 		#TODO debug
 		printLog("package from line: $package", 'TL2');
 		unless ($package =~ /linux-image-unsigned-.*/) {
@@ -6948,7 +6948,7 @@ sub installKernelFlavour {
 		@lines = split /\n/, $retString;
 		$line = '';
 		foreach $line (@lines) {
-			$package = $line =~ s/\s.*//;
+		($package) = $line =~ s/^(\w+)//;
 		#TODO debug
 		printLog("package from line: $package", 'TL2');
 			unless ($package =~ /linux-image-unsigned-.*/) {
