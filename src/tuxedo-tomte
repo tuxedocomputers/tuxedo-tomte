@@ -6881,7 +6881,7 @@ sub installKernelFlavour {
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
 				} else {
-					unless ($package =~ /$flavour/) {
+					unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
 						#TODO debug
 						printLog("package: $package", 'L2');
 						setAptMark($package, 'auto');
@@ -6960,7 +6960,7 @@ sub installKernelFlavour {
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
-						unless ($line =~ /$flavour/) {
+						unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
 							#TODO debug
 							printLog("package: $package", 'L2');
 							setAptMark($package, 'auto');
