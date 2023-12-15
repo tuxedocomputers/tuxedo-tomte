@@ -332,11 +332,6 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
-		},
 		name => 'jammy',
 	},
 	"elementary OS 6.1" => {
@@ -381,11 +376,6 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
-		},
 		name => 'jammy',
 	},
 	"Linux Mint 21.1" => {
@@ -393,22 +383,12 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
-		},
 		name => 'jammy',
 	},
 	"Linux Mint 21.2" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -432,11 +412,6 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
-		},
 		name => 'jammy',
 	},
 	"TUXEDO OS 20.04" => {
@@ -458,11 +433,6 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-		},
-		# TODO temp testing
-		staging => {
-			filename => '/etc/apt/sources.list.d/staging.list',
-			content => ['deb https://stagingdeb.tuxedocomputers.com/ubuntu jammy-wse main'],
 		},
 		name => 'jammy',
 	},
@@ -3374,7 +3344,6 @@ sub checkRequirements {
 		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
 	}
 
-	#TODO are tuxedokeyboard and tuxedokeyboardite exclusive?
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
