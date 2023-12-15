@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.18.1-23';
+our $VERSION = '2.18.1-40';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -592,6 +592,7 @@ my %tuxedo_mirrors = (
 
 
 # add here the respective kernel meta-packages when a new release comes out
+# "falvour" HAS to be the main mata-package name
 #
 my %flavours = (
 	"18.04" => {
@@ -6896,21 +6897,57 @@ sub removePackage {
 ###############################################################################
 # sets mark to auto or manual
 # usage setAptMark('package_name','auto|manual')
-# returns 1 if set 0 if not
+# returns 1 if set
+# returns 0 if not
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
-	if ( `$consoleLanguage apt-mark showauto $package` =~ /$package/ ) {
-		printLog("package is set to auto, changing to manual now", 'L1');
+	getAptMark($package);
+	if ( getAptMark($package) && ($mark eq 'manual') ) {
+		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1');
 		$retVal = `$consoleLanguage apt-mark manual $package`;
-		if ($retVal =~ /was already/) {
-			return (0);
-		} else {
-			return (1);
-		}
+		printLog("result: $retVal", 'L2');
+		getAptMark($package);
+	} elsif ( (!getAptMark($package)) && ($mark eq 'auto') ) {
+		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1');
+		$retVal = `$consoleLanguage apt-mark auto $package`;
+		printLog("result: $retVal", 'L2');
+		getAptMark($package);
 	}
+	if (getAptMark($package) && ($mark eq 'auto')) {
+		printLog("desired resultmark: auto set", 'L2');
+		return (1);
+	}
+	if ((!getAptMark($package)) && $mark eq 'manual') {
+		printLog("desired resultmark: manual set", 'L2');
+		return (1);
+	}
+	printLog("desired resultmark: not set !!!", 'L2');
+	getAptMark($package);
 	return (0);
+}
+
+
+
+
+###############################################################################
+# gets apt-mark auto or manual
+# returns 1 if auto
+# returns 0 if manual or package does not exist
+#
+sub getAptMark {
+	my ($package) = @_;
+	my $retVal;
+	$retVal = `$consoleLanguage apt-mark showauto $package`;
+	printLog("package: $package", 'TL2');
+	if ( $retVal =~ /$package/mg ) {
+		printLog("mark is auto", 'L2');
+		return (1);
+	} else {
+		printLog("mark is manual", 'L2');
+		return (0);
+	}
 }
 
 
@@ -6938,6 +6975,7 @@ sub installKernelFlavour {
 	my $package;
 	my $allPackagesInstalled = 1;
 	my @lines;
+	my $line;
 	my $packageMissing = 0;
 	my $exitStatus = 1;
 	if (!(exists $flavours{$distributionVersion}{$flavour})) {
@@ -6960,26 +6998,32 @@ sub installKernelFlavour {
 	$retString = `$testCmd2`;
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
-	foreach $package (@lines) {
+	foreach $line (@lines) {
+		($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
 		unless ($package =~ /linux-image-unsigned-.*/) {
-			if ($package =~ /dpkg-query: /) {
-				$package =~ s/.*\s//;
-				printLog("package missing: $package", 'L2');
+			if ($line =~ /dpkg-query: /) {
+				$line =~ s/.*\s//;
+				printLog("package missing: $line", 'L2');
 				$packageMissing = 1;
 				$installCmd .= ' '.$package;
 			}
-			if ($package =~ /.*\s[uihrp][ncHUFWti]/) {
-				unless ($package =~ /.*\s[ih][i]/) {
-					$package =~ s/\s.*//;
+			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
+				unless ($line =~ /.*\s[ih][i]/) {
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
+				} else {
+					unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
+						setAptMark($package, 'auto');
+					}
 				}
 			}
 		}
 	}
 
 	if ($packageMissing) {
+		# install the meta packages as well in case there is a new version
+		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
 		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
@@ -6988,6 +7032,7 @@ sub installKernelFlavour {
 			`apt-get update -q`;
 			printLog("installation command: $installCmd", 'L2');
 			$retString = `$installCmd`;
+			printLog("retString: $retString", 'TL2');
 			if ($retString =~ /dpkg --configure -a/) {
 				lockPM();
 				printLog("some packages are not configured", 'L2');
@@ -7027,21 +7072,25 @@ sub installKernelFlavour {
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2');
 		@lines = split /\n/, $retString;
-		my $line;
+		$line = '';
 		foreach $line (@lines) {
-			unless ($line =~ /linux-image-unsigned-.*/) {
+			($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
+			unless ($package =~ /linux-image-unsigned-.*/) {
 				if ($line =~ /dpkg-query: /) {
 					$line =~ s/.*\s//;
-					printLog("package missing: $line", 'L2');
+					printLog("package missing: $package", 'L2');
 					$allPackagesInstalled = 0;
 				}
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
-						printLog("$line is installed", 'L2');
+						unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
+							setAptMark($package, 'auto');
+						}
+						printLog("$package is installed", 'L2');
 						${$somethingDone} += 1;
 					} else {
-						printLog("failed: $line", 'L2');
+						printLog("failed: $package", 'L2');
 						$allPackagesInstalled = 0;
 					}
 				}
@@ -7049,6 +7098,22 @@ sub installKernelFlavour {
 		}
 		if ($allPackagesInstalled) {
 			printLog("kernel $flavour was installed correctly", 'L0');
+		}
+	} else {
+		$installCmd = 'apt-get install -yq';
+		$installCmd .= " $flavour";
+		$installCmd .= ' 2>&1';
+		printLog("install kernel metapackage", 'L2');
+		printLog("install command: $installCmd", 'L2');
+		if (unlockPM("$installCmd") && (isPMlocked() == 0)) {
+			$retString = `$installCmd`;
+			$exitStatus = $?/256;
+			lockPM();
+			printLog("return from install:\n$retString", 'L2');
+			if ($exitStatus != 0) {
+				printLog("installation of kernel meta package failed !!!", 'L0');
+				${$failed} += 1;
+			}
 		}
 	}
 
@@ -7257,6 +7322,23 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $purgeCommand;
 	my $bootDir = '/boot';
 
+	my $bootPartition = `df $bootDir --output=avail,target`;
+	if ($bootPartition =~ / \/boot$/gm) {
+		printLog("separate $bootDir partition found", 'L2');
+	} else {
+		printLog("NO separate $bootDir partition found => quitting deleteKernel", 'L2');
+		return (0);
+	}
+
+	my $fsAvail;
+	if ($bootPartition =~ m/(\d+)/) {
+		$fsAvail = $1;
+		printLog("available space on $bootDir: $fsAvail", 'L2');
+	} else {
+		printLog("available bytes not found (expected a number) => exiting", 'L2');
+		return (0);
+	}
+
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
 			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
@@ -7317,8 +7399,16 @@ sub checkAndDeleteOldestTuxedoKernel {
 				lockPM();
 				printLog("result: $result\nerror: $error", 'L2');
 
-				# log success
-				printLog("successfully removed old kernel $version", 'L0');
+				# check for success: is there more free space on /boot now?
+				my $newBootPartition = `df $bootDir --output=avail,target`;
+				if ($newBootPartition =~ / \/boot$/gm) {
+					if ($newBootPartition =~ m/(\d+)/) {
+						my $newFsAvail = $1;
+						my $fsDiff = $newFsAvail - $fsAvail;
+						my $freedMB = int($fsDiff / 1024);
+						printLog("successfully removed old kernel $version; freed $freedMB MB of disk space", 'L0');
+					}
+				}
 
 			} else {
 				printLog("could not remove the kernel $version as package management is busy", 'L0');
