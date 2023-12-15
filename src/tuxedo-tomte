@@ -6800,6 +6800,7 @@ sub getAptMark {
 	my ($package) = @_;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
+	printLog("package: $package", 'TL2');
 	if ( $retVal =~ /$package/mg ) {
 		printLog("mark is auto", 'L2');
 		return (1);
