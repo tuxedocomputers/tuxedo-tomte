@@ -1,4 +1,4 @@
-tuxedo-tomte (2.18.1-41) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-42) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
@@ -6,8 +6,10 @@ tuxedo-tomte (2.18.1-41) UNRELEASED; urgency=medium
   * automatic upgrade for kernel metapackages
   * set all kernel packages apt-mark to "auto"
   * UNRELEASED
+  * after packaging
+  * removed stagingdeb
 
- -- E. Mohr <tux@tuxedocomputers.com>  Fri, 15 Dec 2023 12:53:10 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 15 Dec 2023 13:29:38 +0100
 
 tuxedo-tomte (2.18.0) jammy; urgency=medium
 
