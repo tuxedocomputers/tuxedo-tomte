@@ -6883,7 +6883,7 @@ sub installKernelFlavour {
 					$installCmd .= ' '.$package;
 				} else {
 					printLog("package: >$package<", 'L2');
-					unless ( exists $flavours{$distributionVersion}{'$package'}) {
+					unless ( exists $flavours{$distributionVersion}{$package}) {
 						#TODO
 						printLog("key exists: >$package<", 'L2');
 						setAptMark($package, 'auto');
