@@ -6859,16 +6859,17 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $line (@lines) {
-		($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
 		unless ($package =~ /linux-image-unsigned-.*/) {
 			if ($line =~ /dpkg-query: /) {
-				$line =~ s/.*\s//;
-				printLog("package missing: $line", 'L2');
+				$package = $line;
+				$package =~ s/.*\s//;
+				printLog("package missing: $package", 'L2');
 				$packageMissing = 1;
 				$installCmd .= ' '.$package;
 			}
 			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 				unless ($line =~ /.*\s[ih][i]/) {
+					($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
