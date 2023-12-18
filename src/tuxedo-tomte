@@ -6874,6 +6874,7 @@ sub installKernelFlavour {
 			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 				$package = $line;
 				$package =~ s/\s.*//;
+				printLog("after regEx package: $package", 'L2');
 				unless ($line =~ /.*\s[ih][i]/) {
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
