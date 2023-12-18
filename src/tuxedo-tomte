@@ -6880,6 +6880,7 @@ sub installKernelFlavour {
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
 				} else {
+					printLog("package: >$package< packages: >@{ $flavours{$distributionVersion}{$flavour}{'packages'}}<", 'L2');
 					unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
 						#TODO
 						printLog("after grep package: >$package<", 'L2');
