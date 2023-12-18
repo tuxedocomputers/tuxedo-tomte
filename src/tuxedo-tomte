@@ -6797,7 +6797,7 @@ sub setAptMark {
 # returns 0 if manual or package does not exist
 #
 sub getAptMark {
-	my ($package) = @_;
+	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
 	printLog("package: $package", 'TL2');
