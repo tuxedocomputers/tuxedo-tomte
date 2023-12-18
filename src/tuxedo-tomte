@@ -6882,8 +6882,8 @@ sub installKernelFlavour {
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
 				} else {
-					printLog("package: >$package< packages: >$flavours{$distributionVersion}{$flavour}<", 'L2');
-					unless ( $package eq $flavours{$distributionVersion}{$flavour}) {
+					printLog("package: >$package< packages: >${ $flavours{$distributionVersion}{$flavour} }<", 'L2');
+					unless ( $package eq ${ $flavours{$distributionVersion}{$flavour} }) {
 						#TODO
 						printLog("after grep package: >$package<", 'L2');
 						setAptMark($package, 'auto');
