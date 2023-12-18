@@ -6873,7 +6873,8 @@ sub installKernelFlavour {
 			printLog("line: $line package: $package", 'L2');
 			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 				unless ($line =~ /.*\s[ih][i]/) {
-					($package) = $line =~ /^([A-Za-z0-9_\-\.]+)/;
+					$package = $line;
+					$package =~ s/\s.*//;
 					printLog("package missing: $package", 'L2');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
