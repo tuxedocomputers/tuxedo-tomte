@@ -6764,8 +6764,6 @@ sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
 	getAptMark($package);
-	#TODO
-	printLog("in setAptMark package: $package", 'L2');
 	if ( getAptMark($package) && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1');
 		$retVal = `$consoleLanguage apt-mark manual $package`;
@@ -6871,8 +6869,6 @@ sub installKernelFlavour {
 			}
 
 			# set apt-mark
-			#TODO
-			printLog("line: >$line< package: >$package<", 'L2');
 			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 				$package = $line;
 				$package =~ s/\s.*//;
@@ -6884,8 +6880,6 @@ sub installKernelFlavour {
 				} else {
 					printLog("package: >$package<", 'L2');
 					unless ( exists $flavours{$distributionVersion}{$package}) {
-						#TODO
-						printLog("key exists: >$package<", 'L2');
 						setAptMark($package, 'auto');
 					}
 				}
