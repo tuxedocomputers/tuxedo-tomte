@@ -2694,7 +2694,7 @@ sub isLocked {
 	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		print("Locking: checking lock: $filename\n");
+		printLog("Locking: checking lock: $filename\n");
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
