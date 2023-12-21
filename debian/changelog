@@ -1,4 +1,4 @@
-tuxedo-tomte (2.18.1-76) UNRELEASED; urgency=medium
+tuxedo-tomte (2.19.0) jammy; urgency=medium
 
   [ E. Mohr ]
   * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
@@ -7,15 +7,7 @@ tuxedo-tomte (2.18.1-76) UNRELEASED; urgency=medium
   * set all kernel packages apt-mark to "auto"
   * added timeout to apt-get where it might be usefull
 
-  [ G. Gottleuber ]
-  * Kernel clean up: removed 250MB condition
-
-  [ E. Mohr ]
-  * UNRELEASED
-  * after packaging
-  * package = line
-
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Dec 2023 22:08:50 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Dec 2023 22:48:52 +0100
 
 tuxedo-tomte (2.18.0) jammy; urgency=medium
 
