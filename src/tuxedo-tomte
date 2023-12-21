@@ -3330,8 +3330,6 @@ sub checkRequirements {
 		printLog("detected $origConfModules{threegfix2}{name} issue", 'L1');
 	}
 
-	#TODO check whether desktoppc also require this
-	printLog("completeDistVersion: $completeDistVersion", 'TL2');
 	# all notebooks require this
 	if ( ($chassisType eq 'notebook') &&
 		(($completeDistVersion =~ /Ubuntu 18.04/) ||
@@ -3367,7 +3365,6 @@ sub checkRequirements {
 		}
 	}
 
-	#TODO check if those Ubuntu versions are really the correct ones
 	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
 		($completeDistVersion =~ /elementary OS 7.1/) ||
 		($completeDistVersion =~ /KDE neon 22.04/) ||
@@ -3377,9 +3374,6 @@ sub checkRequirements {
 		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		$origConfModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
-		#TODO remove tuxedokeyboard and tuxedokeyboardite from the system
-		# only after successfull installation of tuxedodrivers
-		# add removal in tuxedodrivers module
 		$origConfModules{tuxedokeyboardite}{required} = 'no';
 		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
 		$origConfModules{tuxedokeyboard}{required} = 'no';
@@ -9865,6 +9859,9 @@ sub removeWarningMessage {
 	my $message = shift;
 	my $answer;
 	if (!isatty()) {
+		return (1);
+	}
+	if ($FAI || $LiveISO) {
 		return (1);
 	}
 	if ($message ne '') {
