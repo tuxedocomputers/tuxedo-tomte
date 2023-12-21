@@ -1,101 +1,16 @@
-tuxedo-tomte (2.18.1-64) UNRELEASED; urgency=medium
+tuxedo-tomte (2.18.1-74) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
+  * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
   * removed mesautils
-
-  [ G. Gottleuber ]
-  * kernel clean up: removed /boot partition condition
-
-  [ E. Mohr ]
-  * UNRELEASED
-  * after packaging
-  * after packaging
-  * added debug for kernel files install
-  * after packaging
-  * changed apt-mark procedures
-  * after packaging
-  * debug
-  * after packaging
-  * added more debug
-  * more debug
-  * after packaging
-  * clean package and line
-  * after packaging
-  * regex package from line
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * regex
-  * after packaging
-  * removed all flavour kernel elements from apt-set
-  * after packaging
-  * removed some kernel metapackage
-  * after packaging
-  * removed debug
-
-  [ G. Gottleuber ]
-  * Revert "kernel clean up: removed /boot partition condition"
-
-  [ E. Mohr ]
-  * after packaging
-  * after packaging
-  * added package names to mark
-  * after packaging
+  * automatic upgrade for kernel metapackages
+  * set all kernel packages apt-mark to "auto"
   * added timeout to apt-get where it might be usefull
-  * after packaging
-  * after packaging
-  * UNRELEASED
-
-  [ emohrtuxedo ]
-  * after packaging
-  * added log message
-  * after packaging
-  * corrected packages
-  * after packaging
-
-  [ E. Mohr ]
-  * apt-mark to shift
-  * after packaging
-  * added some debug
-  * after packaging
-  * more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * more debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * changed hash
-  * after packaging
-  * changed array to string
-  * after packaging
-  * changed to single flavour package
-  * after packaging
-  * changed hash address to string
-  * after packaging
-  * changed hash
-  * after packaging
-  * debug
-  * after packaging
-  * cleaned up debug
-
- -- E. Mohr <tux@tuxedocomputers.com>  Tue, 19 Dec 2023 22:57:45 +0100
-
-tuxedo-tomte (2.18.1) jammy; urgency=medium
 
   [ G. Gottleuber ]
   * Kernel clean up: removed 250MB condition
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 04 Dec 2023 15:58:02 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 21 Dec 2023 16:04:23 +0100
 
 tuxedo-tomte (2.18.0) jammy; urgency=medium
 

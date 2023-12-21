@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.18.1-64';
+our $VERSION = '2.18.1-74';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -796,7 +796,7 @@ my %tuxedo_devices = (
 	'8' => {
 		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
 		board_name => ['PCx0Dx_GN20'],
-		fix => ['tuxedokeyboardite'],
+		fix => ['tuxedodrivers'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => ['1558:65e5', '1558:67e5'],
 		cpu => '',
@@ -807,7 +807,7 @@ my %tuxedo_devices = (
 	'9' => {
 		model => ['TUXEDO Book XUX7 Gen11'],
 		board_name => ['X170SM'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedokeyboardite'],
+		fix => ['nokeyboardaftersuspendfix', 'tuxedodrivers'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -818,7 +818,7 @@ my %tuxedo_devices = (
 	'10' => {
 		model => ['TUXEDO Book XUX7 Gen13'],
 		board_name => ['X170KM-G'],
-		fix => ['tuxedokeyboardite', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
+		fix => ['tuxedodrivers', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
 		flavour => ['20.04', '22.04'],
 		pci_id => '1558:7715',
 		cpu => '',
@@ -972,7 +972,7 @@ my %tuxedo_devices = (
 	'25' => {
 		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
 		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'amdgpubacklightauxoff'],
+		fix => ['tuxedotouchpadswitch', 'tuxedodrivers', 'amdgpubacklightauxoff'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -983,7 +983,7 @@ my %tuxedo_devices = (
 	'26' => {
 		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
 		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedokeyboardite', 'nvidiabacklightcontrolfix'],
+		fix => ['tuxedotouchpadswitch', 'tuxedodrivers', 'nvidiabacklightcontrolfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1137,7 +1137,7 @@ my %tuxedo_devices = (
 	'41' => {
 		model => ['TUXEDO Stellaris Gen4 Intel'],
 		board_name => ['GMxAGxx'],
-		fix => ['tuxedokeyboardite', "tuxedotouchpadswitch"],
+		fix => ['tuxedodrivers', "tuxedotouchpadswitch"],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1214,7 +1214,7 @@ my %tuxedo_devices = (
 	'48' => {
 		model => ['TUXEDO Stellaris Gen4 AMD'],
 		board_name => ['GMxRGxx'],
-		fix => ['tuxedokeyboardite', "tuxedotouchpadswitch"],
+		fix => ['tuxedodrivers', "tuxedotouchpadswitch"],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1236,7 +1236,7 @@ my %tuxedo_devices = (
 	'50' => {
 		model => ['TUXEDO Gemini 17 Gen1'],
 		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedokeyboardite', 'acpibacklightvideofix'],
+		fix => ['tuxedodrivers', 'acpibacklightvideofix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1247,7 +1247,7 @@ my %tuxedo_devices = (
 	'51' => {
 		model => ['TUXEDO Stellaris 16 Gen5 Intel'],
 		board_name => ['GMxPXxx'],
-		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
+		fix => ['tuxedodrivers', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1313,7 +1313,7 @@ my %tuxedo_devices = (
 	'57' => {
 		model => ['TUXEDO Gemini 15 Gen1'],
 		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedokeyboardite', 'acpibacklightvideofix'],
+		fix => ['tuxedodrivers', 'acpibacklightvideofix'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1346,7 +1346,29 @@ my %tuxedo_devices = (
 	'60' => {
 		model => ['TUXEDO Stellaris 16 Gen5 AMD'],
 		board_name => ['GM6XGxX'],
-		fix => ['tuxedokeyboardite', 'tuxedotouchpadswitch'],
+		fix => ['tuxedodrivers', 'tuxedotouchpadswitch'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'61' => {
+		model => ['all notebooks'],
+		board_name => [''],
+		fix => ['tuxedokeyboard'],
+		flavour => ['18.04', '20.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'62' => {
+		model => ['all notebooks'],
+		board_name => [''],
+		fix => ['tuxedodrivers'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -1522,7 +1544,7 @@ my %origConfModules = (
 		version => 1,
 		installed => 'no',
 		blocked => 'no',
-		required => 'yes',
+		required => 'no',
 		hwid => 1,
 		package => 'yes',
 		packageVersion => 'unkwn',
@@ -2489,6 +2511,27 @@ my %origConfModules = (
 		FAI => 'yes',
 		LiveISO => 'no',
 	},
+	tuxedodrivers => {
+		name => 'tuxedo-drivers',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('tuxedodrivers_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => '',
+		order => '',
+		dkms => 'yes',
+		FAI => 'yes',
+		LiveISO => 'yes',
+	},
 );
 
 
@@ -2651,7 +2694,7 @@ sub isLocked {
 	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		print("Locking: checking lock: $filename\n");
+		printLog("Locking: checking lock: $filename", 'L2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
@@ -2970,6 +3013,10 @@ sub removeLineFromFile {
 ###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
+# e.g.:
+# $distribution = 'Ubuntu'
+# $distributionVersion = '22.04'
+# $completeDistVersion = 'Ubuntu 22.04'
 #
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
@@ -3259,9 +3306,6 @@ sub checkRequirements {
 		}
 	}
 
-
-
-
 	# get the BIOS version
 	# deactivated but could be useful if version changes in the future
 	# $main::biosVersion = `dmidecode -s bios-version`;
@@ -3286,6 +3330,18 @@ sub checkRequirements {
 		printLog("detected $origConfModules{threegfix2}{name} issue", 'L1');
 	}
 
+	# all notebooks require this
+	if ( ($chassisType eq 'notebook') &&
+		(($completeDistVersion =~ /Ubuntu 18.04/) ||
+		($completeDistVersion =~ /Ubuntu 20.04/) ||
+		($completeDistVersion =~ /elementary OS 6.1/) ||
+		($completeDistVersion =~ /KDE neon 20.04/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
+		$origConfModules{tuxedokeyboard}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+	}
+
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /X170KM-G/) ||
 		($boardname =~ /PCx0Dx_GN20/) ||
@@ -3298,8 +3354,30 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		$origConfModules{tuxedokeyboardite}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+		if (($completeDistVersion =~ /Ubuntu 18.04/) ||
+			($completeDistVersion =~ /Ubuntu 20.04/) ||
+			($completeDistVersion =~ /elementary OS 6.1/) ||
+			($completeDistVersion =~ /KDE neon 20.04/) ||
+			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
+			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+			$origConfModules{tuxedokeyboardite}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+		}
+	}
+
+	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
+		($completeDistVersion =~ /elementary OS 7.1/) ||
+		($completeDistVersion =~ /KDE neon 22.04/) ||
+		($completeDistVersion =~ /Linux Mint 21.1/) ||
+		($completeDistVersion =~ /Linux Mint 21.2/) ||
+		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
+		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		$origConfModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
+		$origConfModules{tuxedokeyboardite}{required} = 'no';
+		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
+		$origConfModules{tuxedokeyboard}{required} = 'no';
+		printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -3491,7 +3569,6 @@ sub checkRequirements {
 		$origConfModules{disablegucfix}{required} = 'yes';
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
-
 }
 
 
@@ -3637,7 +3714,7 @@ sub amdgpuwithnvidiafix() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
 			printLog("removing $module", 'TL0');
 			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
 			if (backupFile($fileName)) {
@@ -4236,7 +4313,7 @@ sub fingerprintreader() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("fingerprint-reader\n")) {
 			my $counter = 0;
 			if( isPackageInstalled('fprintd') ) {
 				if (!deinstallSinglePackage('fprintd')) {
@@ -4331,6 +4408,24 @@ sub tuxedorestoreaudiofix() {
 	}
 }
 
+
+
+
+###############################################################################
+# tuxedo-drivers
+#
+sub tuxedodrivers() {
+	my $module = shift;
+	my $action = shift;
+	if (debianPackageModule( $module, $action ) && ($action eq 'install')) {
+		if (isPackageInstalled('tuxedo-keyboard')) {
+			debianPackageModule( 'tuxedokeyboard', 'remove' );
+		}
+		if (isPackageInstalled('tuxedo-keyboard-ite')) {
+			debianPackageModule( 'tuxedokeyboardite', 'remove');
+		}
+	}
+}
 
 
 
@@ -4942,7 +5037,7 @@ sub amdgpudkms() {
 		printLog('upgrade not necessary for packages', 'L1');
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("amdgpu-dkms\n")) {
 			my $counter = 0;
 			if( isPackageInstalled('amdgpu-dkms') ) {
 				if (!deinstallSinglePackage('amdgpu-dkms')) {
@@ -5483,7 +5578,7 @@ sub disablegucfix() {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("disable-guc-fix\n")) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
@@ -6092,7 +6187,7 @@ sub grubModuleEdit {
 		}
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
+		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
 			removeKernelParameters($module, @kernelParameters);
 		}
 	}
@@ -6105,9 +6200,12 @@ sub grubModuleEdit {
 ###############################################################################
 # add's, upgrades or deletes debian packages
 # debianPackageModule( module, install|upgrade|remove );
+# returns 1 if successfull
+# returns 0 if not succesfull
 #
 sub debianPackageModule {
 	my ($module, $action) = @_;
+	my $success = 0;
 
 	if ($action eq 'install') {
 		# check before if the package is already installed
@@ -6125,9 +6223,11 @@ sub debianPackageModule {
 				if ($origConfModules{$module}{restart} eq 'yes') {
 					setRestartValues($module);
 				}
+				$success = 1;
 			} else {
 				$origConfModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
+				$success = 0;
 			}
 
 			# remove verbose line if it was set above
@@ -6138,16 +6238,19 @@ sub debianPackageModule {
 			addToConfiguredModules($module, 'nothingToDo');
 			$origConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = 'yes';
+			$success = 1;
 		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrade not necessary for packages");
+		$success = 0;
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage('')) {
-			removeDebianModule($module, 1);
+		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
+			$success = removeDebianModule($module, 1, '');
 		}
 	}
+	return $success;
 }
 
 
@@ -7588,9 +7691,12 @@ sub uninstallRemnantKernels {
 # if restart = 0 => don't restart
 # if restart = 1 => restart
 # checks if the package is installed
+# returns 1 if successfull
+# returns 0 if not successfull
 #
 sub removeDebianModule {
 	my ($module, $restart, $parameter) = (@_);
+	my $success = 0;
 	if (isPackageInstalled($origConfModules{$module}{name})) {
 		if (removePackage($origConfModules{$module}{name}, "$parameter")) {
 			addToConfiguredModules($module, "removed");
@@ -7600,11 +7706,13 @@ sub removeDebianModule {
 			if ($restart) {
 				setRestartValues($module);
 			}
+			$success = 1;
 		} else {
 			addToConfiguredModules($module, "remove failed");
 			$origConfModules{$module}{installed} = "remove failed";
 			$origConfModules{$module}{version} = $localConfModules{$module}{version};
 			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+			$success = 0;
 		}
 	} else {
 		printLog("$origConfModules{$module}{name} is not installed, which is the desired result", 'TL0');
@@ -7612,7 +7720,9 @@ sub removeDebianModule {
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
 		$origConfModules{$module}{required} = "no";
+		$success = 1;
 	}
+	return $success;
 }
 
 
@@ -9756,6 +9866,9 @@ sub removeWarningMessage {
 	my $message = shift;
 	my $answer;
 	if (!isatty()) {
+		return (1);
+	}
+	if ($FAI || $LiveISO) {
 		return (1);
 	}
 	if ($message ne '') {
