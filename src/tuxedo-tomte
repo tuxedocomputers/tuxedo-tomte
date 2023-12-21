@@ -2525,7 +2525,7 @@ my %origConfModules = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => '',
+		reconfigure => 'always',
 		restart => '',
 		order => '',
 		dkms => 'yes',
@@ -2694,7 +2694,7 @@ sub isLocked {
 	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("Locking: checking lock: $filename\n");
+		printLog("Locking: checking lock: $filename", 'L2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
