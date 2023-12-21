@@ -6962,9 +6962,9 @@ sub installKernelFlavour {
 	printLog("result:\n$retString", 'L2');
 	@lines = split /\n/, $retString;
 	foreach $line (@lines) {
+		$package = $line;
 		unless ($package =~ /linux-image-unsigned-.*/) {
 			if ($line =~ /dpkg-query: /) {
-				$package = $line;
 				$package =~ s/.*\s//;
 				printLog("package missing: $package", 'L2');
 				$packageMissing = 1;
@@ -6973,7 +6973,6 @@ sub installKernelFlavour {
 
 			# set apt-mark
 			if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
-				$package = $line;
 				$package =~ s/\s.*//;
 				printLog("after regEx package: >$package<", 'L2');
 				unless ($line =~ /.*\s[ih][i]/) {
