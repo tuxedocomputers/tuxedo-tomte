@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.18.1-76';
+our $VERSION = '2.19.0';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -50,7 +50,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
