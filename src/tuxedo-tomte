@@ -1376,6 +1376,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'62' => {
+		model => ['all notebooksf from TongFang'],
+		board_name => [''],
+		fix => ['tuxedotouchpadswitch'],
+		flavour => [''],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -3274,6 +3285,11 @@ sub checkRequirements {
 		($boardname =~ /PH4PG31/) ||
 		($boardname =~ /PH6PG01_PH6PG71/) ||
 		($boardname =~ /GM6XGxX/)) {
+		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
+	}
+
+	if ($boardvendor =~ /NB02/) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
 	}
