@@ -5917,7 +5917,10 @@ sub cleanSourcesList {
 					$modified = 1;
 				}
 				# no backup for the file as it only comments out lines
-				print $FHsource "$sourceLine\n";
+				# remove all tuxedo mirrors entries
+				unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
+					print $FHsource "$sourceLine\n";
+				}
 			}
 			close $FHsource;
 		} else {
