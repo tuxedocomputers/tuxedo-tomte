@@ -103,7 +103,6 @@ my $runningAsRoot = 0;
 my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $chassisType = 0;
-my $reposList = $shareDir.'repolist.txt';
 my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
