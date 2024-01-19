@@ -443,7 +443,7 @@ my %tuxedo_repos = (
 my %tuxedo_mirrors = (
 	"Ubuntu 18.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
@@ -452,7 +452,7 @@ my %tuxedo_mirrors = (
 	},
 	"Ubuntu 20.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
@@ -461,7 +461,7 @@ my %tuxedo_mirrors = (
 	},
 	"Ubuntu 22.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -470,7 +470,7 @@ my %tuxedo_mirrors = (
 	},
 	"elementary OS 6.1" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
@@ -479,7 +479,7 @@ my %tuxedo_mirrors = (
 	},
 	"elementary OS 7.1" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -488,7 +488,7 @@ my %tuxedo_mirrors = (
 	},
 	"KDE neon 20.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
@@ -497,7 +497,7 @@ my %tuxedo_mirrors = (
 	},
 	"KDE neon 22.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -524,7 +524,7 @@ my %tuxedo_mirrors = (
 	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
@@ -533,7 +533,7 @@ my %tuxedo_mirrors = (
 	},
 	"TUXEDO_OS Plasma 22.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -542,7 +542,7 @@ my %tuxedo_mirrors = (
 	},
 	"TUXEDO OS 20.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
@@ -551,7 +551,7 @@ my %tuxedo_mirrors = (
 	},
 	"TUXEDO OS 22.04" => {
 		mirrors => {
-			filename => '/etc/apt/sources.list',
+			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
@@ -3969,7 +3969,7 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'remove') {
-		printLog("This removed the module from the list only, manual intervention is necessary to remove the respective repositories", 'TL0');
+		printLog("This only removes the module from the list, manual intervention is necessary to remove the respective repository entries", 'TL0');
 		addToConfiguredModules($module, "removed");
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
@@ -5892,35 +5892,32 @@ sub addRepoKey {
 #
 sub cleanSourcesList {
 	my $FHsource;
-	my @sourcelines;
-	my $sourceline;
-	my $sourcesListFile = shift;
+	my @sourceLines;
+	my $sourceLine;
+	my $sourcesListFile = '/etc/apt/sources.list';
 	my $modified = 0;
-
-	# set default value if undefined
-	if (defined $sourcesListFile) {
-		if ($sourcesListFile eq '') {
-			$sourcesListFile = '/etc/apt/sources.list';
-		}
-	} else {
-		$sourcesListFile = '/etc/apt/sources.list';
-	}
+	#TODO working here
+	my $tomteMessage = '# tuxedo-tomte commented out all entries at installation, any TUXEDO repositories will be automatically deleted';
 
 	# read all the lines
 	if ( (-e $sourcesListFile) && open($FHsource, "<", $sourcesListFile)) {
-		chomp(@sourcelines = <$FHsource>);
+		chomp(@sourceLines = <$FHsource>);
 		close $FHsource;
 		# open for writing
 		if (!-e $sourcesListFile) {
 			return (0);
 		}
 		if (open($FHsource, ">", $sourcesListFile)) {
-			foreach $sourceline (@sourcelines) {
-				if (setComment(\$sourceline)) {
+			unless (grep( /$tomteMessage/, @sourceLines )) {
+				# no backup for the file as it only comments out lines
+				print $FHsource "$tomteMessage\n";
+			}
+			foreach $sourceLine (@sourceLines) {
+				if (commentOut(\$sourceLine)) {
 					$modified = 1;
 				}
 				# no backup for the file as it only comments out lines
-				print $FHsource "$sourceline\n";
+				print $FHsource "$sourceLine\n";
 			}
 			close $FHsource;
 		} else {
@@ -5931,6 +5928,23 @@ sub cleanSourcesList {
 	}
 	return ($modified);
 }
+
+
+
+###############################################################################
+# puts a '#' in front of the passed string and returns it
+#
+sub commentOut {
+	my $line = shift;
+	my $tmpLine = $$line;
+	if ($$tmpLine =~ /^#/) {
+		return (0);
+	} else {
+		$tmpLine = "# $$tmpLine";
+		return (1);
+	}
+}
+
 
 
 ###############################################################################
