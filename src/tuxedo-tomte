@@ -5951,65 +5951,6 @@ sub commentOut {
 
 
 ###############################################################################
-# decides whether the line has to be commented out or not
-# returns 0 if nothing changed
-# returns 1 if commented out
-# modifies the string given to the subroutine
-#
-sub setComment {
-	my $repoline = shift;
-	my $tmpline = $$repoline;
-	my $FH;
-	my @repolines;
-	my $regExUbuntu = '^deb.*\.ubuntu\.com\/ubuntu.* '.$tuxedo_mirrors{$completeDistVersion}{name}.'.*$';
-	my $regExElementaryOS = '^deb.*mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt .* main restricted universe multiverse$';
-	if ( (-e $reposList) && open($FH, '<', $reposList) ) {
-		chomp(@repolines = <$FH>);
-		close $FH;
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("could not open repository mirrors list at $reposList", 'TL0', 'L0');
-		return (0);
-	}
-
-	# don't check if TUXEDO testmirrors included for testing purposes
-	if ($$repoline =~ /^deb https?:\/\/testmirrors\.tuxedocomputers\.com\/.*/) {
-		printLog("found testmirror, not changing it", 'TL2');
-		return (0);
-	}
-
-	if ( $$repoline =~ /^deb .*$tuxedo_mirrors{$completeDistVersion}{name}.*/ || $$repoline =~ m/$regExElementaryOS/ ) {
-		# this is a repo line
-		# if line matches some official debian country mirror & not tuxedo
-		# delete old mirrors.tuxedocomputers.com urls
-		if ( (($$repoline =~ m/$regExUbuntu/) && !($$repoline =~ m/https:\/\/mirrors\.tuxedocomputers.*main restricted universe multiverse/)) || $$repoline =~ m/^deb http:\/\/packages\.tuxedocomputers\.com\// || $$repoline =~ m/^deb http:\/\/mirrors\.tuxedocomputers\.com\// || $$repoline =~ m/$regExElementaryOS/) {
-			$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
-			printLog("commented out: $$repoline", 'L0');
-			return (1);
-		}
-		# check for repos in comprehensive mirror list
-		foreach (@repolines) {
-			if ( $$repoline =~ /$_/ ) {
-				# repo matches
-				$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
-				printLog("commented out: $$repoline", 'L0');
-				return (1);
-			}
-		}
-	} elsif( (($$repoline =~ m/^deb https:\/\/mirrors\.tuxedocomputers\.com\/ubuntu\/mirror/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/) ) ||
-	   (($$repoline =~ m/^deb https:\/\/deb.tuxedocomputers.com\/ubuntu/) && !($$repoline =~ m/$tuxedo_mirrors{$completeDistVersion}{name}/)) ) {
-		$$repoline = "\n#### commented out by TUXEDO Tomte\n"."# $$repoline";
-		printLog("commented out: $$repoline", 'L0');
-		return (1);
-	} else {
-		# nothing has to be done
-		return (0);
-	}
-}
-
-
-
-###############################################################################
 # replaces "http" with "https" in the files given by a %hash
 # returns 2 if something was changed
 # returns 1 if nothing was changed
