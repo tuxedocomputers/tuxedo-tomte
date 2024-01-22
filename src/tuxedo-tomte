@@ -271,6 +271,9 @@ my %supportedOS = (
 			"21.2" => {
 				name => 'victoria',
 			},
+			"21.3" => {
+				name => 'virginia',
+			},
 		},
 	},
 	"TUXEDO_OS Plasma" => {
@@ -406,6 +409,13 @@ my %tuxedo_repos = (
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 			hashvalue => 'abca6201e010d01e36e3ab8cba94d4b1',
+		},
+		name => 'jammy',
+	},
+	"Linux Mint 21.3" => {
+		deb => {
+			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
+			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
 		},
 		name => 'jammy',
 	},
@@ -555,6 +565,15 @@ my %tuxedo_mirrors = (
 		},
 		name => 'jammy',
 	},
+	"Linux Mint 21.3" => {
+		mirrors => {
+			filename => '/etc/apt/sources.list.d/official-package-repositories.list',
+			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
+						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+		},
+		name => 'jammy',
+	},
 	"TUXEDO_OS Plasma 20.04" => {
 		mirrors => {
 			filename => '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list',
@@ -674,6 +693,23 @@ my %flavours = (
 		},
 	},
 	"21.2" => {
+		"linux-generic" => {
+			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
+		},
+		"linux-aws" => {
+			installPackages => 'linux-aws linux-headers-aws linux-image-aws',
+		},
+		"linux-tuxedo-22.04" => {
+			installPackages => 'linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04',
+		},
+		"linux-tuxedo-22.04-edge" => {
+			installPackages => 'linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge',
+		},
+		"linux-tuxedo-22.04-next" => {
+			installPackages => 'linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next',
+		},
+	},
+	"21.3" => {
 		"linux-generic" => {
 			installPackages => 'linux-generic linux-headers-generic linux-image-generic',
 		},
@@ -3578,6 +3614,7 @@ sub checkRequirements {
 		($completeDistVersion =~ /KDE neon 22.04/) ||
 		($completeDistVersion =~ /Linux Mint 21.1/) ||
 		($completeDistVersion =~ /Linux Mint 21.2/) ||
+		($completeDistVersion =~ /Linux Mint 21.3/) ||
 		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		$origConfModules{tuxedodrivers}{required} = 'yes';
@@ -3689,6 +3726,7 @@ sub checkRequirements {
 			($completeDistVersion =~ /KDE neon 22.04/) ||
 			($completeDistVersion =~ /Linux Mint 21.1/) ||
 			($completeDistVersion =~ /Linux Mint 21.2/) ||
+			($completeDistVersion =~ /Linux Mint 21.3/) ||
 			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
@@ -4043,7 +4081,8 @@ sub tuxedorepos() {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
 			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
-			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+			   		($completeDistVersion =~ /Linux Mint 21.2/) ||
+					($completeDistVersion =~ /Linux Mint 21.3/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
 					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
@@ -4078,7 +4117,8 @@ sub tuxedorepos() {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
 			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
-			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+			   		($completeDistVersion =~ /Linux Mint 21.2/) ||
+					($completeDistVersion =~ /Linux Mint 21.3/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
 					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
@@ -5099,6 +5139,7 @@ sub nvidiadriver() {
 				($completeDistVersion =~ /KDE neon 22.04/) ||
 				($completeDistVersion =~ /Linux Mint 21.1/) ||
 				($completeDistVersion =~ /Linux Mint 21.2/) ||
+				($completeDistVersion =~ /Linux Mint 21.3/) ||
 				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
 				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
@@ -5949,7 +5990,8 @@ sub createRepos {
 		($completeDistVersion ne 'KDE neon 22.04') &&
 		($completeDistVersion ne 'TUXEDO OS 22.04') &&
 		($completeDistVersion ne 'Linux Mint 21.1') &&
-		($completeDistVersion ne 'Linux Mint 21.2')) {
+		($completeDistVersion ne 'Linux Mint 21.2') &&
+		($completeDistVersion ne 'Linux Mint 21.3')) {
 		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
 			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
 		}
