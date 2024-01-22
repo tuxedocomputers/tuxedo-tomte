@@ -1,12 +1,9 @@
-tuxedo-tomte (2.20.0-1) UNRELEASED; urgency=medium
+tuxedo-tomte (2.21.0) jammy; urgency=medium
 
-  [ E. Mohr ]
-  * after packaging
+  * added acpibacklightvideofix for TUXEDO Stellaris Gen3 Intel and TUXEDO
+    Polaris Gen3 Intel with boardname: GMxTGxx
 
-  [ emohrtuxedo ]
-  * added acpibacklightvideofix for TUXEDO Stellaris Gen3 Intel and TUXEDO Polaris Gen3 Intel with boardname: GMxTGxx
-
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 18 Jan 2024 09:11:35 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 22 Jan 2024 12:08:23 +0100
 
 tuxedo-tomte (2.20.0) jammy; urgency=medium
 
@@ -16,7 +13,6 @@ tuxedo-tomte (2.20.0) jammy; urgency=medium
 
 tuxedo-tomte (2.19.0) jammy; urgency=medium
 
-  [ E. Mohr ]
   * added tuxedodrivers as module replacing tuxedokeyboard and tuxedokeyboardite
   * removed mesautils
   * automatic upgrade for kernel metapackages
