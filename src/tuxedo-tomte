@@ -50,7 +50,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1636,7 +1636,7 @@ my %origConfModules = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 4,
+		version => 5,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
@@ -3918,6 +3918,19 @@ sub tuxedomirrors() {
 		return (1);
 	}
 
+	#TODO debug
+	my $filename = '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list';
+	my $FH;
+	my $hashFile;
+	my $data;
+	if (-e $filename) {
+		if (open($FH, '<', $filename)) {
+			$data = <$FH>;
+			close $FH;
+			$hashFile = md5_hex($data);
+			printLog("hashvalue $filename: $hashFile", 'L0');
+		}
+	}
 
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
