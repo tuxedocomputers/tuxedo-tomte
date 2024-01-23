@@ -1,3 +1,18 @@
+tuxedo-tomte (2.21.0-1) UNRELEASED; urgency=medium
+
+  [ E. Mohr ]
+  * changed location for ubuntu mirror repo file location, everything will be commented out in sources.list
+  * remove all tuxedo mirror entries from sources.list
+  * removed superfluous subroutine setComment *sniff*
+  * removed repoList and tools *sniff*
+  * packing
+  * after packaging
+
+  [ emohrtuxedo ]
+  * after packaging
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 23 Jan 2024 10:44:23 +0100
+
 tuxedo-tomte (2.21.0) jammy; urgency=medium
 
   * added acpibacklightvideofix for TUXEDO Stellaris Gen3 Intel and TUXEDO
