@@ -300,14 +300,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu bionic main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu bionic main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu bionic main'],
+			hashvalue => '',
 		},
 		name => 'bionic',
 	},
@@ -315,14 +318,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		name => 'focal',
 	},
@@ -330,6 +336,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -337,14 +344,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		name => '6.1 jolnir',
 	},
@@ -352,6 +362,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => '7.1 horus',
 	},
@@ -359,14 +370,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		name => 'focal',
 	},
@@ -374,6 +388,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -381,6 +396,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -388,6 +404,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -395,14 +412,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		name => 'focal',
 	},
@@ -410,6 +430,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -417,14 +438,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
+			hashvalue => '',
 		},
 		name => 'focal',
 	},
@@ -432,6 +456,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => '',
 		},
 		name => 'jammy',
 	},
@@ -5768,6 +5793,11 @@ sub createRepos {
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
+			if ((-e $repos{$completeDistVersion}{$key}{filename}) &&
+				(compareMD5sum( $repos{$completeDistVersion}{$key}{filename},$repos{$completeDistVersion}{$key}{hashvalue}))) {
+				#TODO debug
+				printLog("repo file found and MD5sum correct !!!", 'L2');
+			}
 			$firstEntry = 1;
 			foreach $repo1 (@{ $repos{$completeDistVersion}{$key}{content} }) {
 				if (!(isLinePresent($repo1, %repoHash))) {
