@@ -5680,7 +5680,6 @@ sub disablegucfix() {
 #
 sub createRepos {
 	my %repos = %{$_[0]};
-	my %repoHash;
 	my $key;
 	my $DH;
 	my $sourceline;
@@ -5712,22 +5711,6 @@ sub createRepos {
 	if (!-d $sourcesListDirD) {
 		printLog("no $sourcesListDirD found, creating one", 'TL0');
 		mkdir($sourcesListDirD);
-	}
-
-	# read content from sources.list into hash
-	if (-e $sourcesFileName) {
-		$repoHash{$sourcesFileName} = [readFileReturnLines($sourcesFileName)];
-	}
-
-	# read content from all files *.list into hash
-	if (opendir($DH,$sourcesListDirD)) {
-		while (readdir $DH) {
-			if ( $_ =~ /.*\.list$/ ) {
-				$sourcesFileName = $sourcesListDirD.$_;
-				$repoHash{$sourcesFileName} = [readFileReturnLines($sourcesFileName)];
-			}
-		}
-		closedir($DH);
 	}
 
 	# workaround for possible old entries in sources list
@@ -5784,53 +5767,34 @@ sub createRepos {
 		}
 	}
 
-
-
-	my $firstEntry;
-	my $sourcesListBackedup = 0;
-	my $repo1 = '';
-	my $repo2 = '';
+	my $fileText = '';
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
-			if ((-e $repos{$completeDistVersion}{$key}{filename}) &&
-				(compareMD5sum( $repos{$completeDistVersion}{$key}{filename},$repos{$completeDistVersion}{$key}{hashvalue}))) {
-				#TODO debug
-				printLog("repo file found and MD5sum correct !!!", 'L2');
-			}
-			$firstEntry = 1;
-			foreach $repo1 (@{ $repos{$completeDistVersion}{$key}{content} }) {
-				if (!(isLinePresent($repo1, %repoHash))) {
-					# make backup if file exists and is first entry into file
-					if ( (-s $repos{$completeDistVersion}{$key}{filename}) && ($firstEntry == 1) ) {
-						backupFile($repos{$completeDistVersion}{$key}{filename});
-						$firstEntry = 0;
-						if ($repos{$completeDistVersion}{$key}{filename} eq '/etc/apt/sources.list' ) {
-							$sourcesListBackedup = 1;
-						}
-					}
-					# create file + line
-					if (! -e $repos{$completeDistVersion}{$key}{filename}) {
-						createFile($repos{$completeDistVersion}{$key}{filename}, "# Added by TUXEDO Tomte\n$repo1\n", 1);
-						printLog("new file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-						printLog("added: $repo1", 'L0');
-						$firstEntry = 0;
-						$modified = 1;
-					# or append line
+			if (-e $repos{$completeDistVersion}{$key}{filename}) {
+			   if (compareMD5sum( $repos{$completeDistVersion}{$key}{filename},$repos{$completeDistVersion}{$key}{hashvalue})) {
+					#TODO debug
+					printLog("repo file found and MD5sum correct !!!", 'L2');
+				} else {
+					printLog("creating $repos{$completeDistVersion}{$key}{filename}", 'L0');
+					$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
+					printLog("filetext: $fileText", 'L2');
+					if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
+						printLog("could not create file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 					} else {
-						appendFile($repos{$completeDistVersion}{$key}{filename}, "\n# Added by TUXEDO Tomte\n$repo1\n");
-						printLog("append file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-						printLog("added: $repo1", 'L0');
-						$modified = 1;
+						$modified += 1;
+						printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 					}
 				}
-				# construct repo with '/' ending in URL
-				$repo2 = $repo1;
-				$repo2 =~ s/(deb https{0,}:\/\/.*\/\w+)( .*)/$1\/$2/gm;
-				printLog("in createRepos-> repo1: >$repo1< repo2: >$repo2<", 'L2');
-				if (isLinePresent($repo2, %repoHash)) {
-					printLog("removing line from repolist: $repo2", 'L2');
-					removeLineFromFiles($repo2, %repoHash);
+			} else {
+				printLog("creating $repos{$completeDistVersion}{$key}{filename}", 'L0');
+				$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
+				printLog("filetext: $fileText", 'L2');
+				if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0)) {
+					$modified += 1;
+					printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
+				} else {
+					printLog("could not create file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 				}
 			}
 		}
@@ -7918,6 +7882,30 @@ sub createFile {
 		printLog("can't open $fileName for writing", 'TL0');
 		return (0);
 	}
+}
+
+
+
+
+###############################################################################
+# converts an array into text separated by /n
+# input as array, returns a string, where each array element is separated by a
+# newline
+#
+sub arrayToFileText {
+	my @lines = @_;
+	my $completeString;
+	my $line = '';
+	my $counter = 0;
+	foreach $line (@lines) {
+		if ($counter ==0) {
+			$completeString .= $line;
+		} else {
+			$completeString .= "\n".$line;
+		}
+		$counter += 1;
+	}
+	return ($completeString);
 }
 
 
