@@ -148,15 +148,15 @@ printLog("detected kernel version: $kernelRelease", 'L2');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
-my $boardname;
+my $boardname = '';
 $boardname = readFileReturnLine($boardnameFilename);
 
 my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
-my $boardvendor;
+my $boardvendor = '';;
 $boardvendor = readFileReturnLine($boardvendorFilename);
 
 my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
-my $sysvendor;
+my $sysvendor = '';
 $sysvendor = readFileReturnLine($sysvendorFilename);
 
 # for desktop messages
@@ -10405,17 +10405,19 @@ sub reportPlannedChanges {
 # checks if this is a TUXEDO device
 #
 sub tuxedoDevice {
-	if ($boardname =~ /P65_P67RGRERA/) {
-		return (1);
-	}
-	if ($boardvendor =~ /TUXEDO/) {
-		return (1);
-	}
-	if ($sysvendor =~ /TUXEDO/) {
-		return (1);
-	}
-	if ($boardname =~ /LAPQC71[AB]/) {
-		return (1);
+	if ((defined $boardname) && (defined $boardvendor) && (defined $sysvendor)) {
+		if ($boardname =~ /P65_P67RGRERA/) {
+			return (1);
+		}
+		if ($boardvendor =~ /TUXEDO/) {
+			return (1);
+		}
+		if ($sysvendor =~ /TUXEDO/) {
+			return (1);
+		}
+		if ($boardname =~ /LAPQC71[AB]/) {
+			return (1);
+		}
 	}
 	return (0);
 }
