@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-our $VERSION = '2.21.0-3';
+our $VERSION = '2.22.0';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -147,15 +147,15 @@ printLog("detected kernel version: $kernelRelease", 'L2');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
-my $boardname;
+my $boardname = '';
 $boardname = readFileReturnLine($boardnameFilename);
 
 my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
-my $boardvendor;
+my $boardvendor = '';;
 $boardvendor = readFileReturnLine($boardvendorFilename);
 
 my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
-my $sysvendor;
+my $sysvendor = '';
 $sysvendor = readFileReturnLine($sysvendorFilename);
 
 # for desktop messages
@@ -1414,11 +1414,22 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	'62' => {
+	'63' => {
 		model => ['all notebooks from TongFang'],
 		board_name => [''],
 		fix => ['tuxedotouchpadswitch'],
 		flavour => [''],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'64' => {
+		model => ['all notebooks'],
+		board_name => [''],
+		fix => ['systemdbacklightfix'],
+		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -2581,6 +2592,27 @@ my %origConfModules = (
 		FAI => 'yes',
 		LiveISO => 'yes',
 	},
+	systemdbacklightfix => {
+		name => 'systemd-backlight-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('systemdbacklightfix_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
+	},
 );
 
 
@@ -3394,6 +3426,12 @@ sub checkRequirements {
 		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
 		$origConfModules{tuxedokeyboard}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+	}
+
+	# all notebooks require this
+	if ($chassisType eq 'notebook') {
+		$origConfModules{systemdbacklightfix}{required} = 'yes';
+		printLog("detected $origConfModules{systemdbacklightfix}{name} issue", 'L1');
 	}
 
 	if (($boardname =~ /X170SM/) ||
@@ -5654,6 +5692,55 @@ sub disablegucfix() {
 
 
 
+###############################################################################
+# This is a temporary fix for systemd-backlight until
+# https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream
+#
+sub systemdbacklightfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $fileName = '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules';
+	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
+		"# This is a temporary fix for systemd-backlight until https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream.\n".
+		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval = createFile($fileName, $fileText, 1);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		if (-e $fileName) {
+			if (removeWarningMessage("systemd-backlight-fix\n")) {
+				printLog("removing $module", 'TL0');
+				if (unlink($fileName)) {
+					printLog("$origConfModules{$module}{name} removed", 'TL0');
+				} else {
+					printLog('can\'t remove fix', 'TL0');
+				}
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			}
+		} else {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'removed');
+			printLog("$origConfModules{$module}{name} was already removed", 'TL0');
+		}
+	}
+}
 
 
 
@@ -10320,17 +10407,19 @@ sub reportPlannedChanges {
 # checks if this is a TUXEDO device
 #
 sub tuxedoDevice {
-	if ($boardname =~ /P65_P67RGRERA/) {
-		return (1);
-	}
-	if ($boardvendor =~ /TUXEDO/) {
-		return (1);
-	}
-	if ($sysvendor =~ /TUXEDO/) {
-		return (1);
-	}
-	if ($boardname =~ /LAPQC71[AB]/) {
-		return (1);
+	if ((defined $boardname) && (defined $boardvendor) && (defined $sysvendor)) {
+		if ($boardname =~ /P65_P67RGRERA/) {
+			return (1);
+		}
+		if ($boardvendor =~ /TUXEDO/) {
+			return (1);
+		}
+		if ($sysvendor =~ /TUXEDO/) {
+			return (1);
+		}
+		if ($boardname =~ /LAPQC71[AB]/) {
+			return (1);
+		}
 	}
 	return (0);
 }
