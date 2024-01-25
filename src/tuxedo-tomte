@@ -3657,8 +3657,7 @@ sub checkRequirements {
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
 
-	if (($completeDistVersion =~ /elementary OS 6.1/) ||
-		($completeDistVersion =~ /elementary OS 7.1/)) {
+	if ($completeDistVersion =~ /elementary OS 7.1/) {
 		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
 		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
 	}
