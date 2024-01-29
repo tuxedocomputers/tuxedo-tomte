@@ -4005,6 +4005,7 @@ sub tuxedomirrors() {
 		printLog("file exists", 'L0');
 		if (open($FH, '<', $filename)) {
 			printLog("file open", 'L0');
+			local $/ = undef;
 			$data = <$FH>;
 			printLog("data before close:\n$data", 'L0');
 			close $FH;
