@@ -4004,8 +4004,12 @@ sub tuxedomirrors() {
 		if (open($FH, '<', $filename)) {
 			$data = <$FH>;
 			close $FH;
-			$hashFile = md5_hex($data);
+			$hashFile = md5($data);
 			printLog("hashvalue $filename: $hashFile", 'L0');
+			$hashFile = md5_hex($data);
+			printLog("hashvalue hex $filename: $hashFile", 'L0');
+			$hashFile = md5_base64($data);
+			printLog("hashvalue base64 $filename: $hashFile", 'L0');
 		}
 	}
 
