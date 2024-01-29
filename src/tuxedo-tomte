@@ -6051,6 +6051,8 @@ sub cleanSourcesList {
 sub commentOut {
 	my $line = shift;
 	my $tmpLine = $$line;
+	#TODO debug
+	printLog("line: $$tmpLine", 'L0');
 	if ($$tmpLine =~ /^#/) {
 		return (0);
 	} else {
@@ -7964,11 +7966,8 @@ sub aptgetRefreshModule {
 sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
-	chomp($fileText);
 	if ( open($FH, ">",$fileName) ) {
-		#TODO debug unbuffered to remove partial newline
-		local $| = 1;
-		print $FH "$fileText";
+		print $FH "$fileText\n";
 		close $FH;
 		return (1);
 	} else {
