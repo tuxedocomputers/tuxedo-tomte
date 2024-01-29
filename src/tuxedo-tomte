@@ -4006,7 +4006,9 @@ sub tuxedomirrors() {
 		if (open($FH, '<', $filename)) {
 			printLog("file open", 'L0');
 			$data = <$FH>;
+			printLog("data before close:\n$data", 'L0');
 			close $FH;
+			printLog("data after close:\n$data", 'L0');
 			$hashFile = md5($data);
 			printLog("hashvalue $filename: $hashFile", 'L0');
 			$hashFile = md5_hex($data);
