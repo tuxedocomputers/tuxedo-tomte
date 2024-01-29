@@ -35,7 +35,7 @@ use lib "$Bin/.";
 use Parse::EDID qw(parse_edid);
 
 use Time::HiRes qw(usleep);
-use Digest::MD5 qw(md5_hex);
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Dpkg::Version;
 use JSON;
 use Config::Tiny;
