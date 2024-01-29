@@ -5871,10 +5871,10 @@ sub createRepos {
 					$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
 					printLog("filetext: $fileText", 'L2');
 					if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
-						printLog("could not create file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-					} else {
 						$modified += 1;
 						printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
+					} else {
+						printLog("could not create file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 					}
 				}
 			} else {
@@ -7964,6 +7964,7 @@ sub aptgetRefreshModule {
 sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
+	chomp($fileText);
 	if ( open($FH, ">",$fileName) ) {
 		#TODO debug unbuffered to remove partial newline
 		local $| = 1;
@@ -7987,11 +7988,11 @@ sub createFile {
 #
 sub arrayToFileText {
 	my @lines = @_;
-	my $completeString;
+	my $completeString = '';
 	my $line = '';
 	my $counter = 0;
 	foreach $line (@lines) {
-		if ($counter ==0) {
+		if ($counter == 0) {
 			$completeString .= $line;
 		} else {
 			$completeString .= "\n".$line;
