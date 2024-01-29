@@ -4000,8 +4000,11 @@ sub tuxedomirrors() {
 	my $FH;
 	my $hashFile;
 	my $data;
+	printLog("before file x", 'L0');
 	if (-e $filename) {
+		printLog("file exists", 'L0');
 		if (open($FH, '<', $filename)) {
+			printLog("file open", 'L0');
 			$data = <$FH>;
 			close $FH;
 			$hashFile = md5($data);
