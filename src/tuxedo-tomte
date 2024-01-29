@@ -6024,6 +6024,8 @@ sub cleanSourcesList {
 				print $FHsource "$tomteMessage\n";
 			}
 			foreach $sourceLine (@sourceLines) {
+				#TODO debug
+				printLog("sourceLine: $sourceLine", 'L0');
 				if (commentOut(\$sourceLine)) {
 					$modified = 1;
 				}
@@ -6052,7 +6054,8 @@ sub commentOut {
 	my $line = shift;
 	my $tmpLine = $$line;
 	#TODO debug
-	printLog("line: $$tmpLine", 'L0');
+	printLog("line\$\$: $$tmpLine", 'L0');
+	printLog("line\$: $tmpLine", 'L0');
 	if ($$tmpLine =~ /^#/) {
 		return (0);
 	} else {
