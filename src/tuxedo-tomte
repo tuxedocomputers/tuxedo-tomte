@@ -491,7 +491,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -512,7 +512,7 @@ my %tuxedo_mirrors = (
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
 			hashvalue => '',
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => '7.1 horus',
 	},
@@ -532,7 +532,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -542,7 +542,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -552,7 +552,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -572,7 +572,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -592,7 +592,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '98c4227ad63b11ec1312064774542168',
+			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
 		},
 		name => 'jammy',
 	},
@@ -4007,15 +4007,9 @@ sub tuxedomirrors() {
 			printLog("file open", 'L0');
 			local $/ = undef;
 			$data = <$FH>;
-			printLog("data before close:\n$data", 'L0');
 			close $FH;
-			printLog("data after close:\n$data", 'L0');
-			$hashFile = md5($data);
-			printLog("hashvalue $filename: $hashFile", 'L0');
 			$hashFile = md5_hex($data);
 			printLog("hashvalue hex $filename: $hashFile", 'L0');
-			$hashFile = md5_base64($data);
-			printLog("hashvalue base64 $filename: $hashFile", 'L0');
 		}
 	}
 
@@ -7971,6 +7965,8 @@ sub createFile {
 	my ($fileName, $fileText, $backup) = @_;
 	my $FH;
 	if ( open($FH, ">",$fileName) ) {
+		#TODO debug unbuffered to remove partial newline
+		local $| = 1;
 		print $FH "$fileText";
 		close $FH;
 		return (1);
