@@ -6054,7 +6054,13 @@ sub commentOut {
 	my $line = shift;
 	my $tmpLine = $$line;
 	#TODO debug
+	if (defined $$tmpLine ) {
+		printLog('$$tmpLine is undefined', 'L0');
+	}
 	printLog("line\$\$: $$tmpLine", 'L0');
+	if (defined $tmpLine ) {
+		printLog('$tmpLine is undefined', 'L0');
+	}
 	printLog("line\$: $tmpLine", 'L0');
 	if ($$tmpLine =~ /^#/) {
 		return (0);
