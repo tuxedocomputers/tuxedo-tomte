@@ -300,17 +300,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu bionic main'],
-			hashvalue => '',
+			hashvalue => '1d0a2b4c293b99a94977150286791d18',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu bionic main'],
-			hashvalue => '',
+			hashvalue => '6723281912b9babfb1a3797d1b36dacb',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu bionic main'],
-			hashvalue => '',
+			hashvalue => '8756c1161492b94d4f0578acc7c4b040',
 		},
 		name => 'bionic',
 	},
@@ -318,17 +318,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '181db878920e3f94a22b378a8e566cd3',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => 'b93731889dac4c8a0df951e3deba178c',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '72cd880159c7260a1c5e5ff0580a541d',
 		},
 		name => 'focal',
 	},
@@ -336,7 +336,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -344,17 +344,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '181db878920e3f94a22b378a8e566cd3',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => 'b93731889dac4c8a0df951e3deba178c',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '72cd880159c7260a1c5e5ff0580a541d',
 		},
 		name => '6.1 jolnir',
 	},
@@ -362,7 +362,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => '7.1 horus',
 	},
@@ -370,17 +370,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '181db878920e3f94a22b378a8e566cd3',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => 'b93731889dac4c8a0df951e3deba178c',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '72cd880159c7260a1c5e5ff0580a541d',
 		},
 		name => 'focal',
 	},
@@ -388,7 +388,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -396,7 +396,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -404,7 +404,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -412,17 +412,17 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '181db878920e3f94a22b378a8e566cd3',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => 'b93731889dac4c8a0df951e3deba178c',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '72cd880159c7260a1c5e5ff0580a541d',
 		},
 		name => 'focal',
 	},
@@ -430,7 +430,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -438,25 +438,24 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '181db878920e3f94a22b378a8e566cd3',
 		},
 		oibaf => {
 			filename => '/etc/apt/sources.list.d/oibaf-tuxedo.list',
 			content => ['deb https://oibaf.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => 'b93731889dac4c8a0df951e3deba178c',
 		},
 		graphics => {
 			filename => '/etc/apt/sources.list.d/graphics-tuxedo.list',
 			content => ['deb https://graphics.tuxedocomputers.com/ubuntu focal main'],
-			hashvalue => '',
+			hashvalue => '72cd880159c7260a1c5e5ff0580a541d',
 		},
 		name => 'focal',
-	},
-	"TUXEDO OS 22.04" => {
+	}, "TUXEDO OS 22.04" => {
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
-			hashvalue => '',
+			hashvalue => '2e4ca9519b00ae7a9edf62fdd91753ba',
 		},
 		name => 'jammy',
 	},
@@ -471,7 +470,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'b711ce4a57ffaae7c1879df95278fb04',
 		},
 		name => 'bionic',
 	},
@@ -481,7 +480,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'd7eaed386fbba15620a3abdd3aa993c2',
 		},
 		name => 'focal',
 	},
@@ -491,7 +490,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -501,7 +500,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'd7eaed386fbba15620a3abdd3aa993c2',
 		},
 		name => '6.1 jolnir',
 	},
@@ -511,8 +510,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => '',
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => '7.1 horus',
 	},
@@ -522,7 +520,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'd7eaed386fbba15620a3abdd3aa993c2',
 		},
 		name => 'focal',
 	},
@@ -532,7 +530,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -542,7 +540,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -552,7 +550,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -562,7 +560,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'd7eaed386fbba15620a3abdd3aa993c2',
 		},
 		name => 'focal',
 	},
@@ -572,7 +570,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -582,7 +580,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'],
-			hashvalue => '',
+			hashvalue => 'd7eaed386fbba15620a3abdd3aa993c2',
 		},
 		name => 'focal',
 	},
@@ -592,7 +590,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
-			hashvalue => 'b60613d0c34f7ec23be0862b845dd51c',
+			hashvalue => '44baa5371508a90efa03c70c2e9ce85b',
 		},
 		name => 'jammy',
 	},
@@ -5805,6 +5803,8 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
+	# do NOT add more distributions/flavours here as this is meant only for
+	# old installations where those entries might still exist
 	if (($completeDistVersion ne 'TUXEDO_OS 22.04') &&
 		($completeDistVersion ne 'Ubuntu 22.04') &&
 		($completeDistVersion ne 'elementary OS 7.1') &&
@@ -5862,26 +5862,15 @@ sub createRepos {
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
-			if (-e $repos{$completeDistVersion}{$key}{filename}) {
-			   if (compareMD5sum( $repos{$completeDistVersion}{$key}{filename},$repos{$completeDistVersion}{$key}{hashvalue})) {
-					#TODO debug
-					printLog("repo file found and MD5sum correct !!!", 'L2');
-				} else {
-					printLog("creating $repos{$completeDistVersion}{$key}{filename}", 'L0');
-					$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
-					printLog("filetext: $fileText", 'L2');
-					if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
-						$modified += 1;
-						printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-					} else {
-						printLog("could not create file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
-					}
-				}
+			if ((-e $repos{$completeDistVersion}{$key}{filename}) &&
+				(compareMD5sum( $repos{$completeDistVersion}{$key}{filename},$repos{$completeDistVersion}{$key}{hashvalue}))) {
+				#TODO debug
+				printLog("repo file found and MD5sum correct !!!", 'L2');
 			} else {
 				printLog("creating $repos{$completeDistVersion}{$key}{filename}", 'L0');
 				$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
 				printLog("filetext: $fileText", 'L2');
-				if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0)) {
+				if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
 					$modified += 1;
 					printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 				} else {
