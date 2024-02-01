@@ -6024,13 +6024,13 @@ sub cleanSourcesList {
 				print $FHsource "$tomteMessage\n";
 			}
 			foreach $sourceLine (@sourceLines) {
-				#TODO debug
-				printLog("sourceLine: $sourceLine", 'L0');
 				if (commentOut(\$sourceLine)) {
 					$modified = 1;
 				}
 				# no backup for the file as it only comments out lines
 				# remove all tuxedo mirrors entries
+
+				# TODO add all the other repos here too to avoid repetitions
 				unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
 					print $FHsource "$sourceLine\n";
 				}
@@ -6052,20 +6052,10 @@ sub cleanSourcesList {
 #
 sub commentOut {
 	my $line = shift;
-	my $tmpLine = $$line;
-	#TODO debug
-	if (defined $$tmpLine ) {
-		printLog('$$tmpLine is undefined', 'L0');
-	}
-	printLog("line\$\$: $$tmpLine", 'L0');
-	if (defined $tmpLine ) {
-		printLog('$tmpLine is undefined', 'L0');
-	}
-	printLog("line\$: $tmpLine", 'L0');
-	if ($$tmpLine =~ /^#/) {
+	if (${$line} =~ /^#/) {
 		return (0);
 	} else {
-		$tmpLine = "# $$tmpLine";
+		${$line} = "# ${$line}";
 		return (1);
 	}
 }
