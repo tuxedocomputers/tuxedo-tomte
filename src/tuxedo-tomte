@@ -3900,6 +3900,14 @@ sub tuxedorepos() {
 		return (1);
 	}
 
+# TODO last time I was here
+	# create default repo list if it does not exist
+	unless (-e '/etc/apt/sources.list') {
+		open(FH, '>', '/etc/apt/sources.list');
+		printLog('created /etc/apt/sources.list because it was not there', 'L2');
+		close(FH);
+	}
+
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_repos);
@@ -3935,7 +3943,7 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("uprading $origConfModules{$module}{name}", 'L1');
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
 		addRepoKey();
@@ -5887,8 +5895,7 @@ sub compareMD5sum {
 			$data = <$FH>;
 			close $FH;
 			$hashFile = md5_hex($data);
-			# TODO debug
-			printLog("file: $filename data: $data", 'L2');
+			printLog("file: $filename\ncontent:\n$data", 'L2');
 			printLog("hashfile: $hashFile hash: $givenHash", 'L2');
 			if ($givenHash eq $hashFile) {
 				return (1);
