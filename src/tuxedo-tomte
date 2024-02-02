@@ -3993,24 +3993,6 @@ sub tuxedomirrors() {
 		return (1);
 	}
 
-	#TODO debug
-	my $filename = '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list';
-	my $FH;
-	my $hashFile;
-	my $data;
-	printLog("before file x", 'L0');
-	if (-e $filename) {
-		printLog("file exists", 'L0');
-		if (open($FH, '<', $filename)) {
-			printLog("file open", 'L0');
-			local $/ = undef;
-			$data = <$FH>;
-			close $FH;
-			$hashFile = md5_hex($data);
-			printLog("hashvalue hex $filename: $hashFile", 'L0');
-		}
-	}
-
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createRepos(\%tuxedo_mirrors);
@@ -5867,9 +5849,9 @@ sub createRepos {
 				#TODO debug
 				printLog("repo file found and MD5sum correct !!!", 'L2');
 			} else {
+				printLog("$repos{$completeDistVersion}{$key}{filename} incorrect", 'L0');
 				printLog("creating $repos{$completeDistVersion}{$key}{filename}", 'L0');
 				$fileText = arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
-				printLog("filetext: $fileText", 'L2');
 				if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
 					$modified += 1;
 					printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
@@ -5897,9 +5879,13 @@ sub compareMD5sum {
 	my $data;
 	if (-e $filename) {
 		if (open($FH, '<', $filename)) {
+			local $/;
 			$data = <$FH>;
 			close $FH;
 			$hashFile = md5_hex($data);
+			# TODO debug
+			printLog("file: $filename data: $data", 'L0');
+			printLog("hashfile: $hashFile hash: $givenHash", 'L0');
 			if ($givenHash eq $hashFile) {
 				return (1);
 			} else {
