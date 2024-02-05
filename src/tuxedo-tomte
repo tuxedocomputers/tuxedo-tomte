@@ -2840,13 +2840,13 @@ sub acquireLock {
 	my $num;
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("Locking: acquiring lock: $filename", 'TL2');
+		printLog("Locking: acquiring lock: $filename", 'L2');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_SETLK )) {
-			printLog("Locking: locking successfull", 'TL2');
+			printLog("Locking: locking successfull", 'L2');
 			$num = <$FH> || 0;
 			$lockFiles{$key}{'FH'} = $FH;
 			$lockFiles{$key}{'number'} = $num;
@@ -2854,11 +2854,11 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("Locking: failed to get write lock: $filename: $fs->error", 'TL0');
+			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0');
 			return (0);
 		}
 	} else {
-		printLog("Locking: failed to open: $filename: $!", 'TL2');
+		printLog("Locking: failed to open: $filename: $!", 'L2');
 		return (0);
 	}
 }
@@ -2888,23 +2888,23 @@ sub releaseLock {
 						printLog("Locking: lock released on $filename", 'L2');
 						return (1);
 					} else {
-						printLog("Locking: close failed!: $filename: $!", 'TL2');
+						printLog("Locking: close failed!: $filename: $!", 'L2');
 						return (0);
 					}
 				} else {
-					printLog("Locking: unlock failed!: $filename: $fs->error", 'TL2');
+					printLog("Locking: unlock failed!: $filename: $fs->error", 'L2');
 					return (0);
 				}
 			} else {
-				printLog("Locking: truncate failed!: $filename: $!", 'TL2');
+				printLog("Locking: truncate failed!: $filename: $!", 'L2');
 				return (0);
 			}
 		} else {
-			printLog("Locking: write failed!: $filename: $!", 'TL2');
+			printLog("Locking: write failed!: $filename: $!", 'L2');
 			return (0);
 		}
 	} else {
-		printLog("Locking: seek failed!: $filename: $!", 'TL2');
+		printLog("Locking: seek failed!: $filename: $!", 'L2');
 		return (0);
 	}
 }
@@ -2933,7 +2933,7 @@ sub lockPM {
 		$processedLockFiles++;
 	}
 	if ($processedLockFiles < $lockFilesHashSize) {
-		printLog("Locking: !!! some files are already locked! reverting all locks", 'TL2');
+		printLog("Locking: !!! some files are already locked! reverting all locks", 'L2');
 		unlockPM('Locking: some files locked -> reverting');
 		return (0);
 	}
@@ -3191,16 +3191,16 @@ sub prerequisites {
 }
 
 sub prerequisitesFAI {
-	printLog("starting prerequisites FAI", 'TL0');
+	printLog("starting prerequisites FAI", 'L0');
 	printLog("executing: apt-get update", 'L2');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'T2');
-	printLog("ending prerequisites FAI", 'TL0');
+	printLog("ending prerequisites FAI", 'L0');
 }
 
 sub postrequisitesFAI {
-	printLog("starting postrequisites FAI", 'TL0');
+	printLog("starting postrequisites FAI", 'L0');
 	if (httpToHttps(\%tuxedo_repos)) {
 		printLog('TUXEDO debian repos set to https', 'L0');
 	}
@@ -3211,7 +3211,7 @@ sub postrequisitesFAI {
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'T2');
-	printLog("ending postrequisites FAI", 'TL0');
+	printLog("ending postrequisites FAI", 'L0');
 }
 
 
@@ -4030,6 +4030,7 @@ sub tuxedomirrors() {
 		printLog("uprading $origConfModules{$module}{name}", 'L1');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
+		$retval3 = cleanSourcesList($tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
 		addRepoKey();
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -5955,7 +5956,7 @@ sub addRepoKey {
 				sleep(1);
 			}
 			if (isPackageInstalled("tuxedo-archive-keyring")) {
-				printLog("TUXEDO keyring installed successfully", 'TL2');
+				printLog("TUXEDO keyring installed successfully", 'L2');
 				return (1);
 			} else {
 				printLog("The TUXEDO repository key could not be installed!", 'TL0');
@@ -6008,16 +6009,25 @@ sub cleanSourcesList {
 				# no backup for the file as it only comments out lines
 				print $FHsource "$tomteMessage\n";
 			}
-			foreach $sourceLine (@sourceLines) {
-				if (commentOut(\$sourceLine)) {
-					$modified = 1;
-				}
-				# no backup for the file as it only comments out lines
-				# remove all tuxedo mirrors entries
-
-				# TODO add all the other repos here too to avoid repetitions
-				unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
+			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2');
+			if (($localConfModules{'tuxedomirrors'}{version} + 0) < 5) {
+				printLog("old tuxedomirrors module installed", 'L2');
+				foreach $sourceLine (@sourceLines) {
+					if (commentOut(\$sourceLine)) {
+						$modified = 1;
+					}
 					print $FHsource "$sourceLine\n";
+				}
+				#TODO debug
+			} else {
+				printLog("current tuxedomirrors module is already installed", 'L2');
+			# no backup for the file as it only comments out lines
+				# remove all tuxedo mirrors entries
+				foreach $sourceLine (@sourceLines) {
+					# TODO add all the other repos here too to avoid repetitions
+					unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
+						print $FHsource "$sourceLine\n";
+					}
 				}
 			}
 			close $FHsource;
@@ -6976,7 +6986,7 @@ sub getAptMark {
 	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	printLog("package: $package", 'TL2');
+	printLog("package: $package", 'L2');
 	if ( $retVal =~ /$package/mg ) {
 		printLog("mark is auto", 'L2');
 		return (1);
@@ -7073,7 +7083,7 @@ sub installKernelFlavour {
 			`apt-get update -q`;
 			printLog("installation command: $installCmd", 'L2');
 			$retString = `$installCmd`;
-			printLog("retString: $retString", 'TL2');
+			printLog("retString: $retString", 'L2');
 			if ($retString =~ /dpkg --configure -a/) {
 				lockPM();
 				printLog("some packages are not configured", 'L2');
@@ -8346,20 +8356,20 @@ sub dkmsVerbose {
 	if ($action eq 'insert') {
 		$retValue = appendFile('/etc/dkms/framework.conf', "verbose=\"1\"\n");
 		if ($retValue) {
-			printLog('append verbose for DKMS file', 'TL2');
+			printLog('append verbose for DKMS file', 'L2');
 			return (1);
 		} else {
-			printLog('append verbose for DKMS failed', 'TL2');
+			printLog('append verbose for DKMS failed', 'L2');
 			return (0);
 		}
 	}
 	if ($action eq 'remove') {
 		$retValue = substituteLineInFile('/etc/dkms/framework.conf', "verbose=\"1\"\n", '');
 		if ($retValue) {
-			printLog('remove verbose in DKMS file', 'TL2');
+			printLog('remove verbose in DKMS file', 'L2');
 			return (1);
 		} else {
-			printLog('remove verbose for DKMS failed', 'TL2');
+			printLog('remove verbose for DKMS failed', 'L2');
 			return (0);
 		}
 	}
