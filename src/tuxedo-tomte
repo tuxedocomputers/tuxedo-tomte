@@ -6010,13 +6010,16 @@ sub cleanSourcesList {
 				print $FHsource "$tomteMessage\n";
 			}
 			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2');
+			# in case this is an upgrade or a first time installation
 			if (($localConfModules{'tuxedomirrors'}{version} + 0) < 5) {
 				printLog("old tuxedomirrors module installed", 'L2');
 				foreach $sourceLine (@sourceLines) {
 					if (commentOut(\$sourceLine)) {
 						$modified = 1;
 					}
-					print $FHsource "$sourceLine\n";
+					unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
+						print $FHsource "$sourceLine\n";
+					}
 				}
 				#TODO debug
 			} else {
