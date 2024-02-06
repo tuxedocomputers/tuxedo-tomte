@@ -1,4 +1,4 @@
-tuxedo-tomte (2.22.0-12) UNRELEASED; urgency=medium
+tuxedo-tomte (2.22.0-13) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * changed location for ubuntu mirror repo file location, everything will be commented out in sources.list
@@ -39,8 +39,10 @@ tuxedo-tomte (2.22.0-12) UNRELEASED; urgency=medium
   * changed hashes
   * small changes
   * install and update for mirrors module
+  * after packaging
+  * remove line condition
 
- -- E. Mohr <tux@tuxedocomputers.com>  Mon, 05 Feb 2024 12:08:03 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 Feb 2024 11:02:40 +0100
 
 tuxedo-tomte (2.22.0) jammy; urgency=medium
 
