@@ -92,6 +92,7 @@ my $oldConfigFile = $configDir.'tomte.cfg';
 my $configFile = $configDir.'modules.cfg';
 my $configIniFile = $configDir.'config.ini';
 my $configIniValues = Config::Tiny->new;
+my $tomteFirstInstallFile = '/tmp/tomteFirstInstall';
 
 my %modeFile = (
 	DONT_CONFIGURE => $configDir.'DONT_CONFIGURE',
@@ -5853,7 +5854,7 @@ sub createRepos {
 	foreach $key (keys %{ $repos{$completeDistVersion} }) {
 		# each line
 		if ($key ne 'name') {
-			# changing the text in $fileText will change all the
+			# WARNING !!! changing the text in $fileText will change all the
 			# hash values in %tuxedo_repos and %tuxedo_values !!!
 			$fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
@@ -6010,8 +6011,10 @@ sub cleanSourcesList {
 				print $FHsource "$tomteMessage\n";
 			}
 			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2');
-			# in case this is an upgrade or a first time installation
-			if (($localConfModules{'tuxedomirrors'}{version} + 0) < 5) {
+			# in case this is an upgrade from a version without this feature or a first time installation
+			#TODO debug
+			printLog('first time installaton', 'L2');
+			if ((($localConfModules{'tuxedomirrors'}{version} + 0) < 5) || (-e $tomteFirstInstallFile)) {
 				printLog("old tuxedomirrors module installed", 'L2');
 				foreach $sourceLine (@sourceLines) {
 					if (commentOut(\$sourceLine)) {
@@ -8832,6 +8835,8 @@ sub initConfigFile {
 		readConfigFile();
 		return;
 	} else {
+		# set flag for first installation
+		createFile( $tomteFirstInstallFile, 'tomteFirstInstall', 0 );
 		# create a new configFile
 		printLog("no configfile present ... creating one", 'TL');
 		writeConfigFile();
