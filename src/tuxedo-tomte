@@ -3391,9 +3391,13 @@ sub checkRequirements {
 	}
 
 	# all notebooks require this
+	# the temporary fix has to be removed for now as it causes boot delay issues
+	# on some notebooks
 	if ($chassisType eq 'notebook') {
-		$origConfModules{systemdbacklightfix}{required} = 'yes';
-		printLog("detected $origConfModules{systemdbacklightfix}{name} issue", 'L1');
+		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
+			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1');
+			$origConfModules{systemdbacklightfix}{required} = 'no';
+		}
 	}
 
 	if (($boardname =~ /X170SM/) ||
