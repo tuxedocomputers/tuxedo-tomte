@@ -6013,7 +6013,10 @@ sub cleanSourcesList {
 			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2');
 			# in case this is an upgrade from a version without this feature or a first time installation
 			#TODO debug
-			printLog('first time installaton', 'L2');
+			printLog('check for first time installaton', 'L2');
+			if (-e $tomteFirstInstallFile) {
+				printLog("first time installation file exists !!!", 'L2');
+			}
 			if ((($localConfModules{'tuxedomirrors'}{version} + 0) < 5) || (-e $tomteFirstInstallFile)) {
 				printLog("old tuxedomirrors module installed", 'L2');
 				foreach $sourceLine (@sourceLines) {
