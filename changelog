@@ -1,59 +1,16 @@
-tuxedo-tomte (2.22.0-19) UNRELEASED; urgency=medium
+tuxedo-tomte (2.22.0-21) UNRELEASED; urgency=medium
 
   [ E. Mohr ]
   * changed location for ubuntu mirror repo file location, everything will be commented out in sources.list
   * remove all tuxedo mirror entries from sources.list
   * removed superfluous subroutine setComment *sniff*
   * removed repoList and tools *sniff*
-  * added check for md5
+  * remove backlight fix
 
   [ emohrtuxedo ]
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-
-  [ E. Mohr ]
-  * UNRELEASED
-
-  [ emohrtuxedo ]
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * after packaging
-  * debug
-  * repaired commentOut subroutine
   * added all hash values for repo files
-  * recreating incorrect repo files is ready
-  * changed hashes
-  * small changes
-  * install and update for mirrors module
-  * after packaging
-  * remove line condition
-  * after packaging
-  * first time installation added
-  * packing
-  * packing
 
-  [ test ]
-  * UNRELEASED
-  * UNRELEASED
-
-  [ emohrtuxedo ]
-  * more debug
-
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 07 Feb 2024 10:23:54 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 07 Feb 2024 12:08:22 +0100
 
 tuxedo-tomte (2.22.0) jammy; urgency=medium
 
