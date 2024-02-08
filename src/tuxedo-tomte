@@ -3941,7 +3941,6 @@ sub tuxedorepos() {
 		return (1);
 	}
 
-# TODO last time I was here
 	# create default repo list if it does not exist
 	unless (-e '/etc/apt/sources.list') {
 		open(FH, '>', '/etc/apt/sources.list');
@@ -6106,8 +6105,6 @@ sub cleanSourcesList {
 			}
 			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2');
 			# in case this is an upgrade from a version without this feature or a first time installation
-			#TODO debug
-			printLog('check for first time installaton', 'L2');
 			if (-e $tomteFirstInstallFile) {
 				printLog("first time installation file exists !!!", 'L2');
 			}
@@ -6121,13 +6118,10 @@ sub cleanSourcesList {
 						print $FHsource "$sourceLine\n";
 					}
 				}
-				#TODO debug
 			} else {
 				printLog("current tuxedomirrors module is already installed", 'L2');
-			# no backup for the file as it only comments out lines
 				# remove all tuxedo mirrors entries
 				foreach $sourceLine (@sourceLines) {
-					# TODO add all the other repos here too to avoid repetitions
 					unless ($sourceLine =~ /mirrors\.tuxedocomputers\./) {
 						print $FHsource "$sourceLine\n";
 					}
@@ -6166,7 +6160,6 @@ sub commentOut {
 # returns 1 if nothing was changed
 # returns 0 if there was an error
 #
-# TODO check whether this still works with the new repos under sources.list.d
 sub httpToHttps {
 	my %repos = %{$_[0]};
 	my $key;
