@@ -1398,6 +1398,17 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
+	'65' => {
+		model => ['all Elementary OS'],
+		board_name => [''],
+		fix => [''],
+		flavour => ['6.1', '7.2'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 
@@ -2575,6 +2586,27 @@ my %origConfModules = (
 		FAI => 'yes',
 		LiveISO => 'no',
 	},
+	elementaryosdkmspinningfix => {
+		name => 'elementaryos-dkms-pinning-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('elementaryosdkmspinningfix_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'no',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
+	},
 );
 
 
@@ -3627,6 +3659,11 @@ sub checkRequirements {
 		($boardname =~ /PH6PG01_PH6PG71/)) {
 		$origConfModules{disablegucfix}{required} = 'yes';
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
+	}
+
+	if ($completeDistVersion =~ /elementary OS 7.1/) {
+		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
+		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
 	}
 }
 
@@ -5694,6 +5731,60 @@ sub systemdbacklightfix() {
 		}
 	}
 }
+
+
+
+###############################################################################
+# pinning on Elementary OS to ensure we provide the correct dkms version
+#
+sub elementaryosdkmspinningfix() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
+	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
+		"Package: *\n".
+		"Pin: release a=tuxedo,n=jammy\n".
+		"Pin-Priority: 1000";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval = createFile($fileName, $fileText, 1);
+		if ($retval == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'upgrade') {
+		# not implemented yet
+	}
+	if ($action eq 'remove') {
+		if (-e $fileName) {
+			if (removeWarningMessage("elementaryos-dkms-pinning-fix\n")) {
+				printLog("removing $module", 'TL0');
+				if (unlink($fileName)) {
+					printLog("$origConfModules{$module}{name} removed", 'TL0');
+				} else {
+					printLog('can\'t remove fix', 'TL0');
+				}
+				$origConfModules{$module}{installed} = 'no';
+				$origConfModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			}
+		} else {
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'removed');
+			printLog("$origConfModules{$module}{name} was already removed", 'TL0');
+		}
+	}
+}
+
+
 
 
 
