@@ -5743,9 +5743,9 @@ sub elementaryosdkmspinningfix() {
 	my $retval;
 	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
 	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"Package: *\n".
+		"Package: dkms\n".
 		"Pin: release a=tuxedo,n=jammy\n".
-		"Pin-Priority: 1000";
+		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createFile($fileName, $fileText, 1);
