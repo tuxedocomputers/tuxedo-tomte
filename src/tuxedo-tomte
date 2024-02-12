@@ -3661,10 +3661,12 @@ sub checkRequirements {
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
 
-	if ($completeDistVersion =~ /elementary OS 7.1/) {
-		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
-		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
-	}
+	# this fix is temporarily disabled as the vanilla elementary OS 7.1 iso
+	# installation seems to be broken
+	#if ($completeDistVersion =~ /elementary OS 7.1/) {
+	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
+	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
+	#}
 }
 
 
