@@ -1,24 +1,8 @@
-tuxedo-tomte (2.22.0-22) UNRELEASED; urgency=medium
+tuxedo-tomte (2.23.6) jammy; urgency=medium
 
-  [ E. Mohr ]
-  * changed location for ubuntu mirror repo file location, everything will be commented out in sources.list
-  * remove all tuxedo mirror entries from sources.list
-  * removed superfluous subroutine setComment *sniff*
-  * removed repoList and tools *sniff*
-  * remove backlight fix
+  * remove systemdbacklightfix from all notebooks
 
-  [ emohrtuxedo ]
-  * added all hash values for repo files
-
-  [ E. Mohr ]
-  * added elementaryosdkmspinningfix for elementary OS installations
-  * removed 6.1 from last fix
-
-  [ emohrtuxedo ]
-  * after packaging
-  * removed debug
-
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 08 Feb 2024 10:06:10 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 12 Feb 2024 10:07:45 +0100
 
 tuxedo-tomte (2.22.0) jammy; urgency=medium
 

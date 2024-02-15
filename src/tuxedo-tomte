@@ -1,6 +1,10 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
+<<<<<<< HEAD
 our $VERSION = '2.22.0-22';
+=======
+our $VERSION = '2.23.6';
+>>>>>>> master
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -1438,7 +1442,7 @@ my %tuxedo_devices = (
 	'65' => {
 		model => ['all Elementary OS'],
 		board_name => [''],
-		fix => [''],
+		fix => ['elementaryosdkmspinningfix'],
 		flavour => ['6.1', '7.2'],
 		pci_id => '',
 		cpu => '',
@@ -3460,11 +3464,12 @@ sub checkRequirements {
 	}
 
 	# all notebooks require this
-	# temporary fix has to be removed because of boot delay issues
+	# the temporary fix has to be removed for now as it causes boot delay issues
+	# on some notebooks
 	if ($chassisType eq 'notebook') {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
+			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1');
 			$origConfModules{systemdbacklightfix}{required} = 'no';
-			printLog("detected $origConfModules{systemdbacklightfix}{name} issue", 'L1');
 		}
 	}
 
@@ -3697,10 +3702,12 @@ sub checkRequirements {
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
 	}
 
-	if ($completeDistVersion =~ /elementary OS 7.1/) {
-		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
-		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
-	}
+	# this fix is temporarily disabled as the vanilla elementary OS 7.1 iso
+	# installation seems to be broken
+	#if ($completeDistVersion =~ /elementary OS 7.1/) {
+	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
+	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
+	#}
 }
 
 
@@ -5786,9 +5793,9 @@ sub elementaryosdkmspinningfix() {
 	my $retval;
 	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
 	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"Package: *\n".
+		"Package: dkms\n".
 		"Pin: release a=tuxedo,n=jammy\n".
-		"Pin-Priority: 1000";
+		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 		$retval = createFile($fileName, $fileText, 1);
