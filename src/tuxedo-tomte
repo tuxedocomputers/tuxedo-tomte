@@ -2787,7 +2787,7 @@ sub checkAndSetLocale {
     # Check if either LANG or LANGUAGE is set
     if (defined $ENV{'LANG'} || defined $ENV{'LANGUAGE'}) {
 		# allow manual override of LANGUAGE environment variable
-        my $lang = (length $ENV{'LANGUAGE'} > 0) ? $ENV{'LANGUAGE'} : $ENV{'LANG'};
+        my $lang = $ENV{'LANGUAGE'} || $ENV{'LANG'} || $default_locale;
 
         # Split the language code from the full locale using dot as the delimiter
         # a $lang could be de, de_DE or de_DE.UTF8
