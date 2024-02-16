@@ -1,10 +1,6 @@
 #!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
-<<<<<<< HEAD
-our $VERSION = '2.22.0-22';
-=======
-our $VERSION = '2.23.6';
->>>>>>> master
+our $VERSION = 'API-Change.Feature-Release.Hotfix-Release';
 
 # Copyright (c) TUXEDO Computers GmbH <tux@tuxedocomputers.com>
 # This file is part of TUXEDO Tomte.
@@ -54,7 +50,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1090,7 +1086,7 @@ my %tuxedo_devices = (
 	'33' => {
 		model => ['all with LTE module ME936'],
 		board_name => [''],
-		fix => ['threegfix'],
+		fix => ['huaweime936fix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '12d1:15bb',
 		cpu => '',
@@ -1189,7 +1185,7 @@ my %tuxedo_devices = (
 	'42' => {
 		model => ['all with LTE module ME906s'],
 		board_name => [''],
-		fix => ['threegfix'],
+		fix => ['huaweime906sfix'],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '12d1:15c1',
 		cpu => '',
@@ -1449,6 +1445,17 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'66' => {
+		model => ['all with LTE module ME906s HP rebranded'],
+		board_name => [''],
+		fix => ['huaweime906shpfix'],
+		flavour => ['18.04', '20.04', '22.04'],
+		pci_id => '03f0:a31d',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => 'ME906',
 	},
 );
 
@@ -1739,6 +1746,69 @@ my %origConfModules = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no',
+	},
+	huaweime906sfix => {
+		name => 'huawei-me906s-fix',
+		version => 2,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('huaweime906sfix_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'yes',
+	},
+	huaweime906shpfix => {
+		name => 'huawei-me906s-hp-fix',
+		version => 2,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('huaweime906shpfix_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'yes',
+	},
+	huaweime936fix => {
+		name => 'huawei-me936-fix',
+		version => 2,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('huaweime936fix_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => '',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'yes',
 	},
 	threegfix => {
 		name => 'threeg-fix',
@@ -3437,18 +3507,25 @@ sub checkRequirements {
 		printLog("detected $origConfModules{corefix}{name} issue", 'L1');
 	}
 
-	# if Threeg Huawei ME936 device found
-	$lsusb = `lsusb -d 12d1:15bb`;
-	if ($lsusb =~ /ME936/) {
-		$origConfModules{threegfix}{required} = 'yes';
-		printLog("detected $origConfModules{threegfix}{name} issue", 'L1');
+	# if Huawei LTE ME936 device found
+	my $lsusbHuawei936 = `lsusb -d 12d1:15bb`;
+	if ($lsusbHuawei936 =~ /ME936/) {
+		$origConfModules{huaweime936fix}{required} = 'yes';
+		printLog("detected $origConfModules{huaweime936fix}{name} issue", 'L1');
 	}
 
-	# if Threeg Huawei ME906s device found
-	$lsusb = `lsusb -d 12d1:15c1`;
-	if ($lsusb =~ /huawei/i) {
-		$origConfModules{threegfix2}{required} = 'yes';
-		printLog("detected $origConfModules{threegfix2}{name} issue", 'L1');
+	# if Huawei LTE ME906s device found
+	my $lsusbHuawei906s = `lsusb -d 12d1:15c1`;
+	if ($lsusbHuawei906s =~ /ME906s/) {
+		$origConfModules{huaweime906sfix}{required} = 'yes';
+		printLog("detected $origConfModules{huaweime906sfix}{name} issue", 'L1');
+	}
+
+	# if Huawei LTE ME906s HP rebranded device found
+	my $lsusbHuawei906sHP = `lsusb -d 03f0:a31d`;
+	if ($lsusbHuawei906sHP =~ /hp/) {
+		$origConfModules{huaweime906shpfix}{required} = 'yes';
+		printLog("detected $origConfModules{huaweime906shpfix}{name} issue", 'L1');
 	}
 
 	# all notebooks require this
@@ -4183,103 +4260,71 @@ sub elantechtouchpadfix() {
 # Creates a configuration to use Huawei-ME936
 # - if USB device 12d1:15bb detected
 #
+sub huaweime936fix(){
+	my $module = shift;
+	my $action = shift;
+	LTEModuleFix( $module, $action, 'huawei-me936', '12d1', '15bb', 3)
+}
+
+
+
+###############################################################################
+# Creates a configuration to use Huawei-ME906
+# - if USB device 12d1:15c1 detected
+#
+sub huaweime906sfix(){
+	my $module = shift;
+	my $action = shift;
+	LTEModuleFix( $module, $action, 'huawei-me906s', '12d1', '15c1', 2)
+}
+
+
+
+###############################################################################
+# Creates a configuration to use Huawei-ME906 HP rebranded
+# - if USB device 03f0:a31d detected
+#
+sub huaweime906shpfix(){
+	my $module = shift;
+	my $action = shift;
+	LTEModuleFix( $module, $action, 'huawei-me906s-hp', '03f0', 'a31d', 2)
+}
+
+
+
+###############################################################################
+# Creates a configuration to use Huawei-ME936 (old)
+# - if USB device 12d1:15bb detected
+#
 sub threegfix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval1;
-	my $retval2;
-	my $fileName1 = '/etc/modprobe.d/huawei-me936.conf';
 	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"options usbserial vendor=0x12d1 product=0x15bb\n";
-	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15bb\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"3\" ATTR{bConfigurationValue}=\"3\"\n";
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
-		if ($retval1 == 0 || $retval2 == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
-		if ($retval1 == 0 || $retval2 == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		system "rm -rf $fileName2";
+		
+		$origConfModules{$module}{installed} = 'no';
+		$origConfModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'removed');
 	}
 }
 
 
 
 ###############################################################################
-# Creates a configuration to use Huawei-ME906s
+# Creates a configuration to use Huawei-ME906s (old)
 # - if USB device 12d1:15c1 detected
-# !!!! not tested, could not work at all but should not have any negative
-# effects
 #
 sub threegfix2() {
 	my $module = shift;
 	my $action = shift;
-	my $retval1;
-	my $retval2;
-	my $fileName1 = '/etc/modprobe.d/huawei-me906s.conf';
 	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"options usbserial vendor=0x12d1 product=0x15c1\n";
-	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"12d1\", ATTR{idProduct}==\"15c1\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"2\", ATTR{bConfigurationValue}=\"2\"";
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
-		if ($retval1 == 0 || $retval2 == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
-		if ($retval1 == 0 || $retval2 == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		system "rm -rf $fileName2";
+		
+		$origConfModules{$module}{installed} = 'no';
+		$origConfModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'removed');
 	}
 }
 
@@ -6319,6 +6364,61 @@ sub activatePackagekit {
 		$packagekitState = 'active';
 		printLog("packagekit is already active", 'L2');
 		return (1);
+	}
+}
+
+
+
+
+###############################################################################
+# Creates a udev configuration to use specific LTE modules
+#
+sub LTEModuleFix {
+	my ($module, $action, $name, $vendor, $product, $bConfigurationValue) = @_;
+	my $retval1;
+	my $retval2;
+	my $fileName1 = "/etc/modprobe.d/$name.conf";
+	my $fileName2 = "/etc/udev/rules.d/77-mm-$name.rules";
+	my $niceTime = getBackupFileTime();
+	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
+		"options usbserial vendor=0x$vendor product=0x$product\n";
+	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
+		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"$vendor\", ATTR{idProduct}==\"$product\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"$bConfigurationValue\" ATTR{bConfigurationValue}=\"$bConfigurationValue\"\n";
+	if ($action eq 'install') {
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
+		if ($retval1 == 0 || $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval2 = createFile($fileName2, $fileText2, 1);
+		if ($retval1 == 0 || $retval2 == 0) {
+			$origConfModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'remove') {
+		system "rm -rf $fileName1";
+		system "rm -rf $fileName2";
+
+		$origConfModules{$module}{installed} = 'no';
+		$origConfModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'removed');
 	}
 }
 
@@ -8803,7 +8903,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line", 'L0');

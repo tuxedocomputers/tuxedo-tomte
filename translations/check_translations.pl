@@ -124,8 +124,13 @@ sub compare_language_with_tomte_and_print_diff {
         print "\n";
     }
     print "\n\n";
+
+    return $list1_size + $list2_size;
 }
 
+$differences = 0;
 foreach my $language_code (keys %msgids){
-    compare_language_with_tomte_and_print_diff($language_code);
+    $differences += compare_language_with_tomte_and_print_diff($language_code);
 }
+
+exit $differences;
