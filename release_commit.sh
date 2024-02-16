@@ -8,8 +8,8 @@ git status
 echo "\nCheck for consitency"
 ./check.sh
 
-print "\nDo you wish to proceed based on these informations? (press enter to continue)\n";
-my $returnValue = <>; #proceeds with enter
+echo "\nDo you wish to proceed based on these informations? (press enter to continue)";
+read returnValue #proceeds with enter
 
 # Prompt user for the version
 echo "Please enter the version in format (X.X.X): "
