@@ -1,6 +1,6 @@
 #!/bin/bash
 
-perl ./translations/compile_translation_files.pl
+perl translations/compile_translation_files.pl
 
 install_file="debian/install"
 tmp_file="debian/install.tmp"
