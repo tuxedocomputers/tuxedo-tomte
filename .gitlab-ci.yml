@@ -28,6 +28,10 @@ build-packages:
   script:
     - ./build.sh
     - head -5 src/tuxedo-tomte
+    - ls debian
+    - cat debian/install
+    - ls translations/locale
+    - cat translations/locale/install
     - cd ..
     - |
       for deb_file in *.deb; do
