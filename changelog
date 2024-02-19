@@ -1,3 +1,12 @@
+tuxedo-tomte (2.24.0) UNRELEASED; urgency=medium
+
+  * added LTE-module Huawei ME 906s HP rebranded to fixes (huawei-me906s-hp-fix)
+  * renamed threeg-fix and threeg-fix2 to huawei-me906s-fix, huawei-me936-fix
+  * fixed LANGUAGE environment variable
+  * rebuilt the building process
+
+ -- Maximilian Arnold <tux@tuxedocomputers.com>  Mon, 19 Feb 2024 15:36:51 +0100
+
 tuxedo-tomte (2.23.6) jammy; urgency=medium
 
   * remove systemdbacklightfix from all notebooks
