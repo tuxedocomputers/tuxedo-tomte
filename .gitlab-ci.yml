@@ -1,4 +1,4 @@
-build-packages:
+build-package-:
   image: registry.gitlab.com/tuxedocomputers/development/installation-testing/docker-images/debian-fai-package-builder:latest
   variables:
     PACKAGE_BASE_REPO_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic"
@@ -9,10 +9,9 @@ build-packages:
     - BASE_VERSION=$(echo "$VERSIONSTRING" | awk -F- '{print $1}')
 
     # Check if the current version is in any Git tag
-    - TAG_VERSION="${VERSIONSTRING//[-\.]/_}"
-    - TAG_WITH_VERSION=$(git tag --contains "$TAG_VERSION" 2>/dev/null) || true
+    - "ALREADY_TAGGED=$(curl --silent --fail --header \"JOB-TOKEN: $CI_JOB_TOKEN\" \"$PACKAGE_BASE_REPO_URL/tuxedo-tomte/$BASE_VERSION\")"
     - |
-        if [ -z "$TAG_WITH_VERSION" ]; then
+        if [ -n "$ALREADY_TAGGED" ]; then
             # If the current version is not in a tag, create a test version
             BRANCH_SHORT=$(echo "$CI_COMMIT_REF_NAME" | awk -F- '{print $1}')
             TIMESTAMP=$(date -d "$CI_COMMIT_TIMESTAMP" +"%Y%m%d-%H%M%S")
@@ -23,7 +22,7 @@ build-packages:
             # Update the VERSIONSTRING with the test version
             VERSIONSTRING=$TEST_VERSION
         else
-            echo "Version $VERSIONSTRING found in tag: $TAG_WITH_VERSION"
+            echo "Version $VERSIONSTRING will be packaged."
         fi
   script:
     - ./build.sh

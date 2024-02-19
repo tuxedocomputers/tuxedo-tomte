@@ -25,7 +25,7 @@ fi
 
 dch --newversion $version_tag $commit_message
 vim debian/changelog
-dch --release
+dch --release ""
 cp debian/changelog changelog
 
 # Set version tag and perform commit
