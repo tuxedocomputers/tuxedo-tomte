@@ -416,6 +416,7 @@ my %tuxedo_repos = (
 		deb => {
 			filename => '/etc/apt/sources.list.d/tuxedo-computers.list',
 			content => ['deb https://deb.tuxedocomputers.com/ubuntu jammy main'],
+			hashvalue => 'abca6201e010d01e36e3ab8cba94d4b1',
 		},
 		name => 'jammy',
 	},
@@ -571,6 +572,7 @@ my %tuxedo_mirrors = (
 			content => ['deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse',
 						'deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse'],
+			hashvalue => '63b36f8e95d2ada668af508785ece311',
 		},
 		name => 'jammy',
 	},
