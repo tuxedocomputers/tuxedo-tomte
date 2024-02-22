@@ -44,6 +44,8 @@ use Config::Tiny;
 use Locale::TextDomain ('tomte', '/usr/share/locale');
 use Locale::TextDomain qw(tomte);
 
+use File::Slurp qw(append_file write_file read_file edit_file);
+
 # for debugging
 use Data::Dumper;
 # logLevel:
@@ -149,18 +151,18 @@ printLog("detected kernel version: $kernelRelease", 'L2');
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname = '';
-$boardname = readFileReturnLine($boardnameFilename);
+$boardname = readFirstLineOfFile($boardnameFilename);
 
 my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
 my $boardvendor = '';;
-$boardvendor = readFileReturnLine($boardvendorFilename);
+$boardvendor = readFirstLineOfFile($boardvendorFilename);
 
 my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
 my $sysvendor = '';
-$sysvendor = readFileReturnLine($sysvendorFilename);
+$sysvendor = readFirstLineOfFile($sysvendorFilename);
 
 # for desktop messages
-my $sessionID = readFileReturnLine('/proc/sys/kernel/random/boot_id');
+my $sessionID = readFirstLineOfFile('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
 printLog("sessionID: $sessionID", 'TL2');
@@ -3085,113 +3087,14 @@ sub unlockPM {
 
 
 
-
-
-###############################################################################
-# reads a file and returns an array with the lines
-# chomps the linefeed
-# returns undef if file can't be opened
-#
-sub readFileReturnLines {
-	my $file = shift;
-	my $FH;
-	my @lines;
-	if ( (-e $file) && open($FH, "<", $file) ) {
-		chomp(@lines = <$FH>);
-		close $FH;
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("no $file present or unable to open the file for reading", 'L0');
-		return;
-	}
-	return @lines;
-}
-
-
-
 ###############################################################################
 # reads a file and returns a line
 # chomps the line
 # returns undef if file can't be opened
 #
-sub readFileReturnLine {
-	my $file = shift;
-	my $FH;
-	my $line;
-	if ( (-e $file) && open($FH, "<", $file) ) {
-		chomp($line = <$FH>);
-		close $FH;
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("no $file present or unable to open the file for reading", 'L0');
-		return;
-	}
-	return $line;
-}
-
-
-
-
-###############################################################################
-# write a file with (text, filename)
-# returns 0 if file could not be written
-# returns 1 if file could be written
-#
-sub writeFile {
-	my $text = shift;
-	my $file = shift;
-	open(FH, '>', $file) or return (0);
-	print FH $text;
-	close(FH);
-	return (1);
-}
-
-
-
-
-###############################################################################
-# removes a line of text from given file
-# returns 1 if successfull
-# returns 0 if not successfull
-#
-sub removeLineFromFiles {
-	my $searchLine = shift;
-	my (%hash) = @_;
-	my $filenameKey;
-	my $line;
-	foreach $filenameKey (keys %hash) {
-		foreach $line (@{ $hash{$filenameKey} }) {
-			if ($searchLine eq $line) {
-				return removeLineFromFile($searchLine, $filenameKey);
-			}
-		}
-	}
-	return (0);
-}
-
-
-
-###############################################################################
-# removes a line of text from given file
-# returns 1 if successfull
-# returns 0 if not successfull
-#
-sub removeLineFromFile {
-	my ($removeLine, $file) = @_;
-	my $FH;
-	my $line;
-	my @lines;
-	open($FH, '<', $file) or return (0);
-	@lines = <$FH>;
-	close($FH);
-	open($FH, '>', $file) or return (0);
-	foreach $line (@lines) {
-		if ($line !~ /$removeLine/) {
-			print($FH $line);
-		}
-	}
-	close($FH);
-	return (1);
+sub readFirstLineOfFile {
+	my @lines = read_file(shift, chomp => 1);
+	return $lines[0];
 }
 
 
@@ -3208,7 +3111,7 @@ sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
 	my @osReleaseLines;
 
-	@osReleaseLines = readFileReturnLines($osReleaseFile);
+	@osReleaseLines = read_file($osReleaseFile);
 
 	if ( !@osReleaseLines ) {
 		print "Can't determine the operating system\n";
@@ -3912,7 +3815,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = write_file($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4046,7 +3949,7 @@ sub tuxedorepos() {
 			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText)) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -4081,7 +3984,7 @@ sub tuxedorepos() {
 			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (createFile($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, 0)) {
+					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText)) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -4370,10 +4273,10 @@ sub tuxedonvmefix() {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
 			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/;
 			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
-			$nvmeDevice{$nvmeDir}{'model'} = readFileReturnLine("$nvmeDir/model");
-			$nvmeDevice{$nvmeDir}{'subdevice'} = readFileReturnLine("$nvmeDir/device/subsystem_device");
-			$nvmeDevice{$nvmeDir}{'subvendor'} = readFileReturnLine("$nvmeDir/device/subsystem_vendor");
-			$nvmeDevice{$nvmeDir}{'firmware'} = readFileReturnLine("$nvmeDir/firmware_rev");
+			$nvmeDevice{$nvmeDir}{'model'} = readFirstLineOfFile("$nvmeDir/model");
+			$nvmeDevice{$nvmeDir}{'subdevice'} = readFirstLineOfFile("$nvmeDir/device/subsystem_device");
+			$nvmeDevice{$nvmeDir}{'subvendor'} = readFirstLineOfFile("$nvmeDir/device/subsystem_vendor");
+			$nvmeDevice{$nvmeDir}{'firmware'} = readFirstLineOfFile("$nvmeDir/firmware_rev");
 		}
 		foreach $nvmeDir ( keys %nvmeDevice ) {
 			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
@@ -4575,7 +4478,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName, $fileText, 1);
+		$retval1 = write_file($fileName, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -5296,7 +5199,7 @@ sub apportfix() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
-			$retval = substituteLineInFile('/etc/default/apport', 'enabled=1', 'enabled=0');
+			$retval = edit_file { s/^enabled=1/enabled=0/g } '/etc/default/apport';
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0');
 				#`service apport stop`;
@@ -5380,9 +5283,7 @@ sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (isTextInFile('/etc/default/grub', 'i915.enable_psr=0')) {
-			replaceTextInFile('/etc/default/grub', 'i915.enable_psr=0', '');
-		}
+		edit_file { s/i915\.enable_psr=0//g } '/etc/default/grub';
 	}
 	grubModuleEdit( $module, $action, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
 }
@@ -5414,9 +5315,7 @@ sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (isTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000')) {
-			replaceTextInFile('/etc/default/grub', 'thunderbolt.tuxedo_icm_driver_ready_timeout=2000', '');
-		}
+		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//g } '/etc/default/grub';
 	}
 	grubModuleEdit( $module, $action, 'modprobe.blacklist=thunderbolt');
 }
@@ -5445,7 +5344,7 @@ sub lightdmlogindcheckgraphicalfix() {
 		}
 		if (-e $lightdmCheckGraphicalFile) {
 			unless (isTextInFile($lightdmCheckGraphicalFile, '[LightDM]') && isTextInFile($lightdmCheckGraphicalFile, 'logind-check-graphical=true')) {
-				if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+				if (write_file($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -5456,7 +5355,7 @@ sub lightdmlogindcheckgraphicalfix() {
 				}
 			}
 		} else {
-			if (createFile($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
+			if (write_file($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true")) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -5491,12 +5390,8 @@ sub nvidiabacklightcontrolfix() {
 	my $action = shift;
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (isTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0')) {
-			replaceTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBacklightHandler=0', ' ');
-		}
-		if (isTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBrightnessControl=1')) {
-			replaceTextInFile('/etc/default/grub', ' NVreg_RegistryDwords=EnableBrightnessControl=1', ' ');
-		}
+		edit_file { s/ NVreg_RegistryDwords=EnableBacklightHandler=0//g } '/etc/default/grub';
+		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//g } '/etc/default/grub';
 	}
 	grubModuleEdit( $module, $action, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
 }
@@ -5525,7 +5420,7 @@ sub earlyloadbacklightcontrolfix() {
 		}
 		if (-e $elbcFile) {
 			unless (isTextInFile($elbcFile, $elbcLine)) {
-				if (createFile($elbcFile, $elbcLine)) {
+				if (write_file($elbcFile, $elbcLine)) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -5536,7 +5431,7 @@ sub earlyloadbacklightcontrolfix() {
 				}
 			}
 		} else {
-			if (createFile($elbcFile, $elbcLine)) {
+			if (write_file($elbcFile, $elbcLine)) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -5585,7 +5480,7 @@ sub cardreaderfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval1 = write_file($fileName1, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5631,7 +5526,7 @@ sub samsungnvmefix() {
 			$configuredModules{$module} = 'nothingToDo';
 		} else {
 			printLog("applying $origConfModules{$module}{name}", 'L1');
-			$retval = createFile($fileName, $fileText, 1);
+			$retval = write_file($fileName, $fileText);
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -5645,7 +5540,7 @@ sub samsungnvmefix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = write_file($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5691,7 +5586,7 @@ sub intelgenXIIIpowerctlfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
+		$retval1 = write_file($fileName1, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5791,7 +5686,7 @@ sub systemdbacklightfix() {
 		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = write_file($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5843,7 +5738,7 @@ sub elementaryosdkmspinningfix() {
 		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = createFile($fileName, $fileText, 1);
+		$retval = write_file($fileName, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -5950,40 +5845,18 @@ sub createRepos {
 		($completeDistVersion ne 'TUXEDO OS 22.04') &&
 		($completeDistVersion ne 'Linux Mint 21.1') &&
 		($completeDistVersion ne 'Linux Mint 21.2')) {
-		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu bionic main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu bionic main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu bionic main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', 'deb http://graphics.tuxedocomputers.com/ubuntu focal main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', 'deb http://oibaf.tuxedocomputers.com/ubuntu focal main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu focal main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte')) {
-			substituteLineInFile('/etc/apt/sources.list.d/graphics-tuxedo.list', '# Added by TUXEDO Tomte', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte')) {
-			substituteLineInFile('/etc/apt/sources.list.d/oibaf-tuxedo.list', '# Added by TUXEDO Tomte', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
-			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
-		}
+			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+
+			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			edit_file { s/^deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
+			edit_file { s/^deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
+
+			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
+			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
 	} else {
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main')) {
-			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', 'deb http://deb.tuxedocomputers.com/ubuntu jammy main', '');
-		}
-		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte')) {
-			substituteLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '# Added by TUXEDO Tomte', '');
-		}
+			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
 				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1');
@@ -6010,8 +5883,16 @@ sub createRepos {
 			} else {
 				printLog("$repos{$completeDistVersion}{$key}{filename} incorrect", 'L0');
 				printLog("recreating $repos{$completeDistVersion}{$key}{filename}", 'L0');
-				$fileText .= arrayToFileText(@{ $repos{$completeDistVersion}{$key}{content} });
-				if (createFile($repos{$completeDistVersion}{$key}{filename}, $fileText, 0) ) {
+
+				# add lines of the corresponding repo with linebreaks in between
+				foreach my $item (@{ $repos{$completeDistVersion}{$key}{content} }) {
+					if (defined $item) {
+						$fileText .= $item;
+					}
+					$fileText .= "\n";
+				}
+
+				if (write_file($repos{$completeDistVersion}{$key}{filename}, $fileText) ) {
 					$modified += 1;
 					printLog("wrote file: $repos{$completeDistVersion}{$key}{filename}", 'L0');
 				} else {
@@ -6386,8 +6267,8 @@ sub LTEModuleFix {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"$vendor\", ATTR{idProduct}==\"$product\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"$bConfigurationValue\" ATTR{bConfigurationValue}=\"$bConfigurationValue\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = write_file($fileName1, $fileText1);
+		$retval2 = write_file($fileName2, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -6400,8 +6281,8 @@ sub LTEModuleFix {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = createFile($fileName1, $fileText1, 1);
-		$retval2 = createFile($fileName2, $fileText2, 1);
+		$retval1 = write_file($fileName1, $fileText1);
+		$retval2 = write_file($fileName2, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -6555,7 +6436,7 @@ sub setDkmsVerbose {
 	if ($value == 1) {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			unless (isLineInFile( $dkmsFile, 'verbose="1"' )) {
-				$result = appendFile( $dkmsFile, "verbose=\"1\"\n" );
+				$result = append_file( $dkmsFile, "verbose=\"1\"\n" );
 				printLog("append verbose into dkms file for $module", 'L2');
 				return ($result);
 			} else {
@@ -6566,7 +6447,7 @@ sub setDkmsVerbose {
 	} elsif ($value == 0) {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2');
-			$result = substituteLineInFile( $dkmsFile, "verbose=\"1\"", '' );
+			$result = edit_file { s/^verbose="1"//g } $dkmsFile;
 			if ($result >= 0) {
 				printLog("verbose DKMS substitution successful", 'L2');
 				return (1);
@@ -7869,7 +7750,7 @@ sub setCurrentKernelUninstallParameters {
 		$restartSystem = 1;
 		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 		my $fileText = "#!/bin/sh\nexit 0";
-		createFile('/usr/bin/linux-check-removal', $fileText, 1);
+		write_file('/usr/bin/linux-check-removal', $fileText);
 		chmod 755, '/usr/bin/linux-check-removal';
 		return (1);
 	}
@@ -8156,74 +8037,6 @@ sub aptgetRefreshModule {
 
 
 ###############################################################################
-# creates file with content
-# createFile( filename, text, backup )
-# $backup accepts 0 and 1
-# returns '1' if successfull, '0' if not
-# 
-sub createFile {
-	my ($fileName, $fileText, $backup) = @_;
-	my $FH;
-	if ( open($FH, ">", $fileName) ) {
-		print $FH "$fileText\n";
-		close $FH;
-		return (1);
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("can't open $fileName for writing", 'TL0');
-		return (0);
-	}
-}
-
-
-
-
-###############################################################################
-# converts an array into text separated by /n
-# input as array, returns a string, where each array element is separated by a
-# newline
-#
-sub arrayToFileText {
-	my @lines = @_;
-	my $completeString = '';
-	my $line = '';
-	my $counter = 0;
-	foreach $line (@lines) {
-		if ($counter == 0) {
-			$completeString .= $line;
-		} else {
-			$completeString .= "\n".$line;
-		}
-		$counter += 1;
-	}
-	return ($completeString);
-}
-
-
-
-###############################################################################
-# appends text to the file
-# returns '1' if successfull
-# returns '0' if failed
-# 
-sub appendFile {
-	my $fileName = shift;
-	my $fileText = shift;
-	my $FH;
-	if ( open($FH, ">>",$fileName) ) {
-		print $FH "$fileText";
-		close $FH;
-		return (1);
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("can't open $fileName for writing", 'TL0');
-		return (0);
-	}
-}
-
-
-
-###############################################################################
 # backups file with timestamp
 # 
 sub backupFile {
@@ -8237,77 +8050,6 @@ sub backupFile {
 		printLog("can't create backup file for $fileName", 'TL0');
 		return (0);
 	}
-}
-
-
-
-###############################################################################
-# checks if the line exists in the files given as hash
-# 
-sub isLinePresent {
-	my $searchLine = shift;
-	my (%hash) = @_;
-	my $filenameKey;
-	my $line;
-	foreach $filenameKey (keys %hash) {
-		foreach $line (@{ $hash{$filenameKey} }) {
-			if ($searchLine eq $line) {
-				return (1);
-			}
-		}
-	}
-	return (0);
-}
-
-
-
-###############################################################################
-# substituteFileInLine('filename', 'string1', 'string2')
-# substitutes a line in 'file' as 'string1' with 'string2
-# returns 0 if line is already there
-# returns 1 if successful (line was modified)
-# returns -1 if something went wrong
-# 
-sub substituteLineInFile {
-	my $filename = shift;
-	my $origLine = shift;
-	my $substLine = shift;
-	my @fileLines;
-	my $FH;
-	my $foundLine = 0;
-
-	if ( (-e $filename) && open($FH, "<", $filename) ) {
-		while (<$FH>) {
-			push (@fileLines, $_);
-		}
-		close $FH;
-	} else {
-		printLog("Err: $!", 'L0');
-		printLog("no $filename present or unable to open the file for reading", 'L0');
-		return (-1);
-	}
-
-	foreach( @fileLines ) {
-		if ( $_ =~ /^$origLine$/ ) {
-			$_ = "$substLine\n";
-			$foundLine = 1;
-		}
-	}
-	unless($foundLine) {
-		printLog("line not found in $filename", 'L2');
-		return (-1);
-	}
-	if ( open($FH, ">", $filename) ) {
-		print $FH @fileLines;
-		close ($FH);
-		return (1);
-    } else {
-		printLog("Err: $!", 'L0');
-		printLog("no $filename present or unable to open the file for writing", 'L0');
-		return (-1);
-    }
-
-	return (0);
 }
 
 
@@ -8360,50 +8102,6 @@ sub isTextInFile {
 
 
 ###############################################################################
-# replaceTextInFile('filename', 'string', 'replacement')
-# replaces a text 'string' in file 'filename' with 'replacement'
-# 1 if replaced
-# 0 if not found
-# -1 if failed to open or write file
-#
-sub replaceTextInFile {
-	my ($filename, $match, $replace) = @_;
-	my @lines;
-	my $found = 0;
-	if ( (-e $filename) && open(FH, '<', $filename) ) {
-		@lines = <FH>;
-		close(FH);
-		foreach(@lines) {
-			if ($_ =~ /$match/) {
-				$_ =~ s/$match/$replace/;
-				$found = 1;
-			}
-		}
-		if ($found) {
-			if (!-e $filename) {
-				return (-1);
-			}
-			if ( open(FH, '>', $filename) ) {
-				print FH @lines;
-				close(FH);
-				return (1);
-			} else {
-				return (-1);
-			}
-		} else {
-			return (0);
-		}
-	} else {
-		printLog("can't open file $filename", 'L0');
-		return (-1);
-	}
-	return (-1);
-}
-
-
-
-
-###############################################################################
 # returns 1 if active interface found
 # returns 0 if none found
 #
@@ -8417,7 +8115,7 @@ sub networkStatus {
 	my @FILES = grep { $_ ne '.' && $_ ne '..' && $_ ne 'lo' } readdir($dirHandle);
 	if (scalar(@FILES) < 1) { return (0); }
 	foreach my $file (@FILES) {
-		if (readFileReturnLine("$interfacesDir/$file/operstate") eq 'up' ) {
+		if (readFirstLineOfFile("$interfacesDir/$file/operstate") eq 'up' ) {
 			return (1);
 		}
 	}
@@ -8543,40 +8241,6 @@ sub insertGrubParameter {
 		printLog("inserted '$$parameter' into grub line", 'L1');
 		return (1);
 	}
-}
-
-
-
-
-###############################################################################
-# insert/remove verbose parameter for DKMS
-# dkmsVerbose(insert|remove)
-# returns '1' if successfull, '0' if failed
-#
-sub dkmsVerbose {
-	my $action = shift;
-	my $retValue;
-	if ($action eq 'insert') {
-		$retValue = appendFile('/etc/dkms/framework.conf', "verbose=\"1\"\n");
-		if ($retValue) {
-			printLog('append verbose for DKMS file', 'L2');
-			return (1);
-		} else {
-			printLog('append verbose for DKMS failed', 'L2');
-			return (0);
-		}
-	}
-	if ($action eq 'remove') {
-		$retValue = substituteLineInFile('/etc/dkms/framework.conf', "verbose=\"1\"\n", '');
-		if ($retValue) {
-			printLog('remove verbose in DKMS file', 'L2');
-			return (1);
-		} else {
-			printLog('remove verbose for DKMS failed', 'L2');
-			return (0);
-		}
-	}
-	return (0);
 }
 
 
@@ -9030,7 +8694,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# set flag for first installation
-		createFile( $tomteFirstInstallFile, 'tomteFirstInstall', 0 );
+		write_file( $tomteFirstInstallFile, 'tomteFirstInstall');
 		# create a new configFile
 		printLog("no configfile present ... creating one", 'TL');
 		writeConfigFile();
@@ -9837,7 +9501,7 @@ sub setMode {
 	} else {
 		foreach $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
-				createFile($modeFile{$requestedMode}, '', 0);
+				write_file($modeFile{$requestedMode}, '');
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
@@ -10483,7 +10147,7 @@ sub setRestartValues {
 	my $element = shift;
 	$restartSystem = 1;
 	printLog("setting restart for: $element", 'L2');
-	createFile($needsRestartFile, 'Tomte: system has to be restarted', 0);
+	write_file($needsRestartFile, 'Tomte: system has to be restarted');
 }
 
 
@@ -10502,7 +10166,7 @@ sub tries() {
 		printLog("repeat number $triesDone of $limit", 'L0');
 		if ( $triesDone < $limit ) {
 			printLog("rising tries, triesDone below limit", 'L2');
-			writeFile($triesDone+1, $triesFile);
+			write_file($triesFile, $triesDone+1);
 			return (1);
 		} else {
 			printLog("limit tries done reached", 'L2');
@@ -10512,7 +10176,7 @@ sub tries() {
 		}
 	} else {
 		printLog('creating triesFile', 'L2');
-		writeFile('1', $triesFile);
+		write_file($triesFile, '1');
 	}
 	return (1);
 }
@@ -10525,7 +10189,7 @@ sub tries() {
 #
 sub triesAlreadyDone() {
 	if (-e $triesFile) {
-		return (readFileReturnLine($triesFile)+0);
+		return (readFirstLineOfFile($triesFile)+0);
 	} else {
 		return (0);
 	}
@@ -10820,7 +10484,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					createFile($tomteFinishedFile, 'finished', 0);
+					write_file($tomteFinishedFile, 'finished');
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -10835,7 +10499,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					createFile($tomteFinishedFile, 'finished', 0);
+					write_file($tomteFinishedFile, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -10861,7 +10525,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					createFile($tomteFinishedFile, 'finished', 0);
+					write_file($tomteFinishedFile, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -10896,7 +10560,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					createFile($tomteFinishedFile, 'finished', 0);
+					write_file($tomteFinishedFile, 'finished');
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -10911,7 +10575,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					createFile($tomteFinishedFile, 'finished', 0);
+					write_file($tomteFinishedFile, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -11042,7 +10706,7 @@ END {
 			writeConfigIniFile();
 		}
 		# just to be sure, always write the tomte_finished file
-		if (createFile($tomteFinishedFile, 'finished', 0)) {
+		if (write_file($tomteFinishedFile, 'finished')) {
 			printLog("created $tomteFinishedFile", 'L2');
 		}
 	}
