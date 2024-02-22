@@ -10,12 +10,10 @@ use TOML qw(from_toml to_toml);
 my %origConfModules_tmp = read_toml_file('config/modules/modules_raw.toml');
 my %origConfModules;
 foreach my $module (keys %origConfModules_tmp) {
-	next if $module eq 'default';
+        next if $module eq 'default';
 
-	$origConfModules{$module} = $origConfModules_tmp{'default'};
-	$origConfModules{$module} = $origConfModules_tmp{$module};
-
-	$origConfModules{$module}{'description'} = __($module . "_description");
+        %{$origConfModules{$module}} = %{$origConfModules_tmp{'default'}};
+        @{$origConfModules{$module}}{keys %{$origConfModules_tmp{$module}}} = values %{$origConfModules_tmp{$module}};
 }
 
 write_file('config/modules/modules.toml', to_toml(\%origConfModules));
