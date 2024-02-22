@@ -1,0 +1,656 @@
+###############################################################################
+# Each device has
+# - a unique ID
+# - one or more model names (array)
+# - one or more board names (array)
+# - the fixes that apply (array)
+# - which Ubuntu flavours (array)
+# - PCI device (if available, regex)
+# - CPU (if needed)
+# - Kernel (if needed, regex)
+# - display (if needed, as array)
+# - USB device (if needed)
+# default kernels tuxedokernel2004 and tuxeookernel2204 are not listed
+# only kernels that deviate from the default are listed
+#
+
+[1]
+board_name = ["NL5xRU", "AURA1501"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "nokeyboardaftersuspendfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Aura 15 Gen1"]
+pci_id = "1558:a500"
+usb_device = ""
+[10]
+board_name = ["X170KM-G"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "nokeyboardaftersuspendfix", "thunderboltbootdelayfix"]
+flavour = ["20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book XUX7 Gen13"]
+pci_id = "1558:7715"
+usb_device = ""
+[11]
+board_name = ["EDUBOOK1502"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "nokeyboardaftersuspendfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO EduBook 15 Gen2"]
+pci_id = ""
+usb_device = ""
+[12]
+board_name = ["X35R"]
+cpu = ""
+display = ""
+fix = ["elantechtouchpadfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO InfinityBook 14 v2"]
+pci_id = ""
+usb_device = ""
+[13]
+board_name = ["PHxTQx1", "PHxTxX1", "PH4TQx1"]
+cpu = ""
+display = ""
+fix = ["lightdmlogindcheckgraphicalfix", "tuxedotouchpadswitch", "i915enablepsrfix", "earlyloadbacklightcontrolfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO InfinityBook Pro 14 Gen6"]
+pci_id = "1d05:1132"
+usb_device = ""
+[14]
+board_name = ["N141CU"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO InfinityBook Pro 14 v5"]
+pci_id = ""
+usb_device = ""
+[15]
+board_name = ["N150CU"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO InfinityBook Pro 15 v5"]
+pci_id = "1558:1404"
+usb_device = ""
+[17]
+board_name = ["POLARIS1501A1650TI", "POLARIS1701A1650TI"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "amdgpuwithnvidiafix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti"]
+pci_id = ""
+usb_device = ""
+[18]
+board_name = ["POLARIS1501A2060", "POLARIS1701A2060"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "amdgpuwithnvidiafix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Polaris Gen1 AMD NVIDIA RTX2060"]
+pci_id = ""
+usb_device = ""
+[19]
+board_name = ["POLARIS1501I1650TI", "POLARIS1701I1650TI"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Polaris Gen1 Intel NVIDIA GTX1650Ti"]
+pci_id = ""
+usb_device = ""
+[2]
+board_name = ["PF5PU1G"]
+cpu = ""
+display = ""
+fix = ["nobootonbattery", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book BA15 Gen1"]
+pci_id = ""
+usb_device = ""
+[20]
+board_name = ["POLARIS1501I2060", "POLARIS1701I2060"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Polaris Gen1 Intel NVIDIA RTX2060"]
+pci_id = ""
+usb_device = ""
+[21]
+board_name = ["PULSE1401"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Pulse 14 Gen1"]
+pci_id = ""
+usb_device = ""
+[22]
+board_name = ["PULSE1501"]
+cpu = ""
+display = ""
+fix = ["amdxhcihcdusbquirksuspendfix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Pulse 15 Gen1"]
+pci_id = ""
+usb_device = ""
+[23]
+board_name = ["GMxNGxx"]
+cpu = ""
+display = "BOE Model 2423 Serial Number 0"
+fix = ["tuxedotouchpadswitch", "amdgpubacklightauxoff"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen2 AMD", "TUXEDO Polaris Gen2 AMD"]
+pci_id = ""
+usb_device = ""
+[24]
+board_name = ["GMxMGxx"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen2 Intel", "TUXEDO Polaris Gen2 Intel"]
+pci_id = ""
+usb_device = ""
+[25]
+board_name = ["GMxZGxx"]
+cpu = ""
+display = ["BOE Model 2423 Serial Number 0", "BOE Model 2420 Serial Number 0"]
+fix = ["tuxedotouchpadswitch", "tuxedodrivers", "amdgpubacklightauxoff"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen3 AMD", "TUXEDO Polaris Gen3 AMD"]
+pci_id = ""
+usb_device = ""
+[26]
+board_name = ["GMxTGxx"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch", "tuxedodrivers", "nvidiabacklightcontrolfix", "acpibacklightvideofix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen3 Intel", "TUXEDO Polaris Gen3 Intel"]
+pci_id = ""
+usb_device = ""
+[27]
+board_name = ["TRINITY1501I", "TRINITY1701I"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Trinity Gen1 Intel"]
+pci_id = ""
+usb_device = ""
+[28]
+board_name = ["LAPQC71A"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["XMG Fusion 15 L19 GTX1660Ti"]
+pci_id = ""
+usb_device = ""
+[29]
+board_name = ["LAPQC71B"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["XMG Fusion 15 L19 RTX2070"]
+pci_id = ""
+usb_device = ""
+[3]
+board_name = ["NHxxRZQ"]
+cpu = ""
+display = ""
+fix = ["r8168dkms"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book BC15 Gen10", "TUXEDO Book BC17 Gen10"]
+pci_id = "1558:8562"
+usb_device = ""
+[30]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["apportfix", "tuxedorepos", "tuxedomirrors"]
+flavour = ["18.04", "20.04"]
+kernel = ""
+model = ["all models"]
+pci_id = ""
+usb_device = ""
+[32]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["fingerprintreader"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with fingerprintreader"]
+pci_id = ["147e:100[0123]", "147e:20(15|16|20)", "147e:300[01]", "147e:500[23]", "0483:201[56]", "1c7a:0603"]
+usb_device = ""
+[33]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["huaweime936fix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with LTE module ME936"]
+pci_id = "12d1:15bb"
+usb_device = "ME936"
+[34]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["nvidiadriver"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with NVIDIA"]
+pci_id = "030[02]:"
+usb_device = ""
+[35]
+board_name = [""]
+cpu = ""
+display = "SDC Model 41001 Serial Number 0"
+fix = ["tuxedooledbrt"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with OLED display"]
+pci_id = ""
+usb_device = ""
+[36]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["tuxedonvmefix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["Kingston NVMe"]
+pci_id = "2646:2263"
+usb_device = ""
+[37]
+board_name = ["NS50_70MU", "NS50MU"]
+cpu = ""
+display = ""
+fix = ["i8042noauxfix"]
+flavour = ["18.04", "20.04"]
+kernel = ""
+model = ["InfinityBook S 17 Gen6", "InfinityBook S 15 Gen6"]
+pci_id = ""
+usb_device = ""
+[38]
+board_name = ["NV4XMB,ME,MZ"]
+cpu = ""
+display = ""
+fix = ["lightdmlogindcheckgraphicalfix", "earlyloadbacklightcontrolfix"]
+flavour = ["18.04", "20.04"]
+kernel = ""
+model = ["TUXEDO Book XP14 Gen12"]
+pci_id = ""
+usb_device = ""
+[39]
+board_name = ["NL5xNU"]
+cpu = ""
+display = ""
+fix = []
+flavour = ["18.04", "20.04"]
+kernel = ""
+model = ["TUXEDO Aura 15 Gen2"]
+pci_id = ""
+usb_device = ""
+[4]
+board_name = ["N350TW"]
+cpu = ""
+display = ""
+fix = ["tuxedorestoreaudiofix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book BX1507"]
+pci_id = ""
+usb_device = ""
+[40]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["apportfix", "tuxedorepos", "tuxedomirrors"]
+flavour = ["22.04"]
+kernel = ""
+model = ["all models"]
+pci_id = ""
+usb_device = ""
+[41]
+board_name = ["GMxAGxx"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen4 Intel"]
+pci_id = ""
+usb_device = ""
+[42]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["huaweime906sfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with LTE module ME906s"]
+pci_id = "12d1:15c1"
+usb_device = "ME906"
+[43]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["cardreaderfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with cardreader Realtek RTS522A"]
+pci_id = ["10ec:522a"]
+usb_device = ""
+[44]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["tuxedor8125dkms"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with Realtek RTL8125"]
+pci_id = "10ec:8125"
+usb_device = ""
+[45]
+board_name = ["PF5LUXG"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch", "samsungnvmefix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = "linux-tuxedo-22.04-edge"
+model = ["TUXEDO Pulse 15 Gen2"]
+pci_id = ""
+usb_device = ""
+[46]
+board_name = ["P95_HP", "P95_HR", "P95_HP,HR,HQ"]
+cpu = ""
+display = "AUO Model 21229 Serial Number 808797180"
+fix = ["backlightfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO InsanityBook 15 v1"]
+pci_id = ""
+usb_device = ""
+[47]
+board_name = ["P95_HP", "P95_HR", "P95_HP,HR,HQ"]
+cpu = ""
+display = "AUO Model 21229 Serial Number 808797180"
+fix = ["backlightfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["XP1507"]
+pci_id = ""
+usb_device = ""
+[48]
+board_name = ["GMxRGxx"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "tuxedotouchpadswitch"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris Gen4 AMD"]
+pci_id = ""
+usb_device = ""
+[49]
+board_name = ["PHxARX1_PHxAQF1", "PH6AG01_PH6AQ71_PH6AQI1"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["22.04"]
+kernel = "linux-tuxedo-22.04-edge"
+model = ["TUXEDO InfinityBook Pro 16 Gen7"]
+pci_id = ""
+usb_device = ""
+[5]
+board_name = ["N8xEJEK"]
+cpu = ""
+display = "AUO Model 12701 Serial Number 585803690"
+fix = ["backlightfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book DX1508", "TUXEDO Book DX1708"]
+pci_id = ""
+usb_device = ""
+[50]
+board_name = ["PD5x_7xPNP_PNR_PNN_PNT"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "acpibacklightvideofix"]
+flavour = ["22.04"]
+kernel = "linux-tuxedo-22.04-next"
+model = ["TUXEDO Gemini 17 Gen1"]
+pci_id = ""
+usb_device = ""
+[51]
+board_name = ["GMxPXxx"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "tuxedotouchpadswitch"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris 16 Gen5 Intel"]
+pci_id = ""
+usb_device = ""
+[52]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["intelgenXIIIpowerctlfix"]
+flavour = ["22.04"]
+kernel = ""
+model = ["all with Intel Gen13 PCI USB controller"]
+pci_id = "8086:1135"
+usb_device = ""
+[53]
+board_name = [""]
+cpu = ""
+display = ""
+fix = [""]
+flavour = ["22.04"]
+kernel = ""
+model = ["all with plasma-workspace >=5.25"]
+pci_id = ""
+usb_device = ""
+[54]
+board_name = ["PH4PRX1_PH6PRX1", "PH4PG31", "PH6PG01_PH6PG71"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch", "disablegucfix"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO InfinityBook Pro 14/16 Gen8"]
+pci_id = ""
+usb_device = ""
+[55]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["apportfix", "cracklibruntime", "kerneltuxedo2204", "tuxedocontrolcenter", "tuxedokeyboard", "tuxedomirrors", "tuxedorepos", "tuxedotouchpadswitch"]
+flavour = ["22.04"]
+kernel = ""
+model = ["desktoppc"]
+pci_id = ""
+usb_device = ""
+[56]
+board_name = ["PHxARX1_PHxAQF1"]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = ["22.04"]
+kernel = "linux-tuxedo-22.04-edge"
+model = ["TUXEDO InfinityBook Pro 14 Gen7"]
+pci_id = ""
+usb_device = ""
+[57]
+board_name = ["PD5x_7xPNP_PNR_PNN_PNT"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "acpibacklightvideofix"]
+flavour = ["22.04"]
+kernel = "linux-tuxedo-22.04-next"
+model = ["TUXEDO Gemini 15 Gen1"]
+pci_id = ""
+usb_device = ""
+[58]
+board_name = ["NL45PU2"]
+cpu = ""
+display = ""
+fix = ["r8168dkms"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO Aura 14 Gen3"]
+pci_id = ""
+usb_device = ""
+[59]
+board_name = ["NL57PU"]
+cpu = ""
+display = ""
+fix = ["r8168dkms"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO Aura 15 Gen3"]
+pci_id = ""
+usb_device = ""
+[6]
+board_name = ["NH5xAx"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix", "corefix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book XA15 Gen10"]
+pci_id = "1558:50f0"
+usb_device = ""
+[60]
+board_name = ["GM6XGxX"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers", "tuxedotouchpadswitch"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO Stellaris 16 Gen5 AMD"]
+pci_id = ""
+usb_device = ""
+[61]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["tuxedokeyboard"]
+flavour = ["18.04", "20.04"]
+kernel = ""
+model = ["all notebooks"]
+pci_id = ""
+usb_device = ""
+[62]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers"]
+flavour = ["22.04"]
+kernel = ""
+model = ["all notebooks"]
+pci_id = ""
+usb_device = ""
+[63]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["tuxedotouchpadswitch"]
+flavour = [""]
+kernel = ""
+model = ["all notebooks from TongFang"]
+pci_id = ""
+usb_device = ""
+[64]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["systemdbacklightfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all notebooks"]
+pci_id = ""
+usb_device = ""
+[65]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["elementaryosdkmspinningfix"]
+flavour = ["6.1", "7.2"]
+kernel = ""
+model = ["all Elementary OS"]
+pci_id = ""
+usb_device = ""
+[66]
+board_name = [""]
+cpu = ""
+display = ""
+fix = ["huaweime906shpfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["all with LTE module ME906s HP rebranded"]
+pci_id = "03f0:a31d"
+usb_device = "ME906"
+[7]
+board_name = ["PB50_70DFx,DDx"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book XC15 Gen10", "TUXEDO Book XC17 Gen10"]
+pci_id = "1558:67e1"
+usb_device = ""
+[8]
+board_name = ["PCx0Dx_GN20"]
+cpu = ""
+display = ""
+fix = ["tuxedodrivers"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book XP15 Gen12", "TUXEDO Book XP17 Gen12"]
+pci_id = ["1558:65e5", "1558:67e5"]
+usb_device = ""
+[9]
+board_name = ["X170SM"]
+cpu = ""
+display = ""
+fix = ["nokeyboardaftersuspendfix", "tuxedodrivers"]
+flavour = ["18.04", "20.04", "22.04"]
+kernel = ""
+model = ["TUXEDO Book XUX7 Gen11"]
+pci_id = ""
+usb_device = ""

@@ -1,0 +1,482 @@
+###############################################################################
+# initial definition for all origConfModules/packages
+# defined by a 'short name' which is the name without '-'
+# e.g. no-boot-on-battery = nobootonbattery
+#
+#   name			name of package or name of solution
+#   version			the package or solution version
+#					rises if the solution changes
+#   installed		'no' not installed / 'yes' installed / 'failed' failed to
+#					install, 'undef' if unknown
+#   blocked			'yes' or 'no' will not be configured on upgrade, install
+#					or deinstall, 'undef' if unknown
+#   required		'yes' or 'no' the system requirements are met
+#					'undef' if unknown
+#					'prerequisite' if essentially needed to be present before
+#					anything else and always, non blockable
+#   hwid			the environment (HW or SW) are in a certain defined state
+#					rises if additional HW gets support
+#   package			'yes' or 'no', there is a deb or rpm package as a solution
+#   				if there are seceral packages to be installed then 'no'
+#   fainame			the name to give to FAI to install a certain package
+#   description		A description about the module for the user
+#   postconf		command module to execute after installation of module,
+#					empty if none, the command of the module is defined in
+#					$postConfModule{$postconf}{command}
+#	upgrade			if the system determines this is an upgrade then 'yes'
+#					else 'no'
+#					don't set the value yourself, it will be determined by
+#					Tomte
+#	upgraded		if module was upgraded 'yes', else 'no'
+#	reconfigure		if set to 'always' will always reconfigure if fix detected
+#	restart			the system requires a restart after this module was
+#					installed or upgraded
+#	order			'first':	has to be installed before anything else
+#					'last':		has to be installed after anything else
+#	dkms			'yes':	it is a dkms package
+#					'no':	it is not a dkms package
+#	FAI				'yes':	should be installed during FAI
+#					'no':	should not be installed in FAI
+#	LiveISO			'yes':	should be installed in LiveISO
+#					'no':	should not be installed in LiveISO
+#
+
+[default]
+FAI = "yes"
+LiveISO = "yes"
+blocked = "no"
+description = ""
+dkms = "no"
+fainame = ""
+hwid = 1
+installed = "no"
+name = ""
+order = ""
+package = "no"
+packageVersion = "unkwn"
+postconf = ""
+reconfigure = ""
+required = "no"
+restart = "yes"
+upgrade = ""
+upgraded = ""
+version = 1
+
+
+[acpibacklightvideofix]
+LiveISO = "no"
+name = "acpi-backlight-video-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[amdgpubacklightauxoff]
+LiveISO = "no"
+name = "amdgpu-backlight-aux-off"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[amdgpudkms]
+dkms = "yes"
+hwid = 3
+name = "amdgpu-dkms"
+package = "yes"
+restart = ""
+
+
+[amdgpuwithnvidiafix]
+hwid = 2
+name = "amd-gpu-with-nvidia-fix"
+restart = "yes"
+version = 2
+
+
+[amdxhcihcdusbquirksuspendfix]
+LiveISO = "no"
+hwid = 2
+name = "amd-xhci-hcd-usb-quirk-suspend-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[apportfix]
+name = "apport-fix"
+restart = ""
+version = 2
+
+
+[backlightfix]
+LiveISO = "no"
+hwid = 2
+name = "backlight-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[cardreaderfix]
+name = "cardreader-fix"
+restart = "yes"
+
+
+[corefix]
+LiveISO = "no"
+name = "core-fix"
+postconf = "updateInitramfs"
+restart = "yes"
+
+
+[cracklibruntime]
+name = "cracklib-runtime"
+package = "yes"
+required = "yes"
+restart = ""
+
+
+[disablegucfix]
+LiveISO = "no"
+name = "disable-guc-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[earlyloadbacklightcontrolfix]
+LiveISO = "no"
+name = "early-load-backlight-control-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[elantechtouchpadfix]
+LiveISO = "no"
+name = "elantech-touchpad-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[elementaryosdkmspinningfix]
+LiveISO = "no"
+name = "elementaryos-dkms-pinning-fix"
+
+
+[fingerprintreader]
+name = "fingerprint-reader"
+restart = ""
+
+
+[huaweime906sfix]
+name = "huawei-me906s-fix"
+restart = "yes"
+version = 2
+
+
+[huaweime906shpfix]
+name = "huawei-me906s-hp-fix"
+restart = "yes"
+version = 2
+
+
+[huaweime936fix]
+name = "huawei-me936-fix"
+restart = "yes"
+version = 2
+
+
+[i8042fix]
+LiveISO = "no"
+name = "i8042-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[i8042noauxfix]
+LiveISO = "no"
+name = "i8042noaux-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[i915disablepsrfix]
+LiveISO = "no"
+hwid = 2
+name = "i915-disable-psr-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
+
+[i915enablepsrfix]
+LiveISO = "no"
+hwid = 3
+name = "i915-enable-psr-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[intelgenXIIIpowerctlfix]
+name = "intel-gen13-powerctl-fix"
+restart = "yes"
+
+
+[kernelgenerichwe2004]
+LiveISO = "no"
+name = "linux-generic-hwe-20.04"
+reconfigure = "always"
+restart = "yes"
+version = 3
+
+
+[kernelgenerichwe2004edge]
+LiveISO = "no"
+hwid = 2
+name = "linux-generic-hwe-20.04-edge"
+reconfigure = "always"
+restart = "yes"
+version = 3
+
+
+[kerneltuxedo2004]
+LiveISO = "no"
+hwid = 2
+name = "linux-tuxedo-20.04"
+reconfigure = "always"
+restart = "yes"
+version = 3
+
+
+[kerneltuxedo2004edge]
+LiveISO = "no"
+hwid = 2
+name = "linux-tuxedo-20.04-edge"
+reconfigure = "always"
+restart = "yes"
+version = 3
+
+
+[kerneltuxedo2004next]
+LiveISO = "no"
+name = "linux-tuxedo-20.04-next"
+reconfigure = "always"
+restart = "yes"
+version = 3
+
+
+[kerneltuxedo2204]
+LiveISO = "no"
+name = "linux-tuxedo-22.04"
+reconfigure = "always"
+restart = "yes"
+
+
+[kerneltuxedo2204edge]
+LiveISO = "no"
+name = "linux-tuxedo-22.04-edge"
+reconfigure = "always"
+restart = "yes"
+
+
+[kerneltuxedo2204next]
+LiveISO = "no"
+name = "linux-tuxedo-22.04-next"
+reconfigure = "always"
+restart = "yes"
+
+
+[lightdmlogindcheckgraphicalfix]
+name = "lightdm-logind-check-graphical-fix"
+
+
+[nobootonbattery]
+LiveISO = "no"
+name = "no-boot-on-battery"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[nokeyboardaftersuspendfix]
+LiveISO = "no"
+hwid = 5
+name = "no-keyboard-after-suspend-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[nvidiabacklightcontrolfix]
+LiveISO = "no"
+name = "nvidia-backlight-control-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 2
+
+
+[nvidiadriver]
+LiveISO = "no"
+dkms = "yes"
+name = "nvidia-driver"
+reconfigure = "always"
+restart = "yes"
+version = 5
+
+
+[r8168dkms]
+dkms = "yes"
+name = "r8168-dkms"
+package = "yes"
+restart = ""
+version = 3
+
+
+[realtekr8125dkms]
+dkms = "yes"
+name = "realtek-r8125-dkms"
+package = "yes"
+restart = ""
+version = 3
+
+
+[samsungnvmefix]
+name = "samsung-nvme-fix"
+restart = "yes"
+version = 2
+
+
+[systemdbacklightfix]
+LiveISO = "no"
+name = "systemd-backlight-fix"
+restart = "yes"
+
+
+[threegfix]
+name = "threeg-fix"
+restart = "yes"
+version = 2
+
+
+[threegfix2]
+name = "threeg-fix2"
+restart = "yes"
+version = 2
+
+
+[thunderboltbootdelayfix]
+name = "thunderbolt-boot-delay-fix"
+restart = "yes"
+version = 3
+
+
+[tuxedocontrolcenter]
+name = "tuxedo-control-center"
+package = "yes"
+required = "yes"
+restart = ""
+
+
+[tuxedodgpurun]
+name = "tuxedo-dgpu-run"
+package = "yes"
+
+
+[tuxedodrivers]
+dkms = "yes"
+name = "tuxedo-drivers"
+package = "yes"
+reconfigure = "always"
+restart = ""
+
+
+[tuxedokeyboard]
+dkms = "yes"
+name = "tuxedo-keyboard"
+package = "yes"
+restart = ""
+
+
+[tuxedokeyboardite]
+dkms = "yes"
+hwid = 2
+name = "tuxedo-keyboard-ite"
+package = "yes"
+restart = ""
+
+
+[tuxedomicfix1]
+dkms = "yes"
+hwid = 2
+name = "tuxedo-micfix1"
+package = "yes"
+restart = "yes"
+
+
+[tuxedomirrors]
+name = "tuxedo-mirrors"
+order = "first"
+reconfigure = "always"
+required = "yes"
+restart = ""
+version = 5
+
+
+[tuxedonvmefix]
+name = "tuxedo-nvme-fix"
+package = "yes"
+restart = "yes"
+version = 2
+
+
+[tuxedooledbrt]
+name = "tuxedo-oled-brt"
+package = "yes"
+restart = "yes"
+
+
+[tuxedopinfixtgldkms]
+dkms = "yes"
+name = "tuxedo-pinfix-tgl-dkms"
+package = "yes"
+restart = "yes"
+
+
+[tuxedor8125dkms]
+dkms = "yes"
+name = "tuxedo-r8125-dkms"
+package = "yes"
+restart = "yes"
+version = 3
+
+
+[tuxedorepos]
+name = "tuxedo-repos"
+order = "first"
+reconfigure = "always"
+required = "prerequisite"
+restart = ""
+version = 3
+
+
+[tuxedorestoreaudiofix]
+name = "tuxedo-restore-audio-fix"
+restart = "yes"
+
+
+[tuxedotouchpadswitch]
+name = "tuxedo-touchpad-switch"
+package = "yes"
+restart = ""
