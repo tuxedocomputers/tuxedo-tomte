@@ -4,6 +4,8 @@ build-package:
     PACKAGE_BASE_REPO_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages"
   before_script:
     # Extract the current version from debian/changelog
+    - apt-get update
+    - apt-get install -yqq libtoml-perl libfile-slurp-perl
     - VERSIONSTRING=$(dpkg-parsechangelog | awk '/^Version:/ {print $2}')
     - "echo \"Current version: $VERSIONSTRING\""
     - BASE_VERSION=$(echo "$VERSIONSTRING" | awk -F- '{print $1}')

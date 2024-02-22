@@ -1,5 +1,6 @@
 #!/bin/bash
 
+perl build_configurations.pl
 perl translations/compile_translation_files.pl
 
 install_file="debian/install"
