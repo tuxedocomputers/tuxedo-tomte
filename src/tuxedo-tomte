@@ -799,6 +799,11 @@ sub checkRequirements {
 		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1');
 	}
 
+	if (($boardname =~ /APX958/)) {
+		$origConfModules{amdgpudisablepsr}{required} = 'yes';
+		printLog("detected $origConfModules{amdgpudisablepsr}{name} issue", 'L1');
+	}
+
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
@@ -1273,6 +1278,16 @@ sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 'xhci_hcd.quirks=1073741824');
+}
+
+
+###############################################################################
+# Disables PSR for APX958
+#
+sub amdgpudisablepsr() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 'amdgpu.dcdebugmask=0x10');
 }
 
 

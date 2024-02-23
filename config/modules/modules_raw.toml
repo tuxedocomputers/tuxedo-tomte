@@ -78,6 +78,13 @@ postconf = "updateGrub"
 reconfigure = "always"
 restart = "yes"
 
+[amdgpudisablepsr]
+LiveISO = "no"
+name = "amdgpu-disable-psr"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+
 
 [amdgpudkms]
 dkms = "yes"

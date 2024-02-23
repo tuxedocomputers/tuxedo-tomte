@@ -624,6 +624,16 @@ kernel = ""
 model = ["all with LTE module ME906s HP rebranded"]
 pci_id = "03f0:a31d"
 usb_device = "ME906"
+[67]
+board_name = ["APX958"]
+cpu = ""
+display = ""
+fix = ["amdpgudisablepsr"]
+flavour = ["22.04"]
+kernel = ""
+model = ["TUXEDO Sirius"]
+pci_id = ""
+usb_device = ""
 [7]
 board_name = ["PB50_70DFx,DDx"]
 cpu = ""
