@@ -27,6 +27,13 @@ content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu
 filename = "/etc/apt/sources.list.d/official-package-repositories.list"
 hashvalue = "63b36f8e95d2ada668af508785ece311"
 
+["Linux Mint 21.3"]
+name = "jammy"
+["Linux Mint 21.3".mirrors]
+content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
+filename = "/etc/apt/sources.list.d/official-package-repositories.list"
+hashvalue = "63b36f8e95d2ada668af508785ece311"
+
 
 ["TUXEDO OS 20.04"]
 name = "focal"

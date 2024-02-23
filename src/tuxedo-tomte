@@ -109,6 +109,7 @@ my $chassisType = 0;
 my $distribution;
 my $distributionVersion;
 my $completeDistVersion;
+my $ubuntuCodename = "";
 my $FAI = 0;
 if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
@@ -222,12 +223,12 @@ my %postConfProgram = (
 );
 
 
-my %supportedOS = read_toml_file('/etc/tomte/config/misc/supported_os.toml');
-my %tuxedo_repos = read_toml_file('/etc/tomte/config/misc/tuxedo_repos.toml');
-my %tuxedo_mirrors = read_toml_file('/etc/tomte/config/misc/tuxedo_mirrors.toml');
-my %flavours = read_toml_file('/etc/tomte/config/misc/flavours.toml');
-my %origConfModules = read_toml_file('/etc/tomte/config/modules/modules.toml');
-my %tuxedo_devices = read_toml_file('/etc/tomte/config/misc/tuxedo_devices.toml');
+my %supportedOS = read_toml_file('/usr/lib/tomte/config/misc/supported_os.toml');
+my %tuxedo_repos = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_repos.toml');
+my %tuxedo_mirrors = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_mirrors.toml');
+my %flavours = read_toml_file('/usr/lib/tomte/config/misc/flavours.toml');
+my %origConfModules = read_toml_file('/usr/lib/tomte/config/modules/modules.toml');
+my %tuxedo_devices = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_devices.toml');
 
 foreach my $module (keys %origConfModules) {
 	$origConfModules{$module}{'description'} = __($module . "_description");
@@ -637,6 +638,10 @@ sub readOSData {
 			$_ =~ /VERSION_ID=\"(.*)\"/;
 			$distributionVersion = $1;
 		}
+		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
+			$_ =~ /UBUNTU_CODENAME=(.*)/;
+			$ubuntuCodename = $1;
+		}
 	}
 	$completeDistVersion = $distribution.' '.$distributionVersion;
 }
@@ -672,7 +677,7 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if (exists($supportedOS{$distribution}{versions}{$distributionVersion})) {
+	if (grep { $_ eq $distributionVersion } @{$supportedOS{$distribution}}) {
 		return (1);
 	} elsif (exists($supportedOS{$distribution})) {
 		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
@@ -764,12 +769,7 @@ sub checkRequirements {
 	}
 
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-		($completeDistVersion =~ /KDE neon 22.04/) ||
-		($completeDistVersion =~ /Elementary OS 7.1/) ||
-		($completeDistVersion =~ /Linux Mint 21.1/) ||
-		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
-		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	if ($ubuntuCodename =~ /jammy/) {
 		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
 		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2');
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
@@ -944,12 +944,7 @@ sub checkRequirements {
 
 	# all notebooks require this
 	if ( ($chassisType eq 'notebook') &&
-		(($completeDistVersion =~ /Ubuntu 18.04/) ||
-		($completeDistVersion =~ /Ubuntu 20.04/) ||
-		($completeDistVersion =~ /elementary OS 6.1/) ||
-		($completeDistVersion =~ /KDE neon 20.04/) ||
-		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-		($completeDistVersion =~ /TUXEDO OS 20.04/))) {
+		($ubuntuCodename =~ /focal/)) {
 		$origConfModules{tuxedokeyboard}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
 	}
@@ -976,24 +971,14 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		if (($completeDistVersion =~ /Ubuntu 18.04/) ||
-			($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if (($ubuntuCodename =~ /bionic/) ||
+			($ubuntuCodename =~ /focal/)) {
 			$origConfModules{tuxedokeyboardite}{required} = 'yes';
 			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
 		}
 	}
 
-	if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-		($completeDistVersion =~ /elementary OS 7.1/) ||
-		($completeDistVersion =~ /KDE neon 22.04/) ||
-		($completeDistVersion =~ /Linux Mint 21.1/) ||
-		($completeDistVersion =~ /Linux Mint 21.2/) ||
-		($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
-		($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	if ($ubuntuCodename =~ /jammy/) {
 		$origConfModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
 		$origConfModules{tuxedokeyboardite}{required} = 'no';
@@ -1086,11 +1071,7 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-		($completeDistVersion =~ /elementary OS 6.1/) ||
-		($completeDistVersion =~ /KDE neon 20.04/) ||
-		($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-		($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+	if ($ubuntuCodename =~ /focal/) {
 		if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
 			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
@@ -1098,12 +1079,7 @@ sub checkRequirements {
 			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
-	} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
-			($completeDistVersion =~ /elementary OS 7.1/) ||
-			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 21.1/) ||
-			($completeDistVersion =~ /Linux Mint 21.2/) ||
-			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+	} elsif ($ubuntuCodename =~ /jammy/) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
@@ -1456,8 +1432,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
-			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
 					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText)) {
@@ -1491,8 +1466,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			unless (($completeDistVersion =~ /Linux Mint 21.1/) ||
-			   		($completeDistVersion =~ /Linux Mint 21.2/)) {
+			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
 					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText)) {
@@ -2043,11 +2017,7 @@ sub kernelhwe2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if ($ubuntuCodename =~ /focal/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2090,11 +2060,7 @@ sub kerneltuxedo2004edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if ($ubuntuCodename =~ /focal/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2138,11 +2104,7 @@ sub kerneltuxedo2004next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if ($ubuntuCodename =~ /focal/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2186,11 +2148,7 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 20.04/) ||
-			($completeDistVersion =~ /elementary OS 6.1/) ||
-			($completeDistVersion =~ /KDE neon 20.04/) ||
-			($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-			($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		if ($ubuntuCodename =~ /focal/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2238,11 +2196,7 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-			($completeDistVersion =~ /elementary OS 7.1/) ||
-			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 21.1/) ||
-			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if ($ubuntuCodename =~ /jammy/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2285,11 +2239,7 @@ sub kerneltuxedo2204edge() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-			($completeDistVersion =~ /elementary OS 7.1/) ||
-			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 21.1/) ||
-			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if ($ubuntuCodename =~ /jammy/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2332,11 +2282,7 @@ sub kerneltuxedo2204next() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if (($completeDistVersion =~ /Ubuntu 22.04/) ||
-			($completeDistVersion =~ /elementary OS 7.1/) ||
-			($completeDistVersion =~ /KDE neon 22.04/) ||
-			($completeDistVersion =~ /Linux Mint 21.1/) ||
-			($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		if ($ubuntuCodename =~ /jammy/) {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
@@ -2452,11 +2398,7 @@ sub nvidiadriver() {
 
 
 
-		} elsif (($completeDistVersion =~ /Ubuntu 20.04/) ||
-				($completeDistVersion =~ /elementary OS 6.1/) ||
-				($completeDistVersion =~ /KDE neon 20.04/) ||
-				($completeDistVersion =~ /TUXEDO_OS Plasma 20.04/) ||
-				($completeDistVersion =~ /TUXEDO OS 20.04/)) {
+		} elsif ($ubuntuCodename =~ /focal/) {
 			if (isPackageInRepo($nvidiaDriver510)) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
@@ -2508,13 +2450,7 @@ sub nvidiadriver() {
 
 
 
-		} elsif (($completeDistVersion =~ /Ubuntu 22.04/) ||
-				($completeDistVersion =~ /elementary OS 7.1/) ||
-				($completeDistVersion =~ /KDE neon 22.04/) ||
-				($completeDistVersion =~ /Linux Mint 21.1/) ||
-				($completeDistVersion =~ /Linux Mint 21.2/) ||
-				($completeDistVersion =~ /TUXEDO_OS Plasma 22.04/) ||
-				($completeDistVersion =~ /TUXEDO OS 22.04/)) {
+		} elsif ($ubuntuCodename =~ /jammy/) {
 			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
 			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
 			my $tuxedoNvidiaDriver535 = 'tuxedo-nvidia-driver-535';
@@ -3349,25 +3285,27 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/flavours here as this is meant only for
 	# old installations where those entries might still exist
-	if (($completeDistVersion ne 'TUXEDO_OS 22.04') &&
-		($completeDistVersion ne 'Ubuntu 22.04') &&
-		($completeDistVersion ne 'elementary OS 7.1') &&
-		($completeDistVersion ne 'KDE neon 22.04') &&
-		($completeDistVersion ne 'TUXEDO OS 22.04') &&
-		($completeDistVersion ne 'Linux Mint 21.1') &&
-		($completeDistVersion ne 'Linux Mint 21.2')) {
-			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+	if ($ubuntuCodename ne 'jammy') {
+			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
+				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			}
 
-			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
-			edit_file { s/^deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
-			edit_file { s/^deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
+			if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
+				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
+				edit_file { s/^deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
+			}
 
-			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
-			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list';
-			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
+			if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
+				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
+				edit_file { s/^deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list';
+			}
 	} else {
-			edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
-			edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
+				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list';
+			}
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
 				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1');
@@ -3805,8 +3743,8 @@ sub LTEModuleFix {
 		}
 	}
 	if ($action eq 'remove') {
-		system "rm -rf $fileName1";
-		system "rm -rf $fileName2";
+		unlink($fileName1);
+		unlink($fileName2);
 
 		$origConfModules{$module}{installed} = 'no';
 		$origConfModules{$module}{upgraded} = 'yes';
@@ -4619,7 +4557,7 @@ sub installKernelFlavour {
 	my $line;
 	my $packageMissing = 0;
 	my $exitStatus = 1;
-	if (!(exists $flavours{$distributionVersion}{$flavour})) {
+	if (!(exists $flavours{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0');
 		${$failed} += 1;
 		return (0);
@@ -4629,9 +4567,9 @@ sub installKernelFlavour {
 		${$failed} += 1;
 		return (0);
 	}
-	$testCmd = $testCmd.' '.join($", @{ $flavours{$distributionVersion}{$flavour}{'packages'}});
+	$testCmd = $testCmd.' '.join($", @{ $flavours{$ubuntuCodename}{$flavour}{'packages'}});
 
-	foreach $package (@{ $flavours{$distributionVersion}{$flavour}{'packages'}}) {
+	foreach $package (@{ $flavours{$ubuntuCodename}{$flavour}{'packages'}}) {
 		$testCmd2 = $testCmd2.' '.$package;
 	}
 	$testCmd2 = $testCmd2.' 2>&1';
@@ -4659,7 +4597,7 @@ sub installKernelFlavour {
 					$installCmd .= ' '.$package;
 				} else {
 					printLog("package: >$package<", 'L2');
-					unless ( exists $flavours{$distributionVersion}{$package}) {
+					unless ( exists $flavours{$ubuntuCodename}{$package}) {
 						setAptMark($package, 'auto');
 					}
 				}
@@ -4669,7 +4607,7 @@ sub installKernelFlavour {
 
 	if ($packageMissing) {
 		# install the meta packages as well in case there is a new version
-		$installCmd .= " $flavours{$distributionVersion}{$flavour}{'installPackages'}";
+		$installCmd .= " $flavours{$ubuntuCodename}{$flavour}{'installPackages'}";
 		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
@@ -4693,7 +4631,7 @@ sub installKernelFlavour {
 						${$failed} += 1;
 						return (0);
 					} else {
-						if (unlockPM("$installCmd.$flavours{$distributionVersion}{$flavour}{'installPackages'}") && (isPMlocked() == 0)) {
+						if (unlockPM("$installCmd.$flavours{$ubuntuCodename}{$flavour}{'installPackages'}") && (isPMlocked() == 0)) {
 							$exitStatus = 1;
 							$retString = `$installCmd`;
 							$exitStatus = $?/256;
@@ -4730,7 +4668,7 @@ sub installKernelFlavour {
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
-						unless (grep( /^$package$/, @{ $flavours{$distributionVersion}{$flavour}{'packages'}})) {
+						unless (grep( /^$package$/, @{ $flavours{$ubuntuCodename}{$flavour}{'packages'}})) {
 							setAptMark($package, 'auto');
 						}
 						printLog("$package is installed", 'L2');
@@ -4830,8 +4768,8 @@ sub populateFlavourPackages {
 	my $line;
 	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = $consoleLanguage.'apt-cache depends --important '.$flavours{$distributionVersion}{$flavour}{'installPackages'};
-	@packages = split(' ', $flavours{$distributionVersion}{$flavour}{'installPackages'});
+	$searchCmd = $consoleLanguage.'apt-cache depends --important '.$flavours{$ubuntuCodename}{$flavour}{'installPackages'};
+	@packages = split(' ', $flavours{$ubuntuCodename}{$flavour}{'installPackages'});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("first result:\n$result", 'L2');
@@ -4861,8 +4799,8 @@ sub populateFlavourPackages {
 				}
 			}
 		}
-		@{ $flavours{$distributionVersion}{$flavour}{'packages'}} = uniqInArray(@packages);
-		printLog("packages found: @{ $flavours{$distributionVersion}{$flavour}{'packages'}}", 'L2');
+		@{ $flavours{$ubuntuCodename}{$flavour}{'packages'}} = uniqInArray(@packages);
+		printLog("packages found: @{ $flavours{$ubuntuCodename}{$flavour}{'packages'}}", 'L2');
 	} else {
 		printLog("empty package list for kernel $flavour while populating list, this should not happen!", 'L0');
 		return (0);
@@ -5097,12 +5035,12 @@ sub uninstKernelFlavour {
 	my $currentKernelUninstall = 0;
 
 	# find installed packages
-	if (!(exists $flavours{$distributionVersion}{$kernelToDelete})) {
+	if (!(exists $flavours{$ubuntuCodename}{$kernelToDelete})) {
 		printLog("flavour $kernelToDelete does not exist!!", 'TL0');
 		$failed += 1;
 		return (0);
 	}
-	if (!(exists $flavours{$distributionVersion}{$kernelToKeep})) {
+	if (!(exists $flavours{$ubuntuCodename}{$kernelToKeep})) {
 		printLog("flavour $kernelToKeep does not exist!!", 'TL0');
 		$failed += 1;
 		return (0);
@@ -5113,15 +5051,15 @@ sub uninstKernelFlavour {
 		printLog("no packages found for kernel $kernelToDelete while uninstalling", 'L0');
 		return (0);
 	}
-	$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} = $flavours{$distributionVersion}{$kernelToDelete}{'installPackages'};
-	foreach $package (@{ $flavours{$distributionVersion}{$kernelToDelete}{'packages'}}) {
-		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+	$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} = $flavours{$ubuntuCodename}{$kernelToDelete}{'installPackages'};
+	foreach $package (@{ $flavours{$ubuntuCodename}{$kernelToDelete}{'packages'}}) {
+		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$ubuntuCodename}{$kernelToKeep}{'packages'}}))) {
 			printLog("accepted: $package", 'L2');
-			$flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'} .= " $package";
+			$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} .= " $package";
 		}
 	}
-	printLog("packages to delete: $flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'}", 'L2');
-	$searchCmd .= $flavours{$distributionVersion}{$kernelToDelete}{'deletePackages'}.' 2>&1';
+	printLog("packages to delete: $flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'}", 'L2');
+	$searchCmd .= $flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'}.' 2>&1';
 	# find which packages are installed
 	printLog('find which packages are installed', 'L2');
 	$retString = `$searchCmd`;
@@ -5304,7 +5242,7 @@ sub uninstallRemnantKernels {
 		if ((!($line =~ /dpkg-query:/)) && ($line =~ /.*\s[uirp][cHUFWti]/)) {
 			$line =~ /(\S+)\s*(\S+)/;
 			$package = $1;
-			if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$distributionVersion}{$kernelToKeep}{'packages'}}))) {
+			if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$ubuntuCodename}{$kernelToKeep}{'packages'}}))) {
 				printLog("accepted: $package", 'L2');
 				push(@removePackages, $package);
 			} else {

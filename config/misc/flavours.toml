@@ -1,97 +1,23 @@
-["18.04"]
-["18.04"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["18.04"."linux-generic-hwe-18.04"]
-installPackages = "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04"
-["18.04"."linux-generic-hwe-18.04-edge"]
-installPackages = "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"
+[bionic]
+linux-generic = {installPackages = "linux-generic linux-headers-generic linux-image-generic"}
+"linux-generic-hwe-18.04" = {installPackages = "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04"}
+"linux-generic-hwe-18.04-edge" = {installPackages = "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"}
 
 
-["20.04"]
-["20.04"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["20.04"."linux-generic-hwe-20.04"]
-installPackages = "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04"
-["20.04"."linux-generic-hwe-20.04-edge"]
-installPackages = "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge"
-["20.04"."linux-oem-20.04"]
-installPackages = "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-["20.04"."linux-oem-20.04-edge"]
-installPackages = "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-["20.04"."linux-tuxedo-20.04"]
-installPackages = "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04"
-["20.04"."linux-tuxedo-20.04-edge"]
-installPackages = "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge"
-["20.04"."linux-tuxedo-20.04-next"]
-installPackages = "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next"
+[focal]
+linux-generic = {installPackages = "linux-generic linux-headers-generic linux-image-generic"}
+"linux-generic-hwe-20.04" = {installPackages = "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04"}
+"linux-generic-hwe-20.04-edge" = {installPackages = "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge"}
+"linux-oem-20.04" = {installPackages = "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"}
+"linux-oem-20.04-edge" = {installPackages = "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"}
+"linux-tuxedo-20.04" = {installPackages = "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04"}
+"linux-tuxedo-20.04-edge" = {installPackages = "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge"}
+"linux-tuxedo-20.04-next" = {installPackages = "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next"}
 
 
-["21.1"]
-["21.1"."linux-aws"]
-installPackages = "linux-aws linux-headers-aws linux-image-aws"
-["21.1"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["21.1"."linux-tuxedo-22.04"]
-installPackages = "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
-["21.1"."linux-tuxedo-22.04-edge"]
-installPackages = "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
-["21.1"."linux-tuxedo-22.04-next"]
-installPackages = "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
-
-
-["21.2"]
-["21.2"."linux-aws"]
-installPackages = "linux-aws linux-headers-aws linux-image-aws"
-["21.2"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["21.2"."linux-tuxedo-22.04"]
-installPackages = "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
-["21.2"."linux-tuxedo-22.04-edge"]
-installPackages = "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
-["21.2"."linux-tuxedo-22.04-next"]
-installPackages = "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
-
-
-["22.04"]
-["22.04"."linux-aws"]
-installPackages = "linux-aws linux-headers-aws linux-image-aws"
-["22.04"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["22.04"."linux-tuxedo-22.04"]
-installPackages = "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
-["22.04"."linux-tuxedo-22.04-edge"]
-installPackages = "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
-["22.04"."linux-tuxedo-22.04-next"]
-installPackages = "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
-
-
-["6.1"]
-["6.1"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["6.1"."linux-generic-hwe-20.04"]
-installPackages = "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04"
-["6.1"."linux-generic-hwe-20.04-edge"]
-installPackages = "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge"
-["6.1"."linux-oem-20.04"]
-installPackages = "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-["6.1"."linux-oem-20.04-edge"]
-installPackages = "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-["6.1"."linux-tuxedo-20.04"]
-installPackages = "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04"
-["6.1"."linux-tuxedo-20.04-edge"]
-installPackages = "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge"
-["6.1"."linux-tuxedo-20.04-next"]
-installPackages = "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next"
-
-
-["7.1"]
-["7.1"."linux-aws"]
-installPackages = "linux-aws linux-headers-aws linux-image-aws"
-["7.1"."linux-generic"]
-installPackages = "linux-generic linux-headers-generic linux-image-generic"
-["7.1"."linux-tuxedo-22.04"]
-installPackages = "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
-["7.1"."linux-tuxedo-22.04-edge"]
-installPackages = "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
-["7.1"."linux-tuxedo-22.04-next"]
-installPackages = "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
+[jammy]
+linux-aws = {installPackages = "linux-aws linux-headers-aws linux-image-aws"}
+linux-generic = {installPackages = "linux-generic linux-headers-generic linux-image-generic"}
+"linux-tuxedo-22.04" = {installPackages = "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"}
+"linux-tuxedo-22.04-edge" = {installPackages = "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"}
+"linux-tuxedo-22.04-next" = {installPackages = "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"}

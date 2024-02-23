@@ -35,6 +35,13 @@ content = ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"]
 filename = "/etc/apt/sources.list.d/tuxedo-computers.list"
 hashvalue = "abca6201e010d01e36e3ab8cba94d4b1"
 
+["Linux Mint 21.3"]
+name = "jammy"
+["Linux Mint 21.3".deb]
+content = ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"]
+filename = "/etc/apt/sources.list.d/tuxedo-computers.list"
+hashvalue = "abca6201e010d01e36e3ab8cba94d4b1"
+
 
 ["TUXEDO OS 20.04"]
 name = "focal"
