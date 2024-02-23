@@ -8,51 +8,11 @@
 #             name = VERSION_CODENAME
 # 
 
-["KDE neon"]
-["KDE neon".versions]
-["KDE neon".versions."20.04"]
-name = "focal"
-["KDE neon".versions."22.04"]
-name = "jammy"
+"TUXEDO OS" = ["20.04", "22.04"]
+"TUXEDO_OS Plasma" = ["20.04", "22.04"]
+"KDE neon" = ["20.04", "22.04"]
+"Ubuntu" = ["18.04", "20.04", "22.04"]
 
 
-["Linux Mint"]
-["Linux Mint".versions]
-["Linux Mint".versions."21.1"]
-name = "vera"
-["Linux Mint".versions."21.2"]
-name = "victoria"
-
-
-["TUXEDO OS"]
-["TUXEDO OS".versions]
-["TUXEDO OS".versions."20.04"]
-name = "focal"
-["TUXEDO OS".versions."22.04"]
-name = "jammy"
-
-
-["TUXEDO_OS Plasma"]
-["TUXEDO_OS Plasma".versions]
-["TUXEDO_OS Plasma".versions."20.04"]
-name = "focal"
-["TUXEDO_OS Plasma".versions."22.04"]
-name = "jammy"
-
-
-[Ubuntu]
-[Ubuntu.versions]
-[Ubuntu.versions."18.04"]
-name = "bionic"
-[Ubuntu.versions."20.04"]
-name = "focal"
-[Ubuntu.versions."22.04"]
-name = "jammy"
-
-
-["elementary OS"]
-["elementary OS".versions]
-["elementary OS".versions."6.1"]
-name = "jolnir"
-["elementary OS".versions."7.1"]
-name = "horus"
+"Linux Mint" = ["21.1", "21.2", "21.3"]
+"elementary OS" = ["6.1", "7.1"]
