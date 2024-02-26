@@ -1,102 +1,36 @@
-["KDE neon 20.04"]
-name = "focal"
-["KDE neon 20.04".mirrors]
+[bionic]
+[bionic.mirrors]
+content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"]
+filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+
+[focal]
+[focal.mirrors]
 content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"]
 filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "aa05995c6d7a3cb912be55cd9fe0d2ac"
 
-["KDE neon 22.04"]
-name = "jammy"
-["KDE neon 22.04".mirrors]
+[jammy]
+[jammy.mirrors]
 content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
 filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
 
 
 ["Linux Mint 21.1"]
-name = "jammy"
+name = "vanessa"
 ["Linux Mint 21.1".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
+content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+            "deb http://packages.linuxmint.com vanessa main upstream import backport"]
 filename = "/etc/apt/sources.list.d/official-package-repositories.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
 
 ["Linux Mint 21.2"]
-name = "jammy"
+name = "victoria"
 ["Linux Mint 21.2".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
+content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+            "deb http://packages.linuxmint.com victoria main upstream import backport"]
 filename = "/etc/apt/sources.list.d/official-package-repositories.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
 
 ["Linux Mint 21.3"]
-name = "jammy"
+name = "virginia"
 ["Linux Mint 21.3".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
+content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+            "deb http://packages.linuxmint.com virginia main upstream import backport"]
 filename = "/etc/apt/sources.list.d/official-package-repositories.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
-
-
-["TUXEDO OS 20.04"]
-name = "focal"
-["TUXEDO OS 20.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "aa05995c6d7a3cb912be55cd9fe0d2ac"
-
-["TUXEDO OS 22.04"]
-name = "jammy"
-["TUXEDO OS 22.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
-
-
-["TUXEDO_OS Plasma 20.04"]
-name = "focal"
-["TUXEDO_OS Plasma 20.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "aa05995c6d7a3cb912be55cd9fe0d2ac"
-
-["TUXEDO_OS Plasma 22.04"]
-name = "jammy"
-["TUXEDO_OS Plasma 22.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
-
-
-["Ubuntu 18.04"]
-name = "bionic"
-["Ubuntu 18.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "4c4430919fe19383532c3f2d7e34c282"
-
-["Ubuntu 20.04"]
-name = "focal"
-["Ubuntu 20.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "aa05995c6d7a3cb912be55cd9fe0d2ac"
-
-["Ubuntu 22.04"]
-name = "jammy"
-["Ubuntu 22.04".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
-
-
-["elementary OS 6.1"]
-name = "6.1 jolnir"
-["elementary OS 6.1".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "aa05995c6d7a3cb912be55cd9fe0d2ac"
-
-["elementary OS 7.1"]
-name = "7.1 horus"
-["elementary OS 7.1".mirrors]
-content = ["deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", "deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"]
-filename = "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-hashvalue = "63b36f8e95d2ada668af508785ece311"
