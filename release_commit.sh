@@ -23,7 +23,10 @@ if [[ -z "$EMAIL" || -z "$DEBEMAIL" ]]; then
   export DEBEMAIL="tux@tuxedocomputers.com"
 fi
 
-dch --newversion $version_tag $commit_message
+branch=$(git symbolic-ref --short HEAD);
+commit_hash=$(git log -1 --pretty="%H" -- debian/changelog)
+gbp dch --verbose --debian-branch="$branch" --new-version="$version_tag" --since="$commit_hash"
+head debian/changelog -n 5
 vim debian/changelog
 dch --release ""
 cp debian/changelog changelog
@@ -32,5 +35,6 @@ cp debian/changelog changelog
 git add debian/changelog
 git add changelog
 
-git commit -m "$commit_message"
+commit_body=$(dpkg-parsechangelog --show-field Changes | awk 'NR>3')
+git commit -m "$commit_message" -m "$commit_body"
 git tag $version_tag

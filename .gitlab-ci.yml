@@ -3,9 +3,9 @@ build-package:
   variables:
     PACKAGE_BASE_REPO_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages"
   before_script:
-    # Extract the current version from debian/changelog
     - apt-get update
     - apt-get install -yqq libtoml-perl libfile-slurp-perl
+    # Extract the current version from debian/changelog
     - VERSIONSTRING=$(dpkg-parsechangelog | awk '/^Version:/ {print $2}')
     - "echo \"Current version: $VERSIONSTRING\""
     - BASE_VERSION=$(echo "$VERSIONSTRING" | awk -F- '{print $1}')
@@ -21,7 +21,10 @@ build-package:
             TEST_VERSION="$BASE_VERSION-test-$BRANCH_SHORT-$TIMESTAMP"
             echo "Using test version: $TEST_VERSION"
             # Update the changelog with the new test version number
-            dch --newversion $TEST_VERSION "New test release for $CI_COMMIT_REF_NAME"
+            commit_hash=$(git log -1 --pretty="%H" -- debian/changelog)
+            export DEBEMAIL="tux@tuxedocomputers.com"
+            git checkout "$CI_COMMIT_REF_NAME"
+            gbp dch --verbose --debian-branch "$CI_COMMIT_REF_NAME" --new-version $TEST_VERSION --since="$commit_hash"
             # Update the VERSIONSTRING with the test version
             VERSIONSTRING=$TEST_VERSION
         else
@@ -47,5 +50,7 @@ build-package:
 
 check:
   script:
+    - apt-get update
+    - apt-get install -yqq libparse-edid-perl packagekit-tools perl libfile-fcntllock-perl libdpkg-perl libjson-perl libconfig-tiny-perl libintl-perl libtoml-perl libfile-slurp-perl
     - ./check.sh
   allow_failure: true
