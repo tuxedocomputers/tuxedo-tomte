@@ -654,29 +654,6 @@ sub readOSData {
 
 
 
-
-###############################################################################
-# returns the brand of the CPU (AMD or Intel)
-# returns undef if no file was found
-#
-sub cpuBrand {
-	my $infos;
-	my $cpuinfo = '/proc/cpuinfo';
-	if ( (-e $cpuinfo) && open(FH, '<', '/proc/cpuinfo') ) {
-		local $/;
-		$infos = <FH>;
-		close FH;
-		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
-			return ('AMD');
-		}
-	} else {
-		printLog("file $cpuinfo was not found", 'L0');
-	}
-	return ('Intel');
-}
-
-
-
 ###############################################################################
 # checks the list of supported distributions and versions and returns
 # 1 if supported
