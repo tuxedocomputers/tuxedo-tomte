@@ -26,7 +26,7 @@ use 5.010;
 local $SIG{__WARN__} = sub {
 	my $warning = shift;
 	chomp($warning);
-	printLog("WARNING: " . $warning, "TL0");
+	printLog("WARNING: " . $warning, "L0");
 };
 
 # for file locking
