@@ -5030,6 +5030,11 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $purgeCommand;
 	my $bootDir = '/boot';
 
+	if (triesAlreadyDone() > 0) {
+		printLog("won't delete oldest kernel because Tomte is running in retry-mode", "L2");
+		return (0);
+	}
+
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
 			if ($file =~ /initrd\.img-(.*)-tuxedo$/) {
