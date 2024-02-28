@@ -232,76 +232,76 @@ my %postConfProgram = (
 my %supportedOS = readTOMLFile('/usr/lib/tomte/config/misc/supported_os.toml');
 
 my %tuxedo_repos = (
-	"bionic" => (
-		"deb" => (
+	"bionic" => {
+		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		),
-		"graphics" => (
+		},
+		"graphics" => {
 			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
 			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
-		),
-		"oibaf" => (
+		},
+		"oibaf" => {
 			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
 			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
-		)
-	),
+		}
+	},
 
-	"focal" => (
-		"deb" => (
+	"focal" => {
+		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"),
-		"graphics" => (
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
+		"graphics" => {
 			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"),
-		"oibaf" => (
+			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"},
+		"oibaf" => {
 			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list")
-	),
+			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"}
+	},
 
-	"jammy" => (
-		"deb" => (
+	"jammy" => {
+		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		)
-	)
+		}
+	}
 );
 
 my %tuxedo_mirrors = (
-	"bionic" => (
-		"mirrors" => (
+	"bionic" => {
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		)
-	),
-	"focal" => (
-		"mirrors" => (
+		}
+	},
+	"focal" => {
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		)
-	),
-	"jammy" => (
-		"mirrors" => (
+		}
+	},
+	"jammy" => {
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		)
-	),
+		}
+	},
 
-	"Linux Mint 21.1" => (
+	"Linux Mint 21.1" => {
 		"name" => "vanessa",
-		"mirrors" => (
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
@@ -309,11 +309,11 @@ my %tuxedo_mirrors = (
 				"deb http://packages.linuxmint.com vanessa main upstream import backport"
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		)
-	),
-	"Linux Mint 21.2" => (
+		}
+	},
+	"Linux Mint 21.2" => {
 		"name" => "victoria",
-		"mirrors" => (
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
@@ -321,11 +321,11 @@ my %tuxedo_mirrors = (
 				"deb http://packages.linuxmint.com victoria main upstream import backport"
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		)
-	),
-	"Linux Mint 21.3" => (
+		}
+	},
+	"Linux Mint 21.3" => {
 		"name" => "virginia",
-		"mirrors" => (
+		"mirrors" => {
 			"content" => [
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
@@ -333,67 +333,35 @@ my %tuxedo_mirrors = (
 				"deb http://packages.linuxmint.com virginia main upstream import backport"
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		)
-	)
+		}
+	}
 );
 
 my %flavours = (
-	"bionic" => (
-		"linux-generic" => (
-			installPackages => "linux-generic linux-headers-generic linux-image-generic"
-		),
-		"linux-generic-hwe-18.04" => (
-			installPackages => "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04"
-		),
-		"linux-generic-hwe-18.04-edge" => (
-			installPackages => "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"
-		)
-	),
+	"bionic" => {
+		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
+		"linux-generic-hwe-18.04" => "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04",
+		"linux-generic-hwe-18.04-edge" => "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"
+	},
 
-	"focal" => (
-		"linux-generic" => (
-			installPackages => "linux-generic linux-headers-generic linux-image-generic"
-		),
-		"linux-generic-hwe-20.04" => (
-			installPackages => "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04"
-		),
-		"linux-generic-hwe-20.04-edge" => (
-			installPackages => "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge"
-		),
-		"linux-oem-20.04" => (
-			installPackages => "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-		),
-		"linux-oem-20.04-edge" => (
-			installPackages => "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
-		),
-		"linux-tuxedo-20.04" => (
-			installPackages => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04"
-		),
-		"linux-tuxedo-20.04-edge" => (
-			installPackages => "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge"
-		),
-		"linux-tuxedo-20.04-next" => (
-			installPackages => "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next"
-		)
-	),
+	"focal" => {
+		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
+		"linux-generic-hwe-20.04" => "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04",
+		"linux-generic-hwe-20.04-edge" => "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge",
+		"linux-oem-20.04" => "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b",
+		"linux-oem-20.04-edge" => "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b",
+		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
+		"linux-tuxedo-20.04-edge" => "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge",
+		"linux-tuxedo-20.04-next" => "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next",
+	},
 
-	"jammy" => (
-		"linux-aws" => (
-			installPackages => "linux-aws linux-headers-aws linux-image-aws"
-		),
-		"linux-generic" => (
-			installPackages => "linux-generic linux-headers-generic linux-image-generic"
-		),
-		"linux-tuxedo-22.04" => (
-			installPackages => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
-		),
-		"linux-tuxedo-22.04-edge" => (
-			installPackages => "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
-		),
-		"linux-tuxedo-22.04-next" => (
-			installPackages => "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
-		)
-	)
+	"jammy" => {
+		"linux-aws" => "linux-aws linux-headers-aws linux-image-aws",
+		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
+		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
+		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge",
+		"linux-tuxedo-22.04-next" => "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next",
+	}
 );
 
 my %origConfModules = readTOMLFile('/usr/lib/tomte/config/modules/modules.toml');
@@ -1463,7 +1431,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -1596,7 +1564,7 @@ sub tuxedorepos() {
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
+					unless (write_file($thirdPartyMirrorsFile, \$thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -1630,7 +1598,7 @@ sub tuxedorepos() {
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (write_file($thirdPartyMirrorsFile, $thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
+					unless (write_file($thirdPartyMirrorsFile, \$thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -2124,7 +2092,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -2952,7 +2920,7 @@ sub lightdmlogindcheckgraphicalfix() {
 		}
 		if (-e $lightdmCheckGraphicalFile) {
 			unless (isTextInFile($lightdmCheckGraphicalFile, '[LightDM]') && isTextInFile($lightdmCheckGraphicalFile, 'logind-check-graphical=true')) {
-				if (write_file($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
+				if (write_file($lightdmCheckGraphicalFile, \"[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -2963,7 +2931,7 @@ sub lightdmlogindcheckgraphicalfix() {
 				}
 			}
 		} else {
-			if (write_file($lightdmCheckGraphicalFile, "[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
+			if (write_file($lightdmCheckGraphicalFile, \"[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -3028,7 +2996,7 @@ sub earlyloadbacklightcontrolfix() {
 		}
 		if (-e $elbcFile) {
 			unless (isTextInFile($elbcFile, $elbcLine)) {
-				if (write_file($elbcFile, $elbcLine, {'err_mode' => 'carp'})) {
+				if (write_file($elbcFile, \$elbcLine, {'err_mode' => 'carp'})) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -3039,7 +3007,7 @@ sub earlyloadbacklightcontrolfix() {
 				}
 			}
 		} else {
-			if (write_file($elbcFile, $elbcLine, {'err_mode' => 'carp'})) {
+			if (write_file($elbcFile, \$elbcLine, {'err_mode' => 'carp'})) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -3088,7 +3056,7 @@ sub cardreaderfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, $fileText1, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3134,7 +3102,7 @@ sub samsungnvmefix() {
 			$configuredModules{$module} = 'nothingToDo';
 		} else {
 			printLog("applying $origConfModules{$module}{name}", 'L1');
-			$retval = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+			$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3148,7 +3116,7 @@ sub samsungnvmefix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3194,7 +3162,7 @@ sub intelgenXIIIpowerctlfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, $fileText1, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3294,7 +3262,7 @@ sub systemdbacklightfix() {
 		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3346,7 +3314,7 @@ sub elementaryosdkmspinningfix() {
 		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, $fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3840,8 +3808,8 @@ sub LTEModuleFix {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"$vendor\", ATTR{idProduct}==\"$product\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"$bConfigurationValue\" ATTR{bConfigurationValue}=\"$bConfigurationValue\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, $fileText1, {'err_mode' => 'carp'});
-		$retval2 = write_file($fileName2, $fileText2, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
+		$retval2 = write_file($fileName2, \$fileText2, {'err_mode' => 'carp'});
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3854,8 +3822,8 @@ sub LTEModuleFix {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, $fileText1, {'err_mode' => 'carp'});
-		$retval2 = write_file($fileName2, $fileText2, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
+		$retval2 = write_file($fileName2, \$fileText2, {'err_mode' => 'carp'});
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4731,7 +4699,7 @@ sub installKernelFlavour {
 
 	if ($packageMissing) {
 		# install the meta packages as well in case there is a new version
-		$installCmd .= " $flavours{$ubuntuCodename}{$flavour}{'installPackages'}";
+		$installCmd .= " $flavours{$ubuntuCodename}{$flavour}";
 		$installCmd .= ' 2>&1';
 		messageLongInstall();
 		printLog("installing $flavour", 'TL0');
@@ -4755,7 +4723,7 @@ sub installKernelFlavour {
 						${$failed} += 1;
 						return (0);
 					} else {
-						if (unlockPM("$installCmd.$flavours{$ubuntuCodename}{$flavour}{'installPackages'}") && (isPMlocked() == 0)) {
+						if (unlockPM("$installCmd.$flavours{$ubuntuCodename}{$flavour}") && (isPMlocked() == 0)) {
 							$exitStatus = 1;
 							$retString = `$installCmd`;
 							$exitStatus = $?/256;
@@ -4892,8 +4860,8 @@ sub populateFlavourPackages {
 	my $line;
 	my $pkgString;
 	printLog("populating $flavour", 'L2');
-	$searchCmd = $consoleLanguage.'apt-cache depends --important '.$flavours{$ubuntuCodename}{$flavour}{'installPackages'};
-	@packages = split(' ', $flavours{$ubuntuCodename}{$flavour}{'installPackages'});
+	$searchCmd = $consoleLanguage.'apt-cache depends --important '.$flavours{$ubuntuCodename}{$flavour};
+	@packages = split(' ', $flavours{$ubuntuCodename}{$flavour});
 	printLog("first searchcommand: $searchCmd", 'L2');
 	$result = `$searchCmd`;
 	printLog("first result:\n$result", 'L2');
@@ -5030,7 +4998,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $purgeCommand;
 	my $bootDir = '/boot';
 
-	if (triesAlreadyDone() > 0) {
+	if (-e $triesFile) {
 		printLog("won't delete oldest kernel because Tomte is running in retry-mode", "L2");
 		return (0);
 	}
@@ -5155,7 +5123,7 @@ sub uninstKernelFlavour {
 		printLog("no packages found for kernel $kernelToDelete while uninstalling", 'L0');
 		return (0);
 	}
-	$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} = $flavours{$ubuntuCodename}{$kernelToDelete}{'installPackages'};
+	$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} = $flavours{$ubuntuCodename}{$kernelToDelete};
 	foreach $package (@{ $flavours{$ubuntuCodename}{$kernelToDelete}{'packages'}}) {
 		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$ubuntuCodename}{$kernelToKeep}{'packages'}}))) {
 			printLog("accepted: $package", 'L2');
@@ -5303,7 +5271,7 @@ sub setCurrentKernelUninstallParameters {
 		$restartSystem = 1;
 		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 		my $fileText = "#!/bin/sh\nexit 0";
-		write_file('/usr/bin/linux-check-removal', $fileText, {'err_mode' => 'carp'});
+		write_file('/usr/bin/linux-check-removal', \$fileText, {'err_mode' => 'carp'});
 		chmod 755, '/usr/bin/linux-check-removal';
 		return (1);
 	}
@@ -6264,7 +6232,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# set flag for first installation
-		write_file( $tomteFirstInstallFile, 'tomteFirstInstall', {'err_mode' => 'carp'});
+		write_file( $tomteFirstInstallFile, \'tomteFirstInstall', {'err_mode' => 'carp'});
 		# create a new configFile
 		printLog("no configfile present ... creating one", 'TL');
 		writeConfigFile();
@@ -7071,7 +7039,7 @@ sub setMode {
 	} else {
 		foreach $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
-				write_file($modeFile{$requestedMode}, '', {'err_mode' => 'carp'});
+				write_file($modeFile{$requestedMode}, \'', {'err_mode' => 'carp'});
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
@@ -7717,7 +7685,7 @@ sub setRestartValues {
 	my $element = shift;
 	$restartSystem = 1;
 	printLog("setting restart for: $element", 'L2');
-	write_file($needsRestartFile, 'Tomte: system has to be restarted', {'err_mode' => 'carp'});
+	write_file($needsRestartFile, \'Tomte: system has to be restarted', {'err_mode' => 'carp'});
 }
 
 
@@ -7746,7 +7714,7 @@ sub tries() {
 		}
 	} else {
 		printLog('creating triesFile', 'L2');
-		write_file($triesFile, '1', {'err_mode' => 'carp'});
+		write_file($triesFile, \'1', {'err_mode' => 'carp'});
 	}
 	return (1);
 }
@@ -7759,7 +7727,7 @@ sub tries() {
 #
 sub triesAlreadyDone() {
 	if (-e $triesFile) {
-		return (readFirstLineOfFile($triesFile)+0);
+		return (readFirstLineOfFile(\$triesFile)+0);
 	} else {
 		return (0);
 	}
@@ -8054,7 +8022,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -8069,7 +8037,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8095,7 +8063,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8130,7 +8098,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -8145,7 +8113,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8276,7 +8244,7 @@ END {
 			writeConfigIniFile();
 		}
 		# just to be sure, always write the tomte_finished file
-		if (write_file($tomteFinishedFile, 'finished', {'err_mode' => 'carp'})) {
+		if (write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'})) {
 			printLog("created $tomteFinishedFile", 'L2');
 		}
 	}
