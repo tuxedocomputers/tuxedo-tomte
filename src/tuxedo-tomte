@@ -229,7 +229,7 @@ my %postConfProgram = (
 );
 
 
-my %supportedOS = read_toml_file('/usr/lib/tomte/config/misc/supported_os.toml');
+my %supportedOS = readTOMLFile('/usr/lib/tomte/config/misc/supported_os.toml');
 
 my %tuxedo_repos = (
 	"bionic" => (
@@ -396,8 +396,8 @@ my %flavours = (
 	)
 );
 
-my %origConfModules = read_toml_file('/usr/lib/tomte/config/modules/modules.toml');
-my %tuxedo_devices = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_devices.toml');
+my %origConfModules = readTOMLFile('/usr/lib/tomte/config/modules/modules.toml');
+my %tuxedo_devices = readTOMLFile('/usr/lib/tomte/config/misc/tuxedo_devices.toml');
 
 foreach my $module (keys %origConfModules) {
 	$origConfModules{$module}{'description'} = __($module . "_description");
@@ -6052,19 +6052,19 @@ sub printLog {
 
 
 # accepts a file_path and return a hash with the parsed data
-sub read_toml_file {
+sub readTOMLFile {
 	my $file_path = shift;
 
-	my $toml_str = read_file($file_path, 'err_mode' => 'carp');
-	my $toml_hash_ref = from_toml($toml_str);
+	my $tomlStr = read_file($file_path, 'err_mode' => 'carp');
+	my $tomlHashRef = from_toml($tomlStr);
 
     # Check if the TOML data was parsed successfully
-    if (!defined $toml_hash_ref) {
+    if (!defined $tomlHashRef) {
         printLog("Failed to parse TOML data from file: $file_path", "TL0");
 		return {};
     }
 
-	return %$toml_hash_ref;
+	return %$tomlHashRef;
 }
 
 
