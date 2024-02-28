@@ -230,9 +230,172 @@ my %postConfProgram = (
 
 
 my %supportedOS = read_toml_file('/usr/lib/tomte/config/misc/supported_os.toml');
-my %tuxedo_repos = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_repos.toml');
-my %tuxedo_mirrors = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_mirrors.toml');
-my %flavours = read_toml_file('/usr/lib/tomte/config/misc/flavours.toml');
+
+my %tuxedo_repos = (
+	"bionic" => (
+		"deb" => (
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		),
+		"graphics" => (
+			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
+		),
+		"oibaf" => (
+			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
+		)
+	),
+
+	"focal" => (
+		"deb" => (
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"),
+		"graphics" => (
+			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"),
+		"oibaf" => (
+			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list")
+	),
+
+	"jammy" => (
+		"deb" => (
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		)
+	)
+);
+
+my %tuxedo_mirrors = (
+	"bionic" => (
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		)
+	),
+	"focal" => (
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		)
+	),
+	"jammy" => (
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		)
+	),
+
+	"Linux Mint 21.1" => (
+		"name" => "vanessa",
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com vanessa main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		)
+	),
+	"Linux Mint 21.2" => (
+		"name" => "victoria",
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com victoria main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		)
+	),
+	"Linux Mint 21.3" => (
+		"name" => "virginia",
+		"mirrors" => (
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com virginia main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		)
+	)
+);
+
+my %flavours = (
+	"bionic" => (
+		"linux-generic" => (
+			installPackages => "linux-generic linux-headers-generic linux-image-generic"
+		),
+		"linux-generic-hwe-18.04" => (
+			installPackages => "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04"
+		),
+		"linux-generic-hwe-18.04-edge" => (
+			installPackages => "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"
+		)
+	),
+
+	"focal" => (
+		"linux-generic" => (
+			installPackages => "linux-generic linux-headers-generic linux-image-generic"
+		),
+		"linux-generic-hwe-20.04" => (
+			installPackages => "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04"
+		),
+		"linux-generic-hwe-20.04-edge" => (
+			installPackages => "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge"
+		),
+		"linux-oem-20.04" => (
+			installPackages => "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
+		),
+		"linux-oem-20.04-edge" => (
+			installPackages => "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b"
+		),
+		"linux-tuxedo-20.04" => (
+			installPackages => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04"
+		),
+		"linux-tuxedo-20.04-edge" => (
+			installPackages => "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge"
+		),
+		"linux-tuxedo-20.04-next" => (
+			installPackages => "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next"
+		)
+	),
+
+	"jammy" => (
+		"linux-aws" => (
+			installPackages => "linux-aws linux-headers-aws linux-image-aws"
+		),
+		"linux-generic" => (
+			installPackages => "linux-generic linux-headers-generic linux-image-generic"
+		),
+		"linux-tuxedo-22.04" => (
+			installPackages => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04"
+		),
+		"linux-tuxedo-22.04-edge" => (
+			installPackages => "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge"
+		),
+		"linux-tuxedo-22.04-next" => (
+			installPackages => "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next"
+		)
+	)
+);
+
 my %origConfModules = read_toml_file('/usr/lib/tomte/config/modules/modules.toml');
 my %tuxedo_devices = read_toml_file('/usr/lib/tomte/config/misc/tuxedo_devices.toml');
 
