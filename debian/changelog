@@ -1,3 +1,17 @@
+tuxedo-tomte (2.25.0) jammy; urgency=medium
+
+  [ Maximilian Arnold ]
+  * Change File Operations Subroutines to File::Slurp
+  * moved modules configuration into a config file
+  * added support for Mint 21.3
+  * added amdgpu-disable-psr for Sirius with boardname: APX958
+  * Linux Mint mirror missing
+
+  [ G. Gottleuber ]
+  * kernel clean up: removed /boot partition condition
+
+ -- Maximilian Arnold <tux@tuxedocomputers.com>  Thu, 29 Feb 2024 10:28:11 +0100
+
 tuxedo-tomte (2.24.1) jammy; urgency=medium
 
   * added LTE-module Huawei ME 906s HP rebranded to fixes (huawei-me906s-hp-fix)
