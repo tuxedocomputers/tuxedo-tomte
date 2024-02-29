@@ -1079,6 +1079,17 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => 'ME906',
+	},
+	'67' => {
+		model => ['Sirius 16 - Gen1'],
+		board_name => ['APX958'],
+		fix => ['amdgpudisablepsr'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
 );
 
