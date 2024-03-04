@@ -1782,7 +1782,7 @@ sub checkRequirements {
 
 	# if Huawei LTE ME906s HP rebranded device found
 	my $lsusbHuawei906sHP = `lsusb -d 03f0:a31d`;
-	if ($lsusbHuawei906sHP =~ /hp/) {
+	if ($lsusbHuawei906sHP =~ /hp/i) {
 		$origConfModules{huaweime906shpfix}{required} = 'yes';
 		printLog("detected $origConfModules{huaweime906shpfix}{name} issue", 'L1');
 	}
@@ -2157,7 +2157,7 @@ sub amdgpuwithnvidiafix() {
 		"EndSection\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2290,7 +2290,7 @@ sub tuxedorepos() {
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (write_file($thirdPartyMirrorsFile, \$thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
+					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -2324,7 +2324,7 @@ sub tuxedorepos() {
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
-					unless (write_file($thirdPartyMirrorsFile, \$thirdPartyMirrorsFileText, {'err_mode' => 'carp'})) {
+					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
 						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
 					}
 				}
@@ -2818,7 +2818,7 @@ sub tuxedorestoreaudiofix() {
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
@@ -3501,7 +3501,7 @@ sub apportfix() {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
-			$retval = edit_file { s/^enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
+			$retval = edit_file { s/enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0');
 				#`service apport stop`;
@@ -3646,7 +3646,7 @@ sub lightdmlogindcheckgraphicalfix() {
 		}
 		if (-e $lightdmCheckGraphicalFile) {
 			unless (isTextInFile($lightdmCheckGraphicalFile, '[LightDM]') && isTextInFile($lightdmCheckGraphicalFile, 'logind-check-graphical=true')) {
-				if (write_file($lightdmCheckGraphicalFile, \"[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
+				if (write_file($lightdmCheckGraphicalFile, {'err_mode' => 'carp'}, "[LightDM]\nlogind-check-graphical=true")) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -3657,7 +3657,7 @@ sub lightdmlogindcheckgraphicalfix() {
 				}
 			}
 		} else {
-			if (write_file($lightdmCheckGraphicalFile, \"[LightDM]\nlogind-check-graphical=true", {'err_mode' => 'carp'})) {
+			if (write_file($lightdmCheckGraphicalFile, {'err_mode' => 'carp'}, "[LightDM]\nlogind-check-graphical=true")) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -3722,7 +3722,7 @@ sub earlyloadbacklightcontrolfix() {
 		}
 		if (-e $elbcFile) {
 			unless (isTextInFile($elbcFile, $elbcLine)) {
-				if (write_file($elbcFile, \$elbcLine, {'err_mode' => 'carp'})) {
+				if (write_file($elbcFile, {'err_mode' => 'carp'}, $elbcLine)) {
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
@@ -3733,7 +3733,7 @@ sub earlyloadbacklightcontrolfix() {
 				}
 			}
 		} else {
-			if (write_file($elbcFile, \$elbcLine, {'err_mode' => 'carp'})) {
+			if (write_file($elbcFile, {'err_mode' => 'carp'}, $elbcLine)) {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -3782,7 +3782,7 @@ sub cardreaderfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3828,7 +3828,7 @@ sub samsungnvmefix() {
 			$configuredModules{$module} = 'nothingToDo';
 		} else {
 			printLog("applying $origConfModules{$module}{name}", 'L1');
-			$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+			$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
@@ -3842,7 +3842,7 @@ sub samsungnvmefix() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3888,7 +3888,7 @@ sub intelgenXIIIpowerctlfix() {
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -3988,7 +3988,7 @@ sub systemdbacklightfix() {
 		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4040,7 +4040,7 @@ sub elementaryosdkmspinningfix() {
 		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval = write_file($fileName, \$fileText, {'err_mode' => 'carp'});
+		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4142,24 +4142,24 @@ sub createRepos {
 	# old installations where those entries might still exist
 	if ($ubuntuCodename ne 'jammy') {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
 
 			if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
-				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-				edit_file { s/^deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
 			}
 
 			if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
-				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-				edit_file { s/^deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
 			}
 	} else {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/^deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/^# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
@@ -4181,7 +4181,7 @@ sub createRepos {
 			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
-					(join "\n", @{$repos{$distroKey}{$key}{content}});
+					(join "\n", @{$repos{$distroKey}{$key}{content}}) . "\n";
 
 			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
 			if($noChangesNeeded) {
@@ -4195,7 +4195,7 @@ sub createRepos {
 				printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0');
 				printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0');
 
-				if (write_file($repos{$distroKey}{$key}{filename}, \$fileText, {'err_mode' => 'carp'}) ) {
+				if (write_file($repos{$distroKey}{$key}{filename}, {'err_mode' => 'carp'}, $fileText) ) {
 					$modified += 1;
 					printLog("wrote file: $repos{$distroKey}{$key}{filename}", 'L0');
 				} else {
@@ -4534,8 +4534,8 @@ sub LTEModuleFix {
 		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"$vendor\", ATTR{idProduct}==\"$product\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"$bConfigurationValue\" ATTR{bConfigurationValue}=\"$bConfigurationValue\"\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
-		$retval2 = write_file($fileName2, \$fileText2, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
+		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4548,8 +4548,8 @@ sub LTEModuleFix {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $origConfModules{$module}{name}", 'L1');
-		$retval1 = write_file($fileName1, \$fileText1, {'err_mode' => 'carp'});
-		$retval2 = write_file($fileName2, \$fileText2, {'err_mode' => 'carp'});
+		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
+		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -4703,7 +4703,7 @@ sub setDkmsVerbose {
 	if ($value == 1) {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			unless (isLineInFile( $dkmsFile, 'verbose="1"' )) {
-				$result = append_file( $dkmsFile, "verbose=\"1\"\n", {'err_mode' => 'carp'});
+				$result = append_file( $dkmsFile, {'err_mode' => 'carp'}, "verbose=\"1\"\n");
 				printLog("append verbose into dkms file for $module", 'L2');
 				return ($result);
 			} else {
@@ -4714,7 +4714,7 @@ sub setDkmsVerbose {
 	} elsif ($value == 0) {
 		if (($origConfModules{$module}{dkms} eq 'yes') && (($FAI && ($origConfModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'yes')))) {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2');
-			$result = edit_file { s/^verbose="1"//g } $dkmsFile, {'err_mode' => 'carp'};
+			$result = edit_file { s/verbose="1"//g } $dkmsFile, {'err_mode' => 'carp'};
 			if ($result >= 0) {
 				printLog("verbose DKMS substitution successful", 'L2');
 				return (1);
@@ -5997,7 +5997,7 @@ sub setCurrentKernelUninstallParameters {
 		$restartSystem = 1;
 		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
 		my $fileText = "#!/bin/sh\nexit 0";
-		write_file('/usr/bin/linux-check-removal', \$fileText, {'err_mode' => 'carp'});
+		write_file('/usr/bin/linux-check-removal', {'err_mode' => 'carp'}, $fileText);
 		chmod 755, '/usr/bin/linux-check-removal';
 		return (1);
 	}
@@ -6958,7 +6958,7 @@ sub initConfigFile {
 		return;
 	} else {
 		# set flag for first installation
-		write_file( $tomteFirstInstallFile, \'tomteFirstInstall', {'err_mode' => 'carp'});
+		write_file( $tomteFirstInstallFile, {'err_mode' => 'carp'}, 'tomteFirstInstall');
 		# create a new configFile
 		printLog("no configfile present ... creating one", 'TL');
 		writeConfigFile();
@@ -7765,7 +7765,7 @@ sub setMode {
 	} else {
 		foreach $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
-				write_file($modeFile{$requestedMode}, \'', {'err_mode' => 'carp'});
+				write_file($modeFile{$requestedMode}, {'err_mode' => 'carp'}, '');
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
@@ -8411,7 +8411,7 @@ sub setRestartValues {
 	my $element = shift;
 	$restartSystem = 1;
 	printLog("setting restart for: $element", 'L2');
-	write_file($needsRestartFile, \'Tomte: system has to be restarted', {'err_mode' => 'carp'});
+	write_file($needsRestartFile, {'err_mode' => 'carp'}, 'Tomte: system has to be restarted');
 }
 
 
@@ -8430,7 +8430,7 @@ sub tries() {
 		printLog("repeat number $triesDone of $limit", 'L0');
 		if ( $triesDone < $limit ) {
 			printLog("rising tries, triesDone below limit", 'L2');
-			write_file($triesFile, $triesDone+1, {'err_mode' => 'carp'});
+			write_file($triesFile, {'err_mode' => 'carp'}, $triesDone+1);
 			return (1);
 		} else {
 			printLog("limit tries done reached", 'L2');
@@ -8440,7 +8440,7 @@ sub tries() {
 		}
 	} else {
 		printLog('creating triesFile', 'L2');
-		write_file($triesFile, \'1', {'err_mode' => 'carp'});
+		write_file($triesFile, {'err_mode' => 'carp'}, '1');
 	}
 	return (1);
 }
@@ -8748,7 +8748,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -8763,7 +8763,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8789,7 +8789,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8824,7 +8824,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
@@ -8839,7 +8839,7 @@ if (@ARGV != 0) {
 				listSuccess();
 				writeConfigFile();
 				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'});
+					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
 				}
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -8970,7 +8970,7 @@ END {
 			writeConfigIniFile();
 		}
 		# just to be sure, always write the tomte_finished file
-		if (write_file($tomteFinishedFile, \'finished', {'err_mode' => 'carp'})) {
+		if (write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished')) {
 			printLog("created $tomteFinishedFile", 'L2');
 		}
 	}
