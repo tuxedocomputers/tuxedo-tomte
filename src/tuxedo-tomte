@@ -8453,7 +8453,7 @@ sub tries() {
 #
 sub triesAlreadyDone() {
 	if (-e $triesFile) {
-		return (readFirstLineOfFile(\$triesFile)+0);
+		return (readFirstLineOfFile($triesFile)+0);
 	} else {
 		return (0);
 	}
