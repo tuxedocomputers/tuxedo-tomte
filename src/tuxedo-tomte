@@ -8908,8 +8908,7 @@ if (@ARGV != 0) {
 
 # interrupt repeated delayed execution if not necessary anymore
 if (($startLaterAgain == 0) &&
-	($argValue{command} eq 'configure') &&
-	($argValue{command} eq 'reconfigure')) {
+	(($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure'))) {
 	if (-e $triesFile) {
 		if (-w $triesFile) {
 			printLog('deleting triesFile', 'L2');
