@@ -1892,8 +1892,7 @@ sub checkRequirements {
 		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
 	}
 
-	if (($chassisType eq 'desktoppc') ||
-		(isPackageInstalled('apport'))) {
+	if (-e "/etc/default/apport") {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
 		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
