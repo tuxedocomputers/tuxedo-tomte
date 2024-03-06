@@ -2019,6 +2019,12 @@ sub checkRequirements {
 	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
 	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
 	#}
+
+	my @ath12kstandbyfixDevices = ('17cb:1107');
+	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
+		$origConfModules{ath12kstandbyfix}{required} = 'yes';
+		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1');
+	}
 }
 
 
@@ -4077,6 +4083,30 @@ sub elementaryosdkmspinningfix() {
 
 
 
+###############################################################################
+# Boot delays/freezes in nvidia modes
+#
+sub ath12kstandbyfix() {
+	my $module = shift;
+	my $action = shift;
+	my $content = <<'END_TXT';
+#!/bin/sh
+# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!
+
+case $1 in
+  pre)
+    rmmod ath12k
+    ;;
+  post)
+    modprobe ath12k
+    ;;
+esac
+END_TXT
+	createFileModule( $module, $action, '/usr/lib/systemd/system-sleep/tuxedo-ath12k-standby-fix', $content, "+x");
+}
+
+
+
 
 
 
@@ -4518,6 +4548,77 @@ sub activatePackagekit {
 
 
 ###############################################################################
+# creates a file if the content isn't already the same
+# it removes the file if the module gets removed
+# createFileModule( $module, $action, $filePath, $content, $executable );
+# createFileModule( $module, $action, $filePath, $content );
+#
+sub createFileModule {
+	my ($module, $action, $filePath, $content, $executable) = @_;
+	$executable //= 0;
+
+	if ($action eq 'install' || $action eq 'upgrade') {
+		
+		printLog("applying $origConfModules{$module}{name}", 'L1');
+		my $success = createFile($filePath, $content, $executable);
+
+		if (1 == $success){
+			printLog("$filePath for $origConfModules{$module}{name} was created", 'L1');
+
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			
+			addToConfiguredModules($module, "success");
+
+			if ("yes" eq $origConfModules{$module}{restart}) {
+				setRestartValues($module);
+			}
+		} elsif (0 == $success){
+			printLog("$origConfModules{$module}{name} was already created with correct content", 'L1');
+			
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+
+			addToConfiguredModules($module, "nothingToDo");
+			addToConfiguredModules($module, "success");
+		} else {
+			printLog("$filePath for $origConfModules{$module}{name} failed to be created", 'L1');
+			
+			$origConfModules{$module}{installed} = "failed";
+			
+			addToConfiguredModules($module, "failed");
+		}
+	}
+	
+	if ($action eq 'remove') {
+		unlink($filePath);
+		if (-e $filePath) {
+			printLog("$filePath for $origConfModules{$module}{name} failed to be removed", 'L1');
+			
+			$origConfModules{$module}{installed} = "remove failed";
+			$origConfModules{$module}{version} = $localConfModules{$module}{version};
+			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
+			
+			addToConfiguredModules($module, "remove failed");
+		} else {
+			printLog("$filePath for $origConfModules{$module}{name} was removed", 'L1');
+			
+			$origConfModules{$module}{installed} = 'no';
+			$origConfModules{$module}{upgraded} = 'yes';
+			
+			addToConfiguredModules($module, 'removed');
+
+			if ("yes" eq $origConfModules{$module}{restart}) {
+				setRestartValues($module);
+			}
+		}
+	}
+}
+
+
+
+
+###############################################################################
 # Creates a udev configuration to use specific LTE modules
 #
 sub LTEModuleFix {
@@ -4569,6 +4670,64 @@ sub LTEModuleFix {
 	}
 }
 
+
+###############################################################################
+# creates a file if the content isn't already the same
+# createFile( $filePath, $content, $executable );
+# createFile( $filePath, $content );
+#
+# $executable has to be 1|"yes"|"+x" to be executable
+#
+# returns 
+#        1 if the content was changed successfully
+#        0 if the content was already correct
+#       -1 if there was an error writing to the file
+sub createFile {
+    my ($filePath, $content, $executable) = @_;
+    $executable //= 0;  # Set default value if $executable is not provided
+
+	if (-e $filePath) {
+		# Read the current content of the file
+		my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
+
+		my $fileIsExecutableCheck = 1;
+		if(1 eq $executable || "yes" eq $executable || "+x" eq $executable){
+			$fileIsExecutableCheck = -x $filePath;
+		}
+
+		# Check if the current content is the same as the provided content
+		if ($currentContent eq $content && $fileIsExecutableCheck) {
+			return 0;  # Return 0 if the content is already correct
+		}
+	}
+
+    # Write the new content to the file
+    if(! write_file($filePath, {'err_mode' => 'carp'}, $content)) {
+        return -1;  # Return -1 if there was an error writing to the file
+    }
+
+    # If the file is supposed to be executable, set the execution permission
+    if(1 eq $executable || "yes" eq $executable || "+x" eq $executable){
+        if(system("chmod +x $filePath")) {
+            return -1;  # Return -1 if there was an error setting the execution permission
+        }
+    }
+
+    # Read the current content of the file again
+    my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
+
+	my $fileIsExecutableCheck = 1;
+	if(1 eq $executable || "yes" eq $executable || "+x" eq $executable){
+		$fileIsExecutableCheck = -x $filePath;
+	}
+	
+    # Check if the content of the file is not the same as the provided content
+    if ($currentContent ne $content || ! $fileIsExecutableCheck) {
+        return -1;  # Return -1 if the content is not correctly written to the file
+    }
+
+    return 1;  # Return 1 if the content was changed successfully
+}
 
 
 
