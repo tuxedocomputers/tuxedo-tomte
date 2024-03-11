@@ -2423,7 +2423,7 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'remove') {
-		printLog("This only removes the module from the list, manual intervention is necessary to remove the respective repository entries", 'TL0');
+		printLog("This only removes the module from the list, manual intervention is necessary to remove the respective repository entries", 'TL0', '[INFO]');
 		addToConfiguredModules($module, "removed");
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
@@ -2439,7 +2439,7 @@ sub corefix() {
 	my $module = shift;
 	my $action = shift;
 	if ($main::biosVersion eq "") {
-		printLog("BIOS version empty", 'L1');
+		printLog("BIOS version empty", 'L1', '[WARN]');
 		$origConfModules{$module}{installed} = "failed";
 		addToConfiguredModules($module, "failed");
 		return(0);
@@ -2459,7 +2459,7 @@ sub corefix() {
 	if ($action eq 'install') {
 		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
 			messageLongInstall();
-			printLog("applying $origConfModules{$module}{name}", 'L1');
+			printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
 			copy($amlFileOrig, $amlFileDest);
 			mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
@@ -2476,7 +2476,7 @@ sub corefix() {
 				addToConfiguredModules($module, "failed");
 			}
 		} else {
-			printLog("$origConfModules{$module}{name} was already installed", 'L1');
+			printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 			addToConfiguredModules($module, "nothingToDo");
 		}
 	}
@@ -2485,7 +2485,7 @@ sub corefix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
 }
 
@@ -2605,9 +2605,9 @@ sub tuxedonvmefix() {
 	my $nvmeFWPackageWasInstalled = 0;
 	if (isPackageInstalled('tuxedo-nvme-fix')) {
 		if (! deinstallSinglePackage('tuxedo-nvme-fix')) {
-			printLog('obsolete package tuxedo-nvme-fix was successfully removed', 'L0');
+			printLog('obsolete package tuxedo-nvme-fix was successfully removed', 'L0', '[INFO]');
 		} else {
-			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time', 'L0');
+			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time', 'L0', '[WARN]');
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 			return (0);
@@ -2627,9 +2627,9 @@ sub tuxedonvmefix() {
 			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
 				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/) &&
 				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
-				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}", 'L1');
+				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
 				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
-					printLog("firmware upgrade required", 'L0');
+					printLog("firmware upgrade required", 'L0', '[INFO]');
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
 						if (! installPackage('nvme-cli')) {
@@ -2642,22 +2642,22 @@ sub tuxedonvmefix() {
 						$nvmeFWPackageWasInstalled = 1;
 					}
 					if (installPackage('a2000-s5z42109')) {
-						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L1');
+						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
 						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						$retValue = $?/256;
 						if ($retValue != 0) {
-							printLog('firmware could not be uploaded!', 'L0');
-							printLog($output);
+							printLog('firmware could not be uploaded!', 'L0', '[WARN]');
+							printLog($output, 'L0', '[WARN]');
 							$origConfModules{$module}{installed} = "failed";
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}");
+						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L0', '[INFO]');
 						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
 						$retValue = $?/256;
 						if ($retValue != 0) {
-							printLog('firmware could not be activated');
-							printLog($output);
+							printLog('firmware could not be activated', 'TL0', '[WARN]');
+							printLog($output, 'TL0', '[WARN]');
 							$origConfModules{$module}{installed} = "failed";
 							addToConfiguredModules($module, "failed");
 							return (0);
@@ -2665,7 +2665,7 @@ sub tuxedonvmefix() {
 						setRestartValues($module);
 						$origConfModules{$module}{installed} = "yes";
 						$origConfModules{$module}{upgraded} = "yes";
-						printLog('nvme firmware was successfully updated', 'L0');
+						printLog('nvme firmware was successfully updated', 'L0', '[INFO]');
 						$nvmeUpdateSuccess = 1;
 					} else {
 						$origConfModules{$module}{installed} = "failed";
@@ -2673,7 +2673,7 @@ sub tuxedonvmefix() {
 						return (0);
 					}
 				} else {
-					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'}", 'L1');
+					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
 					$origConfModules{$module}{installed} = "yes";
 					$origConfModules{$module}{upgraded} = "yes";
 				}
@@ -2690,7 +2690,7 @@ sub tuxedonvmefix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -2736,7 +2736,7 @@ sub fingerprintreader() {
 
 		if( $packagefprintd && $packagelibpam ) {
 			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed");
+				printLog("$origConfModules{$module}{name} was already installed", 'L0', '[INFO]');
 				addToConfiguredModules($module, "nothingToDo");
 			} else {
 				addToConfiguredModules($module, 'success');
@@ -2749,7 +2749,7 @@ sub fingerprintreader() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog('upgrade not necessary for packages', 'L1');
+		printLog('upgrade not necessary for packages', 'L1', '[INFO]');
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("fingerprint-reader\n")) {
@@ -2822,12 +2822,12 @@ sub tuxedorestoreaudiofix() {
 		"[Install]\n".
 		"WantedBy=multi-user.target\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		$retval2 = system('systemctl --now enable restore-audiocards.service');
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
-				printLog('systemd could not initialize restore-audiocards.service', 'L0');
+				printLog('systemd could not initialize restore-audiocards.service', 'L0', '[WARN]');
 			}
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2839,11 +2839,11 @@ sub tuxedorestoreaudiofix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("no upgrade available yet for tuxedo-restore-audio-fix", 'L1');
+		printLog("no upgrade available yet for tuxedo-restore-audio-fix", 'L1', '[INFO]');
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -2904,7 +2904,7 @@ sub kernelhwe2004() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -2947,7 +2947,7 @@ sub kerneltuxedo2004edge() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -2991,7 +2991,7 @@ sub kerneltuxedo2004next() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3041,7 +3041,7 @@ sub kerneltuxedo2004() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3083,7 +3083,7 @@ sub kerneltuxedo2204() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3126,7 +3126,7 @@ sub kerneltuxedo2204edge() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3169,7 +3169,7 @@ sub kerneltuxedo2204next() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3239,10 +3239,10 @@ sub nvidiadriver() {
 			}
 
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2', '[INFO]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed", 'L1');
+					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
 					addToConfiguredModules($module, "success");
@@ -3284,25 +3284,25 @@ sub nvidiadriver() {
 				# temporarily activated fix
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0');
-					printLog("$output", 'L2');
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[INFO]');
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[INFO]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed", 'L1');
+					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
-					printLog("installed $origConfModules{$module}{name}", 'L1');
+					printLog("installed $origConfModules{$module}{name}", 'L1', '[INFO]');
 					addToConfiguredModules($module, "success");
 					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$origConfModules{$module}{name} installation failed", 'L1');
+				printLog("$origConfModules{$module}{name} installation failed", 'L1', '[INFO]');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -3334,7 +3334,7 @@ sub nvidiadriver() {
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver535  can't be found in the repositories", 'L0');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver535 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -3348,35 +3348,35 @@ sub nvidiadriver() {
 				# temporarily activated fix
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0');
-					printLog("$output", 'L2');
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[INFO]');
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[INFO]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed", 'L1');
+					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
-					printLog("installed $origConfModules{$module}{name}", 'L1');
+					printLog("installed $origConfModules{$module}{name}", 'L1', '[INFO]');
 					addToConfiguredModules($module, "success");
 					setRestartValues($module);
 				}
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$origConfModules{$module}{name} installation failed", 'L1');
+				printLog("$origConfModules{$module}{name} installation failed", 'L1', '[WARN]');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
 		} else {
-			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0');
+			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3422,7 +3422,7 @@ sub amdgpudkms() {
 
 		if( $packageamdgpu_dkms_firmware && $packageamdgpu_dkms ) {
 			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 				addToConfiguredModules($module, "nothingToDo");
 			} else {
 				addToConfiguredModules($module, 'success');
@@ -3435,7 +3435,7 @@ sub amdgpudkms() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog('upgrade not necessary for packages', 'L1');
+		printLog('upgrade not necessary for packages', 'L1', '[INFO]');
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("amdgpu-dkms\n")) {
@@ -3503,13 +3503,13 @@ sub apportfix() {
 	my $newApportLine = 'default=0';
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
 			$retval = edit_file { s/enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
-				printLog('apport has been disabled in /etc/default/apport', 'L0');
-				#`service apport stop`;
+				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
+				#service apport stop`;
 				#printLog("service apport stop returned: $?");
 				#`systemctl disable apport.service`;
 				#printLog("systemctl disable apport.service returned: $?");
