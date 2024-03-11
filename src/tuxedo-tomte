@@ -26,7 +26,7 @@ use 5.010;
 local $SIG{__WARN__} = sub {
 	my $warning = shift;
 	chomp($warning);
-	printLog("WARNING: " . $warning, "L0");
+	printLog($warning, "L0", '[WARN]');
 };
 
 # for file locking
@@ -153,7 +153,7 @@ if ($FAI) {
 	$kernelRelease = `uname -r`;
 }
 $kernelRelease =~ s/[\n\r]//g;
-printLog("detected kernel version: $kernelRelease", 'L2');
+printLog("detected kernel version: $kernelRelease", 'L2', '[INFO]');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -172,7 +172,7 @@ $sysvendor = readFirstLineOfFile($sysvendorFilename);
 my $sessionID = readFirstLineOfFile('/proc/sys/kernel/random/boot_id');
 $sessionID =~ /(.{7})/;
 $sessionID = hex($1);
-printLog("sessionID: $sessionID", 'TL2');
+printLog("sessionID: $sessionID", 'TL2', '[DEBUG]');
 
 
 
@@ -1178,11 +1178,11 @@ sub checkAndSetLocale {
             if ($found_folder ne 0) {
 				$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
 
-                printLog("Found Tomte locale file in: $locale_path", "L1");
+                printLog("Found Tomte locale file in: $locale_path", "L1", '[INFO]');
             } else {
 				if(length $language_code eq 2){
 					# already searched possible endings and didn't found
-					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1", '[INFO]');
 					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
 				} else {
 					# reduce de_DE to de to search broader
@@ -1195,28 +1195,28 @@ sub checkAndSetLocale {
 							$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
 						}
 
-						printLog("Found Tomte locale file in: $locale_path", "L1");
+						printLog("Found Tomte locale file in: $locale_path", "L1", '[INFO]');
 					} else {
-						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1");
+						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1", '[INFO]');
 						$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
 					}
 				}
             }
         } else {
-            printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1");
-            printLog("Setting both to default: $default_locale", "L1");
+            printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1", '[WARN]');
+            printLog("Setting both to default: $default_locale", "L1", '[INFO]');
             $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
         }
     } else {
         # Neither LANG nor LANGUAGE is set. Setting both to default
-        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1");
+        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1", '[WARN]');
         $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
     }
 }
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
-	printLog("Trying Matching Language for: ", $lang, "\n", "L1");
+	printLog("Trying Matching Language for: ", $lang, "\n", "L1", '[INFO]');
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
@@ -1228,11 +1228,11 @@ sub getMatchingLocaleForLang {
 	foreach my $path (@files) {
 		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
 		$found_language = $path =~ s/$locale_base_path\///ir;
-		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1");
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1", '[INFO]');
 		last;
 	}
 	unless ($found_language) {
-		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1");
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1", '[ERROR]');
 	}
 
 	return ($found_language, "$locale_base_path/$found_language");
@@ -1252,30 +1252,30 @@ sub isLocked {
 	my $fs;
 	my $num;
 	unless (-e $filename) {
-		printLog("Locking: $filename does not exist", 'L2');
+		printLog("Locking: $filename does not exist", 'L2', '[ERROR]');
 		return (0);
 	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("Locking: checking lock: $filename", 'L2');
+		printLog("Locking: checking lock: $filename", 'L2', '[DEBUG]');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_GETLK )) {
 			unless ($fs->l_type() == F_UNLCK) {
-				printLog("Locking: => is locked", 'L2');
+				printLog("Locking: => is locked", 'L2', '[DEBUG]');
 				return (1);
 			} else {
-				printLog("Locking: => is not locked", 'L2');
+				printLog("Locking: => is not locked", 'L2', '[DEBUG]');
 				return (0);
 			}
 		} else {
-			printLog("Locking: failed to get lock information on: $filename error: $fs->error", 'L0');
+			printLog("Locking: failed to get lock information on: $filename error: $fs->error", 'L0', '[ERROR]');
 			return (-1);
 		}
 	} else {
-		printLog("Locking: failed to open: $filename", 'L0');
+		printLog("Locking: failed to open: $filename", 'L0', '[ERROR]');
 		return (-1);
 	}
 }
@@ -1296,15 +1296,15 @@ sub isPMlocked {
 	foreach $key (keys %lockFiles) {
 		$result = isLocked($key);
 		if ($result == 1) {
-			printLog("Locking: one or more files are locked", 'L2');
+			printLog("Locking: one or more files are locked", 'L2', '[DEBUG]');
 			return (1);
 		}
 		if ($result == -1) {
-			printLog("Locking: something went wrong while checking for file locks", 'L2');
+			printLog("Locking: something went wrong while checking for file locks", 'L2', '[WARN]');
 			return (-1);
 		}
 	}
-	printLog("Locking: all files are unlocked", 'L2');
+	printLog("Locking: all files are unlocked", 'L2', '[DEBUG]');
 	return (0);
 }
 
@@ -1324,13 +1324,13 @@ sub acquireLock {
 	my $num;
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
-		printLog("Locking: acquiring lock: $filename", 'L2');
+		printLog("Locking: acquiring lock: $filename", 'L2', '[DEBUG]');
 		$fs = new File::FcntlLock;
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_SETLK )) {
-			printLog("Locking: locking successfull", 'L2');
+			printLog("Locking: locking successfull", 'L2', '[DEBUG]');
 			$num = <$FH> || 0;
 			$lockFiles{$key}{'FH'} = $FH;
 			$lockFiles{$key}{'number'} = $num;
@@ -1338,11 +1338,11 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0');
+			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
 			return (0);
 		}
 	} else {
-		printLog("Locking: failed to open: $filename: $!", 'L2');
+		printLog("Locking: failed to open: $filename: $!", 'L2', '[ERROR]');
 		return (0);
 	}
 }
@@ -1369,26 +1369,26 @@ sub releaseLock {
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
 						$lockFiles{$key}{'locked'} = 0;
-						printLog("Locking: lock released on $filename", 'L2');
+						printLog("Locking: lock released on $filename", 'L2', '[DEBUG]');
 						return (1);
 					} else {
-						printLog("Locking: close failed!: $filename: $!", 'L2');
+						printLog("Locking: close failed!: $filename: $!", 'L2', '[ERROR]');
 						return (0);
 					}
 				} else {
-					printLog("Locking: unlock failed!: $filename: $fs->error", 'L2');
+					printLog("Locking: unlock failed!: $filename: $fs->error", 'L2', '[ERROR]');
 					return (0);
 				}
 			} else {
-				printLog("Locking: truncate failed!: $filename: $!", 'L2');
+				printLog("Locking: truncate failed!: $filename: $!", 'L2', '[ERROR]');
 				return (0);
 			}
 		} else {
-			printLog("Locking: write failed!: $filename: $!", 'L2');
+			printLog("Locking: write failed!: $filename: $!", 'L2', '[ERROR]');
 			return (0);
 		}
 	} else {
-		printLog("Locking: seek failed!: $filename: $!", 'L2');
+		printLog("Locking: seek failed!: $filename: $!", 'L2', '[ERROR]');
 		return (0);
 	}
 }
@@ -1410,18 +1410,18 @@ sub lockPM {
 	if ($FAI) {
 		return (1);
 	}
-	printLog("Locking: trying to lock all files for Tomte", 'L2');
+	printLog("Locking: trying to lock all files for Tomte", 'L2', '[DEBUG]');
 	foreach $key (keys %lockFiles) {
 		# stop if can't get lock
 		last if (acquireLock($key) != 1);
 		$processedLockFiles++;
 	}
 	if ($processedLockFiles < $lockFilesHashSize) {
-		printLog("Locking: !!! some files are already locked! reverting all locks", 'L2');
+		printLog("Locking: !!! some files are already locked! reverting all locks", 'L2', '[DEBUG]');
 		unlockPM('Locking: some files locked -> reverting');
 		return (0);
 	}
-	printLog("Locking: ### all files locked for Tomte", 'L3');
+	printLog("Locking: ### all files locked for Tomte", 'L3', '[DEBUG]');
 	return (1);
 }
 
@@ -1441,21 +1441,21 @@ sub unlockPM {
 	my $hashSize = keys %lockFiles;
 	my $countReleased = 0;
 	my $countToRelease = 0;
-	printLog("Locking: attempting to unlock all files for >$reason< ...", 'L2');
+	printLog("Locking: attempting to unlock all files for >$reason< ...", 'L2', '[DEBUG]');
 	foreach $key (keys %lockFiles) {
-		printLog("Locking: is $key locked?: $lockFiles{$key}{locked}", 'L2');
+		printLog("Locking: is $key locked?: $lockFiles{$key}{locked}", 'L2', '[DEBUG]');
 		if ($lockFiles{$key}{locked}) {
-			printLog("Locking: try to unlock", 'L2');
+			printLog("Locking: try to unlock", 'L2', '[DEBUG]');
 			$countToRelease++;
 			$countReleased += releaseLock($key);
-			printLog("Locking: released $countReleased from $countToRelease", 'L2');
+			printLog("Locking: released $countReleased from $countToRelease", 'L2', '[DEBUG]');
 		}
 	}
 	if ($countReleased == $countToRelease) {
-		printLog("Locking: OOO successfully released all locks for >$reason<", 'L2');
+		printLog("Locking: OOO successfully released all locks for >$reason<", 'L2', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("Locking: XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L2');
+		printLog("Locking: XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L2', '[ERROR]');
 	}
 	return (0);
 }
@@ -1520,16 +1520,16 @@ sub isOSSupported {
 	if (grep { $_ eq $distributionVersion } @{$supportedOS{$distribution}}) {
 		return (1);
 	} elsif (exists($supportedOS{$distribution})) {
-		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0');
+		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
 						__x("The version {version} of {distribution} is not supported.",
 								("version" => $distributionVersion, "distribution" => $distribution)),
 								2, 'dialog-warning');
 		return (0);
 	}
-	printLog("This OS is not supported", 'TL0');
-	printLog("distribution: >$distribution<", 'TL1');
-	printLog("version: >$distributionVersion<", 'TL1');
+	printLog("This OS is not supported", 'TL0', '[FATAL]');
+	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
+	printLog("version: >$distributionVersion<", 'TL1', '[INFO]');
 	return (0);
 }
 
@@ -1540,7 +1540,7 @@ sub isOSSupported {
 #
 sub prerequisites {
 	my $module;
-	printLog("starting prerequisites", 'L1');
+	printLog("starting prerequisites", 'L1', '[INFO]');
 	foreach $module (sort keys %origConfModules) {
 		# basically the required repos
 		if (($origConfModules{$module}{order} eq 'first') &&
@@ -1552,32 +1552,32 @@ sub prerequisites {
 	checkNetwork(10,1);
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'L2');
-	printLog("ending prerequisites", 'L1');
+	printLog("return from apt-get update: $output", 'L2', '[DEBUG]');
+	printLog("ending prerequisites", 'L1', '[INFO]');
 }
 
 sub prerequisitesFAI {
-	printLog("starting prerequisites FAI", 'L0');
-	printLog("executing: apt-get update", 'L2');
+	printLog("starting prerequisites FAI", 'L0', '[INFO]');
+	printLog("executing: apt-get update", 'L2', '[DEBUG]');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2');
-	printLog("ending prerequisites FAI", 'L0');
+	printLog("return from apt-get update: $output", 'T2', '[DEBUG]');
+	printLog("ending prerequisites FAI", 'L0', '[INFO]');
 }
 
 sub postrequisitesFAI {
-	printLog("starting postrequisites FAI", 'L0');
+	printLog("starting postrequisites FAI", 'L0', '[INFO]');
 	if (httpToHttps(\%tuxedo_repos)) {
-		printLog('TUXEDO debian repos set to https', 'L0');
+		printLog('TUXEDO debian repos set to https', 'L0', '[INFO]');
 	}
 	if (httpToHttps(\%tuxedo_mirrors)) {
-		printLog('mirror repos set to https', 'L0');
+		printLog('mirror repos set to https', 'L0', '[INFO]');
 	}
-	printLog("executing: apt-get update", 'L2');
+	printLog("executing: apt-get update", 'L2', '[DEBUG]');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2');
-	printLog("ending postrequisites FAI", 'L0');
+	printLog("return from apt-get update: $output", 'T2', '[DEBUG]');
+	printLog("ending postrequisites FAI", 'L0', '[INFO]');
 }
 
 
@@ -1597,13 +1597,13 @@ sub checkRequirements {
 		if ($FAI) {
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
-				printLog("detected $origConfModules{i8042noauxfix}{name} issue", 'L1');
+				printLog("detected $origConfModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
 			}
 		}
 	}
@@ -1611,19 +1611,19 @@ sub checkRequirements {
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
 	if ($ubuntuCodename =~ /jammy/) {
 		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2');
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[INFO]');
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
-			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2');
+			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2', '[INFO]');
 			installPackage('grub-efi-amd64-signed');
 			installPackage('shim-signed');
 		} else {
-			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2');
+			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[INFO]');
 		}
 	}
 
 	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
-		printLog("detected $origConfModules{nobootonbattery}{name} issue", 'L1');
+		printLog("detected $origConfModules{nobootonbattery}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ /POLARIS1501A1650TI/) ||
@@ -1636,12 +1636,12 @@ sub checkRequirements {
 		($boardname =~ /EDUBOOK1502/) ||
   		($boardname =~ /AURA1501/)) {
 		$origConfModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
-		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ /APX958/)) {
 		$origConfModules{amdgpudisablepsr}{required} = 'yes';
-		printLog("detected $origConfModules{amdgpudisablepsr}{name} issue", 'L1');
+		printLog("detected $origConfModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ /POLARIS1701A1650TI/) ||
@@ -1650,7 +1650,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1501A2060/)) {
 		if ($distributionVersion =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
-			printLog("detected $origConfModules{amdgpuwithnvidiafix}{name} issue", 'L1');
+			printLog("detected $origConfModules{amdgpuwithnvidiafix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
@@ -1671,20 +1671,20 @@ sub checkRequirements {
 		if ($FAI) {
 			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
 		} else {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$origConfModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1');
+				printLog("detected $origConfModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
 		}
 	}
 
 	if ($boardname =~ /X35R/) {
 		$origConfModules{elantechtouchpadfix}{required} = 'yes';
-		printLog("detected $origConfModules{elantechtouchpadfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{elantechtouchpadfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ /LAPQC71A/) ||
@@ -1720,39 +1720,39 @@ sub checkRequirements {
 		($boardname =~ /PH6PG01_PH6PG71/) ||
 		($boardname =~ /GM6XGxX/)) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardvendor =~ /NB02/) {
 		$origConfModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ /N8xEJEK/) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
 	if ($boardname =~ /P95_HP/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
 	if ($boardname =~ /P95_HR/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
 	if ($boardname =~ /P95_HP,HR,HQ/) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$origConfModules{backlightfix}{required} = 'yes';
-			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1');
+			printLog("detected $origConfModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
@@ -1763,35 +1763,35 @@ sub checkRequirements {
 	$main::biosVersion =~ s/\s//g;
 	if ($boardname =~ /NH5xAx/) {
 		$origConfModules{corefix}{required} = 'yes';
-		printLog("detected $origConfModules{corefix}{name} issue", 'L1');
+		printLog("detected $origConfModules{corefix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME936 device found
 	my $lsusbHuawei936 = `lsusb -d 12d1:15bb`;
 	if ($lsusbHuawei936 =~ /ME936/) {
 		$origConfModules{huaweime936fix}{required} = 'yes';
-		printLog("detected $origConfModules{huaweime936fix}{name} issue", 'L1');
+		printLog("detected $origConfModules{huaweime936fix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME906s device found
 	my $lsusbHuawei906s = `lsusb -d 12d1:15c1`;
 	if ($lsusbHuawei906s =~ /ME906s/) {
 		$origConfModules{huaweime906sfix}{required} = 'yes';
-		printLog("detected $origConfModules{huaweime906sfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{huaweime906sfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME906s HP rebranded device found
 	my $lsusbHuawei906sHP = `lsusb -d 03f0:a31d`;
 	if ($lsusbHuawei906sHP =~ /hp/i) {
 		$origConfModules{huaweime906shpfix}{required} = 'yes';
-		printLog("detected $origConfModules{huaweime906shpfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{huaweime906shpfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# all notebooks require this
 	if ( ($chassisType eq 'notebook') &&
 		($ubuntuCodename =~ /focal/)) {
 		$origConfModules{tuxedokeyboard}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedokeyboard}{name} issue", 'L1', '[INFO]');
 	}
 
 	# all notebooks require this
@@ -1799,7 +1799,7 @@ sub checkRequirements {
 	# on some notebooks
 	if ($chassisType eq 'notebook') {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
-			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1');
+			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$origConfModules{systemdbacklightfix}{required} = 'no';
 		}
 	}
@@ -1819,24 +1819,24 @@ sub checkRequirements {
 		if (($ubuntuCodename =~ /bionic/) ||
 			($ubuntuCodename =~ /focal/)) {
 			$origConfModules{tuxedokeyboardite}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1');
+			printLog("detected $origConfModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
 	if ($ubuntuCodename =~ /jammy/) {
 		$origConfModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 		$origConfModules{tuxedokeyboardite}{required} = 'no';
-		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1');
+		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
 		$origConfModules{tuxedokeyboard}{required} = 'no';
-		printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1');
+		printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
 	}
 
 	# get vendor text from vendor ID:device ID
 	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
 		$origConfModules{tuxedonvmefix}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedonvmefix}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedonvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -1849,7 +1849,7 @@ sub checkRequirements {
 		qr/1c7a:0603/);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$origConfModules{fingerprintreader}{required} = 'yes';
-		printLog("detected $origConfModules{fingerprintreader}{name} issue", 'L1');
+		printLog("detected $origConfModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
 		last;
 	}
 
@@ -1857,19 +1857,19 @@ sub checkRequirements {
 	);
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedorestoreaudiofix}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedorestoreaudiofix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	if ($nvidiaDevice =~ /030[02]:/) {
 		$origConfModules{nvidiadriver}{required} = 'yes';
-		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1');
+		printLog("detected $origConfModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/NHxxRZQ/)	{
@@ -1877,25 +1877,25 @@ sub checkRequirements {
 		my $kernelVersionWithR8169 = '6.1';
 		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
 			$origConfModules{r8168dkms}{required} = 'yes';
-			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+			printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
 	if (($boardname =~ m/NL45PU2/) ||
 		($boardname =~ m/NL57PU/))	{
 		$origConfModules{r8168dkms}{required} = 'yes';
-		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1');
+		printLog("detected $origConfModules{r8168dkms}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
 		$origConfModules{tuxedooledbrt}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedooledbrt}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (-e "/etc/default/apport") {
 		# apportfix will always be installed as a workaround
 		$origConfModules{apportfix}{required} = 'yes';
-		printLog("detected $origConfModules{apportfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{apportfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ m/GMxNGxx/) ||
@@ -1903,7 +1903,7 @@ sub checkRequirements {
 		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
 			isDisplayPresent("BOE Model 2420 Serial Number 0")) {
 			$origConfModules{amdgpubacklightauxoff}{required} = 'yes';
-			printLog("detected $origConfModules{amdgpubacklightauxoff}{name} issue", 'L1');
+			printLog("detected $origConfModules{amdgpubacklightauxoff}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
@@ -1911,72 +1911,72 @@ sub checkRequirements {
 		($boardname =~ m/PH4TQx1/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{i915enablepsrfix}{required} = 'yes';
-		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{i915enablepsrfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# kernel
 	if ($ubuntuCodename =~ /focal/) {
 		if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1', '[INFO]');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
 			$origConfModules{kerneltuxedo2004}{required} = 'yes';
 		}
 	} elsif ($ubuntuCodename =~ /jammy/) {
 		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
 			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
 			($boardname =~ m/PF5LUXG/)) {
-			printLog("kernel $origConfModules{kerneltuxedo2204edge}{name} will be default", 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
 			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
 		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1', '[INFO]');
 			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
 		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1');
+			printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 			$origConfModules{kerneltuxedo2204}{required} = 'yes';
 		}
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
 		$origConfModules{thunderboltbootdelayfix}{required} = 'yes';
-		printLog("detected $origConfModules{thunderboltbootdelayfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ((($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/) ||
 		($boardname =~ m/PH4TQx1/)) && (-d '/etc/lightdm/')) {
 		$origConfModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
-		printLog("detected $origConfModules{lightdmlogindcheckgraphicalfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{lightdmlogindcheckgraphicalfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/GMxTGxx/) {
 		$origConfModules{nvidiabacklightcontrolfix}{required} = 'yes';
-		printLog("detected $origConfModules{nvidiabacklightcontrolfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{nvidiabacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
 		($boardname =~ m/PHxTQx1/)) {
 		$origConfModules{earlyloadbacklightcontrolfix}{required} = 'yes';
-		printLog("detected $origConfModules{earlyloadbacklightcontrolfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{earlyloadbacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my @r8125Devices = ('10ec:8125');
 	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
 		$origConfModules{tuxedor8125dkms}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedor8125dkms}{name} issue", 'L1');
+		printLog("detected $origConfModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if cardreader Realtek RTS522A found
 	my @cardreaderDevices = (qr/10ec:522a/); 
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$origConfModules{cardreaderfix}{required} = 'yes';
-		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/PF5LUXG/)	{
 		$origConfModules{samsungnvmefix}{required} = 'yes';
-		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1');
+		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
 
@@ -1984,7 +1984,7 @@ sub checkRequirements {
 	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
 	if ( findPciDevice($lspciOutput, @intelgenXIIIpowerctlfixDevices) ) {
 		$origConfModules{intelgenXIIIpowerctlfix}{required} = 'yes';
-		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{intelgenXIIIpowerctlfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my $minPlasmaDesktopVersion = '5.25';
@@ -1995,35 +1995,35 @@ sub checkRequirements {
 		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
 		unless ( $versionCompareResult == -1 ) {
 			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1');
+			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
 		}
 	} else {
-		printLog("plasma-workspace version could not be determined", 'L2');
+		printLog("plasma-workspace version could not be determined", 'L2', '[WARN]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
 		($boardname =~ m/GMxTGxx/))	{
 		$origConfModules{acpibacklightvideofix}{required} = 'yes';
-		printLog("detected $origConfModules{acpibacklightvideofix}{name} issue", 'L1');
+		printLog("detected $origConfModules{acpibacklightvideofix}{name} issue", 'L1', '[INFO]');
 	}
 	if (($boardname =~ /PH4PRX1_PH6PRX1/) ||
    		($boardname =~ /PH4PG31/) ||
 		($boardname =~ /PH6PG01_PH6PG71/)) {
 		$origConfModules{disablegucfix}{required} = 'yes';
-		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# this fix is temporarily disabled as the vanilla elementary OS 7.1 iso
 	# installation seems to be broken
 	#if ($completeDistVersion =~ /elementary OS 7.1/) {
 	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
-	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1');
+	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
 	#}
 
 	my @ath12kstandbyfixDevices = ('17cb:1107');
 	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
 		$origConfModules{ath12kstandbyfix}{required} = 'yes';
-		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1');
+		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1', '[INFO]');
 	}
 }
 
@@ -2161,7 +2161,7 @@ sub amdgpuwithnvidiafix() {
     	"\tOption \"PrimaryGPU\" \"Yes\"\n".
 		"EndSection\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -2174,19 +2174,19 @@ sub amdgpuwithnvidiafix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		printLog("upgrading $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$origConfModules{$module}{installed} = "yes";
 		$origConfModules{$module}{upgraded} = "yes";
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
-			printLog("removing $module", 'TL0');
+			printLog("removing $module", 'TL0', '[INFO]');
 			unlink glob ("/usr/share/X11/xorg.conf.d/00-tuxedo-nvidia-amdgpu-fix.conf_*");
 			if (backupFile($fileName)) {
 				unlink($fileName);
 			} else {
-				printLog('can\'t remove fix, it seems to be gone already', 'TL1');
+				printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
 			}
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
@@ -2278,12 +2278,12 @@ sub tuxedorepos() {
 	# create default repo list if it does not exist
 	unless (-e '/etc/apt/sources.list') {
 		open(FH, '>', '/etc/apt/sources.list');
-		printLog('created /etc/apt/sources.list because it was not there', 'L2');
+		printLog('created /etc/apt/sources.list because it was not there', 'L2', '[WARN]');
 		close(FH);
 	}
 
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = createRepos(\%tuxedo_repos);
 		addRepoKey();
 		if ($retval == 0) {
@@ -2294,9 +2294,9 @@ sub tuxedorepos() {
 			# Mint uses mintUpdate instead
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
-					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
-						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
 					}
 				}
 			}
@@ -2304,7 +2304,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifications on repos', 'L1');
+				printLog('did no modifications on repos', 'L1', '[INFO]');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2316,7 +2316,7 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		printLog("upgrading $origConfModules{$module}{name}", 'L1', '[INFO]');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_repos);
 		addRepoKey();
@@ -2328,9 +2328,9 @@ sub tuxedorepos() {
 			# Mint uses mintUpdate instead
 			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
 				unless (-e $thirdPartyMirrorsFile) {
-					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0');
+					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
-						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0');
+						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
 					}
 				}
 			}
@@ -2339,7 +2339,7 @@ sub tuxedorepos() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifications on repos', 'L1');
+				printLog('did no modifications on repos', 'L1', '[INFO]');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2350,7 +2350,7 @@ sub tuxedorepos() {
 		}
 	}
 	if ($action eq 'remove') {
-		printLog("This is a prerequisite, removal is not possible for this module", 'TL0');
+		printLog("This is a prerequisite, removal is not possible for this module", 'TL0', '[WARN]');
 	}
 }
 
@@ -2374,7 +2374,7 @@ sub tuxedomirrors() {
 	}
 
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList($tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
 		addRepoKey();
@@ -2386,7 +2386,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifications on mirrors', 'L1');
+				printLog('did no modifications on mirrors', 'L1', '[INFO]');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -2399,7 +2399,7 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("uprading $origConfModules{$module}{name}", 'L1');
+		printLog("uprading $origConfModules{$module}{name}", 'L1', '[INFO]');
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%tuxedo_mirrors);
 		$retval3 = cleanSourcesList($tuxedo_mirrors{$completeDistVersion}{mirrors}{filename});
@@ -2412,7 +2412,7 @@ sub tuxedomirrors() {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "nothingToDo");
-				printLog('did no modifications on mirrors', 'L1');
+				printLog('did no modifications on mirrors', 'L1', '[INFO]');
 			} else {
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
@@ -6840,15 +6840,18 @@ sub getBackupFileTime {
 
 ###############################################################################
 # prints into logFile or to terminal
-# printLog('message', 'tlX')
+# printLog('message', 'tlX', severity)
 # it assumes 'l' or 'L' if 't', 'T', 'L' or 'l' are ommited
 # loglevels for X:
 # 0 highest/errors/fatal
 # 1 normal
 # 2 debug
+# severity is a string which will be put in front of the line
+# possible severities are:
+# [INFO] [DEBUG] [WARN] [ERROR] [FATAL]
 #
 sub printLog {
-	my ($message, $type) = @_;
+	my ($message, $type, $severity) = @_;
 	if ((!defined($type)) || ($type eq '')) {
 		$type = 'L1';
 	}
@@ -6867,12 +6870,12 @@ sub printLog {
 	}
 
 	if ($FAI) {
-		print "$message\n";
+		print "$sverity $message\n";
 	} elsif ($level <= $logLevel) {
 		if ((-e $logFile) && ($type =~ /L/i)) {
 			if (open($LOGFILE, '>>', $logFile) ) {
 				my $timestamp = getLoggingTime();
-				print $LOGFILE "$timestamp $message\n";
+				print $LOGFILE "$severity $timestamp $message\n";
 				close $LOGFILE;
 			}
 		}
