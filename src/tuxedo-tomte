@@ -3510,9 +3510,9 @@ sub apportfix() {
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
 				#service apport stop`;
-				#printLog("service apport stop returned: $?");
+				#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 				#`systemctl disable apport.service`;
-				#printLog("systemctl disable apport.service returned: $?");
+				#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
 				$origConfModules{$module}{installed} = "yes";
 				$origConfModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
@@ -3521,11 +3521,11 @@ sub apportfix() {
 				addToConfiguredModules($module, "failed");
 			}
 		} elsif (isLineInFile('/etc/default/apport', 'enabled=0')) {
-			printLog('apport was already disabled in /etc/default/apport', 'L1');
+			printLog('apport was already disabled in /etc/default/apport', 'L1', '[DEBUG]');
 			#`service apport stop`;
-			#printLog("service apport stop returned: $?");
+			#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 			#`systemctl disable apport.service`;
-			#printLog("systemctl disable apport.service returned: $?");
+			#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			addToConfiguredModules($module, "success");
@@ -3539,7 +3539,7 @@ sub apportfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3640,10 +3640,10 @@ sub lightdmlogindcheckgraphicalfix() {
 	my $lightdmCheckGraphicalFile = $lightdmCheckGraphicalDir.'99_tuxedo.conf';
 
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		unless (-d $lightdmCheckGraphicalDir) {
 			unless (mkdir $lightdmCheckGraphicalDir) {
-				printLog("could not create directory $lightdmCheckGraphicalDir", 'TL0');
+				printLog("could not create directory $lightdmCheckGraphicalDir", 'TL0', '[ERROR]');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 				return (0);
@@ -3679,7 +3679,7 @@ sub lightdmlogindcheckgraphicalfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3716,10 +3716,10 @@ sub earlyloadbacklightcontrolfix() {
 	my $elbcFile = $elbcDir.'tuxedo_early_load_backlight_control_fix.conf';
 
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		unless (-d $elbcDir) {
 			unless (mkdir $elbcDir) {
-				printLog("could not create directory $elbcDir", 'TL0');
+				printLog("could not create directory $elbcDir", 'TL0', '[WARN]');
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 				return (0);
@@ -3755,7 +3755,7 @@ sub earlyloadbacklightcontrolfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3786,7 +3786,7 @@ sub cardreaderfix() {
 	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3803,7 +3803,7 @@ sub cardreaderfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
 
@@ -3827,12 +3827,12 @@ sub samsungnvmefix() {
 		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80c", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-			printLog("entries for samsungnvmefix are already present", 'TL2');
+			printLog("entries for samsungnvmefix are already present", 'TL2', '[INFO]');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
 			$configuredModules{$module} = 'nothingToDo';
 		} else {
-			printLog("applying $origConfModules{$module}{name}", 'L1');
+			printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 			$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 			if ($retval == 0) {
 				$origConfModules{$module}{installed} = "failed";
@@ -3846,7 +3846,7 @@ sub samsungnvmefix() {
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		printLog("upgrading $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3892,7 +3892,7 @@ sub intelgenXIIIpowerctlfix() {
 	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
 		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3935,7 +3935,7 @@ sub disablegucfix() {
 	my @kernelParameters = ('i915.enable_guc=2');
 	my $retval;
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3947,13 +3947,13 @@ sub disablegucfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 				addToConfiguredModules($module, "success");
 			} else {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
 	}
 	if ($action eq 'upgrade') {
-		printLog("upgrading $origConfModules{$module}{name}", 'L1');
+		printLog("upgrading $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -3965,7 +3965,7 @@ sub disablegucfix() {
 				$postConfProgram{updateGrub}{trigger} = 1;
 				addToConfiguredModules($module, "success");
 			} else {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1');
+				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
 				addToConfiguredModules($module, "nothingToDo");
 			}
 		}
@@ -3992,7 +3992,7 @@ sub systemdbacklightfix() {
 		"# This is a temporary fix for systemd-backlight until https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream.\n".
 		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -4010,11 +4010,11 @@ sub systemdbacklightfix() {
 	if ($action eq 'remove') {
 		if (-e $fileName) {
 			if (removeWarningMessage("systemd-backlight-fix\n")) {
-				printLog("removing $module", 'TL0');
+				printLog("removing $module", 'TL0', '[INFO]');
 				if (unlink($fileName)) {
-					printLog("$origConfModules{$module}{name} removed", 'TL0');
+					printLog("$origConfModules{$module}{name} removed", 'TL0', '[INFO]');
 				} else {
-					printLog('can\'t remove fix', 'TL0');
+					printLog('can\'t remove fix', 'TL0', '[WARN]');
 				}
 				$origConfModules{$module}{installed} = 'no';
 				$origConfModules{$module}{upgraded} = 'yes';
@@ -4024,7 +4024,7 @@ sub systemdbacklightfix() {
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
 			addToConfiguredModules($module, 'removed');
-			printLog("$origConfModules{$module}{name} was already removed", 'TL0');
+			printLog("$origConfModules{$module}{name} was already removed", 'TL0', '[INFO]');
 		}
 	}
 }
@@ -4044,7 +4044,7 @@ sub elementaryosdkmspinningfix() {
 		"Pin: release a=tuxedo,n=jammy\n".
 		"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1');
+		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
 			$origConfModules{$module}{installed} = "failed";
@@ -4062,11 +4062,11 @@ sub elementaryosdkmspinningfix() {
 	if ($action eq 'remove') {
 		if (-e $fileName) {
 			if (removeWarningMessage("elementaryos-dkms-pinning-fix\n")) {
-				printLog("removing $module", 'TL0');
+				printLog("removing $module", 'TL0', '[INFO]');
 				if (unlink($fileName)) {
-					printLog("$origConfModules{$module}{name} removed", 'TL0');
+					printLog("$origConfModules{$module}{name} removed", 'TL0', '[INFO]');
 				} else {
-					printLog('can\'t remove fix', 'TL0');
+					printLog('can\'t remove fix', 'TL0', '[ERROR]');
 				}
 				$origConfModules{$module}{installed} = 'no';
 				$origConfModules{$module}{upgraded} = 'yes';
@@ -4076,7 +4076,7 @@ sub elementaryosdkmspinningfix() {
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
 			addToConfiguredModules($module, 'removed');
-			printLog("$origConfModules{$module}{name} was already removed", 'TL0');
+			printLog("$origConfModules{$module}{name} was already removed", 'TL0', '[INFO]');
 		}
 	}
 }
@@ -4143,7 +4143,7 @@ sub createRepos {
 
 	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$distroKey}{deb}) {
-		printLog("deb repos detected", 'TL2');
+		printLog("deb repos detected", 'TL2', '[INFO]');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
 			printLog('testing environment detected, leaving repos as they are', 'TL2');
 			return (1);
