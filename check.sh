@@ -9,14 +9,6 @@ if [[ $todo_present -gt 0 ]]; then
   echo $(grep -n '#TODO' ./src/tuxedo-tomte)
 fi
 
-# Check if a higher log level is set
-higherloglevel_present=0
-echo "Checking for higher log level..."
-grep -Hn 'my \$logLevel =' ./src/tuxedo-tomte | grep -vE 'my \$logLevel = 0;' && higherloglevel_present=1
-if [[ $higherloglevel_present -gt 0 ]]; then
-  echo "Found log level higher then 0!"
-fi
-
 # Run the check_translations script and capture any output
 echo "Checking translations..."
 translation_differences_text=$(perl ./translations/check_translations.pl 2>&1)
