@@ -153,7 +153,7 @@ if ($FAI) {
 	$kernelRelease = `uname -r`;
 }
 $kernelRelease =~ s/[\n\r]//g;
-printLog("detected kernel version: $kernelRelease", 'L2', '[INFO]');
+printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
@@ -1611,13 +1611,13 @@ sub checkRequirements {
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
 	if ($ubuntuCodename =~ /jammy/) {
 		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[INFO]');
+		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[DEBUG]');
 		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
 			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2', '[INFO]');
 			installPackage('grub-efi-amd64-signed');
 			installPackage('shim-signed');
 		} else {
-			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[INFO]');
+			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[DEBUG]');
 		}
 	}
 
@@ -1998,7 +1998,7 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
 		}
 	} else {
-		printLog("plasma-workspace version could not be determined", 'L2', '[WARN]');
+		printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
@@ -3239,7 +3239,7 @@ sub nvidiadriver() {
 			}
 
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2', '[INFO]');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2', '[DEBUG]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
@@ -3285,11 +3285,11 @@ sub nvidiadriver() {
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					$output = `gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[INFO]');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
@@ -3349,11 +3349,11 @@ sub nvidiadriver() {
 				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
 					$output = `gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
 				}
 			}
 
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[INFO]');
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
 					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
@@ -3829,7 +3829,7 @@ sub samsungnvmefix() {
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80c", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
 			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa809", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-			printLog("entries for samsungnvmefix are already present", 'TL2');
+			printLog("entries for samsungnvmefix are already present", 'TL2', '[DEBUG]');
 			$localConfModules{$module}{installed} = 'yes';
 			$origConfModules{$module}{upgraded} = "yes";
 			$configuredModules{$module} = 'nothingToDo';
@@ -4145,15 +4145,15 @@ sub createRepos {
 
 	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$distroKey}{deb}) {
-		printLog("deb repos detected", 'TL2', '[INFO]');
+		printLog("deb repos detected", 'TL2', '[DEBUG]');
 		if (isLineInFile('/etc/apt/sources.list.d/tuxedo-computers.list', '^deb https?:\/\/testdeb.*')) {
-			printLog('testing environment detected, leaving repos as they are', 'TL2', '[INFO]');
+			printLog('testing environment detected, leaving repos as they are', 'TL2', '[DEBUG]');
 			return (1);
 		}
 	} elsif (exists $repos{$distroKey}{mirrors}) {
-		printLog("mirror repos detected", 'TL2', '[INFO]');
+		printLog("mirror repos detected", 'TL2', '[DEBUG]');
 		if (isLineInFile('/etc/apt/sources.list', '^deb https?:\/\/testmirrors.*')) {
-			printLog('testing environment detected, leaving repos as they are', 'TL2', '[INFO]');
+			printLog('testing environment detected, leaving repos as they are', 'TL2', '[DEBUG]');
 			return (1);
 		}
 	}
@@ -4221,7 +4221,7 @@ sub createRepos {
 			}
 
 			if($noChangesNeeded){
-				printLog("repo file found and with correct content", 'L2', '[INFO]');
+				printLog("repo file found and with correct content", 'L2', '[DEBUG]');
 			} else {
 				printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
 				printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
@@ -4255,7 +4255,7 @@ sub addRepoKey {
 	my $pmLocked;
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
-		printLog("TUXEDO keyring is not installed", 'L2', '[WARN]');
+		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
 		if (checkNetwork(15, 1)) {
 			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
 			deactivatePackagekit();
@@ -4332,10 +4332,10 @@ sub cleanSourcesList {
 				# no backup for the file as it only comments out lines
 				print $FHsource "$tomteMessage\n";
 			}
-			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2', '[INFO]');
+			printLog("tuxedomirrors version: $localConfModules{'tuxedomirrors'}{version}", 'L2', '[DEBUG]');
 			# in case this is an upgrade from a version without this feature or a first time installation
 			if (-e $tomteFirstInstallFile) {
-				printLog("first time installation file exists !!!", 'L2', '[INFO]');
+				printLog("first time installation file exists !!!", 'L2', '[DEBUG]');
 			}
 			if ((($localConfModules{'tuxedomirrors'}{version} + 0) < 5) || (-e $tomteFirstInstallFile)) {
 				printLog("old tuxedomirrors module installed", 'L2', '[INFO]');
@@ -6232,23 +6232,23 @@ sub uninstallRemnantKernels {
 				}
 			}
 		} else {
-			printLog("could not uninstall kernel from remnant kernels uninstall, could not get locks", 'L2');
+			printLog("could not uninstall kernel from remnant kernels uninstall, could not get locks", 'L2', '[WARN]');
 			$failed += 1;
 			$somethingWasDone = 1;
 		}
 		if (($failed == 0) && ($somethingWasDone > 0)) {
-			printLog("all remnant kernel packages uninstalled", 'L0');
+			printLog("all remnant kernel packages uninstalled", 'L0', '[INFO]');
 			return (1);
 		} elsif ($failed == 0) {
-			printLog("no remnant kernel packages to uninstall found", 'L1');
+			printLog("no remnant kernel packages to uninstall found", 'L1', '[INFO]');
 			return (1);
 		} else {
-			printLog("error in uninstalling remnant kernel packages", 'L1');	
+			printLog("error in uninstalling remnant kernel packages", 'L1', '[WARN]');
 			return (0);
 		}
 
 	} else {
-		printLog("no remnant kernel packages to uninstall found", 'L1');
+		printLog("no remnant kernel packages to uninstall found", 'L1', '[INFO]');
 		return (1);
 	}
 }
@@ -6286,7 +6286,7 @@ sub removeDebianModule {
 			$success = 0;
 		}
 	} else {
-		printLog("$origConfModules{$module}{name} is not installed, which is the desired result", 'TL0');
+		printLog("$origConfModules{$module}{name} is not installed, which is the desired result", 'TL0', '[INFO]');
 		addToConfiguredModules($module, "nothingToDo");
 		$origConfModules{$module}{installed} = "no";
 		$origConfModules{$module}{upgraded} = "yes";
@@ -6319,7 +6319,7 @@ sub removeKernelParameters {
 			foreach $line (@grubLines) {
 				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/) {
 					foreach $parameter (@parameters) {
-						printLog("removing kernel parameter: $parameter", 'L2');
+						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/) {
 							$line =~ s/$parameter//;
 							$line =~ s/ +/ /g;
@@ -6341,7 +6341,7 @@ sub removeKernelParameters {
 			}
 			return ($counter);
 		} else {
-			printLog("could not open and write $grubFile", 'TL0');
+			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
 			addToConfiguredModules($module, "remove failed");
 			$origConfModules{$module}{installed} = "remove failed";
 			$origConfModules{$module}{version} = $localConfModules{$module}{version};
@@ -6349,7 +6349,7 @@ sub removeKernelParameters {
 			return (0);
 		}
 	} else {
-		printLog("could not open and read $grubFile", 'TL0');
+		printLog("could not open and read $grubFile", 'TL0', '[ERROR]');
 		addToConfiguredModules($module, "remove failed");
 		$origConfModules{$module}{installed} = "remove failed";
 		$origConfModules{$module}{version} = $localConfModules{$module}{version};
@@ -6372,7 +6372,7 @@ sub setNoNetwork {
 	my $value = shift;
 	if ($LiveISO) {
 		if ($value == 1) {
-			printLog("setting permanently for this session no network available", 'L0');
+			printLog("setting permanently for this session no network available", 'L0', '[INFO]');
 			$noNetwork = 1;
 		}
 	} else {
@@ -6405,35 +6405,35 @@ sub aptgetRefreshModule {
 					initAvailablePackagesList();
 					lockPM();
 					if ($exitStatus != 0) {
-						printLog('failed: update packages', 'L0');
-						printLog("output: $output error code: $exitStatus", 'L0');
+						printLog('failed: update packages', 'L0', '[ERROR]');
+						printLog("output: $output error code: $exitStatus", 'L0', '[ERROR]');
 						if ($exitStatus == 7) {
-							printLog('possible network problems', 'L0');
+							printLog('possible network problems', 'L0', '[INFO]');
 						}
 						addToConfiguredModules($aptgetModule, "failed");
 						if ($refreshTriesDone <= $refreshTries) {
-							printLog("will try to refresh the repos again", 'L2');
+							printLog("will try to refresh the repos again", 'L2', '[INFO]');
 						}
 						$refreshTriesDone++;
 						sleep($refreshWait);
 					} else {
-						printLog("success: update packages", 'L1');
+						printLog("success: update packages", 'L1', '[INFO]');
 						addToConfiguredModules($aptgetModule, "success");
 					}
 				} else {
-					printLog("failed to get package management lock to update package management for >$aptgetModule<", 'L2');
+					printLog("failed to get package management lock to update package management for >$aptgetModule<", 'L2', '[WARN]');
 					startTomteDelayed();
 					return(0);
 				}
 			}
 		} else {
-			printLog("no network available, repos could not be updated", 'TL0');
+			printLog("no network available, repos could not be updated", 'TL0', '[WARN]');
 			addToConfiguredModules($aptgetModule, "failed");
 			setNoNetwork(1);
 			return (0);
 		}
 	} else {
-		printLog("not refreshing package management DB as no network available", 'L0');
+		printLog("not refreshing package management DB as no network available", 'L0', '[WARN]');
 		setNoNetwork(1);
 		return (0);
 	}
@@ -6448,11 +6448,11 @@ sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
 	if (copy($fileName, $backupFile)) {
-		printLog("created backup for $fileName", 'TL');
+		printLog("created backup for $fileName", 'TL', '[INFO]');
 		return (1);
 	} else {
-		printLog("Err: $!", 'L0');
-		printLog("can't create backup file for $fileName", 'TL0');
+		printLog("Err: $!", 'L0', '[ERROR]');
+		printLog("can't create backup file for $fileName", 'TL0', '[ERROR]');
 		return (0);
 	}
 }
@@ -6475,7 +6475,7 @@ sub isLineInFile {
 			}
 		}
 	} else {
-		printLog("can't open file $filename", 'L0');
+		printLog("can't open file $filename", 'L0', '[WARN]');
 	}
 	return (0);
 }
@@ -6498,7 +6498,7 @@ sub isTextInFile {
 			}
 		}
 	} else {
-		printLog("can't open file $filename", 'L0');
+		printLog("can't open file $filename", 'L0', '[WARN]');
 	}
 	return (0);
 }
@@ -6514,7 +6514,7 @@ sub networkStatus {
 	my $dirHandle;
 	my $interfacesDir = '/sys/class/net';
 	if ( !opendir ($dirHandle, $interfacesDir)) {
-		printLog("unable to open $interfacesDir: $!", 'L0');
+		printLog("unable to open $interfacesDir: $!", 'L0', '[WARN]');
 		return (0);
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' && $_ ne 'lo' } readdir($dirHandle);
@@ -6541,7 +6541,7 @@ sub waitForNetwork {
 	my $wait = shift;
 	for ( my $i=1; $i<=$triesNbr; $i++ ) {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $triesNbr", 'TL2');
+		printLog("waiting for network: $i of $triesNbr", 'TL2', '[INFO]');
 		sleep ($wait);
 	}
 	return (0);
@@ -6561,11 +6561,11 @@ sub checkNetwork {
 	if ((! $FAI) && ($noNetwork == 0)) {
 		if (waitForNetwork($triesNbr, $wait)) {
 			setNoNetwork(0);
-			printLog('found network !', 'L1');
+			printLog('found network !', 'L1', '[INFO]');
 			return (1);
 		} else {
 			setNoNetwork(1);
-			printLog('no network found!! some fixes might not be applied correctly', 'TL0');
+			printLog('no network found!! some fixes might not be applied correctly', 'TL0', '[WARN]');
 			startTomteDelayed();
 			return (0);
 		}
@@ -6596,8 +6596,8 @@ sub insertGrub {
 		}
 		close $grubFH;
     } else {
-		printLog("Err: $!", 'L0');
-		printLog("no $grubFile present or unable to open the file for reading", 'L0');
+		printLog("Err: $!", 'L0', '[ERROR]');
+		printLog("no $grubFile present or unable to open the file for reading", 'L0', '[ERROR]');
 		return (-1);
     }
 
@@ -6617,8 +6617,8 @@ sub insertGrub {
 		print $grubFH @grubLines;
 		close ($grubFH);
     } else {
-		printLog("Err: $!", 'L0');
-		printLog("no $grubFile present or unable to open the file for writing", 'L0');
+		printLog("Err: $!", 'L0', '[ERROR]');
+		printLog("no $grubFile present or unable to open the file for writing", 'L0', '[ERROR]');
 		return (-1);
     }
     return $inserted;
@@ -6639,11 +6639,11 @@ sub insertGrubParameter {
 	}
 	if ($$line =~ /""/) {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1');
+		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
 		return (1);
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1');
+		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
 		return (1);
 	}
 }
@@ -6694,7 +6694,7 @@ sub messageDesktop {
 		}
 	}
 	if (($mUsername eq '') || ($mPid eq '')) {
-		printLog('No display for message output found, no username or PID', 'L1');
+		printLog('No display for message output found, no username or PID', 'L1', '[INFO]');
 		return (0);
 	}
 
@@ -6703,25 +6703,25 @@ sub messageDesktop {
 		$dbusAddress = do { local $/; <FH> };
 		close FH;
 	} else {
-		printLog('No display for message output found', 'L1');
+		printLog('No display for message output found', 'L1', '[INFO]');
 		return (0);
 	}
 	
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
-		printLog('No display for message output found, no DBUS address', 'L1');
+		printLog('No display for message output found, no DBUS address', 'L1', '[INFO]');
 		return (0);
 	}
 
-	printLog("messaging desktop", 'L2');
+	printLog("messaging desktop", 'L2', '[INFO]');
 	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 	$retValue = $?/256;
 
 	if ($retValue != 0) {
-		printLog("No display for message output found with command:\n$mCmd", 'L1');
+		printLog("No display for message output found with command:\n$mCmd", 'L1', '[DEBUG]');
 		return (0);
 	}
 	return (1);
@@ -6783,15 +6783,15 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1');
+			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1');
+				printLog('in FAI mode', 'L1', '[INFO]');
 			}
 			return;
 		} else {
-			printLog("Err: $!", 'L1');
+			printLog("Err: $!", 'L1', '[ERROR]');
 			$noLogFile =1;
-			print "Could not open logFile $logFile\n$!\n";
+			print "[ERROR] Could not open logFile $logFile\n$!\n";
 			exit (0);
 		}
 	} else {
@@ -6800,13 +6800,13 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1');
+			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1');
+				printLog('in FAI mode', 'L1', '[INFO]');
 			}
 			return;
 		} else {
-			printLog("Err: $!", 'L0', 'L1');
+			printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 			$noLogFile =1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
@@ -6870,7 +6870,7 @@ sub printLog {
 	}
 
 	if ($FAI) {
-		print "$sverity $message\n";
+		print "$severity $message\n";
 	} elsif ($level <= $logLevel) {
 		if ((-e $logFile) && ($type =~ /L/i)) {
 			if (open($LOGFILE, '>>', $logFile) ) {
@@ -6895,7 +6895,7 @@ sub readTOMLFile {
 
     # Check if the TOML data was parsed successfully
     if (!defined $tomlHashRef) {
-        printLog("Failed to parse TOML data from file: $file_path", "TL0");
+        printLog("Failed to parse TOML data from file: $file_path", "TL0", '[ERROR]');
 		return {};
     }
 
@@ -6969,16 +6969,16 @@ sub readConfigFile {
 					$localConfModules{$shortname}{version} = $localConfModules{$shortname}{version} * 1;
 					$localConfModules{$shortname}{hwid} = $localConfModules{$shortname}{hwid} * 1;
 				} else {
-					printLog("module: $name does not exist", 'L1');
+					printLog("module: $name does not exist", 'L1', '[WARN]');
 				}
 			} else {
-				printLog("invalid line in $configFile", 'L0');
+				printLog("invalid line in $configFile", 'L0', '[ERROR]');
 			}
 		}
 		close $FH;
 	} else {
-		printLog("Err: $!", 'L0');
-		printLog("could not open configFile: $configFile $!", 'TL0');
+		printLog("Err: $!", 'L0', '[ERROR]');
+		printLog("could not open configFile: $configFile $!", 'TL0', '[ERROR]');
 		return (0);
 	}
 	return (1);
@@ -6995,7 +6995,7 @@ sub validConfigLine {
 	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/) {
 		return (1);
 	} else {
-		printLog("found invalid configuration line in $configFile:\n$line", 'L0');
+		printLog("found invalid configuration line in $configFile:\n$line", 'L0', '[ERROR]');
 		return (0);
 	}
 }
@@ -7008,10 +7008,10 @@ sub validConfigLine {
 #
 sub writeConfigIniFile {
 	if ($configIniValues->write($configIniFile, 'utf8')) {
-		printLog("$configIniFile successfully written", 'L2');
+		printLog("$configIniFile successfully written", 'L2', '[INFO]');
 		return (1);
 	} else {
-		printLog("problems writing $configIniFile", 'L2');
+		printLog("problems writing $configIniFile", 'L2', '[WARN]');
 		return (0);
 	}
 }
@@ -7034,7 +7034,7 @@ sub writeConfigFile {
 
 	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
-		printLog("writing configfile", 'L1');
+		printLog("writing configfile", 'L1', '[INFO]');
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
@@ -7077,8 +7077,8 @@ sub writeConfigFile {
 		}
 		close $FH;
 	} else {
-		printLog("Err: $!", 'L0', 'L1');
-		printLog("can't write to configfile $configFile $!", 'TL0');
+		printLog("Err: $!", 'L0', 'L1', '[ERROR]');
+		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
 		exit (0);
 	}
 }
@@ -7096,7 +7096,7 @@ sub initConfigDir {
 		mkdir($configDir, 0755);
 		unless ( -d $configDir ) {
 			$noConfigFile = 1;
-			printLog("could not create $configDir, that's really bad!!", 'TL0');
+			printLog("could not create $configDir, that's really bad!!", 'TL0', '[FATAL]');
 			exit (0);
 		}
 	}
@@ -7121,7 +7121,7 @@ sub initConfigFile {
 		# set flag for first installation
 		write_file( $tomteFirstInstallFile, {'err_mode' => 'carp'}, 'tomteFirstInstall');
 		# create a new configFile
-		printLog("no configfile present ... creating one", 'TL');
+		printLog("no configfile present ... creating one", 'TL', '[INFO]');
 		writeConfigFile();
 		return;
 	}
@@ -7142,8 +7142,8 @@ sub findActiveEDIDs {
 	my $edidTrigger = 0;
 
 	if ( !opendir ($dir_handle, $cards_dir)) {
-		printLog("Err: $!", 'L1');
-		printLog("unable to open $cards_dir: $!", 'L1');
+		printLog("Err: $!", 'L1', '[WARN]');
+		printLog("unable to open $cards_dir: $!", 'L1', '[WARN]');
 		return @edidfile;
 	}
 	my @FILES = grep { $_ ne '.' && $_ ne '..' } readdir($dir_handle);
@@ -7171,12 +7171,12 @@ sub findActiveEDIDs {
 					}
 				}
 			} else {
-				printLog("file $enabledFile not found", 'L2');
+				printLog("file $enabledFile not found", 'L2', '[WARN]');
 			}
 		}
 	}
 	if (! $edidTrigger ) {
-		printLog('no enabled and active edid files found!', 'L1');
+		printLog('no enabled and active edid files found!', 'L1', '[WARN]');
 	}
 	return @edidfile;
 }
@@ -7198,8 +7198,8 @@ sub getEDIDData {
 			close $FH;
 			push @edidRefs, parse_edid($fileContent);
 		} else {
-			printLog("Err: $!", 'L1');
-			printLog("could not open file $_ $!", 'L1');
+			printLog("Err: $!", 'L1', '[ERROR]');
+			printLog("could not open file $_ $!", 'L1', '[ERROR]');
 		}
 	}
 	# returns array of hash references to module
@@ -7230,7 +7230,7 @@ sub isDisplayPresent {
 			}
 		}
 	}
-	printLog("edid string not found", 'L1');
+	printLog("edid string not found", 'L1', '[WARN]');
 	return (0);
 }
 
@@ -7536,21 +7536,21 @@ sub addToConfiguredModules {
 	my $status = shift;
 	$configuredModules{$module} = $status;
 	if ($status =~ /failed/) {
-		printLog("failed to install $origConfModules{$module}{name}", 'L0');
+		printLog("failed to install $origConfModules{$module}{name}", 'L0', '[ERROR]');
 	} elsif ($status =~ /success/) {
-		printLog("succesfully installed $origConfModules{$module}{name}", 'L0');
+		printLog("succesfully installed $origConfModules{$module}{name}", 'L0', '[INFO]');
 	} elsif ($status =~ /removed/) {
 		if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
-			printLog("succesfully removed $origConfModules{$module}{name}", 'L0');
+			printLog("succesfully removed $origConfModules{$module}{name}", 'L0', '[INFO]');
 			print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
 			print "\$ sudo tomte block $origConfModules{$module}{name}\n";
 			print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
 			print "or tomte will reinstall it again at the next start\n";
 		}
 	} elsif ($status =~ /remove failed/) {
-		printLog("failed to remove $origConfModules{$module}{name}", 'L0');
+		printLog("failed to remove $origConfModules{$module}{name}", 'L0', '[ERROR]');
 	} elsif ($status =~ /nothingToDo/) {
-		printLog("nothing to do for $origConfModules{$module}{name}", 'L0');
+		printLog("nothing to do for $origConfModules{$module}{name}", 'L0', '[INFO]');
 	}
 }
 
@@ -7673,14 +7673,14 @@ sub configureSingleModule {
 	$module = getSubName($moduleName);
 
 	if ($module eq "") {
-		printLog("wrong module name", 'TL');
+		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
 
 	# check if in LiveISO and exit from subroutine if module should not be
 	# installed
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
-		printLog("Module: $module will not be installed as this is a LiveISO", 'L0');
+		printLog("Module: $module will not be installed as this is a LiveISO", 'L0', '[WARN]');
 		addToConfiguredModules($module, 'nothingToDo');
 		$localConfModules{$module}{installed} = 'LiveISO';
 		return;
@@ -7693,14 +7693,14 @@ sub configureSingleModule {
 	   	($origConfModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes') {
-		printLog("configure module: $module", 'L1');
+		printLog("configure module: $module", 'L1', '[INFO]');
 		configureModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
 		$origConfModules{$module}{required} eq 'yes' &&
 		$origConfModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
-		printLog("upgrade module: $module", 'L1');
+		printLog("upgrade module: $module", 'L1', '[INFO]');
 		updateModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
@@ -7725,12 +7725,12 @@ sub removeSingleModule {
 	$module = getSubName($moduleName);
 
 	if ($module eq "") {
-		printLog("wrong module name", 'TL');
+		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
 
 	if ($localConfModules{$module}{blocked} eq 'no') {
-		printLog("removing module $moduleName", 'TL');
+		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
 	}	
 
@@ -7771,17 +7771,17 @@ sub reconfigureSingleModule {
 	my $moduleName = shift;
 	my $module;
 	$module = getSubName($moduleName);
-	printLog("reconfigureSingleModule: $moduleName", 'L2');
+	printLog("reconfigureSingleModule: $moduleName", 'L2', '[INFO]');
 
 	if ($module eq "") {
-		printLog("wrong module name", 'TL');
+		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
 
 	# check if in LiveISO and exit from subroutine if module should not be
 	# installed
 	if ($LiveISO && ($origConfModules{$module}{LiveISO} eq 'no')) {
-		printLog("Module: $module will not be reconfigured as this is a LiveISO", 'L0');
+		printLog("Module: $module will not be reconfigured as this is a LiveISO", 'L0', '[WARN]');
 		addToConfiguredModules($module, 'nothingToDo');
 		$localConfModules{$module}{installed} = 'LiveISO';
 		return;
@@ -7791,10 +7791,10 @@ sub reconfigureSingleModule {
 		(($localConfModules{$module}{blocked} eq 'no') && ($origConfModules{$module}{required} eq 'yes'))) {
 
 		if ($origConfModules{$module}{upgrade} eq 'yes') {
-			printLog("upgrade module: $module", 'L1');
+			printLog("upgrade module: $module", 'L1', '[INFO]');
 			updateModule($module);
 		} else {
-			printLog("configure module: $module", 'L1');
+			printLog("configure module: $module", 'L1', '[INFO]');
 			configureModule($module);
 		}
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
@@ -7830,7 +7830,7 @@ sub reconfigureSingleModule {
 sub block {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
-	printLog("block module: >$module<", 'L2');
+	printLog("block module: >$module<", 'L2', '[INFO]');
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
@@ -7847,7 +7847,7 @@ sub block {
 		print "Blocking module $moduleName\n";
 		print "$moduleName will not be upgraded or reinstalled if removed\n";
 		$origConfModules{$module}{blocked} = 'yes';
-		printLog("blocking module $moduleName", 'L1');
+		printLog("blocking module $moduleName", 'L1', '[INFO]');
 		return;
 	}
 }
@@ -7858,7 +7858,7 @@ sub block {
 sub unblock {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
-	printLog("unblock module: >$module<", 'L2');
+	printLog("unblock module: >$module<", 'L2', '[INFO]');
 	if ($module eq '') {
 		print "Module $moduleName does not exist\n";
 		return;
@@ -7870,7 +7870,7 @@ sub unblock {
 	if ($localConfModules{$module}{blocked} eq 'yes') {
 		print "Unblocking module $moduleName\n";
 		$origConfModules{$module}{blocked} = 'no';
-		printLog("unblocking module $moduleName", 'L1');
+		printLog("unblocking module $moduleName", 'L1', '[INFO]');
 		return;
 	}
 }
@@ -7886,7 +7886,7 @@ sub blockAllModules {
 			($origConfModules{$module}{blocked} ne 'yes') &&
 			($origConfModules{$module}{required} ne 'prerequisite')) {
 			$origConfModules{$module}{blocked} = 'yes';
-			printLog("blocking module $origConfModules{$module}{name}", 'TL0');
+			printLog("blocking module $origConfModules{$module}{name}", 'TL0', '[INFO]');
 		}
 	}
 }
@@ -7902,7 +7902,7 @@ sub unblockAllModules {
 		if (($origConfModules{$module}{required} eq 'yes') &&
 			($origConfModules{$module}{blocked} eq 'yes')) {
 			$origConfModules{$module}{blocked} = 'no';
-			printLog("unblocking module $origConfModules{$module}{name}", 'TL0');
+			printLog("unblocking module $origConfModules{$module}{name}", 'TL0', '[INFO]');
 		}
 	}
 }
@@ -7922,15 +7922,15 @@ sub setMode {
 
 	$mode = checkMode();
 	if ($mode eq $requestedMode) {
-		printLog("Requested mode '$requestedMode' is already set", 'TL0');
+		printLog("Requested mode '$requestedMode' is already set", 'TL0', '[INFO]');
 	} else {
 		foreach $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
 				write_file($modeFile{$requestedMode}, {'err_mode' => 'carp'}, '');
-				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0');
+				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0', '[INFO]');
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
-				printLog("removing superfluous modefile: $modeFile{$key}", 'TL2');
+				printLog("removing superfluous modefile: $modeFile{$key}", 'TL2', '[INFO]');
 			}
 		}
 	}
@@ -7959,14 +7959,14 @@ sub checkMode {
 	}
 	if ($countModes == 0) {
 		$mode = 'AUTOMATIC';
-		printLog('No mode setting found, assuming AUTOMATIC', 'L2');
+		printLog('No mode setting found, assuming AUTOMATIC', 'L2', '[INFO]');
 		$mode = 'AUTOMATIC';
 	}
 	if ($countModes == 1) {
-		printLog("Found mode setting $mode", 'L2');
+		printLog("Found mode setting $mode", 'L2', '[INFO]');
 	}
 	if ($countModes > 1) {
-		printLog("More then one mode setting found, assuming $mode", 'L2');
+		printLog("More then one mode setting found, assuming $mode", 'L2', '[INFO]');
 	}
 	return $mode;
 }
@@ -7983,7 +7983,7 @@ sub checkModePermission {
 	# this is a double check, just in case ...
 
 	if ($origConfModules{$module}{required} eq 'prerequisite') {
-		printLog("module is prerequisite", 'L2');
+		printLog("module is prerequisite", 'L2', '[INFO]');
 		# always permit if it is a prerequisite
 		return (1);
 	}
@@ -8220,7 +8220,7 @@ sub checkModePermission {
 sub configureModule {
 	my $module = shift;
 	my $permission = checkModePermission('install', $module);
-	printLog("configure module: $module permission: $permission", 'L2');
+	printLog("configure module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission) {
 		$module->($module, 'install');
 	}
@@ -8233,7 +8233,7 @@ sub configureModule {
 sub removeModule {
 	my $module = shift;
 	my $permission = checkModePermission('remove', $module);
-	printLog("remove module: $module permission: $permission", 'L2');
+	printLog("remove module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission) {
 		$module->($module, 'remove');
 	}
@@ -8247,7 +8247,7 @@ sub removeModule {
 sub updateModule {
 	my $module = shift;
 	my $permission = checkModePermission('update', $module);
-	printLog("upgrade module: $module permission: $permission", 'L2');
+	printLog("upgrade module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission) {
 		$module->($module, 'upgrade');
 	}
@@ -8313,21 +8313,21 @@ sub postConfigure {
 	my $postConfTrigger = 0;
 	my $output;
 	my $command;
-	printLog("initializing post-configuration");
+	printLog("initializing post-configuration", 'TL0', '[INFO]');
 	foreach $sysProgram (keys %postConfProgram) {
 		if ($postConfProgram{$sysProgram}{trigger} == 1 ) {
-			printLog("starting $sysProgram", 'L1');
+			printLog("starting $sysProgram", 'L1', '[INFO]');
 			$command = $postConfProgram{$sysProgram}{command}.' 2>&1';
 			$output = `$command`;
 			$exitStatus = $?;
 			if ($exitStatus == 0) {
-				printLog("success: $postConfProgram{$sysProgram}{command}", 'L1');
+				printLog("success: $postConfProgram{$sysProgram}{command}", 'L1', '[INFO]');
 				postSetModulesState($sysProgram, "success");
 				setRestartValues($sysProgram);
 			} else {
 				$postConfTrigger = 1;
-				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0');
-				printLog("returned error code: $exitStatus", 'L0');
+				printLog("failed: $postConfProgram{$sysProgram}{command}", 'L0', '[WARN]');
+				printLog("returned error code: $exitStatus", 'L0', '[WARN]');
 				postSetModulesState($sysProgram, "failed");
 			}
 		}
@@ -8351,25 +8351,25 @@ sub startTomteDelayed {
 	my $triesValue;
 
 	if ($LiveISO) {
-		printLog("not starting Tomte delayed as this is a live ISO", 'L0');
+		printLog("not starting Tomte delayed as this is a live ISO", 'L0', '[INFO]');
 		return (0);
 	}
 	if ($FAI) {
-		printLog("not starting Tomte delayed as this is a FAI installation", 'L0');
+		printLog("not starting Tomte delayed as this is a FAI installation", 'L0', '[INFO]');
 		return (0);
 	}
 	if (defined($configIniValues->{installation}->{FAI}) &&
 		(($configIniValues->{installation}->{FAI} eq 'first reboot after FAI') ||
 		($configIniValues->{installation}->{FAI} eq 'second reboot after FAI'))) {
-		printLog("not starting Tomte delayed as this is in OEM configuration", 'L0');
+		printLog("not starting Tomte delayed as this is in OEM configuration", 'L0', '[INFO]');
 		return (0);
 	}
 
-	printLog("start later again: $startLaterAgain", 'L2');
+	printLog("start later again: $startLaterAgain", 'L2', '[INFO]');
 	if ($startLaterAgain != 1) {
 		$triesValue = tries($triesLimit);
 		if (! $triesValue) {
-			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2');
+			printLog("repeat limit reached, program will not start again, tries: $triesValue", 'L2', '[INFO]');
 			$startLaterAgain = 1;
 			if ($restartSystem) {
 				messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
@@ -8384,7 +8384,7 @@ sub startTomteDelayed {
 			}
 			return (1);
 		} else {
-			printLog("program will start again, tries: $triesValue, trieslimit: $triesLimit", 'L2');
+			printLog("program will start again, tries: $triesValue, trieslimit: $triesLimit", 'L2', '[INFO]');
 		}
 	}
 	if ($startLaterAgain == 0) {
@@ -8392,10 +8392,10 @@ sub startTomteDelayed {
 		# This might not be completely reliable, specially when starting a fresh installed system
 		my $systemctlCmd = 'systemd-run --on-active="'.$systemdDelay.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
 
-		printLog("systemctlCmd: $systemctlCmd", 'TL0');
-		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0');
+		printLog("systemctlCmd: $systemctlCmd", 'TL0', '[DEBUG]');
+		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
 		$retVal = system($systemctlCmd);
-		printLog("ret value: $retVal", 'L0');
+		printLog("ret value: $retVal", 'L0', '[DEBUG]');
 	}
 	return (0);
 }
@@ -8571,7 +8571,7 @@ sub modulesList() {
 sub setRestartValues {
 	my $element = shift;
 	$restartSystem = 1;
-	printLog("setting restart for: $element", 'L2');
+	printLog("setting restart for: $element", 'L2', '[DEBUG]');
 	write_file($needsRestartFile, {'err_mode' => 'carp'}, 'Tomte: system has to be restarted');
 }
 
@@ -8585,22 +8585,22 @@ sub setRestartValues {
 #
 sub tries() {
 	my $limit = shift;
-	printLog("tries: given limit: $limit", 'L2');
+	printLog("tries: given limit: $limit", 'L2', '[DEBUG]');
 	if (-e $triesFile) {
 		my $triesDone = triesAlreadyDone();
-		printLog("repeat number $triesDone of $limit", 'L0');
+		printLog("repeat number $triesDone of $limit", 'L0', '[DEBUG]');
 		if ( $triesDone < $limit ) {
-			printLog("rising tries, triesDone below limit", 'L2');
+			printLog("rising tries, triesDone below limit", 'L2', '[DEBUG]');
 			write_file($triesFile, {'err_mode' => 'carp'}, $triesDone+1);
 			return (1);
 		} else {
-			printLog("limit tries done reached", 'L2');
-			printLog('deleting triesFile', 'L2');
+			printLog("limit tries done reached", 'L2', '[DEBUG]');
+			printLog('deleting triesFile', 'L2', '[DEBUG]');
 			unlink($triesFile);
 			return (0);
 		}
 	} else {
-		printLog('creating triesFile', 'L2');
+		printLog('creating triesFile', 'L2', '[DEBUG]');
 		write_file($triesFile, {'err_mode' => 'carp'}, '1');
 	}
 	return (1);
@@ -8689,7 +8689,7 @@ sub reportPlannedChanges {
 			if (($localConfModules{$module}{installed} eq 'no') &&
 				($localConfModules{$module}{blocked} eq 'no') &&
 				(checkModePermission('install', $module))) {
-				printLog("module $module will be installed", 'L0');
+				printLog("module $module will be installed", 'L0', '[INFO]');
 			}
 		}
 	}
@@ -8749,8 +8749,8 @@ sub getChassisType {
 	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
 	my $returnHostnamectl = `$hostnamectlCmd`;
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gm) {
-		printLog("chassis is a virtual machine", 'TL2');
-		printLog("machine will be treated as desktoppc", 'TL2');
+		printLog("chassis is a virtual machine", 'TL2', '[DEBUG]');
+		printLog("machine will be treated as desktoppc", 'TL2', '[DEBUG]');
 		return ('desktoppc');
 	}
 	return ('0');
@@ -8767,7 +8767,7 @@ sub getChassisType {
 # MAIN PROGRAM
 
 $chassisType = getChassisType();
-printLog("chassistype will be: $chassisType", 'TL2');
+printLog("chassistype will be: $chassisType", 'TL2', '[DEBUG]');
 if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
 	exit (0);
@@ -8877,14 +8877,14 @@ if (@ARGV != 0) {
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				if ($LiveISO) {
-					printLog("starting Tomte in LiveISO mode", 'L0');
+					printLog("starting Tomte in LiveISO mode", 'L0', '[INFO]');
 					print "Starting tuxedo-tomte $VERSION in LiveISO mode\n".
 					"This should not be used in a normal situation\n".
 					"only when installing a new system with LiveISO\n";
 				}
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("only prerequisite modules will be installed", 'TL0');
+					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
+					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
@@ -8899,9 +8899,9 @@ if (@ARGV != 0) {
 							$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte >/dev/null 2>&1`;
 						}
 						lockPM();
-						printLog("return from apt-get:\n$retval", 'L2');
+						printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
 					} else {
-						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1');
+						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1', '[DEBUG]');
 					}
 				}
 				configureAllModules();
@@ -8913,8 +8913,8 @@ if (@ARGV != 0) {
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("Mode DONT_CONFIGURE is set", 'TL0');
-					printLog("only prerequisite modules will be installed", 'TL0');
+					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
+					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
@@ -8932,7 +8932,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L0');
+		printLog('Tomte finished', 'L0', '[INFO]');
 
 	# remove
 	} elsif ($argValue{command} eq "remove") {
@@ -8958,13 +8958,13 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L0');
+		printLog('Tomte finished', 'L0', '[INFO]');
 
 	# reconfigure
 	} elsif ($argValue{command} eq "reconfigure") {
 		# reconfigure interrupts repeated execution
 		if (-e $triesFile) {
-			printLog('delete triesFile', 'L2');
+			printLog('delete triesFile', 'L2', '[DEBUG]');
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne '') {
@@ -8974,8 +8974,8 @@ if (@ARGV != 0) {
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("only prerequisite modules will be installed", 'TL0');
+					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
+					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
@@ -8989,8 +8989,8 @@ if (@ARGV != 0) {
 				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
-					printLog("DONT_CONFIGURE is set", 'TL0');
-					printLog("only prerequisite modules will be installed", 'TL0');
+					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
+					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 				if (-e $tomteFinishedFile) {
 					unlink($tomteFinishedFile);
@@ -9008,7 +9008,7 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name or \"all\" missing\n";
 		}
-		printLog('Tomte finished', 'L0');
+		printLog('Tomte finished', 'L0', '[INFO]');
 
 	# blocking/unblocking should work in any mode
 	# block
@@ -9019,11 +9019,11 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq 'all') {
 				blockAllModules();
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne '') {
 				block($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L0');
+				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -9039,11 +9039,11 @@ if (@ARGV != 0) {
 			if ($argValue{module} eq 'all') {
 				unblockAllModules();
 				writeConfigFile();
-				printLog('Tomte finished', 'L1');
+				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne '') {
 				unblock($argValue{module});
 				writeConfigFile();
-				printLog('Tomte finished', 'L0');
+				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -9058,7 +9058,7 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode($argValue{command});
 		prepareValues();
-		printLog('Tomte finished', 'L0');
+		printLog('Tomte finished', 'L0', '[INFO]');
 	} else {
 		print "Unknown command: $argValue{command}\n";
 		help();
@@ -9072,7 +9072,7 @@ if (($startLaterAgain == 0) &&
 	(($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure'))) {
 	if (-e $triesFile) {
 		if (-w $triesFile) {
-			printLog('deleting triesFile', 'L2');
+			printLog('deleting triesFile', 'L2', '[DEBUG]');
 			unlink($triesFile);
 		}
 	}
@@ -9085,15 +9085,15 @@ END {
 		if (!$FAI) {
 			my $packagekitEnabled = getSystemdEnabled('packagekit');
 			$packagekitState = getSystemdState('packagekit');
-			printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2');
+			printLog("\npackagekitEnabled: $packagekitEnabled\npackagekitOriginalEnabled: $packagekitOriginalEnabled\npackagekitState: $packagekitState\npackagekitOriginalState: $packagekitOriginalState", 'L2', '[DEBUG]');
 			if ($packagekitEnabled ne $packagekitOriginalEnabled) {
-				printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2');
+				printLog("packagekit enabled was originally: $packagekitOriginalEnabled now: $packagekitEnabled", 'L2', '[DEBUG]');
 				if ($packagekitOriginalEnabled eq 'enabled') {
 					commandSystemdModule('unmask', 'packagekit');
 				}
 			}
 			if ($packagekitOriginalState ne $packagekitState) {
-				printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2');
+				printLog("packagekit was originally: $packagekitOriginalState it is now: $packagekitState", 'L2', '[DEBUG]');
 				if ($packagekitOriginalState eq 'active') {
 					commandSystemdModule('enable', 'packagekit');
 				}
@@ -9109,17 +9109,17 @@ END {
 				# if the OEM stage gets interrupted by a reboot or shutdown
 				# if you reboot the system after a FAI installation in OEM, please,
 				# just make a new FAI installation! to make sure everything is proper
-				printLog("after FAI installation detected, this is probably the OEM stage", 'L2');
+				printLog("after FAI installation detected, this is probably the OEM stage", 'L2', '[DEBUG]');
 				my $calamaresProcesses = `pgrep -c calamares`;
-				printLog("calamares processes found: $calamaresProcesses", 'L2');
-				printLog("first boot out of OEM, setting second reboot flag", 'L2');
+				printLog("calamares processes found: $calamaresProcesses", 'L2', '[DEBUG]');
+				printLog("first boot out of OEM, setting second reboot flag", 'L2', '[DEBUG]');
 				$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
 				writeConfigIniFile();
 			} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
-				printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2');
+				printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2', '[DEBUG]');
 				my $calamaresProcesses = `pgrep -c calamares`;
 				if ($calamaresProcesses =~ /0/gm) {
-					printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2');
+					printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2', '[DEBUG]');
 					delete $configIniValues->{installation};
 					writeConfigIniFile();
 				}
@@ -9131,7 +9131,7 @@ END {
 		}
 		# just to be sure, always write the tomte_finished file
 		if (write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished')) {
-			printLog("created $tomteFinishedFile", 'L2');
+			printLog("created $tomteFinishedFile", 'L2', '[DEBUG]');
 		}
 	}
 }
