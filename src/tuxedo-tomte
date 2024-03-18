@@ -6785,13 +6785,13 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1');
+			printLog("starting Tomte $VERSION", 'L0');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1');
+				printLog('in FAI mode', 'L0');
 			}
 			return;
 		} else {
-			printLog("Err: $!", 'L1');
+			printLog("Err: $!", 'L0');
 			$noLogFile =1;
 			print "Could not open logFile $logFile\n$!\n";
 			exit (0);
@@ -6802,13 +6802,13 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1');
+			printLog("starting Tomte $VERSION", 'L0');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1');
+				printLog('in FAI mode', 'L0');
 			}
 			return;
 		} else {
-			printLog("Err: $!", 'L0', 'L1');
+			printLog("Err: $!", 'L0');
 			$noLogFile =1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
