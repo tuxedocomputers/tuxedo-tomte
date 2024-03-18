@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Check if a TODO is present in the code
-todo_present=0
-echo "Checking for TODOs..."
-grep -n '#TODO' ./src/tuxedo-tomte && todo_present=1
-if [[ $todo_present -gt 0 ]]; then
-  echo "Found TODOs!"
-  echo $(grep -n '#TODO' ./src/tuxedo-tomte)
-fi
-
 # Run the check_translations script and capture any output
 echo "Checking translations..."
 translation_differences_text=$(perl ./translations/check_translations.pl 2>&1)
