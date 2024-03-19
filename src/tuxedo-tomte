@@ -1915,27 +1915,15 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if ($ubuntuCodename =~ /focal/) {
-		if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
-			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
-		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
-			$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		}
+	if ($ubuntuCodename =~ /focal/ && $boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+		printLog("kernel $origConfModules{kerneltuxedo2204}{name} should be installed", 'L1');
+		$origConfModules{kerneltuxedo2204next}{required} = 'yes';
+	} elsif ($ubuntuCodename =~ /focal/) {
+		printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1');
+		$origConfModules{kerneltuxedo2004}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /jammy/) {
-		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
-			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
-			($boardname =~ m/PF5LUXG/)) {
-			printLog("kernel $origConfModules{kerneltuxedo2204edge}{name} will be default", 'L1');
-			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
-		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1');
-			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
-		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1');
-			$origConfModules{kerneltuxedo2204}{required} = 'yes';
-		}
+		printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1');
+		$origConfModules{kerneltuxedo2204}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -2868,138 +2856,6 @@ sub tuxedodrivers() {
 
 
 
-###############################################################################
-# kernel HWE 18.04 and 20.04
-#
-sub kernelhwe2004() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-edge
-#
-sub kerneltuxedo2004edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-next
-#
-sub kerneltuxedo2004next() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
 
 
 ###############################################################################
@@ -3011,36 +2867,33 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
 
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
-				if ($localConfModules{'kerneltuxedo2004edge'}{installed} eq 'yes') {
-					removePackage('linux-tuxedo-20.04-edge');
-				}
-				if ($localConfModules{'kerneltuxedo2004next'}{installed} eq 'yes') {
-					removePackage('linux-tuxedo-20.04-next');
-				}
+		installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
+		if ($instFailed == 0) {
+			uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
+			if ($localConfModules{'kerneltuxedo2004edge'}{installed} eq 'yes') {
+				removePackage('linux-tuxedo-20.04-edge');
 			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
+			if ($localConfModules{'kerneltuxedo2004next'}{installed} eq 'yes') {
+				removePackage('linux-tuxedo-20.04-next');
 			}
+		}
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$origConfModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'remove') {
@@ -3060,118 +2913,27 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
 
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
+		installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
+		if ($instFailed == 0) {
+			uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
 		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04-edge
-#
-sub kerneltuxedo2204edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04-next
-#
-sub kerneltuxedo2204next() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$origConfModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'remove') {
