@@ -2881,6 +2881,7 @@ sub kernelhwe2004() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -2924,6 +2925,7 @@ sub kerneltuxedo2004edge() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -2968,6 +2970,7 @@ sub kerneltuxedo2004next() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -3012,6 +3015,7 @@ sub kerneltuxedo2004() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -3060,6 +3064,7 @@ sub kerneltuxedo2204() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -3103,6 +3108,7 @@ sub kerneltuxedo2204edge() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -3146,6 +3152,7 @@ sub kerneltuxedo2204next() {
 
 			# clean up oldest tuxedo kernel in /boot (if not used)
 			checkAndDeleteOldestTuxedoKernel();
+			checkAndDeleteOldestRemnantLinuxHeader();
 
 			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
 			if ($instFailed == 0) {
@@ -5871,6 +5878,131 @@ sub populateKernelPackages {
 
 
 ###############################################################################
+# deletes the oldest remnant linux header
+# returns 0 if nothing was done
+# returns 1 if some linux header was deleted
+sub checkAndDeleteOldestRemnantLinuxHeader {
+	# Check if the tries file exists
+	if (-e $triesFile) {
+		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2");
+		return (0);
+	}
+
+	my %headers;
+	# Get the list of installed linux-tuxedo headers using dpkg-query
+	# example: linux-tuxedo-5.15-headers-5.15.0-10033
+	my @headersList = split /\n/, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\n' 'linux-tuxedo-*-headers-*');
+
+	# Check each header line and store installed headers with their versions
+	foreach my $line (@headersList) {
+		chomp $line;
+		my ($status, $version, $package) = split /=/, $line, 3;
+		if (
+			# Check if $package is installed
+			"installed" eq $status &&
+
+			# Check if $package matches the expected pattern
+			$package =~ /^linux-tuxedo-.*-headers-.*$/ &&
+
+			# Check if $package does not contain any whitespace characters
+			$package !~ /\s/ &&
+
+			# Check if the length of $package exceeds 50 characters
+			length($package) < 50
+		
+		){
+			$headers{$version} = $package;
+		}
+	}
+
+	my %images;
+	# Get the list of installed linux-image packages using dpkg-query
+	# example: linux-image-5.15.0-10025-tuxedo
+	my @imagesList = split /\n/, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\n' 'linux-image-*-tuxedo');
+
+	# Check each images line and store installed headers with their versions
+	foreach my $line (@imagesList) {
+		chomp $line;
+		my ($status, $version, $package) = split /=/, $line, 3;
+		if ("installed" eq $status){
+			$images{$version} = $package;
+		}
+	}
+
+	# Get the current kernel version by removing the "-tuxedo" suffix
+	my $currentKernelVersion = `uname -r`;
+	$currentKernelVersion =~ s/-tuxedo$//;
+
+	my @headersOnly;
+	# Get the headers where no corresponding image exists
+	foreach my $key (keys %headers) {
+		# Skip if there is a corresponding image for the header version
+		if (exists $images{$key}) {
+			next;
+		}
+
+		# Skip if the header version matches the current kernel version
+		# header version can be 6.5.0-10005.5 but currentKernelVersion is then just 6.5.0-10005
+		if ($key =~ /$currentKernelVersion/) {
+			next;
+		}
+
+		# Add the header version to the @headersOnly array
+		push @headersOnly, $key;
+	}
+
+	# If there are headers without corresponding images
+	if (@headersOnly) {
+		# Sort the headers in ascending order
+		@headersOnly = sort { version_compare($a, $b) } @headersOnly;
+
+		# Get the oldest header package name
+		my $oldestHeader = $headers{$headersOnly[0]};
+
+		# Safety check: Verify the format and length of $oldestHeader
+		if (
+			# Check if $oldestHeader does not match the expected pattern
+			$oldestHeader !~ /^linux-tuxedo-.*-headers-.*$/ ||
+
+			# Check if $oldestHeader contains any whitespace characters
+			$oldestHeader =~ /\s/ ||
+
+			# Check if the length of $oldestHeader exceeds 50 characters
+			length($oldestHeader) > 50
+			) {
+				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0");
+				return 0;
+		}
+
+		printLog("Removing header $oldestHeader", "L2");
+
+		# Construct the apt-get purge command to remove the oldest header
+		my $purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader";
+		printLog("purge command: $purgeCommand", 'L2');
+
+		# Attempt to unlock the package management and check if it's unlocked
+		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+			# Execute the purge command and capture the result and error
+			my $result = `$purgeCommand`;
+			my $error = $?;
+			lockPM();
+			printLog("result: $result\nerror: $error", 'L2');
+
+			# Log the success message
+			printLog("successfully removed old header $oldestHeader", 'L0');
+			return 1;
+		} else {
+			# Log the failure message if package management is busy
+			printLog("could not remove the header $oldestHeader as package management is busy", 'L0');
+		}
+	}
+	return 0;
+}
+
+
+
+
+###############################################################################
 # deletes the oldest TUXEDO kernel by version
 # returns 0 if nothing was done
 # returns 1 if some kernel was deleted
@@ -5939,7 +6071,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 			# get all related kernel packages
 			my @packageList = populateKernelPackages($fileListResult[-1]);
 			# purge package
-			$purgeCommand = "apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList";
+			$purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList";
 			printLog("purge command: $purgeCommand", 'L2');
 			my $result;
 			my $error;
