@@ -1338,7 +1338,11 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
+			if (defined $fs->error) {
+				printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
+			} else {
+				printLog("Locking: failed to get write lock: $filename", 'L0', '[WARN]');
+			}
 			return (0);
 		}
 	} else {
