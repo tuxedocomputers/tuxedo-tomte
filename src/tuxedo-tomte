@@ -1556,15 +1556,6 @@ sub prerequisites {
 	printLog("ending prerequisites", 'L1');
 }
 
-sub prerequisitesFAI {
-	printLog("starting prerequisites FAI", 'L0');
-	printLog("executing: apt-get update", 'L2');
-	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2');
-	printLog("ending prerequisites FAI", 'L0');
-}
-
 sub postrequisitesFAI {
 	printLog("starting postrequisites FAI", 'L0');
 	if (httpToHttps(\%tuxedo_repos)) {
@@ -1573,10 +1564,6 @@ sub postrequisitesFAI {
 	if (httpToHttps(\%tuxedo_mirrors)) {
 		printLog('mirror repos set to https', 'L0');
 	}
-	printLog("executing: apt-get update", 'L2');
-	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2');
 	printLog("ending postrequisites FAI", 'L0');
 }
 
@@ -8991,7 +8978,6 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
-		prerequisitesFAI();
 		configureAllModules();
 		postrequisitesFAI();
 		postConfigure();
