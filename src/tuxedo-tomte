@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1216,7 +1216,7 @@ sub checkAndSetLocale {
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
-	printLog("Trying Matching Language for: ", $lang, "\n", "L1", '[INFO]');
+	printLog("Trying matching language for: $lang", "L1", '[INFO]');
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
@@ -1228,11 +1228,11 @@ sub getMatchingLocaleForLang {
 	foreach my $path (@files) {
 		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
 		$found_language = $path =~ s/$locale_base_path\///ir;
-		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1", '[INFO]');
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language", "L1", '[INFO]');
 		last;
 	}
 	unless ($found_language) {
-		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1", '[ERROR]');
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang", "L1", '[ERROR]');
 	}
 
 	return ($found_language, "$locale_base_path/$found_language");
@@ -1338,11 +1338,7 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			if (defined $fs->error) {
-				printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
-			} else {
-				printLog("Locking: failed to get write lock: $filename", 'L0', '[WARN]');
-			}
+			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -3520,7 +3516,7 @@ sub apportfix() {
 			$retval = edit_file { s/enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
-				#service apport stop`;
+				#`service apport stop`;
 				#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 				#`systemctl disable apport.service`;
 				#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
@@ -3922,7 +3918,7 @@ sub intelgenXIIIpowerctlfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
 }
 
@@ -4226,10 +4222,6 @@ sub createRepos {
 			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
 			if($noChangesNeeded) {
 				my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
-				#TODO debug
-				printLog("file: $repos{$distroKey}{$key}{filename}", 'L0', '[DEBUG]');
-				printLog(">$fileContentText<", 'L0', '[DEBUG]');
-				printLog(">$fileText<", 'L0', '[DEBUG]');
 				$noChangesNeeded = $fileContentText eq $fileText;
 			}
 
@@ -4374,7 +4366,7 @@ sub cleanSourcesList {
 			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0', '[ERROR]');
 		}
 	} else {
-		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[[ERROR]]');
+		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[ERROR]');
 	}
 	return ($modified);
 }
@@ -5470,30 +5462,34 @@ sub removePackage {
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
-	my $retVal;
-	getAptMark($package);
-	if ( getAptMark($package) && ($mark eq 'manual') ) {
+	my $exitStatus;
+	my $retString;
+	my $aptMark = getAptMark($package);
+	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark manual $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
-		getAptMark($package);
-	} elsif ( (!getAptMark($package)) && ($mark eq 'auto') ) {
+		$retString = `$consoleLanguage apt-mark manual $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to manually installed/) && ($exitStatus == 0)) {
+			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
+	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark auto $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
-		getAptMark($package);
+		$retString = `$consoleLanguage apt-mark auto $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to automatically installed/) && ($exitStatus == 0)) {
+			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
 	}
-	if (getAptMark($package) && ($mark eq 'auto')) {
-		printLog("desired resultmark: auto set", 'L2', '[INFO]');
-		return (1);
-	}
-	if ((!getAptMark($package)) && $mark eq 'manual') {
-		printLog("desired resultmark: manual set", 'L2', '[INFO]');
-		return (1);
-	}
-	printLog("desired resultmark: not set !!!", 'L2', '[WARN]');
-	getAptMark($package);
-	return (0);
 }
 
 
@@ -5508,12 +5504,11 @@ sub getAptMark {
 	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	printLog("package: $package", 'L2', '[DEBUG]');
 	if ( $retVal =~ /$package/mg ) {
-		printLog("mark is auto", 'L2', '[DEBUG]');
+		printLog("package: $package mark is auto", 'L2', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("mark is manual", 'L2', '[DEBUG]');
+		printLog("package: $package mark is manual", 'L2', '[DEBUG]');
 		return (0);
 	}
 }
@@ -5888,7 +5883,7 @@ sub populateKernelPackages {
 sub checkAndDeleteOldestRemnantLinuxHeader {
 	# Check if the tries file exists
 	if (-e $triesFile) {
-		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2");
+		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2", '[INFO]');
 		return (0);
 	}
 
@@ -5974,15 +5969,15 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			# Check if the length of $oldestHeader exceeds 50 characters
 			length($oldestHeader) > 50
 			) {
-				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0");
+				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0", '[WARN]');
 				return 0;
 		}
 
-		printLog("Removing header $oldestHeader", "L2");
+		printLog("Removing header $oldestHeader", "L2", '[INFO]');
 
 		# Construct the apt-get purge command to remove the oldest header
 		my $purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader";
-		printLog("purge command: $purgeCommand", 'L2');
+		printLog("purge command: $purgeCommand", 'L2', '[DEBUG]');
 
 		# Attempt to unlock the package management and check if it's unlocked
 		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
@@ -5990,14 +5985,14 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			my $result = `$purgeCommand`;
 			my $error = $?;
 			lockPM();
-			printLog("result: $result\nerror: $error", 'L2');
+			printLog("result: $result\nerror: $error", 'L2', '[DEBUG]');
 
 			# Log the success message
-			printLog("successfully removed old header $oldestHeader", 'L0');
+			printLog("successfully removed old header $oldestHeader", 'L0', '[INFO]');
 			return 1;
 		} else {
 			# Log the failure message if package management is busy
-			printLog("could not remove the header $oldestHeader as package management is busy", 'L0');
+			printLog("could not remove the header $oldestHeader as package management is busy", 'L0', '[WARN]');
 		}
 	}
 	return 0;
@@ -6032,7 +6027,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListInitrd{$1} = $fileSize;
 				}
 			}
@@ -6041,7 +6036,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListVmlinuz{$1} = $fileSize;
 				}
 			}
