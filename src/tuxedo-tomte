@@ -1567,12 +1567,6 @@ sub prerequisitesFAI {
 
 sub postrequisitesFAI {
 	printLog("starting postrequisites FAI", 'L0');
-	if (httpToHttps(\%tuxedo_repos)) {
-		printLog('TUXEDO debian repos set to https', 'L0');
-	}
-	if (httpToHttps(\%tuxedo_mirrors)) {
-		printLog('mirror repos set to https', 'L0');
-	}
 	printLog("executing: apt-get update", 'L2');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
@@ -4388,50 +4382,6 @@ sub commentOut {
 		${$line} = "# ${$line}";
 		return (1);
 	}
-}
-
-
-
-###############################################################################
-# replaces "http" with "https" in the files given by a %hash
-# returns 2 if something was changed
-# returns 1 if nothing was changed
-# returns 0 if there was an error
-#
-sub httpToHttps {
-	my %repos = %{$_[0]};
-	my $key;
-	my $listFH;
-	my @lines;
-	my $returnValue = 0;
-	foreach $key (keys %{ $repos{$completeDistVersion} }) {
-		if ($key ne 'name') {
-			if (-e $repos{$completeDistVersion}{$key}{filename}) {
-				if (open($listFH, '<', $repos{$completeDistVersion}{$key}{filename})) {
-					@lines = <$listFH>;
-					close ($listFH);
-					foreach (@lines) {
-						if ($_ =~ /^deb http:/) {
-							printLog("replacing in line: $_", 'TL2');
-							$_ =~ s/^deb http:/deb https:/g;
-							$returnValue = 2;
-						}
-					}
-					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
-						print $listFH @lines;
-						close($listFH);
-					} else {
-						printLog("can't open $repos{$completeDistVersion}{$key}{filename} for writing", 'TL0');
-						return (0);
-					}
-				} else {
-					printLog("can't open $repos{$completeDistVersion}{$key}{filename} for reading", 'TL0');
-					return (0);
-				}
-			}
-		}
-	}
-	return ($returnValue);
 }
 
 
