@@ -4226,10 +4226,6 @@ sub createRepos {
 			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
 			if($noChangesNeeded) {
 				my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
-				#TODO debug
-				printLog("file: $repos{$distroKey}{$key}{filename}", 'L0', '[DEBUG]');
-				printLog(">$fileContentText<", 'L0', '[DEBUG]');
-				printLog(">$fileText<", 'L0', '[DEBUG]');
 				$noChangesNeeded = $fileContentText eq $fileText;
 			}
 
@@ -5471,28 +5467,26 @@ sub removePackage {
 sub setAptMark {
 	my ($package, $mark) = @_;
 	my $retVal;
-	getAptMark($package);
-	if ( getAptMark($package) && ($mark eq 'manual') ) {
+	my $aptMark = getAptMark($package);
+	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
 		$retVal = `$consoleLanguage apt-mark manual $package`;
 		printLog("result: $retVal", 'L2', '[INFO]');
-		getAptMark($package);
-	} elsif ( (!getAptMark($package)) && ($mark eq 'auto') ) {
+	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
 		$retVal = `$consoleLanguage apt-mark auto $package`;
 		printLog("result: $retVal", 'L2', '[INFO]');
-		getAptMark($package);
 	}
-	if (getAptMark($package) && ($mark eq 'auto')) {
+	$aptMark = getAptMark($package);
+	if ($aptMark && ($mark eq 'auto')) {
 		printLog("desired resultmark: auto set", 'L2', '[INFO]');
 		return (1);
 	}
-	if ((!getAptMark($package)) && $mark eq 'manual') {
+	if (!$aptMark && ($mark eq 'manual')) {
 		printLog("desired resultmark: manual set", 'L2', '[INFO]');
 		return (1);
 	}
-	printLog("desired resultmark: not set !!!", 'L2', '[WARN]');
-	getAptMark($package);
+	printLog("desired mark: not set !!!", 'L2', '[ERROR]');
 	return (0);
 }
 
@@ -5508,12 +5502,11 @@ sub getAptMark {
 	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	printLog("package: $package", 'L2', '[DEBUG]');
 	if ( $retVal =~ /$package/mg ) {
-		printLog("mark is auto", 'L2', '[DEBUG]');
+		printLog("package: $package mark is auto", 'L2', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("mark is manual", 'L2', '[DEBUG]');
+		printLog("package: $package mark is manual", 'L2', '[DEBUG]');
 		return (0);
 	}
 }
