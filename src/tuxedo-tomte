@@ -4218,8 +4218,6 @@ sub createRepos {
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
 		if ($key ne 'name') {
-			# WARNING !!! changing the text in $fileText will change all the
-			# hash values in %tuxedo_repos and %tuxedo_values !!!
 			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
@@ -4228,6 +4226,10 @@ sub createRepos {
 			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
 			if($noChangesNeeded) {
 				my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
+				#TODO debug
+				printLog("file: $repos{$distroKey}{$key}{filename}", 'L0', '[DEBUG]');
+				printLog(">$fileContentText<", 'L0', '[DEBUG]');
+				printLog(">$fileText<", 'L0', '[DEBUG]');
 				$noChangesNeeded = $fileContentText eq $fileText;
 			}
 
