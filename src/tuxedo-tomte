@@ -1216,7 +1216,7 @@ sub checkAndSetLocale {
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
-	printLog("Trying Matching Language for: ", $lang, "\n", "L1", '[INFO]');
+	printLog("Trying matching language for: $lang", "L1", '[INFO]');
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
@@ -1228,11 +1228,11 @@ sub getMatchingLocaleForLang {
 	foreach my $path (@files) {
 		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
 		$found_language = $path =~ s/$locale_base_path\///ir;
-		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1", '[INFO]');
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language", "L1", '[INFO]');
 		last;
 	}
 	unless ($found_language) {
-		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1", '[ERROR]');
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang", "L1", '[ERROR]');
 	}
 
 	return ($found_language, "$locale_base_path/$found_language");
