@@ -1566,8 +1566,8 @@ sub prerequisitesFAI {
 }
 
 sub postrequisitesFAI {
-	printLog("starting postrequisites FAI", 'L0');
-	printLog("executing: apt-get update", 'L2');
+	printLog("starting postrequisites FAI", 'L0', '[INFO]');
+	printLog("executing: apt-get update", 'L2', '[DEBUG]');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
 	printLog("return from apt-get update: $output", 'T2', '[DEBUG]');
