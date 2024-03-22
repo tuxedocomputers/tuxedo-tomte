@@ -5466,28 +5466,36 @@ sub removePackage {
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
-	my $retVal;
+	my $exitStatus;
+	my $retString;
 	my $aptMark = getAptMark($package);
 	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark manual $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
+		$retString = `$consoleLanguage apt-mark manual $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to manually installed/) && ($exitStatus == 0)) {
+			#TODO debug
+			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
 	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark auto $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
+		$retString = `$consoleLanguage apt-mark auto $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to automatically installed/) && ($exitStatus == 0)) {
+			#TODO debug
+			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
 	}
-	$aptMark = getAptMark($package);
-	if ($aptMark && ($mark eq 'auto')) {
-		printLog("desired resultmark: auto set", 'L2', '[INFO]');
-		return (1);
-	}
-	if (!$aptMark && ($mark eq 'manual')) {
-		printLog("desired resultmark: manual set", 'L2', '[INFO]');
-		return (1);
-	}
-	printLog("desired mark: not set !!!", 'L2', '[ERROR]');
-	return (0);
 }
 
 
