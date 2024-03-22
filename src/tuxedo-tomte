@@ -1338,14 +1338,7 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			if (defined $fs->error) {
-				#TODO debug
-				printLog("before failed lock fs->error", 'L2', '[DEBUG]');
-				printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
-			} else {
-				printLog("before failed lock", 'L2', '[DEBUG]');
-				printLog("Locking: failed to get write lock: $filename", 'L0', '[WARN]');
-			}
+			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -5479,7 +5472,6 @@ sub setAptMark {
 		$exitStatus = $?;
 		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
 		if (($retString =~ /set to manually installed/) && ($exitStatus == 0)) {
-			#TODO debug
 			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
 			return (1);
 		} else {
@@ -5492,7 +5484,6 @@ sub setAptMark {
 		$exitStatus = $?;
 		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
 		if (($retString =~ /set to automatically installed/) && ($exitStatus == 0)) {
-			#TODO debug
 			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
 			return (1);
 		} else {
@@ -6037,7 +6028,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListInitrd{$1} = $fileSize;
 				}
 			}
@@ -6046,7 +6037,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListVmlinuz{$1} = $fileSize;
 				}
 			}
