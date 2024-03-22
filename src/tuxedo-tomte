@@ -1342,7 +1342,6 @@ sub acquireLock {
 			return (0);
 		}
 	} else {
-		printLog("before failed to open", 'L2', '[DEBUG]');
 		printLog("Locking: failed to open: $filename: $!", 'L2', '[ERROR]');
 		return (0);
 	}
