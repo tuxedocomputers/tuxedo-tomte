@@ -3516,7 +3516,7 @@ sub apportfix() {
 			$retval = edit_file { s/enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
-				#service apport stop`;
+				#`service apport stop`;
 				#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 				#`systemctl disable apport.service`;
 				#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
