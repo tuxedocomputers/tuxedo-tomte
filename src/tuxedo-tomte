@@ -1339,13 +1339,17 @@ sub acquireLock {
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
 			if (defined $fs->error) {
+				#TODO debug
+				printLog("before failed lock fs->error", 'L2', '[DEBUG]');
 				printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
 			} else {
+				printLog("before failed lock", 'L2', '[DEBUG]');
 				printLog("Locking: failed to get write lock: $filename", 'L0', '[WARN]');
 			}
 			return (0);
 		}
 	} else {
+		printLog("before failed to open", 'L2', '[DEBUG]');
 		printLog("Locking: failed to open: $filename: $!", 'L2', '[ERROR]');
 		return (0);
 	}
