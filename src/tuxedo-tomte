@@ -3918,7 +3918,7 @@ sub intelgenXIIIpowerctlfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
 }
 
@@ -4366,7 +4366,7 @@ sub cleanSourcesList {
 			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0', '[ERROR]');
 		}
 	} else {
-		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[[ERROR]]');
+		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[ERROR]');
 	}
 	return ($modified);
 }
@@ -5883,7 +5883,7 @@ sub populateKernelPackages {
 sub checkAndDeleteOldestRemnantLinuxHeader {
 	# Check if the tries file exists
 	if (-e $triesFile) {
-		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2");
+		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2", '[INFO]');
 		return (0);
 	}
 
@@ -5969,15 +5969,15 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			# Check if the length of $oldestHeader exceeds 50 characters
 			length($oldestHeader) > 50
 			) {
-				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0");
+				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0", '[WARN]');
 				return 0;
 		}
 
-		printLog("Removing header $oldestHeader", "L2");
+		printLog("Removing header $oldestHeader", "L2", '[INFO]');
 
 		# Construct the apt-get purge command to remove the oldest header
 		my $purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader";
-		printLog("purge command: $purgeCommand", 'L2');
+		printLog("purge command: $purgeCommand", 'L2', '[DEBUG]');
 
 		# Attempt to unlock the package management and check if it's unlocked
 		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
@@ -5985,14 +5985,14 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			my $result = `$purgeCommand`;
 			my $error = $?;
 			lockPM();
-			printLog("result: $result\nerror: $error", 'L2');
+			printLog("result: $result\nerror: $error", 'L2', '[DEBUG]');
 
 			# Log the success message
-			printLog("successfully removed old header $oldestHeader", 'L0');
+			printLog("successfully removed old header $oldestHeader", 'L0', '[INFO]');
 			return 1;
 		} else {
 			# Log the failure message if package management is busy
-			printLog("could not remove the header $oldestHeader as package management is busy", 'L0');
+			printLog("could not remove the header $oldestHeader as package management is busy", 'L0', '[WARN]');
 		}
 	}
 	return 0;
