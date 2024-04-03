@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1090,6 +1090,17 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'68' => {
+		model => ['TUXEDO InfinityBook S 15/17 - Gen8'],
+		board_name => ['NS5X_NS7XAU', 'NS5X_7XAU'], # case insensitive
+		fix => ['nvmequirkswitchtodeepsleepfix'],
+		flavour => ['22.04'],
+		pci_id => '144d:a80d',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
 );
 
@@ -1974,9 +1985,16 @@ sub checkRequirements {
 		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/PF5LUXG/)	{
+	if ($boardname =~ m/PF5LUXG/) {
 		$origConfModules{samsungnvmefix}{required} = 'yes';
 		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
+	}
+
+	my @samsungNvme990Devices = ('144d:a80d');	
+	if ((($boardname =~ m/NS5X_NS7XAU/i) || ($boardname =~ m/NS5X_7XAU/i)) &&
+		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
+		$origConfModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
+		printLog("detected $origConfModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
 	}
 
 
@@ -3871,6 +3889,19 @@ sub samsungnvmefix() {
 		# not implemented yet
 	}
 }
+
+
+
+
+###############################################################################
+# InfinityBook 15/17 Gen8 in combination with some Samsung SSDs
+#
+sub nvmequirkswitchtodeepsleepfix() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 'mem_sleep_default=deep' );
+}
+
 
 
 
