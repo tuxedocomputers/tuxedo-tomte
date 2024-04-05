@@ -3,10 +3,10 @@ set -e
 
 # Check the current 
 echo "Checking tomte..."
-./check.sh
+./check.sh  || true # ignores the exitcode of check.sh
 
 echo "Do you wish to proceed based on these informations? (press enter to continue)";
-read returnValue #proceeds with enter
+read -r returnValue #proceeds with enter
 
 # Save the original directory
 original_directory="$PWD"
@@ -43,7 +43,7 @@ export DEBEMAIL="tux@tuxedocomputers.com"
 
 # Generate a new entry in the debian changelog file
 echo "Generating new entry in debian changelog file..."
-gbp dch --verbose --debian-branch "$BRANCH_NAME" --new-version $TEST_VERSION --since="$commit_hash"
+gbp dch --verbose --debian-branch "$BRANCH_NAME" --new-version "$TEST_VERSION" --since="$commit_hash"
 VERSIONSTRING=$TEST_VERSION
 
 # Run the build script
