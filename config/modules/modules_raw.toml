@@ -243,23 +243,6 @@ name = "intel-gen13-powerctl-fix"
 restart = "yes"
 
 
-[kernelgenerichwe2004]
-LiveISO = "no"
-name = "linux-generic-hwe-20.04"
-reconfigure = "always"
-restart = "yes"
-version = 3
-
-
-[kernelgenerichwe2004edge]
-LiveISO = "no"
-hwid = 2
-name = "linux-generic-hwe-20.04-edge"
-reconfigure = "always"
-restart = "yes"
-version = 3
-
-
 [kerneltuxedo2004]
 LiveISO = "no"
 hwid = 2
@@ -269,40 +252,9 @@ restart = "yes"
 version = 3
 
 
-[kerneltuxedo2004edge]
-LiveISO = "no"
-hwid = 2
-name = "linux-tuxedo-20.04-edge"
-reconfigure = "always"
-restart = "yes"
-version = 3
-
-
-[kerneltuxedo2004next]
-LiveISO = "no"
-name = "linux-tuxedo-20.04-next"
-reconfigure = "always"
-restart = "yes"
-version = 3
-
-
 [kerneltuxedo2204]
 LiveISO = "no"
 name = "linux-tuxedo-22.04"
-reconfigure = "always"
-restart = "yes"
-
-
-[kerneltuxedo2204edge]
-LiveISO = "no"
-name = "linux-tuxedo-22.04-edge"
-reconfigure = "always"
-restart = "yes"
-
-
-[kerneltuxedo2204next]
-LiveISO = "no"
-name = "linux-tuxedo-22.04-next"
 reconfigure = "always"
 restart = "yes"
 
