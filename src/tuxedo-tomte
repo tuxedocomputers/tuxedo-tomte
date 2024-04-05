@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -347,29 +347,12 @@ my %tuxedo_mirrors = (
 );
 
 my %flavours = (
-	"bionic" => {
-		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
-		"linux-generic-hwe-18.04" => "linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04 linux-image-generic-hwe-18.04",
-		"linux-generic-hwe-18.04-edge" => "linux-generic-hwe-18.04-edge linux-headers-generic-hwe-18.04-edge linux-image-generic-hwe-18.04-edge"
-	},
-
 	"focal" => {
-		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
-		"linux-generic-hwe-20.04" => "linux-generic-hwe-20.04 linux-headers-generic-hwe-20.04 linux-image-generic-hwe-20.04",
-		"linux-generic-hwe-20.04-edge" => "linux-generic-hwe-20.04-edge linux-headers-generic-hwe-20.04-edge linux-image-generic-hwe-20.04-edge",
-		"linux-oem-20.04" => "linux-oem-20.04 linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b",
-		"linux-oem-20.04-edge" => "linux-oem-20.04-edge linux-oem-20.04b linux-headers-oem-20.04b linux-image-oem-20.04b",
 		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
-		"linux-tuxedo-20.04-edge" => "linux-tuxedo-20.04-edge linux-headers-tuxedo-20.04-edge linux-image-tuxedo-20.04-edge",
-		"linux-tuxedo-20.04-next" => "linux-tuxedo-20.04-next linux-headers-tuxedo-20.04-next linux-image-tuxedo-20.04-next",
 	},
 
 	"jammy" => {
-		"linux-aws" => "linux-aws linux-headers-aws linux-image-aws",
-		"linux-generic" => "linux-generic linux-headers-generic linux-image-generic",
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
-		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge linux-headers-tuxedo-22.04-edge linux-image-tuxedo-22.04-edge",
-		"linux-tuxedo-22.04-next" => "linux-tuxedo-22.04-next linux-headers-tuxedo-22.04-next linux-image-tuxedo-22.04-next",
 	}
 );
 
@@ -1090,6 +1073,17 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'68' => {
+		model => ['TUXEDO InfinityBook S 15/17 - Gen8'],
+		board_name => ['NS5X_NS7XAU', 'NS5X_7XAU'], # case insensitive
+		fix => ['nvmequirkswitchtodeepsleepfix'],
+		flavour => ['22.04'],
+		pci_id => '144d:a80d',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
 );
 
@@ -1216,7 +1210,7 @@ sub checkAndSetLocale {
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
-	printLog("Trying Matching Language for: ", $lang, "\n", "L1", '[INFO]');
+	printLog("Trying matching language for: $lang", "L1", '[INFO]');
 	# Directory where the existing translations can be found
 	my $locale_base_path = "/usr/share/locale";
 
@@ -1228,11 +1222,11 @@ sub getMatchingLocaleForLang {
 	foreach my $path (@files) {
 		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
 		$found_language = $path =~ s/$locale_base_path\///ir;
-		printLog("Found valid Tomte locale file in $locale_base_path/$found_language.\n", "L1", '[INFO]');
+		printLog("Found valid Tomte locale file in $locale_base_path/$found_language", "L1", '[INFO]');
 		last;
 	}
 	unless ($found_language) {
-		printLog("Found no valid Tomte locale file in $locale_base_path/$lang.\n", "L1", '[ERROR]');
+		printLog("Found no valid Tomte locale file in $locale_base_path/$lang", "L1", '[ERROR]');
 	}
 
 	return ($found_language, "$locale_base_path/$found_language");
@@ -1338,7 +1332,7 @@ sub acquireLock {
 			return (1);
 		} else {
 			$lockFiles{$key}{'locked'} = 0;
-			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0');
+			printLog("Locking: failed to get write lock: $filename: $fs->error", 'L0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -1567,12 +1561,6 @@ sub prerequisitesFAI {
 
 sub postrequisitesFAI {
 	printLog("starting postrequisites FAI", 'L0', '[INFO]');
-	if (httpToHttps(\%tuxedo_repos)) {
-		printLog('TUXEDO debian repos set to https', 'L0', '[INFO]');
-	}
-	if (httpToHttps(\%tuxedo_mirrors)) {
-		printLog('mirror repos set to https', 'L0', '[INFO]');
-	}
 	printLog("executing: apt-get update", 'L2', '[DEBUG]');
 	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 	my $output = `$command`;
@@ -1915,27 +1903,15 @@ sub checkRequirements {
 	}
 
 	# kernel
-	if ($ubuntuCodename =~ /focal/) {
-		if ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1', '[INFO]');
-			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
-		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
-			$origConfModules{kerneltuxedo2004}{required} = 'yes';
-		}
+	if ($ubuntuCodename =~ /focal/ && $boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
+		printLog("kernel $origConfModules{kerneltuxedo2204}{name} should be installed", 'L1', '[INFO]');
+		$origConfModules{kerneltuxedo2204}{required} = 'yes';
+	} elsif ($ubuntuCodename =~ /focal/) {
+		printLog("kernel $origConfModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
+		$origConfModules{kerneltuxedo2004}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /jammy/) {
-		if (($boardname =~ m/PHxARX1_PHxAQF1/) ||
-			($boardname =~ m/PH6AG01_PH6AQ71_PH6AQI1/) ||
-			($boardname =~ m/PF5LUXG/)) {
-			printLog("kernel $origConfModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
-			$origConfModules{kerneltuxedo2204edge}{required} = 'yes';
-		} elsif ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-			printLog("kernel $origConfModules{kerneltuxedo2204next}{name} should be installed", 'L1', '[INFO]');
-			$origConfModules{kerneltuxedo2204next}{required} = 'yes';
-		} else {
-			printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-			$origConfModules{kerneltuxedo2204}{required} = 'yes';
-		}
+		printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
+		$origConfModules{kerneltuxedo2204}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -1974,9 +1950,16 @@ sub checkRequirements {
 		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/PF5LUXG/)	{
+	if ($boardname =~ m/PF5LUXG/) {
 		$origConfModules{samsungnvmefix}{required} = 'yes';
 		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
+	}
+
+	my @samsungNvme990Devices = ('144d:a80d');	
+	if ((($boardname =~ m/NS5X_NS7XAU/i) || ($boardname =~ m/NS5X_7XAU/i)) &&
+		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
+		$origConfModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
+		printLog("detected $origConfModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
 	}
 
 
@@ -2868,138 +2851,6 @@ sub tuxedodrivers() {
 
 
 
-###############################################################################
-# kernel HWE 18.04 and 20.04
-#
-sub kernelhwe2004() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-generic-hwe-20.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-generic-hwe-20.04', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-edge
-#
-sub kerneltuxedo2004edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-edge', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
-
-
-###############################################################################
-# kernel-tuxedo-20.04-next
-#
-sub kerneltuxedo2004next() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04-next', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
 
 
 ###############################################################################
@@ -3011,36 +2862,24 @@ sub kerneltuxedo2004() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
 
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-20.04', \$instFailed, \$instDone);
-				if ($localConfModules{'kerneltuxedo2004edge'}{installed} eq 'yes') {
-					removePackage('linux-tuxedo-20.04-edge');
-				}
-				if ($localConfModules{'kerneltuxedo2004next'}{installed} eq 'yes') {
-					removePackage('linux-tuxedo-20.04-next');
-				}
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
+		installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$origConfModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'remove') {
@@ -3060,118 +2899,24 @@ sub kerneltuxedo2204() {
 	my $instFailed = 0;
 	my $instDone = 0;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
 
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04-edge
-#
-sub kerneltuxedo2204edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04-next
-#
-sub kerneltuxedo2204next() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /jammy/) {
-
-			# clean up oldest tuxedo kernel in /boot (if not used)
-			checkAndDeleteOldestTuxedoKernel();
-			checkAndDeleteOldestRemnantLinuxHeader();
-
-			installKernelFlavour('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
-			if ($instFailed == 0) {
-				uninstallAllOtherKernelFlavours('linux-tuxedo-22.04-next', \$instFailed, \$instDone);
-			}
-			if ($instFailed > 0) {
-				startTomteDelayed();
-				addToConfiguredModules($module, "failed");
-				$origConfModules{$module}{installed} = "failed";
-			} elsif ($instDone > 0) {
-				addToConfiguredModules($module, "success");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-				setRestartValues($module);
-			} else {
-				addToConfiguredModules($module, "nothingToDo");
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
-			}
+		installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$origConfModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'remove') {
@@ -3874,6 +3619,19 @@ sub samsungnvmefix() {
 
 
 
+
+###############################################################################
+# InfinityBook 15/17 Gen8 in combination with some Samsung SSDs
+#
+sub nvmequirkswitchtodeepsleepfix() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 'mem_sleep_default=deep' );
+}
+
+
+
+
 ###############################################################################
 # Commandline tool and KDE context menu entries to run programms on dGPU while
 # in on-demand mode
@@ -3918,7 +3676,7 @@ sub intelgenXIIIpowerctlfix() {
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0');
+		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
 }
 
@@ -4366,7 +4124,7 @@ sub cleanSourcesList {
 			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0', '[ERROR]');
 		}
 	} else {
-		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[[ERROR]]');
+		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[ERROR]');
 	}
 	return ($modified);
 }
@@ -4384,50 +4142,6 @@ sub commentOut {
 		${$line} = "# ${$line}";
 		return (1);
 	}
-}
-
-
-
-###############################################################################
-# replaces "http" with "https" in the files given by a %hash
-# returns 2 if something was changed
-# returns 1 if nothing was changed
-# returns 0 if there was an error
-#
-sub httpToHttps {
-	my %repos = %{$_[0]};
-	my $key;
-	my $listFH;
-	my @lines;
-	my $returnValue = 0;
-	foreach $key (keys %{ $repos{$completeDistVersion} }) {
-		if ($key ne 'name') {
-			if (-e $repos{$completeDistVersion}{$key}{filename}) {
-				if (open($listFH, '<', $repos{$completeDistVersion}{$key}{filename})) {
-					@lines = <$listFH>;
-					close ($listFH);
-					foreach (@lines) {
-						if ($_ =~ /^deb http:/) {
-							printLog("replacing in line: $_", 'TL2', '[INFO]');
-							$_ =~ s/^deb http:/deb https:/g;
-							$returnValue = 2;
-						}
-					}
-					if (open($listFH, '>', $repos{$completeDistVersion}{$key}{filename})) {
-						print $listFH @lines;
-						close($listFH);
-					} else {
-						printLog("can't open $repos{$completeDistVersion}{$key}{filename} for writing", 'TL0', '[ERROR]');
-						return (0);
-					}
-				} else {
-					printLog("can't open $repos{$completeDistVersion}{$key}{filename} for reading", 'TL0', '[ERROR]');
-					return (0);
-				}
-			}
-		}
-	}
-	return ($returnValue);
 }
 
 
@@ -5310,28 +5024,34 @@ sub removePackage {
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
-	my $retVal;
+	my $exitStatus;
+	my $retString;
 	my $aptMark = getAptMark($package);
 	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark manual $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
+		$retString = `$consoleLanguage apt-mark manual $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to manually installed/) && ($exitStatus == 0)) {
+			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
 	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
-		$retVal = `$consoleLanguage apt-mark auto $package`;
-		printLog("result: $retVal", 'L2', '[INFO]');
+		$retString = `$consoleLanguage apt-mark auto $package`;
+		$exitStatus = $?;
+		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		if (($retString =~ /set to automatically installed/) && ($exitStatus == 0)) {
+			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			return (0);
+		}
 	}
-	$aptMark = getAptMark($package);
-	if ($aptMark && ($mark eq 'auto')) {
-		printLog("desired resultmark: auto set", 'L2', '[INFO]');
-		return (1);
-	}
-	if (!$aptMark && ($mark eq 'manual')) {
-		printLog("desired resultmark: manual set", 'L2', '[INFO]');
-		return (1);
-	}
-	printLog("desired mark: not set !!!", 'L2', '[ERROR]');
-	return (0);
 }
 
 
@@ -5538,47 +5258,6 @@ sub installKernelFlavour {
 
 
 ###############################################################################
-# uninstallAllOtherKernelFlavours($exceptKernel, \$failed, \$somethingWasDone)
-# uninstall all other kernels except the one given
-#
-sub uninstallAllOtherKernelFlavours {
-	my ($exceptKernel, $failed, $somethingWasDone) = @_;
-	my $tempInstFailed = 0;
-	my $tempInstDone = 0;
-# 	if ($exceptKernel ne 'linux-generic') {
-# 		uninstKernelFlavour('linux-generic',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-oem-20.04') {
-# 		uninstKernelFlavour('linux-oem-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-oem-20.04-edge') {
-# 		uninstKernelFlavour('linux-oem-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-generic-hwe-20.04') {
-# 		uninstKernelFlavour('linux-generic-hwe-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-generic-hwe-20.04-edge') {
-# 		uninstKernelFlavour('linux-generic-hwe-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-tuxedo-20.04') {
-# 		uninstKernelFlavour('linux-tuxedo-20.04',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-tuxedo-20.04-edge') {
-# 		uninstKernelFlavour('linux-tuxedo-20.04-edge',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	if ($exceptKernel ne 'linux-tuxedo-20.04-next') {
-# 		uninstKernelFlavour('linux-tuxedo-20.04-next',$exceptKernel, $tempInstFailed, $tempInstDone);
-# 	}
-# 	uninstallRemnantKernels($exceptKernel, $tempInstFailed, $tempInstDone);
-	$failed = $tempInstFailed;
-	$somethingWasDone = $tempInstDone;
-}
-
-
-
-
-
-###############################################################################
 # finds which main packages belong to the flavour and puts them into a list
 # works only if packages are known or installed on the system
 # returns 0 if something went wrong
@@ -5725,7 +5404,7 @@ sub populateKernelPackages {
 sub checkAndDeleteOldestRemnantLinuxHeader {
 	# Check if the tries file exists
 	if (-e $triesFile) {
-		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2");
+		printLog("won't delete oldest header because Tomte is running in retry-mode", "L2", '[INFO]');
 		return (0);
 	}
 
@@ -5811,15 +5490,15 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			# Check if the length of $oldestHeader exceeds 50 characters
 			length($oldestHeader) > 50
 			) {
-				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0");
+				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0", '[WARN]');
 				return 0;
 		}
 
-		printLog("Removing header $oldestHeader", "L2");
+		printLog("Removing header $oldestHeader", "L2", '[INFO]');
 
 		# Construct the apt-get purge command to remove the oldest header
 		my $purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader";
-		printLog("purge command: $purgeCommand", 'L2');
+		printLog("purge command: $purgeCommand", 'L2', '[DEBUG]');
 
 		# Attempt to unlock the package management and check if it's unlocked
 		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
@@ -5827,14 +5506,14 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			my $result = `$purgeCommand`;
 			my $error = $?;
 			lockPM();
-			printLog("result: $result\nerror: $error", 'L2');
+			printLog("result: $result\nerror: $error", 'L2', '[DEBUG]');
 
 			# Log the success message
-			printLog("successfully removed old header $oldestHeader", 'L0');
+			printLog("successfully removed old header $oldestHeader", 'L0', '[INFO]');
 			return 1;
 		} else {
 			# Log the failure message if package management is busy
-			printLog("could not remove the header $oldestHeader as package management is busy", 'L0');
+			printLog("could not remove the header $oldestHeader as package management is busy", 'L0', '[WARN]');
 		}
 	}
 	return 0;
@@ -5869,7 +5548,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListInitrd{$1} = $fileSize;
 				}
 			}
@@ -5878,7 +5557,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
 				if (($fileSize) > 1000000) {
-					printLog("filesize accepted into hash", 'L2', '[DEBUG]');
+					printLog("filesize accepted into hash-list", 'L2', '[DEBUG]');
 					$fileListVmlinuz{$1} = $fileSize;
 				}
 			}
@@ -5935,296 +5614,6 @@ sub checkAndDeleteOldestTuxedoKernel {
 	} else {
 		printLog("less than 4 kernels present => nothing to do", 'L2', '[DEBUG]');
 		return (0);
-	}
-}
-
-
-
-
-###############################################################################
-# deinstalls flavourToUninstall, keeps flavourNotToBeUninstalled
-# modifies failed and somethingWasDone
-# uninstKernelFlavour($flavourToDeinstall, $flavourNotToBeDeinstalled, \$failed, \$somethingWasDone)
-# failed = 0 if everything went well (kernel uninstalled)
-# failed = 1 if something could not be uninstalled
-# somethingWasDone = 0 if no packages were uninstalled
-# somethingWasDone = 1 if at least some package was uninstalled
-# takes care not to uninstall any package from flavourNotBeUninstalled
-# returns 0 if something went wrong
-# returns 1 if subroutine run through
-#
-sub uninstKernelFlavour {
-	my ($kernelToDelete, $kernelToKeep, $failed, $somethingWasDone) = @_;
-	my $retString;
-	my $retValue = 0;
-	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' ";
-	my @lines;
-	my %pkgsHash;
-	my $deinstString = $consoleLanguage.'apt-get -o Dpkg::lock::timeout=0 remove -yq --purge';
-	my $package;
-	my $kernelModuleName;
-	my $currentKernelUninstall = 0;
-
-	# find installed packages
-	if (!(exists $flavours{$ubuntuCodename}{$kernelToDelete})) {
-		printLog("flavour $kernelToDelete does not exist!!", 'TL0', '[WARN]');
-		$failed += 1;
-		return (0);
-	}
-	if (!(exists $flavours{$ubuntuCodename}{$kernelToKeep})) {
-		printLog("flavour $kernelToKeep does not exist!!", 'TL0', '[WARN]');
-		$failed += 1;
-		return (0);
-	}
-
-	printLog("uninstKernel: $kernelToDelete keep: $kernelToKeep", 'L2', '[DEBUG]');
-	if (!populateFlavourPackages("$kernelToDelete")) {
-		printLog("no packages found for kernel $kernelToDelete while uninstalling", 'L0', '[WARN]');
-		return (0);
-	}
-	$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} = $flavours{$ubuntuCodename}{$kernelToDelete};
-	foreach $package (@{ $flavours{$ubuntuCodename}{$kernelToDelete}{'packages'}}) {
-		if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$ubuntuCodename}{$kernelToKeep}{'packages'}}))) {
-			printLog("accepted: $package", 'L2', '[DEBUG]');
-			$flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'} .= " $package";
-		}
-	}
-	printLog("packages to delete: $flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'}", 'L2', '[DEBUG]');
-	$searchCmd .= $flavours{$ubuntuCodename}{$kernelToDelete}{'deletePackages'}.' 2>&1';
-	# find which packages are installed
-	printLog('find which packages are installed', 'L2', '[DEBUG]');
-	$retString = `$searchCmd`;
-	printLog("return values:\n$retString", 'L2', '[DEBUG]');
-	@lines = split /\n/, $retString;
-	foreach (@lines) {
-		if ((!($_ =~ /dpkg-query:/)) && ($_ =~ /.*\s[uirp][cHUFWti]/)) {
-			/(\S+)\s*(\S+)/;
-			$pkgsHash{$1} = $2;
-		}
-	}
-
-	# deinstall found packages
-	if ((keys %pkgsHash) != 0) {
-		messageLongInstall();
-		printLog("kernel packages to deinstall found", 'L1', '[DEBUG]');
-		foreach $package (keys %pkgsHash) {
-			$deinstString .= ' '.$package;
-		}
-		$deinstString .= ' 2>&1';
-		printLog("uninstalling $kernelToDelete", 'L0', '[INFO]');
-		printLog("deinstallation command: $deinstString", 'L2', '[DEBUG]');
-
-		# circumvent Ubuntu failsafe for currently installed kernel
-		if (setCurrentKernelUninstallParameters($deinstString)) {
-			$currentKernelUninstall = 1;
-		}
-
-		deactivatePackagekit();
-		if (unlockPM("deinst current Kernel: $deinstString") && (isPMlocked() == 0)) {
-			$retString = `$deinstString`;
-			lockPM();
-			if ($retString =~ /sudo dpkg --configure -a/) {
-				printLog("some packages are not completely configured!!", 'L0', '[WARN]');
-				printLog("executing: dpkg --configure -a", 'L0', '[INFO]');
-				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
-					`dpkg --configure -a`;
-					$retValue = $?/256;
-					lockPM();
-					if ($retValue != 0) {
-						printLog("configure -a failed!! exiting", 'L0', '[INFO]');
-						$failed += 1;
-						startTomteDelayed();
-						$failed += 1;
-						$somethingWasDone += 1;
-						return (0);
-					} else {
-						if (unlockPM("second try: $deinstString") && (isPMlocked() == 0)) {
-							$retString = `$deinstString`;
-							lockPM();
-						} else {
-							printLog("second uninstall of current kernel failed, can't get lock", 'L2', '[ERROR]');
-							startTomteDelayed();
-							$failed += 1;
-							return (0);
-						}
-					}
-				} else {
-					printLog("can't repair package management, can't get locks", 'L2', '[ERROR]');
-					startTomteDelayed();
-					$failed += 1;
-					$somethingWasDone += 1;
-					return (0);
-				}
-			}
-		} else {
-			printLog("can't deinstall current kernel, can't get locks", 'L2', '[ERROR]');
-			startTomteDelayed();
-			$failed += 1;
-			return (0);
-		}
-		if ($currentKernelUninstall) {
-			unsetCurrentKernelUninstallParameters();
-			printLog("current kernel $kernelToDelete deinstalled", 'L0', '[INFO]');
-		}
-
-		printLog("return: $retString", 'L2', '[DEBUG]');
-		if ($retValue != 0) {
-			printLog("error: $retValue", 'L0', '[ERROR]');
-		} else {
-			printLog('no error from deinstall', 'L1', '[INFO]');
-		}
-
-		# check whether packages have been deinstalled
-		foreach $package (keys %pkgsHash) {
-			printLog("package: $package", 'L2', '[DEBUG]');
-			if (isPackageInstalled($package)) {
-				printLog("unwanted package $package is still installed", 'L0', '[WARN]');
-				$failed += 1;
-			} else {
-				$somethingWasDone += 1;
-			}
-		}
-		if ($failed == 0) {
-			$kernelModuleName = getSubName($kernelToDelete);
-			if ($somethingWasDone > 0) {
-				printLog("packages for $kernelToDelete were uninstalled", 'L2', '[INFO]');
-			}
-			printLog("no packages for $kernelToDelete present", 'L0', '[DEBUG]');
-			if ($kernelModuleName ne '') {
-				printLog("remove $kernelModuleName from origConfModules", 'L2', '[INFO]');
-				$origConfModules{$kernelModuleName}{installed} = 'no';
-				$origConfModules{$kernelModuleName}{upgraded} = 'no';
-				$localConfModules{$kernelModuleName}{installed} = 'no';
-				return (1);
-			}
-		}
-		return (0);
-	} else {
-		$kernelModuleName = getSubName($kernelToDelete);
-		printLog("no packages to uninstall found for $kernelToDelete", 'L2', '[DEBUG]');
-		if ($kernelModuleName ne '') {
-			printLog("remove $kernelModuleName from origConfModules", 'L2', '[INFO]');
-			$origConfModules{$kernelModuleName}{installed} = 'no';
-			$origConfModules{$kernelModuleName}{upgraded} = 'no';
-			$localConfModules{$kernelModuleName}{installed} = 'no';
-			return (1);
-		}
-	}
-	return (0);
-}
-
-
-
-###############################################################################
-# checks if it is the current kernel to be uninstalled and sets parameters to
-# uninstall
-# setCurrentKernelUninstallParameters($deinstString)
-# $deinstString is a string with kernel names to be uninstalled
-# returns 1 if current kernel was detected
-# returns 0 if current kernel was not detected
-#
-sub setCurrentKernelUninstallParameters {
-	my $deinstString = shift;
-	if ($deinstString =~ /$kernelRelease/) {
-		printLog("preparing to deinstall current kernel!", 'L2', '[DEBUG]');
-		$restartSystem = 1;
-		rename '/usr/bin/linux-check-removal', '/usr/bin/linux-check-removal.orig';
-		my $fileText = "#!/bin/sh\nexit 0";
-		write_file('/usr/bin/linux-check-removal', {'err_mode' => 'carp'}, $fileText);
-		chmod 755, '/usr/bin/linux-check-removal';
-		return (1);
-	}
-	return (0);
-}
-
-
-
-
-###############################################################################
-# restores the parameters set to uninstall the current kernel
-#
-sub unsetCurrentKernelUninstallParameters {
-	printLog("resetting parameters to deinstall kernel to original settings", 'L2', '[DEBUG]');
-	unlink '/usr/bin/linux-check-removal';
-	rename '/usr/bin/linux-check-removal.orig', '/usr/bin/linux-check-removal';
-}
-
-
-
-###############################################################################
-# uninstalls remnant kernels not connected with the desired metapackage
-# returns 1 if all were uninstalled or no packages found
-# returns 0 if something failed
-# 
-sub uninstallRemnantKernels {
-	my ($kernelToKeep, $failed, $somethingWasDone) = @_;
-	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' linux-image-* linux-modules-* 2>&1";
-	my $retString;
-	my $retValue = 0;
-	my @lines;
-	my @removePackages;
-	my $package;
-	my $line;
-	my $deinstString = $consoleLanguage.'apt-get -o Dpkg::lock::timeout=0 remove -yq --purge ';
-	$retString = `$searchCmd`;
-	printLog("result query remnant linux kernels:\n$retString", 'L2', '[DEBUG]');
-	@lines = split /\n/, $retString;
-	foreach $line (@lines) {
-		if ((!($line =~ /dpkg-query:/)) && ($line =~ /.*\s[uirp][cHUFWti]/)) {
-			$line =~ /(\S+)\s*(\S+)/;
-			$package = $1;
-			if (($package =~ /^linux-.*(?:image|modules)-.*/) && !(grep(/^$package$/, @{ $flavours{$ubuntuCodename}{$kernelToKeep}{'packages'}}))) {
-				printLog("accepted: $package", 'L2', '[DEBUG]');
-				push(@removePackages, $package);
-			} else {
-				printLog("rejected: $package", 'L2', '[DEBUG]');
-			}
-		}
-	}
-	$package = '';
-	if (scalar(@removePackages) > 0) {
-		$deinstString .= join(' ', @removePackages).' 2>&1';
-		printLog("deinstallation command: $deinstString", 'L2', '[DEBUG]');
-		deactivatePackagekit();
-		if (unlockPM("deinstString: $deinstString") && (isPMlocked() == 0)) {
-			$retString = `$deinstString`;
-			$retValue = $?/256;
-			lockPM();
-			printLog("deinstallation result: $retString", 'L2', '[DEBUG]');
-			if ($retValue != 0) {
-				printLog("error: $retValue", 'L0', '[ERROR]');
-			} else {
-				printLog('no error from deinstall', 'L1', '[DEBUG]');
-			}
-			# check whether packages have been deinstalled
-			foreach $package (@removePackages) {
-				printLog("test package: $package", 'L2', '[DEBUG]');
-				if (isPackageInstalled($package)) {
-					printLog("unwanted package $package is still installed", 'L0', '[WARN]');
-					$failed += 1;
-				} else {
-					$somethingWasDone += 1;
-				}
-			}
-		} else {
-			printLog("could not uninstall kernel from remnant kernels uninstall, could not get locks", 'L2', '[WARN]');
-			$failed += 1;
-			$somethingWasDone = 1;
-		}
-		if (($failed == 0) && ($somethingWasDone > 0)) {
-			printLog("all remnant kernel packages uninstalled", 'L0', '[INFO]');
-			return (1);
-		} elsif ($failed == 0) {
-			printLog("no remnant kernel packages to uninstall found", 'L1', '[INFO]');
-			return (1);
-		} else {
-			printLog("error in uninstalling remnant kernel packages", 'L1', '[WARN]');
-			return (0);
-		}
-
-	} else {
-		printLog("no remnant kernel packages to uninstall found", 'L1', '[INFO]');
-		return (1);
 	}
 }
 
