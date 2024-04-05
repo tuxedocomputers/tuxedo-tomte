@@ -1,3 +1,11 @@
+tuxedo-tomte (2.28.0) jammy; urgency=medium
+
+  * added nvmequirkswitchtodeepsleepfix for TUXEDO InfinityBook S Gen8 with
+    boardnames: NS5X_NS7XAU and NS5X_7XAU and PCI ID 144d:a80d
+  * added severity info for logfile entries
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 04 Apr 2024 08:06:27 +0200
+
 tuxedo-tomte (2.27.0) jammy; urgency=medium
 
   * added Samsung 980 pci id 0xa809 to samsungnvmefix
