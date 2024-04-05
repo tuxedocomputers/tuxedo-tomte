@@ -370,6 +370,16 @@ restart = "yes"
 version = 3
 
 
+[nvmequirkswitchtodeepsleepfix]
+LiveISO = "no"
+hwid = 1
+name = "nvme-quirk-switch-to-deepsleep-fix"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+version = 1
+
+
 [systemdbacklightfix]
 LiveISO = "no"
 name = "systemd-backlight-fix"
