@@ -14,7 +14,7 @@ my %msgids;
 
 # Specify the directory to start the search
 my $script_directory = $RealBin;
-my $start_directory = $script_directory . '/locale_raw/';
+my $start_directory = $script_directory . '/po/';
 my $defaultLanguage = 'en';
 
 

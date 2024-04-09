@@ -6,3 +6,19 @@
 
 override_dh_installinit:
 	true
+
+# Override the dh_auto_build step to compile .po files into .mo files
+override_dh_auto_build:
+	dh_auto_build
+
+	# Navigate to the po directory and compile the .po files
+	for po in po/*.po; do \
+		lang=`basename $$po .po`; \
+		mkdir -p usr/share/locale/$$lang/LC_MESSAGES; \
+		msgfmt --output-file=usr/share/locale/$$lang/LC_MESSAGES/tomte.mo $$po; \
+		echo $(CURDIR); \
+	done
+
+override_dh_auto_install:
+	dh_auto_install
+	dh_install usr/share/locale/* usr/share/locale/

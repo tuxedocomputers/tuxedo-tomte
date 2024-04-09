@@ -34,8 +34,6 @@ build-package:
     - head -20 config/modules/modules.toml
     - ls debian
     - cat debian/install
-    - ls translations/locale
-    - cat translations/locale/install
     - cd ..
     - |
       for deb_file in *.deb; do

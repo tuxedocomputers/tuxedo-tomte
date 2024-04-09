@@ -18,7 +18,7 @@ fi
 
 # Run the check_translations script and capture any output
 echo "Checking translations..."
-translation_differences_text=$(perl ./translations/check_translations.pl 2>&1)
+translation_differences_text=$(perl ./check_translations.pl 2>&1)
 translations_differences=$?
 
 if [[ $translations_differences -gt 0 ]]; then
