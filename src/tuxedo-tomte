@@ -1550,15 +1550,6 @@ sub prerequisites {
 	printLog("ending prerequisites", 'L1', '[INFO]');
 }
 
-sub postrequisitesFAI {
-	printLog("starting postrequisites FAI", 'L0', '[INFO]');
-	printLog("executing: apt-get update", 'L2', '[DEBUG]');
-	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2', '[DEBUG]');
-	printLog("ending postrequisites FAI", 'L0', '[INFO]');
-}
-
 
 
 ###############################################################################
@@ -8216,7 +8207,6 @@ if (@ARGV != 0) {
 		setMode('AUTOMATIC');
 		prepareValues();
 		configureAllModules();
-		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
