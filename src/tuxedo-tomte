@@ -6137,9 +6137,9 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
+			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1', '[INFO]');
+				printLog('in FAI mode', 'L0', '[INFO]');
 			}
 			return;
 		} else {
@@ -6154,9 +6154,9 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
+			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1', '[INFO]');
+				printLog('in FAI mode', 'L0', '[INFO]');
 			}
 			return;
 		} else {
