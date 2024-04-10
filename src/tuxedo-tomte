@@ -1549,15 +1549,6 @@ sub prerequisites {
 	printLog("ending prerequisites", 'L1', '[INFO]');
 }
 
-sub postrequisitesFAI {
-	printLog("starting postrequisites FAI", 'L0', '[INFO]');
-	printLog("executing: apt-get update", 'L2', '[DEBUG]');
-	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'T2', '[DEBUG]');
-	printLog("ending postrequisites FAI", 'L0', '[INFO]');
-}
-
 
 
 ###############################################################################
@@ -6137,9 +6128,9 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
+			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1', '[INFO]');
+				printLog('in FAI mode', 'L0', '[INFO]');
 			}
 			return;
 		} else {
@@ -6154,9 +6145,9 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("starting Tomte $VERSION", 'L1', '[INFO]');
+			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
-				printLog('in FAI mode', 'L1', '[INFO]');
+				printLog('in FAI mode', 'L0', '[INFO]');
 			}
 			return;
 		} else {
@@ -8215,7 +8206,6 @@ if (@ARGV != 0) {
 		setMode('AUTOMATIC');
 		prepareValues();
 		configureAllModules();
-		postrequisitesFAI();
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
