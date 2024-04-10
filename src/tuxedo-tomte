@@ -128,7 +128,6 @@ my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
-my $tomteFinishedFile = '/tmp/tomte_finished';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
@@ -8240,9 +8239,6 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				# Update Tuxedo Tomte to ensure current version
 				if (! ($LiveISO or $FAI)){
 					if (unlockPM("apt-get -yq install tuxedo-tomte") && (isPMlocked() == 0)) {
@@ -8262,24 +8258,15 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
-				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				configureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
-				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8292,9 +8279,6 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne '') {
 			if (validModuleName($argValue{module}) ne '') {
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				initLogging();
 				checkMode();
 				prepareValues();
@@ -8303,9 +8287,6 @@ if (@ARGV != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
-				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8331,31 +8312,19 @@ if (@ARGV != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				reconfigureAllModules();
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
-				}
 			} elsif (validModuleName($argValue{module}) ne '') {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-				if (-e $tomteFinishedFile) {
-					unlink($tomteFinishedFile);
-				}
 				reconfigureSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-				if(!(-e $tomteFinishedFile) && ($startLaterAgain == 0)) {
-					write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished');
-				}
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -8484,8 +8453,5 @@ END {
 			writeConfigIniFile();
 		}
 		# just to be sure, always write the tomte_finished file
-		if (write_file($tomteFinishedFile, {'err_mode' => 'carp'}, 'finished')) {
-			printLog("created $tomteFinishedFile", 'L2', '[DEBUG]');
-		}
 	}
 }
