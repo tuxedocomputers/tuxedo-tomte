@@ -16,7 +16,7 @@ build-package:
             # If the current version is not in a tag, create a test version
             BRANCH_SHORT=$(echo "$CI_COMMIT_BRANCH" | awk -F- '{print $1}')
             TIMESTAMP=$(date -d "$CI_COMMIT_TIMESTAMP" +"%Y%m%d-%H%M%S")
-            TEST_VERSION="$BASE_VERSION-test-$BRANCH_SHORT-$TIMESTAMP"
+            TEST_VERSION="$BASE_VERSION-test-$TIMESTAMP-$BRANCH_SHORT"
             echo "Using test version: $TEST_VERSION"
             # Update the changelog with the new test version number
             commit_hash=$(git log -1 --pretty="%H" -- debian/changelog)
