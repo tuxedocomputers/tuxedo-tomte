@@ -8380,11 +8380,9 @@ if (@ARGV != 0) {
 	} elsif ($argValue{command} eq "loglevel") {
 		#TODO debug
 		printLog("before loglevel: $logLevel", 'L2', '[DEBUG]');
-		my $inputLogLevel;
-		$inputLogLevel = <>;
-		chomp($inputLogLevel);
-		if (($inputLogLevel >= 0) && ($inputLogLevel < 3)) {
-			$logLevel = $inputLogLevel;
+		$argValue{module} += 0;
+		if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
+			$logLevel = $argValue{module};
 			$logLevel += 0;
 			printLog("input loglevel: $logLevel", 'L2', '[DEBUG]');
 			$configIniValues->{loglevel} = $logLevel;
