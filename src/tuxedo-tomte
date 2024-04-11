@@ -6258,6 +6258,11 @@ sub readConfigIniValues {
 	if (-e $configIniFile) {
 		$configIniValues = Config::Tiny->new;
 		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
+		if (defined $configIniValues->{debugMode}) {
+			#TODO debug
+			printLog("debugLevel before: $logLevel ValueFromIniFile: $configIniValues->{debugMode}", 'L2');
+			$logLevel = $configIniValues->{loglevel};
+		}
 		return (1);
 	}
 	return (0);
@@ -8372,6 +8377,18 @@ if (@ARGV != 0) {
 		setMode($argValue{command});
 		prepareValues();
 		printLog('Tomte finished', 'L0', '[INFO]');
+	} elsif ($argValue{command} eq "loglevel") {
+		#TODO debug
+		printLog("before loglevel: $logLevel", 'L2', '[DEBUG]');
+		my $inputLogLevel;
+		$inputLogLevel = <>;
+		chomp($inputLogLevel);
+		if (($inputLogLevel >= 0) && ($inputLogLevel < 3)) {
+			$logLevel = $inputLogLevel;
+			$logLevel += 0;
+			printLog("input loglevel: $logLevel", 'L2', '[DEBUG]');
+			$configIniValues->{loglevel} = $logLevel;
+		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
 		help();
