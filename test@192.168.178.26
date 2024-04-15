@@ -282,7 +282,7 @@ my %tuxedo_repos = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
 		},
 		"plasma" => {
-			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
+			"content" => ["deb https://plasma.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
 	}
@@ -3978,7 +3978,7 @@ sub createRepos {
 			}
 
 			if($noChangesNeeded){
-				printLog("repo file $repos{$distroKey}{$key}{filename} found and with correct content", 'L2', '[DEBUG]');
+				printLog("repo file found and with correct content", 'L2', '[DEBUG]');
 			} else {
 				printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
 				printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
