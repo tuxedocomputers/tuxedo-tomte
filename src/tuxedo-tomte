@@ -2939,9 +2939,7 @@ sub nvidiadriver() {
 	my $oldDriversRemoved = 0;
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
-	my $nvidiaDriver525 = 'nvidia-driver-525';
-	my $nvidiaDriver530 = 'nvidia-driver-530';
-	my $nvidiaDriver535 = 'nvidia-driver-535';
+	my $nvidiaDriver550 = 'nvidia-driver-550';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($completeDistVersion =~ /Ubuntu 18.04/) {
@@ -3057,30 +3055,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /jammy/) {
-			my $tuxedoNvidiaDriver525 = 'tuxedo-nvidia-driver-525';
-			my $tuxedoNvidiaDriver530 = 'tuxedo-nvidia-driver-530';
-			my $tuxedoNvidiaDriver535 = 'tuxedo-nvidia-driver-535';
+			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver535 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver535);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver535);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver535) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver535);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver535,'manual');
+					setAptMark($tuxedoNvidiaDriver550,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver535 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -4011,6 +4007,7 @@ sub addRepoKey {
 				$counter++;
 				my $command = $consoleLanguage.'apt-get -y --allow-unauthenticated -o Dpkg::lock::timeout=0 install /tmp/tuxedo-archive-keyring* 2>/dev/null';
 				if (unlockPM("$command") && (isPMlocked() == 0)) {
+					printLog("executing: $command", 'L2', '[DEBUG]');
 					$outputKey = `$command`;
 					$errorCode = $?/256;
 					lockPM();
@@ -4601,10 +4598,11 @@ sub setDkmsVerbose {
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
+	my $retValue = '';
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
-	printLog("$searchCmd", 'L2', '[DEBUG]');
+	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
 	my $retString = `$searchCmd`;
-	my $retValue = $?/256;
+	$retValue = $?/256;
 	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
 	my $deinstCmd;
 	my $deinstKey;
@@ -4620,11 +4618,7 @@ sub deinstExcept {
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
 	my @exceptDependencies = getPackageDependencies($except);
 
-	if ($FAI) {
-		$deinstCmd = $consoleLanguage.'apt-get -yq remove';
-	} else {
-		$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
-	}
+	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
 	my $deinstCounter = 0;
 
 	foreach $deinstKey (keys %retHash) {
@@ -4646,16 +4640,23 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0', '[DEBUG]');
-		my $retText;
+		my $retText = '';
 		if ($FAI) {
+			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
 			$retText = `$deinstCmd`;
 		} else {
 			$deinstCmd .= ' >/dev/null 2>&1';
-			$retText = `$deinstCmd`;
+			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
+			if (unlockPM("$deinstCmd") && (isPMlocked() == 0)) {
+				printLog("deinstalling: $deinstList", 'L2', '[DEBUG]');
+				$retText = `$deinstCmd`;
+				lockPM();
+			}
 		}
+		$retValue = '';
 		$retValue = $?/256;
 		if ($retValue != 0) {
-			printLog("failed to deinstall packages, retvalue: $retValue", 'L0', '[WARN]');
+			printLog("failed to deinstall packages, retvalue: >$retValue<", 'L0', '[WARN]');
 			printLog("retText: $retText", 'L0', '[WARN]');
 			return (0);
 		} else {
@@ -4736,6 +4737,7 @@ sub deinstallSinglePackage {
 	if (isPackageInstalled($deinst)) {
 		deactivatePackagekit();
 		if (unlockPM("$aptgetDeinst") && (isPMlocked() == 0)) {
+			printLog("executing deinstallation", 'L2', '[DEBUG]');
 			if (system($aptgetDeinst)) {
 				$retValue = $?/256;
 				lockPM();
@@ -4888,6 +4890,7 @@ sub installPackage {
 		if (checkNetwork(10, 1)) {
 			deactivatePackagekit();
 			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
+				printLog("installing $packageName", 'L2', '[DEBUG]');
 				if ($logLevel > 1) {
 					$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install $packageName >>$logFile 2>&1`;
 				} else {
@@ -4901,6 +4904,7 @@ sub installPackage {
 					printLog("will try again later", 'L0', '[WARN]');
 					# repair a possibly wrecked package manager
 					if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+						printLog("executing --configure -a", 'L2', '[DEBUG]');
 						`dpkg --configure -a`;
 						lockPM();
 						startTomteDelayed();
@@ -4966,6 +4970,8 @@ sub setPackageInstallStatus {
 
 ###############################################################################
 # removes a package by apt-get
+# parameters are parameters for apt-get
+# removePackage( packagename, parameters )
 # returns 1 if successful or not installed
 # returns 0 if failed
 #
@@ -4979,7 +4985,8 @@ sub removePackage {
 		$parameter = '';
 	}
 	if (unlockPM("apt-get -yq remove $parameter $packageName") && (isPMlocked() == 0)) {
-		$retval = `apt-get -yq -o Dpkg::lock::timeout=0 remove $parameter $packageName >/dev/null 2>&1`;
+		printLog("removing $packageName", 'L2', '[DEBUG]');
+		$retval = `$consoleLanguage apt-get -yq -o Dpkg::lock::timeout=0 remove $parameter $packageName >/dev/null 2>&1`;
 		lockPM();
 		printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
 		$retval = isPackageInstalled($packageName);
@@ -5143,6 +5150,7 @@ sub installKernelFlavour {
 		printLog("installing $flavour", 'TL0', '[INFO]');
 		deactivatePackagekit();
 		if (unlockPM('apt-get update -q and dpkg --configure -a') && (isPMlocked() == 0)) {
+			printLog("execute update -q", 'L2', '[DEBUG]');
 			`apt-get update -q`;
 			printLog("installation command: $installCmd", 'L2', '[DEBUG]');
 			$retString = `$installCmd`;
@@ -5153,6 +5161,7 @@ sub installKernelFlavour {
 				printLog("executing: make configure -a", 'L2', '[INFO]');
 				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
 					$exitStatus = 1;
+					printLog("executing --configure -a", 'L2', '[DEBUG]');
 					`dpkg --configure -a`;
 					$exitStatus = $?/256;
 					lockPM();
@@ -5163,6 +5172,7 @@ sub installKernelFlavour {
 					} else {
 						if (unlockPM("$installCmd.$flavours{$ubuntuCodename}{$flavour}") && (isPMlocked() == 0)) {
 							$exitStatus = 1;
+							printLog("executing Kernel installation", 'L2', '[DEBUG]');
 							$retString = `$installCmd`;
 							$exitStatus = $?/256;
 							lockPM();
@@ -5220,6 +5230,7 @@ sub installKernelFlavour {
 		printLog("install kernel metapackage", 'L2', '[INFO]');
 		printLog("install command: $installCmd", 'L2', '[DEBUG]');
 		if (unlockPM("$installCmd") && (isPMlocked() == 0)) {
+			printLog("executing installation", 'L2', '[DEBUG]');
 			$retString = `$installCmd`;
 			$exitStatus = $?/256;
 			lockPM();
@@ -5487,6 +5498,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 		# Attempt to unlock the package management and check if it's unlocked
 		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
 			# Execute the purge command and capture the result and error
+			printLog("executing purge", 'L2', '[DEBUG]');
 			my $result = `$purgeCommand`;
 			my $error = $?;
 			lockPM();
@@ -5580,6 +5592,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 			my $result;
 			my $error;
 			if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+				printLog("executing purge", 'L2', '[DEBUG]');
 				$result = `$purgeCommand`;
 				$error = $?;
 				lockPM();
@@ -5748,6 +5761,7 @@ sub aptgetRefreshModule {
 			while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
 				my $command = $consoleLanguage.'apt-get update 2>/dev/null';
 				if(unlockPM($command) && (isPMlocked() == 0)) {
+					printLog("executing apt-get update", 'L2', '[DEBUG]');
 					$output = `$command`;
 					$exitStatus = $?/256;
 					initAvailablePackagesList();
@@ -6223,7 +6237,11 @@ sub printLog {
 		if ((-e $logFile) && ($type =~ /L/i)) {
 			if (open($LOGFILE, '>>', $logFile) ) {
 				my $timestamp = getLoggingTime();
-				print $LOGFILE "$severity $timestamp $message\n";
+				if (defined($severity)) {
+					print $LOGFILE "$severity $timestamp $message\n";
+				} else {
+					print $LOGFILE "$timestamp $message\n";
+				}
 				close $LOGFILE;
 			}
 		}
@@ -8236,6 +8254,7 @@ if (@ARGV != 0) {
 				if (! ($LiveISO or $FAI)){
 					if (unlockPM("apt-get -yq install tuxedo-tomte") && (isPMlocked() == 0)) {
 						my $retval;
+						printLog("executing tuxedo-tomte installation", 'L2', '[DEBUG]');
 						if ($logLevel > 1) {
 							$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte >>$logFile 2>&1`;
 						} else {
