@@ -6260,7 +6260,7 @@ sub readConfigIniValues {
 		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
 		if (defined $configIniValues->{debugMode}) {
 			#TODO debug
-			printLog("debugLevel before: $logLevel ValueFromIniFile: $configIniValues->{debugMode}", 'L2');
+			printLog("debugLevel before: $logLevel ValueFromIniFile: $configIniValues->{debugMode}", 'L2', '[DEBUG]');
 			$logLevel = $configIniValues->{loglevel};
 		}
 		return (1);
