@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -946,7 +946,7 @@ my %tuxedo_devices = (
 	'55' => {
 		model => ['desktoppc'],
 		board_name => [''],
-		fix => ['apportfix', 'cracklibruntime', 'kerneltuxedo2204', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		fix => ['apportfix', 'kerneltuxedo2204', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
 		flavour => ['22.04'],
 		pci_id => '',
 		cpu => '',
@@ -3126,16 +3126,6 @@ sub nvidiadriver() {
 	}
 }
 
-
-
-###############################################################################
-# cracklib-runtime
-#
-sub cracklibruntime() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-}
 
 
 
