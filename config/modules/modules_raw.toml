@@ -142,13 +142,6 @@ postconf = "updateInitramfs"
 restart = "yes"
 
 
-[cracklibruntime]
-name = "cracklib-runtime"
-package = "yes"
-required = "yes"
-restart = ""
-
-
 [disablegucfix]
 LiveISO = "no"
 name = "disable-guc-fix"
