@@ -1992,10 +1992,10 @@ sub checkRequirements {
 
 	# this fix is temporarily disabled as the vanilla elementary OS 7.1 iso
 	# installation seems to be broken
-	#if ($completeDistVersion =~ /elementary OS 7.1/) {
-	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
-	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
-	#}
+	if ($completeDistVersion =~ /elementary OS 7.1/) {
+		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
+		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
+	}
 
 	my @ath12kstandbyfixDevices = ('17cb:1107');
 	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
@@ -3790,10 +3790,10 @@ sub elementaryosdkmspinningfix() {
 	my $action = shift;
 	my $retval;
 	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
-	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"Package: dkms\n".
-		"Pin: release a=tuxedo,n=jammy\n".
-		"Pin-Priority: 1000\n";
+	my $fileText = 	"# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
+					"Package: dkms\n".
+					"Pin: release a=tuxedo,n=jammy\n".
+					"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
