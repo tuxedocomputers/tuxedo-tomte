@@ -252,6 +252,13 @@ reconfigure = "always"
 restart = "yes"
 
 
+[[kerneltuxedo2204]
+LiveISO = "no"
+name = "linux-tuxedo-24.04"
+reconfigure = "always"
+restart = "yes"
+
+
 [lightdmlogindcheckgraphicalfix]
 name = "lightdm-logind-check-graphical-fix"
 
