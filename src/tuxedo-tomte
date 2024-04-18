@@ -964,7 +964,7 @@ my %tuxedo_devices = (
 	'55' => {
 		model => ['desktoppc'],
 		board_name => [''],
-		fix => ['apportfix', 'kerneltuxedo2204', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
+		fix => ['apportfix', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
 		flavour => ['22.04', '24.04'],
 		pci_id => '',
 		cpu => '',
@@ -8537,6 +8537,5 @@ END {
 
 			writeConfigIniFile();
 		}
-		# just to be sure, always write the tomte_finished file
 	}
 }
