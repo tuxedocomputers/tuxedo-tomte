@@ -378,9 +378,11 @@ my %flavours = (
 	"focal" => {
 		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
 	},
-
 	"jammy" => {
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
+	},
+	"noble" => {
+		"linux-tuxedo-24.04" => "linux-tuxedo-24.04 linux-headers-tuxedo-24.04 linux-image-tuxedo-24.04",
 	}
 );
 
@@ -1607,7 +1609,6 @@ sub checkRequirements {
 	}
 
 	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	# TODO noble?
 	if ($ubuntuCodename =~ /jammy/) {
 		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
 		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[DEBUG]');
@@ -1822,14 +1823,18 @@ sub checkRequirements {
 		}
 	}
 
-	if (($ubuntuCodename =~ /jammy/) ||
-		($ubuntuCodename =~ /noble/)) {
+	if ($ubuntuCodename =~ /jammy/) {
 		$origConfModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 		$origConfModules{tuxedokeyboardite}{required} = 'no';
 		printLog("will remove obsolete $origConfModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
 		$origConfModules{tuxedokeyboard}{required} = 'no';
 		printLog("will remove obsolete $origConfModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
+	}
+
+	if ($ubuntuCodename =~ /noble/) {
+		$origConfModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -1853,8 +1858,7 @@ sub checkRequirements {
 		last;
 	}
 
-	my @tuxedomicfix1Devices = (
-	);
+	my @tuxedomicfix1Devices = ();
 	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
 		$origConfModules{tuxedomicfix1}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1', '[INFO]');
@@ -1915,7 +1919,6 @@ sub checkRequirements {
 	}
 
 	# kernel
-	# kernel for noble?
 	if ($ubuntuCodename =~ /focal/ && $boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
 		printLog("kernel $origConfModules{kerneltuxedo2204}{name} should be installed", 'L1', '[INFO]');
 		$origConfModules{kerneltuxedo2204}{required} = 'yes';
@@ -1925,6 +1928,9 @@ sub checkRequirements {
 	} elsif ($ubuntuCodename =~ /jammy/) {
 		printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 		$origConfModules{kerneltuxedo2204}{required} = 'yes';
+	} elsif ($ubuntuCodename =~ /noble/) {
+		printLog("kernel $origConfModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
+		$origConfModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -2937,6 +2943,44 @@ sub kerneltuxedo2204() {
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
+
+
+
+###############################################################################
+# kernel-tuxedo-24.04
+#
+sub kerneltuxedo2404() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
+
+		installKernelFlavour('linux-tuxedo-24.04', \$instFailed, \$instDone);
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$origConfModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$origConfModules{$module}{installed} = "yes";
+			$origConfModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+	}
+}
+
 
 
 
