@@ -1,10 +1,18 @@
+tuxedo-tomte (2.30.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * removed installation of cracklibruntime
+  * added driver tuxedo-nvidia-550
+
+ -- test <tux@tuxedocomputers.com>  Wed, 17 Apr 2024 17:46:38 +0200
+
 tuxedo-tomte (2.29.0) jammy; urgency=medium
 
   [ M. Arnold ]
   * kernel header files are now also removed when kernel is removed
   * removed deprecated code
 
- -- test <tux@tuxedocomputers.com>  Thu, 11 Apr 2024 19:07:28 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 11 Apr 2024 19:07:28 +0200
 
 tuxedo-tomte (2.28.0) jammy; urgency=medium
 
