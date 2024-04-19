@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1587,19 +1587,6 @@ sub checkRequirements {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
 				printLog("detected $origConfModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
 			}
-		}
-	}
-
-	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	if ($ubuntuCodename =~ /jammy/) {
-		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[DEBUG]');
-		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
-			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2', '[INFO]');
-			installPackage('grub-efi-amd64-signed');
-			installPackage('shim-signed');
-		} else {
-			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[DEBUG]');
 		}
 	}
 
