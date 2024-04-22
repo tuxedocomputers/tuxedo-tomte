@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1480,6 +1480,23 @@ sub readFirstLineOfFile {
 
 
 
+
+
+###############################################################################
+# counts the lines in a given string
+#
+sub countLinesInString {
+	my $myString = shift;
+	return 0 if( !defined $myString or $myString eq "");
+	my $lastchar = substr $myString, -1,1;
+	my $numlines = () = $myString =~ /\n/g;
+	# was last line a whole line with a "\n"?;
+	return $numlines + ($lastchar ne "\n");
+}
+
+
+
+
 ###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
@@ -1587,19 +1604,6 @@ sub checkRequirements {
 				$origConfModules{i8042noauxfix}{required} = 'yes';
 				printLog("detected $origConfModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
 			}
-		}
-	}
-
-	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	if ($ubuntuCodename =~ /jammy/) {
-		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[DEBUG]');
-		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
-			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2', '[INFO]');
-			installPackage('grub-efi-amd64-signed');
-			installPackage('shim-signed');
-		} else {
-			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[DEBUG]');
 		}
 	}
 
@@ -1967,15 +1971,22 @@ sub checkRequirements {
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaWorkspaceVersion = '';
 	my $versionCompareResult;
-	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-	if ($currentPlasmaWorkspaceVersion ne '') {
-		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-		unless ( $versionCompareResult == -1 ) {
-			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+	my $lspciGpus = '';
+	$lspciGpus = `lspci -d ::0300`;
+	if (countLinesInString($lspciGpus) >= 2) {
+		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ($currentPlasmaWorkspaceVersion ne '') {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+			unless ( $versionCompareResult == -1 ) {
+				$origConfModules{tuxedodgpurun}{required} = 'yes';
+				printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+			}
+		} else {
+			printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 		}
 	} else {
-		printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
+		printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
@@ -5316,6 +5327,7 @@ sub uniqInArray {
 	my %seen;
 	return grep { !$seen{$_}++ } @_;
 }
+
 
 
 
