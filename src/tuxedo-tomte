@@ -1480,6 +1480,23 @@ sub readFirstLineOfFile {
 
 
 
+
+
+###############################################################################
+# counts the lines in a given string
+#
+sub countLinesInString {
+	my $myString = shift;
+	return 0 if( !defined $myString or $myString eq "");
+	my $lastchar = substr $myString, -1,1;
+	my $numlines = () = $myString =~ /\n/g;
+	# was last line a whole line with a "\n"?;
+	return $numlines + ($lastchar ne "\n");
+}
+
+
+
+
 ###############################################################################
 # find OS name and version and put them into $distribution and
 # $distributionVersion
@@ -1954,15 +1971,22 @@ sub checkRequirements {
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaWorkspaceVersion = '';
 	my $versionCompareResult;
-	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-	if ($currentPlasmaWorkspaceVersion ne '') {
-		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-		unless ( $versionCompareResult == -1 ) {
-			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+	my $lspciGpus = '';
+	$lspciGpus = `lspci -d ::0300`;
+	if (countLinesInString($lspciGpus) >= 2) {
+		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ($currentPlasmaWorkspaceVersion ne '') {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+			unless ( $versionCompareResult == -1 ) {
+				$origConfModules{tuxedodgpurun}{required} = 'yes';
+				printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+			}
+		} else {
+			printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 		}
 	} else {
-		printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
+		printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
@@ -5305,6 +5329,7 @@ sub uniqInArray {
 	my %seen;
 	return grep { !$seen{$_}++ } @_;
 }
+
 
 
 
