@@ -447,3 +447,13 @@ restart = "yes"
 name = "tuxedo-touchpad-switch"
 package = "yes"
 restart = ""
+
+
+[tuxedoplasmaupgrade]
+FAI = "no"
+LiveISO = "no"
+name = "tuxedo-plasma-upgrade"
+package = "yes"
+restart = "no"
+
+
