@@ -113,6 +113,7 @@ my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $chassisType = 0;
 my $distribution;
+my $distributionVersionID;
 my $distributionVersion;
 my $completeDistVersion;
 my $ubuntuCodename = "";
@@ -134,6 +135,7 @@ my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my @availableDebianPackages;
 my %packageHash;
+my $tuxedoPlasma6Installed = 0;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -279,7 +281,7 @@ my %tuxedo_repos = (
 		},
 		"nonplasma6" => {
 			"txos" => {
-				"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammyi main"],
+				"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
 				"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
 			},
 			"plasma" => {
@@ -1110,7 +1112,19 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'69' => {
+		model => ['all'],
+		board_name => [''],
+		fix => ['plasma6'],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
+
 );
 
 foreach my $module (keys %origConfModules) {
@@ -1513,10 +1527,10 @@ sub countLinesInString {
 
 ###############################################################################
 # find OS name and version and put them into $distribution and
-# $distributionVersion
+# $distributionVersionID
 # e.g.:
 # $distribution = 'Ubuntu'
-# $distributionVersion = '22.04'
+# $distributionVersionID = '22.04'
 # $completeDistVersion = 'Ubuntu 22.04'
 #
 sub readOSData {
@@ -1536,14 +1550,18 @@ sub readOSData {
 		}
 		if ( $_ =~ /^VERSION_ID=/ ) {
 			$_ =~ /VERSION_ID=\"(.*)\"/;
-			$distributionVersion = $1;
+			$distributionVersionID = $1;
 		}
 		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
 			$_ =~ /UBUNTU_CODENAME=(.*)/;
 			$ubuntuCodename = $1;
 		}
+		if ( $_ =~ /^VERSION=/ ) {
+			$_ =~ /VERSION=\"(.*)\"/;
+			$distributionVersion = $1;
+		}
 	}
-	$completeDistVersion = $distribution.' '.$distributionVersion;
+	$completeDistVersion = $distribution.' '.$distributionVersionID;
 }
 
 
@@ -1554,19 +1572,19 @@ sub readOSData {
 # 0 if not
 #
 sub isOSSupported {
-	if (grep { $_ eq $distributionVersion } @{$supportedOS{$distribution}}) {
+	if (grep { $_ eq $distributionVersionID } @{$supportedOS{$distribution}}) {
 		return (1);
 	} elsif (exists($supportedOS{$distribution})) {
-		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0', '[FATAL]');
+		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
 						__x("The version {version} of {distribution} is not supported.",
-								("version" => $distributionVersion, "distribution" => $distribution)),
+								("version" => $distributionVersionID, "distribution" => $distribution)),
 								2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
-	printLog("version: >$distributionVersion<", 'TL1', '[INFO]');
+	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
 }
 
@@ -1648,7 +1666,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
-		if ($distributionVersion =~ /18.04/) {
+		if ($distributionVersionID =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 			printLog("detected $origConfModules{amdgpuwithnvidiafix}{name} issue", 'L1', '[INFO]');
 		}
@@ -2024,6 +2042,30 @@ sub checkRequirements {
 	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
 		$origConfModules{ath12kstandbyfix}{required} = 'yes';
 		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1', '[INFO]');
+	}
+
+	# plasma6 installation
+	my $minPlasmaWorkspaceVersion = 6;
+	if (($distribution =~ /TUXEDO OS/) && ($distributionVersion =~ /2 22.04/)) {
+		if (! defined($configIniValues->{plasma6})) {
+			printLog("plasma6 not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
+			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+			if ($currentPlasmaWorkspaceVersion ne '') {
+				$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
+				unless ( $versionCompareResult == -1 ) {
+					$tuxedoPlasma6Installed = 1;
+					printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
+					$origConfModules{plasma6}{required} = 'yes';
+					printLog("detected $origConfModules{plasma6}{name} issue", 'L1', '[INFO]');
+				} else {
+					printLog("plasma 6 is installed", 'L2', '[DEBUG]');
+				}
+			} else {
+				printLog("current plasma workstation version is: $currentPlasmaWorkspaceVersion", 'L2', '[DEBUG]');
+			}
+		} else {
+			printLog("plasma 6 has been installed already in the past", 'L2', '[DEBUG]');
+		}
 	}
 }
 
@@ -3878,6 +3920,19 @@ END_TXT
 
 
 
+###############################################################################
+# TUXEDO plasma6
+#
+sub plasma6() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+	$configIniValues->{plasma6} = 1;
+	writeConfigIniFile();
+}
+
+
+
 
 
 
@@ -3972,19 +4027,24 @@ sub createRepos {
 		}
 	}
 
-	my $tuxedoPlasma6Install;
-	my $minPlasmaWorkspaceVersion = '6';
-	my $currentPlasmaWorkspaceVersion = '';
-	my $versionCompareResult;
-	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-	if ($currentPlasmaWorkspaceVersion ne '') {
-		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-	}
-
-
+	my $repoFileText = '';
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
 		if ($key ne 'name') {
+			# dirty hack to set the TUXEDO plasma repos to the correct values
+			if ($origConfModules{plasma6}{installed} eq 'yes') {
+				if ($repos{$distroKey}{$key}{nonplasma6} eq 'txos') {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{txos}{content}};
+				} elsif ($repos{$distroKey}{$key}{nonplasma6} eq 'plasma') {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{plasma}{content}};
+				} elsif ($repos{$distroKey}{$key}{plasma6} eq 'txos') {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{txos}{content}};
+				} elsif ($repos{$distroKey}{$key}{plasma6} eq 'plasma') {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{plasma}{content}};
+				}
+			} else {
+				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
+			}
 			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
