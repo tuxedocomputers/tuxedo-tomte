@@ -277,13 +277,27 @@ my %tuxedo_repos = (
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		},
-		"txos" => {
-			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+		"nonplasma6" => {
+			"txos" => {
+				"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammyi main"],
+				"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+			},
+			"plasma" => {
+				"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
+				"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			},
 		},
-		"plasma" => {
-			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+		"plasma6" => {
+			"txos" => {
+				"content" => [
+					"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
+				   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
+				"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+			},
+			"plasma" => {
+				"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
+				"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			},
 		}
 	}
 );
@@ -3957,6 +3971,16 @@ sub createRepos {
 			}
 		}
 	}
+
+	my $tuxedoPlasma6Install;
+	my $minPlasmaWorkspaceVersion = '6';
+	my $currentPlasmaWorkspaceVersion = '';
+	my $versionCompareResult;
+	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+	if ($currentPlasmaWorkspaceVersion ne '') {
+		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+	}
+
 
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
