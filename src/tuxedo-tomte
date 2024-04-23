@@ -4045,10 +4045,11 @@ sub createRepos {
 			} else {
 				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 			}
+
 			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
-					(join "\n", @{$repos{$distroKey}{$key}{content}}) . "\n";
+					$repoFileText . "\n";
 
 			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
 			if($noChangesNeeded) {
