@@ -4033,6 +4033,7 @@ sub createRepos {
 		if ($key ne 'name') {
 			# dirty hack to set the TUXEDO plasma repos to the correct values
 			if ($origConfModules{plasma6}{installed} eq 'yes') {
+				printLog("plasma6: yes", 'L2', '[DEBUG]');
 				if ($repos{$distroKey}{$key}{nonplasma6} eq 'txos') {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{txos}{content}};
 				} elsif ($repos{$distroKey}{$key}{nonplasma6} eq 'plasma') {
@@ -4043,8 +4044,11 @@ sub createRepos {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{plasma}{content}};
 				}
 			} else {
+				printLog("key: $key", 'L2', '[DEBUG]');
+				printLog("content: @{$repos{$distroKey}{$key}{content}}", 'L2', '[DEBUG]');
 				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 			}
+			printLog("repofiletext: $repoFileText", 'L2', '[DEBUG]');
 
 			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
