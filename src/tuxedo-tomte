@@ -279,27 +279,23 @@ my %tuxedo_repos = (
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		},
-		"nonplasma6" => {
-			"txos" => {
-				"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-				"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-			},
-			"plasma" => {
-				"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
-				"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-			},
+		"nonplasma6txos" => {
+			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
 		},
-		"plasma6" => {
-			"txos" => {
-				"content" => [
-					"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
-				   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
-				"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+		"nonplasma6plasma" => {
+			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+		},
+		"plasma6txos" => {
+			"content" => [
+				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
+			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
 			},
-			"plasma" => {
-				"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
-				"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-			},
+		"plasma6plasma" => {
+			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
 	}
 );
@@ -1116,8 +1112,8 @@ my %tuxedo_devices = (
 	'69' => {
 		model => ['all'],
 		board_name => [''],
-		fix => ['plasma6'],
-		flavour => ['22.04'],
+		fix => ['tuxedoplasmaupgrade'],
+		flavour => ['TUXEDO OS 2 22.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => '',
@@ -2044,21 +2040,21 @@ sub checkRequirements {
 		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	# plasma6 installation
-	my $minPlasmaWorkspaceVersion = 6;
+	# tuxedoplasmaupgrade installation
+	my $minPlasmaWorkspaceVersion = '6.0.0';
 	if (($distribution =~ /TUXEDO OS/) && ($distributionVersion =~ /2 22.04/)) {
-		if (! defined($configIniValues->{plasma6})) {
-			printLog("plasma6 not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
+		if (! defined($configIniValues->{'tuxedo-plasma-upgrade'})) {
+			printLog("tuxedo-plasma-upgrade not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
 			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
 			if ($currentPlasmaWorkspaceVersion ne '') {
 				$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
 				unless ( $versionCompareResult == -1 ) {
 					$tuxedoPlasma6Installed = 1;
-					printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
-					$origConfModules{plasma6}{required} = 'yes';
-					printLog("detected $origConfModules{plasma6}{name} issue", 'L1', '[INFO]');
-				} else {
 					printLog("plasma 6 is installed", 'L2', '[DEBUG]');
+				} else {
+					$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
+					printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
+					printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
 				}
 			} else {
 				printLog("current plasma workstation version is: $currentPlasmaWorkspaceVersion", 'L2', '[DEBUG]');
@@ -3923,12 +3919,14 @@ END_TXT
 ###############################################################################
 # TUXEDO plasma6
 #
-sub plasma6() {
+sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
-	debianPackageModule( $module, $action );
-	$configIniValues->{plasma6} = 1;
-	writeConfigIniFile();
+	unless ($configIniValues->{'tuxedo-plasma-upgrade'} == 1) {
+		debianPackageModule( 'tuxedo-plasma-upgrade', $action );
+		$configIniValues->{'tuxedo-plasma-upgrade'} = 1;
+		writeConfigIniFile();
+	}
 }
 
 
@@ -4030,18 +4028,18 @@ sub createRepos {
 	my $repoFileText = '';
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
+		printLog("key: $key distroKey: $distroKey", 'L2', '[DEBUG]');
 		if ($key ne 'name') {
-			# dirty hack to set the TUXEDO plasma repos to the correct values
-			if ($origConfModules{plasma6}{installed} eq 'yes') {
+			# hack to set the TUXEDO plasma repos to the correct values
+			if ($tuxedoPlasma6Installed) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
-				if ($repos{$distroKey}{$key}{nonplasma6} eq 'txos') {
-					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{txos}{content}};
-				} elsif ($repos{$distroKey}{$key}{nonplasma6} eq 'plasma') {
-					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{plasma}{content}};
-				} elsif ($repos{$distroKey}{$key}{plasma6} eq 'txos') {
-					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{txos}{content}};
-				} elsif ($repos{$distroKey}{$key}{plasma6} eq 'plasma') {
-					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{plasma}{content}};
+				if (($key =~ /plasma6txos/) || ($key =~ /plasma6plasma/) || ($key =~ /deb/)) {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
+				}
+			} elsif ($distribution =~ /TUXEDO OS/) {
+				printLog("plasma6: no", 'L2', '[DEBUG]');
+				if (($key =~ /nonplasma6txos/) || ($key =~ /nonplasma6plasma/) || ($key =~ /deb/) || ($key =~ /mirrors/)) {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} else {
 				printLog("key: $key", 'L2', '[DEBUG]');
@@ -4049,31 +4047,34 @@ sub createRepos {
 				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 			}
 			printLog("repofiletext: $repoFileText", 'L2', '[DEBUG]');
-
-			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
+			
+			if ($repoFileText ne '') {
+				my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
 					$repoFileText . "\n";
 
-			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
-			if($noChangesNeeded) {
-				my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
-				$noChangesNeeded = $fileContentText eq $fileText;
-			}
+				my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
+				if($noChangesNeeded) {
+					my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
+					$noChangesNeeded = $fileContentText eq $fileText;
+				}
 
-			if($noChangesNeeded){
-				printLog("repo file $repos{$distroKey}{$key}{filename} found and with correct content", 'L2', '[DEBUG]');
-			} else {
-				printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
-				printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
-
-				if (write_file($repos{$distroKey}{$key}{filename}, {'err_mode' => 'carp'}, $fileText) ) {
-					$modified += 1;
-					printLog("wrote file: $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+				if($noChangesNeeded){
+					printLog("repo file $repos{$distroKey}{$key}{filename} found and with correct content", 'L2', '[DEBUG]');
 				} else {
-					printLog("could not create file: $repos{$distroKey}{$key}{filename}", 'L0', '[ERROR]');
+					printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
+					printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+
+					if (write_file($repos{$distroKey}{$key}{filename}, {'err_mode' => 'carp'}, $fileText) ) {
+						$modified += 1;
+						printLog("wrote file: $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+					} else {
+						printLog("could not create file: $repos{$distroKey}{$key}{filename}", 'L0', '[ERROR]');
+					}
 				}
 			}
+			$repoFileText = '';
 		}
 	}
 	return ($modified+1);
