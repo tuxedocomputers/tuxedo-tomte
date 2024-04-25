@@ -2042,9 +2042,11 @@ sub checkRequirements {
 
 	# tuxedoplasmaupgrade installation
 	my $minPlasmaWorkspaceVersion = '6.0.0';
-	if (($distribution =~ /TUXEDO OS/) && ($distributionVersion =~ /2 22.04/)) {
-		if (! defined($configIniValues->{'tuxedo-plasma-upgrade'})) {
-			printLog("tuxedo-plasma-upgrade not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
+	#TODO debug
+	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
+	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22.04/) || ($distributionVersion =~ /3 22.04.*/))) {
+		if (! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) {
+			printLog("tuxedoplasmaupgrade not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
 			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
 			if ($currentPlasmaWorkspaceVersion ne '') {
 				$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
@@ -2061,6 +2063,7 @@ sub checkRequirements {
 			}
 		} else {
 			printLog("plasma 6 has been installed already in the past", 'L2', '[DEBUG]');
+			$tuxedoPlasma6Installed = 1;
 		}
 	}
 }
@@ -3922,9 +3925,12 @@ END_TXT
 sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
-	unless ($configIniValues->{'tuxedo-plasma-upgrade'} == 1) {
-		debianPackageModule( 'tuxedo-plasma-upgrade', $action );
-		$configIniValues->{'tuxedo-plasma-upgrade'} = 1;
+	#TODO debug
+	printLog("tpu installetion", 'L2', '[DEBUG]');
+	if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
+		($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1')) {
+		debianPackageModule( 'tuxedoplasmaupgrade', $action );
+		$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
 		writeConfigIniFile();
 	}
 }
