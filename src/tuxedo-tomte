@@ -135,7 +135,7 @@ my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my @availableDebianPackages;
 my %packageHash;
-my $tuxedoPlasma6Installed = 0;
+my $plasma6Installed = 0;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -2045,25 +2045,34 @@ sub checkRequirements {
 	#TODO debug
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
 	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22.04/) || ($distributionVersion =~ /3 22.04.*/))) {
-		if (! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) {
-			printLog("tuxedoplasmaupgrade not defined in $configIniFile, means it has not been installed before", 'L2', '[DEBUG]');
-			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-			if ($currentPlasmaWorkspaceVersion ne '') {
-				$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
-				unless ( $versionCompareResult == -1 ) {
-					$tuxedoPlasma6Installed = 1;
-					printLog("plasma 6 is installed", 'L2', '[DEBUG]');
-				} else {
-					$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
-					printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
-					printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
-				}
+		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
+
+		# check whether plasma6 is installed
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne '')) {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
+			unless ( $versionCompareResult == -1 ) {
+			$plasma6Installed = 1;
+				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
 			} else {
-				printLog("current plasma workstation version is: $currentPlasmaWorkspaceVersion", 'L2', '[DEBUG]');
+				$plasma6Installed = 0;
+				printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
 			}
 		} else {
-			printLog("plasma 6 has been installed already in the past", 'L2', '[DEBUG]');
-			$tuxedoPlasma6Installed = 1;
+			$plasma6Installed = 0;
+			printLog("could not determine plasma version", 'L2', '[DEBUG]');
+		}
+
+		# check whether tuxedoplasmaupgrade should be installed or
+		# has been installed already in the past, we don't want to install it again
+		if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
+			printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
+			$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
+		} elsif ($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1') {
+			printLog("tuxedo-plasma-upgrade has been installed already in the past", 'L2', '[DEBUG]');
+		} else {
+			printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
 		}
 	}
 }
@@ -3929,9 +3938,10 @@ sub tuxedoplasmaupgrade() {
 	printLog("tpu installetion", 'L2', '[DEBUG]');
 	if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
 		($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1')) {
-		debianPackageModule( 'tuxedoplasmaupgrade', $action );
-		$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
-		writeConfigIniFile();
+		if (debianPackageModule( 'tuxedoplasmaupgrade', $action )) {
+			$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
+			writeConfigIniFile();
+		}
 	}
 }
 
@@ -4037,7 +4047,7 @@ sub createRepos {
 		printLog("key: $key distroKey: $distroKey", 'L2', '[DEBUG]');
 		if ($key ne 'name') {
 			# hack to set the TUXEDO plasma repos to the correct values
-			if ($tuxedoPlasma6Installed) {
+			if ($plasma6Installed) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
 				if (($key =~ /plasma6txos/) || ($key =~ /plasma6plasma/) || ($key =~ /deb/)) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
