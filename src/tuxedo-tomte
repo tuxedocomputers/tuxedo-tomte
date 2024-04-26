@@ -2042,7 +2042,6 @@ sub checkRequirements {
 
 	# tuxedoplasmaupgrade installation
 	my $minPlasmaWorkspaceVersion = '6.0.0';
-	#TODO debug
 	readConfigIniValues();
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
 	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22\.04.*/) || ($distributionVersion =~ /3 22\.04.*/))) {
@@ -2064,8 +2063,8 @@ sub checkRequirements {
 			printLog("could not determine plasma version", 'L2', '[DEBUG]');
 		}
 
-		# check whether tuxedoplasmaupgrade should be installed or
-		# has been installed already in the past, we don't want to install it again
+		# check whether tuxedoplasmaupgrade should be installed or if it
+		# has been installed already in the past because we don't want to install it again
 		if ($plasma6Installed == 0) {
 			if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
 				printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
@@ -3937,9 +3936,7 @@ END_TXT
 sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
-	#TODO debug
 	if ($action =~ /install/) {
-		printLog("tpu installation", 'L2', '[DEBUG]');
 		if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
 			($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) {
 			if ( isPackageInstalled($origConfModules{$module}{name}) ) {
@@ -4061,12 +4058,12 @@ sub createRepos {
 			# hack to set the TUXEDO plasma repos to the correct values
 			if ($plasma6Installed) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
-				if (($key =~ /plasma6txos/) || ($key =~ /plasma6plasma/) || ($key =~ /deb/)) {
+				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} elsif ($distribution =~ /TUXEDO OS/) {
 				printLog("plasma6: no", 'L2', '[DEBUG]');
-				if (($key =~ /nonplasma6txos/) || ($key =~ /nonplasma6plasma/) || ($key =~ /deb/) || ($key =~ /mirrors/)) {
+				if (($key eq 'nonplasma6txos') || ($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} else {
@@ -4229,10 +4226,10 @@ sub cleanSourcesList {
 			}
 			close $FHsource;
 		} else {
-			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0', '[ERROR]');
+			printLog("file $sourcesListFile not found", 'L0', '[ERROR]');
 		}
 	} else {
-		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[ERROR]');
+		printLog("file $sourcesListFile not found", 'L0', '[ERROR]');
 	}
 	return ($modified);
 }
