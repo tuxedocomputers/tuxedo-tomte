@@ -2053,7 +2053,7 @@ sub checkRequirements {
 		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne '')) {
 			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
 			unless ( $versionCompareResult == -1 ) {
-			$plasma6Installed = 1;
+				$plasma6Installed = 1;
 				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
 			} else {
 				$plasma6Installed = 0;
@@ -2066,14 +2066,16 @@ sub checkRequirements {
 
 		# check whether tuxedoplasmaupgrade should be installed or
 		# has been installed already in the past, we don't want to install it again
-		if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
-			printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
-			$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
-		} elsif ($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1') {
-			printLog("tuxedo-plasma-upgrade has been installed already in the past", 'L2', '[DEBUG]');
-		} else {
-			printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
+		if ($plasma6Installed == 0) {
+			if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
+				printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
+				$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
+				printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
+			} elsif ($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1') {
+				printLog("tuxedo-plasma-upgrade has been installed already in the past", 'L2', '[DEBUG]');
+			} else {
+				printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
+			}
 		}
 	}
 }
@@ -3937,7 +3939,7 @@ sub tuxedoplasmaupgrade() {
 	my $action = shift;
 	#TODO debug
 	if ($action =~ /install/) {
-		printLog("tpu installetion", 'L2', '[DEBUG]');
+		printLog("tpu installation", 'L2', '[DEBUG]');
 		if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
 			($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) {
 			if ( isPackageInstalled($origConfModules{$module}{name}) ) {
