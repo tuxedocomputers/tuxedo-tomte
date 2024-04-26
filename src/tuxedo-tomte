@@ -2043,8 +2043,9 @@ sub checkRequirements {
 	# tuxedoplasmaupgrade installation
 	my $minPlasmaWorkspaceVersion = '6.0.0';
 	#TODO debug
+	readConfigIniValues();
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
-	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22.04/) || ($distributionVersion =~ /3 22.04.*/))) {
+	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22\.04.*/) || ($distributionVersion =~ /3 22\.04.*/))) {
 		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
 
 		# check whether plasma6 is installed
@@ -6261,6 +6262,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog("#####################################################", 'L0', '[INFO]');
 			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
 				printLog('in FAI mode', 'L0', '[INFO]');
