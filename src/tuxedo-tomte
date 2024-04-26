@@ -3936,13 +3936,22 @@ sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
 	#TODO debug
-	printLog("tpu installetion", 'L2', '[DEBUG]');
-	if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
-		($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1')) {
-		if (debianPackageModule( 'tuxedoplasmaupgrade', $action )) {
-			$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
-			writeConfigIniFile();
+	if ($action =~ /install/) {
+		printLog("tpu installetion", 'L2', '[DEBUG]');
+		if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
+			($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) {
+			if ( isPackageInstalled($origConfModules{$module}{name}) ) {
+				$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
+				writeConfigIniFile();
+			} else {
+				if (debianPackageModule( 'tuxedoplasmaupgrade', $action )) {
+					$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
+					writeConfigIniFile();
+				}
+			}
 		}
+	} else {
+		printLog("other actions besides install are not possible for this module", 'L2', '[DEBUG]');
 	}
 }
 
