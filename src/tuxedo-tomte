@@ -59,7 +59,6 @@ use Data::Dumper;
 # 1 = some debug
 # 2 = lots of debug
 my $logLevel = 2;
-$logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -100,6 +99,8 @@ my $oldConfigFile = $configDir.'tomte.cfg';
 my $configFile = $configDir.'modules.cfg';
 my $configIniFile = $configDir.'config.ini';
 my $configIniValues = Config::Tiny->new;
+readConfigIniValues();
+$logLevel = $ENV{LOGLEVEL} // $logLevel;
 my $tomteFirstInstallFile = '/tmp/tomteFirstInstall';
 
 my %modeFile = (
@@ -8527,13 +8528,14 @@ if (@ARGV != 0) {
 		printLog('Tomte finished', 'L0', '[INFO]');
 	} elsif ($argValue{command} eq "loglevel") {
 		#TODO debug
-		printLog("before loglevel: $logLevel", 'L2', '[DEBUG]');
+		printLog("before loglevel: $logLevel requested loglevel: $argValue{module}", 'L2', '[DEBUG]');
 		$argValue{module} += 0;
 		if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
 			$logLevel = $argValue{module};
 			$logLevel += 0;
-			printLog("input loglevel: $logLevel", 'L2', '[DEBUG]');
-			$configIniValues->{loglevel} = $logLevel;
+			printLog("resulting loglevel: $logLevel", 'L2', '[DEBUG]');
+			$configIniValues->{initvalues}->{loglevel} = $logLevel;
+			writeConfigIniFile();
 		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
