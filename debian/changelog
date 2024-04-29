@@ -1,10 +1,19 @@
+tuxedo-tomte (2.31.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * removed grub-efi-amd64-signed installation
+  * added check for amount of GPUs to install tuxedo-dgpu-run
+  * added installation of tuxedo-plasma-upgrade, plasma version recognition and plasma 6 repositories
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 29 Apr 2024 16:04:44 +0200
+
 tuxedo-tomte (2.30.0) jammy; urgency=medium
 
   [ E. Mohr ]
   * removed installation of cracklibruntime
   * added driver tuxedo-nvidia-550
 
- -- test <tux@tuxedocomputers.com>  Wed, 17 Apr 2024 17:46:38 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 17 Apr 2024 17:46:38 +0200
 
 tuxedo-tomte (2.29.0) jammy; urgency=medium
 
