@@ -142,13 +142,6 @@ postconf = "updateInitramfs"
 restart = "yes"
 
 
-[cracklibruntime]
-name = "cracklib-runtime"
-package = "yes"
-required = "yes"
-restart = ""
-
-
 [disablegucfix]
 LiveISO = "no"
 name = "disable-guc-fix"
@@ -297,7 +290,7 @@ dkms = "yes"
 name = "nvidia-driver"
 reconfigure = "always"
 restart = "yes"
-version = 5
+version = 6
 
 
 [r8168dkms]
@@ -454,3 +447,13 @@ restart = "yes"
 name = "tuxedo-touchpad-switch"
 package = "yes"
 restart = ""
+
+
+[tuxedoplasmaupgrade]
+FAI = "no"
+LiveISO = "no"
+name = "tuxedo-plasma-upgrade"
+package = "yes"
+restart = "no"
+
+
