@@ -100,6 +100,9 @@ my $configFile = $configDir.'modules.cfg';
 my $configIniFile = $configDir.'config.ini';
 my $configIniValues = Config::Tiny->new;
 readConfigIniValues();
+if (defined($configIniValues->{initvalues}->{loglevel})) {
+	$logLevel = $configIniValues->{initvalues}->{loglevel};
+}
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 my $tomteFirstInstallFile = '/tmp/tomteFirstInstall';
 
