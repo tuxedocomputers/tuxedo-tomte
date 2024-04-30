@@ -6240,7 +6240,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -8142,6 +8142,7 @@ sub help {
 	print __('HELP_AUTOMATIC'), "\n";
 	print __('HELP_UPDATES_ONLY'), "\n";
 	print __('HELP_DONT_CONFIGURE'), "\n";
+	print __('HELP_loglevel'), "\n";
 	print __('HELP_help'), "\n";
 	print "\n\n";
 	print __('HELP_footer'), "\n";
@@ -8290,7 +8291,7 @@ if (!isOSSupported()) {
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
@@ -8530,15 +8531,20 @@ if (@ARGV != 0) {
 		prepareValues();
 		printLog('Tomte finished', 'L0', '[INFO]');
 	} elsif ($argValue{command} eq "loglevel") {
-		#TODO debug
 		printLog("before loglevel: $logLevel requested loglevel: $argValue{module}", 'L2', '[DEBUG]');
-		$argValue{module} += 0;
-		if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
-			$logLevel = $argValue{module};
-			$logLevel += 0;
-			printLog("resulting loglevel: $logLevel", 'L2', '[DEBUG]');
-			$configIniValues->{initvalues}->{loglevel} = $logLevel;
-			writeConfigIniFile();
+		if (defined($argValue{module}) && $argValue{module} ne '') {
+			$argValue{module} += 0;
+			if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
+				$logLevel = $argValue{module};
+				$logLevel += 0;
+				printLog("resulting loglevel: $logLevel", 'L2', '[DEBUG]');
+				$configIniValues->{initvalues}->{loglevel} = $logLevel;
+				writeConfigIniFile();
+			} else {
+				printLog("invalid entry for loglevel. Valid numbers are 0, 1 and 2", 'TL0', '[DEBUG]');
+			}
+		} else {
+			printLog("$logLevel", 'T0', '[DEBUG]');
 		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
@@ -8561,7 +8567,7 @@ if (($startLaterAgain == 0) &&
 
 END {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 	if ( exists $options{$argValue{command}} && $runningAsRoot ) {
 		if (!$FAI) {
 			my $packagekitEnabled = getSystemdEnabled('packagekit');
