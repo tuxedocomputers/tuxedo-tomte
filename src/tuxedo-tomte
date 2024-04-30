@@ -1119,7 +1119,19 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'70' => {
+		model => ['all with ethernet controller YT6801'],
+		board_name => [''],
+		fix => ['tuxedoyt6801'],
+		flavour => ['22.04'],
+		pci_id => '1f0a:6801',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
+
 
 );
 
@@ -2076,6 +2088,12 @@ sub checkRequirements {
 				printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
 			}
 		}
+	}
+
+	my @tuxedoyt6801Devices = ('1f0a:6801');
+	if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
+		$origConfModules{tuxedoyt6801}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
 	}
 }
 
@@ -3953,6 +3971,22 @@ sub tuxedoplasmaupgrade() {
 		printLog("other actions besides install are not possible for this module", 'L2', '[DEBUG]');
 	}
 }
+
+
+
+###############################################################################
+# Installs Linux device driver for Ethernet controller Motorcomm YT6801
+#
+sub tuxedoyt6801() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+}
+
+
+
+
+
 
 
 
