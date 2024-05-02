@@ -9,9 +9,9 @@ tuxedo-tomte \- Manages fixes for TUXEDO notebooks
 is a little helper that provides services, updates and fixes for
 .B TUXEDO
 devices in the background\&. It does not send any information, telemetry
-data or similar stuff out!
+data or similar stuff anywhere!
 .P
-Many but not all options require administrator privileges\&.
+Many but not all options require administrative privileges\&.
 .SH "COMMANDS"
 .PP
 The following commands are understood:
@@ -52,7 +52,7 @@ tomte list
 .LP
 Does nothing if \fBDONT_CONFIGURE\fR is set\&.
 .P
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .RE
 .PP
 \fBreconfigure \fI<MODULE>\fR|\fIall\fR
@@ -70,7 +70,7 @@ To see which modules can be installed use
 .LP
 Does nothing if \fBDONT_CONFIGURE\fR is set\&.
 .P
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .RE
 .PP
 \fBblock \fI<MODULE>\fR|\fIall\fR
@@ -80,7 +80,7 @@ Prevents the module from being installed or updated\&.
 Already installed modules will not be upgraded or deleted except for packages which are
 managed by the systems package manager\&.
 .P
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .P
 Modules marked as
 .B prerequisite
@@ -93,7 +93,7 @@ Allows the module to be automatically installed or upgraded by
 .B Tomte
 if it is required by this system\&.
 .P
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .RE
 .PP
 \fBremove \fI<MODULE>\fR
@@ -109,14 +109,24 @@ or the module will be installed again automatically if the chosen mode is set
 to
 .B AUTOMATIC\&.
 .P
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .P
 At this moment removal only works on some of the modules\&.
 .RE
 .PP
+\fBloglevel \fI<desired loglevel>\fR
+.RS 4
+Prints the currently used loglevel if used without arguments\&.
+.P
+Changes to desired loglevel where loglevel is a number from 0 to 2,
+where 2 is the highest loglevel used for debugging. It is not recommended
+to use this level for continuous operation as it produces a very large amount
+of data\&.
+.RE
+.PP
 .SH "CONFIGURATION MODES"
 .RS 4
-Requires administrator privileges\&.
+Requires administrative privileges\&.
 .P
 There are three configuration modes: \fBAUTOMATIC\fR, \fBUPDATES_ONLY\fR and
 \fBDONT_CONFIGURE\fR\&.
@@ -176,8 +186,8 @@ be installed automatically\&.
 .PP
 .SH "INSTALLATION ON VANILLA SYSTEM"
 .RS 4
-Everything will be installed automatically. It might take a few minutes till
-all is installed. Messages will appear on the desktop\&.
+Everything will be installed automatically. It might take a few minutes until
+everything is installed. Messages will appear on the desktop\&.
 .P
 Interrupting the installation might damage the system\&.
 .P
