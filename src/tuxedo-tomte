@@ -1124,7 +1124,7 @@ my %tuxedo_devices = (
 		model => ['all with ethernet controller YT6801'],
 		board_name => [''],
 		fix => ['tuxedoyt6801'],
-		flavour => ['22.04'],
+		flavour => ['22.04', 'TUXEDO OS'],
 		pci_id => '1f0a:6801',
 		cpu => '',
 		kernel => '',
@@ -2090,10 +2090,12 @@ sub checkRequirements {
 		}
 	}
 
-	my @tuxedoyt6801Devices = ('1f0a:6801');
-	if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
-		$origConfModules{tuxedoyt6801}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
+	if (($ubuntuCodename eq 'jammy') || ($distribution =~ /TUXEDO OS/)) {
+		my @tuxedoyt6801Devices = ('1f0a:6801');
+		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
+			$origConfModules{tuxedoyt6801}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
+		}
 	}
 }
 
