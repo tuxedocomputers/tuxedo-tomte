@@ -45,7 +45,6 @@ use Time::HiRes qw(usleep);
 use Dpkg::Version;
 use JSON;
 use Config::Tiny;
-use TOML qw(from_toml);
 
 # for Translations
 use Locale::TextDomain ('tomte', '/usr/share/locale');
