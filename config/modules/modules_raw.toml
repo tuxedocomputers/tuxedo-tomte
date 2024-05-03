@@ -454,3 +454,21 @@ restart = "yes"
 name = "tuxedo-touchpad-switch"
 package = "yes"
 restart = ""
+
+
+[tuxedoplasmaupgrade]
+FAI = "no"
+LiveISO = "no"
+name = "tuxedo-plasma-upgrade"
+package = "yes"
+restart = "no"
+
+
+[tuxedoyt6801]
+dkms = "yes"
+name = "tuxedo-yt6801"
+package = "yes"
+restart = ""
+version = 1
+
+

@@ -113,6 +113,7 @@ my $mode = 'AUTOMATIC'; #default mode
 my $shareDir = '/usr/share/tuxedo-tomte/';
 my $chassisType = 0;
 my $distribution;
+my $distributionVersionID;
 my $distributionVersion;
 my $completeDistVersion;
 my $ubuntuCodename = "";
@@ -134,6 +135,7 @@ my $startLaterAgain = 0;
 my $systemdDelay = 30;
 my @availableDebianPackages;
 my %packageHash;
+my $plasma6Installed = 0;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -283,12 +285,22 @@ my %tuxedo_repos = (
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		},
-		"txos" => {
+		"nonplasma6txos" => {
 			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
 		},
-		"plasma" => {
+		"nonplasma6plasma" => {
 			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+		},
+		"plasma6txos" => {
+			"content" => [
+				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
+			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+			},
+		"plasma6plasma" => {
+			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
 	}
@@ -1114,7 +1126,31 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'69' => {
+		model => ['all'],
+		board_name => [''],
+		fix => ['tuxedoplasmaupgrade'],
+		flavour => ['TUXEDO OS 2 22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	'70' => {
+		model => ['all with ethernet controller YT6801'],
+		board_name => [''],
+		fix => ['tuxedoyt6801'],
+		flavour => ['22.04', 'TUXEDO OS'],
+		pci_id => '1f0a:6801',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
+
+
 );
 
 foreach my $module (keys %origConfModules) {
@@ -1498,12 +1534,29 @@ sub readFirstLineOfFile {
 
 
 
+
+
+###############################################################################
+# counts the lines in a given string
+#
+sub countLinesInString {
+	my $myString = shift;
+	return 0 if( !defined $myString or $myString eq "");
+	my $lastchar = substr $myString, -1,1;
+	my $numlines = () = $myString =~ /\n/g;
+	# was last line a whole line with a "\n"?;
+	return $numlines + ($lastchar ne "\n");
+}
+
+
+
+
 ###############################################################################
 # find OS name and version and put them into $distribution and
-# $distributionVersion
+# $distributionVersionID
 # e.g.:
 # $distribution = 'Ubuntu'
-# $distributionVersion = '22.04'
+# $distributionVersionID = '22.04'
 # $completeDistVersion = 'Ubuntu 22.04'
 #
 sub readOSData {
@@ -1523,14 +1576,18 @@ sub readOSData {
 		}
 		if ( $_ =~ /^VERSION_ID=/ ) {
 			$_ =~ /VERSION_ID=\"(.*)\"/;
-			$distributionVersion = $1;
+			$distributionVersionID = $1;
 		}
 		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
 			$_ =~ /UBUNTU_CODENAME=(.*)/;
 			$ubuntuCodename = $1;
 		}
+		if ( $_ =~ /^VERSION=/ ) {
+			$_ =~ /VERSION=\"(.*)\"/;
+			$distributionVersion = $1;
+		}
 	}
-	$completeDistVersion = $distribution.' '.$distributionVersion;
+	$completeDistVersion = $distribution.' '.$distributionVersionID;
 }
 
 
@@ -1541,19 +1598,19 @@ sub readOSData {
 # 0 if not
 #
 sub isOSSupported {
-	if (grep { $_ eq $distributionVersion } @{$supportedOS{$distribution}}) {
+	if (grep { $_ eq $distributionVersionID } @{$supportedOS{$distribution}}) {
 		return (1);
 	} elsif (exists($supportedOS{$distribution})) {
-		printLog("The version $distributionVersion of $distribution is not supported.", 'TL0', '[FATAL]');
+		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
 						__x("The version {version} of {distribution} is not supported.",
-								("version" => $distributionVersion, "distribution" => $distribution)),
+								("version" => $distributionVersionID, "distribution" => $distribution)),
 								2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
-	printLog("version: >$distributionVersion<", 'TL1', '[INFO]');
+	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
 }
 
@@ -1608,19 +1665,6 @@ sub checkRequirements {
 		}
 	}
 
-	# temporary workaround for grub-efi-amd64-signed which does not get installed if not forced
-	if ($ubuntuCodename =~ /jammy/) {
-		my $grubEfiAmd64SignedVersion = `dpkg-query  --showformat='\${Version}' --show grub-efi-amd64-signed`;
-		printLog("grub-efi-amd64-signed version: $grubEfiAmd64SignedVersion", 'L2', '[DEBUG]');
-		if (version_compare($grubEfiAmd64SignedVersion, '1.187') == -1) {
-			printLog("earlier version of grub-efi-amd64-signed detected, installing new version", '2', '[INFO]');
-			installPackage('grub-efi-amd64-signed');
-			installPackage('shim-signed');
-		} else {
-			printLog("no earlier version of grub-efi-amd64-signed detected", 'L2', '[DEBUG]');
-		}
-	}
-
 	if ($boardname =~ /PF5PU1G/) {
 		$origConfModules{nobootonbattery}{required} = 'yes';
 		printLog("detected $origConfModules{nobootonbattery}{name} issue", 'L1', '[INFO]');
@@ -1648,7 +1692,7 @@ sub checkRequirements {
 		($boardname =~ /POLARIS1701A2060/) ||
 		($boardname =~ /POLARIS1501A1650TI/) ||
 		($boardname =~ /POLARIS1501A2060/)) {
-		if ($distributionVersion =~ /18.04/) {
+		if ($distributionVersionID =~ /18.04/) {
 			$origConfModules{amdgpuwithnvidiafix}{required} = 'yes';
 			printLog("detected $origConfModules{amdgpuwithnvidiafix}{name} issue", 'L1', '[INFO]');
 		}
@@ -1992,15 +2036,22 @@ sub checkRequirements {
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaWorkspaceVersion = '';
 	my $versionCompareResult;
-	$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-	if ($currentPlasmaWorkspaceVersion ne '') {
-		$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-		unless ( $versionCompareResult == -1 ) {
-			$origConfModules{tuxedodgpurun}{required} = 'yes';
-			printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+	my $lspciGpus = '';
+	$lspciGpus = `lspci -d ::0300`;
+	if (countLinesInString($lspciGpus) >= 2) {
+		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ($currentPlasmaWorkspaceVersion ne '') {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+			unless ( $versionCompareResult == -1 ) {
+				$origConfModules{tuxedodgpurun}{required} = 'yes';
+				printLog("detected $origConfModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+			}
+		} else {
+			printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 		}
 	} else {
-		printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
+		printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
@@ -2015,17 +2066,61 @@ sub checkRequirements {
 		printLog("detected $origConfModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	# this fix is temporarily disabled as the vanilla elementary OS 7.1 iso
-	# installation seems to be broken
-	#if ($completeDistVersion =~ /elementary OS 7.1/) {
-	#	$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
-	#	printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
-	#}
+	if ($completeDistVersion =~ /elementary OS 7.1/) {
+		$origConfModules{elementaryosdkmspinningfix}{required} = 'yes';
+		printLog("detected $origConfModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
+	}
 
 	my @ath12kstandbyfixDevices = ('17cb:1107');
 	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
 		$origConfModules{ath12kstandbyfix}{required} = 'yes';
 		printLog("detected $origConfModules{ath12kstandbyfix}{name} issue", 'L1', '[INFO]');
+	}
+
+	# tuxedoplasmaupgrade installation
+	my $minPlasmaWorkspaceVersion = '6.0.0';
+	readConfigIniValues();
+	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
+	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22\.04.*/) || ($distributionVersion =~ /3 22\.04.*/))) {
+		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
+
+		# check whether plasma6 is installed
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne '')) {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
+			unless ( $versionCompareResult == -1 ) {
+				$plasma6Installed = 1;
+				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
+			} else {
+				$plasma6Installed = 0;
+				printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
+			}
+		} else {
+			$plasma6Installed = 0;
+			printLog("could not determine plasma version", 'L2', '[DEBUG]');
+		}
+
+		# check whether tuxedoplasmaupgrade should be installed or if it
+		# has been installed already in the past because we don't want to install it again
+		if ($plasma6Installed == 0) {
+			if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
+				printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
+				$origConfModules{tuxedoplasmaupgrade}{required} = 'yes';
+				printLog("detected $origConfModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
+			} elsif ($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1') {
+				printLog("tuxedo-plasma-upgrade has been installed already in the past", 'L2', '[DEBUG]');
+			} else {
+				printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
+			}
+		}
+	}
+
+	if (($ubuntuCodename eq 'jammy') || ($distribution =~ /TUXEDO OS/)) {
+		my @tuxedoyt6801Devices = ('1f0a:6801');
+		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
+			$origConfModules{tuxedoyt6801}{required} = 'yes';
+			printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
+		}
 	}
 }
 
@@ -3856,10 +3951,10 @@ sub elementaryosdkmspinningfix() {
 	my $action = shift;
 	my $retval;
 	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
-	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"Package: dkms\n".
-		"Pin: release a=tuxedo,n=jammy\n".
-		"Pin-Priority: 1000\n";
+	my $fileText = 	"# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
+					"Package: dkms\n".
+					"Pin: release a=tuxedo,n=jammy\n".
+					"Pin-Priority: 1000\n";
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
@@ -3921,6 +4016,48 @@ esac
 END_TXT
 	createFileModule( $module, $action, '/usr/lib/systemd/system-sleep/tuxedo-ath12k-standby-fix', $content, "+x");
 }
+
+
+
+
+###############################################################################
+# TUXEDO plasma6
+#
+sub tuxedoplasmaupgrade() {
+	my $module = shift;
+	my $action = shift;
+	if ($action =~ /install/) {
+		if ((!defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) ||
+			($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) {
+			if ( isPackageInstalled($origConfModules{$module}{name}) ) {
+				$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
+				writeConfigIniFile();
+			} else {
+				if (debianPackageModule( 'tuxedoplasmaupgrade', $action )) {
+					$configIniValues->{tuxedoplasmaupgrade}->{installed} = '1';
+					writeConfigIniFile();
+				}
+			}
+		}
+	} else {
+		printLog("other actions besides install are not possible for this module", 'L2', '[DEBUG]');
+	}
+}
+
+
+
+###############################################################################
+# Installs Linux device driver for Ethernet controller Motorcomm YT6801
+#
+sub tuxedoyt6801() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+}
+
+
+
+
 
 
 
@@ -4019,33 +4156,56 @@ sub createRepos {
 		}
 	}
 
+	my $repoFileText = '';
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
+		printLog("key: $key distroKey: $distroKey", 'L2', '[DEBUG]');
 		if ($key ne 'name') {
-			my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
+			# hack to set the TUXEDO plasma repos to the correct values
+			if ($plasma6Installed) {
+				printLog("plasma6: yes", 'L2', '[DEBUG]');
+				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb')) {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
+				}
+			} elsif ($distribution =~ /TUXEDO OS/) {
+				printLog("plasma6: no", 'L2', '[DEBUG]');
+				if (($key eq 'nonplasma6txos') || ($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
+					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
+				}
+			} else {
+				printLog("key: $key", 'L2', '[DEBUG]');
+				printLog("content: @{$repos{$distroKey}{$key}{content}}", 'L2', '[DEBUG]');
+				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
+			}
+			printLog("repofiletext: $repoFileText", 'L2', '[DEBUG]');
+			
+			if ($repoFileText ne '') {
+				my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
 					"# e.g. /etc/apt/sources.list.d/own-modifications.list\n".
-					(join "\n", @{$repos{$distroKey}{$key}{content}}) . "\n";
+					$repoFileText . "\n";
 
-			my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
-			if($noChangesNeeded) {
-				my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
-				$noChangesNeeded = $fileContentText eq $fileText;
-			}
+				my $noChangesNeeded = -e $repos{$distroKey}{$key}{filename};
+				if($noChangesNeeded) {
+					my $fileContentText = read_file($repos{$distroKey}{$key}{filename}, 'err_mode' => 'carp');
+					$noChangesNeeded = $fileContentText eq $fileText;
+				}
 
-			if($noChangesNeeded){
-				printLog("repo file $repos{$distroKey}{$key}{filename} found and with correct content", 'L2', '[DEBUG]');
-			} else {
-				printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
-				printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
-
-				if (write_file($repos{$distroKey}{$key}{filename}, {'err_mode' => 'carp'}, $fileText) ) {
-					$modified += 1;
-					printLog("wrote file: $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+				if($noChangesNeeded){
+					printLog("repo file $repos{$distroKey}{$key}{filename} found and with correct content", 'L2', '[DEBUG]');
 				} else {
-					printLog("could not create file: $repos{$distroKey}{$key}{filename}", 'L0', '[ERROR]');
+					printLog("$repos{$distroKey}{$key}{filename} incorrect", 'L0', '[WARN]');
+					printLog("recreating $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+
+					if (write_file($repos{$distroKey}{$key}{filename}, {'err_mode' => 'carp'}, $fileText) ) {
+						$modified += 1;
+						printLog("wrote file: $repos{$distroKey}{$key}{filename}", 'L0', '[INFO]');
+					} else {
+						printLog("could not create file: $repos{$distroKey}{$key}{filename}", 'L0', '[ERROR]');
+					}
 				}
 			}
+			$repoFileText = '';
 		}
 	}
 	return ($modified+1);
@@ -4175,10 +4335,10 @@ sub cleanSourcesList {
 			}
 			close $FHsource;
 		} else {
-			printLog("file $sourcesListFile not found, this is bad and should not happen!!", 'L0', '[ERROR]');
+			printLog("file $sourcesListFile not found", 'L0', '[ERROR]');
 		}
 	} else {
-		printLog("file $sourcesListFile not found, this is very bad and should not happen!!", 'L0', '[ERROR]');
+		printLog("file $sourcesListFile not found", 'L0', '[ERROR]');
 	}
 	return ($modified);
 }
@@ -5394,6 +5554,7 @@ sub uniqInArray {
 
 
 
+
 ###############################################################################
 # accepts a kernel version and returns an array with all dependant packages
 # found for linux-image-$version-tuxedo, linux-headres-$version-tuxedo and
@@ -6218,6 +6379,7 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
+			printLog("#####################################################", 'L0', '[INFO]');
 			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
 				printLog('in FAI mode', 'L0', '[INFO]');
