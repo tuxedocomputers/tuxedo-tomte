@@ -3273,10 +3273,69 @@ sub nvidiadriver() {
 
 
 
-
-
 		} elsif ($ubuntuCodename =~ /noble/) {
-			printLog("no nvidia drivers available yet", 'L0', '[INFO]');
+			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
+				# check if the package is already installed
+				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					setDkmsVerbose( 'nvidiadriver', 1 );
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					setDkmsVerbose( 'nvidiadriver', 0 );
+				} else {
+					setAptMark($tuxedoNvidiaDriver550,'manual');
+					$packageNvidiaDriver = 1;
+				}
+			} else {
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+			}
+
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 1;
+			}
+
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+					$output = `gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
+				}
+			}
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					printLog("installed $origConfModules{$module}{name}", 'L1', '[INFO]');
+					addToConfiguredModules($module, "success");
+					setRestartValues($module);
+				}
+				$origConfModules{$module}{installed} = "yes";
+				$origConfModules{$module}{upgraded} = "yes";
+			} else {
+				printLog("$origConfModules{$module}{name} installation failed", 'L1', '[WARN]');
+				$origConfModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+
+
+
+
+
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
