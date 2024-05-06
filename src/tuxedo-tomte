@@ -1883,13 +1883,6 @@ sub checkRequirements {
 		last;
 	}
 
-	my @tuxedomicfix1Devices = (
-	);
-	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
-		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1', '[INFO]');
-	}
-
 	if ($boardname =~ m/N350TW/) {
 		$origConfModules{tuxedorestoreaudiofix}{required} = 'yes';
 		printLog("detected $origConfModules{tuxedorestoreaudiofix}{name} issue", 'L1', '[INFO]');
@@ -2817,17 +2810,6 @@ sub fingerprintreader() {
 			}
 		}
 	}
-}
-
-
-
-###############################################################################
-# tuxedo-micfix1
-#
-sub tuxedomicfix1() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
 }
 
 
