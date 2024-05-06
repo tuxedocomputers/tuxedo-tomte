@@ -2140,17 +2140,6 @@ sub findPciDevice {
 
 
 ###############################################################################
-# for keyboard not present on boot
-#
-sub i8042fix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.nopnp');
-}
-
-
-
-###############################################################################
 # for touchpad problems
 #
 sub i8042noauxfix() {

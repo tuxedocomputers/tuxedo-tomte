@@ -187,15 +187,6 @@ restart = "yes"
 version = 2
 
 
-[i8042fix]
-LiveISO = "no"
-name = "i8042-fix"
-postconf = "updateGrub"
-reconfigure = "always"
-restart = "yes"
-version = 2
-
-
 [i8042noauxfix]
 LiveISO = "no"
 name = "i8042noaux-fix"
