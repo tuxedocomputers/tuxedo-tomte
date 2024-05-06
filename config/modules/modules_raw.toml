@@ -196,15 +196,6 @@ restart = "yes"
 version = 2
 
 
-[i915disablepsrfix]
-LiveISO = "no"
-hwid = 2
-name = "i915-disable-psr-fix"
-postconf = "updateGrub"
-reconfigure = "always"
-restart = "yes"
-
-
 [i915enablepsrfix]
 LiveISO = "no"
 hwid = 3
