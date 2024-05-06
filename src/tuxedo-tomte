@@ -1207,28 +1207,6 @@ my %tuxedo_devices = (
 #					'no':	should not be installed in LiveISO
 #
 my %origConfModules = (
-	i8042fix => {
-	# obsolete since kernel 5.15.0-53
-		name => 'i8042-fix',
-		version => 2,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => '',
-		description => __('i8042fix_description'),
-		postconf => 'updateGrub',
-		upgrade => '',
-		upgraded => '',
-		reconfigure => 'always',
-		restart => 'yes',
-		order => '',
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'no',
-	},
 	nobootonbattery => {
 		name => 'no-boot-on-battery',
 		version => 2,
