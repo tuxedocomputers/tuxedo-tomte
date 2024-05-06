@@ -57,7 +57,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -1075,7 +1075,7 @@ my %tuxedo_devices = (
 	'64' => {
 		model => ['all notebooks'],
 		board_name => [''],
-		fix => ['systemdbacklightfix'],
+		fix => [''],
 		flavour => ['18.04', '20.04', '22.04'],
 		pci_id => '',
 		cpu => '',
@@ -2619,18 +2619,22 @@ sub readOSData {
 	}
 	foreach ( @osReleaseLines ) {
 		if ( $_ =~ /^NAME=/ ) {
+			# e.g. Ubuntu
 			$_ =~ /NAME=\"(.*)\"/;
 			$distribution = $1;
 		}
 		if ( $_ =~ /^VERSION_ID=/ ) {
+			# e.g. 22.04
 			$_ =~ /VERSION_ID=\"(.*)\"/;
 			$distributionVersionID = $1;
 		}
 		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
+			# e.g. jammy
 			$_ =~ /UBUNTU_CODENAME=(.*)/;
 			$ubuntuCodename = $1;
 		}
 		if ( $_ =~ /^VERSION=/ ) {
+			# e.g. 22.04.4 LTS (Jammy Jellyfish)
 			$_ =~ /VERSION=\"(.*)\"/;
 			$distributionVersion = $1;
 		}
@@ -2912,7 +2916,9 @@ sub checkRequirements {
 	# all notebooks require this
 	# the temporary fix has to be removed for now as it causes boot delay issues
 	# on some notebooks
-	if ($chassisType eq 'notebook') {
+	# not necessary on 24.04
+	# when deleting this workaround, also delete the module entry from the config
+	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/))) {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$origConfModules{systemdbacklightfix}{required} = 'no';
@@ -2966,13 +2972,6 @@ sub checkRequirements {
 		$origConfModules{fingerprintreader}{required} = 'yes';
 		printLog("detected $origConfModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
 		last;
-	}
-
-	my @tuxedomicfix1Devices = (
-	);
-	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
-		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/N350TW/) {
@@ -3228,17 +3227,6 @@ sub findPciDevice {
 ###############################################################################
 
 
-
-
-
-###############################################################################
-# for keyboard not present on boot
-#
-sub i8042fix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.nopnp');
-}
 
 
 
@@ -3701,44 +3689,6 @@ sub huaweime906shpfix(){
 
 
 
-###############################################################################
-# Creates a configuration to use Huawei-ME936 (old)
-# - if USB device 12d1:15bb detected
-#
-sub threegfix() {
-	my $module = shift;
-	my $action = shift;
-	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	if ($action eq 'remove') {
-		system "rm -rf $fileName2";
-		
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-}
-
-
-
-###############################################################################
-# Creates a configuration to use Huawei-ME906s (old)
-# - if USB device 12d1:15c1 detected
-#
-sub threegfix2() {
-	my $module = shift;
-	my $action = shift;
-	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	if ($action eq 'remove') {
-		system "rm -rf $fileName2";
-		
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-}
-
-
-
 
 ###############################################################################
 # Uniwill touchpad LED fix
@@ -3940,17 +3890,6 @@ sub fingerprintreader() {
 			}
 		}
 	}
-}
-
-
-
-###############################################################################
-# tuxedo-micfix1
-#
-sub tuxedomicfix1() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
 }
 
 
@@ -4310,82 +4249,6 @@ sub nvidiadriver() {
 
 
 ###############################################################################
-# Fixes AMD GPU frequency communication with display
-# !! deprecated since 20220216
-#
-sub amdgpudkms() {
-	my $module = shift;
-	my $action = shift;
-	my $wasInstalled = 1;
-	my $packageamdgpu_dkms_firmware;
-	my $packageamdgpu_dkms;
-	if ($action eq 'install') {
-		# check if the package is already installed
-		if( ! isPackageInstalled('amdgpu-dkms-firmware') ) {
-			messageLongInstall();
-			$wasInstalled = 0;
-			$packageamdgpu_dkms_firmware = installPackage('amdgpu-dkms-firmware');
-		} else {
-			$packageamdgpu_dkms_firmware = 1;
-		}
-		if( ! isPackageInstalled('amdgpu-dkms') ) {
-			messageLongInstall();
-			$wasInstalled = 0;
-			$packageamdgpu_dkms = installPackage('amdgpu-dkms');
-		} else {
-			$packageamdgpu_dkms = 1;
-		}
-
-		if( $packageamdgpu_dkms_firmware && $packageamdgpu_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
-			} else {
-				addToConfiguredModules($module, 'success');
-			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
-		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog('upgrade not necessary for packages', 'L1', '[INFO]');
-	}
-	if ($action eq 'remove') {
-		if (removeWarningMessage("amdgpu-dkms\n")) {
-			my $counter = 0;
-			if( isPackageInstalled('amdgpu-dkms') ) {
-				if (!deinstallSinglePackage('amdgpu-dkms')) {
-					$counter = $counter+1;
-				}
-			} else {
-				$counter = $counter+1;
-			}
-			if( isPackageInstalled('amdgpu-dkms-firmware') ) {
-				if (!deinstallSinglePackage('amdgpu-dkms-firmware')) {
-					$counter = $counter+1;
-				}
-			} else {
-				$counter = $counter+1;
-			}
-			if ($counter == 2) {
-				$origConfModules{$module}{installed} = 'no';
-				$origConfModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			} else {
-				$origConfModules{$module}{installed} = 'yes';
-				$origConfModules{$module}{upgraded} = 'no';
-				addToConfiguredModules($module, 'remove failed');
-			}
-		}
-	}
-}
-
-
-
-###############################################################################
 # Installs Linux device driver for several Realtek Ethernet controllers
 #
 sub r8168dkms() {
@@ -4462,17 +4325,6 @@ sub apportfix() {
 
 
 
-###############################################################################
-# Removes Linux device driver if installed and in configuration list
-# package is obsolete !!!
-#
-sub realtekr8125dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );	
-}
-
-
 
 ###############################################################################
 # Fixes backlight issue with BOE Model 2423 Serial Number 0 displays on
@@ -4485,16 +4337,6 @@ sub amdgpubacklightauxoff() {
 }
 
 
-
-
-###############################################################################
-# Fixes screen flickering when using some input devices
-#
-sub i915disablepsrfix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i915.enable_psr=0' );
-}
 
 
 
@@ -4511,20 +4353,6 @@ sub i915enablepsrfix() {
 	grubModuleEdit( $module, $action, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
 }
 
-
-
-
-###############################################################################
-# Fixes unresponsive touchpad 
-# - GMxTGxx
-#
-# obsolete
-#
-sub tuxedopinfixtgldkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-}
 
 
 
@@ -4908,57 +4736,6 @@ sub disablegucfix() {
 	}
 }
 
-
-
-###############################################################################
-# This is a temporary fix for systemd-backlight until
-# https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream
-#
-sub systemdbacklightfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval;
-	my $fileName = '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules';
-	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"# This is a temporary fix for systemd-backlight until https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream.\n".
-		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		if (-e $fileName) {
-			if (removeWarningMessage("systemd-backlight-fix\n")) {
-				printLog("removing $module", 'TL0', '[INFO]');
-				if (unlink($fileName)) {
-					printLog("$origConfModules{$module}{name} removed", 'TL0', '[INFO]');
-				} else {
-					printLog('can\'t remove fix', 'TL0', '[WARN]');
-				}
-				$origConfModules{$module}{installed} = 'no';
-				$origConfModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			}
-		} else {
-			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-			printLog("$origConfModules{$module}{name} was already removed", 'TL0', '[INFO]');
-		}
-	}
-}
 
 
 
@@ -7531,7 +7308,6 @@ sub readConfigIniValues {
 		$configIniValues = Config::Tiny->new;
 		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
 		if (defined $configIniValues->{debugMode}) {
-			#TODO debug
 			printLog("debugLevel before: $logLevel ValueFromIniFile: $configIniValues->{debugMode}", 'L2', '[DEBUG]');
 			$logLevel = $configIniValues->{loglevel};
 		}

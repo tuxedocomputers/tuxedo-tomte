@@ -108,9 +108,6 @@ msgstr "reconfigures grub according to grub file"
 msgid "updateInitramfs_description"
 msgstr "updates initramfs"
 
-msgid "i8042fix_description"
-msgstr "Fix for no-keyboard-present after boot on XC1711"
-
 msgid "nobootonbattery_description"
 msgstr "Fix for no-boot-on-battery on BA15"
 
@@ -140,12 +137,6 @@ msgstr "Adds TUXEDO maintained Ubuntu repositories"
 
 msgid "corefix_description"
 msgstr "ACPI mod for accurate cores recognition"
-
-msgid "threegfix_description"
-msgstr "Configuration needed to operate Huawei-ME936 (deprecated)"
-
-msgid "threegfix2_description"
-msgstr "Configuration needed to operate Huawei-ME906s (deprecated)"
 
 msgid "huaweime936fix_description"
 msgstr "Configuration needed to operate Huawei-ME936"
@@ -183,9 +174,6 @@ msgstr "Selects, installs and cleans up TUXEDO Linux kernels"
 msgid "nvidiadriver_description"
 msgstr "Required Nvidia drivers"
 
-msgid "amdgpudkms_description"
-msgstr "Enables AMD GPU and display to share configuration information"
-
 msgid "amdgpudisablepsr_description"
 msgstr "Disables PSR"
 
@@ -198,23 +186,11 @@ msgstr "Workaround to control OLED display brightness using dbus and xrandr"
 msgid "apportfix_description"
 msgstr "Workaround for undefined problems with apport"
 
-msgid "realtekr8125dkms_description"
-msgstr "Linux device driver for several Realtek Ethernet controllers [obsolete]"
-
 msgid "amdgpubacklightauxoff_description"
 msgstr "Fixes backlight control"
 
-msgid "i915disablepsrfix_description"
-msgstr "Fixes screen flickering when using some input devices"
-
 msgid "i915enablepsrfix_description"
 msgstr "Provides better battery life"
-
-msgid "tuxedopinfixtgldkms_description"
-msgstr "Fixes unresponsive touchpad"
-
-msgid "tuxedomicfix1_description"
-msgstr "Kernel audio module which fixes different issues with audio output"
 
 msgid "thunderboltbootdelayfix_description"
 msgstr "Solves kernel takes too long at loading thundebolt module at boot"
