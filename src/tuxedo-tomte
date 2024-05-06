@@ -2618,26 +2618,6 @@ sub huaweime906shpfix(){
 
 
 ###############################################################################
-# Creates a configuration to use Huawei-ME906s (old)
-# - if USB device 12d1:15c1 detected
-#
-sub threegfix2() {
-	my $module = shift;
-	my $action = shift;
-	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	if ($action eq 'remove') {
-		system "rm -rf $fileName2";
-		
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-}
-
-
-
-
-###############################################################################
 # Uniwill touchpad LED fix
 #
 sub tuxedotouchpadswitch() {
