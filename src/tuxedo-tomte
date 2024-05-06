@@ -3301,17 +3301,6 @@ sub apportfix() {
 
 
 
-###############################################################################
-# Removes Linux device driver if installed and in configuration list
-# package is obsolete !!!
-#
-sub realtekr8125dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );	
-}
-
-
 
 ###############################################################################
 # Fixes backlight issue with BOE Model 2423 Serial Number 0 displays on
