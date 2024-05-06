@@ -3248,16 +3248,6 @@ sub amdgpubacklightauxoff() {
 
 
 
-###############################################################################
-# Fixes screen flickering when using some input devices
-#
-sub i915disablepsrfix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i915.enable_psr=0' );
-}
-
-
 
 ###############################################################################
 # Provides better battery life
