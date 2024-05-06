@@ -3287,20 +3287,6 @@ sub i915enablepsrfix() {
 
 
 ###############################################################################
-# Fixes unresponsive touchpad 
-# - GMxTGxx
-#
-# obsolete
-#
-sub tuxedopinfixtgldkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-}
-
-
-
-###############################################################################
 # for reducing the timeout on loading the thunderbolt kernel module when
 # booting the system
 # - X170KM-G
