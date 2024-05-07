@@ -3782,25 +3782,20 @@ sub textboot() {
 	my $action = shift;
 	my @splashParameter = ('splash');
 	my @nosplashParameter = ('nosplash');
-	#TODO debug
-	printLog("textboot action: $action", 'L2', '[DEBUG]');
-	printLog("installed: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
-	printLog("upgraded: $origConfModules{$module}{upgraded}", 'L2', '[DEBUG]');
-	printLog("blocked: $origConfModules{$module}{blocked}", 'L2', '[DEBUG]');
-	printLog("configured: $configuredModules{$module}", 'L2', '[DEBUG]');
+	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters(@splashParameter);
 		grubModuleEdit( $module, $action, 'nosplash');
 	}
 	if ($action eq 'remove') {
-		removeKernelParameters(@nosplashParameter);
-		grubModuleEdit( $module, 'install', 'splash');
+		grubModuleEdit( $module, 'remove', @nosplashParameter);
+		$retPar = insertGrub($module, \@splashParameter);
+		if ($retPar) {
+			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
+		} else {
+			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
+		}
 	}
-	printLog("after", 'L2', '[DEBUG]');
-	printLog("installed: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
-	printLog("upgraded: $origConfModules{$module}{upgraded}", 'L2', '[DEBUG]');
-	printLog("blocked: $origConfModules{$module}{blocked}", 'L2', '[DEBUG]');
-	printLog("configured: $configuredModules{$module}", 'L2', '[DEBUG]');
 }
 
 
