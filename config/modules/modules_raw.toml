@@ -405,9 +405,9 @@ restart = ""
 version = 1
 
 
-[nosplashgrub]
+[textboot]
 LiveISO = "no"
-name = "nosplash-grub"
+name = "text-boot"
 postconf = "updateGrub"
 reconfigure = "always"
 restart = "yes"

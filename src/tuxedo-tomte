@@ -2102,8 +2102,8 @@ sub checkRequirements {
 	}
 
 	if ($distribution =~ /TUXEDO OS/) {
-		$origConfModules{nosplashgrub}{required} = 'yes';
-		printLog("detected $origConfModules{nosplashgrub}{name} issue", 'L1', '[INFO]');
+		$origConfModules{textboot}{required} = 'yes';
+		printLog("detected $origConfModules{textboot}{name} issue", 'L1', '[INFO]');
 	}
 }
 
@@ -3777,7 +3777,7 @@ sub tuxedoyt6801() {
 ###############################################################################
 # solves black screen after plasma6 upgrade
 #
-sub nosplashgrub() {
+sub textboot() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
