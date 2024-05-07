@@ -3784,8 +3784,8 @@ sub textboot() {
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		removeKernelParameters(@splashParameter);
-		grubModuleEdit( $module, $action, 'nosplash');
+		removeKernelParameters($module, @splashParameter);
+		grubModuleEdit($module, $action, 'nosplash');
 	}
 	if ($action eq 'remove') {
 		grubModuleEdit( $module, 'remove', @nosplashParameter);
