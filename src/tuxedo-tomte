@@ -2100,6 +2100,11 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
 		}
 	}
+
+	if ($distribution =~ /TUXEDO OS/) {
+		$origConfModules{nosplashgrub}{required} = 'yes';
+		printLog("detected $origConfModules{nosplashgrub}{name} issue", 'L1', '[INFO]');
+	}
 }
 
 
@@ -3765,6 +3770,26 @@ sub tuxedoyt6801() {
 	my $action = shift;
 	debianPackageModule( $module, $action );
 }
+
+
+
+
+###############################################################################
+# solves black screen after plasma6 upgrade
+#
+sub nosplashgrub() {
+	my $module = shift;
+	my $action = shift;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		grubModuleEdit( $module, 'remove', 'splash');
+		grubModuleEdit( $module, $action, 'nosplash');
+	}
+	if ($action eq 'remove') {
+		grubModuleEdit( $module, 'remove', 'splash');
+		grubModuleEdit( $module, 'install', 'splash');
+	}
+}
+
 
 
 

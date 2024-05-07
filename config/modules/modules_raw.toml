@@ -405,3 +405,11 @@ restart = ""
 version = 1
 
 
+[nosplashgrub]
+LiveISO = "no"
+name = "nosplash-grub"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+blocked = "yes"
+
