@@ -6880,23 +6880,28 @@ sub newHwid {
 sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
-	$configuredModules{$module} = $status;
-	if ($status =~ /failed/) {
-		printLog("failed to install $origConfModules{$module}{name}", 'L0', '[ERROR]');
-	} elsif ($status =~ /success/) {
-		printLog("succesfully installed $origConfModules{$module}{name}", 'L0', '[INFO]');
-	} elsif ($status =~ /removed/) {
-		if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
-			printLog("succesfully removed $origConfModules{$module}{name}", 'L0', '[INFO]');
-			print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
-			print "\$ sudo tomte block $origConfModules{$module}{name}\n";
-			print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
-			print "or tomte will reinstall it again at the next start\n";
+	if (defined($module) && ($module ne '')) {
+		$configuredModules{$module} = $status;
+		if ($status =~ /failed/) {
+			printLog("failed to install $origConfModules{$module}{name}", 'L0', '[ERROR]');
+		} elsif ($status =~ /success/) {
+			printLog("succesfully installed $origConfModules{$module}{name}", 'L0', '[INFO]');
+		} elsif ($status =~ /removed/) {
+			if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
+				printLog("succesfully removed $origConfModules{$module}{name}", 'L0', '[INFO]');
+				print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
+				print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+				print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
+				print "or tomte will reinstall it again at the next start\n";
+			}
+		} elsif ($status =~ /remove failed/) {
+			printLog("failed to remove $origConfModules{$module}{name}", 'L0', '[ERROR]');
+		} elsif ($status =~ /nothingToDo/) {
+			printLog("nothing to do for $origConfModules{$module}{name}", 'L0', '[INFO]');
 		}
-	} elsif ($status =~ /remove failed/) {
-		printLog("failed to remove $origConfModules{$module}{name}", 'L0', '[ERROR]');
-	} elsif ($status =~ /nothingToDo/) {
-		printLog("nothing to do for $origConfModules{$module}{name}", 'L0', '[INFO]');
+	} else {
+		printLog("modules not defined at addToConfiguredModules", 'L2', '[ERROR]');
+		return (0);
 	}
 }
 
