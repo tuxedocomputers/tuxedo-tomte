@@ -3780,14 +3780,27 @@ sub tuxedoyt6801() {
 sub textboot() {
 	my $module = shift;
 	my $action = shift;
+	my @splashParameter = ('splash');
+	my @nosplashParameter = ('nosplash');
+	#TODO debug
+	printLog("textboot action: $action", 'L2', '[DEBUG]');
+	printLog("installed: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
+	printLog("upgraded: $origConfModules{$module}{upgraded}", 'L2', '[DEBUG]');
+	printLog("blocked: $origConfModules{$module}{blocked}", 'L2', '[DEBUG]');
+	printLog("configured: $configuredModules{$module}", 'L2', '[DEBUG]');
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		grubModuleEdit( $module, 'remove', 'splash');
+		removeKernelParameters(@splashParameter);
 		grubModuleEdit( $module, $action, 'nosplash');
 	}
 	if ($action eq 'remove') {
-		grubModuleEdit( $module, 'remove', 'splash');
+		removeKernelParameters(@nosplashParameter);
 		grubModuleEdit( $module, 'install', 'splash');
 	}
+	printLog("after", 'L2', '[DEBUG]');
+	printLog("installed: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
+	printLog("upgraded: $origConfModules{$module}{upgraded}", 'L2', '[DEBUG]');
+	printLog("blocked: $origConfModules{$module}{blocked}", 'L2', '[DEBUG]');
+	printLog("configured: $configuredModules{$module}", 'L2', '[DEBUG]');
 }
 
 
@@ -5629,7 +5642,7 @@ sub removeDebianModule {
 
 ###############################################################################
 # removes kernel parameter from grub
-# removeKernelParameters($module, @kernelParamaters)
+# removeKernelParameters($module, @kernelParameters)
 # returns amount of parameters found
 # returns 0 if nothing found or changed
 #
