@@ -3784,7 +3784,7 @@ sub textboot() {
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		removeKernelParameters($module, 0, @splashParameter);
+		removeKernelParameters($module, 1, @splashParameter);
 		grubModuleEdit($module, $action, @nosplashParameter);
 	}
 	if ($action eq 'remove') {
@@ -7167,6 +7167,7 @@ sub reconfigureSingleModule {
 		($origConfModules{$module}{required} ne 'prerequisite') &&
    		($mode ne 'DONT_CONFIGURE') &&
 		($mode ne 'UPDATES_ONLY')) {
+		printLog("module $module is blocked", 'L2', '[INFO]');
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 		if ($LiveISO) {
@@ -7178,6 +7179,7 @@ sub reconfigureSingleModule {
 	if (($origConfModules{$module}{required} eq 'no') &&
 		($configuredModules{$module} ne 'remove failed') &&
 		($configuredModules{$module} ne 'removed')) {
+		printLog("module $module is not required by this system", 'L2', '[INFO]');
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
