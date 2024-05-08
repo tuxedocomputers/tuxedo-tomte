@@ -3787,13 +3787,16 @@ sub textboot() {
 	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		printLog("before removeKernelParameter: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
-		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("installed: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 		removeKernelParameters($module, 1, @splashParameter);
 		printLog("after removeKernelParameter: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
 		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 		grubModuleEdit($module, $action, @nosplashParameter);
 		printLog("after grubModuleEdit: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
 		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 	}
 	if ($action eq 'remove') {
 		grubModuleEdit( $module, $action, @nosplashParameter);
@@ -6398,11 +6401,9 @@ sub writeConfigFile {
 	writeConfigIniFile();
 
 	#TODO debug
-	print Dumper($configIniValues);
 	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1', '[INFO]');
-		print "origConfModules\n";
 		print Dumper(\%origConfModules);
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
@@ -6445,8 +6446,7 @@ sub writeConfigFile {
 			}
 		}
 		close $FH;
-	#TODO debug
-	print Dumper($configIniValues);
+		printLog("$configFile successfully written", 'L2', '[DEBUG]');
 	} else {
 		printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
@@ -8289,14 +8289,18 @@ if (@ARGV != 0) {
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 		printLog("installed before configuresinglemodule: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				configureSingleModule($argValue{module});
 				#TODO debug
 		printLog("installed before postconfigure: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				postConfigure();
 		printLog("installed before listsuccess: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 
 				listSuccess();
 		printLog("installed before writeconfig: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
+		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
