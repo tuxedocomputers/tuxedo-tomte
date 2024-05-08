@@ -4418,7 +4418,10 @@ sub grubModuleEdit {
 	}
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
+		#TODO debug
+		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
 		$retVal = insertGrub($module, \@kernelParameters);
+		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
 			$origConfModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
