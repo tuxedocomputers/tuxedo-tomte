@@ -3786,8 +3786,14 @@ sub textboot() {
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
+		printLog("before removeKernelParameter: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
+		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 		removeKernelParameters($module, 1, @splashParameter);
+		printLog("after removeKernelParameter: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
+		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 		grubModuleEdit($module, $action, @nosplashParameter);
+		printLog("after grubModuleEdit: Dumper(\%origConfModules)", 'L2', '[DEBUG]');
+		printLog("installe: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 	}
 	if ($action eq 'remove') {
 		grubModuleEdit( $module, $action, @nosplashParameter);
@@ -6396,6 +6402,8 @@ sub writeConfigFile {
 	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1', '[INFO]');
+		print "origConfModules\n";
+		print Dumper(\%origConfModules);
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
@@ -8280,15 +8288,15 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-		printLog("installed before configuresinglemodule: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
+		printLog("installed before configuresinglemodule: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 				configureSingleModule($argValue{module});
 				#TODO debug
-		printLog("installed before postconfigure: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
+		printLog("installed before postconfigure: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 				postConfigure();
-		printLog("installed before listsuccess: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
+		printLog("installed before listsuccess: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 
 				listSuccess();
-		printLog("installed before writeconfig: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
+		printLog("installed before writeconfig: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
 				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
