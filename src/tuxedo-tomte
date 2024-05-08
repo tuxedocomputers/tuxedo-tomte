@@ -4429,9 +4429,7 @@ sub grubModuleEdit {
 	}
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
-		#TODO debug
 		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
-		printLog("installed before insert: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
 		$retVal = insertGrub($module, \@kernelParameters);
 		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
@@ -5690,7 +5688,6 @@ sub removeKernelParameters {
 			}
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
-			#TODO debug
 			# temp removing for testing
 			#$origConfModules{$module}{required} = "no";
 			if ($counter > 0) {
@@ -6402,11 +6399,9 @@ sub writeConfigFile {
 	}
 	writeConfigIniFile();
 
-	#TODO debug
 	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1', '[INFO]');
-		print Dumper(\%origConfModules);
 		print $FH "# name version installed blocked required hwid\n";
 		foreach my $name (sort keys %origConfModules) {
 			# values have to be same as in readConfigFile
@@ -6415,11 +6410,13 @@ sub writeConfigFile {
 					# upgrade available
 					if ($origConfModules{$name}{upgraded} eq 'yes') {
 						# upgrade was executed
+						printLog("upgrade was executed", 'L2', '[DEBUG]');
 						$version = $origConfModules{$name}{version};
 						$hwid = $origConfModules{$name}{hwid};
 						$installed = $origConfModules{$name}{installed};
 					} else {
 						# upgrade was not executed
+						printLog("upgrade was not executed", 'L2', '[DEBUG]');
 						if ( $origConfModules{$name}{installed} eq 'yes' ) {
 							$version = $localConfModules{$name}{version};
 							$hwid = $localConfModules{$name}{hwid};
@@ -6432,6 +6429,7 @@ sub writeConfigFile {
 					}
 				} else {
 					# no upgrade available
+					printLog("no upgrade available", 'L2', '[DEBUG]');
 					$version = $origConfModules{$name}{version};
 					$hwid = $origConfModules{$name}{hwid};
 					$installed = $origConfModules{$name}{installed};
@@ -8290,19 +8288,10 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-		printLog("installed before configuresinglemodule: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
-		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				configureSingleModule($argValue{module});
-				#TODO debug
-		printLog("installed before postconfigure: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
-		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				postConfigure();
-		printLog("installed before listsuccess: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
-		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 
 				listSuccess();
-		printLog("installed before writeconfig: $origConfModules{textboot}{installed}", 'L2', '[DEBUG]');
-		printLog("required: $origConfModules{textboot}{required}", 'L2', '[DEBUG]');
 				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
