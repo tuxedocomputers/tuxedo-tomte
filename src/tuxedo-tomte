@@ -5985,7 +5985,7 @@ sub insertGrub {
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 
-	if ($$line =~ /$$parameter/) {
+	if (($$line =~ /^$$parameter /) || ($$line =~ /^$$parameter$/) || ($$line =~ / $$parameter$/) || ($$line =~ / $$parameter /)) {
 		return (0);
 	}
 	if ($$line =~ /""/) {
