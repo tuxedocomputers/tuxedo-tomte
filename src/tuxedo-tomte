@@ -5690,7 +5690,9 @@ sub removeKernelParameters {
 			}
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
-			$origConfModules{$module}{required} = "no";
+			#TODO debug
+			# temp removing for testing
+			#$origConfModules{$module}{required} = "no";
 			if ($counter > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			}
