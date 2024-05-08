@@ -28,6 +28,12 @@ use File::Slurp qw(append_file write_file read_file edit_file);
 # for debugging
 use Data::Dumper;
 
+use Exporter 'import';
+
+our @EXPORTER_OK = qw( %supportedOS %tuxedo_repos %tuxedo_mirrors %flavours %tuxedo_devices %origConfModules );
+
+
+
 
 
 our %supportedOS = (

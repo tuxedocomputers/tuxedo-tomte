@@ -31,7 +31,7 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
-use Tomte::Presets qw<%tuxedo_devices>;
+use Tomte::Presets qw(%tuxedo_devices);
 #require Tomte::Presets;
 
 # for file locking
