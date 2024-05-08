@@ -68,6 +68,8 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+printLog("##############################################################################", 'L0', '[INFO]');
+
 checkAndSetLocale();
 
 ###############################################################################
@@ -4420,6 +4422,7 @@ sub grubModuleEdit {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		#TODO debug
 		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
+		printLog("installed before insert: $origConfModules{$module}{installed}", 'L2', '[DEBUG]');
 		$retVal = insertGrub($module, \@kernelParameters);
 		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
@@ -6131,7 +6134,6 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("#####################################################", 'L0', '[INFO]');
 			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
 				printLog('in FAI mode', 'L0', '[INFO]');
@@ -6389,6 +6391,8 @@ sub writeConfigFile {
 	}
 	writeConfigIniFile();
 
+	#TODO debug
+	print Dumper($configIniValues);
 	renameOldConfigFile();
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1', '[INFO]');
@@ -6433,6 +6437,8 @@ sub writeConfigFile {
 			}
 		}
 		close $FH;
+	#TODO debug
+	print Dumper($configIniValues);
 	} else {
 		printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
@@ -8274,9 +8280,15 @@ if (@ARGV != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
+		printLog("installed before configuresinglemodule: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
 				configureSingleModule($argValue{module});
+				#TODO debug
+		printLog("installed before postconfigure: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
 				postConfigure();
+		printLog("installed before listsuccess: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
+
 				listSuccess();
+		printLog("installed before writeconfig: $origConfModules{textgrub}{installed}", 'L2', '[DEBUG]');
 				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
