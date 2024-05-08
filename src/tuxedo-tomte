@@ -3792,11 +3792,11 @@ sub textboot() {
 	if ($action eq 'remove') {
 		grubModuleEdit( $module, $action, @nosplashParameter);
 		$retPar = insertGrub($module, \@splashParameter);
-		if ($retPar) {
-			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
-		} else {
+		if ($retPar >= 1) {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
 			block('text-boot');
+		} else {
+			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
 		}
 	}
 }
