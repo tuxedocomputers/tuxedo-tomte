@@ -3796,6 +3796,7 @@ sub textboot() {
 			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
 		} else {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
+			block('text-boot');
 		}
 	}
 }
@@ -7195,6 +7196,7 @@ sub reconfigureSingleModule {
 
 ###############################################################################
 # blocks a module
+# block( $moduleName )
 #
 sub block {
 	my $moduleName = shift;
