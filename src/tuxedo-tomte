@@ -2158,7 +2158,7 @@ sub findPciDevice {
 sub i8042noauxfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.noaux');
+	grubModuleEdit( $module, $action, 0, 'i8042.noaux');
 }
 
 
@@ -2174,7 +2174,7 @@ sub i8042noauxfix() {
 sub nobootonbattery() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, 'remove', 'iommu=soft');
+	grubModuleEdit( $module, 'remove', 0, 'iommu=soft');
 }
 
 
@@ -2193,7 +2193,7 @@ sub nobootonbattery() {
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'xhci_hcd.quirks=1073741824');
+	grubModuleEdit( $module, $action, 0, 'xhci_hcd.quirks=1073741824');
 }
 
 
@@ -2203,7 +2203,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 sub amdgpudisablepsr() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'amdgpu.dcdebugmask=0x10');
+	grubModuleEdit( $module, $action, 0, 'amdgpu.dcdebugmask=0x10');
 }
 
 
@@ -2307,7 +2307,7 @@ sub tuxedokeyboard() {
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
+	grubModuleEdit( $module, $action, 0, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
 }
 
 
@@ -2321,7 +2321,7 @@ sub nokeyboardaftersuspendfix() {
 sub backlightfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i915.enable_dpcd_backlight=1');
+	grubModuleEdit( $module, $action, 0, 'i915.enable_dpcd_backlight=1');
 }
 
 
@@ -3255,7 +3255,7 @@ sub apportfix() {
 sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'amdgpu.backlight=0' );
+	grubModuleEdit( $module, $action, 0, 'amdgpu.backlight=0' );
 }
 
 
@@ -3272,7 +3272,7 @@ sub i915enablepsrfix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		edit_file { s/i915\.enable_psr=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
+	grubModuleEdit( $module, $action, 0, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
 }
 
 
@@ -3290,7 +3290,7 @@ sub thunderboltbootdelayfix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'modprobe.blacklist=thunderbolt');
+	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
 }
 
 
@@ -3366,7 +3366,7 @@ sub nvidiabacklightcontrolfix() {
 		edit_file { s/ NVreg_RegistryDwords=EnableBacklightHandler=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
 		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
+	grubModuleEdit( $module, $action, 0, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
 }
 
 
@@ -3540,7 +3540,7 @@ sub samsungnvmefix() {
 sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'mem_sleep_default=deep' );
+	grubModuleEdit( $module, $action, 0, 'mem_sleep_default=deep' );
 }
 
 
@@ -3602,7 +3602,7 @@ sub intelgenXIIIpowerctlfix() {
 sub acpibacklightvideofix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'acpi_backlight=video');
+	grubModuleEdit( $module, $action, 0, 'acpi_backlight=video');
 }
 
 
@@ -3787,10 +3787,10 @@ sub textboot() {
 	my $retPar;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters($module, 1, @splashParameter);
-		grubModuleEdit($module, $action, @nosplashParameter);
+		grubModuleEdit($module, $action, 0, @nosplashParameter);
 	}
 	if ($action eq 'remove') {
-		grubModuleEdit( $module, $action, @nosplashParameter);
+		grubModuleEdit( $module, $action, 0, @nosplashParameter);
 		$retPar = insertGrub($module, \@splashParameter);
 		if ($retPar >= 1) {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
@@ -4410,10 +4410,12 @@ sub createFile {
 
 ###############################################################################
 # add's, upgrades or deletes entries into the grub file /etc/default/grub
-# grubModuleEdit( module, install|upgrade|remove, kernelParameter|... );
+# grubModuleEdit( module, silent, install|upgrade|remove, kernelParameter|... );
+# where $silent = 0 means normal operation and
+# $silent = 1 means that it will not activate addToConfiguredModules
 #
 sub grubModuleEdit {
-	my ($module, $action, @kernelParameters) = @_;
+	my ($module, $action, $silent, @kernelParameters) = @_;
 	my $retVal;
 	if ($LiveISO) {
 		printLog("not changing grub for $module as this is a LiveISO", 'L0', '[INFO]');
@@ -4426,16 +4428,22 @@ sub grubModuleEdit {
 		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
 			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+			unless ($silent) {
+				addToConfiguredModules($module, "failed");
+			}
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			if ($retVal > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
+				unless ($silent) {
+					addToConfiguredModules($module, "success");
+				}
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
+				unless ($silent) {
+					addToConfiguredModules($module, "nothingToDo");
+				}
 			}
 		}
 	}
@@ -4444,22 +4452,28 @@ sub grubModuleEdit {
 		$retVal = insertGrub($module, \@kernelParameters);
 		if ($retVal < 0) {
 			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+			unless ($silent) {
+				addToConfiguredModules($module, "failed");
+			}
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			if ($retVal > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
+				unless ($silent) {
+					addToConfiguredModules($module, "success");
+				}
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
+				unless ($silent) {
+					addToConfiguredModules($module, "nothingToDo");
+				}
 			}
 		}
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
-			removeKernelParameters($module, 0, @kernelParameters);
+			removeKernelParameters($module, $silent, @kernelParameters);
 		}
 	}
 }
@@ -5978,20 +5992,28 @@ sub insertGrub {
 
 ###############################################################################
 # inserts a parameter into a grub line
+# the line must begin with: 'GRUB_CMDLINE_LINUX_DEFAULT='
 # if the parameter is not present yet
 # returns 1 if parameter inserted
 # returns 0 if parameter already present
+# returns -1 if line is wrong
 #
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
+	my $cleanLine;
 
-	if (($$line =~ /^$$parameter /) || ($$line =~ /^$$parameter$/) || ($$line =~ / $$parameter$/) || ($$line =~ / $$parameter /)) {
-		return (0);
+	unless ($$line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=/) {
+		printLog("grub kernel parameter line is malformed, can't insert $$parameter", 'L0', '[ERROR]');
+		return (-1);
 	}
-	if ($$line =~ /""/) {
-		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
-		return (1);
+
+	#TODO debug
+	$cleanLine = $$line =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//;
+	printLog("cleanLine: $cleanLine", 'L2', '[DEBUG]');
+
+	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
+		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
+		return (0);
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
 		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
