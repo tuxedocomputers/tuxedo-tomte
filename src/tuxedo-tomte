@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -6007,18 +6007,14 @@ sub insertGrubParameter {
 		return (-1);
 	}
 
-	#TODO debug 1
 	$cleanLine = $$line;
 	$cleanLine =~ s/"\R//;
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT="//;
-	printLog("line: $$line", 'L2', '[DEBUG]');
-	printLog("cleanLine: $cleanLine", 'L2', '[DEBUG]');
 
 	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
-		printLog("line before insert: $$line parameter: $$parameter", 'L2', '[DEBUG]');
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
