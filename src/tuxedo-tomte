@@ -3790,7 +3790,7 @@ sub textboot() {
 		grubModuleEdit($module, $action, 0, @nosplashParameter);
 	}
 	if ($action eq 'remove') {
-		grubModuleEdit( $module, $action, 0, @nosplashParameter);
+		grubModuleEdit( $module, $action, 1, @nosplashParameter);
 		$retPar = insertGrub($module, \@splashParameter);
 		if ($retPar >= 1) {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
@@ -6008,15 +6008,19 @@ sub insertGrubParameter {
 	}
 
 	#TODO debug
-	$cleanLine = $$line =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//;
+	$cleanLine = $$line;
+	$cleanLine =~ s/"\R//;
+	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT="//;
+	printLog("line: $$line", 'L2', '[DEBUG]');
 	printLog("cleanLine: $cleanLine", 'L2', '[DEBUG]');
 
 	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
+		printLog("line before insert: $$line parameter: $$parameter", 'L2', '[DEBUG]');
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
+		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
 	}
 }
