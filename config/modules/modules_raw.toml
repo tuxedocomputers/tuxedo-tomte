@@ -405,3 +405,11 @@ restart = ""
 version = 1
 
 
+[textboot]
+LiveISO = "no"
+name = "text-boot"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+blocked = "yes"
+
