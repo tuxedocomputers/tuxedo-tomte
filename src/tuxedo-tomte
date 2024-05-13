@@ -31,7 +31,7 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
-use Tomte::Presets qw(%tuxedo_devices);
+use Tomte::Presets qw( %tuxedo_devices );
 #require Tomte::Presets;
 
 # for file locking
@@ -246,7 +246,7 @@ my %postConfProgram = (
 #
 sub printTuxedoDevices {
 	my $ID;
-	foreach $ID (keys %tuxedo_devices) {
+	foreach $ID (keys Presets::%tuxedo_devices) {
 		if ((defined $tuxedo_devices{$ID}) && ($tuxedo_devices{$ID} ne '') && (exists $tuxedo_devices{$ID})) {
 			printIfExistsNotUndefinedNotEmpty("$ID", "model");
 			printIfExistsNotUndefinedNotEmpty("$ID", "board_name");
