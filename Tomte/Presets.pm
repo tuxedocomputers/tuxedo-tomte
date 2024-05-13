@@ -1999,6 +1999,28 @@ our %origConfModules = (
 		FAI => 'no',
 		LiveISO => 'no',
 	},
+	textgrub => {
+		name => 'text-grub',
+		version => 1,
+		installed => 'no',
+		blocked => 'yes',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('textgrub_description'),
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
+	},
+
 );
 
 1;
