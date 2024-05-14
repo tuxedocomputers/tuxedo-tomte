@@ -2858,7 +2858,7 @@ sub tuxedoyt6801() {
 ###############################################################################
 # solves black screen after plasma6 upgrade
 #
-sub textboot() {
+sub textgrub() {
 	my $module = shift;
 	my $action = shift;
 	my @splashParameter = ('splash');
