@@ -1,3 +1,34 @@
+tuxedo-tomte (2.33.1) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * change http to https in tuxedo-ubuntu-mirrors.list
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 13 May 2024 21:19:43 +0200
+
+tuxedo-tomte (2.33.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * added module text-grub for nosplash grub kernel parameter
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 10 May 2024 17:18:01 +0200
+
+tuxedo-tomte (2.32.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * added modifying loglevel on CLI
+  * added tuxedoyt6801 for devices with PCI ID: 1f0a:6801
+  * removed module amdgpudkms
+  * removed module realtekr8125dkms
+  * removed module threegfix
+  * removed module threegfix2
+  * removed module tuxedomicfix1
+  * removed module tuxedopinfixtgldkms
+  * removed module i8042fix
+  * removed module i915disablepsrfix
+  * removed workaround for systemdbacklightfix from 24.04
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 06 May 2024 17:39:31 +0200
+
 tuxedo-tomte (2.31.0) jammy; urgency=medium
 
   [ E. Mohr ]

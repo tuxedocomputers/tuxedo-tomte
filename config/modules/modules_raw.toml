@@ -78,20 +78,13 @@ postconf = "updateGrub"
 reconfigure = "always"
 restart = "yes"
 
+
 [amdgpudisablepsr]
 LiveISO = "no"
 name = "amdgpu-disable-psr"
 postconf = "updateGrub"
 reconfigure = "always"
 restart = "yes"
-
-
-[amdgpudkms]
-dkms = "yes"
-hwid = 3
-name = "amdgpu-dkms"
-package = "yes"
-restart = ""
 
 
 [amdgpuwithnvidiafix]
@@ -194,15 +187,6 @@ restart = "yes"
 version = 2
 
 
-[i8042fix]
-LiveISO = "no"
-name = "i8042-fix"
-postconf = "updateGrub"
-reconfigure = "always"
-restart = "yes"
-version = 2
-
-
 [i8042noauxfix]
 LiveISO = "no"
 name = "i8042noaux-fix"
@@ -210,15 +194,6 @@ postconf = "updateGrub"
 reconfigure = "always"
 restart = "yes"
 version = 2
-
-
-[i915disablepsrfix]
-LiveISO = "no"
-hwid = 2
-name = "i915-disable-psr-fix"
-postconf = "updateGrub"
-reconfigure = "always"
-restart = "yes"
 
 
 [i915enablepsrfix]
@@ -308,14 +283,6 @@ restart = ""
 version = 3
 
 
-[realtekr8125dkms]
-dkms = "yes"
-name = "realtek-r8125-dkms"
-package = "yes"
-restart = ""
-version = 3
-
-
 [samsungnvmefix]
 name = "samsung-nvme-fix"
 restart = "yes"
@@ -336,18 +303,6 @@ version = 1
 LiveISO = "no"
 name = "systemd-backlight-fix"
 restart = "yes"
-
-
-[threegfix]
-name = "threeg-fix"
-restart = "yes"
-version = 2
-
-
-[threegfix2]
-name = "threeg-fix2"
-restart = "yes"
-version = 2
 
 
 [thunderboltbootdelayfix]
@@ -391,14 +346,6 @@ package = "yes"
 restart = ""
 
 
-[tuxedomicfix1]
-dkms = "yes"
-hwid = 2
-name = "tuxedo-micfix1"
-package = "yes"
-restart = "yes"
-
-
 [tuxedomirrors]
 name = "tuxedo-mirrors"
 order = "first"
@@ -417,13 +364,6 @@ version = 2
 
 [tuxedooledbrt]
 name = "tuxedo-oled-brt"
-package = "yes"
-restart = "yes"
-
-
-[tuxedopinfixtgldkms]
-dkms = "yes"
-name = "tuxedo-pinfix-tgl-dkms"
 package = "yes"
 restart = "yes"
 
@@ -471,4 +411,12 @@ package = "yes"
 restart = ""
 version = 1
 
+
+[textboot]
+LiveISO = "no"
+name = "text-boot"
+postconf = "updateGrub"
+reconfigure = "always"
+restart = "yes"
+blocked = "yes"
 

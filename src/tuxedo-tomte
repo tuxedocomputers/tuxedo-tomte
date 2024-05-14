@@ -58,7 +58,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -69,6 +69,8 @@ $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
+printLog("##############################################################################", 'L0', '[INFO]');
+
 checkAndSetLocale();
 
 ###############################################################################
@@ -100,6 +102,11 @@ my $oldConfigFile = $configDir.'tomte.cfg';
 my $configFile = $configDir.'modules.cfg';
 my $configIniFile = $configDir.'config.ini';
 my $configIniValues = Config::Tiny->new;
+readConfigIniValues();
+if (defined($configIniValues->{initvalues}->{loglevel})) {
+	$logLevel = $configIniValues->{initvalues}->{loglevel};
+}
+$logLevel = $ENV{LOGLEVEL} // $logLevel;
 my $tomteFirstInstallFile = '/tmp/tomteFirstInstall';
 
 my %modeFile = (
@@ -1072,17 +1079,6 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	'64' => {
-		model => ['all notebooks'],
-		board_name => [''],
-		fix => ['systemdbacklightfix'],
-		flavour => ['18.04', '20.04', '22.04', '24.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
 	'65' => {
 		model => ['all Elementary OS'],
 		board_name => [''],
@@ -1571,18 +1567,22 @@ sub readOSData {
 	}
 	foreach ( @osReleaseLines ) {
 		if ( $_ =~ /^NAME=/ ) {
+			# e.g. Ubuntu
 			$_ =~ /NAME=\"(.*)\"/;
 			$distribution = $1;
 		}
 		if ( $_ =~ /^VERSION_ID=/ ) {
+			# e.g. 22.04
 			$_ =~ /VERSION_ID=\"(.*)\"/;
 			$distributionVersionID = $1;
 		}
 		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
+			# e.g. jammy
 			$_ =~ /UBUNTU_CODENAME=(.*)/;
 			$ubuntuCodename = $1;
 		}
 		if ( $_ =~ /^VERSION=/ ) {
+			# e.g. 22.04.4 LTS (Jammy Jellyfish)
 			$_ =~ /VERSION=\"(.*)\"/;
 			$distributionVersion = $1;
 		}
@@ -1841,7 +1841,9 @@ sub checkRequirements {
 	# all notebooks require this
 	# the temporary fix has to be removed for now as it causes boot delay issues
 	# on some notebooks
-	if ($chassisType eq 'notebook') {
+	# not necessary on 24.04
+	# when deleting this workaround, also delete the module entry from the config
+	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/))) {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $origConfModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$origConfModules{systemdbacklightfix}{required} = 'no';
@@ -1900,12 +1902,6 @@ sub checkRequirements {
 		$origConfModules{fingerprintreader}{required} = 'yes';
 		printLog("detected $origConfModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
 		last;
-	}
-
-	my @tuxedomicfix1Devices = ();
-	if ( findPciDevice($lspciOutput, @tuxedomicfix1Devices) ) {
-		$origConfModules{tuxedomicfix1}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedomicfix1}{name} issue", 'L1', '[INFO]');
 	}
 
 	if ($boardname =~ m/N350TW/) {
@@ -2122,6 +2118,11 @@ sub checkRequirements {
 			printLog("detected $origConfModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
 		}
 	}
+
+	if ($distribution =~ /TUXEDO OS/) {
+		$origConfModules{textboot}{required} = 'yes';
+		printLog("detected $origConfModules{textboot}{name} issue", 'L1', '[INFO]');
+	}
 }
 
 
@@ -2168,23 +2169,12 @@ sub findPciDevice {
 
 
 ###############################################################################
-# for keyboard not present on boot
-#
-sub i8042fix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.nopnp');
-}
-
-
-
-###############################################################################
 # for touchpad problems
 #
 sub i8042noauxfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.noaux');
+	grubModuleEdit( $module, $action, 0, 'i8042.noaux');
 }
 
 
@@ -2200,7 +2190,7 @@ sub i8042noauxfix() {
 sub nobootonbattery() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, 'remove', 'iommu=soft');
+	grubModuleEdit( $module, 'remove', 0, 'iommu=soft');
 }
 
 
@@ -2219,7 +2209,7 @@ sub nobootonbattery() {
 sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'xhci_hcd.quirks=1073741824');
+	grubModuleEdit( $module, $action, 0, 'xhci_hcd.quirks=1073741824');
 }
 
 
@@ -2229,7 +2219,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 sub amdgpudisablepsr() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'amdgpu.dcdebugmask=0x10');
+	grubModuleEdit( $module, $action, 0, 'amdgpu.dcdebugmask=0x10');
 }
 
 
@@ -2333,7 +2323,7 @@ sub tuxedokeyboard() {
 sub nokeyboardaftersuspendfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
+	grubModuleEdit( $module, $action, 0, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
 }
 
 
@@ -2347,7 +2337,7 @@ sub nokeyboardaftersuspendfix() {
 sub backlightfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'i915.enable_dpcd_backlight=1');
+	grubModuleEdit( $module, $action, 0, 'i915.enable_dpcd_backlight=1');
 }
 
 
@@ -2637,44 +2627,6 @@ sub huaweime906shpfix(){
 
 
 
-###############################################################################
-# Creates a configuration to use Huawei-ME936 (old)
-# - if USB device 12d1:15bb detected
-#
-sub threegfix() {
-	my $module = shift;
-	my $action = shift;
-	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	if ($action eq 'remove') {
-		system "rm -rf $fileName2";
-		
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-}
-
-
-
-###############################################################################
-# Creates a configuration to use Huawei-ME906s (old)
-# - if USB device 12d1:15c1 detected
-#
-sub threegfix2() {
-	my $module = shift;
-	my $action = shift;
-	my $fileName2 = '/etc/udev/rules.d/77-mm-huawei-configuration.rules';
-	if ($action eq 'remove') {
-		system "rm -rf $fileName2";
-		
-		$origConfModules{$module}{installed} = 'no';
-		$origConfModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-}
-
-
-
 
 ###############################################################################
 # Uniwill touchpad LED fix
@@ -2876,17 +2828,6 @@ sub fingerprintreader() {
 			}
 		}
 	}
-}
-
-
-
-###############################################################################
-# tuxedo-micfix1
-#
-sub tuxedomicfix1() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
 }
 
 
@@ -3350,82 +3291,6 @@ sub nvidiadriver() {
 
 
 ###############################################################################
-# Fixes AMD GPU frequency communication with display
-# !! deprecated since 20220216
-#
-sub amdgpudkms() {
-	my $module = shift;
-	my $action = shift;
-	my $wasInstalled = 1;
-	my $packageamdgpu_dkms_firmware;
-	my $packageamdgpu_dkms;
-	if ($action eq 'install') {
-		# check if the package is already installed
-		if( ! isPackageInstalled('amdgpu-dkms-firmware') ) {
-			messageLongInstall();
-			$wasInstalled = 0;
-			$packageamdgpu_dkms_firmware = installPackage('amdgpu-dkms-firmware');
-		} else {
-			$packageamdgpu_dkms_firmware = 1;
-		}
-		if( ! isPackageInstalled('amdgpu-dkms') ) {
-			messageLongInstall();
-			$wasInstalled = 0;
-			$packageamdgpu_dkms = installPackage('amdgpu-dkms');
-		} else {
-			$packageamdgpu_dkms = 1;
-		}
-
-		if( $packageamdgpu_dkms_firmware && $packageamdgpu_dkms ) {
-			if ($wasInstalled) {
-				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
-			} else {
-				addToConfiguredModules($module, 'success');
-			}
-			$origConfModules{$module}{installed} = 'yes';
-			$origConfModules{$module}{upgraded} = 'yes';
-		} else {
-			$origConfModules{$module}{installed} = 'failed';
-			addToConfiguredModules($module, 'failed');
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog('upgrade not necessary for packages', 'L1', '[INFO]');
-	}
-	if ($action eq 'remove') {
-		if (removeWarningMessage("amdgpu-dkms\n")) {
-			my $counter = 0;
-			if( isPackageInstalled('amdgpu-dkms') ) {
-				if (!deinstallSinglePackage('amdgpu-dkms')) {
-					$counter = $counter+1;
-				}
-			} else {
-				$counter = $counter+1;
-			}
-			if( isPackageInstalled('amdgpu-dkms-firmware') ) {
-				if (!deinstallSinglePackage('amdgpu-dkms-firmware')) {
-					$counter = $counter+1;
-				}
-			} else {
-				$counter = $counter+1;
-			}
-			if ($counter == 2) {
-				$origConfModules{$module}{installed} = 'no';
-				$origConfModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			} else {
-				$origConfModules{$module}{installed} = 'yes';
-				$origConfModules{$module}{upgraded} = 'no';
-				addToConfiguredModules($module, 'remove failed');
-			}
-		}
-	}
-}
-
-
-
-###############################################################################
 # Installs Linux device driver for several Realtek Ethernet controllers
 #
 sub r8168dkms() {
@@ -3502,17 +3367,6 @@ sub apportfix() {
 
 
 
-###############################################################################
-# Removes Linux device driver if installed and in configuration list
-# package is obsolete !!!
-#
-sub realtekr8125dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );	
-}
-
-
 
 ###############################################################################
 # Fixes backlight issue with BOE Model 2423 Serial Number 0 displays on
@@ -3521,20 +3375,10 @@ sub realtekr8125dkms() {
 sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'amdgpu.backlight=0' );
+	grubModuleEdit( $module, $action, 0, 'amdgpu.backlight=0' );
 }
 
 
-
-
-###############################################################################
-# Fixes screen flickering when using some input devices
-#
-sub i915disablepsrfix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 'i915.enable_psr=0' );
-}
 
 
 
@@ -3548,23 +3392,9 @@ sub i915enablepsrfix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		edit_file { s/i915\.enable_psr=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
+	grubModuleEdit( $module, $action, 0, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
 }
 
-
-
-
-###############################################################################
-# Fixes unresponsive touchpad 
-# - GMxTGxx
-#
-# obsolete
-#
-sub tuxedopinfixtgldkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-}
 
 
 
@@ -3580,7 +3410,7 @@ sub thunderboltbootdelayfix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'modprobe.blacklist=thunderbolt');
+	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
 }
 
 
@@ -3656,7 +3486,7 @@ sub nvidiabacklightcontrolfix() {
 		edit_file { s/ NVreg_RegistryDwords=EnableBacklightHandler=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
 		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
-	grubModuleEdit( $module, $action, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
+	grubModuleEdit( $module, $action, 0, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
 }
 
 
@@ -3830,7 +3660,7 @@ sub samsungnvmefix() {
 sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'mem_sleep_default=deep' );
+	grubModuleEdit( $module, $action, 0, 'mem_sleep_default=deep' );
 }
 
 
@@ -3892,7 +3722,7 @@ sub intelgenXIIIpowerctlfix() {
 sub acpibacklightvideofix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'acpi_backlight=video');
+	grubModuleEdit( $module, $action, 0, 'acpi_backlight=video');
 }
 
 
@@ -3943,62 +3773,11 @@ sub disablegucfix() {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("disable-guc-fix\n")) {
-			removeKernelParameters($module, @kernelParameters);
+			removeKernelParameters($module, 0, @kernelParameters);
 		}
 	}
 }
 
-
-
-###############################################################################
-# This is a temporary fix for systemd-backlight until
-# https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream
-#
-sub systemdbacklightfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval;
-	my $fileName = '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules';
-	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-		"# This is a temporary fix for systemd-backlight until https://github.com/systemd/systemd/commit/7ebbaaa7f426b5bb11b4a697898844bf6d8b6ec9 reaches downstream.\n".
-		"SUBSYSTEM==\"leds\", KERNEL==\"*kbd_backlight*\", TAG+=\"systemd\", IMPORT{builtin}=\"path_id\", ENV{SYSTEMD_WANTS}+=\"systemd-backlight\@leds:\$name.service\"\n";
-	if ($action eq 'install') {
-		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		if (-e $fileName) {
-			if (removeWarningMessage("systemd-backlight-fix\n")) {
-				printLog("removing $module", 'TL0', '[INFO]');
-				if (unlink($fileName)) {
-					printLog("$origConfModules{$module}{name} removed", 'TL0', '[INFO]');
-				} else {
-					printLog('can\'t remove fix', 'TL0', '[WARN]');
-				}
-				$origConfModules{$module}{installed} = 'no';
-				$origConfModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			}
-		} else {
-			$origConfModules{$module}{installed} = 'no';
-			$origConfModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-			printLog("$origConfModules{$module}{name} was already removed", 'TL0', '[INFO]');
-		}
-	}
-}
 
 
 
@@ -4117,6 +3896,35 @@ sub tuxedoyt6801() {
 
 
 
+###############################################################################
+# solves black screen after plasma6 upgrade
+#
+sub textboot() {
+	my $module = shift;
+	my $action = shift;
+	my @splashParameter = ('splash');
+	my @nosplashParameter = ('nosplash');
+	my $retPar;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		removeKernelParameters($module, 1, @splashParameter);
+		grubModuleEdit($module, $action, 0, @nosplashParameter);
+	}
+	if ($action eq 'remove') {
+		grubModuleEdit( $module, $action, 1, @nosplashParameter);
+		$retPar = insertGrub($module, \@splashParameter);
+		if ($retPar >= 1) {
+			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
+			block('text-boot');
+		} else {
+			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
+		}
+	}
+}
+
+
+
+
+
 
 
 
@@ -4189,20 +3997,20 @@ sub createRepos {
 				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
 
-			if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
-				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-				edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-			}
+		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
+			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+		}
 
-			if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
-				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-				edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-			}
+		if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
+			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+		}
 	} else {
-			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			}
+		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
+			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+		}
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
 				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1', '[INFO]');
@@ -4223,7 +4031,7 @@ sub createRepos {
 			# hack to set the TUXEDO plasma repos to the correct values
 			if ($plasma6Installed) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
-				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb')) {
+				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} elsif ($distribution =~ /TUXEDO OS/) {
@@ -4725,10 +4533,12 @@ sub createFile {
 
 ###############################################################################
 # add's, upgrades or deletes entries into the grub file /etc/default/grub
-# grubModuleEdit( module, install|upgrade|remove, kernelParameter|... );
+# grubModuleEdit( module, silent, install|upgrade|remove, kernelParameter|... );
+# where $silent = 0 means normal operation and
+# $silent = 1 means that it will not activate addToConfiguredModules
 #
 sub grubModuleEdit {
-	my ($module, $action, @kernelParameters) = @_;
+	my ($module, $action, $silent, @kernelParameters) = @_;
 	my $retVal;
 	if ($LiveISO) {
 		printLog("not changing grub for $module as this is a LiveISO", 'L0', '[INFO]');
@@ -4736,19 +4546,27 @@ sub grubModuleEdit {
 	}
 	if ($action eq 'install') {
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
+		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
 		$retVal = insertGrub($module, \@kernelParameters);
+		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
 			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+			unless ($silent) {
+				addToConfiguredModules($module, "failed");
+			}
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			if ($retVal > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
+				unless ($silent) {
+					addToConfiguredModules($module, "success");
+				}
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
+				unless ($silent) {
+					addToConfiguredModules($module, "nothingToDo");
+				}
 			}
 		}
 	}
@@ -4757,22 +4575,28 @@ sub grubModuleEdit {
 		$retVal = insertGrub($module, \@kernelParameters);
 		if ($retVal < 0) {
 			$origConfModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
+			unless ($silent) {
+				addToConfiguredModules($module, "failed");
+			}
 		} else {
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 			if ($retVal > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
+				unless ($silent) {
+					addToConfiguredModules($module, "success");
+				}
 			} else {
 				printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
+				unless ($silent) {
+					addToConfiguredModules($module, "nothingToDo");
+				}
 			}
 		}
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$origConfModules{$module}{name}\n")) {
-			removeKernelParameters($module, @kernelParameters);
+			removeKernelParameters($module, $silent, @kernelParameters);
 		}
 	}
 }
@@ -5955,12 +5779,14 @@ sub removeDebianModule {
 
 ###############################################################################
 # removes kernel parameter from grub
-# removeKernelParameters($module, @kernelParamaters)
+# removeKernelParameters($module, $silent, @kernelParameters)
+# where $silent = 0 means normal operation and
+# $silent = 1 means that it will not activate addToConfiguredModules
 # returns amount of parameters found
 # returns 0 if nothing found or changed
 #
 sub removeKernelParameters {
-	my ($module, @parameters) = @_;
+	my ($module, $silent, @parameters) = @_;
 	my $parameter;
 	my $GF;
 	my @grubLines;
@@ -5986,17 +5812,22 @@ sub removeKernelParameters {
 				print $GF "$line\n";
 			}
 			close($GF);
-			addToConfiguredModules($module, "removed");
+			unless ($silent) {
+				addToConfiguredModules($module, "removed");
+			}
 			$origConfModules{$module}{installed} = "no";
 			$origConfModules{$module}{upgraded} = "yes";
-			$origConfModules{$module}{required} = "no";
+			# temp removing for testing
+			#$origConfModules{$module}{required} = "no";
 			if ($counter > 0) {
 				$postConfProgram{updateGrub}{trigger} = 1;
 			}
 			return ($counter);
 		} else {
 			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
-			addToConfiguredModules($module, "remove failed");
+			unless ($silent) {
+				addToConfiguredModules($module, "remove failed");
+			}
 			$origConfModules{$module}{installed} = "remove failed";
 			$origConfModules{$module}{version} = $localConfModules{$module}{version};
 			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
@@ -6004,7 +5835,9 @@ sub removeKernelParameters {
 		}
 	} else {
 		printLog("could not open and read $grubFile", 'TL0', '[ERROR]');
-		addToConfiguredModules($module, "remove failed");
+		unless ($silent) {
+			addToConfiguredModules($module, "remove failed");
+		}
 		$origConfModules{$module}{installed} = "remove failed";
 		$origConfModules{$module}{version} = $localConfModules{$module}{version};
 		$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
@@ -6282,23 +6115,31 @@ sub insertGrub {
 
 ###############################################################################
 # inserts a parameter into a grub line
+# the line must begin with: 'GRUB_CMDLINE_LINUX_DEFAULT='
 # if the parameter is not present yet
 # returns 1 if parameter inserted
 # returns 0 if parameter already present
+# returns -1 if line is wrong
 #
 sub insertGrubParameter {
 	my ($line, $parameter) = @_;
+	my $cleanLine;
 
-	if ($$line =~ /$$parameter/) {
-		return (0);
+	unless ($$line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=/) {
+		printLog("grub kernel parameter line is malformed, can't insert $$parameter", 'L0', '[ERROR]');
+		return (-1);
 	}
-	if ($$line =~ /""/) {
-		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1$$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
-		return (1);
+
+	$cleanLine = $$line;
+	$cleanLine =~ s/"\R//;
+	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT="//;
+
+	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
+		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
+		return (0);
 	} else {
 		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
-		printLog("inserted '$$parameter' into grub line", 'L1', '[INFO]');
+		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
 	}
 }
@@ -6404,7 +6245,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq '') {
@@ -6438,7 +6279,6 @@ sub initLogging {
 			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			close $LOGFILE;
-			printLog("#####################################################", 'L0', '[INFO]');
 			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
 				printLog('in FAI mode', 'L0', '[INFO]');
@@ -6573,6 +6413,10 @@ sub readConfigIniValues {
 	if (-e $configIniFile) {
 		$configIniValues = Config::Tiny->new;
 		$configIniValues = Config::Tiny->read($configIniFile, 'utf8');
+		if (defined $configIniValues->{debugMode}) {
+			printLog("debugLevel before: $logLevel ValueFromIniFile: $configIniValues->{debugMode}", 'L2', '[DEBUG]');
+			$logLevel = $configIniValues->{loglevel};
+		}
 		return (1);
 	}
 	return (0);
@@ -6703,11 +6547,13 @@ sub writeConfigFile {
 					# upgrade available
 					if ($origConfModules{$name}{upgraded} eq 'yes') {
 						# upgrade was executed
+						printLog("upgrade was executed", 'L2', '[DEBUG]');
 						$version = $origConfModules{$name}{version};
 						$hwid = $origConfModules{$name}{hwid};
 						$installed = $origConfModules{$name}{installed};
 					} else {
 						# upgrade was not executed
+						printLog("upgrade was not executed", 'L2', '[DEBUG]');
 						if ( $origConfModules{$name}{installed} eq 'yes' ) {
 							$version = $localConfModules{$name}{version};
 							$hwid = $localConfModules{$name}{hwid};
@@ -6720,6 +6566,7 @@ sub writeConfigFile {
 					}
 				} else {
 					# no upgrade available
+					printLog("no upgrade available for $origConfModules{$name}{name}", 'L2', '[DEBUG]');
 					$version = $origConfModules{$name}{version};
 					$hwid = $origConfModules{$name}{hwid};
 					$installed = $origConfModules{$name}{installed};
@@ -6736,6 +6583,7 @@ sub writeConfigFile {
 			}
 		}
 		close $FH;
+		printLog("$configFile successfully written", 'L2', '[DEBUG]');
 	} else {
 		printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
@@ -7194,23 +7042,28 @@ sub newHwid {
 sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
-	$configuredModules{$module} = $status;
-	if ($status =~ /failed/) {
-		printLog("failed to install $origConfModules{$module}{name}", 'L0', '[ERROR]');
-	} elsif ($status =~ /success/) {
-		printLog("succesfully installed $origConfModules{$module}{name}", 'L0', '[INFO]');
-	} elsif ($status =~ /removed/) {
-		if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
-			printLog("succesfully removed $origConfModules{$module}{name}", 'L0', '[INFO]');
-			print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
-			print "\$ sudo tomte block $origConfModules{$module}{name}\n";
-			print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
-			print "or tomte will reinstall it again at the next start\n";
+	if (defined($module) && ($module ne '')) {
+		$configuredModules{$module} = $status;
+		if ($status =~ /failed/) {
+			printLog("failed to install $origConfModules{$module}{name}", 'L0', '[ERROR]');
+		} elsif ($status =~ /success/) {
+			printLog("succesfully installed $origConfModules{$module}{name}", 'L0', '[INFO]');
+		} elsif ($status =~ /removed/) {
+			if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
+				printLog("succesfully removed $origConfModules{$module}{name}", 'L0', '[INFO]');
+				print "The module $origConfModules{$module}{name} has been removed. Please block it with:\n";
+				print "\$ sudo tomte block $origConfModules{$module}{name}\n";
+				print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
+				print "or tomte will reinstall it again at the next start\n";
+			}
+		} elsif ($status =~ /remove failed/) {
+			printLog("failed to remove $origConfModules{$module}{name}", 'L0', '[ERROR]');
+		} elsif ($status =~ /nothingToDo/) {
+			printLog("nothing to do for $origConfModules{$module}{name}", 'L0', '[INFO]');
 		}
-	} elsif ($status =~ /remove failed/) {
-		printLog("failed to remove $origConfModules{$module}{name}", 'L0', '[ERROR]');
-	} elsif ($status =~ /nothingToDo/) {
-		printLog("nothing to do for $origConfModules{$module}{name}", 'L0', '[INFO]');
+	} else {
+		printLog("modules not defined at addToConfiguredModules", 'L2', '[ERROR]');
+		return (0);
 	}
 }
 
@@ -7465,6 +7318,7 @@ sub reconfigureSingleModule {
 		($origConfModules{$module}{required} ne 'prerequisite') &&
    		($mode ne 'DONT_CONFIGURE') &&
 		($mode ne 'UPDATES_ONLY')) {
+		printLog("module $module is blocked", 'L2', '[INFO]');
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 		if ($LiveISO) {
@@ -7476,6 +7330,7 @@ sub reconfigureSingleModule {
 	if (($origConfModules{$module}{required} eq 'no') &&
 		($configuredModules{$module} ne 'remove failed') &&
 		($configuredModules{$module} ne 'removed')) {
+		printLog("module $module is not required by this system", 'L2', '[INFO]');
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
@@ -7486,6 +7341,7 @@ sub reconfigureSingleModule {
 
 ###############################################################################
 # blocks a module
+# block( $moduleName )
 #
 sub block {
 	my $moduleName = shift;
@@ -8301,6 +8157,7 @@ sub help {
 	print __('HELP_AUTOMATIC'), "\n";
 	print __('HELP_UPDATES_ONLY'), "\n";
 	print __('HELP_DONT_CONFIGURE'), "\n";
+	print __('HELP_loglevel'), "\n";
 	print __('HELP_help'), "\n";
 	print "\n\n";
 	print __('HELP_footer'), "\n";
@@ -8449,7 +8306,7 @@ if (!isOSSupported()) {
 
 if (@ARGV != 0) {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
@@ -8571,6 +8428,7 @@ if (@ARGV != 0) {
 				}
 				configureSingleModule($argValue{module});
 				postConfigure();
+
 				listSuccess();
 				writeConfigFile();
 			} else {
@@ -8688,6 +8546,22 @@ if (@ARGV != 0) {
 		setMode($argValue{command});
 		prepareValues();
 		printLog('Tomte finished', 'L0', '[INFO]');
+	} elsif ($argValue{command} eq "loglevel") {
+		printLog("before loglevel: $logLevel requested loglevel: $argValue{module}", 'L2', '[DEBUG]');
+		if (defined($argValue{module}) && $argValue{module} ne '') {
+			$argValue{module} += 0;
+			if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
+				$logLevel = $argValue{module};
+				$logLevel += 0;
+				printLog("resulting loglevel: $logLevel", 'L2', '[DEBUG]');
+				$configIniValues->{initvalues}->{loglevel} = $logLevel;
+				writeConfigIniFile();
+			} else {
+				printLog("invalid entry for loglevel. Valid numbers are 0, 1 and 2", 'TL0', '[DEBUG]');
+			}
+		} else {
+			printLog("$logLevel", 'T0', '[DEBUG]');
+		}
 	} else {
 		print "Unknown command: $argValue{command}\n";
 		help();
@@ -8709,7 +8583,7 @@ if (($startLaterAgain == 0) &&
 
 END {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 	if ( exists $options{$argValue{command}} && $runningAsRoot ) {
 		if (!$FAI) {
 			my $packagekitEnabled = getSystemdEnabled('packagekit');

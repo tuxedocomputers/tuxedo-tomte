@@ -89,6 +89,9 @@ msgstr "  UPDATES_ONLY                   Nur Updates werden automatisch installi
 msgid "HELP_DONT_CONFIGURE"
 msgstr "  DONT_CONFIGURE                 Stoppt alle automatischen Konfigurationen"
 
+msgid "HELP_loglevel"
+msgstr "  loglevel                       Setzt oder zeigt den momentan verwendeten loglevel"
+
 msgid "HELP_help"
 msgstr "  help                           Zeigt diese Nachricht an"
 
@@ -104,9 +107,6 @@ msgstr "konfiguriert Grub gemäß der Grub-Datei neu"
 
 msgid "updateInitramfs_description"
 msgstr "aktualisiert initramfs"
-
-msgid "i8042fix_description"
-msgstr "Fix für keine-Tastatur-vorhanden nach dem Booten auf XC1711"
 
 msgid "nobootonbattery_description"
 msgstr "Fix für Kein-Boot-im-Batteriebetrieb auf BA15"
@@ -137,12 +137,6 @@ msgstr "Fügt von TUXEDO gewartete Ubuntu-Repositories hinzu"
 
 msgid "corefix_description"
 msgstr "ACPI-Mod für eine genaue Erkennung der Kerne"
-
-msgid "threegfix_description"
-msgstr "Konfiguration erforderlich für den Betrieb von Huawei-ME936 (abgekündigt)"
-
-msgid "threegfix2_description"
-msgstr "Konfiguration erforderlich für den Betrieb von Huawei-ME906s (abgekündigt)"
 
 msgid "huaweime936fix_description"
 msgstr "Konfiguration erforderlich für den Betrieb von Huawei-ME936"
@@ -183,9 +177,6 @@ msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
 msgid "nvidiadriver_description"
 msgstr "Erforderliche Nvidia-Treiber"
 
-msgid "amdgpudkms_description"
-msgstr "Ermöglicht es der AMD-GPU und dem Display, Konfigurationsinformationen zu teilen"
-
 msgid "amdgpudisablepsr_description"
 msgstr "Deaktiviert PSR aus"
 
@@ -198,23 +189,11 @@ msgstr "Workaround zur Steuerung der OLED-Displayhelligkeit mit dbus und xrandr"
 msgid "apportfix_description"
 msgstr "Workaround für undefinierte Probleme mit Apport"
 
-msgid "realtekr8125dkms_description"
-msgstr "Linux-Gerätetreiber für mehrere Realtek-Ethernet-Controller [veraltet]"
-
 msgid "amdgpubacklightauxoff_description"
 msgstr "Behebt die Hintergrundbeleuchtungssteuerung"
 
-msgid "i915disablepsrfix_description"
-msgstr "Behebt Bildschirmflackern bei Verwendung einiger Eingabegeräte"
-
 msgid "i915enablepsrfix_description"
 msgstr "Bietet eine bessere Akkulaufzeit"
-
-msgid "tuxedopinfixtgldkms_description"
-msgstr "Behebt das nicht reagierende Touchpad"
-
-msgid "tuxedomicfix1_description"
-msgstr "Kernel-Audiomodul, das verschiedene Probleme mit der Audioausgabe behebt"
 
 msgid "thunderboltbootdelayfix_description"
 msgstr "Löst das Problem, dass der Kernel beim Laden des Thunderbolt-Moduls beim Booten zu lange dauert"
@@ -272,3 +251,6 @@ msgstr "Anwendung die Plasma 6 installiert"
 
 msgid "tuxedoyt6801_description"
 msgstr "Treiber für Motorcomm YT6801 Netzwerkcontroller"
+
+msgid "textboot_description"
+msgstr "Aktiviert den Systemstart in den Textmodus"
