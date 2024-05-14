@@ -2873,7 +2873,7 @@ sub textgrub() {
 		$retPar = insertGrub($module, \@splashParameter);
 		if ($retPar >= 1) {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
-			block('text-boot');
+			block('text-grub');
 		} else {
 			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
 		}
