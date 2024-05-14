@@ -2109,7 +2109,7 @@ sub lockFiles {
 	return %LOCKFILES;
 }
 
-sub postConfProgramsList {
+sub postConfPrograms {
 	return %POST_CONF_PROGRAMS;
 }
 
