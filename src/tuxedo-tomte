@@ -1183,8 +1183,8 @@ sub checkRequirements {
 	}
 
 	if ($distribution =~ /TUXEDO OS/) {
-		$presetModules{textboot}{required} = 'yes';
-		printLog("detected $presetModules{textboot}{name} issue", 'L1', '[INFO]');
+		$presetModules{textgrub}{required} = 'yes';
+		printLog("detected $presetModules{textgrub}{name} issue", 'L1', '[INFO]');
 	}
 }
 
