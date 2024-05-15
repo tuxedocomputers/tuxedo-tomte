@@ -1184,8 +1184,8 @@ sub checkRequirements {
 	}
 
 	if ($distribution =~ /TUXEDO OS/) {
-		$presetModules{textgrub}{required} = 'yes';
-		printLog("detected $presetModules{textgrub}{name} issue", 'L1', '[INFO]');
+		$presetModules{textboot}{required} = 'yes';
+		printLog("detected $presetModules{textboot}{name} issue", 'L1', '[INFO]');
 	}
 }
 
@@ -2859,7 +2859,7 @@ sub tuxedoyt6801() {
 ###############################################################################
 # solves black screen after plasma6 upgrade
 #
-sub textgrub() {
+sub textboot() {
 	my $module = shift;
 	my $action = shift;
 	my @splashParameter = ('splash');
@@ -2874,7 +2874,7 @@ sub textgrub() {
 		$retPar = insertGrub($module, \@splashParameter);
 		if ($retPar >= 1) {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
-			block('text-grub');
+			block('text-boot');
 		} else {
 			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
 		}
