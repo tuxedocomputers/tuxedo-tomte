@@ -237,7 +237,7 @@ sub printIfExistsNotUndefinedNotEmpty {
 
 
 # hash to load the configfile
-# is a copy from origConfModules to exclude undefined values
+# is a copy from presetModules to exclude undefined values
 my %localConfModules = %presetModules;
 
 
@@ -952,8 +952,8 @@ sub checkRequirements {
 	}
 
 	if ($ubuntuCodename =~ /noble/) {
-		$origConfModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
+		$presetModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -1039,11 +1039,11 @@ sub checkRequirements {
 		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2004}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /jammy/) {
-		printLog("kernel $origConfModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-		$origConfModules{kerneltuxedo2204}{required} = 'yes';
+		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2204}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /noble/) {
-		printLog("kernel $origConfModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
-		$origConfModules{kerneltuxedo2404}{required} = 'yes';
+		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -2072,16 +2072,16 @@ sub kerneltuxedo2404() {
 		if ($instFailed > 0) {
 			startTomteDelayed();
 			addToConfiguredModules($module, "failed");
-			$origConfModules{$module}{installed} = "failed";
+			$presetModules{$module}{installed} = "failed";
 		} elsif ($instDone > 0) {
 			addToConfiguredModules($module, "success");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
 			setRestartValues($module);
 		} else {
 			addToConfiguredModules($module, "nothingToDo");
-			$origConfModules{$module}{installed} = "yes";
-			$origConfModules{$module}{upgraded} = "yes";
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
 		}
 	}
 	if ($action eq 'remove') {
@@ -2321,7 +2321,7 @@ sub nvidiadriver() {
 
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
-				if ($FAI || ($origConfModules{$module}{installed} eq 'no')) {
+				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
 					$output = `gpu-manager && prime-select nvidia`;
 					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
 					printLog("$output", 'L2', '[DEBUG]');
@@ -2331,18 +2331,18 @@ sub nvidiadriver() {
 			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
 				if ($wasInstalled) {
-					printLog("$origConfModules{$module}{name} was already installed", 'L1', '[INFO]');
+					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
 					addToConfiguredModules($module, "nothingToDo");
 				} else {
-					printLog("installed $origConfModules{$module}{name}", 'L1', '[INFO]');
+					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
 					addToConfiguredModules($module, "success");
 					setRestartValues($module);
 				}
-				$origConfModules{$module}{installed} = "yes";
-				$origConfModules{$module}{upgraded} = "yes";
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$origConfModules{$module}{name} installation failed", 'L1', '[WARN]');
-				$origConfModules{$module}{installed} = "failed";
+				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
+				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
 
