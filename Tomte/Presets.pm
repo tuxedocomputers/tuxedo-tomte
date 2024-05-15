@@ -810,7 +810,7 @@ our %SUPPORTED_OS = (
 	"TUXEDO OS" => ["20.04", "22.04"],
 	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
 	"KDE neon" => ["20.04", "22.04"],
-	"Ubuntu" => ["18.04", "20.04", "22.04"],
+	"Ubuntu" => ["18.04", "20.04", "22.04", '24.04'],
 	"Linux Mint" => ["21.1", "21.2", "21.3"],
 	"elementary OS" => ["6.1", "7.1"]
 );
@@ -850,6 +850,14 @@ our %ESSENTIAL_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		}
 	},
+
+	"noble" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		}
+	},
+
 	"TUXEDO OS 22.04" => {
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
@@ -887,6 +895,7 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
 		}
 	},
+
 	"focal" => {
 		"mirrors" => {
 			"content" => [
@@ -897,6 +906,7 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
 		}
 	},
+
 	"jammy" => {
 		"mirrors" => {
 			"content" => [
@@ -907,6 +917,18 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
 		}
 	},
+
+	"noble" => {
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		}
+	},
+
 
 	"Linux Mint 21.1" => {
 		"name" => "vanessa",
@@ -920,6 +942,7 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
 		}
 	},
+
 	"Linux Mint 21.2" => {
 		"name" => "victoria",
 		"mirrors" => {
@@ -932,6 +955,7 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
 		}
 	},
+
 	"Linux Mint 21.3" => {
 		"name" => "virginia",
 		"mirrors" => {
@@ -953,6 +977,10 @@ our %KERNELS = (
 
 	"jammy" => {
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
+	},
+
+	"noble" => {
+		"linux-tuxedo-24.04" => "linux-tuxedo-24.04 linux-headers-tuxedo-24.04 linux-image-tuxedo-24.04",
 	}
 );
 
