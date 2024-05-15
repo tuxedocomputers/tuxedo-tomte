@@ -852,21 +852,7 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ /P95_HP/) {
-		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if ($boardname =~ /P95_HR/) {
-		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if ($boardname =~ /P95_HP,HR,HQ/) {
+	if (($boardname =~ /P95_HP/) || ($boardname =~ /P95_HR/) || ($boardname =~ /P95_HP,HR,HQ/)) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
