@@ -2274,14 +2274,14 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /noble/) {
-			my $tuxedoNvidiaDriver550 = 'nvidia-driver-550';
+			my $tuxedoNvidiaDriver550 = 'tuxeedo-nvidia-driver-550';
 
 			# check if the drivers to install are actually available in repos
 			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
 
-				my $oldDriversRemovedCounter = deinstExcept('nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
 				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
