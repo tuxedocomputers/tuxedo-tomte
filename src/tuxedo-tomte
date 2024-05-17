@@ -2274,7 +2274,7 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /noble/) {
-			my $tuxedoNvidiaDriver550 = 'tuxeedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
 
 			# check if the drivers to install are actually available in repos
 			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
