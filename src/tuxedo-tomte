@@ -1594,11 +1594,11 @@ sub isOSSupported {
 	printLog("distribution: $distribution versions: $supportedOS{$distribution}", 'L0', '[DEBUG]');
 	$distribution = 'XXX';
 	printLog("versions XXX: $supportedOS{$distribution}", 'L0', '[DEBUG]');
-	my $badexists = exists($supportedOS{$distribution});
+	my $badexists = exists $supportedOS{$distribution};
 	printLog("exists: $badexists", 'L2', '[DEBUG]');
 	if (grep { $_ eq $distributionVersionID } @{ $supportedOS{$distribution} }) {
 		return (1);
-	} elsif (exists($supportedOS{$distribution})) {
+	} elsif (exists $supportedOS{$distribution} ) {
 
 printLog("in exists !!!", 'L0', '[DEBUG]');
 
