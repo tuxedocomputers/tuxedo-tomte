@@ -671,17 +671,19 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if (grep { $_ eq $distributionVersionID } @{ $supportedOSList{ $distribution } }) {
-		return (1);
-	} elsif (exists $supportedOSList{ $distribution }) {
+	if (exists $supportedOSList{ $distribution }) {
+		if ( grep(/^$distributionVersionID$/, @{ $supportedOSList{ $distribution } } ) ) {
+			return (1);
+		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
-						__x("The version {version} of {distribution} is not supported.",
+						__x("This version {version} of {distribution} is not supported.",
 								("version" => $distributionVersionID, "distribution" => $distribution)),
 								2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
+	printLog("Please check on our website https://www.tuxedocomputers.com which Systems are supported by Tomte", 'TL0', '[FATAL]');
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
 	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
