@@ -673,7 +673,7 @@ sub cpuBrand {
 sub isOSSupported {
 	if (grep { $_ eq $distributionVersionID } @{ $supportedOSList{ $distribution } }) {
 		return (1);
-	} elsif (exists($supportedOSList{ $distribution })) {
+	} elsif (exists $supportedOSList{ $distribution }) {
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
 						__x("The version {version} of {distribution} is not supported.",
