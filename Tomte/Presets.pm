@@ -880,8 +880,8 @@ our %OTHER_REPOS = (
 	"bionic" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -890,8 +890,8 @@ our %OTHER_REPOS = (
 	"focal" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -900,8 +900,8 @@ our %OTHER_REPOS = (
 	"jammy" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -912,8 +912,8 @@ our %OTHER_REPOS = (
 		"name" => "vanessa",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com vanessa main upstream import backport"
 			],
@@ -924,8 +924,8 @@ our %OTHER_REPOS = (
 		"name" => "victoria",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com victoria main upstream import backport"
 			],
@@ -936,8 +936,8 @@ our %OTHER_REPOS = (
 		"name" => "virginia",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com virginia main upstream import backport"
 			],

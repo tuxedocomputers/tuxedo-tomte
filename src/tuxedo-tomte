@@ -1067,7 +1067,7 @@ sub checkRequirements {
 	}
 
 	# if cardreader Realtek RTS522A found
-	my @cardreaderDevices = (qr/10ec:522a/); 
+	my @cardreaderDevices = (qr/10ec:522a/);
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$presetModules{cardreaderfix}{required} = 'yes';
 		printLog("detected $presetModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
@@ -1078,7 +1078,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my @samsungNvme990Devices = ('144d:a80d');	
+	my @samsungNvme990Devices = ('144d:a80d');
 	if ((($boardname =~ m/NS5X_NS7XAU/i) || ($boardname =~ m/NS5X_7XAU/i)) &&
 		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
 		$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
@@ -1380,7 +1380,7 @@ sub tuxedokeyboard() {
 # - PB50_70DFx,DDx
 # - N150CU
 # - N141CU
-# - XC15 
+# - XC15
 # - IBS15v6
 # - EDUBOOK1502
 #
@@ -2123,7 +2123,7 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		
+
 
 
 
@@ -2688,7 +2688,7 @@ sub acpibacklightvideofix() {
 
 
 ###############################################################################
-# disabled GuC submission while keeping HuC on Intel iGPU 
+# disabled GuC submission while keeping HuC on Intel iGPU
 #
 sub disablegucfix() {
 	my $module = shift;
@@ -3005,7 +3005,7 @@ sub createRepos {
 				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 			}
 			printLog("repofiletext: $repoFileText", 'L2', '[DEBUG]');
-			
+
 			if ($repoFileText ne '') {
 				my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
@@ -3315,7 +3315,7 @@ sub createFileModule {
 	$executable //= 0;
 
 	if ($action eq 'install' || $action eq 'upgrade') {
-		
+
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		my $success = createFile($filePath, $content, $executable);
 
@@ -3324,7 +3324,7 @@ sub createFileModule {
 
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
-			
+
 			addToConfiguredModules($module, "success");
 
 			if ("yes" eq $presetModules{$module}{restart}) {
@@ -3332,7 +3332,7 @@ sub createFileModule {
 			}
 		} elsif (0 == $success){
 			printLog("$presetModules{$module}{name} was already created with correct content", 'L1', '[INFO]');
-			
+
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
 
@@ -3340,29 +3340,29 @@ sub createFileModule {
 			addToConfiguredModules($module, "success");
 		} else {
 			printLog("$filePath for $presetModules{$module}{name} failed to be created", 'L1', '[ERROR]');
-			
+
 			$presetModules{$module}{installed} = "failed";
-			
+
 			addToConfiguredModules($module, "failed");
 		}
 	}
-	
+
 	if ($action eq 'remove') {
 		unlink($filePath);
 		if (-e $filePath) {
 			printLog("$filePath for $presetModules{$module}{name} failed to be removed", 'L1', '[ERROR]');
-			
+
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
 			$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
-			
+
 			addToConfiguredModules($module, "remove failed");
 		} else {
 			printLog("$filePath for $presetModules{$module}{name} was removed", 'L1', '[INFO]');
-			
+
 			$presetModules{$module}{installed} = 'no';
 			$presetModules{$module}{upgraded} = 'yes';
-			
+
 			addToConfiguredModules($module, 'removed');
 
 			if ("yes" eq $presetModules{$module}{restart}) {
@@ -3435,7 +3435,7 @@ sub LTEModuleFix {
 #
 # $executable has to be 1|"yes"|"+x" to be executable
 #
-# returns 
+# returns
 #        1 if the content was changed successfully
 #        0 if the content was already correct
 #       -1 if there was an error writing to the file
@@ -3477,7 +3477,7 @@ sub createFile {
 	if(1 eq $executable || "yes" eq $executable || "+x" eq $executable){
 		$fileIsExecutableCheck = -x $filePath;
 	}
-	
+
     # Check if the content of the file is not the same as the provided content
     if ($currentContent ne $content || ! $fileIsExecutableCheck) {
         return -1;  # Return -1 if the content is not correctly written to the file
@@ -4265,7 +4265,7 @@ sub installKernelFlavour {
 		} else {
 			printLog("failed get locks to update and configure package management", 'L2', '[ERROR]');
 		}
-	
+
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2', '[DEBUG]');
 		@lines = split /\n/, $retString;
@@ -4498,7 +4498,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 
 			# Check if the length of $package exceeds 50 characters
 			length($package) < 50
-		
+
 		){
 			$headers{$version} = $package;
 		}
@@ -4888,7 +4888,7 @@ sub aptgetRefreshModule {
 
 ###############################################################################
 # backups file with timestamp
-# 
+#
 sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
@@ -5159,7 +5159,7 @@ sub messageDesktop {
 		printLog('No display for message output found', 'L1', '[INFO]');
 		return (0);
 	}
-	
+
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
@@ -5487,7 +5487,7 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
-	
+
 	if ($FAI) {
 		$configIniValues->{installation}->{FAI} = 'first reboot after FAI';
 	}
@@ -5550,7 +5550,7 @@ sub writeConfigFile {
 
 
 
-############################################################################### 
+###############################################################################
 # check if config directory exists
 # if not creates a new directory
 # if that is not possible, exits (!!!)
@@ -5902,7 +5902,7 @@ sub listStatusJson {
 	} else {
 		$list{restart} = 'no';
 	}
-	
+
 
 	foreach $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
@@ -6202,7 +6202,7 @@ sub removeSingleModule {
 	if ($localConfModules{$module}{blocked} eq 'no') {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
-	}	
+	}
 
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 		print "Module $moduleName cannot be removed because:\n";
