@@ -1,4 +1,4 @@
-!/usr/bin/perl -w
+#!/usr/bin/perl -w
 # do not edit manually as it will be overwritten while packaging
 our $VERSION = 'API-Change.Feature-Release.Hotfix-Release';
 
@@ -236,7 +236,7 @@ my %postConfProgram = (
 );
 
 
-my %supportedOS = (
+my %supportedOSList = (
 	"TUXEDO OS" => ["20.04", "22.04"],
 	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
 	"KDE neon" => ["20.04", "22.04"],
@@ -310,8 +310,8 @@ my %tuxedo_mirrors = (
 	"bionic" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -320,8 +320,8 @@ my %tuxedo_mirrors = (
 	"focal" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -330,8 +330,8 @@ my %tuxedo_mirrors = (
 	"jammy" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
@@ -342,8 +342,8 @@ my %tuxedo_mirrors = (
 		"name" => "vanessa",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com vanessa main upstream import backport"
 			],
@@ -354,8 +354,8 @@ my %tuxedo_mirrors = (
 		"name" => "victoria",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com victoria main upstream import backport"
 			],
@@ -366,8 +366,8 @@ my %tuxedo_mirrors = (
 		"name" => "virginia",
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse", 
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse", 
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com virginia main upstream import backport"
 			],
@@ -1590,29 +1590,23 @@ sub readOSData {
 # 0 if not
 #
 sub isOSSupported {
-	#TODO debug
-	printLog("distribution: $distribution versions: $supportedOS{$distribution}", 'L0', '[DEBUG]');
-	$distribution = 'XXX';
-	printLog("versions XXX: $supportedOS{$distribution}", 'L0', '[DEBUG]');
-	my $badexists = exists $supportedOS{$distribution};
-	printLog("exists: $badexists", 'L2', '[DEBUG]');
-	if (grep { $_ eq $distributionVersionID } @{ $supportedOS{$distribution} }) {
-		return (1);
-	} elsif (exists $supportedOS{$distribution} ) {
-
-printLog("in exists !!!", 'L0', '[DEBUG]');
-
+	if (exists $supportedOSList{ $distribution }) {
+		if ( grep(/^$distributionVersionID$/, @{ $supportedOSList{ $distribution } } ) ) {
+			return (1);
+		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
-						__x("The version {version} of {distribution} is not supported.",
-								("version" => $distributionVersionID, "distribution" => $distribution)),
-								2, 'dialog-warning');
+			__x("This version {version} of {distribution} is not supported.",
+				("version" => $distributionVersionID, "distribution" => $distribution)),
+			2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
+	printLog("Please check on our website https://www.tuxedocomputers.com which Systems are supported by Tomte", 'TL0', '[FATAL]');
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
 	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
+
 }
 
 
@@ -1996,7 +1990,7 @@ sub checkRequirements {
 	}
 
 	# if cardreader Realtek RTS522A found
-	my @cardreaderDevices = (qr/10ec:522a/); 
+	my @cardreaderDevices = (qr/10ec:522a/);
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$origConfModules{cardreaderfix}{required} = 'yes';
 		printLog("detected $origConfModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
@@ -2007,7 +2001,7 @@ sub checkRequirements {
 		printLog("detected $origConfModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my @samsungNvme990Devices = ('144d:a80d');	
+	my @samsungNvme990Devices = ('144d:a80d');
 	if ((($boardname =~ m/NS5X_NS7XAU/i) || ($boardname =~ m/NS5X_7XAU/i)) &&
 		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
 		$origConfModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
@@ -2309,7 +2303,7 @@ sub tuxedokeyboard() {
 # - PB50_70DFx,DDx
 # - N150CU
 # - N141CU
-# - XC15 
+# - XC15
 # - IBS15v6
 # - EDUBOOK1502
 #
@@ -3052,7 +3046,7 @@ sub nvidiadriver() {
 				$origConfModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-		
+
 
 
 
@@ -3617,7 +3611,7 @@ sub acpibacklightvideofix() {
 
 
 ###############################################################################
-# disabled GuC submission while keeping HuC on Intel iGPU 
+# disabled GuC submission while keeping HuC on Intel iGPU
 #
 sub disablegucfix() {
 	my $module = shift;
@@ -3934,7 +3928,7 @@ sub createRepos {
 				$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 			}
 			printLog("repofiletext: $repoFileText", 'L2', '[DEBUG]');
-			
+
 			if ($repoFileText ne '') {
 				my $fileText = "# tuxedo-tomte will overwrite this file if you modify anything,\n".
 					"# we recommend you to put your own modifications into some other file\n".
@@ -4244,7 +4238,7 @@ sub createFileModule {
 	$executable //= 0;
 
 	if ($action eq 'install' || $action eq 'upgrade') {
-		
+
 		printLog("applying $origConfModules{$module}{name}", 'L1', '[INFO]');
 		my $success = createFile($filePath, $content, $executable);
 
@@ -4253,7 +4247,7 @@ sub createFileModule {
 
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
-			
+
 			addToConfiguredModules($module, "success");
 
 			if ("yes" eq $origConfModules{$module}{restart}) {
@@ -4261,7 +4255,7 @@ sub createFileModule {
 			}
 		} elsif (0 == $success){
 			printLog("$origConfModules{$module}{name} was already created with correct content", 'L1', '[INFO]');
-			
+
 			$origConfModules{$module}{installed} = "yes";
 			$origConfModules{$module}{upgraded} = "yes";
 
@@ -4269,29 +4263,29 @@ sub createFileModule {
 			addToConfiguredModules($module, "success");
 		} else {
 			printLog("$filePath for $origConfModules{$module}{name} failed to be created", 'L1', '[ERROR]');
-			
+
 			$origConfModules{$module}{installed} = "failed";
-			
+
 			addToConfiguredModules($module, "failed");
 		}
 	}
-	
+
 	if ($action eq 'remove') {
 		unlink($filePath);
 		if (-e $filePath) {
 			printLog("$filePath for $origConfModules{$module}{name} failed to be removed", 'L1', '[ERROR]');
-			
+
 			$origConfModules{$module}{installed} = "remove failed";
 			$origConfModules{$module}{version} = $localConfModules{$module}{version};
 			$origConfModules{$module}{hwid} = $localConfModules{$module}{hwid};
-			
+
 			addToConfiguredModules($module, "remove failed");
 		} else {
 			printLog("$filePath for $origConfModules{$module}{name} was removed", 'L1', '[INFO]');
-			
+
 			$origConfModules{$module}{installed} = 'no';
 			$origConfModules{$module}{upgraded} = 'yes';
-			
+
 			addToConfiguredModules($module, 'removed');
 
 			if ("yes" eq $origConfModules{$module}{restart}) {
@@ -4364,7 +4358,7 @@ sub LTEModuleFix {
 #
 # $executable has to be 1|"yes"|"+x" to be executable
 #
-# returns 
+# returns
 #        1 if the content was changed successfully
 #        0 if the content was already correct
 #       -1 if there was an error writing to the file
@@ -4406,7 +4400,7 @@ sub createFile {
 	if(1 eq $executable || "yes" eq $executable || "+x" eq $executable){
 		$fileIsExecutableCheck = -x $filePath;
 	}
-	
+
     # Check if the content of the file is not the same as the provided content
     if ($currentContent ne $content || ! $fileIsExecutableCheck) {
         return -1;  # Return -1 if the content is not correctly written to the file
@@ -5194,7 +5188,7 @@ sub installKernelFlavour {
 		} else {
 			printLog("failed get locks to update and configure package management", 'L2', '[ERROR]');
 		}
-	
+
 		$retString = `$testCmd`;
 		printLog("check installed packages: \n$retString", 'L2', '[DEBUG]');
 		@lines = split /\n/, $retString;
@@ -5427,7 +5421,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 
 			# Check if the length of $package exceeds 50 characters
 			length($package) < 50
-		
+
 		){
 			$headers{$version} = $package;
 		}
@@ -5817,7 +5811,7 @@ sub aptgetRefreshModule {
 
 ###############################################################################
 # backups file with timestamp
-# 
+#
 sub backupFile {
 	my $fileName = shift;
 	my $backupFile = $fileName.'_'.getBackupFileTime().'.bak';
@@ -6088,7 +6082,7 @@ sub messageDesktop {
 		printLog('No display for message output found', 'L1', '[INFO]');
 		return (0);
 	}
-	
+
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
@@ -6416,7 +6410,7 @@ sub writeConfigFile {
 	my $installed;
 	my $version;
 	my $hwid;
-	
+
 	if ($FAI) {
 		$configIniValues->{installation}->{FAI} = 'first reboot after FAI';
 	}
@@ -6479,7 +6473,7 @@ sub writeConfigFile {
 
 
 
-############################################################################### 
+###############################################################################
 # check if config directory exists
 # if not creates a new directory
 # if that is not possible, exits (!!!)
@@ -6831,7 +6825,7 @@ sub listStatusJson {
 	} else {
 		$list{restart} = 'no';
 	}
-	
+
 
 	foreach $module (sort keys %localConfModules) {
 		if($origConfModules{$module}{upgrade} eq 'yes') {
@@ -7131,7 +7125,7 @@ sub removeSingleModule {
 	if ($localConfModules{$module}{blocked} eq 'no') {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
-	}	
+	}
 
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
 		print "Module $moduleName cannot be removed because:\n";
