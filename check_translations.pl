@@ -73,14 +73,14 @@ while (my $line = <$tomte_file>) {
 }
 
 # call descriptions are directly read from modules
-delete $tomte_msgids{'module . "_description'};
-my %origConfModules = read_toml_file('config/modules/modules_raw.toml');
-foreach my $module (keys %origConfModules) {
-    next if $module eq 'default';
-    next if ! defined $module;
-    my $module_string = $module . "_description";
-    $tomte_msgids{$module_string} = 1;
-}
+#delete $tomte_msgids{'module . "_description'};
+#my %origConfModules = read_toml_file('config/modules/modules_raw.toml');
+#foreach my $module (keys %origConfModules) {
+#    next if $module eq 'default';
+#    next if ! defined $module;
+#    my $module_string = $module . "_description";
+#    $tomte_msgids{$module_string} = 1;
+#}
 
 # Subroutine to compare two lists
 sub compare_language_with_tomte_and_print_diff {
@@ -141,19 +141,19 @@ sub compare_language_with_tomte_and_print_diff {
     return $list1_size + $list2_size;
 }
 
-sub read_toml_file {
-	my $file_path = shift;
-
-	my $toml_str = read_file($file_path);
-	my $toml_hash_ref = from_toml($toml_str);
+#sub read_toml_file {
+#	my $file_path = shift;
+#
+#	my $toml_str = read_file($file_path);
+#	my $toml_hash_ref = from_toml($toml_str);
 
     # Check if the TOML data was parsed successfully
-    if (!defined $toml_hash_ref) {
-        die("Failed to parse TOML data from file: $file_path");
-    }
+	#    if (!defined $toml_hash_ref) {
+	#        die("Failed to parse TOML data from file: $file_path");
+	#    }
 
-	return %$toml_hash_ref;
-}
+	#	return %$toml_hash_ref;
+	#}
 
 my $differences = 0;
 foreach my $language_code (keys %msgids){
