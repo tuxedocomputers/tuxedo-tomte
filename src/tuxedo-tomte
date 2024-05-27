@@ -1059,9 +1059,11 @@ sub checkRequirements {
 	}
 
 	my @r8125Devices = ('10ec:8125');
-	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-		$presetModules{tuxedor8125dkms}{required} = 'yes';
-		printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+	unless ($ubuntuCodename =~ /noble/) {
+		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
+			$presetModules{tuxedor8125dkms}{required} = 'yes';
+			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	# if cardreader Realtek RTS522A found
