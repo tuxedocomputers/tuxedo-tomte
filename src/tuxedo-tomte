@@ -1136,9 +1136,18 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
+	},
+	'71' => {
+		model => ['all with Wi-Fi with respective PCI-IDs'],
+		board_name => [''],
+		fix => ['tuxedowifisetregdomain'],
+		flavour => ['24.04', 'TUXEDO OS'],
+		pci_id => ['0x14c3:0608', '14c3:0616'],
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	}
-
-
 );
 
 foreach my $module (keys %origConfModules) {
@@ -2110,6 +2119,13 @@ sub checkRequirements {
 		$origConfModules{textboot}{required} = 'yes';
 		printLog("detected $origConfModules{textboot}{name} issue", 'L1', '[INFO]');
 	}
+	# get vendor text from vendor ID:device ID
+	my @tuxedoWifiSetRegDomainDevices = ('14c3:0608','14c3:0616');
+	if ( findPciDevice($lspciOutput, @tuxedoWifiSetRegDomainDevices) ) {
+		$origConfModules{tuxedowifisetregdomain}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
+	}
+
 }
 
 
@@ -3771,6 +3787,18 @@ sub tuxedoplasmaupgrade() {
 # Installs Linux device driver for Ethernet controller Motorcomm YT6801
 #
 sub tuxedoyt6801() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+}
+
+
+
+
+###############################################################################
+# Installs module usefull for Wi-Fi
+#
+sub tuxedowifisetregdomain() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
