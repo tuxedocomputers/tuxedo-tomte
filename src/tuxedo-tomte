@@ -1148,6 +1148,30 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	}
+	#TODO boardname
+	'72' => {
+		model => ['TUXEDO Pulse 14 Gen3'],
+		board_name => [''],
+		fix => ['amdgpudisablepsr'],
+		flavour => ['22.04', '24.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
+	#TODO boardname
+	'73' => {
+		model => ['TUXEDO Pulse 14 Gen4'],
+		board_name => [''],
+		fix => ['amdgpudisablepsr'],
+		flavour => ['22.04', '24.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
+	},
 );
 
 foreach my $module (keys %origConfModules) {
@@ -1687,7 +1711,10 @@ sub checkRequirements {
 		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /APX958/)) {
+	# TODO boardnames
+	if (($boardname =~ /APX958/) ||
+		($boardname =~ //) ||
+		($boardname =~ //)) {
 		$origConfModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $origConfModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
@@ -2217,7 +2244,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 
 
 ###############################################################################
-# Disables PSR for APX958
+# Disables PSR for APX958, Pulse 14 Gen3, and Pulse 14 Gen4
 #
 sub amdgpudisablepsr() {
 	my $module = shift;
