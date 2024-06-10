@@ -2122,8 +2122,8 @@ sub checkRequirements {
 	# get vendor text from vendor ID:device ID
 	my @tuxedoWifiSetRegDomainDevices = ('14c3:0608','14c3:0616');
 	if ( findPciDevice($lspciOutput, @tuxedoWifiSetRegDomainDevices) ) {
-		$origConfModules{tuxedoWifiSetRegDomain}{required} = 'yes';
-		printLog("detected $origConfModules{tuxedoWifiSetRegDomain}{name} issue", 'L1', '[INFO]');
+		$origConfModules{tuxedowifisetregdomain}{required} = 'yes';
+		printLog("detected $origConfModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
 }
