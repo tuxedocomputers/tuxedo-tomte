@@ -1147,11 +1147,10 @@ my %tuxedo_devices = (
 		kernel => '',
 		display => '',
 		usb_device => '',
-	}
-	#TODO boardname
+	},
 	'72' => {
 		model => ['TUXEDO Pulse 14 Gen3'],
-		board_name => [''],
+		board_name => ['R14FA1'],
 		fix => ['amdgpudisablepsr'],
 		flavour => ['22.04', '24.04'],
 		pci_id => '',
@@ -1160,10 +1159,9 @@ my %tuxedo_devices = (
 		display => '',
 		usb_device => '',
 	},
-	#TODO boardname
 	'73' => {
 		model => ['TUXEDO Pulse 14 Gen4'],
-		board_name => [''],
+		board_name => ['R14FA2'],
 		fix => ['amdgpudisablepsr'],
 		flavour => ['22.04', '24.04'],
 		pci_id => '',
@@ -1711,10 +1709,9 @@ sub checkRequirements {
 		printLog("detected $origConfModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	# TODO boardnames
 	if (($boardname =~ /APX958/) ||
-		($boardname =~ //) ||
-		($boardname =~ //)) {
+		($boardname =~ /R14FA1/) ||
+		($boardname =~ /R14FA2/)) {
 		$origConfModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $origConfModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
