@@ -62,7 +62,9 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
+# TODO
 my $logLevel = 2;
+$logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -236,7 +238,7 @@ sub printIfExistsNotUndefinedNotEmpty {
 
 
 # hash to load the configfile
-# is a copy from origConfModules to exclude undefined values
+# is a copy from presetModules to exclude undefined values
 my %localConfModules = %presetModules;
 
 
@@ -670,20 +672,23 @@ sub cpuBrand {
 # 0 if not
 #
 sub isOSSupported {
-	if (grep { $_ eq $distributionVersionID } @{ $supportedOSList{ $distribution } }) {
-		return (1);
-	} elsif (exists($supportedOSList{ $distribution })) {
+	if (exists $supportedOSList{ $distribution }) {
+		if ( grep(/^$distributionVersionID$/, @{ $supportedOSList{ $distribution } } ) ) {
+			return (1);
+		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
-						__x("The version {version} of {distribution} is not supported.",
+						__x("This version {version} of {distribution} is not supported.",
 								("version" => $distributionVersionID, "distribution" => $distribution)),
 								2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
+	printLog("Please check on our website https://www.tuxedocomputers.com which Systems are supported by Tomte", 'TL0', '[FATAL]');
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
 	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
+
 }
 
 
@@ -851,21 +856,7 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ /P95_HP/) {
-		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if ($boardname =~ /P95_HR/) {
-		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if ($boardname =~ /P95_HP,HR,HQ/) {
+	if (($boardname =~ /P95_HP/) || ($boardname =~ /P95_HR/) || ($boardname =~ /P95_HP,HR,HQ/)) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
@@ -948,6 +939,11 @@ sub checkRequirements {
 		printLog("will remove obsolete $presetModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
 		$presetModules{tuxedokeyboard}{required} = 'no';
 		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
+	}
+
+	if ($ubuntuCodename =~ /noble/) {
+		$presetModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -1035,6 +1031,9 @@ sub checkRequirements {
 	} elsif ($ubuntuCodename =~ /jammy/) {
 		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2204}{required} = 'yes';
+	} elsif ($ubuntuCodename =~ /noble/) {
+		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -1061,9 +1060,11 @@ sub checkRequirements {
 	}
 
 	my @r8125Devices = ('10ec:8125');
-	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-		$presetModules{tuxedor8125dkms}{required} = 'yes';
-		printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+	unless ($ubuntuCodename =~ /noble/) {
+		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
+			$presetModules{tuxedor8125dkms}{required} = 'yes';
+			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	# if cardreader Realtek RTS522A found
@@ -2046,6 +2047,44 @@ sub kerneltuxedo2204() {
 
 
 
+###############################################################################
+# kernel-tuxedo-24.04
+#
+sub kerneltuxedo2404() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
+
+		installKernelFlavour('linux-tuxedo-24.04', \$instFailed, \$instDone);
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$presetModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+	}
+}
+
+
+
+
 
 
 ###############################################################################
@@ -2237,6 +2276,72 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
+
+
+		} elsif ($ubuntuCodename =~ /noble/) {
+			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
+				# check if the package is already installed
+				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					setDkmsVerbose( 'nvidiadriver', 1 );
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					setDkmsVerbose( 'nvidiadriver', 0 );
+				} else {
+					setAptMark($tuxedoNvidiaDriver550,'manual');
+					$packageNvidiaDriver = 1;
+				}
+			} else {
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+			}
+
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 1;
+			}
+
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
+					$output = `gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
+				}
+			}
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
+					addToConfiguredModules($module, "success");
+					setRestartValues($module);
+				}
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+			} else {
+				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
+				$presetModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+
+
+
+
+
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
@@ -2950,12 +3055,12 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/flavours here as this is meant only for
 	# old installations where those entries might still exist
-	if ($ubuntuCodename ne 'jammy') {
-		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-		}
+	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
+			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			}
 
 		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
 			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
@@ -3117,6 +3222,9 @@ sub cleanSourcesList {
 	my @sourceLines;
 	my $sourceLine;
 	my $sourcesListFile = '/etc/apt/sources.list';
+	if ($ubuntuCodename eq 'noble') {
+		$sourcesListFile = '/etc/apt/sources.list.d/ubuntu.sources';
+	}
 	my $modified = 0;
 	my $tomteMessage = '# tuxedo-tomte commented out all entries at installation, any TUXEDO repositories will be automatically deleted';
 
@@ -7589,6 +7697,5 @@ END {
 
 			writeConfigIniFile();
 		}
-		# just to be sure, always write the tomte_finished file
 	}
 }

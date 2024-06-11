@@ -32,6 +32,186 @@ use File::Slurp qw(append_file write_file read_file edit_file);
 use Data::Dumper;
 
 
+our %SUPPORTED_OS = (
+	"TUXEDO OS" => ["20.04", "22.04"],
+	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
+	"KDE neon" => ["20.04", "22.04"],
+	"Ubuntu" => ["18.04", "20.04", "22.04", "24.04"],
+	"Linux Mint" => ["21.1", "21.2", "21.3"],
+	"elementary OS" => ["6.1", "7.1"]
+);
+
+our %ESSENTIAL_REPOS = (
+	"bionic" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		},
+		"graphics" => {
+			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
+		},
+		"oibaf" => {
+			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
+			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
+		}
+	},
+
+	"focal" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
+		"graphics" => {
+			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"},
+		"oibaf" => {
+			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
+			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
+		}
+	},
+
+	"jammy" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		}
+	},
+
+	"noble" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		}
+	},
+
+	"TUXEDO OS 22.04" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		},
+		"nonplasma6txos" => {
+			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+		},
+		"nonplasma6plasma" => {
+			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+		},
+		"plasma6txos" => {
+			"content" => [
+				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
+			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
+			},
+		"plasma6plasma" => {
+			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+		}
+	}
+);
+
+our %OTHER_REPOS = (
+	"bionic" => {
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		}
+	},
+
+	"focal" => {
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		}
+	},
+
+	"jammy" => {
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		}
+	},
+
+	"noble" => {
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse"
+			],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+		}
+	},
+
+
+	"Linux Mint 21.1" => {
+		"name" => "vanessa",
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com vanessa main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		}
+	},
+
+	"Linux Mint 21.2" => {
+		"name" => "victoria",
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com victoria main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		}
+	},
+
+	"Linux Mint 21.3" => {
+		"name" => "virginia",
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com virginia main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		}
+	}
+);
+
+our %KERNELS = (
+	"focal" => {
+		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
+	},
+
+	"jammy" => {
+		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
+	},
+
+	"noble" => {
+		"linux-tuxedo-24.04" => "linux-tuxedo-24.04 linux-headers-tuxedo-24.04 linux-image-tuxedo-24.04",
+	}
+);
+
+
+
 
 
 
@@ -396,7 +576,7 @@ our %DEVICES = (
 		model => ['all with NVIDIA'],
 		board_name => [''],
 		fix => ['nvidiadriver'],
-		flavour => ['18.04', '20.04', '22.04'],
+		flavour => ['18.04', '20.04', '22.04', '24.04'],
 		pci_id => '030[02]:',
 		cpu => '',
 		kernel => '',
@@ -803,158 +983,6 @@ our %DEVICES = (
 
 
 
-
-
-
-our %SUPPORTED_OS = (
-	"TUXEDO OS" => ["20.04", "22.04"],
-	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
-	"KDE neon" => ["20.04", "22.04"],
-	"Ubuntu" => ["18.04", "20.04", "22.04"],
-	"Linux Mint" => ["21.1", "21.2", "21.3"],
-	"elementary OS" => ["6.1", "7.1"]
-);
-
-our %ESSENTIAL_REPOS = (
-	"bionic" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
-		},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
-		}
-	},
-
-	"focal" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
-		}
-	},
-
-	"jammy" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		}
-	},
-	"TUXEDO OS 22.04" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"nonplasma6txos" => {
-			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-		},
-		"nonplasma6plasma" => {
-			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		},
-		"plasma6txos" => {
-			"content" => [
-				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
-			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-			},
-		"plasma6plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		}
-	}
-);
-
-our %OTHER_REPOS = (
-	"bionic" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-	"focal" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-	"jammy" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-
-	"Linux Mint 21.1" => {
-		"name" => "vanessa",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com vanessa main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-	"Linux Mint 21.2" => {
-		"name" => "victoria",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com victoria main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-	"Linux Mint 21.3" => {
-		"name" => "virginia",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com virginia main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	}
-);
-
-our %KERNELS = (
-	"focal" => {
-		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
-	},
-
-	"jammy" => {
-		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
-	}
-);
 
 
 
@@ -1455,6 +1483,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'no',
 	},
+	kerneltuxedo2404 => {
+		name => 'linux-tuxedo-24.04',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('kerneltuxedo2404_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
+	},
+
 	nvidiadriver => {
 		name => 'nvidia-driver',
 		version => 6,
