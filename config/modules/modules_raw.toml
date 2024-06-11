@@ -413,3 +413,12 @@ reconfigure = "always"
 restart = "yes"
 blocked = "yes"
 
+
+[tuxedowifisetregdomain]
+dkms = "yes"
+name = "tuxedo-wifi-set-reg-domain"
+package = "yes"
+restart = "no"
+version = 1
+
+
