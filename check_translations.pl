@@ -11,6 +11,7 @@ use File::Slurp qw(write_file read_file);
 use TOML qw(from_toml to_toml);
 
 my %msgids;
+my %tomteMsgids;
 
 # Specify the directory to start the search
 my $scriptDirectory = $RealBin;
@@ -37,7 +38,6 @@ sub loadMsgIdsFromDirectories {
 			}
 		}
 	}
-
 	close $inputFile;
 }
 
@@ -118,7 +118,6 @@ sub compareLanguageWithTomteAndPrintDiff {
 # Perform the file search
 find({ wanted => \&loadMsgIdsFromDirectories, no_chdir => 1 }, startDirectory);
 
-my %tomteMsgids;
 
 # Open the tomte file
 open my $tomteFile, '<', 'src/tuxedo-tomte' or die "Couldn't open input file: $!";
