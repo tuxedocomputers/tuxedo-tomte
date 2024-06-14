@@ -1,5 +1,5 @@
 [Unit]
-Description = Tomte-daemon, finishes tasks that could not be accomplished before
+Description = Starts tuxedo-tomte to check and configure the system
 After = network.target auditd.target
 Before = oem-config.service
 

@@ -678,9 +678,9 @@ sub isOSSupported {
 		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
 		messageDesktop(__("This OS version is not supported"),
-						__x("This version {version} of {distribution} is not supported.",
-								("version" => $distributionVersionID, "distribution" => $distribution)),
-								2, 'dialog-warning');
+			__x("This version {version} of {distribution} is not supported.",
+				("version" => $distributionVersionID, "distribution" => $distribution)),
+			2, 'dialog-warning');
 		return (0);
 	}
 	printLog("This OS is not supported", 'TL0', '[FATAL]');
@@ -760,7 +760,9 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /APX958/)) {
+	if (($boardname =~ /APX958/) ||
+		($boardname =~ /R14FA1/) ||
+		($boardname =~ /R14FA2/)) {
 		$presetModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
@@ -1188,6 +1190,13 @@ sub checkRequirements {
 		$presetModules{textboot}{required} = 'yes';
 		printLog("detected $presetModules{textboot}{name} issue", 'L1', '[INFO]');
 	}
+	# get vendor text from vendor ID:device ID
+	my @tuxedoWifiSetRegDomainDevices = ('14c3:0608','14c3:0616');
+	if ( findPciDevice($lspciOutput, @tuxedoWifiSetRegDomainDevices) ) {
+		$presetModules{tuxedowifisetregdomain}{required} = 'yes';
+		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
+	}
+
 }
 
 
@@ -1279,7 +1288,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 
 
 ###############################################################################
-# Disables PSR for APX958
+# Disables PSR for APX958, Pulse 14 Gen3, and Pulse 14 Gen4
 #
 sub amdgpudisablepsr() {
 	my $module = shift;
@@ -2962,6 +2971,18 @@ sub tuxedoyt6801() {
 
 
 ###############################################################################
+# Installs module usefull for Wi-Fi
+#
+sub tuxedowifisetregdomain() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+}
+
+
+
+
+###############################################################################
 # solves black screen after plasma6 upgrade
 #
 sub textboot() {
@@ -3053,7 +3074,7 @@ sub createRepos {
 	}
 
 	# workaround for possible old entries in sources list
-	# do NOT add more distributions/flavours here as this is meant only for
+	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
 	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
@@ -5757,7 +5778,7 @@ sub findActiveEDIDs {
 
 ###############################################################################
 # gets valid edid files
-# converts edid data into an array of hash references to origConfModules
+# converts edid data into an array of hash references to presetModules
 #
 sub getEDIDData {
 	my @edidFiles = findActiveEDIDs();
@@ -7697,5 +7718,6 @@ END {
 
 			writeConfigIniFile();
 		}
+		# just to be sure, always write the tomte_finished file
 	}
 }
