@@ -10,12 +10,16 @@ use File::Find;
 use File::Slurp qw(write_file read_file);
 use TOML qw(from_toml to_toml);
 
+use Data::Dumper;
+
+use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+
 my %msgids;
 my %tomteMsgids;
 
 # Specify the directory to start the search
 my $scriptDirectory = $RealBin;
-my startDirectory = $scriptDirectory . '/po/';
+my $startDirectory = $scriptDirectory . '/po/';
 my $defaultLanguage = 'en';
 
 
@@ -48,13 +52,13 @@ sub compareLanguageWithTomteAndPrintDiff {
 	print "Comparing Tomte Code msgids with those from $languageCode..\n";
 
 
-	my %unique_items = %{ dclone(\%tomteMsgids) };
+	my %uniqueItems = %{ dclone(\%tomteMsgids) };
 	my %returnHash;
 	my @onlyInList1;
 	my @onlyInList2;
 
 	# Check items in list 2
-	foreach my $item (@{$msgids{$language_code}}) {
+	foreach my $item (@{$msgids{$languageCode}}) {
 		if (exists $uniqueItems{$item}) {
 			delete $uniqueItems{$item};  # Remove common items
 		} else {
@@ -62,7 +66,7 @@ sub compareLanguageWithTomteAndPrintDiff {
 		}
 	}
 
-	# Remaining items in %unique_items are only in list 1
+	# Remaining items in %uniqueItems are only in list 1
 	@onlyInList1 = keys %uniqueItems;
 
 
@@ -116,8 +120,10 @@ sub compareLanguageWithTomteAndPrintDiff {
 
 
 # Perform the file search
-find({ wanted => \&loadMsgIdsFromDirectories, no_chdir => 1 }, startDirectory);
+find({ wanted => \&loadMsgIdsFromDirectories, no_chdir => 1 }, $startDirectory);
 
+#TODO
+print Dumper(\%msgids);
 
 # Open the tomte file
 open my $tomteFile, '<', 'src/tuxedo-tomte' or die "Couldn't open input file: $!";
@@ -139,21 +145,22 @@ while (my $line = <$tomteFile>) {
 			# Check if this msgid is unique, then write it to the output
 			if (!$tomteMsgids{$match}) {
 				$tomteMsgids{$match} = 1;  # Mark as seen
-			# print "Tomte: $match\n";
+			print "Tomte: $match\n";
 			}
 		}
 	}
 }
 
 # call descriptions are directly read from modules
-#delete $tomteMsgids{'module . "_description'};
-#my %origConfModules = readTomlFile('config/modules/modules_raw.toml');
-#foreach my $module (keys %origConfModules) {
-#    next if $module eq 'default';
-#    next if ! defined $module;
-#    my $moduleString = $module . "_description";
-#    $tomteMsgids{$moduleString} = 1;
-#}
+delete $tomteMsgids{'module . "_description'};
+my %origConfModules = initialModuleSettings();
+foreach my $module (keys %origConfModules) {
+	next if $module eq 'default';
+	next if ! defined $module;
+	my $moduleString = $module . "_description";
+	print "moduleString: $moduleString module: $module\n";
+	$tomteMsgids{$moduleString} = 1;
+}
 
 
 my $differences = 0;
