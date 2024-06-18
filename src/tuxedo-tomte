@@ -1178,7 +1178,9 @@ sub checkRequirements {
 		}
 	}
 
-	if (($ubuntuCodename eq 'jammy') || ($distribution =~ /TUXEDO OS/)) {
+	if (($ubuntuCodename eq 'jammy') ||
+		($ubuntuCodename eq 'noble') ||
+		($distribution =~ /TUXEDO OS/)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
 			$presetModules{tuxedoyt6801}{required} = 'yes';
