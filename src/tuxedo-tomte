@@ -5457,12 +5457,17 @@ sub printLog {
 	}
 
 	if ($FAI) {
+		# TODO debug
+		print "in FAI\n";
 		print "$severity $message\n";
 		unless(-e $faiLogFile) {
-			open my $FAILOGFILE, ">", $faiLogFile;
+			print "logfile does not exist, creating one\n";
+			open($FAILOGFILE, ">", $faiLogFile);
 			close $FAILOGFILE;
 		}
+		# TODO debug
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+			print "writing to logfilelogfile\n";
 			my $timestamp = getLoggingTime();
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
