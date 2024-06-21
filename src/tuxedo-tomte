@@ -75,8 +75,8 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 printLog("##############################################################################", 'L0', '[INFO]');
-my $faiLogDir = '/tmp/fai/';
-my $faiLogFile = $faiLogDir.'tomte.log';
+my $faiLogDir = '/var/log/';
+my $faiLogFile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
 
 checkAndSetLocale();
