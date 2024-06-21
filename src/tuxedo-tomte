@@ -5458,15 +5458,19 @@ sub printLog {
 
 	if ($FAI) {
 		print "$severity $message\n";
+		unless(-e $faiLogFile) {
+			open my $FAILOGFILE, ">", $faiLogFile;
+			close $FAILOGFILE;
+		}
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
-				my $timestamp = getLoggingTime();
-				if (defined($severity)) {
-					print $FAILOGFILE "$severity $timestamp $message\n";
-				} else {
-					print $FAILOGFILE "$timestamp $message\n";
-				}
-				close $FAILOGFILE;
+			my $timestamp = getLoggingTime();
+			if (defined($severity)) {
+				print $FAILOGFILE "$severity $timestamp $message\n";
+			} else {
+				print $FAILOGFILE "$timestamp $message\n";
 			}
+			close $FAILOGFILE;
+		}
 
 	} elsif ($level <= $logLevel) {
 		if ((-e $logFile) && ($type =~ /L/i)) {
