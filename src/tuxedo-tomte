@@ -75,6 +75,9 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 printLog("##############################################################################", 'L0', '[INFO]');
+my $faiLogDir = $ENV{LOGDIR};
+my $faiLogFile = $faiLogDir.'tomte.log';
+my $FAILOGFILE;
 
 checkAndSetLocale();
 
@@ -5455,6 +5458,16 @@ sub printLog {
 
 	if ($FAI) {
 		print "$severity $message\n";
+		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+				my $timestamp = getLoggingTime();
+				if (defined($severity)) {
+					print $FAILOGFILE "$severity $timestamp $message\n";
+				} else {
+					print $FAILOGFILE "$timestamp $message\n";
+				}
+				close $FAILOGFILE;
+			}
+
 	} elsif ($level <= $logLevel) {
 		if ((-e $logFile) && ($type =~ /L/i)) {
 			if (open($LOGFILE, '>>', $logFile) ) {
