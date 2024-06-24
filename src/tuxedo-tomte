@@ -5466,6 +5466,7 @@ sub printLog {
 			close $FAILOGFILE;
 		} else {
 			print "faiLogFile exists already\n";
+			print "faiLogFile exists already\n";
 		}
 		# TODO debug
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
