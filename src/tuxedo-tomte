@@ -5464,6 +5464,8 @@ sub printLog {
 			print "logfile does not exist, creating one\n";
 			open($FAILOGFILE, ">", $faiLogFile);
 			close $FAILOGFILE;
+		} else {
+			print "faiLogFile exists already\n";
 		}
 		# TODO debug
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
@@ -5475,6 +5477,8 @@ sub printLog {
 				print $FAILOGFILE "$timestamp $message\n";
 			}
 			close $FAILOGFILE;
+		} else {
+			print "could not open logfile\n";
 		}
 
 	} elsif ($level <= $logLevel) {
