@@ -153,7 +153,17 @@ my $plasma6Installed = 0;
 # if in FAI it should check which is the installed
 # kernel package version on target
 my $kernelRelease;
-if ($FAI) {
+# check whether we are in a chroot environment
+sub isChroot {
+	my $rootPath = "/";
+	my $procRootPath = "/proc/1/root/.";
+
+	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
+	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
+
+	return "$rootDev:$rootIno" ne "$procRootDev:$procRootIno";
+}
+if (isChroot) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
 	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
