@@ -7664,6 +7664,11 @@ if (@ARGV != 0) {
 			print "Module name missing\n";
 		}
 
+	# return whether everything could be installed correctly
+	} elsif ($argValue{command} eq "check") {
+
+	}
+
 	# modes
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
