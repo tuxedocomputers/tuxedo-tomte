@@ -39,6 +39,7 @@ use File::FcntlLock;
 
 use File::Copy;
 use File::Find;
+use Cwd 'realpath';
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
