@@ -6058,6 +6058,28 @@ sub listVersions {
 
 
 
+###############################################################################
+# checks whether all modules have been installed successfully
+# returns 1 if everything was installed
+# returns 0 if something went wrong
+#
+sub checkNoFailedModules {
+	my $successfull = 1;
+	my $module;
+	foreach $module (sort keys %localConfModules) {
+		if (($localConfModules{$module}{installed} eq 'no') &&
+			($localConfModules{$module}{required} eq 'yes')) {
+			$successfull = 0;
+		}
+		if (($localConfModules{$module}{installed} eq 'no') &&
+			($localConfModules{$module}{required} eq 'prerequisite')) {
+			$successfull = 0;
+		}
+	}
+	return $successfull;
+}
+
+
 
 sub listStatusJson {
 	my $module;
@@ -7666,8 +7688,7 @@ if (@ARGV != 0) {
 
 	# return whether everything could be installed correctly
 	} elsif ($argValue{command} eq "check") {
-
-	}
+		checkNoFailedModules();
 
 	# modes
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
