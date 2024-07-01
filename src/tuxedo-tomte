@@ -39,6 +39,7 @@ use File::FcntlLock;
 
 use File::Copy;
 use File::Find;
+use Cwd 'realpath';
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -62,7 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-# TODO4
+# TODO
 my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
@@ -153,7 +154,17 @@ my $plasma6Installed = 0;
 # if in FAI it should check which is the installed
 # kernel package version on target
 my $kernelRelease;
-if ($FAI) {
+# check whether we are in a chroot environment
+sub isChroot {
+	my $rootPath = "/";
+	my $procRootPath = "/proc/1/root/.";
+
+	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
+	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
+
+	return "$rootDev:$rootIno" ne "$procRootDev:$procRootIno";
+}
+if (isChroot) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
 	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
