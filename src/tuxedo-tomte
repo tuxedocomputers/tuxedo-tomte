@@ -6068,11 +6068,11 @@ sub checkNoFailedModules {
 	my $module;
 	foreach $module (sort keys %localConfModules) {
 		if (($localConfModules{$module}{installed} eq 'no') &&
-			($localConfModules{$module}{required} eq 'yes')) {
+			($presetModules{$module}{required} eq 'yes')) {
 			$successfull = 0;
 		}
 		if (($localConfModules{$module}{installed} eq 'no') &&
-			($localConfModules{$module}{required} eq 'prerequisite')) {
+			($presetModules{$module}{required} eq 'prerequisite')) {
 			$successfull = 0;
 		}
 	}
@@ -7508,6 +7508,17 @@ if (@ARGV != 0) {
 		}
 		listStatusJson();
 
+	# return whether everything could be installed correctly
+	} elsif ($argValue{command} eq "check") {
+		checkMode();
+		renameOldConfigFile();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
+		} else {
+			prepareValues();
+		}
+		print checkNoFailedModules();
+
 	# description
 	} elsif ($argValue{command} eq "description") {
 		moduleDescription();
@@ -7685,10 +7696,6 @@ if (@ARGV != 0) {
 		} else {
 			print "Module name missing\n";
 		}
-
-	# return whether everything could be installed correctly
-	} elsif ($argValue{command} eq "check") {
-		checkNoFailedModules();
 
 	# modes
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
