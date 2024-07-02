@@ -781,16 +781,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /POLARIS1701A1650TI/) ||
-		($boardname =~ /POLARIS1701A2060/) ||
-		($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/)) {
-		if ($distributionVersionID =~ /18.04/) {
-			$presetModules{amdgpuwithnvidiafix}{required} = 'yes';
-			printLog("detected $presetModules{amdgpuwithnvidiafix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /PB50_70DFx,DDx/) ||
    		($boardname =~ /LAPQC71A/) ||
@@ -941,8 +931,7 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		if (($ubuntuCodename =~ /bionic/) ||
-			($ubuntuCodename =~ /focal/)) {
+		if ($ubuntuCodename =~ /focal/) {
 			$presetModules{tuxedokeyboardite}{required} = 'yes';
 			printLog("detected $presetModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
@@ -2131,67 +2120,7 @@ sub nvidiadriver() {
 	my $nvidiaDriver550 = 'nvidia-driver-550';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($completeDistVersion =~ /Ubuntu 18.04/) {
-			if (isPackageInRepo($nvidiaDriver510)) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver510) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver510);
-			} else {
-				setAptMark($nvidiaDriver510,'manual');
-				$packageNvidiaDriver = 1;
-			}
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-			if( ! isPackageInstalled('python-appindicator') ) {
-				$wasInstalled = 0;
-				$packagePythonAppindicator = installPackage('python-appindicator');
-			} else {
-				$packagePythonAppindicator = 1;
-			}
-			if( ! isPackageInstalled('python-cairo') ) {
-				$wasInstalled = 0;
-				$packagePythonCairo = installPackage('python-cairo');
-			} else {
-				$packagePythonCairo = 1;
-			}
-			if( ! isPackageInstalled('python-gtk2') ) {
-				$wasInstalled = 0;
-				$packagePythonGtk2 = installPackage('python-gtk2');
-			} else {
-				$packagePythonGtk2 = 1;
-			}
-
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-
-		} elsif ($ubuntuCodename =~ /focal/) {
+		if ($ubuntuCodename =~ /focal/) {
 			if (isPackageInRepo($nvidiaDriver510)) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
@@ -3094,7 +3023,6 @@ sub createRepos {
 	# old installations where those entries might still exist
 	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
