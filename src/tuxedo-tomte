@@ -911,13 +911,6 @@ sub checkRequirements {
 	}
 
 	# all notebooks require this
-	if ( ($chassisType eq 'notebook') &&
-		($ubuntuCodename =~ /focal/)) {
-		$presetModules{tuxedokeyboard}{required} = 'yes';
-		printLog("detected $presetModules{tuxedokeyboard}{name} issue", 'L1', '[INFO]');
-	}
-
-	# all notebooks require this
 	# the temporary fix has to be removed for now as it causes boot delay issues
 	# on some notebooks
 	# not necessary on 24.04
@@ -941,20 +934,10 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		if (($ubuntuCodename =~ /bionic/) ||
-			($ubuntuCodename =~ /focal/)) {
+		if ($ubuntuCodename =~ /bionic/) {
 			$presetModules{tuxedokeyboardite}{required} = 'yes';
 			printLog("detected $presetModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
-	}
-
-	if ($ubuntuCodename =~ /jammy/) {
-		$presetModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
-		$presetModules{tuxedokeyboardite}{required} = 'no';
-		printLog("will remove obsolete $presetModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
-		$presetModules{tuxedokeyboard}{required} = 'no';
-		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
 	}
 
 	if ($ubuntuCodename =~ /noble/) {
@@ -1035,21 +1018,6 @@ sub checkRequirements {
 		($boardname =~ m/PHxTQx1/)) {
 		$presetModules{i915enablepsrfix}{required} = 'yes';
 		printLog("detected $presetModules{i915enablepsrfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	# kernel
-	if ($ubuntuCodename =~ /focal/ && $boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) {
-		printLog("kernel $presetModules{kerneltuxedo2204}{name} should be installed", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /focal/) {
-		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2004}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /jammy/) {
-		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /noble/) {
-		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -1192,20 +1160,6 @@ sub checkRequirements {
 		}
 	}
 
-	if (($ubuntuCodename eq 'jammy') ||
-		($ubuntuCodename eq 'noble') ||
-		($distribution =~ /TUXEDO OS/)) {
-		my @tuxedoyt6801Devices = ('1f0a:6801');
-		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
-			$presetModules{tuxedoyt6801}{required} = 'yes';
-			printLog("detected $presetModules{tuxedoyt6801}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if ($distribution =~ /TUXEDO OS/) {
-		$presetModules{textboot}{required} = 'yes';
-		printLog("detected $presetModules{textboot}{name} issue", 'L1', '[INFO]');
-	}
 	# get vendor text from vendor ID:device ID
 	my @tuxedoWifiSetRegDomainDevices = ('14c3:0608','14c3:0616');
 	if ( findPciDevice($lspciOutput, @tuxedoWifiSetRegDomainDevices) ) {
@@ -1997,81 +1951,6 @@ sub tuxedodrivers() {
 
 
 
-
-###############################################################################
-# kernel-tuxedo-20.04
-#
-sub kerneltuxedo2004() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04
-#
-sub kerneltuxedo2204() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
-
-
 ###############################################################################
 # kernel-tuxedo-24.04
 #
@@ -2187,185 +2066,6 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-
-
-
-
-		} elsif ($ubuntuCodename =~ /focal/) {
-			if (isPackageInRepo($nvidiaDriver510)) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver510) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver510);
-			} else {
-				setAptMark($nvidiaDriver510,'manual');
-				$packageNvidiaDriver = 1;
-			}
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[INFO]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-
-		} elsif ($ubuntuCodename =~ /jammy/) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
-
-			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
-
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
-				$oldDriversRemoved += $oldDriversRemovedCounter;
-				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
-					messageLongInstall();
-					$wasInstalled = 0;
-					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
-					setDkmsVerbose( 'nvidiadriver', 0 );
-				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
-					$packageNvidiaDriver = 1;
-				}
-			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
-			}
-
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-		} elsif ($ubuntuCodename =~ /noble/) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
-
-			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
-
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
-				$oldDriversRemoved += $oldDriversRemovedCounter;
-				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
-					messageLongInstall();
-					$wasInstalled = 0;
-					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
-					setDkmsVerbose( 'nvidiadriver', 0 );
-				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
-					$packageNvidiaDriver = 1;
-				}
-			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
-			}
-
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-
 
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
@@ -3095,24 +2795,11 @@ sub createRepos {
 	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
 				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
-
-		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
 		}
 
-		if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-		}
 	} else {
-		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-		}
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
 				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1', '[INFO]');
