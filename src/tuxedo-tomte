@@ -7509,7 +7509,7 @@ if (@ARGV != 0) {
 		listStatusJson();
 
 	# return whether everything could be installed correctly
-	} elsif ($argValue{command} eq "check") {
+	} elsif ($argValue{command} eq "ok") {
 		checkMode();
 		renameOldConfigFile();
 		if (!-e $configFile) {
