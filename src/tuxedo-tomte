@@ -940,11 +940,6 @@ sub checkRequirements {
 		}
 	}
 
-	if ($ubuntuCodename =~ /noble/) {
-		$presetModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
-	}
-
 	# get vendor text from vendor ID:device ID
 	my @tuxedonvmefixDevices = ('2646:2263');
 	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
@@ -2793,10 +2788,9 @@ sub createRepos {
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
 	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
-			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			}
+		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 		}
 
 	} else {
@@ -2946,9 +2940,6 @@ sub cleanSourcesList {
 	my @sourceLines;
 	my $sourceLine;
 	my $sourcesListFile = '/etc/apt/sources.list';
-	if ($ubuntuCodename eq 'noble') {
-		$sourcesListFile = '/etc/apt/sources.list.d/ubuntu.sources';
-	}
 	my $modified = 0;
 	my $tomteMessage = '# tuxedo-tomte commented out all entries at installation, any TUXEDO repositories will be automatically deleted';
 
