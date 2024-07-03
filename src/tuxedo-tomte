@@ -742,12 +742,7 @@ sub checkRequirements {
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
-		if ($FAI) {
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		} else {
+		unless ($FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$presetModules{i8042noauxfix}{required} = 'yes';
@@ -795,12 +790,7 @@ sub checkRequirements {
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
-		if ($FAI) {
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		} else {
+		unless ($FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
