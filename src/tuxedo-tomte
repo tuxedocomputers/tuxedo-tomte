@@ -915,7 +915,7 @@ sub checkRequirements {
 	# on some notebooks
 	# not necessary on 24.04
 	# when deleting this workaround, also delete the module entry from the config
-	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/))) {
+	if ($chassisType eq 'notebook') {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $presetModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$presetModules{systemdbacklightfix}{required} = 'no';
@@ -1039,11 +1039,9 @@ sub checkRequirements {
 	}
 
 	my @r8125Devices = ('10ec:8125');
-	unless ($ubuntuCodename =~ /noble/) {
-		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-			$presetModules{tuxedor8125dkms}{required} = 'yes';
-			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
-		}
+	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
+		$presetModules{tuxedor8125dkms}{required} = 'yes';
+		printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if cardreader Realtek RTS522A found
@@ -1104,11 +1102,6 @@ sub checkRequirements {
 		($boardname =~ /PH6PG01_PH6PG71/)) {
 		$presetModules{disablegucfix}{required} = 'yes';
 		printLog("detected $presetModules{disablegucfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	if ($completeDistVersion =~ /elementary OS 7.1/) {
-		$presetModules{elementaryosdkmspinningfix}{required} = 'yes';
-		printLog("detected $presetModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my @ath12kstandbyfixDevices = ('17cb:1107');
@@ -1417,13 +1410,10 @@ sub tuxedorepos() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
-			# Mint uses mintUpdate instead
-			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
-				unless (-e $thirdPartyMirrorsFile) {
-					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
-					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
-						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
-					}
+			unless (-e $thirdPartyMirrorsFile) {
+				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
+				unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
+					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
 				}
 			}
 			if ($retval == 1) {
@@ -1451,13 +1441,10 @@ sub tuxedorepos() {
 			addToConfiguredModules($module, "failed");
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
-			# Mint uses mintUpdate instead
-			unless (($ubuntuCodename =~ /jammy/) && ($distribution =~ /Linux Mint/)) {
-				unless (-e $thirdPartyMirrorsFile) {
-					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
-					unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
-						printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
-					}
+			unless (-e $thirdPartyMirrorsFile) {
+				printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
+				unless (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) {
+					printLog("something is very fishy! can't create $thirdPartyMirrorsFile", 'L0', '[ERROR]');
 				}
 			}
 
@@ -1943,43 +1930,6 @@ sub tuxedodrivers() {
 	}
 }
 
-
-
-
-###############################################################################
-# kernel-tuxedo-24.04
-#
-sub kerneltuxedo2404() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-24.04', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
 
 
 
@@ -2567,58 +2517,6 @@ sub disablegucfix() {
 
 
 ###############################################################################
-# pinning on Elementary OS to ensure we provide the correct dkms version
-#
-sub elementaryosdkmspinningfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval;
-	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
-	my $fileText = 	"# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-					"Package: dkms\n".
-					"Pin: release a=tuxedo,n=jammy\n".
-					"Pin-Priority: 1000\n";
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		if (-e $fileName) {
-			if (removeWarningMessage("elementaryos-dkms-pinning-fix\n")) {
-				printLog("removing $module", 'TL0', '[INFO]');
-				if (unlink($fileName)) {
-					printLog("$presetModules{$module}{name} removed", 'TL0', '[INFO]');
-				} else {
-					printLog('can\'t remove fix', 'TL0', '[ERROR]');
-				}
-				$presetModules{$module}{installed} = 'no';
-				$presetModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			}
-		} else {
-			$presetModules{$module}{installed} = 'no';
-			$presetModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-			printLog("$presetModules{$module}{name} was already removed", 'TL0', '[INFO]');
-		}
-	}
-}
-
-
-
-###############################################################################
 # Boot delays/freezes in nvidia modes
 #
 sub ath12kstandbyfix() {
@@ -2787,24 +2685,11 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
-	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
-		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-		}
-
-	} else {
-		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
-			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
-				printLog('deleted /etc/apt/sources.list.d/graphics-tuxedo.list', 'TL1', '[INFO]');
-			}
-		}
-		if (-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
-			if (unlink('/etc/apt/sources.list.d/oibaf-tuxedo.list')) {
-				printLog('deleted /etc/apt/sources.list.d/oibaf-tuxedo.list', 'TL1', '[INFO]');
-			}
-		}
+	if(-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+		edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+		edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 	}
+
 
 	my $repoFileText = '';
 	foreach my $key (keys %{ $repos{$distroKey} }) {
