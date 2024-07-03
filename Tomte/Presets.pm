@@ -57,9 +57,14 @@ our %OTHER_REPOS = (
 	"bionic" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic main restricted",
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates main restricted",
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic universe",
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe",
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic multiverse",
+				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates multiverse",
+				"deb http://security.ubuntu.com/ubuntu bionic-security universe",
+				"deb http://security.ubuntu.com/ubuntu bionic-security multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
 		}
