@@ -18,6 +18,8 @@ our $VERSION = 'API-Change.Feature-Release.Hotfix-Release';
 # You should have received a copy of the GNU General Public License
 # along with TUXEDO Tomte. If not, see <https://www.gnu.org/licenses/>.
 
+package Tomte;
+
 use strict qw(vars subs);
 use warnings;
 use 5.010;
@@ -29,12 +31,15 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
+use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
 use File::FcntlLock;
 
 use File::Copy;
 use File::Find;
+use Cwd 'realpath';
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -45,7 +50,6 @@ use Time::HiRes qw(usleep);
 use Dpkg::Version;
 use JSON;
 use Config::Tiny;
-use TOML qw(from_toml);
 
 # for Translations
 use Locale::TextDomain ('tomte', '/usr/share/locale');
@@ -59,7 +63,8 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
+$logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -70,6 +75,9 @@ my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 printLog("##############################################################################", 'L0', '[INFO]');
+my $faiLogDir = '/var/log/';
+my $faiLogFile = $faiLogDir.'fai-tomte.log';
+my $FAILOGFILE;
 
 checkAndSetLocale();
 
@@ -148,7 +156,17 @@ my $plasma6Installed = 0;
 # if in FAI it should check which is the installed
 # kernel package version on target
 my $kernelRelease;
-if ($FAI) {
+# check whether we are in a chroot environment
+sub isChroot {
+	my $rootPath = "/";
+	my $procRootPath = "/proc/1/root/.";
+
+	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
+	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
+
+	return "$rootDev:$rootIno" ne "$procRootDev:$procRootIno";
+}
+if (isChroot) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
 	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
@@ -183,999 +201,14 @@ $sessionID = hex($1);
 printLog("sessionID: $sessionID", 'TL2', '[DEBUG]');
 
 
-
-###############################################################################
-# files used by package manager utilities to lock package management
-#
-my %lockFilesList = (
-	aptArchivesLock => {
-		filename => '/var/cache/apt/archives/lock',
-		FH => '',
-		number => '0',
-		locked => '0',
-	},
-	aptListsLock => {
-		filename => '/var/lib/apt/lists/lock',
-		FH => '',
-		number => '0',
-		locked => '0',
-	},
-	dpkgLock => {
-		filename => '/var/lib/dpkg/lock',
-		FH => '',
-		number => '0',
-		locked => '0',
-	},
-	dpkgLockFrontend => {
-		filename => '/var/lib/dpkg/lock-frontend',
-		FH => '',
-		number => '0',
-		locked => '0',
-	},
-);
-
-
-###############################################################################
-# initial definition of post configuration modules
-#   command		the command to be executed on the system
-#   trigger		'1' / 'undef' wether the command should be executed
-#   status		'undef' / 'failed' wether the command execution failed
-#
-my %postConfProgramsList = (
-	updateGrub => {
-		command => 'update-grub',
-		trigger => 0,
-		status => 'undef',
-		description => __('updateGrub_description'),
-	},
-	updateInitramfs => {
-		command => 'update-initramfs -u -k all',
-		trigger => 0,
-		status => 'undef',
-		description => __('updateInitramfs_description'),
-	},
-);
-
-
-my %supportedOSList = (
-	"TUXEDO OS" => ["20.04", "22.04"],
-	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
-	"KDE neon" => ["20.04", "22.04"],
-	"Ubuntu" => ["18.04", "20.04", "22.04"],
-	"Linux Mint" => ["21.1", "21.2", "21.3"],
-	"elementary OS" => ["6.1", "7.1"]
-);
-
-my %essentialReposList = (
-	"bionic" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
-		},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
-		}
-	},
-
-	"focal" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
-		}
-	},
-
-	"jammy" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		}
-	},
-	"TUXEDO OS 22.04" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"nonplasma6txos" => {
-			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-		},
-		"nonplasma6plasma" => {
-			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		},
-		"plasma6txos" => {
-			"content" => [
-				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
-			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-			},
-		"plasma6plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		}
-	}
-);
-
-my %otherReposList = (
-	"bionic" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu bionic-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu bionic-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-	"focal" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-	"jammy" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-
-	"Linux Mint 21.1" => {
-		"name" => "vanessa",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com vanessa main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-	"Linux Mint 21.2" => {
-		"name" => "victoria",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com victoria main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-	"Linux Mint 21.3" => {
-		"name" => "virginia",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com virginia main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	}
-);
-
-my %kernelsList = (
-	"focal" => {
-		"linux-tuxedo-20.04" => "linux-tuxedo-20.04 linux-headers-tuxedo-20.04 linux-image-tuxedo-20.04",
-	},
-
-	"jammy" => {
-		"linux-tuxedo-22.04" => "linux-tuxedo-22.04 linux-headers-tuxedo-22.04 linux-image-tuxedo-22.04",
-	}
-);
-
-my %presetModules = (readTOMLFile('/usr/lib/tomte/config/modules/modules.toml'));
-
-my %devicesList = (
-	'1' => {
-		model => ['TUXEDO Aura 15 Gen1'],
-		board_name => ['NL5xRU', 'AURA1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1558:a500',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'2' => {
-		model => ['TUXEDO Book BA15 Gen1'],
-		board_name => ['PF5PU1G'],
-		fix => ['nobootonbattery', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'3' => {
-		model => ['TUXEDO Book BC15 Gen10', 'TUXEDO Book BC17 Gen10'],
-		board_name => ['NHxxRZQ'],
-		fix => ['r8168dkms'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1558:8562',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'4' => {
-		model => ['TUXEDO Book BX1507'],
-		board_name => ['N350TW'],
-		fix => ['tuxedorestoreaudiofix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'5' => {
-		model => ['TUXEDO Book DX1508', 'TUXEDO Book DX1708'],
-		board_name => ['N8xEJEK'],
-		fix => ['backlightfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'AUO Model 12701 Serial Number 585803690',
-		usb_device => '',
-	},
-	'6' => {
-		model => ['TUXEDO Book XA15 Gen10'],
-		board_name => ['NH5xAx'],
-		fix => ['nokeyboardaftersuspendfix', 'corefix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1558:50f0',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'7' => {
-		model => ['TUXEDO Book XC15 Gen10', 'TUXEDO Book XC17 Gen10'],
-		board_name => ['PB50_70DFx,DDx'],
-		fix => ['nokeyboardaftersuspendfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1558:67e1',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'8' => {
-		model => ['TUXEDO Book XP15 Gen12', 'TUXEDO Book XP17 Gen12'],
-		board_name => ['PCx0Dx_GN20'],
-		fix => ['tuxedodrivers'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => ['1558:65e5', '1558:67e5'],
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'9' => {
-		model => ['TUXEDO Book XUX7 Gen11'],
-		board_name => ['X170SM'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedodrivers'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'10' => {
-		model => ['TUXEDO Book XUX7 Gen13'],
-		board_name => ['X170KM-G'],
-		fix => ['tuxedodrivers', 'nokeyboardaftersuspendfix', 'thunderboltbootdelayfix'],
-		flavour => ['20.04', '22.04'],
-		pci_id => '1558:7715',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'11' => {
-		model => ['TUXEDO EduBook 15 Gen2'],
-		board_name => ['EDUBOOK1502'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'nokeyboardaftersuspendfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'12' => {
-		model => ['TUXEDO InfinityBook 14 v2'],
-		board_name => ['X35R'],
-		fix => ['elantechtouchpadfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'13' => {
-		model => ['TUXEDO InfinityBook Pro 14 Gen6'],
-		board_name => ['PHxTQx1', 'PHxTxX1', 'PH4TQx1'],
-		fix => ['lightdmlogindcheckgraphicalfix', 'tuxedotouchpadswitch', 'i915enablepsrfix', 'earlyloadbacklightcontrolfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1d05:1132',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'14' => {
-		model => ['TUXEDO InfinityBook Pro 14 v5'],
-		board_name => ['N141CU'],
-		fix => ['nokeyboardaftersuspendfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'15' => {
-		model => ['TUXEDO InfinityBook Pro 15 v5'],
-		board_name => ['N150CU'],
-		fix => ['nokeyboardaftersuspendfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '1558:1404',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'17' => {
-		model => ['TUXEDO Polaris Gen1 AMD NVIDIA GTX1650Ti'],
-		board_name => ['POLARIS1501A1650TI', 'POLARIS1701A1650TI'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'18' => {
-		model => ['TUXEDO Polaris Gen1 AMD NVIDIA RTX2060'],
-		board_name => ['POLARIS1501A2060', 'POLARIS1701A2060'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'amdgpuwithnvidiafix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'19' => {
-		model => ['TUXEDO Polaris Gen1 Intel NVIDIA GTX1650Ti'],
-		board_name => ['POLARIS1501I1650TI', 'POLARIS1701I1650TI'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'20' => {
-		model => ['TUXEDO Polaris Gen1 Intel NVIDIA RTX2060'],
-		board_name => ['POLARIS1501I2060', 'POLARIS1701I2060'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'21' => {
-		model => ['TUXEDO Pulse 14 Gen1'],
-		board_name => ['PULSE1401'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'22' => {
-		model => ['TUXEDO Pulse 15 Gen1'],
-		board_name => ['PULSE1501'],
-		fix => ['amdxhcihcdusbquirksuspendfix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'23' => {
-		model => ['TUXEDO Stellaris Gen2 AMD', 'TUXEDO Polaris Gen2 AMD'],
-		board_name => ['GMxNGxx'],
-		fix => ['tuxedotouchpadswitch', 'amdgpubacklightauxoff'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'BOE Model 2423 Serial Number 0',
-		usb_device => '',
-	},
-	'24' => {
-		model => ['TUXEDO Stellaris Gen2 Intel', 'TUXEDO Polaris Gen2 Intel'],
-		board_name => ['GMxMGxx'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'25' => {
-		model => ['TUXEDO Stellaris Gen3 AMD', 'TUXEDO Polaris Gen3 AMD'],
-		board_name => ['GMxZGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedodrivers', 'amdgpubacklightauxoff'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => ['BOE Model 2423 Serial Number 0', 'BOE Model 2420 Serial Number 0'],
-		usb_device => '',
-	},
-	'26' => {
-		model => ['TUXEDO Stellaris Gen3 Intel', 'TUXEDO Polaris Gen3 Intel'],
-		board_name => ['GMxTGxx'],
-		fix => ['tuxedotouchpadswitch', 'tuxedodrivers', 'nvidiabacklightcontrolfix', 'acpibacklightvideofix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'27' => {
-		model => ['TUXEDO Trinity Gen1 Intel'],
-		board_name => ['TRINITY1501I', 'TRINITY1701I'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'28' => {
-		model => ['XMG Fusion 15 L19 GTX1660Ti'],
-		board_name => ['LAPQC71A'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'29' => {
-		model => ['XMG Fusion 15 L19 RTX2070'],
-		board_name => ['LAPQC71B'],
-		fix => ['nokeyboardaftersuspendfix', 'tuxedotouchpadswitch'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'30' => {
-		model => ['all models'],
-		board_name => [''],
-		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'32' => {
-		model => ['all with fingerprintreader'],
-		board_name => [''],
-		fix => ['fingerprintreader'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => ['147e:100[0123]', '147e:20(15|16|20)', '147e:300[01]', '147e:500[23]', '0483:201[56]', '1c7a:0603'],
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'33' => {
-		model => ['all with LTE module ME936'],
-		board_name => [''],
-		fix => ['huaweime936fix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '12d1:15bb',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => 'ME936',
-	},
-	'34' => {
-		model => ['all with NVIDIA'],
-		board_name => [''],
-		fix => ['nvidiadriver'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '030[02]:',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'35' => {
-		model => ['all with OLED display'],
-		board_name => [''],
-		fix => ['tuxedooledbrt'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'SDC Model 41001 Serial Number 0',
-		usb_device => '',
-	},
-	'36' => {
-		model => ['Kingston NVMe'],
-		board_name => [''],
-		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '2646:2263',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'37' => {
-		model => ['InfinityBook S 17 Gen6', 'InfinityBook S 15 Gen6'],
-		board_name => ['NS50_70MU', 'NS50MU'],
-		fix => ['i8042noauxfix'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'38' => {
-		model => ['TUXEDO Book XP14 Gen12'],
-		board_name => ['NV4XMB,ME,MZ'],
-		fix => ['lightdmlogindcheckgraphicalfix', 'earlyloadbacklightcontrolfix'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'39' => {
-		model => ['TUXEDO Aura 15 Gen2'],
-		board_name => ['NL5xNU'],
-		fix => [],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'40' => {
-		model => ['all models'],
-		board_name => [''],
-		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'41' => {
-		model => ['TUXEDO Stellaris Gen4 Intel'],
-		board_name => ['GMxAGxx'],
-		fix => ['tuxedodrivers', "tuxedotouchpadswitch"],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'42' => {
-		model => ['all with LTE module ME906s'],
-		board_name => [''],
-		fix => ['huaweime906sfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '12d1:15c1',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => 'ME906',
-	},
-	'43' => {
-		model => ['all with cardreader Realtek RTS522A'],
-		board_name => [''],
-		fix => ['cardreaderfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => ['10ec:522a'],
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'44' => {
-		model => ['all with Realtek RTL8125'],
-		board_name => [''],
-		fix => ['tuxedor8125dkms'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '10ec:8125',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'45' => {
-		model => ['TUXEDO Pulse 15 Gen2'],
-		board_name => ['PF5LUXG'],
-		fix => ['tuxedotouchpadswitch', 'samsungnvmefix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => 'linux-tuxedo-22.04-edge',
-		display => '',
-		usb_device => '',
-	},
-	'46' => {
-		model => ['TUXEDO InsanityBook 15 v1'],
-		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
-		fix => ['backlightfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'AUO Model 21229 Serial Number 808797180',
-		usb_device => '',
-	},
-	'47' => {
-		model => ['XP1507'],
-		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
-		fix => ['backlightfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => 'AUO Model 21229 Serial Number 808797180',
-		usb_device => '',
-	},
-	'48' => {
-		model => ['TUXEDO Stellaris Gen4 AMD'],
-		board_name => ['GMxRGxx'],
-		fix => ['tuxedodrivers', "tuxedotouchpadswitch"],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'49' => {
-		model => ['TUXEDO InfinityBook Pro 16 Gen7'],
-		board_name => ['PHxARX1_PHxAQF1', 'PH6AG01_PH6AQ71_PH6AQI1'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => 'linux-tuxedo-22.04-edge',
-		display => '',
-		usb_device => '',
-	},
-	'50' => {
-		model => ['TUXEDO Gemini 17 Gen1'],
-		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedodrivers', 'acpibacklightvideofix'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => 'linux-tuxedo-22.04-next',
-		display => '',
-		usb_device => '',
-	},
-	'51' => {
-		model => ['TUXEDO Stellaris 16 Gen5 Intel'],
-		board_name => ['GMxPXxx'],
-		fix => ['tuxedodrivers', 'tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'52' => {
-		model => ['all with Intel Gen13 PCI USB controller'],
-		board_name => [''],
-		fix => ['intelgenXIIIpowerctlfix'],
-		flavour => ['22.04'],
-		pci_id => '8086:1135',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'53' => {
-		model => ['all with plasma-workspace >=5.25'],
-		board_name => [''],
-		fix => [''],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'54' => {
-		model => ['TUXEDO InfinityBook Pro 14/16 Gen8'],
-		board_name => ['PH4PRX1_PH6PRX1', 'PH4PG31', 'PH6PG01_PH6PG71'],
-		fix => ['tuxedotouchpadswitch', 'disablegucfix'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'55' => {
-		model => ['desktoppc'],
-		board_name => [''],
-		fix => ['apportfix', 'kerneltuxedo2204', 'tuxedocontrolcenter', 'tuxedokeyboard', 'tuxedomirrors', 'tuxedorepos', 'tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'56' => {
-		model => ['TUXEDO InfinityBook Pro 14 Gen7'],
-		board_name => ['PHxARX1_PHxAQF1'],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => 'linux-tuxedo-22.04-edge',
-		display => '',
-		usb_device => '',
-	},
-	'57' => {
-		model => ['TUXEDO Gemini 15 Gen1'],
-		board_name => ['PD5x_7xPNP_PNR_PNN_PNT'],
-		fix => ['tuxedodrivers', 'acpibacklightvideofix'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => 'linux-tuxedo-22.04-next',
-		display => '',
-		usb_device => '',
-	},
-	'58' => {
-		model => ['TUXEDO Aura 14 Gen3'],
-		board_name => ['NL45PU2'],
-		fix => ['r8168dkms'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'59' => {
-		model => ['TUXEDO Aura 15 Gen3'],
-		board_name => ['NL57PU'],
-		fix => ['r8168dkms'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'60' => {
-		model => ['TUXEDO Stellaris 16 Gen5 AMD'],
-		board_name => ['GM6XGxX'],
-		fix => ['tuxedodrivers', 'tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'61' => {
-		model => ['all notebooks'],
-		board_name => [''],
-		fix => ['tuxedokeyboard'],
-		flavour => ['18.04', '20.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'62' => {
-		model => ['all notebooks'],
-		board_name => [''],
-		fix => ['tuxedodrivers'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'63' => {
-		model => ['all notebooks from TongFang'],
-		board_name => [''],
-		fix => ['tuxedotouchpadswitch'],
-		flavour => [''],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'64' => {
-		model => ['all notebooks'],
-		board_name => [''],
-		fix => [''],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'65' => {
-		model => ['all Elementary OS'],
-		board_name => [''],
-		fix => ['elementaryosdkmspinningfix'],
-		flavour => ['6.1', '7.2'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'66' => {
-		model => ['all with LTE module ME906s HP rebranded'],
-		board_name => [''],
-		fix => ['huaweime906shpfix'],
-		flavour => ['18.04', '20.04', '22.04'],
-		pci_id => '03f0:a31d',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => 'ME906',
-	},
-	'67' => {
-		model => ['Sirius 16 - Gen1'],
-		board_name => ['APX958'],
-		fix => ['amdgpudisablepsr'],
-		flavour => ['22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'68' => {
-		model => ['TUXEDO InfinityBook S 15/17 - Gen8'],
-		board_name => ['NS5X_NS7XAU', 'NS5X_7XAU'], # case insensitive
-		fix => ['nvmequirkswitchtodeepsleepfix'],
-		flavour => ['22.04'],
-		pci_id => '144d:a80d',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'69' => {
-		model => ['all'],
-		board_name => [''],
-		fix => ['tuxedoplasmaupgrade'],
-		flavour => ['TUXEDO OS 2 22.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'70' => {
-		model => ['all with ethernet controller YT6801'],
-		board_name => [''],
-		fix => ['tuxedoyt6801'],
-		flavour => ['22.04', 'TUXEDO OS'],
-		pci_id => '1f0a:6801',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'71' => {
-		model => ['all with Wi-Fi with respective PCI-IDs'],
-		board_name => [''],
-		fix => ['tuxedowifisetregdomain'],
-		flavour => ['24.04', 'TUXEDO OS'],
-		pci_id => ['0x14c3:0608', '14c3:0616'],
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'72' => {
-		model => ['TUXEDO Pulse 14 Gen3'],
-		board_name => ['R14FA1'],
-		fix => ['amdgpudisablepsr'],
-		flavour => ['22.04', '24.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-	'73' => {
-		model => ['TUXEDO Pulse 14 Gen4'],
-		board_name => ['R14FA2'],
-		fix => ['amdgpudisablepsr'],
-		flavour => ['22.04', '24.04'],
-		pci_id => '',
-		cpu => '',
-		kernel => '',
-		display => '',
-		usb_device => '',
-	},
-);
-
-foreach my $module (keys %presetModules) {
-	$presetModules{$module}{'description'} = __($module . "_description");
-}
+my %devicesList = devices();
+my %presetModules = initialModuleSettings();
+my %supportedOSList = supportedOS();
+my %essentialReposList = essentialRepos();
+my %otherReposList = otherRepos();
+my %kernelsList = kernels();
+my %lockFilesList = lockFiles();
+my %postConfProgramsList = postConfPrograms();
 
 
 ###############################################################################
@@ -1227,6 +260,13 @@ my %localConfModules = %presetModules;
 # where status should be "success" or "failed"
 #
 my %configuredModules;
+
+
+# for the localization
+foreach my $module (keys %presetModules) {
+	$presetModules{$module}{'description'} = __($module . "_description");
+}
+
 
 
 ###############################################################################
@@ -1701,12 +741,7 @@ sub checkRequirements {
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NS50MU/)) {
-		if ($FAI) {
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		} else {
+		unless ($FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$presetModules{i8042noauxfix}{required} = 'yes';
@@ -1740,16 +775,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /POLARIS1701A1650TI/) ||
-		($boardname =~ /POLARIS1701A2060/) ||
-		($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/)) {
-		if ($distributionVersionID =~ /18.04/) {
-			$presetModules{amdgpuwithnvidiafix}{required} = 'yes';
-			printLog("detected $presetModules{amdgpuwithnvidiafix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
 	if (($boardname =~ /X170SM/) ||
 		($boardname =~ /PB50_70DFx,DDx/) ||
    		($boardname =~ /LAPQC71A/) ||
@@ -1764,12 +789,7 @@ sub checkRequirements {
 		($boardname =~ /NS50_70MU/) ||
 		($boardname =~ /NJ50_70CU/) ||
 		($boardname =~ /X170KM-G/ )) {
-		if ($FAI) {
-			if ($ENV{classes} =~ /^((UBUNTU_1804_LTS)|(UBUNTU_1804))/gm) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		} else {
+		unless ($FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
@@ -1900,8 +920,7 @@ sub checkRequirements {
 		($boardname =~ /LAPQC71B/) ||
 		($boardname =~ /GMxPXxx/) ||
 		($boardname =~ /GM6XGxX/)) {
-		if (($ubuntuCodename =~ /bionic/) ||
-			($ubuntuCodename =~ /focal/)) {
+		if ($ubuntuCodename =~ /focal/) {
 			$presetModules{tuxedokeyboardite}{required} = 'yes';
 			printLog("detected $presetModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
@@ -1914,6 +933,11 @@ sub checkRequirements {
 		printLog("will remove obsolete $presetModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
 		$presetModules{tuxedokeyboard}{required} = 'no';
 		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
+	}
+
+	if ($ubuntuCodename =~ /noble/) {
+		$presetModules{tuxedodrivers}{required} = 'yes';
+		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
 	# get vendor text from vendor ID:device ID
@@ -2001,6 +1025,9 @@ sub checkRequirements {
 	} elsif ($ubuntuCodename =~ /jammy/) {
 		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2204}{required} = 'yes';
+	} elsif ($ubuntuCodename =~ /noble/) {
+		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	if ($boardname =~ m/X170KM-G/) {
@@ -2027,9 +1054,11 @@ sub checkRequirements {
 	}
 
 	my @r8125Devices = ('10ec:8125');
-	if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-		$presetModules{tuxedor8125dkms}{required} = 'yes';
-		printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+	unless ($ubuntuCodename =~ /noble/) {
+		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
+			$presetModules{tuxedor8125dkms}{required} = 'yes';
+			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	# if cardreader Realtek RTS522A found
@@ -2141,7 +1170,9 @@ sub checkRequirements {
 		}
 	}
 
-	if (($ubuntuCodename eq 'jammy') || ($distribution =~ /TUXEDO OS/)) {
+	if (($ubuntuCodename eq 'jammy') ||
+		($ubuntuCodename eq 'noble') ||
+		($distribution =~ /TUXEDO OS/)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
 			$presetModules{tuxedoyt6801}{required} = 'yes';
@@ -3019,6 +2050,44 @@ sub kerneltuxedo2204() {
 
 
 
+###############################################################################
+# kernel-tuxedo-24.04
+#
+sub kerneltuxedo2404() {
+	my $module = shift;
+	my $action = shift;
+	my $instFailed = 0;
+	my $instDone = 0;
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		# clean up oldest tuxedo kernel in /boot (if not used)
+		checkAndDeleteOldestTuxedoKernel();
+		checkAndDeleteOldestRemnantLinuxHeader();
+
+		installKernelFlavour('linux-tuxedo-24.04', \$instFailed, \$instDone);
+		if ($instFailed > 0) {
+			startTomteDelayed();
+			addToConfiguredModules($module, "failed");
+			$presetModules{$module}{installed} = "failed";
+		} elsif ($instDone > 0) {
+			addToConfiguredModules($module, "success");
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
+			setRestartValues($module);
+		} else {
+			addToConfiguredModules($module, "nothingToDo");
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
+		}
+	}
+	if ($action eq 'remove') {
+		# not implemented yet
+		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+	}
+}
+
+
+
+
 
 
 ###############################################################################
@@ -3040,67 +2109,7 @@ sub nvidiadriver() {
 	my $nvidiaDriver550 = 'nvidia-driver-550';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($completeDistVersion =~ /Ubuntu 18.04/) {
-			if (isPackageInRepo($nvidiaDriver510)) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver510) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver510);
-			} else {
-				setAptMark($nvidiaDriver510,'manual');
-				$packageNvidiaDriver = 1;
-			}
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-			if( ! isPackageInstalled('python-appindicator') ) {
-				$wasInstalled = 0;
-				$packagePythonAppindicator = installPackage('python-appindicator');
-			} else {
-				$packagePythonAppindicator = 1;
-			}
-			if( ! isPackageInstalled('python-cairo') ) {
-				$wasInstalled = 0;
-				$packagePythonCairo = installPackage('python-cairo');
-			} else {
-				$packagePythonCairo = 1;
-			}
-			if( ! isPackageInstalled('python-gtk2') ) {
-				$wasInstalled = 0;
-				$packagePythonGtk2 = installPackage('python-gtk2');
-			} else {
-				$packagePythonGtk2 = 1;
-			}
-
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packagePythonAppIndicator: $packagePythonAppindicator packagePythonCairo: $packagePythonCairo packagePythonGtk2: $packagePythonGtk2", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime && $packagePythonAppindicator && $packagePythonCairo && $packagePythonGtk2 ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-
-		} elsif ($ubuntuCodename =~ /focal/) {
+		if ($ubuntuCodename =~ /focal/) {
 			if (isPackageInRepo($nvidiaDriver510)) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
@@ -3210,6 +2219,72 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
+
+
+		} elsif ($ubuntuCodename =~ /noble/) {
+			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
+				# check if the package is already installed
+				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					setDkmsVerbose( 'nvidiadriver', 1 );
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					setDkmsVerbose( 'nvidiadriver', 0 );
+				} else {
+					setAptMark($tuxedoNvidiaDriver550,'manual');
+					$packageNvidiaDriver = 1;
+				}
+			} else {
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+			}
+
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime');
+			} else {
+				$packageNvidiaPrime = 1;
+			}
+
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
+					$output = `gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
+				}
+			}
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
+				if ($wasInstalled) {
+					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
+					addToConfiguredModules($module, "nothingToDo");
+				} else {
+					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
+					addToConfiguredModules($module, "success");
+					setRestartValues($module);
+				}
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+			} else {
+				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
+				$presetModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			}
+
+
+
+
+
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
@@ -3935,12 +3010,11 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
-	if ($ubuntuCodename ne 'jammy') {
-		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu bionic main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-		}
+	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
+			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			}
 
 		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
 			edit_file { s/# Added by TUXEDO Tomte//g } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
@@ -4102,6 +3176,9 @@ sub cleanSourcesList {
 	my @sourceLines;
 	my $sourceLine;
 	my $sourcesListFile = '/etc/apt/sources.list';
+	if ($ubuntuCodename eq 'noble') {
+		$sourcesListFile = '/etc/apt/sources.list.d/ubuntu.sources';
+	}
 	my $modified = 0;
 	my $tomteMessage = '# tuxedo-tomte commented out all entries at installation, any TUXEDO repositories will be automatically deleted';
 
@@ -6308,7 +5385,31 @@ sub printLog {
 	}
 
 	if ($FAI) {
+		# TODO debug
+		print "in FAI\n";
 		print "$severity $message\n";
+		unless(-e $faiLogFile) {
+			print "logfile does not exist, creating one\n";
+			open($FAILOGFILE, ">", $faiLogFile);
+			close $FAILOGFILE;
+		} else {
+			print "faiLogFile exists already\n";
+			print "faiLogFile exists already\n";
+		}
+		# TODO debug
+		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+			print "writing to logfilelogfile\n";
+			my $timestamp = getLoggingTime();
+			if (defined($severity)) {
+				print $FAILOGFILE "$severity $timestamp $message\n";
+			} else {
+				print $FAILOGFILE "$timestamp $message\n";
+			}
+			close $FAILOGFILE;
+		} else {
+			print "could not open logfile\n";
+		}
+
 	} elsif ($level <= $logLevel) {
 		if ((-e $logFile) && ($type =~ /L/i)) {
 			if (open($LOGFILE, '>>', $logFile) ) {
@@ -6872,6 +5973,28 @@ sub listVersions {
 	}
 }
 
+
+
+###############################################################################
+# checks whether all modules have been installed successfully
+# returns 1 if everything was installed
+# returns 0 if something went wrong
+#
+sub checkNoFailedModules {
+	my $successfull = 1;
+	my $module;
+	foreach $module (sort keys %localConfModules) {
+		if (($localConfModules{$module}{installed} eq 'no') &&
+			($presetModules{$module}{required} eq 'yes')) {
+			$successfull = 0;
+		}
+		if (($localConfModules{$module}{installed} eq 'no') &&
+			($presetModules{$module}{required} eq 'prerequisite')) {
+			$successfull = 0;
+		}
+	}
+	return $successfull;
+}
 
 
 
@@ -8301,6 +7424,17 @@ if (@ARGV != 0) {
 			prepareValues();
 		}
 		listStatusJson();
+
+	# return whether everything could be installed correctly
+	} elsif ($argValue{command} eq "ok") {
+		checkMode();
+		renameOldConfigFile();
+		if (!-e $configFile) {
+			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
+		} else {
+			prepareValues();
+		}
+		print checkNoFailedModules();
 
 	# description
 	} elsif ($argValue{command} eq "description") {
