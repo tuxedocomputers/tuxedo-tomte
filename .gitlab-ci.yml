@@ -31,7 +31,6 @@ build-package:
   script:
     - ./build.sh
     - head -5 src/tuxedo-tomte
-    - head -20 config/modules/modules.toml
     - ls debian
     - cat debian/install
     - cd ..
