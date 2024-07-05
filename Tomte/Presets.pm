@@ -2016,7 +2016,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes',
 	},
-	tuxedoplsmaupgrade => {
+	tuxedoplasmaupgrade => {
 		name => 'tuxedo-plasma-upgrade',
 		version => 1,
 		installed => 'no',
