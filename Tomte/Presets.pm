@@ -57,16 +57,16 @@ our %OTHER_REPOS = (
 	"bionic" => {
 		"mirrors" => {
 			"content" => [
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic main restricted",
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates main restricted",
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic universe",
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe",
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic multiverse",
-				"deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates multiverse",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic main restricted",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic-updates main restricted",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic universe",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic-updates universe",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic multiverse",
+				"deb http://archive.ubuntu.com/ubuntu/ bionic-updates multiverse",
 				"deb http://security.ubuntu.com/ubuntu bionic-security universe",
 				"deb http://security.ubuntu.com/ubuntu bionic-security multiverse"
 			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+			"filename" => "/etc/apt/sources.list.d/ubuntu-mirrors.list"
 		}
 	}
 );
@@ -1065,7 +1065,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 5,
+		version => 6,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
@@ -1077,7 +1077,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		postconf => '',
 		upgrade => '',
 		upgraded => '',
-		reconfigure => 'always',
+		reconfigure => '',
 		restart => '',
 		order => 'first',
 		dkms => 'no',

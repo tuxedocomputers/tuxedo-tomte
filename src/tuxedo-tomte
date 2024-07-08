@@ -713,6 +713,12 @@ sub isOSSupported {
 sub prerequisites {
 	my $module;
 	printLog("starting prerequisites", 'L1', '[INFO]');
+	reconfigureSingleModule($presetModules{'tuxedorepos'}{name});
+	if ($presetModules{'tuxedomirrors'}{upgrade} eq 'yes') {
+
+		#TODO once only upgrade procedure
+	}
+
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
 		if (($presetModules{$module}{order} eq 'first') &&
