@@ -717,7 +717,34 @@ sub prerequisites {
 	if ($presetModules{'tuxedomirrors'}{upgrade} eq 'yes') {
 
 		#TODO once only upgrade procedure
+		printLog("uprading $presetModules{$module}{name}", 'L1', '[INFO]');
+		backupFile('/etc/apt/sources.list');
+		$retval = createRepos(\%otherReposList);
+		$retval3 = cleanSourcesList($otherReposList{$completeDistVersion}{mirrors}{filename});
+		addRepoKey();
+		if ($retval == 0) {
+			$presetModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			if ($retval == 1) {
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "nothingToDo");
+				printLog('did no modifications on mirrors', 'L1', '[INFO]');
+			} else {
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+				# update of repos has to be immediate for possible later package
+				# installation
+				aptgetRefreshModule($module, 3);
+			}
+		}
 	}
+
+
+
+
+
 
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
