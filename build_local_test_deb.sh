@@ -38,8 +38,12 @@ BRANCH_NAME=$(git branch --show-current)
 BRANCH_SHORT=$(echo "$BRANCH_NAME" | awk -F- '{print $1}')
 TIMESTAMP=$(git log -1 --format="%at" | xargs -I{} date -d @{} +"%Y%m%d-%H%M%S")
 
-#TEST_VERSION="$BASE_VERSION-test-$TIMESTAMP-$BRANCH_SHORT"
-TEST_VERSION="$BASE_VERSION"
+
+
+TEST_VERSION="$BASE_VERSION-test-$TIMESTAMP-$BRANCH_SHORT"
+#TEST_VERSION="$BASE_VERSION"
+
+
 
 commit_hash=$(git log -1 --pretty="%H" -- debian/changelog)
 export DEBEMAIL="tux@tuxedocomputers.com"
