@@ -37,7 +37,7 @@ our %SUPPORTED_OS = (
 	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
 	"KDE neon" => ["20.04", "22.04"],
 	"Ubuntu" => ["20.04", "22.04", "24.04"],
-	"Linux Mint" => ["21.1", "21.2", "21.3"],
+	"Linux Mint" => ["21.1", "21.2", "21.3", "22"],
 	"elementary OS" => ["6.1", "7.1"]
 );
 
@@ -164,6 +164,19 @@ our %OTHER_REPOS = (
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
 				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
 				"deb http://packages.linuxmint.com virginia main upstream import backport"
+			],
+			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		}
+	},
+
+	"Linux Mint 22" => {
+		"name" => "wilma",
+		"mirrors" => {
+			"content" => [
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
+				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse",
+				"deb http://packages.linuxmint.com wilma main upstream import backport #id:linuxmint_main"
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
 		}
