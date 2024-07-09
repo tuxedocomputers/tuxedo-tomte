@@ -714,8 +714,8 @@ sub prerequisites {
 	my $module;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 	reconfigureSingleModule($presetModules{tuxedorepos}{name});
-	printLog("version: $presetModules{tuxedomirrors}{version}", 'L2', '[DEBUG]');
-	if ($presetModules{tuxedomirrors}{version} < 6) {
+	printLog("version: $localConfModules{tuxedomirrors}{version}", 'L2', '[DEBUG]');
+	if ($localConfModules{tuxedomirrors}{version} < 6) {
 		printLog("one time upgrade for tuxedomirrors", 'L2', '[DEBUG]');
 		#TODO once only upgrade procedure
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
