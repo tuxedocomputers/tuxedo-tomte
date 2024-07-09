@@ -718,8 +718,9 @@ sub prerequisites {
 		printLog("one time upgrade for tuxedomirrors", 'L2', '[DEBUG]');
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
 		write_file($otherReposList{bionic}{mirrors}{filename}, {'err_mode' => 'carp'}, $fileText); 
-		$localConfModules{tuxedomirrors}{upgraded} = 'yes';
 		printLog("removing /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L2', '[DEBUG]');
+		$localConfModules{tuxedomirrors}{upgraded} = 'yes';
+		$presetModules{tuxedomirrors}{upgraded} = 'yes';
 		unlink ("/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list");
 	}
 
