@@ -63,8 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-# TODO2
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -5035,20 +5034,11 @@ sub printLog {
 	}
 
 	if ($FAI) {
-		# TODO debug
-		print "in FAI\n";
-		print "$severity $message\n";
 		unless(-e $faiLogFile) {
-			print "logfile does not exist, creating one\n";
 			open($FAILOGFILE, ">", $faiLogFile);
 			close $FAILOGFILE;
-		} else {
-			print "faiLogFile exists already\n";
-			print "faiLogFile exists already\n";
 		}
-		# TODO debug
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
-			print "writing to logfilelogfile\n";
 			my $timestamp = getLoggingTime();
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
