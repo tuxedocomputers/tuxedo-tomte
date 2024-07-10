@@ -713,20 +713,20 @@ sub prerequisites {
 	my $module;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 	reconfigureSingleModule($presetModules{tuxedorepos}{name});
-	printLog("local mirrors version: $localConfModules{tuxedomirrors}{version}", 'L2', '[DEBUG]');
-	printLog("mirrors installed: $localConfModules{tuxedomirrors}{installed}", 'L2', '[DEBUG]');
-	if (($localConfModules{tuxedomirrors}{version} < 6) ||
-		($localConfModules{tuxedomirrors}{installed} eq 'no')) {
+	printLog("mirrors: $configIniValues->{ubuntumirrorrepos}->{installed}", 'L2', '[DEBUG]');
+	if (((! defined($configIniValues->{ubuntumirrorrepos}->{installed})) ||
+		($configIniValues->{ubuntumirrorrepos}->{installed} ne '1'))) {
 		printLog("one time upgrade for tuxedomirrors", 'L2', '[DEBUG]');
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
 		$fileText .= "\n"; 
 		write_file($otherReposList{bionic}{mirrors}{filename}, {'err_mode' => 'carp'}, $fileText); 
 		printLog("removing /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L2', '[DEBUG]');
+		unlink ("/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list");
 		$localConfModules{tuxedomirrors}{upgraded} = 'yes';
 		$presetModules{tuxedomirrors}{upgraded} = 'yes';
 		$localConfModules{tuxedomirrors}{installed} = 'yes';
 		$presetModules{tuxedomirrors}{installed} = 'yes';
-		unlink ("/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list");
+		$configIniValues->{ubuntumirrorrepos}->{installed} = '1';
 	}
 
 	# wait max. 10 sec. as it takes some time to get network
