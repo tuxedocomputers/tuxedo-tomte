@@ -33,8 +33,8 @@ use Data::Dumper;
 
 
 our %SUPPORTED_OS = (
-	"TUXEDO OS" => ["20.04", "22.04"],
-	"TUXEDO_OS Plasma" => ["20.04", "22.04"],
+	"TUXEDO OS" => ["20.04", "22.04", 24.04],
+	"TUXEDO_OS Plasma" => ["20.04", "22.04", 24.04],
 	"KDE neon" => ["20.04", "22.04"],
 	"Ubuntu" => ["20.04", "22.04", "24.04"],
 	"Linux Mint" => ["21.1", "21.2", "21.3", "22"],
