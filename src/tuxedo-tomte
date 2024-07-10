@@ -1539,7 +1539,6 @@ sub tuxedomirrors() {
 		}
 	}
 	if ($action eq 'remove') {
-		printLog("This only removes the module from the list, manual intervention is necessary to remove the respective repository entries", 'TL0', '[INFO]');
 		addToConfiguredModules($module, "removed");
 		$presetModules{$module}{installed} = "no";
 		$presetModules{$module}{upgraded} = "yes";
