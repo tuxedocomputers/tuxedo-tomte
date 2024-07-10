@@ -716,6 +716,7 @@ sub prerequisites {
 	if ($localConfModules{tuxedomirrors}{version} < 6) {
 		printLog("one time upgrade for tuxedomirrors", 'L2', '[DEBUG]');
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
+		$fileText .= "\n"; 
 		write_file($otherReposList{bionic}{mirrors}{filename}, {'err_mode' => 'carp'}, $fileText); 
 		printLog("removing /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L2', '[DEBUG]');
 		$localConfModules{tuxedomirrors}{upgraded} = 'yes';
