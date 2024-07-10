@@ -63,7 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -713,6 +713,7 @@ sub prerequisites {
 	my $module;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 	reconfigureSingleModule($presetModules{tuxedorepos}{name});
+	printLog("local mirrors version: $localConfModules{tuxedomirrors}{version}", 'L2', '[DEBUG]');
 	if ($localConfModules{tuxedomirrors}{version} < 6) {
 		printLog("one time upgrade for tuxedomirrors", 'L2', '[DEBUG]');
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
