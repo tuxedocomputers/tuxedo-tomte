@@ -92,6 +92,13 @@ our %ESSENTIAL_REPOS = (
 			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
+	},
+
+	"TUXEDO OS 24.04" => {
+		"deb" => {
+			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		}
 	}
 );
 
@@ -179,6 +186,13 @@ our %OTHER_REPOS = (
 				"deb http://packages.linuxmint.com wilma main upstream import backport #id:linuxmint_main"
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
+		}
+	}
+
+	"TUXEDO OS 224.04" => {
+		"plasma" => {
+			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
 	}
 );
