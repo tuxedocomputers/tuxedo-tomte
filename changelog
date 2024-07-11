@@ -1,12 +1,13 @@
-tuxedo-tomte (2.35.2-bionic) jammy; urgency=medium
+tuxedo-tomte (2.35.3-bionic) jammy; urgency=medium
 
   [ E. Mohr ]
-  * preliminary last release for Bionic 18.04
-  * removed all other flavours
+  * preliminary last release for Ubuntu Bionic 18.04
+  * removed all other newer flavours
   * removed the TUXEDO repository mirrors
   * added the default Ubuntu repositories
+  * removed module tuxedomirrors
 
- -- E. Mohr <tux@tuxedocomputers.com>  Wed, 10 Jul 2024 11:39:52 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 11 Jul 2024 11:19:08 +0200
 
 tuxedo-tomte (2.34.0) jammy; urgency=medium
 
