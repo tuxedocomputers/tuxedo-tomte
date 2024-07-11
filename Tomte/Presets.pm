@@ -187,9 +187,9 @@ our %OTHER_REPOS = (
 			],
 			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
 		}
-	}
+	},
 
-	"TUXEDO OS 224.04" => {
+	"TUXEDO OS 24.04" => {
 		"plasma" => {
 			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
