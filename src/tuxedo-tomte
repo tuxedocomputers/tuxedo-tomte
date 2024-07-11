@@ -720,13 +720,17 @@ sub prerequisites {
 		my $fileText = join "\n", @{$otherReposList{bionic}{mirrors}{content}};
 		$fileText .= "\n"; 
 		write_file($otherReposList{bionic}{mirrors}{filename}, {'err_mode' => 'carp'}, $fileText); 
-		printLog("removing /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L2', '[DEBUG]');
-		unlink ("/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list");
-		$localConfModules{tuxedomirrors}{upgraded} = 'yes';
-		$presetModules{tuxedomirrors}{upgraded} = 'yes';
-		$localConfModules{tuxedomirrors}{installed} = 'yes';
-		$presetModules{tuxedomirrors}{installed} = 'yes';
-		$configIniValues->{ubuntumirrorrepos}->{installed} = '1';
+		if ( -e $otherReposList{bionic}{mirrors}{filename} ) {
+			printLog("removing /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L2', '[DEBUG]');
+			unlink ("/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list");
+			$localConfModules{tuxedomirrors}{upgraded} = 'yes';
+			$presetModules{tuxedomirrors}{upgraded} = 'yes';
+			$localConfModules{tuxedomirrors}{installed} = 'yes';
+			$presetModules{tuxedomirrors}{installed} = 'yes';
+			$configIniValues->{ubuntumirrorrepos}->{installed} = '1';
+		} else {
+			printLog("Ubuntu repos could not be created in $otherReposList{bionic}{mirrors}{filename}", 'L0', '[DEBUG]');
+		}
 	}
 
 	# wait max. 10 sec. as it takes some time to get network
