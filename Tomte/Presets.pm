@@ -98,6 +98,10 @@ our %ESSENTIAL_REPOS = (
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+		},
+		"plasma" => {
+			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		}
 	}
 );
