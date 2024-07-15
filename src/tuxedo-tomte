@@ -4253,11 +4253,6 @@ sub installKernelFlavour {
 					printLog("package missing: >$package<", 'L2', '[ERROR]');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
-				} else {
-					printLog("package: >$package<", 'L2', '[DEBUG]');
-					unless ( exists $kernelsList{$ubuntuCodename}{$package}) {
-						setAptMark($package, 'auto');
-					}
 				}
 			}
 		}
@@ -4329,9 +4324,6 @@ sub installKernelFlavour {
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
-						unless (grep( /^$package$/, @{ $kernelsList{$ubuntuCodename}{$flavour}{'packages'}})) {
-							setAptMark($package, 'auto');
-						}
 						printLog("$package is installed", 'L2', '[DEBUG]');
 						${$somethingDone} += 1;
 					} else {
