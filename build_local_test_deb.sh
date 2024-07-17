@@ -43,7 +43,8 @@ TIMESTAMP=$(git log -1 --format="%at" | xargs -I{} date -d @{} +"%Y%m%d-%H%M%S")
 
 #TEST_VERSION="$BASE_VERSION-test-$TIMESTAMP-$BRANCH_SHORT"
 #TEST_VERSION="$BASE_VERSION"
-TEST_VERSION="2.35.3-bionic"
+#TEST_VERSION="2.35.3-bionic"
+TEST_VERSION="$BASE_VERSION-bionic-test-$TIMESTAMP-$BRANCH_SHORT"
 
 
 

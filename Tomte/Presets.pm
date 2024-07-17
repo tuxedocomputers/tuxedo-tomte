@@ -1036,7 +1036,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'prerequisite',
