@@ -1470,6 +1470,17 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
+
+		# remove obsolete TUXEDO repos as they don't exist anymore
+		if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
+			printLog("removing obsolete /etc/apt/sources.list.d/oibaf-tuxedo.list", 'L0', '[INFO]');
+			unlink ('/etc/apt/sources.list.d/oibaf-tuxedo.list');
+		}
+		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
+			printLog("removing obsolete /etc/apt/sources.list.d/graphics-tuxedo.list", 'L0', '[INFO]');
+			unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
+		}
+
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%essentialReposList);
 		addRepoKey();
