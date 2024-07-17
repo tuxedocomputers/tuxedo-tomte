@@ -41,14 +41,6 @@ our %ESSENTIAL_REPOS = (
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu bionic main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"
-		},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu bionic main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
 		}
 	}
 );
