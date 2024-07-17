@@ -63,6 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
+# TODO
 my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
@@ -138,9 +139,10 @@ if ($argValue{command} eq 'FAI') {
 }
 my $LiveISO = 0;
 my $noNetwork = 0;
-my $packagekitState = 0;
+my $packagekitState = '';
 my $packagekitOriginalState = getSystemdState('packagekit');
 my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
+$packagekitState = $packagekitOriginalState;
 my $triesFile = '/tmp/tomteTries';
 my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
@@ -711,19 +713,19 @@ sub isOSSupported {
 #
 sub prerequisites {
 	my $module;
+	my @modulesList;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
 		if (($presetModules{$module}{order} eq 'first') &&
 			($presetModules{$module}{blocked} eq 'no')) {
 			reconfigureSingleModule($presetModules{$module}{name});
+			push (@modulesList, $module);
 		}
 	}
 	# wait max. 10 sec. as it takes some time to get network
 	checkNetwork(10,1);
-	my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-	my $output = `$command`;
-	printLog("return from apt-get update: $output", 'L2', '[DEBUG]');
+	aptgetRefreshModule(1, @modulesList);
 	printLog("ending prerequisites", 'L1', '[INFO]');
 }
 
@@ -1463,10 +1465,6 @@ sub tuxedorepos() {
 			} else {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
-				# repo updates have to be immediate for package installation
-				if (!$FAI) {
-					aptgetRefreshModule($module, 3);
-				}
 			}
 		}
 	}
@@ -1498,9 +1496,6 @@ sub tuxedorepos() {
 			} else {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
-				# update of repos has to be immediate for possible later package
-				# installation
-				aptgetRefreshModule($module, 3);
 			}
 		}
 	}
@@ -1545,11 +1540,6 @@ sub tuxedomirrors() {
 			} else {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
-				# update of repos has to be immediate for possible later package
-				# installation
-				if (!$FAI) {
-					aptgetRefreshModule($module, 3);
-				}
 			}
 		}
 	}
@@ -1571,9 +1561,6 @@ sub tuxedomirrors() {
 			} else {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
-				# update of repos has to be immediate for possible later package
-				# installation
-				aptgetRefreshModule($module, 3);
 			}
 		}
 	}
@@ -3319,7 +3306,7 @@ sub deactivatePackagekit {
 	if ($packagekitState eq 'inactive') {
 		return (1);
 	}
-	if (getSystemdState('packagekit') eq 'active') {
+	if ($packagekitState eq 'active') {
 		printLog("packagekit is active => deactivating ...", 'L2', '[INFO]');
 		# temporary disabling masking
 		commandSystemdModule('disable', 'packagekit');
@@ -3346,7 +3333,7 @@ sub deactivatePackagekit {
 # returns 1 if successful, 0 if not
 #
 sub activatePackagekit {
-	if (getSystemdState('packagekit') eq 'inactive') {
+	if ($packagekitState eq 'inactive') {
 		printLog("packagekit is inactive => activating ...", 'L2', '[INFO]');
 		commandSystemdModule('unmask', 'packagekit');
 		if (getSystemdState('packagekit') eq 'active') {
@@ -4267,11 +4254,6 @@ sub installKernelFlavour {
 					printLog("package missing: >$package<", 'L2', '[ERROR]');
 					$packageMissing = 1;
 					$installCmd .= ' '.$package;
-				} else {
-					printLog("package: >$package<", 'L2', '[DEBUG]');
-					unless ( exists $kernelsList{$ubuntuCodename}{$package}) {
-						setAptMark($package, 'auto');
-					}
 				}
 			}
 		}
@@ -4343,9 +4325,6 @@ sub installKernelFlavour {
 				if ($line =~ /.*\s[uihrp][ncHUFWti]/) {
 					if ($line =~ /.*\s[ih][i]/) {
 						$line =~ s/\s.*//;
-						unless (grep( /^$package$/, @{ $kernelsList{$ubuntuCodename}{$flavour}{'packages'}})) {
-							setAptMark($package, 'auto');
-						}
 						printLog("$package is installed", 'L2', '[DEBUG]');
 						${$somethingDone} += 1;
 					} else {
@@ -4895,11 +4874,12 @@ sub setNoNetwork {
 # aptgetRefreshModule($module, $retries)
 #
 sub aptgetRefreshModule {
-	my ($aptgetModule, $refreshTries) = @_;
+	my ($refreshTries, @aptgetModules) = @_;
 	my $output;
 	my $exitStatus = 1;
 	my $refreshTriesDone = 0;
 	my $refreshWait = 1;
+	my $module;
 	unless($LiveISO && $noNetwork) {
 		if (checkNetwork(15, 1)) {
 			deactivatePackagekit();
@@ -4917,25 +4897,31 @@ sub aptgetRefreshModule {
 						if ($exitStatus == 7) {
 							printLog('possible network problems', 'L0', '[INFO]');
 						}
-						addToConfiguredModules($aptgetModule, "failed");
-						if ($refreshTriesDone <= $refreshTries) {
-							printLog("will try to refresh the repos again", 'L2', '[INFO]');
+						foreach $module (@aptgetModules) {
+							addToConfiguredModules($module, "failed");
+							if ($refreshTriesDone <= $refreshTries) {
+								printLog("will try to refresh the repos again", 'L2', '[INFO]');
+							}
 						}
 						$refreshTriesDone++;
 						sleep($refreshWait);
 					} else {
 						printLog("success: update packages", 'L1', '[INFO]');
-						addToConfiguredModules($aptgetModule, "success");
+						foreach $module (@aptgetModules) {
+							addToConfiguredModules($module, "success");
+						}
 					}
 				} else {
-					printLog("failed to get package management lock to update package management for >$aptgetModule<", 'L2', '[WARN]');
+					printLog("failed to get package management lock to update package management for >@aptgetModules<", 'L2', '[WARN]');
 					startTomteDelayed();
 					return(0);
 				}
 			}
 		} else {
 			printLog("no network available, repos could not be updated", 'TL0', '[WARN]');
-			addToConfiguredModules($aptgetModule, "failed");
+			foreach $module (@aptgetModules) {
+				addToConfiguredModules($module, "failed");
+			}
 			setNoNetwork(1);
 			return (0);
 		}
