@@ -45,7 +45,7 @@ our %ESSENTIAL_REPOS = (
 	"focal" => {
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		}
 	},
 
