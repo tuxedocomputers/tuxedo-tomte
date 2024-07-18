@@ -63,8 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-# TODO
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -1470,6 +1469,19 @@ sub tuxedorepos() {
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
+
+		# remove obsolete TUXEDO repos in focal as they don't exist anymore
+		if ($ubuntuCodename =~ /focal/) {
+			if (-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/oibaf-tuxedo.list", 'L0', '[INFO]');
+				unlink ('/etc/apt/sources.list.d/oibaf-tuxedo.list');
+			}
+			if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/graphics-tuxedo.list", 'L0', '[INFO]');
+				unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
+			}
+		}
+
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%essentialReposList);
 		addRepoKey();

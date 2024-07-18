@@ -45,13 +45,7 @@ our %ESSENTIAL_REPOS = (
 	"focal" => {
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"},
-		"graphics" => {
-			"content" => ["deb https://graphics.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/graphics-tuxedo.list"},
-		"oibaf" => {
-			"content" => ["deb https://oibaf.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/oibaf-tuxedo.list"
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		}
 	},
 
@@ -1207,7 +1201,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedorepos => {
 		name => 'tuxedo-repos',
-		version => 3,
+		version => 4,
 		installed => 'no',
 		blocked => 'no',
 		required => 'prerequisite',
