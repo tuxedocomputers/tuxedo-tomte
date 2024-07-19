@@ -7278,6 +7278,9 @@ sub tuxedoDevice {
 		if ($boardname =~ /P65_P67RGRERA/) {
 			return (1);
 		}
+		if ($boardname =~ /P64_HJ,HK1/) {
+			return (1);
+		}
 		if ($boardvendor =~ /TUXEDO/) {
 			return (1);
 		}
