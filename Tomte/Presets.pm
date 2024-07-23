@@ -2000,8 +2000,8 @@ our %INITIAL_MODULES_SETTINGS = (
 		LiveISO => 'yes',
 	},
 	nvmequirkswitchtodeepsleepfix => {
-		name => '',
-		version => 1,
+		name => 'nvme-quirk-switch-to-deep-sleep-fix',
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
