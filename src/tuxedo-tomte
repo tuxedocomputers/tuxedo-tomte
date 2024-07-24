@@ -4233,7 +4233,12 @@ sub installKernelFlavour {
 		$exitStatus = $?/256;
 		lockPM();
 		printLog("return from install:\n$retString", 'L2', '[DEBUG]');
-		if ($exitStatus != 0) {
+		if (($retString =~ /is already the newest version/m) && ($exitStatus == 0)) {
+			printLog("$kernelsList{$ubuntuCodename}{$flavour} is already the newest version", 'L0', '[ERROR]');
+		} elsif ($exitStatus == 0) {
+			${$somethingDone} = 1;
+			printLog("$kernelsList{$ubuntuCodename}{$flavour} was installed", 'L0', '[ERROR]');
+		} elsif ($exitStatus != 0) {
 			printLog("installation of kernel meta package failed !!!", 'L0', '[ERROR]');
 			${$failed} += 1;
 		}
