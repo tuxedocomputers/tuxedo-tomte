@@ -4211,12 +4211,8 @@ sub getAptMark {
 #
 sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
-	if (!(defined ${$failed})) {
-		${$failed} = 0;
-	}
-	if (!(defined ${$somethingDone})) {
-		${$somethingDone} = 0;
-	}
+	${$failed} = 0;
+	${$somethingDone} = 0;
 	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
 	my $retString;
 	my $exitStatus;
@@ -4243,9 +4239,6 @@ sub installKernelFlavour {
 		}
 	}
 
-	if (!$allPackagesInstalled) {
-		${$failed} += 1;
-	}
 	printLog("failed: ${$failed}, somethingdone: ${$somethingDone}", 'L2', '[ERROR]');
 	return (1);
 }
