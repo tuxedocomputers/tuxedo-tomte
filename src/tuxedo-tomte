@@ -63,7 +63,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
@@ -5150,29 +5150,21 @@ sub insertGrubParameter {
 		return (-1);
 	}
 
-	#TODO debug
-
 	$cleanLine = $$line;
 	$cleanLine =~ s/^\s+//;
 	$cleanLine =~ s/\s+$//;
 	$cleanLine =~ s/["']//g;
-		printLog("cleanline1: $cleanLine", 'L2', '[DEBUG]');
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//;
-		printLog("cleanline2: $cleanLine", 'L2', '[DEBUG]');
 
 	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/) {
-			printLog("line \": $$line", 'L2', '[DEBUG]');
 			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"\n/;
-			printLog("line \" after: $$line", 'L2', '[DEBUG]');
 		}
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/) {
-			printLog("line ': $$line", 'L2', '[DEBUG]');
 			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'\n/;
-			printLog("line ' after: $$line", 'L2', '[DEBUG]');
 		}
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
