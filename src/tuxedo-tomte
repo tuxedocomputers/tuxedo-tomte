@@ -741,6 +741,7 @@ sub checkRequirements {
 
 	#TODO debug
 	$presetModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
+	$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
 
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
