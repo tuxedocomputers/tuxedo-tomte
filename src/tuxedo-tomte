@@ -5165,12 +5165,14 @@ sub insertGrubParameter {
 		return (0);
 	} else {
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/) {
-			printLog("line: $$line", 'L2', '[DEBUG]');
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+			printLog("line \": $$line", 'L2', '[DEBUG]');
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"\n/;
+			printLog("line \" after: $$line", 'L2', '[DEBUG]');
 		}
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/) {
-			printLog("line: $$line", 'L2', '[DEBUG]');
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'\n/$1 $$parameter'\n/;
+			printLog("line ': $$line", 'L2', '[DEBUG]');
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'\n/;
+			printLog("line ' after: $$line", 'L2', '[DEBUG]');
 		}
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
