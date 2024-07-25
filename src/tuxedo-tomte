@@ -5147,15 +5147,22 @@ sub insertGrubParameter {
 		return (-1);
 	}
 
+	$$line =~ s/^\s+//;
+	$$line =~ s/\s+$//;
 	$cleanLine = $$line;
 	$cleanLine =~ s/"\R//;
-	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT="//;
+	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=.//;
 
 	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
-		$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/) {
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"\n/$1 $$parameter"\n/;
+		}
+		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/) {
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'\n/$1 $$parameter'\n/;
+		}
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
 	}
