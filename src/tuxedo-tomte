@@ -5152,9 +5152,9 @@ sub insertGrubParameter {
 
 	#TODO debug
 
-	$$line =~ s/^\s+//;
-	$$line =~ s/\s+$//;
 	$cleanLine = $$line;
+	$cleanLine =~ s/^\s+//;
+	$cleanLine =~ s/\s+$//;
 	$cleanLine =~ s/["']//g;
 		printLog("cleanline1: $cleanLine", 'L2', '[DEBUG]');
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//;
