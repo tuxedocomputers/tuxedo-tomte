@@ -5150,7 +5150,7 @@ sub insertGrubParameter {
 	$$line =~ s/^\s+//;
 	$$line =~ s/\s+$//;
 	$cleanLine = $$line;
-	$cleanLine =~ s/"\R//;
+	$cleanLine =~ s/["']\R//;
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=.//;
 
 	if (($cleanLine =~ /^$$parameter /) || ($cleanLine =~ /^$$parameter$/) || ($cleanLine =~ / $$parameter$/) || ($cleanLine =~ / $$parameter /)) {
