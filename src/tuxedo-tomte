@@ -4409,7 +4409,9 @@ sub checkAndDeleteOldestTuxedoKernel {
 	my $bootDir = '/boot';
 
 	#TODO debug
+	printLog("before populateKernelPackages test", 'L2', '[DEBUG]');
 	my @testArray = populateKernelPackages('5.15.0-135');
+	printLog("after populateKernelPackages test", 'L2', '[DEBUG]');
 
 	if (-e $triesFile) {
 		printLog("won't delete oldest kernel because Tomte is running in retry-mode", "L2", '[INFO]');
