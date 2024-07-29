@@ -4252,6 +4252,77 @@ sub installKernelFlavour {
 
 
 
+###############################################################################
+# accepts a kernel version and returns an array with all dependant packages
+# found for linux-image-$version-tuxedo, linux-headres-$version-tuxedo and
+# linux-modules-extra-$version-tuxedo
+# returns an empty string if nothing was found or the version entry is wrong
+sub populateKernelPackages {
+	my $version = shift;
+	if ($version =~ /\s/) {
+		printLog("something is wrong with the kernel version number", 'L0', '[ERROR]');
+		return '';
+	}
+	my @rootPackages = ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	my @packages;
+	my @packagesUnique;
+	my $packageLine;
+	my $packageString;
+	my $searchCommand;
+	my $result;
+	my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
+	my $line;
+	my @lines;
+	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
+	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
+	$result = `$searchCommand`;
+	printLog("first result:\n$result", 'L2', '[DEBUG]');
+	@lines = split /\n/, $result;
+	foreach $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+			$packageString = $1;
+			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+				printLog("Accepted: $packageString", 'L2', '[DEBUG]');
+				$packageLine .= " $packageString";
+				push @packages, $packageString;
+			}
+		}
+	}
+	if (@packages) {
+		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
+		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
+		$result = `$searchCommand`;
+		printLog("second result:\n$result", 'L2', '[DEBUG]');
+		@lines = split /\n/, $result;
+		foreach $line (@lines) {
+			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/) {
+				$packageString = $1;
+				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/) {
+					printLog("Accepted: $packageString", 'L2', '[DEBUG]');
+					push @packages, $packageString;
+				}
+			}
+		}
+	}
+	$searchCommand = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '."linux-modules-extra-$version-tuxedo".' 2>&1';
+	$result = `$searchCommand`;
+	if ($result =~ m/^[uihrp][HUFWti]\s$/) {
+		push @packages, "linux-modules-extra-$version-tuxedo";
+	}
+	push @packages, ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
+	@packagesUnique = uniqInArray(@packages);
+	printLog("kernel packages found: @packagesUnique", 'L2', '[DEBUG]');
+
+	# safety check: something went wrong if we got more than 20 packages for removal
+	if (scalar(@packagesUnique) < 20) {
+		return (@packagesUnique);
+	} else {
+		return '';
+	}
+}
+
+
+
 
 
 ###############################################################################
