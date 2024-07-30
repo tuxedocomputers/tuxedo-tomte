@@ -89,8 +89,8 @@ my %argValue = (
 	module => '',
 );
 
-if (@ARGV > 0) { $argValue{command} = $ARGV[0]; }
-if (@ARGV > 1) { $argValue{module} = $ARGV[1]; }
+if (scalar(@ARGV) > 0) { $argValue{command} = $ARGV[0]; }
+if (scalar(@ARGV) > 1) { $argValue{module} = $ARGV[1]; }
 
 # make sure this is the only running instance
 use Fcntl ':flock';
@@ -210,6 +210,10 @@ my %otherReposList = otherRepos();
 my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
+
+#TODO debug
+printLog("value1: $postConfProgramsList{updateGrub}{command}", 'L2', '[DEBUG]');
+printLog("value2: $postConfProgramsList{updateInitramfs}{command}", 'L2', '[DEBUG]');
 
 
 ###############################################################################
@@ -1653,7 +1657,7 @@ sub corefix() {
 sub elantechtouchpadfix() {
 	my $module = shift;
 	my $action = shift;
-	editGrub( $module, $action, 'psmouse.elantech_smbus=0');
+	grubModuleEdit( $module, $action, 'psmouse.elantech_smbus=0');
 }
 
 
@@ -5246,22 +5250,6 @@ sub printLog {
 }
 
 
-# accepts a file_path and return a hash with the parsed data
-sub readTOMLFile {
-	my $file_path = shift;
-
-	my $tomlStr = read_file($file_path, 'err_mode' => 'carp');
-	my $tomlHashRef = from_toml($tomlStr);
-
-    # Check if the TOML data was parsed successfully
-    if (!defined $tomlHashRef) {
-        printLog("Failed to parse TOML data from file: $file_path", "TL0", '[ERROR]');
-		return {};
-    }
-
-	return %$tomlHashRef;
-}
-
 
 
 ###############################################################################
@@ -7189,7 +7177,7 @@ if (!isOSSupported()) {
 # define for each argvalues procedures
 # modify $USAGE if any modifications are made here
 
-if (@ARGV != 0) {
+if (scalar(@ARGV) != 0) {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
 
