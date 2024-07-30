@@ -86,8 +86,8 @@ checkAndSetLocale();
 # Argument values given to script
 #
 my %argValue = (
-	command => '',
-	module => '',
+	command => q{},
+	module => q{},
 );
 
 if (scalar(@ARGV) > 0) { $argValue{command} = $ARGV[0]; }
@@ -132,14 +132,14 @@ my $distribution;
 my $distributionVersionID;
 my $distributionVersion;
 my $completeDistVersion;
-my $ubuntuCodename = "";
+my $ubuntuCodename = q{};
 my $FAI = 0;
 if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
 }
 my $LiveISO = 0;
 my $noNetwork = 0;
-my $packagekitState = '';
+my $packagekitState = q{};
 my $packagekitOriginalState = getSystemdState('packagekit');
 my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
 $packagekitState = $packagekitOriginalState;
@@ -185,15 +185,15 @@ printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
-my $boardname = '';
+my $boardname = q{};
 $boardname = readFirstLineOfFile($boardnameFilename);
 
 my $boardvendorFilename = "/sys/class/dmi/id/board_vendor";
-my $boardvendor = '';;
+my $boardvendor = q{};;
 $boardvendor = readFirstLineOfFile($boardvendorFilename);
 
 my $sysvendorFilename = "/sys/class/dmi/id/sys_vendor";
-my $sysvendor = '';
+my $sysvendor = q{};
 $sysvendor = readFirstLineOfFile($sysvendorFilename);
 
 # for desktop messages
@@ -607,7 +607,7 @@ sub readFirstLineOfFile {
 #
 sub countLinesInString {
 	my $myString = shift;
-	return 0 if( !defined $myString or $myString eq "");
+	return 0 if( !defined $myString or $myString eq '');
 	my $lastchar = substr $myString, -1,1;
 	my $numlines = () = $myString =~ /\n/g;
 	# was last line a whole line with a "\n"?;
@@ -1095,9 +1095,9 @@ sub checkRequirements {
 	}
 
 	my $minPlasmaDesktopVersion = '5.25';
-	my $currentPlasmaWorkspaceVersion = '';
+	my $currentPlasmaWorkspaceVersion = q{};
 	my $versionCompareResult;
-	my $lspciGpus = '';
+	my $lspciGpus = q{};
 	$lspciGpus = `lspci -d ::0300`;
 	if (countLinesInString($lspciGpus) >= 2) {
 		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
@@ -1597,7 +1597,7 @@ sub tuxedomirrors() {
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($main::biosVersion eq "") {
+	if ($main::biosVersion eq '') {
 		printLog("BIOS version empty", 'L1', '[WARN]');
 		$presetModules{$module}{installed} = "failed";
 		addToConfiguredModules($module, "failed");
@@ -3046,7 +3046,7 @@ sub createRepos {
 		}
 	}
 
-	my $repoFileText = '';
+	my $repoFileText = q{};
 	foreach my $key (keys %{ $repos{$distroKey} }) {
 		# each line
 		printLog("key: $key distroKey: $distroKey", 'L2', '[DEBUG]');
@@ -3095,7 +3095,7 @@ sub createRepos {
 					}
 				}
 			}
-			$repoFileText = '';
+			$repoFileText = q{};
 		}
 	}
 	return ($modified+1);
@@ -3737,7 +3737,7 @@ sub setDkmsVerbose {
 sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
-	my $retValue = '';
+	my $retValue = q{};
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
 	my $retString = `$searchCmd`;
@@ -3745,7 +3745,7 @@ sub deinstExcept {
 	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
 	my $deinstCmd;
 	my $deinstKey;
-	my $deinstList ='';
+	my $deinstList =q{};
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1', '[DEBUG]');
@@ -3779,7 +3779,7 @@ sub deinstExcept {
 	}
 	if ($deinstCounter != 0) {
 		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0', '[DEBUG]');
-		my $retText = '';
+		my $retText = q{};
 		if ($FAI) {
 			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
 			$retText = `$deinstCmd`;
@@ -3792,7 +3792,7 @@ sub deinstExcept {
 				lockPM();
 			}
 		}
-		$retValue = '';
+		$retValue = q{};
 		$retValue = $?/256;
 		if ($retValue != 0) {
 			printLog("failed to deinstall packages, retvalue: >$retValue<", 'L0', '[WARN]');
@@ -3980,7 +3980,7 @@ sub arePackagesInstalled {
 sub getPackageVersion {
 	my $package = shift;
 	my $cmd = $consoleLanguage.'dpkg-query --showformat=\'${Version}\' --show '.$package.' 2>&1';
-	my $retString = '';
+	my $retString = q{};
 	$retString = `$cmd`;
 	my $retValue = $?/256;
 	printLog("version string for $package: $retString retValue: $retValue", 'L2', '[DEBUG]');
@@ -4121,7 +4121,7 @@ sub removePackage {
 	deactivatePackagekit();
 	if (!defined($parameter)) {
 		printLog("parameter was undefined", 'L2', '[WARN]');
-		$parameter = '';
+		$parameter = q{};
 	}
 	if (unlockPM("apt-get -yq remove $parameter $packageName") && (isPMlocked() == 0)) {
 		printLog("removing $packageName", 'L2', '[DEBUG]');
@@ -4530,7 +4530,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 		printLog("more than $keepKernels kernels found, will delete the oldest one", 'L2', '[INFO]');
 		@fileListResult = sort { version_compare($b, $a) } @fileListResult;
 		printLog("sorted filelist: @fileListResult", 'L2', '[DEBUG]');
-		$version = '';
+		$version = q{};
 		$version = $fileListResult[-1];
 		my $currentKernelVersion = `uname -r`;
 		$currentKernelVersion =~ s/-tuxedo$//;
@@ -5019,11 +5019,11 @@ sub messageDesktop {
 	my $icon = shift;
 	my $retValue = 0;
 
-	my $mUsername = '';
-	my $mPid = '';
-	my $mLine = '';
+	my $mUsername = q{};
+	my $mPid = q{};
+	my $mLine = q{};
 	my @whoLines = `who -u`;
-	my $environ = '';
+	my $environ = q{};
 	my $dbusAddress;
 
 	# don't message the desktop if LiveISO or FAI
@@ -5622,13 +5622,13 @@ sub listStatus {
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
-	my $upgradeAvailable = '';
+	my $upgradeAvailable = q{};
 
 	foreach $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
-			$upgradeAvailable = '';
+			$upgradeAvailable = q{};
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
@@ -5705,7 +5705,7 @@ sub listVersions {
 	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
-	my $upgradeAvailable = '';
+	my $upgradeAvailable = q{};
 
 	print "tuxedo-tomte $VERSION\n";
 
@@ -5713,9 +5713,9 @@ sub listVersions {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
-			$upgradeAvailable = '';
+			$upgradeAvailable = q{};
 		}
-		$localConfModules{$module}{packageVersion} = '';
+		$localConfModules{$module}{packageVersion} = q{};
 		if ($module eq 'nvidiadriver') {
 			$localConfModules{$module}{packageVersion} = getPackageVersion('nvidia-driver-*');
 		}
@@ -5806,7 +5806,7 @@ sub checkNoFailedModules {
 
 sub listStatusJson {
 	my $module;
-	my $upgradeAvailable = '';
+	my $upgradeAvailable = q{};
 	my %list;
 
 	$list{version} = $VERSION;
@@ -5822,7 +5822,7 @@ sub listStatusJson {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
-			$upgradeAvailable = '';
+			$upgradeAvailable = q{};
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
@@ -5956,7 +5956,7 @@ sub getSubName {
 		}
 	}
 	# return empty string if module is not found
-	return "";
+	return '';
 }
 
 
@@ -6056,7 +6056,7 @@ sub configureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 
-	if ($module eq "") {
+	if ($module eq '') {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6108,7 +6108,7 @@ sub removeSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 
-	if ($module eq "") {
+	if ($module eq '') {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6157,7 +6157,7 @@ sub reconfigureSingleModule {
 	$module = getSubName($moduleName);
 	printLog("reconfigureSingleModule: $moduleName", 'L2', '[INFO]');
 
-	if ($module eq "") {
+	if ($module eq '') {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6928,7 +6928,7 @@ sub moduleDescription {
 	my $module;
 	if ($moduleName) {
 		$module = getSubName($moduleName);
-		if ( $module ne "" ) {
+		if ( $module ne '' ) {
 	    print "$presetModules{$module}{description}\n";
 		} else {
 			print "module: $moduleName is not in the modules list\n";
