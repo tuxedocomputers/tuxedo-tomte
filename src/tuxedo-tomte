@@ -1192,6 +1192,13 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
+	if (($ubuntuCodename eq 'focal') ||
+		($ubuntuCodename eq 'jammy') ||
+		($ubuntuCodename eq 'noble') &&
+		(!($distribution =~ /TUXEDO OS/))) {
+		$presetModules{gfxmode}{required} = 'yes';
+		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
+
 }
 
 
@@ -2942,6 +2949,46 @@ sub textboot() {
 
 
 
+###############################################################################
+# controls video mode
+#
+sub gfxmode() {
+	my $module = shift;
+	my $action = shift;
+	my $retval;
+	my $fileName = '/etc/default/grub.d/gfxmode.cfg';
+	my $fileText = "GRUB_GFXMODE=1280x720,1280x800,1280x1024\n".
+					"GRUB_GFXPAYLOAD_LINUX=keep\n";
+	if ($action eq 'install') {
+		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
+		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
+		if ($retval == 0) {
+			$presetModules{$module}{installed} = "failed";
+			addToConfiguredModules($module, "failed");
+		} else {
+			$presetModules{$module}{installed} = "yes";
+			$presetModules{$module}{upgraded} = "yes";
+			addToConfiguredModules($module, "success");
+			setRestartValues($module);
+		}
+	}
+	if ($action eq 'upgrade') {
+		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
+		$presetModules{$module}{installed} = "yes";
+		$presetModules{$module}{upgraded} = "yes";
+		addToConfiguredModules($module, "success");
+	}
+	if ($action eq 'remove') {
+		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
+			unless (unlink($fileName) {
+				printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
+			}
+			$presetModules{$module}{installed} = 'no';
+			$presetModules{$module}{upgraded} = 'yes';
+			addToConfiguredModules($module, 'removed');
+		}
+	}
+}
 
 
 
