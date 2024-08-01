@@ -2980,7 +2980,7 @@ sub gfxmode() {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
-			unless (unlink($fileName) {
+			unless (unlink($fileName)) {
 				printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
 			}
 			$presetModules{$module}{installed} = 'no';
