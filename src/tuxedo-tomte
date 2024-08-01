@@ -1198,7 +1198,7 @@ sub checkRequirements {
 		(!($distribution =~ /TUXEDO OS/))) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
-
+	}
 }
 
 
