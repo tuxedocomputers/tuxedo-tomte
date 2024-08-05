@@ -2981,18 +2981,24 @@ sub gfxmode() {
 	my $fileName = '/etc/grub.d/gfxmode.cfg';
 	my $fileText = "GRUB_GFXMODE=1280x720,1280x800,1280x1024\n".
 					"GRUB_GFXPAYLOAD_LINUX=keep\n";
+	my $currentText;
 	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
+		unless (-e $fileName) {
+			$currentText = read_file($fileName, 'err_mode' => 'carp');
+			unless ($currentText eq $fileText) {
+				printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
+				$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
+				if ($retval == 0) {
+					printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
+					$presetModules{$module}{installed} = "failed";
+					addToConfiguredModules($module, "failed");
+				} else {
+					$presetModules{$module}{installed} = "yes";
+					$presetModules{$module}{upgraded} = "yes";
+					addToConfiguredModules($module, "success");
+					setRestartValues($module);
+				}
+			}
 		}
 	}
 	if ($action eq 'upgrade') {
