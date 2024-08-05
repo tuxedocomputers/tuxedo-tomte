@@ -421,7 +421,7 @@ sub isPMlocked {
 			return (1);
 		}
 		if ($result == -1) {
-			printLog("Locking: something went wrong while checking for file locks", 'L2', '[WARN]');
+			printLog("Locking: something went wrong while checking for file locks", 'L0', '[WARN]');
 			return (-1);
 		}
 	}
@@ -463,7 +463,7 @@ sub acquireLock {
 			return (0);
 		}
 	} else {
-		printLog("Locking: failed to open: $filename: $!", 'L2', '[ERROR]');
+		printLog("Locking: failed to open: $filename: $!", 'L0', '[ERROR]');
 		return (0);
 	}
 }
@@ -538,7 +538,7 @@ sub lockPM {
 		$processedLockFiles++;
 	}
 	if ($processedLockFiles < $lockFilesListHashSize) {
-		printLog("Locking: !!! some files are already locked! reverting all locks", 'L2', '[DEBUG]');
+		printLog("Locking: !!! some files are already locked! reverting all locks", 'L0', '[DEBUG]');
 		unlockPM('Locking: some files locked -> reverting');
 		return (0);
 	}
@@ -576,7 +576,7 @@ sub unlockPM {
 		printLog("Locking: OOO successfully released all locks for >$reason<", 'L2', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("Locking: XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L2', '[ERROR]');
+		printLog("Locking: XXX unlock failed: $countReleased locks released out of $countToRelease for >$reason<", 'L0', '[ERROR]');
 	}
 	return (0);
 }
@@ -776,23 +776,34 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /X170SM/) ||
-		($boardname =~ /PB50_70DFx,DDx/) ||
-   		($boardname =~ /LAPQC71A/) ||
-		($boardname =~ /LAPQC71B/) ||
-		($boardname =~ /N141CU/) ||
-		($boardname =~ /N150CU/) ||
-   		($boardname =~ /NH5xAx/) ||
-   		($boardname =~ /NL5xRU/) ||
-		($boardname =~ /AURA1501/) ||
-		($boardname =~ /EDUBOOK1502/) ||
-		($boardname =~ /NS50MU/) ||
-		($boardname =~ /NS50_70MU/) ||
-		($boardname =~ /NJ50_70CU/) ||
-		($boardname =~ /X170KM-G/ )) {
-		unless ($FAI) {
+	unless ($FAI) {
+		if (($boardname =~ /X170SM/) ||
+			($boardname =~ /PB50_70DFx,DDx/) ||
+			($boardname =~ /LAPQC71A/) ||
+			($boardname =~ /LAPQC71B/) ||
+			($boardname =~ /N141CU/) ||
+			($boardname =~ /N150CU/) ||
+			($boardname =~ /NH5xAx/) ||
+			($boardname =~ /NL5xRU/) ||
+			($boardname =~ /AURA1501/) ||
+			($boardname =~ /EDUBOOK1502/) ||
+			($boardname =~ /NS50MU/) ||
+			($boardname =~ /NS50_70MU/) ||
+			($boardname =~ /NJ50_70CU/) ||
+			($boardname =~ /X170KM-G/ )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
+				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
+			}
+		}
+	}
+
+	unless ($FAI) {
+		if ($boardname =~ /GM6XGxX/) {
+			my $minKernelVersionFornoauxfix = '6.8';
+			if ((version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 1) ||
+				(version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 0)) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
@@ -1349,7 +1360,7 @@ sub amdgpuwithnvidiafix() {
 			if (backupFile($fileName)) {
 				unlink($fileName);
 			} else {
-				printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
+				printLog('can\'t remove fix, it seems to be gone already', 'TL0', '[WARN]');
 			}
 			$presetModules{$module}{installed} = 'no';
 			$presetModules{$module}{upgraded} = 'yes';
@@ -2159,7 +2170,7 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[INFO]');
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -2221,7 +2232,7 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -2282,7 +2293,7 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
 			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L1', '[WARN]');
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
@@ -2456,6 +2467,7 @@ sub lightdmlogindcheckgraphicalfix() {
 					$presetModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
 				} else {
+					printLog("lightdmlogindcheckgraphicalfix installation failed", 'TL0', '[ERROR]');
 					$presetModules{$module}{installed} = "failed";
 					addToConfiguredModules($module, "failed");
 					return (0);
@@ -2467,6 +2479,7 @@ sub lightdmlogindcheckgraphicalfix() {
 				$presetModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
 			} else {
+				printLog("lightdmlogindcheckgraphicalfix installation failed", 'TL0', '[ERROR]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 				return (0);
@@ -2519,7 +2532,7 @@ sub earlyloadbacklightcontrolfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		unless (-d $elbcDir) {
 			unless (mkdir $elbcDir) {
-				printLog("could not create directory $elbcDir", 'TL0', '[WARN]');
+				printLog("could not create directory $elbcDir", 'TL0', '[ERROR]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 				return (0);
@@ -2532,6 +2545,7 @@ sub earlyloadbacklightcontrolfix() {
 					$presetModules{$module}{upgraded} = "yes";
 					addToConfiguredModules($module, "success");
 				} else {
+		printLog("$presetModules{$module}{name} installation failed", 'L1', '[ERROR]');
 					$presetModules{$module}{installed} = "failed";
 					addToConfiguredModules($module, "failed");
 					return (0);
@@ -2543,6 +2557,7 @@ sub earlyloadbacklightcontrolfix() {
 				$presetModules{$module}{upgraded} = "yes";
 				addToConfiguredModules($module, "success");
 			} else {
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[ERROR]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 				return (0);
@@ -2589,6 +2604,7 @@ sub cardreaderfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2637,6 +2653,7 @@ sub samsungnvmefix() {
 			printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 			$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 			if ($retval == 0) {
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			} else {
@@ -2651,6 +2668,7 @@ sub samsungnvmefix() {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2710,6 +2728,7 @@ sub intelgenXIIIpowerctlfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		if ($retval1 == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2753,6 +2772,7 @@ sub disablegucfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2771,6 +2791,7 @@ sub disablegucfix() {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = insertGrub($module, \@kernelParameters);
 		if ($retval < 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2811,6 +2832,7 @@ sub elementaryosdkmspinningfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2942,7 +2964,7 @@ sub textboot() {
 			printLog("@splashParameter successfully inserted into grub", 'L2', '[DEBUG]');
 			block('text-boot');
 		} else {
-			printLog("something went wrong while inserting @splashParameter into grub", 'L2', '[ERROR]');
+			printLog("something went wrong while inserting @splashParameter into grub", 'L0', '[ERROR]');
 		}
 	}
 }
@@ -2956,13 +2978,14 @@ sub gfxmode() {
 	my $module = shift;
 	my $action = shift;
 	my $retval;
-	my $fileName = '/etc/default/grub.d/gfxmode.cfg';
+	my $fileName = '/etc/grub.d/gfxmode.cfg';
 	my $fileText = "GRUB_GFXMODE=1280x720,1280x800,1280x1024\n".
 					"GRUB_GFXPAYLOAD_LINUX=keep\n";
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
 		if ($retval == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -2979,14 +3002,12 @@ sub gfxmode() {
 		addToConfiguredModules($module, "success");
 	}
 	if ($action eq 'remove') {
-		if (removeWarningMessage("amd-gpu-with-nvidia-fix\n")) {
-			unless (unlink($fileName)) {
-				printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
-			}
-			$presetModules{$module}{installed} = 'no';
-			$presetModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
+		unless (unlink($fileName)) {
+			printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
 		}
+		$presetModules{$module}{installed} = 'no';
+		$presetModules{$module}{upgraded} = 'yes';
+		addToConfiguredModules($module, 'removed');
 	}
 }
 
@@ -3174,8 +3195,8 @@ sub addRepoKey {
 					$errorCode = $?/256;
 					lockPM();
 					if ($errorCode != 0) {
-						printLog("error code apt-get: $errorCode", 'L2', '[ERROR]');
-						printLog("output apt-get: $outputKey", 'L2', '[ERROR]');
+						printLog("error code apt-get: $errorCode", 'L0', '[ERROR]');
+						printLog("output apt-get: $outputKey", 'L0', '[ERROR]');
 					} else {
 						printLog("no errors installing keyrings", 'L2', '[INFO]');
 						last;
@@ -3183,7 +3204,7 @@ sub addRepoKey {
 				} else {
 					printLog("something is wrong while looking for locks for keyring installation", 'L0', '[ERROR]');
 				}
-				printLog("problem installing keyring, trying again later", 'L2', '[WARN]');
+				printLog("problem installing keyring, trying again later", 'L0', '[WARN]');
 				sleep(1);
 			}
 			if (isPackageInstalled("tuxedo-archive-keyring")) {
@@ -3447,7 +3468,7 @@ sub createFileModule {
 			addToConfiguredModules($module, "nothingToDo");
 			addToConfiguredModules($module, "success");
 		} else {
-			printLog("$filePath for $presetModules{$module}{name} failed to be created", 'L1', '[ERROR]');
+			printLog("$filePath for $presetModules{$module}{name} failed to be created", 'L0', '[ERROR]');
 
 			$presetModules{$module}{installed} = "failed";
 
@@ -3458,7 +3479,7 @@ sub createFileModule {
 	if ($action eq 'remove') {
 		unlink($filePath);
 		if (-e $filePath) {
-			printLog("$filePath for $presetModules{$module}{name} failed to be removed", 'L1', '[ERROR]');
+			printLog("$filePath for $presetModules{$module}{name} failed to be removed", 'L0', '[ERROR]');
 
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
@@ -3502,6 +3523,7 @@ sub LTEModuleFix {
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L1', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3516,6 +3538,7 @@ sub LTEModuleFix {
 		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
 		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
 		if ($retval1 == 0 || $retval2 == 0) {
+			printLog("$presetModules{$module}{name} upgrade failed", 'L1', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
@@ -3615,6 +3638,7 @@ sub grubModuleEdit {
 		$retVal = insertGrub($module, \@kernelParameters);
 		printLog("retVal: $retVal", 'L2', '[DEBUG]');
 		if ($retVal < 0) {
+			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			unless ($silent) {
 				addToConfiguredModules($module, "failed");
@@ -3639,6 +3663,7 @@ sub grubModuleEdit {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retVal = insertGrub($module, \@kernelParameters);
 		if ($retVal < 0) {
+			printLog("$presetModules{$module}{name} upgrade failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			unless ($silent) {
 				addToConfiguredModules($module, "failed");
@@ -3698,6 +3723,7 @@ sub debianPackageModule {
 				}
 				$success = 1;
 			} else {
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 				$presetModules{$module}{installed} = 'failed';
 				addToConfiguredModules($module, 'failed');
 				$success = 0;
@@ -3793,7 +3819,7 @@ sub deinstExcept {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1', '[DEBUG]');
 			return (1);
 		}
-		printLog('something went wrong while searching for packages', 'L1', '[WARN]');
+		printLog('something went wrong while searching for packages', 'L0', '[WARN]');
 		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/g;
@@ -3892,7 +3918,7 @@ sub isPackageInRepo {
 		printLog("package $package found in repos", 'L2', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("package $package can't be found in the repositories", 'L2', '[ERROR]');
+		printLog("package $package can't be found in the repositories", 'L0', '[ERROR]');
 		return (0);
 	}
 }
@@ -3929,7 +3955,7 @@ sub deinstallSinglePackage {
 				return (0);
 			}
 		} else {
-			printLog("package deinstallation failed!! Could not get package manager lock", 'L2', '[WARN]');
+			printLog("package deinstallation failed!! Could not get package manager lock", 'L0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -4095,7 +4121,7 @@ sub installPackage {
 					}
 				}
 			} else {
-				printLog("failed to get package management lock to install $packageName!!", 'L2', '[WARN]');
+				printLog("failed to get package management lock to install $packageName!!", 'L0', '[WARN]');
 				startTomteDelayed();
 				return (0);
 			}
@@ -4178,7 +4204,7 @@ sub removePackage {
 			return (0);
 		}
 	} else {
-		printLog("locks for package management could not be unlocked!!", 'L2', '[WARN]');
+		printLog("locks for package management could not be unlocked!!", 'L0', '[WARN]');
 		startTomteDelayed();
 		return (0);
 	}
@@ -4208,7 +4234,7 @@ sub setAptMark {
 			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
 			return (1);
 		} else {
-			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			printLog("desired mark: not set !!!", 'L0', '[ERROR]');
 			return (0);
 		}
 	} elsif ( !$aptMark && ($mark eq 'auto') ) {
@@ -4220,7 +4246,7 @@ sub setAptMark {
 			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
 			return (1);
 		} else {
-			printLog("desired mark: not set !!!", 'L2', '[ERROR]');
+			printLog("desired mark: not set !!!", 'L0', '[ERROR]');
 			return (0);
 		}
 	}
@@ -4634,6 +4660,7 @@ sub removeDebianModule {
 			}
 			$success = 1;
 		} else {
+			printLog("$presetModules{$module}{name} remove failed", 'L0', '[INFO]');
 			addToConfiguredModules($module, "remove failed");
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
@@ -4791,7 +4818,7 @@ sub aptgetRefreshModule {
 						}
 					}
 				} else {
-					printLog("failed to get package management lock to update package management for >@aptgetModules<", 'L2', '[WARN]');
+					printLog("failed to get package management lock to update package management for >@aptgetModules<", 'L0', '[WARN]');
 					startTomteDelayed();
 					return(0);
 				}
@@ -4913,7 +4940,7 @@ sub waitForNetwork {
 	my $wait = shift;
 	for ( my $i=1; $i<=$triesNbr; $i++ ) {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $triesNbr", 'TL2', '[INFO]');
+		printLog("waiting for network: $i of $triesNbr", 'TL0', '[INFO]');
 		sleep ($wait);
 	}
 	return (0);
@@ -5025,10 +5052,10 @@ sub insertGrubParameter {
 		return (0);
 	} else {
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/) {
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"\n/;
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"/;
 		}
 		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/) {
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'\n/;
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'/;
 		}
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
@@ -5097,7 +5124,7 @@ sub messageDesktop {
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/;
 	$dbusAddress = $1;
 	if ($dbusAddress eq '') {
-		printLog('No display for message output found, no DBUS address', 'L1', '[INFO]');
+		printLog('No display for message output found, no DBUS address', 'L0', '[INFO]');
 		return (0);
 	}
 
@@ -5108,7 +5135,7 @@ sub messageDesktop {
 	$retValue = $?/256;
 
 	if ($retValue != 0) {
-		printLog("No display for message output found with command:\n$mCmd", 'L1', '[DEBUG]');
+		printLog("No display for message output found with command:\n$mCmd", 'L0', '[DEBUG]');
 		return (0);
 	}
 	return (1);
@@ -5422,7 +5449,7 @@ sub writeConfigIniFile {
 		printLog("$configIniFile successfully written", 'L2', '[INFO]');
 		return (1);
 	} else {
-		printLog("problems writing $configIniFile", 'L2', '[WARN]');
+		printLog("problems writing $configIniFile", 'L0', '[WARN]');
 		return (0);
 	}
 }
@@ -5460,7 +5487,7 @@ sub writeConfigFile {
 						$installed = $presetModules{$name}{installed};
 					} else {
 						# upgrade was not executed
-						printLog("upgrade was not executed", 'L2', '[DEBUG]');
+						printLog("upgrade was not executed", 'L0', '[DEBUG]');
 						if ( $presetModules{$name}{installed} eq 'yes' ) {
 							$version = $localConfModules{$name}{version};
 							$hwid = $localConfModules{$name}{hwid};
