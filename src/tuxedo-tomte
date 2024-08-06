@@ -703,7 +703,6 @@ sub isOSSupported {
 	printLog("distribution: >$distribution<", 'TL1', '[INFO]');
 	printLog("version: >$distributionVersionID<", 'TL1', '[INFO]');
 	return (0);
-
 }
 
 
@@ -724,9 +723,10 @@ sub prerequisites {
 		}
 	}
 	# wait max. 10 sec. as it takes some time to get network
-	checkNetwork(10,1);
-	aptgetRefreshModule(1, @modulesList);
-	printLog("ending prerequisites", 'L1', '[INFO]');
+	if (checkNetwork(10,1)) {
+		aptgetRefreshModule(1, @modulesList);
+		printLog("ending prerequisites", 'L1', '[INFO]');
+	}
 }
 
 
@@ -2983,8 +2983,8 @@ sub gfxmode() {
 	my $fileText = "GRUB_GFXMODE=1280x720,1280x800,1280x1024\n".
 					"GRUB_GFXPAYLOAD_LINUX=keep\n";
 	my $currentText;
-	if ($action eq 'install') {
-		unless (-e $fileName) {
+	if (($action eq 'install') || ($action eq 'upgrade')) {
+		if (-e $fileName) {
 			$currentText = read_file($fileName, 'err_mode' => 'carp');
 			unless ($currentText eq $fileText) {
 				printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
@@ -3000,22 +3000,35 @@ sub gfxmode() {
 					setRestartValues($module);
 				}
 			}
+		} else {
+			printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
+			$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
+			if ($retval == 0) {
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
+				$presetModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+			} else {
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+				addToConfiguredModules($module, "success");
+				setRestartValues($module);
+			}
 		}
 	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
-		$presetModules{$module}{installed} = "yes";
-		$presetModules{$module}{upgraded} = "yes";
-		addToConfiguredModules($module, "success");
-	}
 	if ($action eq 'remove') {
-		unless (unlink($fileName)) {
-			printLog('can\'t remove fix, it seems to be gone already', 'TL1', '[WARN]');
+		if (-e $fileName) {
+			unless (unlink($fileName)) {
+				printLog("can't remove the file $fileName", 'TL0', '[WARN]');
+				return (0);
+			}
+		} else {
+			printLog("can't remove fix, the file $fileName seems to be gone already", 'TL0', '[WARN]');
 		}
 		$presetModules{$module}{installed} = 'no';
 		$presetModules{$module}{upgraded} = 'yes';
 		addToConfiguredModules($module, 'removed');
 	}
+	return (1);
 }
 
 
@@ -4776,6 +4789,7 @@ sub setNoNetwork {
 	} else {
 		$noNetwork = $value;
 	}
+	return (1);
 }
 
 
@@ -7358,6 +7372,8 @@ if (@ARGV != 0) {
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
+		listStatus();
+		printLog('Tomte in FAI finished', 'L0', '[INFO]');
 
 	# configure
 	} elsif ($argValue{command} eq "configure") {
