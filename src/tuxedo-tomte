@@ -5772,6 +5772,19 @@ sub listStatus {
 			write;
 		}
 	}
+	if ($printIt && $FAI) {
+		unless(-e $faiLogFile) {
+			print "logfile does not exist, creating one\n";
+			open($FAILOGFILE, ">", $faiLogFile);
+			close $FAILOGFILE;
+		}
+		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+			print $FAILOGFILE "@arr\n";
+			close $FAILOGFILE;
+		} else {
+			print "could not open logfile\n";
+		}
+	}
 	if (-e $needsRestartFile) {
 		print "Some fixes need a system restart to be effective\n";
 		if ($LiveISO) {
