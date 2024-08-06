@@ -204,6 +204,10 @@ our %KERNELS = (
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04",
 	},
 
+	"jammy" => {
+		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge",
+	},
+
 	"noble" => {
 		"linux-tuxedo-24.04" => "linux-tuxedo-24.04",
 	}
