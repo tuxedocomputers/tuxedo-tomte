@@ -998,7 +998,7 @@ our %DEVICES = (
 	},
 	'72' => {
 		model => ['TUXEDO InfinityBook 14 Intel Gen9'],
-		board_name => ['IBP14I09MK1'],
+		board_name => ['GXxMRXx'],
 		fix => [''],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -1008,8 +1008,8 @@ our %DEVICES = (
 		usb_device => '',
 	},
 	'73' => {
-		model => ['TUXEDO InfinityBook 14 AMD'],
-		board_name => ['IBP14A09MK1'],
+		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
+		board_name => ['GXxHRXx'],
 		fix => [''],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -1020,7 +1020,7 @@ our %DEVICES = (
 	},
 	'74' => {
 		model => ['TUXEDO InfinityBook 15 Intel Gen9'],
-		board_name => ['IBP15I09MK1'],
+		board_name => ['GXxMRXx'],
 		fix => [''],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -1031,7 +1031,7 @@ our %DEVICES = (
 	},
 	'75' => {
 		model => ['TUXEDO InfinityBook 15 AMD Gen9'],
-		board_name => ['IBP15A09MK1'],
+		board_name => ['GXxHRXx'],
 		fix => [''],
 		flavour => ['22.04'],
 		pci_id => '',
@@ -1586,7 +1586,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'no',
 	},
-
 	nvidiadriver => {
 		name => 'nvidia-driver',
 		version => 6,
