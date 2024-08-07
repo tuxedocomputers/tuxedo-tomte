@@ -722,6 +722,10 @@ sub prerequisites {
 			push (@modulesList, $module);
 		}
 	}
+	#TODO debug
+	if ($FAI) {
+		`apt update`;
+	}
 	# wait max. 10 sec. as it takes some time to get network
 	if (checkNetwork(10,1)) {
 		aptgetRefreshModule(1, @modulesList);
