@@ -1039,7 +1039,9 @@ sub checkRequirements {
 		if (($boardname eq 'IBP14I09MK1') ||
 			($boardname eq 'IBP14A09MK1') ||
 			($boardname eq 'IBP15I09MK1') ||
-			($boardname eq 'IBP15A09MK1')) {
+			($boardname eq 'IBP15A09MK1') ||
+			# TODO added Testboardname
+			($boardname eq 'GXxMRXx')) {
 			printLog("kernel $presetModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
 			$presetModules{kerneltuxedo2204edge}{required} = 'yes';
 		} else {
