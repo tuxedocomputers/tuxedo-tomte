@@ -66,7 +66,7 @@ our %ESSENTIAL_REPOS = (
 	"TUXEDO OS 22.04" => {
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main",
-						"deb https://static.tuxedocomputers.com/deb/linux-meta/jammy/6.8.0-100038.38~22.04.1tux2+3/ jammy main"],
+						"deb [trusted=yes] https://static.tuxedocomputers.com/deb/linux-meta/jammy/6.8.0-100038.38~22.04.1tux2+3/ /"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		},
 		"nonplasma6txos" => {
