@@ -2097,7 +2097,7 @@ sub kerneltuxedo2204edge() {
 		checkAndDeleteOldestTuxedoKernel();
 		checkAndDeleteOldestRemnantLinuxHeader();
 
-		installKernelFlavour('linux-tuxedo-24.04-edge', \$instFailed, \$instDone);
+		installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
 		if ($instFailed > 0) {
 			startTomteDelayed();
 			addToConfiguredModules($module, "failed");
