@@ -2975,12 +2975,14 @@ sub tuxedoplasmaupgrade() {
 
 
 
+
 ###############################################################################
 # Installs Linux device driver for Ethernet controller Motorcomm YT6801
 #
 sub tuxedoyt6801() {
 	my $module = shift;
 	my $action = shift;
+	#TODO debug
 	checkNetwork();
 	my $output = `nslookup deb.tuxedocomputers.com`;
 	printLog("nslookup before: $output", "L2", '[DEBUG]');
