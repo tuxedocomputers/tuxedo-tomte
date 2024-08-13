@@ -2976,22 +2976,7 @@ sub tuxedoplasmaupgrade() {
 sub tuxedoyt6801() {
 	my $module = shift;
 	my $action = shift;
-	#TODO debug
-	checkNetwork();
-	my $output = `nslookup deb.tuxedocomputers.com`;
-	printLog("nslookup before: $output", "L2", '[DEBUG]');
-	$output = `ls /target/lib/modules/`;
-	printLog("ls target: $output", "L2", '[DEBUG]');
-	$output = `ls /lib/modules/`;
-	printLog("ls lib: $output", "L2", '[DEBUG]');
 	debianPackageModule( $module, $action );
-	checkNetwork();
-	$output = `nslookup deb.tuxedocomputers.com`;
-	printLog("nslookup after: $output", "L2", '[DEBUG]');
-	$output = `ls /target/lib/modules/`;
-	printLog("ls target: $output", "L2", '[DEBUG]');
-	$output = `ls /lib/modules/`;
-	printLog("ls lib: $output", "L2", '[DEBUG]');
 }
 
 
