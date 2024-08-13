@@ -29,11 +29,20 @@ fi
 
 # Check if there are syntax errors in the code
 syntax_incorrect=0
-echo "Checking for syntax errors..."
+echo "Checking for syntax errors in src/tuxedo-tomte..."
 perl -c ./src/tuxedo-tomte >/dev/null 2>&1 || syntax_incorrect=1
 if [[ $syntax_incorrect -gt 0 ]]; then
-  echo "Found syntax errors!"
+  echo "Found syntax errors in src/tuxedo-tomte!"
   perl -c ./src/tuxedo-tomte
+fi
+
+# Check if there are syntax errors in the code
+syntax_incorrect=0
+echo "Checking for syntax errors Tomte/Presets.pm..."
+perl -c ./Tomte/Presets.pm >/dev/null 2>&1 || syntax_incorrect=1
+if [[ $syntax_incorrect -gt 0 ]]; then
+  echo "Found syntax errors in Tomte/Presets.pm!"
+  perl -c ./Tomte/Presets.pm
 fi
 
 # Calculate the exit code as the sum of the variables
