@@ -206,6 +206,10 @@ our %KERNELS = (
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04",
 	},
 
+	"jammy" => {
+		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge",
+	},
+
 	"noble" => {
 		"linux-tuxedo-24.04" => "linux-tuxedo-24.04"
 	}
@@ -863,12 +867,12 @@ our %DEVICES = (
 		model => ['TUXEDO Stellaris 16 Gen5 AMD'],
 		board_name => ['GM6XGxX'],
 		fix => ['tuxedodrivers', 'tuxedotouchpadswitch'],
-		flavour => ['22.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
+		flavour => ['22.04', '24.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => '',
+		display => '',
+		usb_device => '',
 	},
 	'61' => {
 		model => ['all notebooks'],
@@ -990,6 +994,50 @@ our %DEVICES = (
 		kernel => q{},
 		display => q{},
 		usb_device => q{}
+	},
+	'72' => {
+		model => ['TUXEDO InfinityBook 14 Intel Gen9'],
+		board_name => ['IBP14I09MK1'],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'kerneltuxedo2204edge',
+		display => '',
+		usb_device => '',
+	},
+	'73' => {
+		model => ['TUXEDO InfinityBook 14 AMD'],
+		board_name => ['IBP14A09MK1'],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'kerneltuxedo2204edge',
+		display => '',
+		usb_device => '',
+	},
+	'74' => {
+		model => ['TUXEDO InfinityBook 15 Intel Gen9'],
+		board_name => ['IBP15I09MK1'],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'kerneltuxedo2204edge',
+		display => '',
+		usb_device => '',
+	},
+	'75' => {
+		model => ['TUXEDO InfinityBook 15 AMD Gen9'],
+		board_name => ['IBP15A09MK1'],
+		fix => [''],
+		flavour => ['22.04'],
+		pci_id => '',
+		cpu => '',
+		kernel => 'kerneltuxedo2204edge',
+		display => '',
+		usb_device => '',
 	}
 );
 
@@ -1494,6 +1542,27 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
+	},
+	kerneltuxedo2204edge => {
+		name => 'linux-tuxedo-22.04-edge',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('kerneltuxedo2204edge_description'),
+		postconf => '',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
 	},
 	kerneltuxedo2404 => {
 		name => 'linux-tuxedo-24.04',
@@ -2104,8 +2173,30 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'yes',
 		FAI => 'yes',
-		LiveISO => 'no'
-	}
+		LiveISO => 'no',
+	},
+	gfxmode => {
+		name => 'gfxmode',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('gfxmode_description'),
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
+	},
+>>>>>>> nextRelease
 );
 
 
