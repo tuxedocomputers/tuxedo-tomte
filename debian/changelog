@@ -1,3 +1,16 @@
+tuxedo-tomte (2.38.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * modified loglevels for critical messages
+  * added module gfxmode grub configuration
+  * added nokeyboardaftersuspendfix for TUXEDO Stellaris 16 Gen5 AMD with
+    boardname GM6XGxX and kernel >= 6.8
+  * added linuxtuxedo22.04edge for TUXEDO InfinityBook 14 AMD Gen9 with
+    boardname GXxHRXx and TUXEDO InfinityBook 14 Intel Gen9 with boardname
+    GXxMRXx
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 13 Aug 2024 17:47:45 +0200
+
 tuxedo-tomte (2.37.1) jammy; urgency=medium
 
   [ E. Mohr ]
