@@ -32,7 +32,9 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
-use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles );
+
+use Tomte::Presets 'postConfPrograms';
 
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
@@ -211,7 +213,7 @@ my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
 my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
-my %postConfProgramsList = postConfPrograms();
+my %postConfProgramsList = Tomte::Presets::postConfPrograms();
 
 #TODO debug
 printLog("value1: $postConfProgramsList{updateGrub}{command}", 'L2', '[DEBUG]');
