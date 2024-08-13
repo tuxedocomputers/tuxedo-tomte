@@ -722,10 +722,7 @@ sub prerequisites {
 			push (@modulesList, $module);
 		}
 	}
-	#TODO debug
-	if ($FAI) {
-		`apt update`;
-	}
+
 	# wait max. 10 sec. as it takes some time to get network
 	if (checkNetwork(10,1)) {
 		aptgetRefreshModule(1, @modulesList);
@@ -1032,9 +1029,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{i915enablepsrfix}{name} issue", 'L1', '[INFO]');
 	}
 
-
-	#TODO
-	printLog('in checkRequirements before kernel selection', 'TL0', '[DEBUG]');
 
 	# kernel
 	if (($ubuntuCodename =~ /focal/) && ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
@@ -7248,18 +7242,11 @@ sub isRoot {
 # checks system requirements, loads configfile
 #
 sub prepareValues {
-	#TODO debug
-				printLog("before cR", 'L0', '[DEBUG]');
 	checkRequirements();
-				printLog("before iAP", 'L0', '[DEBUG]');
 	initAvailablePackagesList();
-				printLog("before iCF", 'L0', '[DEBUG]');
 	initConfigFile();
-				printLog("before tCV", 'L0', '[DEBUG]');
 	transferConfigValues();
-				printLog("before rCC", 'L0', '[DEBUG]');
 	reportPlannedChanges();
-				printLog("after", 'L0', '[DEBUG]');
 }
 
 
@@ -7460,8 +7447,6 @@ if (@ARGV != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
-		#TODO debug for testing
-			prerequisites();
 		configureAllModules();
 		postConfigure();
 		listSuccess();
