@@ -32,9 +32,7 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
-use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles );
-
-use Tomte::Presets 'postConfPrograms';
+use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
 
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
@@ -212,11 +210,7 @@ my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
 my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
-my %postConfProgramsList = Tomte::Presets::postConfPrograms();
-
-#TODO debug
-printLog("value1: $postConfProgramsList{updateGrub}{command}", 'L2', '[DEBUG]');
-printLog("value2: $postConfProgramsList{updateInitramfs}{command}", 'L2', '[DEBUG]');
+my %postConfProgramsList = postConfPrograms();
 
 
 ###############################################################################
@@ -609,7 +603,7 @@ sub readFirstLineOfFile {
 #
 sub countLinesInString {
 	my $myString = shift;
-	return 0 if( !defined $myString or $myString eq '');
+	return 0 if( !defined $myString or $myString eq "");
 	my $lastchar = substr $myString, -1,1;
 	my $numlines = () = $myString =~ /\n/g;
 	# was last line a whole line with a "\n"?;
@@ -1686,7 +1680,7 @@ sub corefix() {
 sub elantechtouchpadfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 'psmouse.elantech_smbus=0');
+	editGrub( $module, $action, 'psmouse.elantech_smbus=0');
 }
 
 

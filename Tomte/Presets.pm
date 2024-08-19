@@ -16,8 +16,6 @@
 
 package Tomte::Presets;
 
-our $VERSION = 1.0;
-
 use strict qw(vars subs);
 use warnings;
 use 5.010;
@@ -35,12 +33,12 @@ use Data::Dumper;
 
 
 our %SUPPORTED_OS = (
-	"TUXEDO OS" => ['20.04', '22.04', '24.04'],
-	"TUXEDO_OS Plasma" => ['20.04', '22.04', '24.04'],
-	"KDE neon" => ['20.04', '22.04'],
-	"Ubuntu" => ['20.04', '22.04', '24.04'],
-	"Linux Mint" => ['21.1', '21.2', '21.3', '22'],
-	"elementary OS" => ['6.1', '7.1']
+	"TUXEDO OS" => ["20.04", "22.04", "24.04"],
+	"TUXEDO_OS Plasma" => ["20.04", "22.04", "24.04"],
+	"KDE neon" => ["20.04", "22.04"],
+	"Ubuntu" => ["20.04", "22.04", "24.04"],
+	"Linux Mint" => ["21.1", "21.2", "21.3", "22"],
+	"elementary OS" => ["6.1", "7.1"]
 );
 
 our %ESSENTIAL_REPOS = (
@@ -208,7 +206,7 @@ our %KERNELS = (
 	},
 
 	"noble" => {
-		"linux-tuxedo-24.04" => "linux-tuxedo-24.04"
+		"linux-tuxedo-24.04" => "linux-tuxedo-24.04",
 	}
 );
 
