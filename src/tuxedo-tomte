@@ -69,8 +69,8 @@ $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
-$ENV{LC_MESSAGES} = 'C';
-$ENV{DEBIAN_FRONTEND} = 'noninteractive';
+local $ENV{LC_MESSAGES} = 'C';
+local $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
@@ -1680,7 +1680,7 @@ sub corefix() {
 sub elantechtouchpadfix() {
 	my $module = shift;
 	my $action = shift;
-	editGrub( $module, $action, 'psmouse.elantech_smbus=0');
+	grubModuleEdit( $module, $action, 0, 'psmouse.elantech_smbus=0' );
 }
 
 
