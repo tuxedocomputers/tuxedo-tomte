@@ -676,7 +676,9 @@ sub cpuBrand {
 	if ( (-e $cpuinfo) && open($FH, '<', '/proc/cpuinfo') ) {
 		local $/;
 		$infos = <$FH>;
-		close $FH;
+		if (! close $FH) {
+			printLog("error closing $cpuinfo", 'L0', '[ERROR]');
+		}
 		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/sxm) {
 			return ('AMD');
 		}
@@ -720,6 +722,7 @@ sub isOSSupported {
 sub prerequisites {
 	my $module;
 	my @modulesList;
+	use constant WAIT_TIME => 10;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
@@ -731,7 +734,7 @@ sub prerequisites {
 	}
 
 	# wait max. 10 sec. as it takes some time to get network
-	if (checkNetwork(10,1)) {
+	if (checkNetwork(WAIT_TIME,1)) {
 		aptgetRefreshModule(1, @modulesList);
 		printLog("ending prerequisites", 'L1', '[INFO]');
 	}
@@ -746,13 +749,14 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
+	use constant NEG_ONE => -1;
 
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/sm) ||
 		($boardname =~ /NS50MU/sm)) {
 		if (!$FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == NEG_ONE) {
 				$presetModules{i8042noauxfix}{required} = 'yes';
 				printLog("detected $presetModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
 			}
@@ -800,7 +804,7 @@ sub checkRequirements {
 			($boardname =~ /NJ50_70CU/sm) ||
 			($boardname =~ /X170KM-G/smx )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == NEG_ONE) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
@@ -873,7 +877,7 @@ sub checkRequirements {
 
 	if (($boardname =~ /P95_HP/sm)
 		|| ($boardname =~ /P95_HR/sm)
-		|| ($boardname =~ /P95_HP,HR,HQ/sm)) {
+		|| ($boardname =~ /P95_HP,HR,HQ/smx)) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
@@ -943,7 +947,7 @@ sub checkRequirements {
 		}
 	}
 
-	if ($ubuntuCodename =~ /jammy/) {
+	if ($ubuntuCodename =~ /jammy/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 		$presetModules{tuxedokeyboardite}{required} = 'no';
@@ -952,7 +956,7 @@ sub checkRequirements {
 		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
 	}
 
-	if ($ubuntuCodename =~ /noble/) {
+	if ($ubuntuCodename =~ /noble/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
@@ -990,7 +994,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/NHxxRZQ/sm)	{
+	if ($boardname =~ m/NHxxRZQ/sm) {
 		# starting at kernel version 6.1 driver r8169 is included and supports the present device
 		my $kernelVersionWithR8169 = '6.1';
 		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
@@ -1122,7 +1126,7 @@ sub checkRequirements {
 		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
 		if ($currentPlasmaWorkspaceVersion ne q{}) {
 			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-			if (! ($versionCompareResult == -1) ) {
+			if (! ($versionCompareResult == NEG_ONE) ) {
 				$presetModules{tuxedodgpurun}{required} = 'yes';
 				printLog("detected $presetModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
 			}
@@ -1167,7 +1171,7 @@ sub checkRequirements {
 		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
 		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
 			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
-			if (! ($versionCompareResult == -1) ) {
+			if (! ($versionCompareResult == NEG_ONE) ) {
 				$plasma6Installed = 1;
 				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
 			} else {
@@ -1474,9 +1478,14 @@ sub tuxedorepos() {
 
 	# create default repo list if it does not exist
 	if (! -e '/etc/apt/sources.list') {
-		open($FH, '>', '/etc/apt/sources.list');
-		printLog('created /etc/apt/sources.list because it was not there', 'L2', '[WARN]');
-		close($FH);
+		if (open($FH, '>', '/etc/apt/sources.list')) {
+			printLog('created /etc/apt/sources.list because it was not there', 'L2', '[WARN]');
+			if (close($FH)) {
+				printLog('could not close /etc/apt/sources.list thats very bad', 'L0', '[ERROR]');
+			}
+		} else {
+			printLog('could not create /etc/apt/sources.list thats very bad', 'L0', '[ERROR]');
+		}
 	}
 
 	if ($action eq 'install') {
@@ -1632,27 +1641,18 @@ sub tuxedomirrors() {
 ###############################################################################
 # Adds the core-fix for certain BIOS versions on certain mainboards
 #
-#TODO should be deleted as it it not used anymore?
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($main::biosVersion eq '') {
-		printLog("BIOS version empty", 'L1', '[WARN]');
-		$presetModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-		return(0);
-	}
-	my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
+	my $amlHookScript = q{tuxedo-corefix-clevo-nh5xax};
 	my $amlHookScriptOrig = $shareDir.$amlHookScript;
 	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
 	my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
-	my %amlFile = (
-		'1.07.04NBC' => 'nh5xax-1.aml',
-	);
-	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
+	my $amlFile = ('nh5xax-1.aml');
+	my $amlFileOrig = $shareDir.$amlFile;
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-	$amlFile{$main::biosVersion} =~ s/-\d*//;
-	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
+	$amlFile =~ s/-\d*//;
+	my $amlFileDest = $amlFileDirDest.$amlFile;
 
 	if ($action eq 'install') {
 		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
