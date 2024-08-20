@@ -977,6 +977,8 @@ sub checkRequirements {
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	# TODO debug
+	# if the right nvidia driver is installed, it should show up in 'tomte list'
+	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
 		|| ((isPackageInstalled('nvidia-driver-510') && ($ubuntuCodename =~ /focal/)))
 		|| ((isPackageInstalled('nvidia-driver-550') && (($ubuntuCodename =~ /jammy/) || ($ubuntuCodename =~ /noble/))))) {
