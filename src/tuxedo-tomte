@@ -738,7 +738,6 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
-	my $biosVersion;
 	my $lsusb;
 
 	# check values for each module
@@ -872,11 +871,6 @@ sub checkRequirements {
 		}
 	}
 
-	# get the BIOS version
-	# deactivated but could be useful if version changes in the future
-	# $main::biosVersion = `dmidecode -s bios-version`;
-	$main::biosVersion = '1.07.04NBC';
-	$main::biosVersion =~ s/\s//g;
 	if ($boardname =~ /NH5xAx/) {
 		$presetModules{corefix}{required} = 'yes';
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
@@ -1619,23 +1613,15 @@ sub tuxedomirrors() {
 sub corefix() {
 	my $module = shift;
 	my $action = shift;
-	if ($main::biosVersion eq '') {
-		printLog("BIOS version empty", 'L1', '[WARN]');
-		$presetModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-		return(0);
-	}
 	my $amlHookScript = 'tuxedo-corefix-clevo-nh5xax';
 	my $amlHookScriptOrig = $shareDir.$amlHookScript;
 	my $amlHookDirDest = '/etc/initramfs-tools/hooks/';
 	my $amlHookScriptDest = $amlHookDirDest.$amlHookScript;
-	my %amlFile = (
-		'1.07.04NBC' => 'nh5xax-1.aml',
-	);
-	my $amlFileOrig = $shareDir.$amlFile{$main::biosVersion};
+	my $amlFile = 'nh5xax-1.aml';
+	my $amlFileOrig = $shareDir.$amlFile;
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-	$amlFile{$main::biosVersion} =~ s/-\d*//;
-	my $amlFileDest = $amlFileDirDest.$amlFile{$main::biosVersion};
+	$amlFile =~ s/-\d*//;
+	my $amlFileDest = $amlFileDirDest.$amlFile;
 
 	if ($action eq 'install') {
 		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
