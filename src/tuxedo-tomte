@@ -1653,16 +1653,18 @@ sub corefix() {
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
 	$amlFile =~ s/-\d*//;
 	my $amlFileDest = $amlFileDirDest.$amlFile;
+	use constant FILE_MODE_SIXFOURFOUR => '0644';
+	use constant FILE_MODE_SEVENZEROZERO => '0700';
 
 	if ($action eq 'install') {
 		if (($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure')) {
 			messageLongInstall();
 			printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-			mkdir($amlFileDirDest, 0644) unless(-d $amlFileDirDest);
+			mkdir($amlFileDirDest, FILE_MODE_SIXFOURFOUR) if ( !(-d $amlFileDirDest) );
 			copy($amlFileOrig, $amlFileDest);
-			mkdir($amlHookDirDest, 0644) unless(-d $amlHookDirDest);
+			mkdir($amlHookDirDest, FILE_MODE_SIXFOURFOUR) if ( !(-d $amlHookDirDest) );
 			copy($amlHookScriptOrig, $amlHookScriptDest);
-			chmod 0700, $amlHookScriptDest;
+			chmod FILE_MODE_SEVENZEROZERO, $amlHookScriptDest;
 
 			if ((-e $amlFileDest) and (-e $amlHookScriptDest)) {
 				$presetModules{$module}{installed} = "yes";
@@ -1699,6 +1701,7 @@ sub elantechtouchpadfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'psmouse.elantech_smbus=0' );
+	return;
 }
 
 
@@ -1710,7 +1713,9 @@ sub elantechtouchpadfix() {
 sub huaweime936fix(){
 	my $module = shift;
 	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me936', '12d1', '15bb', 3)
+	use constant CONFIGURATION_VALUE_3 => 3;
+	LTEModuleFix( $module, $action, 'huawei-me936', '12d1', '15bb', CONFIGURATION_VALUE_3);
+	return;
 }
 
 
@@ -1722,7 +1727,9 @@ sub huaweime936fix(){
 sub huaweime906sfix(){
 	my $module = shift;
 	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me906s', '12d1', '15c1', 2)
+	use constant CONFIGURATION_VALUE_2 => 2;
+	LTEModuleFix( $module, $action, 'huawei-me906s', '12d1', '15c1', CONFIGURATION_VALUE_2);
+	return;
 }
 
 
@@ -1734,7 +1741,8 @@ sub huaweime906sfix(){
 sub huaweime906shpfix(){
 	my $module = shift;
 	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me906s-hp', '03f0', 'a31d', 2)
+	LTEModuleFix( $module, $action, 'huawei-me906s-hp', '03f0', 'a31d', 2);
+	return;
 }
 
 
@@ -1747,6 +1755,7 @@ sub tuxedotouchpadswitch() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1777,7 +1786,7 @@ sub tuxedonvmefix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
-			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/;
+			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sxm;
 			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
 			$nvmeDevice{$nvmeDir}{'model'} = readFirstLineOfFile("$nvmeDir/model");
 			$nvmeDevice{$nvmeDir}{'subdevice'} = readFirstLineOfFile("$nvmeDir/device/subsystem_device");
@@ -1785,8 +1794,8 @@ sub tuxedonvmefix() {
 			$nvmeDevice{$nvmeDir}{'firmware'} = readFirstLineOfFile("$nvmeDir/firmware_rev");
 		}
 		foreach $nvmeDir ( keys %nvmeDevice ) {
-			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/) &&
-				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/) &&
+			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/sxm) &&
+				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/sm) &&
 				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/)) {
 				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
 				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
@@ -1853,6 +1862,7 @@ sub tuxedonvmefix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -1865,6 +1875,7 @@ sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1940,6 +1951,7 @@ sub fingerprintreader() {
 			}
 		}
 	}
+	return;
 }
 
 
@@ -1995,6 +2007,7 @@ sub tuxedorestoreaudiofix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2014,6 +2027,7 @@ sub tuxedodrivers() {
 			debianPackageModule( 'tuxedokeyboardite', 'remove');
 		}
 	}
+	return;
 }
 
 
@@ -2053,6 +2067,7 @@ sub kerneltuxedo2004() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2090,6 +2105,7 @@ sub kerneltuxedo2204() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2129,6 +2145,7 @@ sub kerneltuxedo2204edge() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2169,6 +2186,7 @@ sub kerneltuxedo2404() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2193,7 +2211,7 @@ sub nvidiadriver() {
 	my $nvidiaDriver550 = 'nvidia-driver-550';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		if ($ubuntuCodename =~ /focal/) {
+		if ($ubuntuCodename =~ /focal/sm) {
 			if (isPackageInRepo($nvidiaDriver510)) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
@@ -2245,7 +2263,7 @@ sub nvidiadriver() {
 
 
 
-		} elsif ($ubuntuCodename =~ /jammy/) {
+		} elsif ($ubuntuCodename =~ /jammy/sm) {
 			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
 
 			# check if the drivers to install are actually available in repos
@@ -2306,7 +2324,7 @@ sub nvidiadriver() {
 
 
 
-		} elsif ($ubuntuCodename =~ /noble/) {
+		} elsif ($ubuntuCodename =~ /noble/sm) {
 			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
 
 			# check if the drivers to install are actually available in repos
@@ -2377,6 +2395,7 @@ sub nvidiadriver() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2389,6 +2408,7 @@ sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2402,6 +2422,7 @@ sub tuxedooledbrt() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2419,7 +2440,7 @@ sub apportfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
-			$retval = edit_file { s/enabled=1/enabled=0/g } '/etc/default/apport', {'err_mode' => 'carp'};
+			$retval = edit_file { s/enabled=1/enabled=0/gsxm } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
 				#`service apport stop`;
@@ -2454,6 +2475,7 @@ sub apportfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2468,6 +2490,7 @@ sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'amdgpu.backlight=0' );
+	return;
 }
 
 
@@ -2482,9 +2505,10 @@ sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/i915\.enable_psr=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/i915\.enable_psr=0//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
+	return;
 }
 
 
@@ -2500,9 +2524,10 @@ sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//g } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
+	return;
 }
 
 
@@ -2519,7 +2544,7 @@ sub lightdmlogindcheckgraphicalfix() {
 
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		unless (-d $lightdmCheckGraphicalDir) {
+		if (! -d $lightdmCheckGraphicalDir) {
 			unless (mkdir $lightdmCheckGraphicalDir) {
 				printLog("could not create directory $lightdmCheckGraphicalDir", 'TL0', '[ERROR]');
 				$presetModules{$module}{installed} = "failed";
@@ -2561,6 +2586,7 @@ sub lightdmlogindcheckgraphicalfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
