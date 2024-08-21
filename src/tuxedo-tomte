@@ -982,8 +982,8 @@ sub checkRequirements {
 	printLog("nvidiaDevice: $nvidiaDevice", 'L0', '[DEBUG]');
 	printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 	if (($nvidiaDevice =~ /030[02]:/)
-		|| (isPackageInstalled('nvidia-driver-510') && ($ubuntuCodename =~ /focal/))
-		|| (isPackageInstalled('nvidia-driver-550') && ($ubuntuCodename =~ /(jammy|noble)/))) {
+		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
+		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -3808,7 +3808,7 @@ sub debianPackageModule {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$presetModules{$module}{name}\n")) {
-			$success = removeDebianModule($module, 1, '');
+			$success = removeDebianModule($module, $presteModules{$module}{restart}, '');
 		}
 	}
 	return $success;
@@ -4717,7 +4717,7 @@ sub removeDebianModule {
 			$presetModules{$module}{installed} = "no";
 			$presetModules{$module}{upgraded} = "yes";
 			$presetModules{$module}{required} = "no";
-			if ($restart) {
+			if ($restart =~ /yes/) {
 				setRestartValues($module);
 			}
 			$success = 1;
