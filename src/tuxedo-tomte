@@ -3776,13 +3776,10 @@ sub debianPackageModule {
 			# or LiveISO and set the verbose line
 			setDkmsVerbose( $module, 1 );
 
-			if (installPackage($presetModules{$module}{name})) {
+			if (installPackage($module)) {
 				$presetModules{$module}{installed} = 'yes';
 				$presetModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, 'success');
-				if ($presetModules{$module}{restart} eq 'yes') {
-					setRestartValues($module);
-				}
 				$success = 1;
 			} else {
 				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
@@ -3808,7 +3805,7 @@ sub debianPackageModule {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$presetModules{$module}{name}\n")) {
-			$success = removeDebianModule($module, $presteModules{$module}{restart}, '');
+			$success = removeDebianModule($module, $presetModules{$module}{restart}, '');
 		}
 	}
 	return $success;
@@ -4138,7 +4135,8 @@ sub getPackageVersion {
 # returns 0 if package was not installed
 #
 sub installPackage {
-	my $packageName = shift;
+	my $module = shift;
+	my $packageName = $presetModules{$module}{name};
 	my $retval;
 	if (isPackageInstalled($packageName)) {
 		return (1);
@@ -4180,6 +4178,10 @@ sub installPackage {
 					} else {
 						printLog('Could not repair package management, will try again later', 'L0', '[WARN]');
 						startTomteDelayed();
+					}
+				} elsif ($retval == 1) {
+					if ($presetModules{$module}{restart} eq 'yes') {
+						setRestartValues();
 					}
 				}
 			} else {
