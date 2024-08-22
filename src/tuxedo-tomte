@@ -67,6 +67,8 @@ use Data::Dumper;
 my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
+use Readonly;
+
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 local $ENV{LC_MESSAGES} = 'C';
@@ -144,24 +146,24 @@ my $packagekitOriginalState = getSystemdState('packagekit');
 my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
 $packagekitState = $packagekitOriginalState;
 my $triesFile = '/tmp/tomteTries';
-use constant TRIES_LIMIT => 12;
 my $needsRestartFile = '/tmp/needs_restart';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
-use constant SYSTEMD_DELAY => 30;
 my @availableDebianPackages;
 my %packageHash;
 my $plasma6Installed = 0;
 
-use constant NEG_ONE => -1;
-use constant WAIT_TIME => 10;
-use constant FILE_MODE_SIXFOURFOUR => '0644';
-use constant FILE_MODE_SEVENZEROZERO => '0700';
-use constant CONFIGURATION_VALUE_3 => 3;
-use constant CONFIGURATION_VALUE_2 => 2;
-use constant RETVAL_CONVERTER => 256;
-use constant NETWORK_CHECKS => 15;
+Readonly my SYSTEMD_DELAY => 30;
+Readonly my TRIES_LIMIT => 12;
+Readonly my NEG_ONE => -1;
+Readonly my WAIT_TIME => 10;
+Readonly my FILE_MODE_SIXFOURFOUR => '0644';
+Readonly my FILE_MODE_SEVENZEROZERO => '0700';
+Readonly my CONFIGURATION_VALUE_3 => 3;
+Readonly my CONFIGURATION_VALUE_2 => 2;
+Readonly my RETVAL_CONVERTER => 256;
+Readonly my NETWORK_CHECKS => 15;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -252,7 +254,7 @@ sub printIfExistsNotUndefinedNotEmpty {
 	if ((defined $devicesList{$ID}{$type}) && ($devicesList{$ID}{$type} ne q{}) && (exists $devicesList{$ID}{$type})) {
 		if (ref($devicesList{$ID}{$type}) eq 'ARRAY') {
 			if ($devicesList{$ID}{$type}->[0] ne q{}) {
-				my $joinedArray = join ' ', @{$devicesList{$ID}{$type}};
+				my $joinedArray = join q{ }, @{$devicesList{$ID}{$type}};
 				print "$type: $joinedArray\n";
 			}
 		} else {
@@ -667,7 +669,7 @@ sub readOSData {
 			$distributionVersion = $1;
 		}
 	}
-	$completeDistVersion = $distribution.' '.$distributionVersionID;
+	$completeDistVersion = $distribution.q{ }.$distributionVersionID;
 	return;
 }
 
@@ -3728,13 +3730,13 @@ sub createFile {
 
     # Write the new content to the file
     if(! write_file($filePath, {'err_mode' => 'carp'}, $content)) {
-        return -1;  # Return -1 if there was an error writing to the file
+        return NEG_ONE;  # Return -1 if there was an error writing to the file
     }
 
     # If the file is supposed to be executable, set the execution permission
-    if($executable eq 1 || $executable eq 'yes' || $executable eq '+x') {
+    if($executable == 1 || $executable eq 'yes' || $executable eq '+x') {
         if(system("chmod +x $filePath")) {
-            return -1;  # Return -1 if there was an error setting the execution permission
+            return NEG_ONE;  # Return -1 if there was an error setting the execution permission
         }
     }
 
@@ -3742,13 +3744,13 @@ sub createFile {
     my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
 
 	my $fileIsExecutableCheck = 1;
-	if($executable eq 1|| $executable eq 'yes'|| $executable eq '+x') {
+	if($executable == 1|| $executable eq 'yes'|| $executable eq '+x') {
 		$fileIsExecutableCheck = -x $filePath;
 	}
 
     # Check if the content of the file is not the same as the provided content
     if ($currentContent ne $content || ! $fileIsExecutableCheck) {
-        return -1;  # Return -1 if the content is not correctly written to the file
+        return NEG_ONE;  # Return -1 if the content is not correctly written to the file
     }
 
     return 1;  # Return 1 if the content was changed successfully
@@ -3947,7 +3949,7 @@ sub deinstExcept {
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
 	my $retString = `$searchCmd`;
-	$retValue = $?/256;
+	$retValue = $?/RETVAL_CONVERTER;
 	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
 	my $deinstCmd;
 	my $deinstKey;
@@ -3979,8 +3981,8 @@ sub deinstExcept {
 			!($deinstKey =~ $except) &&
 			!(grep( /^$deinstKey$/sxm, @exceptDependencies ))) {
 			$deinstCounter++;
-			$deinstCmd .= ' '.$deinstKey;
-			$deinstList .= ' '.$deinstKey;
+			$deinstCmd .= q{ }.$deinstKey;
+			$deinstList .= q{ }.$deinstKey;
 		}
 	}
 	if ($deinstCounter != 0) {
@@ -3999,7 +4001,7 @@ sub deinstExcept {
 			}
 		}
 		$retValue = q{};
-		$retValue = $?/256;
+		$retValue = $?/RETVAL_CONVERTER;
 		if ($retValue != 0) {
 			printLog("failed to deinstall packages, retvalue: >$retValue<", 'L0', '[WARN]');
 			printLog("retText: $retText", 'L0', '[WARN]');
@@ -4084,7 +4086,7 @@ sub deinstallSinglePackage {
 		if (unlockPM("$aptgetDeinst") && (isPMlocked() == 0)) {
 			printLog("executing deinstallation", 'L2', '[DEBUG]');
 			if (system($aptgetDeinst)) {
-				$retValue = $?/256;
+				$retValue = $?/RETVAL_CONVERTER;
 				lockPM();
 				printLog("failed to deinstall package, retvalue: $retValue", 'L0', '[WARN]');
 				return (1);
@@ -4189,7 +4191,7 @@ sub getPackageVersion {
 	my $cmd = $consoleLanguage.'dpkg-query --showformat=\'${Version}\' --show '.$package.' 2>&1';
 	my $retString = q{};
 	$retString = `$cmd`;
-	my $retValue = $?/256;
+	my $retValue = $?/RETVAL_CONVERTER;
 	printLog("version string for $package: $retString retValue: $retValue", 'L2', '[DEBUG]');
 	if ($retValue == 0) {
 		$retString =~ s/.*://sxm;
@@ -4233,7 +4235,7 @@ sub installPackage {
 	} elsif (!($LiveISO && $noNetwork)) {
 		messageLongInstall();
 		printLog("install package $packageName", 'L0', '[INFO]');
-		if (checkNetwork(10, 1)) {
+		if (checkNetwork(WAIT_TIME, 1)) {
 			deactivatePackagekit();
 			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
 				printLog("installing $packageName", 'L2', '[DEBUG]');
@@ -4405,7 +4407,7 @@ sub getAptMark {
 	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	if ( $retVal =~ /$package/mgsm ) {
+	if ( $retVal =~ /$package/mgsx ) {
 		printLog("package: $package mark is auto", 'L2', '[DEBUG]');
 		return (1);
 	} else {
@@ -4443,7 +4445,7 @@ sub installKernelFlavour {
 	if (unlockPM("$installCmd") && (isPMlocked() == 0)) {
 		printLog("executing installation", 'L2', '[DEBUG]');
 		$retString = `$installCmd`;
-		$exitStatus = $?/256;
+		$exitStatus = $?/RETVAL_CONVERTER;
 		lockPM();
 		printLog("return from install:\n$retString", 'L2', '[DEBUG]');
 		if (($retString =~ /is already the newest version/sm) && ($exitStatus == 0)) {
@@ -4478,7 +4480,6 @@ sub populateKernelPackages {
 	}
 	my @rootPackages = ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
 	my @packages;
-	my @packagesUnique;
 	my $packageLine;
 	my $packageString;
 	my $searchCommand;
@@ -4531,6 +4532,7 @@ sub populateKernelPackages {
 	} else {
 		return q{};
 	}
+	return;
 }
 
 
@@ -4565,7 +4567,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %headers;
 	# Get the list of installed linux-tuxedo headers using dpkg-query
 	# example: linux-tuxedo-5.15-headers-5.15.0-10033
-	my @headersList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\n' 'linux-tuxedo-*-headers-*');
+	my @headersList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-tuxedo-*-headers-*');
 
 	# Check each header line and store installed headers with their versions
 	foreach my $line (@headersList) {
@@ -4592,7 +4594,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %images;
 	# Get the list of installed linux-image packages using dpkg-query
 	# example: linux-image-5.15.0-10025-tuxedo
-	my @imagesList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\n' 'linux-image-*-tuxedo');
+	my @imagesList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-image-*-tuxedo');
 
 	# Check each images line and store installed headers with their versions
 	foreach my $line (@imagesList) {
@@ -4844,19 +4846,21 @@ sub removeKernelParameters {
 				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/) {
-							$line =~ s/$parameter//;
-							$line =~ s/ +/ /g;
-							$line =~ s/=" /="/;
-							$line =~ s/ "$/"/;
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sxm) {
+							$line =~ s/$parameter//sxm;
+							$line =~ s/ +/ /gsxm;
+							$line =~ s/=" /="/sxm;
+							$line =~ s/ "$/"/sxm;
 							++$counter;
 						}
 					}
 				}
 				print $GF "$line\n";
 			}
-			close($GF);
-			unless ($silent) {
+			if (! close($GF) ) {
+				printLog("could not close $grubFile", 'L0', '[ERROR]');
+			}
+			if (! $silent) {
 				addToConfiguredModules($module, "removed");
 			}
 			$presetModules{$module}{installed} = "no";
@@ -4869,7 +4873,7 @@ sub removeKernelParameters {
 			return ($counter);
 		} else {
 			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
-			unless ($silent) {
+			if (!$silent) {
 				addToConfiguredModules($module, "remove failed");
 			}
 			$presetModules{$module}{installed} = "remove failed";
@@ -4879,7 +4883,7 @@ sub removeKernelParameters {
 		}
 	} else {
 		printLog("could not open and read $grubFile", 'TL0', '[ERROR]');
-		unless ($silent) {
+		if (! $silent) {
 			addToConfiguredModules($module, "remove failed");
 		}
 		$presetModules{$module}{installed} = "remove failed";
@@ -4927,7 +4931,7 @@ sub aptgetRefreshModule {
 	my $refreshTriesDone = 0;
 	my $refreshWait = 1;
 	my $module;
-	unless($LiveISO && $noNetwork) {
+	if ( !($LiveISO && $noNetwork)) {
 		if (checkNetwork(15, 1)) {
 			deactivatePackagekit();
 			while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
@@ -4977,6 +4981,7 @@ sub aptgetRefreshModule {
 		setNoNetwork(1);
 		return (0);
 	}
+	return;
 }
 
 
@@ -5008,9 +5013,10 @@ sub backupFile {
 sub isLineInFile {
 	my $filename = shift;
 	my $match = shift;
-	if ( (-e $filename) && open(FH, '<', $filename) ) {
+	my $FH;
+	if ( (-e $filename) && open($FH, '<', $filename) ) {
 		while( <FH> ) {
-			if ( $_ =~ /^$match$/) {
+			if ( $_ =~ /^$match$/sxm) {
 				return (1);
 			}
 		}
@@ -5031,9 +5037,10 @@ sub isLineInFile {
 sub isTextInFile {
 	my $filename = shift;
 	my $match = shift;
-	if ( (-e $filename) && open(FH, '<', $filename) ) {
+	my $FH;
+	if ( (-e $filename) && open($FH, '<', $filename) ) {
 		while( <FH> ) {
-			if ( $_ =~ /$match/) {
+			if ( $_ =~ /$match/sxm) {
 				return (1);
 			}
 		}
@@ -5270,7 +5277,7 @@ sub messageDesktop {
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
-	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
+	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summaryq{ }$bodyq{ }[]q{ }{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 	$retValue = $?/256;
