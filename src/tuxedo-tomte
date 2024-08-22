@@ -2349,8 +2349,39 @@ sub nvidiadriver() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+		my $nvidiaDriver = q{};
+		if ($ubuntuCodename =~ /focal/) {
+			$nvidiaDriver = $nvidiaDriver510;
+		}
+		if ($ubuntuCodename =~ /(jammy|noble)/) {
+			$nvidiaDriver = $nvidiaDriver550;
+		}
+		if (removeWarningMessage("nvidia-driver\n")) {
+			my $counter = 0;
+			if( isPackageInstalled($nvidiaDriver) ) {
+				if (!deinstallSinglePackage($nvidiaDriver)) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if( isPackageInstalled('nvidia-prime') ) {
+				if (!deinstallSinglePackage('nvidia-prime')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if ($counter == 2) {
+				$presetModules{$module}{installed} = 'no';
+				$presetModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$presetModules{$module}{installed} = 'yes';
+				$presetModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
+		}
 	}
 }
 
