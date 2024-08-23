@@ -4064,6 +4064,9 @@ sub deinstallSinglePackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
+	if ($package eq q{}) {
+		return (0);
+	}
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/256;
@@ -4166,8 +4169,7 @@ sub getPackageVersion {
 # returns 0 if package was not installed
 #
 sub installPackage {
-	my $module = shift;
-	my $packageName = $presetModules{$module}{name};
+	my $packageName = shift;
 	my $retval;
 	if (isPackageInstalled($packageName)) {
 		return (1);
