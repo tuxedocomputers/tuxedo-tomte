@@ -7258,29 +7258,29 @@ sub isRoot {
 #
 sub prepareValues {
 			#TODO debug
-			print "before checkRequirements\n";
 			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
 			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+			print "before checkRequirements\n";
 	checkRequirements();
 			#TODO debug
-			print "before initAvailablePack\n";
 			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
 			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+			print "before initAvailablePack\n";
 	initAvailablePackagesList();
 			#TODO debug
-			print "before initConfigFile\n";
 			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
 			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+			print "before initConfigFile\n";
 	initConfigFile();
 			#TODO debug
-			print "before transferConfigVal\n";
 			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
 			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+			print "before transferConfigVal\n";
 	transferConfigValues();
 			#TODO debug
-			print "before reportPlanned\n";
 			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
 			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+			print "before reportPlanned\n";
 	reportPlannedChanges();
 			#TODO debug
 			print "after reportPlannedCh\n";
