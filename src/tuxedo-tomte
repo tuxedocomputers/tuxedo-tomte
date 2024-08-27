@@ -216,7 +216,7 @@ my %postConfProgramsList = postConfPrograms();
 
 # hash to load the configfile
 # is a copy from presetModules to exclude undefined values
-my %localConfModules = dclone(\%presetModules);
+my %localConfModules = %{ dclone(\%presetModules) };
 
 
 # empty hash, will be filled with successfully installed modules
