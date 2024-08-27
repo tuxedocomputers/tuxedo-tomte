@@ -7393,9 +7393,26 @@ if (scalar(@ARGV) != 0) {
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
+			#TODO debug
+			print " before prepareValues\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 			prepareValues();
+			#TODO debug
+			print "after prepareValues\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 		}
+		#TODO debug
+			print "before listStatus\n";
+		print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+		print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 		listStatus();
+			#TODO debug
+			print "after listStatus\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+
 
 	# versions
 	} elsif ($argValue{command} eq "versions") {
