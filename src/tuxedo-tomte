@@ -34,6 +34,8 @@ local $SIG{__WARN__} = sub {
 
 use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
 
+use Storable qw(dclone);
+
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
 use File::FcntlLock;
@@ -212,6 +214,19 @@ my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
+# hash to load the configfile
+# is a copy from presetModules to exclude undefined values
+my %localConfModules = dclone(\%presetModules);
+
+
+# empty hash, will be filled with successfully installed modules
+# as hashes: {modulename}{status}
+# where status should be "success" or "failed"
+#
+my %configuredModules;
+
+
+
 
 ###############################################################################
 # simple print out of all supported devices and fixes
@@ -250,18 +265,6 @@ sub printIfExistsNotUndefinedNotEmpty {
 	}
 }
 
-
-
-# hash to load the configfile
-# is a copy from presetModules to exclude undefined values
-my %localConfModules = %presetModules;
-
-
-# empty hash, will be filled with successfully installed modules
-# as hashes: {modulename}{status}
-# where status should be "success" or "failed"
-#
-my %configuredModules;
 
 
 # for the localization
