@@ -7250,11 +7250,35 @@ sub isRoot {
 # checks system requirements, loads configfile
 #
 sub prepareValues {
+			#TODO debug
+			print "before checkRequirements\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 	checkRequirements();
+			#TODO debug
+			print "before initAvailablePack\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 	initAvailablePackagesList();
+			#TODO debug
+			print "before initConfigFile\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 	initConfigFile();
+			#TODO debug
+			print "before transferConfigVal\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 	transferConfigValues();
+			#TODO debug
+			print "before reportPlanned\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 	reportPlannedChanges();
+			#TODO debug
+			print "after reportPlannedCh\n";
+			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 }
 
 
