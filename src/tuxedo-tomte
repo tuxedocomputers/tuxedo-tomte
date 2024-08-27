@@ -987,6 +987,9 @@ sub checkRequirements {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
+	#TODO debug
+	printLog("nvidia preset required: $presetModules{nvidiadriver}{required}", 'L0', '[DEBUG]');
+	printLog("nvidia localConf required: $localConfModules{nvidiadriver}{required}", 'L0', '[DEBUG]');
 
 	if ($boardname =~ m/NHxxRZQ/) {
 		# starting at kernel version 6.1 driver r8169 is included and supports the present device
@@ -2374,10 +2377,12 @@ sub nvidiadriver() {
 			}
 			if ($counter == 2) {
 				$presetModules{$module}{installed} = 'no';
+				$presetModules{$module}{required} = 'no';
 				$presetModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, 'removed');
 			} else {
 				$presetModules{$module}{installed} = 'yes';
+				$presetModules{$module}{required} = 'no';
 				$presetModules{$module}{upgraded} = 'no';
 				addToConfiguredModules($module, 'remove failed');
 			}
@@ -5791,12 +5796,18 @@ sub listStatus {
 	my $printIt = 0;
 	my $upgradeAvailable = q{};
 
+	#TODO debug
+	print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
+	print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
+	
 	foreach $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
 			$upgradeAvailable = q{};
 		}
+
+
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
 			($presetModules{$module}{required} eq 'no')) {
