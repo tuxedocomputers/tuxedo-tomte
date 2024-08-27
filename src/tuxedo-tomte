@@ -1226,6 +1226,7 @@ sub checkRequirements {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
+	return (0);
 }
 
 
@@ -4250,6 +4251,7 @@ sub installPackage {
 sub initAvailablePackagesList {
 	@availableDebianPackages = `apt-cache pkgnames`;
 	chomp(@availableDebianPackages);
+	return (0);
 }
 
 
@@ -5657,6 +5659,7 @@ sub initConfigFile {
 		writeConfigFile();
 		return;
 	}
+	return (0);
 }
 
 
@@ -6070,6 +6073,7 @@ sub transferConfigValues {
 			$presetModules{$name}{upgraded} = 'no';
 		}
 	}
+	return (0);
 }
 
 
