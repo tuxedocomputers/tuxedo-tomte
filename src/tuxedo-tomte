@@ -990,9 +990,6 @@ sub checkRequirements {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
-	#TODO debug
-	printLog("nvidia preset required: $presetModules{nvidiadriver}{required}", 'L0', '[DEBUG]');
-	printLog("nvidia localConf required: $localConfModules{nvidiadriver}{required}", 'L0', '[DEBUG]');
 
 	if ($boardname =~ m/NHxxRZQ/) {
 		# starting at kernel version 6.1 driver r8169 is included and supports the present device
@@ -5802,10 +5799,6 @@ sub listStatus {
 	my $printIt = 0;
 	my $upgradeAvailable = q{};
 
-	#TODO debug
-	print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-	print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-	
 	foreach $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
@@ -7257,35 +7250,11 @@ sub isRoot {
 # checks system requirements, loads configfile
 #
 sub prepareValues {
-			#TODO debug
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-			print "before checkRequirements\n";
 	checkRequirements();
-			#TODO debug
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-			print "before initAvailablePack\n";
 	initAvailablePackagesList();
-			#TODO debug
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-			print "before initConfigFile\n";
 	initConfigFile();
-			#TODO debug
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-			print "before transferConfigVal\n";
 	transferConfigValues();
-			#TODO debug
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
-			print "before reportPlanned\n";
 	reportPlannedChanges();
-			#TODO debug
-			print "after reportPlannedCh\n";
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 }
 
 
@@ -7424,25 +7393,9 @@ if (scalar(@ARGV) != 0) {
 		if (!-e $configFile) {
 			print "no config file present yet, please use 'sudo tomte list' or 'sudo tomte status' to initialize one\n";
 		} else {
-			#TODO debug
-			print " before prepareValues\n";
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 			prepareValues();
-			#TODO debug
-			print "after prepareValues\n";
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 		}
-		#TODO debug
-			print "before listStatus\n";
-		print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-		print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 		listStatus();
-			#TODO debug
-			print "after listStatus\n";
-			print "nvidia required preset: $presetModules{nvidiadriver}{required}\n";
-			print "nvidia required local: $localConfModules{nvidiadriver}{required}\n";
 
 
 	# versions
