@@ -1823,7 +1823,7 @@ sub tuxedonvmefix() {
 					printLog("firmware upgrade required", 'L0', '[INFO]');
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
-						if (! installPackage('nvme-cli')) {
+						if (! installPackage('nvme-cli', 'tuxedonvmefix')) {
 							$presetModules{$module}{installed} = "failed";
 							addToConfiguredModules($module, "failed");
 							return (0);
@@ -1832,7 +1832,7 @@ sub tuxedonvmefix() {
 					if (isPackageInstalled('a2000-s5z42109')) {
 						$nvmeFWPackageWasInstalled = 1;
 					}
-					if (installPackage('a2000-s5z42109')) {
+					if (installPackage('a2000-s5z42109', 'tuxedonvmefix')) {
 						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
 						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						$retValue = $?/$RETVAL_CONVERTER;
@@ -1915,14 +1915,14 @@ sub fingerprintreader() {
 		if( ! isPackageInstalled('fprintd') ) {
 			$wasInstalled = 0;
 			messageLongInstall();
-			$packagefprintd = installPackage('fprintd');
+			$packagefprintd = installPackage('fprintd', 'fingerprintreader');
 		} else {
 			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
 			messageLongInstall();
-			$packagelibpam = installPackage('libpam-fprintd');
+			$packagelibpam = installPackage('libpam-fprintd', 'fingerprintreader');
 		} else {
 			$packagelibpam = 1;
 		}
@@ -2242,14 +2242,14 @@ sub nvidiadriver() {
 			if( ! isPackageInstalled($nvidiaDriver510) ) {
 				messageLongInstall();
 				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver510);
+				$packageNvidiaDriver = installPackage($nvidiaDriver510, 'nvidiadriver');
 			} else {
 				setAptMark($nvidiaDriver510,'manual');
 				$packageNvidiaDriver = 1;
 			}
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
 			} else {
 				$packageNvidiaPrime = 1;
 			}
