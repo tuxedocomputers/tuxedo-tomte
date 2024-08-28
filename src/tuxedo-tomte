@@ -69,6 +69,8 @@ use Data::Dumper;
 my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
+use Readonly;
+
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 local $ENV{LC_MESSAGES} = 'C';
@@ -106,8 +108,8 @@ if (!(flock $ME, LOCK_EX|LOCK_NB)) {
 
 
 my $grubFile = '/etc/default/grub';
-my $noLogFile = 1;		# 0 = logFile ok, 1 = no logFile
-my $noConfigFile = 1;	# 0 = configfile ok, 1 = no configfile
+my $noLogFile = 1;      # 0 = logFile ok, 1 = no logFile
+my $noConfigFile = 1;   # 0 = configfile ok, 1 = no configfile
 my $configDir = '/etc/tomte/';
 my $oldConfigFile = $configDir.'tomte.cfg';
 my $configFile = $configDir.'modules.cfg';
@@ -146,15 +148,30 @@ my $packagekitOriginalState = getSystemdState('packagekit');
 my $packagekitOriginalEnabled = getSystemdEnabled('packagekit');
 $packagekitState = $packagekitOriginalState;
 my $triesFile = '/tmp/tomteTries';
-my $triesLimit = 12;
 my $needsRestartFile = '/tmp/needs_restart';
 my $longInstall = 0;
 my $restartSystem = 0;
 my $startLaterAgain = 0;
-my $systemdDelay = 30;
 my @availableDebianPackages;
 my %packageHash;
 my $plasma6Installed = 0;
+
+Readonly my $SYSTEMD_DELAY => 30;
+Readonly my $TRIES_LIMIT => 12;
+Readonly my $NEG_ONE => -1;
+Readonly my $WAIT_TIME => 10;
+Readonly my $FILE_MODE_SIXFOURFOUR => '0644';
+Readonly my $FILE_MODE_SEVENZEROZERO => '0700';
+Readonly my $CONFIGURATION_VALUE_3 => 3;
+Readonly my $CONFIGURATION_VALUE_2 => 2;
+Readonly my $RETVAL_CONVERTER => 256;
+Readonly my $NETWORK_CHECKS => 15;
+Readonly my $MAX_KERNEL_PACKAGES_REMOVE => 20;
+Readonly my $MAX_HEADERS_TO_ANALYZE => 3;
+Readonly my $MAX_PACKAGE_NAME => 50;
+Readonly my $MAX_TO_DELETE_KERNEL => 3;
+Readonly my $MAX_OLDEST_HEADER_NAME => 50;
+Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -162,7 +179,7 @@ my $plasma6Installed = 0;
 my $kernelRelease;
 # check whether we are in a chroot environment
 sub isChroot {
-	my $rootPath = "/";
+	my $rootPath = q{/};
 	my $procRootPath = "/proc/1/root/.";
 
 	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
@@ -173,7 +190,7 @@ sub isChroot {
 if (isChroot) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
-	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/g;
+	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/smg;
 	my $hashSize = keys %kernelHash;
 	if ($hashSize != 0) {
 		my $firstkey = (sort(keys %kernelHash))[0];
@@ -182,7 +199,7 @@ if (isChroot) {
 } else {
 	$kernelRelease = `uname -r`;
 }
-$kernelRelease =~ s/[\n\r]//g;
+$kernelRelease =~ s/[\n\r]//gsm;
 printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
@@ -200,9 +217,10 @@ $sysvendor = readFirstLineOfFile($sysvendorFilename);
 
 # for desktop messages
 my $sessionID = readFirstLineOfFile('/proc/sys/kernel/random/boot_id');
-$sessionID =~ /(.{7})/;
-$sessionID = hex($1);
-printLog("sessionID: $sessionID", 'TL2', '[DEBUG]');
+if ($sessionID =~ /(.{7})/sm) {
+	$sessionID = hex($1);
+	printLog("sessionID: $sessionID", 'TL2', '[DEBUG]');
+}
 
 
 my %devicesList = devices();
@@ -234,7 +252,7 @@ my %configuredModules;
 sub printTuxedoDevices {
 	my $ID;
 	foreach $ID (keys %devicesList) {
-		if ((defined $devicesList{$ID}) && ($devicesList{$ID} ne '') && (exists $devicesList{$ID})) {
+		if ((defined $devicesList{$ID}) && ($devicesList{$ID} ne q{}) && (exists $devicesList{$ID})) {
 			printIfExistsNotUndefinedNotEmpty("$ID", "model");
 			printIfExistsNotUndefinedNotEmpty("$ID", "board_name");
 			printIfExistsNotUndefinedNotEmpty("$ID", "fix");
@@ -246,6 +264,7 @@ sub printTuxedoDevices {
 			printIfExistsNotUndefinedNotEmpty("$ID", "usb_device");
 		}
 	}
+	return;
 }
 
 
@@ -253,16 +272,17 @@ sub printTuxedoDevices {
 sub printIfExistsNotUndefinedNotEmpty {
 	my $ID = shift;
 	my $type = shift;
-	if ((defined $devicesList{$ID}{$type}) && ($devicesList{$ID}{$type} ne '') && (exists $devicesList{$ID}{$type})) {
+	if ((defined $devicesList{$ID}{$type}) && ($devicesList{$ID}{$type} ne q{}) && (exists $devicesList{$ID}{$type})) {
 		if (ref($devicesList{$ID}{$type}) eq 'ARRAY') {
-			if ($devicesList{$ID}{$type}->[0] ne '') {
-				my $joinedArray = join ' ', @{$devicesList{$ID}{$type}};
+			if ($devicesList{$ID}{$type}->[0] ne q{}) {
+				my $joinedArray = join q{ }, @{$devicesList{$ID}{$type}};
 				print "$type: $joinedArray\n";
 			}
 		} else {
 			print "$type: $devicesList{$ID}{$type}\n";
 		}
 	}
+	return;
 }
 
 
@@ -284,83 +304,84 @@ sub dieSingleton {
 
 
 sub checkAndSetLocale {
-    my $default_locale = "en";
+    my $defaultLocale = "en";
 
     # Check if either LANG or LANGUAGE is set
     if (defined $ENV{'LANG'} || defined $ENV{'LANGUAGE'}) {
 		# allow manual override of LANGUAGE environment variable
-        my $lang = $ENV{'LANGUAGE'} || $ENV{'LANG'} || $default_locale;
+        my $lang = $ENV{'LANGUAGE'} || $ENV{'LANG'} || $defaultLocale;
 
         # Split the language code from the full locale using dot as the delimiter
         # a $lang could be de, de_DE or de_DE.UTF8
-        my $language_code = (split /\./, $lang)[0] // $lang;
+        my $languageCode = (split /\./sm, $lang)[0] // $lang;
 
-		# $language_code is now de or de_DE
-        if ($language_code) {
-			my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
+		# $languageCode is now de or de_DE
+        if ($languageCode) {
+			my ($foundFolder, $localePath) = getMatchingLocaleForLang($languageCode);
 
             # Check if the directory exists
-            if ($found_folder ne 0) {
-				$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+            if ($foundFolder == 0) {
+				local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder;
 
-                printLog("Found Tomte locale file in: $locale_path", "L1", '[INFO]');
+                printLog("Found Tomte locale file in: $localePath", "L1", '[INFO]');
             } else {
-				if(length $language_code eq 2){
+				if(length $languageCode == 2){
 					# already searched possible endings and didn't found
-					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1", '[INFO]');
-					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $defaultLocale", "L1", '[INFO]');
+					local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
 				} else {
 					# reduce de_DE to de to search broader
-					$language_code = (split /_/, $language_code)[0];
-					my ($found_folder, $locale_path) = getMatchingLocaleForLang($language_code);
+					$languageCode = (split /_/sm, $languageCode)[0];
+					my ($foundFolder2, $localePath2) = getMatchingLocaleForLang($languageCode);
 
 					# Check if the directory exists
-					if ($found_folder ne 0) {
-						if($language_code ne $found_folder){
-							$ENV{'LANG'} = $ENV{'LANGUAGE'} = $found_folder;
+					if ($foundFolder2 == 0) {
+						if($languageCode ne $foundFolder2){
+							local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder2;
 						}
 
-						printLog("Found Tomte locale file in: $locale_path", "L1", '[INFO]');
+						printLog("Found Tomte locale file in: $localePath2", "L1", '[INFO]');
 					} else {
-						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $default_locale", "L1", '[INFO]');
-						$ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $defaultLocale", "L1", '[INFO]');
+						local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
 					}
 				}
             }
         } else {
             printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1", '[WARN]');
-            printLog("Setting both to default: $default_locale", "L1", '[INFO]');
-            $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+            printLog("Setting both to default: $defaultLocale", "L1", '[INFO]');
+            local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
         }
     } else {
         # Neither LANG nor LANGUAGE is set. Setting both to default
-        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $default_locale", "L1", '[WARN]');
-        $ENV{'LANG'} = $ENV{'LANGUAGE'} = $default_locale;
+        printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $defaultLocale", "L1", '[WARN]');
+        local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
     }
+	return;
 }
 
 sub getMatchingLocaleForLang {
 	my $lang = shift;
 	printLog("Trying matching language for: $lang", "L1", '[INFO]');
 	# Directory where the existing translations can be found
-	my $locale_base_path = "/usr/share/locale";
+	my $localeBasePath = "/usr/share/locale";
 
-	my $found_language = 0;
-	my $locale_path = 0;
+	my $foundLanguage = 0;
+	my $localePath = 0;
 
-	my @files = glob($locale_base_path . "/" . $lang . "*/LC_MESSAGES/tomte.mo");
+	my @files = glob($localeBasePath . q{/} . $lang . "*/LC_MESSAGES/tomte.mo");
 
 	foreach my $path (@files) {
-		$path =~ s/\/LC_MESSAGES\/tomte.mo//i;
-		$found_language = $path =~ s/$locale_base_path\///ir;
-		printLog("Found valid Tomte locale file in $locale_base_path/$found_language", "L1", '[INFO]');
+		$path =~ s/\/LC_MESSAGES\/tomte.mo//ism;
+		$foundLanguage = $path =~ s/$localeBasePath\///irsm;
+		printLog("Found valid Tomte locale file in $localeBasePath/$foundLanguage", "L1", '[INFO]');
 		last;
 	}
-	unless ($found_language) {
-		printLog("Found no valid Tomte locale file in $locale_base_path/$lang", "L1", '[ERROR]');
+	if (! $foundLanguage) {
+		printLog("Found no valid Tomte locale file in $localeBasePath/$lang", "L1", '[ERROR]');
 	}
 
-	return ($found_language, "$locale_base_path/$found_language");
+	return ($foundLanguage, "$localeBasePath/$foundLanguage");
 }
 
 
@@ -376,19 +397,19 @@ sub isLocked {
 	my $FH;
 	my $fs;
 	my $num;
-	unless (-e $filename) {
+	if (! -e $filename) {
 		printLog("Locking: $filename does not exist", 'L2', '[ERROR]');
 		return (0);
 	}
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
 		printLog("Locking: checking lock: $filename", 'L2', '[DEBUG]');
-		$fs = new File::FcntlLock;
+		$fs = File::FcntlLock -> new();
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_GETLK )) {
-			unless ($fs->l_type() == F_UNLCK) {
+			if (!($fs->l_type() == F_UNLCK)) {
 				printLog("Locking: => is locked", 'L2', '[DEBUG]');
 				return (1);
 			} else {
@@ -397,11 +418,11 @@ sub isLocked {
 			}
 		} else {
 			printLog("Locking: failed to get lock information on: $filename error: $fs->error", 'L0', '[ERROR]');
-			return (-1);
+			return ($NEG_ONE);
 		}
 	} else {
 		printLog("Locking: failed to open: $filename", 'L0', '[ERROR]');
-		return (-1);
+		return ($NEG_ONE);
 	}
 }
 
@@ -424,9 +445,9 @@ sub isPMlocked {
 			printLog("Locking: one or more files are locked", 'L2', '[DEBUG]');
 			return (1);
 		}
-		if ($result == -1) {
+		if ($result == $NEG_ONE) {
 			printLog("Locking: something went wrong while checking for file locks", 'L0', '[WARN]');
-			return (-1);
+			return ($NEG_ONE);
 		}
 	}
 	printLog("Locking: all files are unlocked", 'L2', '[DEBUG]');
@@ -450,7 +471,7 @@ sub acquireLock {
 	if (sysopen($FH, $filename, O_RDWR | O_CREAT)) {
 		$FH->autoflush(1);
 		printLog("Locking: acquiring lock: $filename", 'L2', '[DEBUG]');
-		$fs = new File::FcntlLock;
+		$fs = File::FcntlLock -> new();
 		$fs->l_type( F_WRLCK );
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
@@ -489,7 +510,7 @@ sub releaseLock {
 	if (seek($FH, 0, SEEK_SET)) {
 		if (print $FH "$num\n") {
 			if (truncate($FH, tell($FH))) {
-				$fs = new File::FcntlLock;
+				$fs = File::FcntlLock -> new();
 				$fs->l_type(F_UNLCK);
 				if ($fs->lock( $FH, F_SETLK )) {
 					if (close($FH)) {
@@ -606,9 +627,9 @@ sub readFirstLineOfFile {
 #
 sub countLinesInString {
 	my $myString = shift;
-	return 0 if( !defined $myString or $myString eq "");
-	my $lastchar = substr $myString, -1,1;
-	my $numlines = () = $myString =~ /\n/g;
+	return 0 if( (!defined $myString) or $myString eq q{});
+	my $lastchar = substr $myString, $NEG_ONE,1;
+	my $numlines = () = $myString =~ /\n/gsm;
 	# was last line a whole line with a "\n"?;
 	return $numlines + ($lastchar ne "\n");
 }
@@ -627,6 +648,7 @@ sub countLinesInString {
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
 	my @osReleaseLines;
+	my $line;
 
 	@osReleaseLines = read_file($osReleaseFile, 'err_mode' => 'carp');
 
@@ -634,29 +656,30 @@ sub readOSData {
 		print "Can't determine the operating system\n";
 		exit (0);
 	}
-	foreach ( @osReleaseLines ) {
-		if ( $_ =~ /^NAME=/ ) {
+	foreach $line ( @osReleaseLines ) {
+		if ( $line =~ /^NAME=/sm ) {
 			# e.g. Ubuntu
-			$_ =~ /NAME=\"(.*)\"/;
+			$line =~ /NAME=\"(.*)\"/sm;
 			$distribution = $1;
 		}
-		if ( $_ =~ /^VERSION_ID=/ ) {
+		if ( $line =~ /^VERSION_ID=/sm ) {
 			# e.g. 22.04
-			$_ =~ /VERSION_ID=\"(.*)\"/;
+			$line =~ /VERSION_ID=\"(.*)\"/sm;
 			$distributionVersionID = $1;
 		}
-		if ( $_ =~ /^UBUNTU_CODENAME=/ ) {
+		if ( $line =~ /^UBUNTU_CODENAME=/sm ) {
 			# e.g. jammy
-			$_ =~ /UBUNTU_CODENAME=(.*)/;
+			$line =~ /UBUNTU_CODENAME=(.*)/sm;
 			$ubuntuCodename = $1;
 		}
-		if ( $_ =~ /^VERSION=/ ) {
+		if ( $line =~ /^VERSION=/sxm ) {
 			# e.g. 22.04.4 LTS (Jammy Jellyfish)
-			$_ =~ /VERSION=\"(.*)\"/;
+			$line =~ /VERSION=\"(.*)\"/sm;
 			$distributionVersion = $1;
 		}
 	}
-	$completeDistVersion = $distribution.' '.$distributionVersionID;
+	$completeDistVersion = $distribution.q{ }.$distributionVersionID;
+	return;
 }
 
 
@@ -669,11 +692,14 @@ sub readOSData {
 sub cpuBrand {
 	my $infos;
 	my $cpuinfo = '/proc/cpuinfo';
-	if ( (-e $cpuinfo) && open(FH, '<', '/proc/cpuinfo') ) {
+	my $FH;
+	if ( (-e $cpuinfo) && open($FH, '<', '/proc/cpuinfo') ) {
 		local $/;
-		$infos = <FH>;
-		close FH;
-		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/) {
+		$infos = <$FH>;
+		if (! close $FH) {
+			printLog("error closing $cpuinfo", 'L0', '[ERROR]');
+		}
+		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/sm) {
 			return ('AMD');
 		}
 	} else {
@@ -691,7 +717,7 @@ sub cpuBrand {
 #
 sub isOSSupported {
 	if (exists $supportedOSList{ $distribution }) {
-		if ( grep(/^$distributionVersionID$/, @{ $supportedOSList{ $distribution } } ) ) {
+		if ( grep(/^$distributionVersionID$/sm, @{ $supportedOSList{ $distribution } } ) ) {
 			return (1);
 		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
@@ -727,10 +753,11 @@ sub prerequisites {
 	}
 
 	# wait max. 10 sec. as it takes some time to get network
-	if (checkNetwork(10,1)) {
+	if (checkNetwork($WAIT_TIME,1)) {
 		aptgetRefreshModule(1, @modulesList);
 		printLog("ending prerequisites", 'L1', '[INFO]');
 	}
+	return;
 }
 
 
@@ -741,7 +768,6 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
-	my $lsusb;
 
 	# check values for each module
 	if (($boardname =~ /NS50_70MU/) ||
@@ -755,56 +781,56 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ /PF5PU1G/) {
+	if ($boardname =~ /PF5PU1G/sm) {
 		$presetModules{nobootonbattery}{required} = 'yes';
 		printLog("detected $presetModules{nobootonbattery}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/) ||
-		($boardname =~ /POLARIS1701A1650TI/) ||
-		($boardname =~ /POLARIS1701A2060/) ||
-		($boardname =~ /PULSE1401/) ||
-		($boardname =~ /PULSE1501/) ||
-		($boardname =~ /NL5xRU/) ||
-		($boardname =~ /EDUBOOK1502/) ||
-  		($boardname =~ /AURA1501/)) {
+	if (($boardname =~ /POLARIS1501A1650TI/sm) ||
+		($boardname =~ /POLARIS1501A2060/sm) ||
+		($boardname =~ /POLARIS1701A1650TI/sm) ||
+		($boardname =~ /POLARIS1701A2060/sm) ||
+		($boardname =~ /PULSE1401/sm) ||
+		($boardname =~ /PULSE1501/sm) ||
+		($boardname =~ /NL5xRU/sm) ||
+		($boardname =~ /EDUBOOK1502/sm) ||
+  		($boardname =~ /AURA1501/sm)) {
 		$presetModules{amdxhcihcdusbquirksuspendfix}{required} = 'yes';
 		printLog("detected $presetModules{amdxhcihcdusbquirksuspendfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /APX958/) ||
-		($boardname =~ /R14FA1/) ||
-		($boardname =~ /R14FA2/)) {
+	if (($boardname =~ /APX958/sm) ||
+		($boardname =~ /R14FA1/sm) ||
+		($boardname =~ /R14FA2/sm)) {
 		$presetModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-	unless ($FAI) {
-		if (($boardname =~ /X170SM/) ||
-			($boardname =~ /PB50_70DFx,DDx/) ||
-			($boardname =~ /LAPQC71A/) ||
-			($boardname =~ /LAPQC71B/) ||
-			($boardname =~ /N141CU/) ||
-			($boardname =~ /N150CU/) ||
-			($boardname =~ /NH5xAx/) ||
-			($boardname =~ /NL5xRU/) ||
-			($boardname =~ /AURA1501/) ||
-			($boardname =~ /EDUBOOK1502/) ||
-			($boardname =~ /NS50MU/) ||
-			($boardname =~ /NS50_70MU/) ||
-			($boardname =~ /NJ50_70CU/) ||
-			($boardname =~ /X170KM-G/ )) {
+	if (!$FAI) {
+		if (($boardname =~ /X170SM/sm) ||
+			($boardname =~ /PB50_70DFx,DDx/sm) ||
+			($boardname =~ /LAPQC71A/sm) ||
+			($boardname =~ /LAPQC71B/sm) ||
+			($boardname =~ /N141CU/sm) ||
+			($boardname =~ /N150CU/sm) ||
+			($boardname =~ /NH5xAx/sm) ||
+			($boardname =~ /NL5xRU/sm) ||
+			($boardname =~ /AURA1501/sm) ||
+			($boardname =~ /EDUBOOK1502/sm) ||
+			($boardname =~ /NS50MU/sm) ||
+			($boardname =~ /NS50_70MU/sm) ||
+			($boardname =~ /NJ50_70CU/sm) ||
+			($boardname =~ /X170KM-G/sm )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == $NEG_ONE) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
 				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
 			}
 		}
 	}
 
-	unless ($FAI) {
-		if ($boardname =~ /GM6XGxX/) {
+	if (!$FAI) {
+		if ($boardname =~ /GM6XGxX/sm) {
 			my $minKernelVersionFornoauxfix = '6.8';
 			if ((version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 1) ||
 				(version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 0)) {
@@ -814,95 +840,97 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ /X35R/) {
+	if ($boardname =~ /X35R/sm) {
 		$presetModules{elantechtouchpadfix}{required} = 'yes';
 		printLog("detected $presetModules{elantechtouchpadfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /LAPQC71A/) ||
-		($boardname =~ /LAPQC71B/) ||
-		($boardname =~ /PF5PU1G/) ||
-		($boardname =~ /POLARIS1501A1650TI/) ||
-		($boardname =~ /POLARIS1501A2060/) ||
-		($boardname =~ /POLARIS1501I1650TI/) ||
-		($boardname =~ /POLARIS1501I2060/) ||
-		($boardname =~ /POLARIS1701A1650TI/) ||
-		($boardname =~ /POLARIS1701A2060/) ||
-		($boardname =~ /POLARIS1701I1650TI/) ||
-		($boardname =~ /POLARIS1701I2060/) ||
-		($boardname =~ /PULSE1401/) ||
-		($boardname =~ /PULSE1501/) ||
-		($boardname =~ /TRINITY1501I/) ||
-		($boardname =~ /TRINITY1701I/) ||
-		($boardname =~ /PHxTxX1/) ||
-		($boardname =~ /PH4TQx1/) ||
-		($boardname =~ /PHxTQx1/) || #alias to PH4TQx1
-		($boardname =~ /GMxNGxx/) ||
-		($boardname =~ /GMxZGxx/) ||
-		($boardname =~ /GMxTGxx/) ||
-		($boardname =~ /GMxAGxx/) ||
-		($boardname =~ /GMxMGxx/) ||
-		($boardname =~ /GMxRGxx/) ||
-		($boardname =~ /PF5LUXG/) ||
-		($boardname =~ /PHxARX1_PHxAQF1/) ||
-		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/) ||
-		($boardname =~ /GMxPXxx/) ||
-		($boardname =~ /PH4PRX1_PH6PRX1/) ||
-		($boardname =~ /PH4PG31/) ||
-		($boardname =~ /PH6PG01_PH6PG71/) ||
-		($boardname =~ /GM6XGxX/)) {
+	if (($boardname =~ /LAPQC71A/sm) ||
+		($boardname =~ /LAPQC71B/sm) ||
+		($boardname =~ /PF5PU1G/sm) ||
+		($boardname =~ /POLARIS1501A1650TI/sm) ||
+		($boardname =~ /POLARIS1501A2060/sm) ||
+		($boardname =~ /POLARIS1501I1650TI/sm) ||
+		($boardname =~ /POLARIS1501I2060/sm) ||
+		($boardname =~ /POLARIS1701A1650TI/sm) ||
+		($boardname =~ /POLARIS1701A2060/sm) ||
+		($boardname =~ /POLARIS1701I1650TI/sm) ||
+		($boardname =~ /POLARIS1701I2060/sm) ||
+		($boardname =~ /PULSE1401/sm) ||
+		($boardname =~ /PULSE1501/sm) ||
+		($boardname =~ /TRINITY1501I/sm) ||
+		($boardname =~ /TRINITY1701I/sm) ||
+		($boardname =~ /PHxTxX1/sm) ||
+		($boardname =~ /PH4TQx1/sm) ||
+		($boardname =~ /PHxTQx1/sm) || #alias to PH4TQx1
+		($boardname =~ /GMxNGxx/sm) ||
+		($boardname =~ /GMxZGxx/sm) ||
+		($boardname =~ /GMxTGxx/sm) ||
+		($boardname =~ /GMxAGxx/sm) ||
+		($boardname =~ /GMxMGxx/sm) ||
+		($boardname =~ /GMxRGxx/sm) ||
+		($boardname =~ /PF5LUXG/sm) ||
+		($boardname =~ /PHxARX1_PHxAQF1/sm) ||
+		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/sm) ||
+		($boardname =~ /GMxPXxx/sm) ||
+		($boardname =~ /PH4PRX1_PH6PRX1/sm) ||
+		($boardname =~ /PH4PG31/sm) ||
+		($boardname =~ /PH6PG01_PH6PG71/sm) ||
+		($boardname =~ /GM6XGxX/sm)) {
 		$presetModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $presetModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardvendor =~ /NB02/) {
+	if ($boardvendor =~ /NB02/sm) {
 		$presetModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $presetModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ /N8xEJEK/) {
+	if ($boardname =~ /N8xEJEK/sm) {
 		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
-	if (($boardname =~ /P95_HP/) || ($boardname =~ /P95_HR/) || ($boardname =~ /P95_HP,HR,HQ/)) {
+	if (($boardname =~ /P95_HP/sm)
+		|| ($boardname =~ /P95_HR/sm)
+		|| ($boardname =~ /P95_HP,HR,HQ/smx)) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
-	if ($boardname =~ /NH5xAx/) {
+	if ($boardname =~ /NH5xAx/sm) {
 		$presetModules{corefix}{required} = 'yes';
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME936 device found
 	my $lsusbHuawei936 = `lsusb -d 12d1:15bb`;
-	if ($lsusbHuawei936 =~ /ME936/) {
+	if ($lsusbHuawei936 =~ /ME936/sm) {
 		$presetModules{huaweime936fix}{required} = 'yes';
 		printLog("detected $presetModules{huaweime936fix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME906s device found
 	my $lsusbHuawei906s = `lsusb -d 12d1:15c1`;
-	if ($lsusbHuawei906s =~ /ME906s/) {
+	if ($lsusbHuawei906s =~ /ME906s/sm) {
 		$presetModules{huaweime906sfix}{required} = 'yes';
 		printLog("detected $presetModules{huaweime906sfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# if Huawei LTE ME906s HP rebranded device found
 	my $lsusbHuawei906sHP = `lsusb -d 03f0:a31d`;
-	if ($lsusbHuawei906sHP =~ /hp/i) {
+	if ($lsusbHuawei906sHP =~ /hp/ism) {
 		$presetModules{huaweime906shpfix}{required} = 'yes';
 		printLog("detected $presetModules{huaweime906shpfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	# all notebooks require this
 	if ( ($chassisType eq 'notebook') &&
-		($ubuntuCodename =~ /focal/)) {
+		($ubuntuCodename =~ /focal/sm)) {
 		$presetModules{tuxedokeyboard}{required} = 'yes';
 		printLog("detected $presetModules{tuxedokeyboard}{name} issue", 'L1', '[INFO]');
 	}
@@ -912,32 +940,32 @@ sub checkRequirements {
 	# on some notebooks
 	# not necessary on 24.04
 	# when deleting this workaround, also delete the module entry from the config
-	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/))) {
+	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/sm))) {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $presetModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$presetModules{systemdbacklightfix}{required} = 'no';
 		}
 	}
 
-	if (($boardname =~ /X170SM/) ||
-		($boardname =~ /X170KM-G/) ||
-		($boardname =~ /PCx0Dx_GN20/) ||
-		($boardname =~ /GMxZGxx/) ||
-		($boardname =~ /GMxAGxx/) ||
-		($boardname =~ /GMxTGxx/) ||
-		($boardname =~ /GMxRGxx/) ||
-		($boardname =~ /LAPQC71A/) ||
-		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/) ||
-		($boardname =~ /LAPQC71B/) ||
-		($boardname =~ /GMxPXxx/) ||
-		($boardname =~ /GM6XGxX/)) {
-		if ($ubuntuCodename =~ /focal/) {
+	if (($boardname =~ /X170SM/sm) ||
+		($boardname =~ /X170KM-G/sxm) ||
+		($boardname =~ /PCx0Dx_GN20/sm) ||
+		($boardname =~ /GMxZGxx/sm) ||
+		($boardname =~ /GMxAGxx/sm) ||
+		($boardname =~ /GMxTGxx/sm) ||
+		($boardname =~ /GMxRGxx/sm) ||
+		($boardname =~ /LAPQC71A/sm) ||
+		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/sm) ||
+		($boardname =~ /LAPQC71B/sm) ||
+		($boardname =~ /GMxPXxx/sm) ||
+		($boardname =~ /GM6XGxX/sm)) {
+		if ($ubuntuCodename =~ /focal/sm) {
 			$presetModules{tuxedokeyboardite}{required} = 'yes';
 			printLog("detected $presetModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
-	if ($ubuntuCodename =~ /jammy/) {
+	if ($ubuntuCodename =~ /jammy/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 		$presetModules{tuxedokeyboardite}{required} = 'no';
@@ -946,7 +974,7 @@ sub checkRequirements {
 		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
 	}
 
-	if ($ubuntuCodename =~ /noble/) {
+	if ($ubuntuCodename =~ /noble/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
@@ -960,19 +988,19 @@ sub checkRequirements {
 
 	my $fingerprintLsUsb = `lsusb`;
 	my @fingerprintRegExp = (
-		qr/147e:100[0123]/,
-		qr/147e:20(15|16|20)/,
-		qr/147e:300[01]/,
-		qr/147e:500[23]/,
-		qr/0483:201[56]/,
-		qr/1c7a:0603/);
+		qr/147e:100[0123]/sm,
+		qr/147e:20(15|16|20)/sm,
+		qr/147e:300[01]/sm,
+		qr/147e:500[23]/sm,
+		qr/0483:201[56]/sm,
+		qr/1c7a:0603/sm);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$presetModules{fingerprintreader}{required} = 'yes';
 		printLog("detected $presetModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
 		last;
 	}
 
-	if ($boardname =~ m/N350TW/) {
+	if ($boardname =~ m/N350TW/sm) {
 		$presetModules{tuxedorestoreaudiofix}{required} = 'yes';
 		printLog("detected $presetModules{tuxedorestoreaudiofix}{name} issue", 'L1', '[INFO]');
 	}
@@ -991,7 +1019,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/NHxxRZQ/) {
+	if ($boardname =~ m/NHxxRZQ/sm) {
 		# starting at kernel version 6.1 driver r8169 is included and supports the present device
 		my $kernelVersionWithR8169 = '6.1';
 		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
@@ -1000,8 +1028,8 @@ sub checkRequirements {
 		}
 	}
 
-	if (($boardname =~ m/NL45PU2/) ||
-		($boardname =~ m/NL57PU/)) {
+	if (($boardname =~ m/NL45PU2/sm) ||
+		($boardname =~ m/NL57PU/sm)) {
 		$presetModules{r8168dkms}{required} = 'yes';
 		printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
 	}
@@ -1017,8 +1045,8 @@ sub checkRequirements {
 		printLog("detected $presetModules{apportfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ m/GMxNGxx/) ||
-		($boardname =~ m/GMxZGxx/)) {
+	if (($boardname =~ m/GMxNGxx/sm) ||
+		($boardname =~ m/GMxZGxx/sm)) {
 		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
 			isDisplayPresent("BOE Model 2420 Serial Number 0")) {
 			$presetModules{amdgpubacklightauxoff}{required} = 'yes';
@@ -1026,22 +1054,22 @@ sub checkRequirements {
 		}
 	}
 
-	if (($boardname =~ m/PHxTxX1/) ||
-		($boardname =~ m/PH4TQx1/) ||
-		($boardname =~ m/PHxTQx1/)) {
+	if (($boardname =~ m/PHxTxX1/sm) ||
+		($boardname =~ m/PH4TQx1/sm) ||
+		($boardname =~ m/PHxTQx1/sm)) {
 		$presetModules{i915enablepsrfix}{required} = 'yes';
 		printLog("detected $presetModules{i915enablepsrfix}{name} issue", 'L1', '[INFO]');
 	}
 
 
 	# kernel
-	if (($ubuntuCodename =~ /focal/) && ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/)) {
+	if (($ubuntuCodename =~ /focal/sm) && ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/sm)) {
 		printLog("kernel $presetModules{kerneltuxedo2204}{name} should be installed", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /focal/) {
+	} elsif ($ubuntuCodename =~ /focal/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2004}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /jammy/) {
+	} elsif ($ubuntuCodename =~ /jammy/sm) {
 		if (($boardname eq 'GXxHRXx') ||
 			($boardname eq 'GXxMRXx')) {
 			printLog("kernel $presetModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
@@ -1050,36 +1078,36 @@ sub checkRequirements {
 			printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 			$presetModules{kerneltuxedo2204}{required} = 'yes';
 		}
-	} elsif ($ubuntuCodename =~ /noble/) {
+	} elsif ($ubuntuCodename =~ /noble/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
-	if ($boardname =~ m/X170KM-G/) {
+	if ($boardname =~ m/X170KM-G/sm) {
 		$presetModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog("detected $presetModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ((($boardname =~ m/NV4XMB,ME,MZ/) ||
-		($boardname =~ m/PHxTQx1/) ||
-		($boardname =~ m/PH4TQx1/)) && (-d '/etc/lightdm/')) {
+	if ((($boardname =~ m/NV4XMB,ME,MZ/sm) ||
+		($boardname =~ m/PHxTQx1/sm) ||
+		($boardname =~ m/PH4TQx1/sm)) && (-d '/etc/lightdm/')) {
 		$presetModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
 		printLog("detected $presetModules{lightdmlogindcheckgraphicalfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/GMxTGxx/) {
+	if ($boardname =~ m/GMxTGxx/sm) {
 		$presetModules{nvidiabacklightcontrolfix}{required} = 'yes';
 		printLog("detected $presetModules{nvidiabacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ m/NV4XMB,ME,MZ/) ||
-		($boardname =~ m/PHxTQx1/)) {
+	if (($boardname =~ m/NV4XMB,ME,MZ/sm) ||
+		($boardname =~ m/PHxTQx1/sm)) {
 		$presetModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog("detected $presetModules{earlyloadbacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my @r8125Devices = ('10ec:8125');
-	unless ($ubuntuCodename =~ /noble/) {
+	if (!($ubuntuCodename =~ /noble/sm)) {
 		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
 			$presetModules{tuxedor8125dkms}{required} = 'yes';
 			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
@@ -1087,19 +1115,19 @@ sub checkRequirements {
 	}
 
 	# if cardreader Realtek RTS522A found
-	my @cardreaderDevices = (qr/10ec:522a/);
+	my @cardreaderDevices = (qr/10ec:522a/sm);
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$presetModules{cardreaderfix}{required} = 'yes';
 		printLog("detected $presetModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/PF5LUXG/) {
+	if ($boardname =~ m/PF5LUXG/sm) {
 		$presetModules{samsungnvmefix}{required} = 'yes';
 		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my @samsungNvme990Devices = ('144d:a80d');
-	if ((($boardname =~ m/NS5X_NS7XAU/i) || ($boardname =~ m/NS5X_7XAU/i)) &&
+	if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
 		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
 		$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
 		printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
@@ -1121,9 +1149,9 @@ sub checkRequirements {
 	if (countLinesInString($lspciGpus) >= 2) {
 		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
 		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-		if ($currentPlasmaWorkspaceVersion ne '') {
+		if ($currentPlasmaWorkspaceVersion ne q{}) {
 			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-			unless ( $versionCompareResult == -1 ) {
+			if (! ($versionCompareResult == $NEG_ONE) ) {
 				$presetModules{tuxedodgpurun}{required} = 'yes';
 				printLog("detected $presetModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
 			}
@@ -1134,19 +1162,19 @@ sub checkRequirements {
 		printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 	}
 
-	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/) ||
-		($boardname =~ m/GMxTGxx/))	{
+	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/sm) ||
+		($boardname =~ m/GMxTGxx/sm)) {
 		$presetModules{acpibacklightvideofix}{required} = 'yes';
 		printLog("detected $presetModules{acpibacklightvideofix}{name} issue", 'L1', '[INFO]');
 	}
-	if (($boardname =~ /PH4PRX1_PH6PRX1/) ||
-   		($boardname =~ /PH4PG31/) ||
-		($boardname =~ /PH6PG01_PH6PG71/)) {
+	if (($boardname =~ /PH4PRX1_PH6PRX1/sm) ||
+   		($boardname =~ /PH4PG31/sm) ||
+		($boardname =~ /PH6PG01_PH6PG71/sm)) {
 		$presetModules{disablegucfix}{required} = 'yes';
 		printLog("detected $presetModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($completeDistVersion =~ /elementary OS 7.1/) {
+	if ($completeDistVersion =~ /elementary OS 7.1/sm) {
 		$presetModules{elementaryosdkmspinningfix}{required} = 'yes';
 		printLog("detected $presetModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
 	}
@@ -1161,14 +1189,14 @@ sub checkRequirements {
 	my $minPlasmaWorkspaceVersion = '6.0.0';
 	readConfigIniValues();
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
-	if (($distribution =~ /TUXEDO OS/) && (($distributionVersion =~ /2 22\.04.*/) || ($distributionVersion =~ /3 22\.04.*/))) {
+	if (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sm) || ($distributionVersion =~ /3 22\.04.*/sm))) {
 		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
 
 		# check whether plasma6 is installed
 		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne '')) {
+		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
 			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
-			unless ( $versionCompareResult == -1 ) {
+			if (! ($versionCompareResult == $NEG_ONE) ) {
 				$plasma6Installed = 1;
 				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
 			} else {
@@ -1197,7 +1225,7 @@ sub checkRequirements {
 
 	if (($ubuntuCodename eq 'jammy') ||
 		($ubuntuCodename eq 'noble') ||
-		($distribution =~ /TUXEDO OS/)) {
+		($distribution =~ /TUXEDO OS/sm)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
 			$presetModules{tuxedoyt6801}{required} = 'yes';
@@ -1205,7 +1233,7 @@ sub checkRequirements {
 		}
 	}
 
-	if ($distribution =~ /TUXEDO OS/) {
+	if ($distribution =~ /TUXEDO OS/sm) {
 		$presetModules{textboot}{required} = 'yes';
 		printLog("detected $presetModules{textboot}{name} issue", 'L1', '[INFO]');
 	}
@@ -1219,7 +1247,7 @@ sub checkRequirements {
 	if (($ubuntuCodename eq 'focal') ||
 		($ubuntuCodename eq 'jammy') ||
 		($ubuntuCodename eq 'noble') &&
-		(!($distribution =~ /TUXEDO OS/))) {
+		(!($distribution =~ /TUXEDO OS/sm))) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
@@ -1236,7 +1264,7 @@ sub findPciDevice {
 	my ($lspciList, @pciDevices) = @_;
 	my $pciDevice;
 	foreach $pciDevice (@pciDevices) {
-		if ($lspciList =~ /$pciDevice/) {
+		if ($lspciList =~ /$pciDevice/sm) {
 			return (1);
 		}
 	}
@@ -1276,6 +1304,7 @@ sub i8042noauxfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'i8042.noaux');
+	return;
 }
 
 
@@ -1292,6 +1321,7 @@ sub nobootonbattery() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, 'remove', 0, 'iommu=soft');
+	return;
 }
 
 
@@ -1311,6 +1341,7 @@ sub amdxhcihcdusbquirksuspendfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'xhci_hcd.quirks=1073741824');
+	return;
 }
 
 
@@ -1321,6 +1352,7 @@ sub amdgpudisablepsr() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'amdgpu.dcdebugmask=0x10');
+	return;
 }
 
 
@@ -1381,6 +1413,7 @@ sub amdgpuwithnvidiafix() {
 			addToConfiguredModules($module, 'removed');
 		}
 	}
+	return;
 }
 
 
@@ -1391,6 +1424,7 @@ sub tuxedocontrolcenter() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1402,6 +1436,7 @@ sub tuxedokeyboard() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1425,6 +1460,7 @@ sub nokeyboardaftersuspendfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
+	return;
 }
 
 
@@ -1439,6 +1475,7 @@ sub backlightfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'i915.enable_dpcd_backlight=1');
+	return;
 }
 
 
@@ -1546,6 +1583,7 @@ sub tuxedorepos() {
 	if ($action eq 'remove') {
 		printLog("This is a prerequisite, removal is not possible for this module", 'TL0', '[WARN]');
 	}
+	return;
 }
 
 
@@ -1615,6 +1653,7 @@ sub tuxedomirrors() {
 		$presetModules{$module}{upgraded} = "yes";
 		$presetModules{$module}{required} = "no";
 	}
+	return;
 }
 
 
@@ -1665,6 +1704,7 @@ sub corefix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
+	return;
 }
 
 
@@ -1678,6 +1718,7 @@ sub elantechtouchpadfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'psmouse.elantech_smbus=0' );
+	return;
 }
 
 
@@ -1726,6 +1767,7 @@ sub tuxedotouchpadswitch() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1832,6 +1874,7 @@ sub tuxedonvmefix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -1844,6 +1887,7 @@ sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -1919,6 +1963,7 @@ sub fingerprintreader() {
 			}
 		}
 	}
+	return;
 }
 
 
@@ -1974,6 +2019,7 @@ sub tuxedorestoreaudiofix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -1993,6 +2039,7 @@ sub tuxedodrivers() {
 			debianPackageModule( 'tuxedokeyboardite', 'remove');
 		}
 	}
+	return;
 }
 
 
@@ -2032,6 +2079,7 @@ sub kerneltuxedo2004() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2069,6 +2117,7 @@ sub kerneltuxedo2204() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2108,6 +2157,7 @@ sub kerneltuxedo2204edge() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2148,6 +2198,7 @@ sub kerneltuxedo2404() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2389,6 +2440,7 @@ sub nvidiadriver() {
 			}
 		}
 	}
+	return;
 }
 
 
@@ -2401,6 +2453,7 @@ sub r8168dkms() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2414,6 +2467,7 @@ sub tuxedooledbrt() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2466,6 +2520,7 @@ sub apportfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2480,6 +2535,7 @@ sub amdgpubacklightauxoff() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'amdgpu.backlight=0' );
+	return;
 }
 
 
@@ -2497,6 +2553,7 @@ sub i915enablepsrfix() {
 		edit_file { s/i915\.enable_psr=0//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
+	return;
 }
 
 
@@ -2515,6 +2572,7 @@ sub thunderboltbootdelayfix() {
 		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
+	return;
 }
 
 
@@ -2573,6 +2631,7 @@ sub lightdmlogindcheckgraphicalfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2593,6 +2652,7 @@ sub nvidiabacklightcontrolfix() {
 		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//g } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
+	return;
 }
 
 
@@ -2651,6 +2711,7 @@ sub earlyloadbacklightcontrolfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2663,6 +2724,7 @@ sub tuxedor8125dkms() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2700,6 +2762,7 @@ sub cardreaderfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
+	return;
 }
 
 
@@ -2760,6 +2823,7 @@ sub samsungnvmefix() {
 	if ($action eq 'remove') {
 		# not implemented yet
 	}
+	return;
 }
 
 
@@ -2772,6 +2836,7 @@ sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'mem_sleep_default=deep' );
+	return;
 }
 
 
@@ -2785,6 +2850,7 @@ sub tuxedodgpurun() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -2824,6 +2890,7 @@ sub intelgenXIIIpowerctlfix() {
 		# not implemented yet
 		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
 	}
+	return;
 }
 
 
@@ -2835,6 +2902,7 @@ sub acpibacklightvideofix() {
 	my $module = shift;
 	my $action = shift;
 	grubModuleEdit( $module, $action, 0, 'acpi_backlight=video');
+	return;
 }
 
 
@@ -2890,6 +2958,7 @@ sub disablegucfix() {
 			removeKernelParameters($module, 0, @kernelParameters);
 		}
 	}
+	return;
 }
 
 
@@ -2944,6 +3013,7 @@ sub elementaryosdkmspinningfix() {
 			printLog("$presetModules{$module}{name} was already removed", 'TL0', '[INFO]');
 		}
 	}
+	return;
 }
 
 
@@ -2968,6 +3038,7 @@ case $1 in
 esac
 END_TXT
 	createFileModule( $module, $action, '/usr/lib/systemd/system-sleep/tuxedo-ath12k-standby-fix', $content, "+x");
+	return;
 }
 
 
@@ -2995,6 +3066,7 @@ sub tuxedoplasmaupgrade() {
 	} else {
 		printLog("other actions besides install are not possible for this module", 'L2', '[DEBUG]');
 	}
+	return;
 }
 
 
@@ -3007,6 +3079,7 @@ sub tuxedoyt6801() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -3019,6 +3092,7 @@ sub tuxedowifisetregdomain() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
+	return;
 }
 
 
@@ -3047,6 +3121,7 @@ sub textboot() {
 			printLog("something went wrong while inserting @splashParameter into grub", 'L0', '[ERROR]');
 		}
 	}
+	return;
 }
 
 
@@ -3140,7 +3215,6 @@ sub gfxmode() {
 sub createRepos {
 	my %repos = %{$_[0]};
 	my $DH;
-	my $sourceline;
 	my $modified = 0;
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
@@ -3277,7 +3351,6 @@ sub addRepoKey {
 	my $errorCode;
 	my $outputKey;
 	my $counter = 0;
-	my $pmLocked;
 	# install TUXEDO keyring for repositories
 	unless (isPackageInstalled("tuxedo-archive-keyring")) {
 		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
@@ -3472,6 +3545,7 @@ sub commandSystemdModule {
 	my $systemdCmd = "systemctl $command $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
 	printLog("systemd returns: $systemdReturn", 'L2', '[INFO]');
+	return;
 }
 
 
@@ -3598,6 +3672,7 @@ sub createFileModule {
 			}
 		}
 	}
+	return;
 }
 
 
@@ -3655,6 +3730,7 @@ sub LTEModuleFix {
 		$presetModules{$module}{upgraded} = 'yes';
 		addToConfiguredModules($module, 'removed');
 	}
+	return;
 }
 
 
@@ -3788,6 +3864,7 @@ sub grubModuleEdit {
 			removeKernelParameters($module, $silent, @kernelParameters);
 		}
 	}
+	return;
 }
 
 
@@ -3842,7 +3919,7 @@ sub debianPackageModule {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$presetModules{$module}{name}\n")) {
-			$success = removeDebianModule($module, $presetModules{$module}{restart}, '');
+			$success = removeDebianModule($module, $presetModules{$module}{restart}, q{});
 		}
 	}
 	return $success;
@@ -4057,6 +4134,7 @@ sub deinstallSinglePackage {
 	} else {
 		printLog("package $deinst was not found", 'L0', '[WARN]');
 	}
+	return;
 }
 
 
@@ -4107,7 +4185,7 @@ sub arePackagesInstalled {
 	my @packagesNotInstalled;
 
 	if (scalar(@packages) == 0) {
-		return ('');
+		return (q{});
 	}
 	foreach $package (@packages) {
 		$packageQuery .= " $package";
@@ -4158,11 +4236,11 @@ sub getPackageVersion {
 			return $retString;
 		} else {
 			printLog("package $package is probably not installed, can't get its version number", 'L1', '[WARN]');
-			return '';
+			return q{};
 		}
 	} else {
 		printLog("package $package is probably not installed, can't get its version number", 'L1', '[WARN]');
-		return '';
+		return q{};
 	}
 }
 
@@ -4274,6 +4352,7 @@ sub isPackageAvailable {
 sub setPackageInstallStatus {
 	my ($package, $status) = @_;
 	$packageHash{$package} = $status;
+	return;
 }
 
 
@@ -4393,7 +4472,6 @@ sub installKernelFlavour {
 	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
 	my $retString;
 	my $exitStatus;
-	my $allPackagesInstalled;
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
 		${$failed} += 1;
@@ -4438,7 +4516,7 @@ sub populateKernelPackages {
 	my $version = shift;
 	if ($version =~ /\s/) {
 		printLog("something is wrong with the kernel version number", 'L0', '[ERROR]');
-		return '';
+		return q{};
 	}
 	my @rootPackages = ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
 	my @packages;
@@ -4447,7 +4525,6 @@ sub populateKernelPackages {
 	my $packageString;
 	my $searchCommand;
 	my $result;
-	my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 	my $line;
 	my @lines;
 	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
@@ -4494,8 +4571,9 @@ sub populateKernelPackages {
 	if (scalar(@packagesUnique) < 20) {
 		return (@packagesUnique);
 	} else {
-		return '';
+		return q{};
 	}
+	return;
 }
 
 
@@ -4549,7 +4627,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			# Check if the length of $package exceeds 50 characters
 			length($package) < 50
 
-		){
+		) {
 			$headers{$version} = $package;
 		}
 	}
@@ -4736,6 +4814,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 		printLog("less than 4 kernels present => nothing to do", 'L2', '[DEBUG]');
 		return (0);
 	}
+	return;
 }
 
 
@@ -4941,6 +5020,7 @@ sub aptgetRefreshModule {
 		setNoNetwork(1);
 		return (0);
 	}
+	return;
 }
 
 
@@ -5258,6 +5338,7 @@ sub messageLongInstall {
 			$longInstall = 1;
 		}
 	}
+	return;
 }
 
 
@@ -5422,6 +5503,7 @@ sub printLog {
 			print "$message\n";
 		}
 	}
+	return (0);
 }
 
 
@@ -5454,6 +5536,7 @@ sub renameOldConfigFile {
 	if (-e $oldConfigFile) {
 		rename($oldConfigFile, $configFile);
 	}
+	return (0);
 }
 
 
@@ -5487,7 +5570,7 @@ sub readConfigFile {
 				my ($name, @cols) = split /\s+/, $line;
 				# check if module name exists in orig and return shortname
 				$shortname = validModuleName($name);
-				if ($shortname ne '') {
+				if ($shortname ne q{}) {
 					# @comp values have to be same as in writeConfigFile
 					@comp{qw(name version installed blocked required hwid)} = ($name, @cols);
 
@@ -5612,6 +5695,7 @@ sub writeConfigFile {
 		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
 		exit (0);
 	}
+	return (0);
 }
 
 
@@ -5721,7 +5805,6 @@ sub findActiveEDIDs {
 sub getEDIDData {
 	my @edidFiles = findActiveEDIDs();
 	my @edidRefs;
-	my @edidInfo;
 	my $FH;
 	my $fileContent;
 	foreach ( @edidFiles ) {
@@ -5820,7 +5903,7 @@ sub listStatus {
 				"$localConfModules{$module}{required}"]);
 		}
 		# required, installed and not removed
-		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
+		if (($localConfModules{$module}{required} eq 'yes') || ($localConfModules{$module}{required} eq 'prerequisite')) {
 			$noneRequired = 0;
 			$printIt = 1;
 			push(@arr,
@@ -5867,6 +5950,7 @@ sub listStatus {
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
 	}
+	return (0);
 }
 
 
@@ -5917,7 +6001,7 @@ sub listVersions {
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($presetModules{$module}{package} eq 'yes')) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($presetModules{$module}{name});
-			if ($localConfModules{$module}{packageVersion} eq '') {
+			if ($localConfModules{$module}{packageVersion} eq q{}) {
 				$localConfModules{$module}{packageVersion} = 'unkwn';
 			}
 		}
@@ -5969,6 +6053,7 @@ sub listVersions {
 	if ($noneRequired) {
 		print "No fixes available for this system\n";
 	}
+	return (0);
 }
 
 
@@ -6029,7 +6114,7 @@ sub listStatusJson {
 			};
 		}
 		# required, installed and not removed
-		if (($localConfModules{$module}{required} eq 'yes') ||	($localConfModules{$module}{required} eq 'prerequisite')) {
+		if (($localConfModules{$module}{required} eq 'yes') || ($localConfModules{$module}{required} eq 'prerequisite')) {
 			push @{ $list{modules} }, {
 				name => $localConfModules{$module}{name},
 				version => $localConfModules{$module}{version},
@@ -6041,6 +6126,7 @@ sub listStatusJson {
 	}
 	my $jsonText = encode_json \%list;
 	print "$jsonText\n";
+	return (0);
 }
 
 
@@ -6106,7 +6192,7 @@ sub newHwid {
 sub addToConfiguredModules {
 	my $module = shift;
 	my $status = shift;
-	if (defined($module) && ($module ne '')) {
+	if (defined($module) && ($module ne q{})) {
 		$configuredModules{$module} = $status;
 		if ($status =~ /failed/) {
 			printLog("failed to install $presetModules{$module}{name}", 'L0', '[ERROR]');
@@ -6129,6 +6215,7 @@ sub addToConfiguredModules {
 		printLog("modules not defined at addToConfiguredModules", 'L2', '[ERROR]');
 		return (0);
 	}
+	return (0);
 }
 
 
@@ -6149,7 +6236,7 @@ sub getSubName {
 		}
 	}
 	# return empty string if module is not found
-	return '';
+	return q{};
 }
 
 
@@ -6167,7 +6254,7 @@ sub validModuleName {
 			}
 		}
 	}
-	return '';
+	return q{};
 }
 
 
@@ -6236,6 +6323,7 @@ sub configureAllModules {
 			removeSingleModule($presetModules{$module}{name});
 		}
 	}
+	return (0);
 }
 
 
@@ -6249,7 +6337,7 @@ sub configureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 
-	if ($module eq '') {
+	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6289,6 +6377,7 @@ sub configureSingleModule {
 		print "Module $moduleName cannot be installed/removed/updated because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
+	return (0);
 }
 
 
@@ -6301,7 +6390,7 @@ sub removeSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 
-	if ($module eq '') {
+	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6315,6 +6404,7 @@ sub removeSingleModule {
 		print "Module $moduleName cannot be removed because:\n";
 		print "- it is blocked (maybe use 'unblock')\n";
 	}
+	return (0);
 }
 
 
@@ -6336,6 +6426,7 @@ sub reconfigureAllModules {
 			removeModule($module);
 		}
 	}
+	return (0);
 }
 
 
@@ -6350,7 +6441,7 @@ sub reconfigureSingleModule {
 	$module = getSubName($moduleName);
 	printLog("reconfigureSingleModule: $moduleName", 'L2', '[INFO]');
 
-	if ($module eq '') {
+	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
 	}
@@ -6398,6 +6489,7 @@ sub reconfigureSingleModule {
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
 	}
+	return (0);
 }
 
 
@@ -6411,7 +6503,7 @@ sub block {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	printLog("block module: >$module<", 'L2', '[INFO]');
-	if ($module eq '') {
+	if ($module eq q{}) {
 		print "Module $moduleName does not exist\n";
 		return;
 	}
@@ -6439,7 +6531,7 @@ sub unblock {
 	my $moduleName = shift;
 	my $module = getSubName($moduleName);
 	printLog("unblock module: >$module<", 'L2', '[INFO]');
-	if ($module eq '') {
+	if ($module eq q{}) {
 		print "Module $moduleName does not exist\n";
 		return;
 	}
@@ -6469,6 +6561,7 @@ sub blockAllModules {
 			printLog("blocking module $presetModules{$module}{name}", 'TL0', '[INFO]');
 		}
 	}
+	return (0);
 }
 
 
@@ -6485,6 +6578,7 @@ sub unblockAllModules {
 			printLog("unblocking module $presetModules{$module}{name}", 'TL0', '[INFO]');
 		}
 	}
+	return (0);
 }
 
 
@@ -6506,7 +6600,7 @@ sub setMode {
 	} else {
 		foreach $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
-				write_file($modeFile{$requestedMode}, {'err_mode' => 'carp'}, '');
+				write_file($modeFile{$requestedMode}, {'err_mode' => 'carp'}, q{});
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0', '[INFO]');
 			} elsif (-e $modeFile{$key}) {
 				unlink($modeFile{$key});
@@ -6514,6 +6608,7 @@ sub setMode {
 			}
 		}
 	}
+	return (0);
 }
 
 
@@ -6523,7 +6618,6 @@ sub setMode {
 # 'AUTOMATIC', 'UPDATES_ONLY' or 'DONT_CONFIGURE'
 #
 sub checkMode {
-	my $tmpMode;
 	my $countModes = 0;
 	if (-e $modeFile{AUTOMATIC}) {
 		++$countModes;
@@ -6804,6 +6898,7 @@ sub configureModule {
 	if ($permission) {
 		$module->($module, 'install');
 	}
+	return (0);
 }
 
 
@@ -6817,6 +6912,7 @@ sub removeModule {
 	if ($permission) {
 		$module->($module, 'remove');
 	}
+	return (0);
 }
 
 
@@ -6831,6 +6927,7 @@ sub updateModule {
 	if ($permission) {
 		$module->($module, 'upgrade');
 	}
+	return (0);
 }
 
 
@@ -6851,7 +6948,7 @@ sub removeWarningMessage {
 	if ($FAI || $LiveISO) {
 		return (1);
 	}
-	if ($message ne '') {
+	if ($message ne q{}) {
 		print "$message";
 	}
 	print "Are you sure you want to remove this module? (y/n) ";
@@ -6915,6 +7012,7 @@ sub postConfigure {
 	if ($postConfTrigger == 1) {
 		startTomteDelayed();
 	}
+	return (0);
 }
 
 
@@ -6993,6 +7091,7 @@ sub postSetModulesState {
 	foreach $module (keys %configuredModules) {
 		$configuredModules{$module}{status} = $status;
 	}
+	return (0);
 }
 
 
@@ -7063,6 +7162,7 @@ sub listSuccess {
 	} elsif ( configuredModulesExceptDefault(@successModules) ) {
 		messageDesktop(__('TUXEDO Tomte finished'), __('TUXEDO Tomte finished applying all the required fixes available for this system.'), 1, 'dialog-information');
 	}
+	return (0);
 }
 
 
@@ -7098,6 +7198,7 @@ sub printNameDescriptionModules {
 	foreach $element (@elements) {
 		print "- $presetModules{$element}{name}: $presetModules{$element}{description}\n";
 	}
+	return (0);
 }
 
 
@@ -7110,6 +7211,7 @@ sub printNameDescriptionPrograms {
 	foreach $element (@elements) {
 		print "- $element: $postConfProgramsList{$element}{description}\n";
 	}
+	return (0);
 }
 
 
@@ -7121,7 +7223,7 @@ sub moduleDescription {
 	my $module;
 	if ($moduleName) {
 		$module = getSubName($moduleName);
-		if ( $module ne '' ) {
+		if ( $module ne q{} ) {
 	    print "$presetModules{$module}{description}\n";
 		} else {
 			print "module: $moduleName is not in the modules list\n";
@@ -7129,6 +7231,7 @@ sub moduleDescription {
     } else {
 		print "Missing module name\n";
 	}
+	return (0);
 }
 
 
@@ -7141,6 +7244,7 @@ sub modulesList() {
 	foreach $module (keys %presetModules) {
 		print "$presetModules{$module}{name}\n";
 	}
+	return (0);
 }
 
 
@@ -7153,6 +7257,7 @@ sub setRestartValues {
 	$restartSystem = 1;
 	printLog("setting restart for: $element", 'L2', '[DEBUG]');
 	write_file($needsRestartFile, {'err_mode' => 'carp'}, 'Tomte: system has to be restarted');
+	return (0);
 }
 
 
@@ -7255,6 +7360,7 @@ sub prepareValues {
 	initConfigFile();
 	transferConfigValues();
 	reportPlannedChanges();
+	return (0);
 }
 
 
@@ -7274,6 +7380,7 @@ sub reportPlannedChanges {
 			}
 		}
 	}
+	return (0);
 }
 
 
@@ -7397,7 +7504,6 @@ if (scalar(@ARGV) != 0) {
 		}
 		listStatus();
 
-
 	# versions
 	} elsif ($argValue{command} eq "versions") {
 		checkMode();
@@ -7466,7 +7572,7 @@ if (scalar(@ARGV) != 0) {
 	# configure
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
-		if ($argValue{module} ne '') {
+		if ($argValue{module} ne q{}) {
 			initLogging();
 			checkMode();
 			prepareValues();
@@ -7502,7 +7608,7 @@ if (scalar(@ARGV) != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-			} elsif (validModuleName($argValue{module}) ne '') {
+			} elsif (validModuleName($argValue{module}) ne q{}) {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
@@ -7522,8 +7628,8 @@ if (scalar(@ARGV) != 0) {
 
 	# remove
 	} elsif ($argValue{command} eq "remove") {
-		if ($argValue{module} ne '') {
-			if (validModuleName($argValue{module}) ne '') {
+		if ($argValue{module} ne q{}) {
+			if (validModuleName($argValue{module}) ne q{}) {
 				initLogging();
 				checkMode();
 				prepareValues();
@@ -7547,7 +7653,7 @@ if (scalar(@ARGV) != 0) {
 			printLog('delete triesFile', 'L2', '[DEBUG]');
 			unlink($triesFile);
 		}
-		if ($argValue{module} ne '') {
+		if ($argValue{module} ne q{}) {
 			initLogging();
 			checkMode();
 			prepareValues();
@@ -7561,7 +7667,7 @@ if (scalar(@ARGV) != 0) {
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
-			} elsif (validModuleName($argValue{module}) ne '') {
+			} elsif (validModuleName($argValue{module}) ne q{}) {
 				if ($mode eq 'DONT_CONFIGURE') {
 					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
@@ -7581,14 +7687,14 @@ if (scalar(@ARGV) != 0) {
 	# blocking/unblocking should work in any mode
 	# block
 	} elsif ($argValue{command} eq "block") {
-		if ($argValue{module} ne '') {
+		if ($argValue{module} ne q{}) {
 			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				blockAllModules();
 				writeConfigFile();
 				printLog('Tomte finished', 'L1', '[INFO]');
-			} elsif (validModuleName($argValue{module}) ne '') {
+			} elsif (validModuleName($argValue{module}) ne q{}) {
 				block($argValue{module});
 				writeConfigFile();
 				printLog('Tomte finished', 'L0', '[INFO]');
@@ -7601,14 +7707,14 @@ if (scalar(@ARGV) != 0) {
 
 	# unblock
 	} elsif ($argValue{command} eq "unblock") {
-		if ($argValue{module} ne '') {
+		if ($argValue{module} ne q{}) {
 			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				unblockAllModules();
 				writeConfigFile();
 				printLog('Tomte finished', 'L1', '[INFO]');
-			} elsif (validModuleName($argValue{module}) ne '') {
+			} elsif (validModuleName($argValue{module}) ne q{}) {
 				unblock($argValue{module});
 				writeConfigFile();
 				printLog('Tomte finished', 'L0', '[INFO]');
@@ -7629,7 +7735,7 @@ if (scalar(@ARGV) != 0) {
 		printLog('Tomte finished', 'L0', '[INFO]');
 	} elsif ($argValue{command} eq "loglevel") {
 		printLog("before loglevel: $logLevel requested loglevel: $argValue{module}", 'L2', '[DEBUG]');
-		if (defined($argValue{module}) && $argValue{module} ne '') {
+		if (defined($argValue{module}) && $argValue{module} ne q{}) {
 			$argValue{module} += 0;
 			if (($argValue{module} >= 0) && ($argValue{module} < 3)) {
 				$logLevel = $argValue{module};
