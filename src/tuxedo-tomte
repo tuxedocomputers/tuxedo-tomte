@@ -34,6 +34,8 @@ local $SIG{__WARN__} = sub {
 
 use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
 
+use Storable qw(dclone);
+
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
 use File::FcntlLock;
@@ -64,7 +66,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -173,7 +175,7 @@ Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 
 # get current kernel version
 # if in FAI it should check which is the installed
-# kernel package version on 
+# kernel package version on target
 my $kernelRelease;
 # check whether we are in a chroot environment
 sub isChroot {
@@ -188,7 +190,7 @@ sub isChroot {
 if (isChroot) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgkernel = `$searchCmd`;
-	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/sxmg;
+	my %kernelHash = $dpkgkernel =~ /ii (.*) (.*)/smg;
 	my $hashSize = keys %kernelHash;
 	if ($hashSize != 0) {
 		my $firstkey = (sort(keys %kernelHash))[0];
@@ -197,7 +199,7 @@ if (isChroot) {
 } else {
 	$kernelRelease = `uname -r`;
 }
-$kernelRelease =~ s/[\n\r]//gsxm;
+$kernelRelease =~ s/[\n\r]//gsm;
 printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
@@ -215,7 +217,7 @@ $sysvendor = readFirstLineOfFile($sysvendorFilename);
 
 # for desktop messages
 my $sessionID = readFirstLineOfFile('/proc/sys/kernel/random/boot_id');
-if ($sessionID =~ /(.{7})/sxm) {
+if ($sessionID =~ /(.{7})/sm) {
 	$sessionID = hex($1);
 	printLog("sessionID: $sessionID", 'TL2', '[DEBUG]');
 }
@@ -229,6 +231,19 @@ my %otherReposList = otherRepos();
 my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
+
+# hash to load the configfile
+# is a copy from presetModules to exclude undefined values
+my %localConfModules = %{ dclone(\%presetModules) };
+
+
+# empty hash, will be filled with successfully installed modules
+# as hashes: {modulename}{status}
+# where status should be "success" or "failed"
+#
+my %configuredModules;
+
+
 
 
 ###############################################################################
@@ -272,18 +287,6 @@ sub printIfExistsNotUndefinedNotEmpty {
 
 
 
-# hash to load the configfile
-# is a copy from presetModules to exclude undefined values
-my %localConfModules = %presetModules;
-
-
-# empty hash, will be filled with successfully installed modules
-# as hashes: {modulename}{status}
-# where status should be "success" or "failed"
-#
-my %configuredModules;
-
-
 # for the localization
 foreach my $module (keys %presetModules) {
 	$presetModules{$module}{'description'} = __($module . "_description");
@@ -310,7 +313,7 @@ sub checkAndSetLocale {
 
         # Split the language code from the full locale using dot as the delimiter
         # a $lang could be de, de_DE or de_DE.UTF8
-        my $languageCode = (split /\./sxm, $lang)[0] // $lang;
+        my $languageCode = (split /\./sm, $lang)[0] // $lang;
 
 		# $languageCode is now de or de_DE
         if ($languageCode) {
@@ -369,8 +372,8 @@ sub getMatchingLocaleForLang {
 	my @files = glob($localeBasePath . q{/} . $lang . "*/LC_MESSAGES/tomte.mo");
 
 	foreach my $path (@files) {
-		$path =~ s/\/LC_MESSAGES\/tomte.mo//isxm;
-		$foundLanguage = $path =~ s/$localeBasePath\///irsxm;
+		$path =~ s/\/LC_MESSAGES\/tomte.mo//ism;
+		$foundLanguage = $path =~ s/$localeBasePath\///irsm;
 		printLog("Found valid Tomte locale file in $localeBasePath/$foundLanguage", "L1", '[INFO]');
 		last;
 	}
@@ -626,7 +629,7 @@ sub countLinesInString {
 	my $myString = shift;
 	return 0 if( (!defined $myString) or $myString eq q{});
 	my $lastchar = substr $myString, $NEG_ONE,1;
-	my $numlines = () = $myString =~ /\n/gsxm;
+	my $numlines = () = $myString =~ /\n/gsm;
 	# was last line a whole line with a "\n"?;
 	return $numlines + ($lastchar ne "\n");
 }
@@ -654,24 +657,24 @@ sub readOSData {
 		exit (0);
 	}
 	foreach $line ( @osReleaseLines ) {
-		if ( $line =~ /^NAME=/sxm ) {
+		if ( $line =~ /^NAME=/sm ) {
 			# e.g. Ubuntu
-			$line =~ /NAME=\"(.*)\"/sxm;
+			$line =~ /NAME=\"(.*)\"/sm;
 			$distribution = $1;
 		}
-		if ( $line =~ /^VERSION_ID=/sxm ) {
+		if ( $line =~ /^VERSION_ID=/sm ) {
 			# e.g. 22.04
-			$line =~ /VERSION_ID=\"(.*)\"/sxm;
+			$line =~ /VERSION_ID=\"(.*)\"/sm;
 			$distributionVersionID = $1;
 		}
-		if ( $line =~ /^UBUNTU_CODENAME=/sxm ) {
+		if ( $line =~ /^UBUNTU_CODENAME=/sm ) {
 			# e.g. jammy
-			$line =~ /UBUNTU_CODENAME=(.*)/sxm;
+			$line =~ /UBUNTU_CODENAME=(.*)/sm;
 			$ubuntuCodename = $1;
 		}
 		if ( $line =~ /^VERSION=/sxm ) {
 			# e.g. 22.04.4 LTS (Jammy Jellyfish)
-			$line =~ /VERSION=\"(.*)\"/sxm;
+			$line =~ /VERSION=\"(.*)\"/sm;
 			$distributionVersion = $1;
 		}
 	}
@@ -696,7 +699,7 @@ sub cpuBrand {
 		if (! close $FH) {
 			printLog("error closing $cpuinfo", 'L0', '[ERROR]');
 		}
-		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/sxm) {
+		if ($infos =~ /vendor_id\s*:\s*AuthenticAMD/sm) {
 			return ('AMD');
 		}
 	} else {
@@ -714,7 +717,7 @@ sub cpuBrand {
 #
 sub isOSSupported {
 	if (exists $supportedOSList{ $distribution }) {
-		if ( grep(/^$distributionVersionID$/sxm, @{ $supportedOSList{ $distribution } } ) ) {
+		if ( grep(/^$distributionVersionID$/sm, @{ $supportedOSList{ $distribution } } ) ) {
 			return (1);
 		}
 		printLog("The version $distributionVersionID of $distribution is not supported.", 'TL0', '[FATAL]');
@@ -767,11 +770,11 @@ sub checkRequirements {
 	my $FH;
 
 	# check values for each module
-	if (($boardname =~ /NS50_70MU/sm) ||
-		($boardname =~ /NS50MU/sm)) {
-		if (!$FAI) {
+	if (($boardname =~ /NS50_70MU/) ||
+		($boardname =~ /NS50MU/)) {
+		unless ($FAI) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == $NEG_ONE) {
+			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
 				$presetModules{i8042noauxfix}{required} = 'yes';
 				printLog("detected $presetModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
 			}
@@ -805,7 +808,7 @@ sub checkRequirements {
 
 	if (!$FAI) {
 		if (($boardname =~ /X170SM/sm) ||
-			($boardname =~ /PB50_70DFx,DDx/smx) ||
+			($boardname =~ /PB50_70DFx,DDx/sm) ||
 			($boardname =~ /LAPQC71A/sm) ||
 			($boardname =~ /LAPQC71B/sm) ||
 			($boardname =~ /N141CU/sm) ||
@@ -817,7 +820,7 @@ sub checkRequirements {
 			($boardname =~ /NS50MU/sm) ||
 			($boardname =~ /NS50_70MU/sm) ||
 			($boardname =~ /NJ50_70CU/sm) ||
-			($boardname =~ /X170KM-G/smx )) {
+			($boardname =~ /X170KM-G/sm )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == $NEG_ONE) {
 				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
@@ -899,7 +902,7 @@ sub checkRequirements {
 		}
 	}
 
-	if ($boardname =~ /NH5xAx/sxm) {
+	if ($boardname =~ /NH5xAx/sm) {
 		$presetModules{corefix}{required} = 'yes';
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
 	}
@@ -937,7 +940,7 @@ sub checkRequirements {
 	# on some notebooks
 	# not necessary on 24.04
 	# when deleting this workaround, also delete the module entry from the config
-	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/sxm))) {
+	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/sm))) {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $presetModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$presetModules{systemdbacklightfix}{required} = 'no';
@@ -985,12 +988,12 @@ sub checkRequirements {
 
 	my $fingerprintLsUsb = `lsusb`;
 	my @fingerprintRegExp = (
-		qr/147e:100[0123]/sxm,
-		qr/147e:20(15|16|20)/sxm,
-		qr/147e:300[01]/sxm,
-		qr/147e:500[23]/sxm,
-		qr/0483:201[56]/sxm,
-		qr/1c7a:0603/sxm);
+		qr/147e:100[0123]/sm,
+		qr/147e:20(15|16|20)/sm,
+		qr/147e:300[01]/sm,
+		qr/147e:500[23]/sm,
+		qr/0483:201[56]/sm,
+		qr/1c7a:0603/sm);
 	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
 		$presetModules{fingerprintreader}{required} = 'yes';
 		printLog("detected $presetModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
@@ -1004,7 +1007,14 @@ sub checkRequirements {
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
-	if ($nvidiaDevice =~ /030[02]:/sxm) {
+	# TODO debug
+	# if the right nvidia driver is installed, it should show up in 'tomte list'
+	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
+	printLog("nvidiaDevice: $nvidiaDevice", 'L0', '[DEBUG]');
+	printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
+	if (($nvidiaDevice =~ /030[02]:/)
+		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
+		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -1073,12 +1083,12 @@ sub checkRequirements {
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
-	if ($boardname =~ m/X170KM-G/sxm) {
+	if ($boardname =~ m/X170KM-G/sm) {
 		$presetModules{thunderboltbootdelayfix}{required} = 'yes';
 		printLog("detected $presetModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ((($boardname =~ m/NV4XMB,ME,MZ/sxm) ||
+	if ((($boardname =~ m/NV4XMB,ME,MZ/sm) ||
 		($boardname =~ m/PHxTQx1/sm) ||
 		($boardname =~ m/PH4TQx1/sm)) && (-d '/etc/lightdm/')) {
 		$presetModules{lightdmlogindcheckgraphicalfix}{required} = 'yes';
@@ -1090,7 +1100,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{nvidiabacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ m/NV4XMB,ME,MZ/sxm) ||
+	if (($boardname =~ m/NV4XMB,ME,MZ/sm) ||
 		($boardname =~ m/PHxTQx1/sm)) {
 		$presetModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog("detected $presetModules{earlyloadbacklightcontrolfix}{name} issue", 'L1', '[INFO]');
@@ -1105,7 +1115,7 @@ sub checkRequirements {
 	}
 
 	# if cardreader Realtek RTS522A found
-	my @cardreaderDevices = (qr/10ec:522a/sxm);
+	my @cardreaderDevices = (qr/10ec:522a/sm);
 	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
 		$presetModules{cardreaderfix}{required} = 'yes';
 		printLog("detected $presetModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
@@ -1164,7 +1174,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($completeDistVersion =~ /elementary OS 7.1/sxm) {
+	if ($completeDistVersion =~ /elementary OS 7.1/sm) {
 		$presetModules{elementaryosdkmspinningfix}{required} = 'yes';
 		printLog("detected $presetModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
 	}
@@ -1179,7 +1189,7 @@ sub checkRequirements {
 	my $minPlasmaWorkspaceVersion = '6.0.0';
 	readConfigIniValues();
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
-	if (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sxm) || ($distributionVersion =~ /3 22\.04.*/sxm))) {
+	if (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sm) || ($distributionVersion =~ /3 22\.04.*/sm))) {
 		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
 
 		# check whether plasma6 is installed
@@ -1241,7 +1251,7 @@ sub checkRequirements {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
-	return;
+	return (0);
 }
 
 
@@ -1254,7 +1264,7 @@ sub findPciDevice {
 	my ($lspciList, @pciDevices) = @_;
 	my $pciDevice;
 	foreach $pciDevice (@pciDevices) {
-		if ($lspciList =~ /$pciDevice/sxm) {
+		if ($lspciList =~ /$pciDevice/sm) {
 			return (1);
 		}
 	}
@@ -1666,7 +1676,7 @@ sub corefix() {
 	my $amlFile = ('nh5xax-1.aml');
 	my $amlFileOrig = $shareDir.$amlFile;
 	my $amlFileDirDest = '/lib/firmware/tuxedo-corefix-clevo-nh5xax/';
-	$amlFile =~ s/-\d*//sxm;
+	$amlFile =~ s/-\d*//sm;
 	my $amlFileDest = $amlFileDirDest.$amlFile;
 
 	if ($action eq 'install') {
@@ -1797,7 +1807,7 @@ sub tuxedonvmefix() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
-			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sxm;
+			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sm;
 			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
 			$nvmeDevice{$nvmeDir}{'model'} = readFirstLineOfFile("$nvmeDir/model");
 			$nvmeDevice{$nvmeDir}{'subdevice'} = readFirstLineOfFile("$nvmeDir/device/subsystem_device");
@@ -1805,7 +1815,7 @@ sub tuxedonvmefix() {
 			$nvmeDevice{$nvmeDir}{'firmware'} = readFirstLineOfFile("$nvmeDir/firmware_rev");
 		}
 		foreach $nvmeDir ( keys %nvmeDevice ) {
-			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/sxm) &&
+			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/sm) &&
 				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/sm) &&
 				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/sm)) {
 				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
@@ -2289,7 +2299,7 @@ sub nvidiadriver() {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
 					setAptMark($tuxedoNvidiaDriver550,'manual');
@@ -2301,7 +2311,7 @@ sub nvidiadriver() {
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
 			} else {
 				$packageNvidiaPrime = 1;
 			}
@@ -2350,7 +2360,7 @@ sub nvidiadriver() {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
 					setAptMark($tuxedoNvidiaDriver550,'manual');
@@ -2362,7 +2372,7 @@ sub nvidiadriver() {
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime');
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
 			} else {
 				$packageNvidiaPrime = 1;
 			}
@@ -2403,8 +2413,41 @@ sub nvidiadriver() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+		my $nvidiaDriver = q{};
+		if ($ubuntuCodename =~ /focal/) {
+			$nvidiaDriver = $nvidiaDriver510;
+		}
+		if ($ubuntuCodename =~ /(jammy|noble)/) {
+			$nvidiaDriver = $nvidiaDriver550;
+		}
+		if (removeWarningMessage("nvidia-driver\n")) {
+			my $counter = 0;
+			if( isPackageInstalled($nvidiaDriver) ) {
+				if (!deinstallSinglePackage($nvidiaDriver)) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if( isPackageInstalled('nvidia-prime') ) {
+				if (!deinstallSinglePackage('nvidia-prime')) {
+					$counter = $counter+1;
+				}
+			} else {
+				$counter = $counter+1;
+			}
+			if ($counter == 2) {
+				$presetModules{$module}{installed} = 'no';
+				$presetModules{$module}{required} = 'no';
+				$presetModules{$module}{upgraded} = 'yes';
+				addToConfiguredModules($module, 'removed');
+			} else {
+				$presetModules{$module}{installed} = 'yes';
+				$presetModules{$module}{required} = 'no';
+				$presetModules{$module}{upgraded} = 'no';
+				addToConfiguredModules($module, 'remove failed');
+			}
+		}
 	}
 	return;
 }
@@ -2451,7 +2494,7 @@ sub apportfix() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 
 		if (isLineInFile('/etc/default/apport', 'enabled=1')) {
-			$retval = edit_file { s/enabled=1/enabled=0/gsxm } '/etc/default/apport', {'err_mode' => 'carp'};
+			$retval = edit_file { s/enabled=1/enabled=0/gsm } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
 				#`service apport stop`;
@@ -2516,7 +2559,7 @@ sub i915enablepsrfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/i915\.enable_psr=0//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/i915\.enable_psr=0//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'i915.tuxedo_disable_psr2=1', 'i915.enable_psr=1');
 	return;
@@ -2535,7 +2578,7 @@ sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
 	return;
@@ -2614,8 +2657,8 @@ sub nvidiabacklightcontrolfix() {
 	my $action = shift;
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/ NVreg_RegistryDwords=EnableBacklightHandler=0//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
-		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//gsxm } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/ NVreg_RegistryDwords=EnableBacklightHandler=0//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
+		edit_file { s/ NVreg_RegistryDwords=EnableBrightnessControl=1//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
 	}
 	grubModuleEdit( $module, $action, 0, 'nvidia.NVreg_RegistryDwords=EnableBacklightHandler=0', 'nvidia.NVreg_RegistryDwords=EnableBrightnessControl=1', 'i915.enable_dpcd_backlight=0');
 	return;
@@ -3218,23 +3261,23 @@ sub createRepos {
 	# old installations where those entries might still exist
 	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
 			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//gsxm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/# Added by TUXEDO Tomte//gsxm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+				edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			}
 
 		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//gsxm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//gsxm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
 		}
 
 		if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//gsxm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//gsxm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
+			edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
 		}
 	} else {
 		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//gsxm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			edit_file { s/# Added by TUXEDO Tomte//gsxm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
+			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 		}
 		if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 			if (unlink('/etc/apt/sources.list.d/graphics-tuxedo.list')) {
@@ -3398,7 +3441,7 @@ sub cleanSourcesList {
 			return (0);
 		}
 		if (open($FHsource, ">", $sourcesListFile)) {
-			if (! grep( /$tomteMessage/sxm, @sourceLines ) ) {
+			if (! grep( /$tomteMessage/sm, @sourceLines ) ) {
 				# no backup for the file as it only comments out lines
 				print $FHsource "$tomteMessage\n";
 			}
@@ -3413,7 +3456,7 @@ sub cleanSourcesList {
 					if (commentOut(\$sourceLine)) {
 						$modified = 1;
 					}
-					if (! ($sourceLine =~ /mirrors\.tuxedocomputers\./sxm) ) {
+					if (! ($sourceLine =~ /mirrors\.tuxedocomputers\./sm) ) {
 						print $FHsource "$sourceLine\n";
 					}
 				}
@@ -3421,7 +3464,7 @@ sub cleanSourcesList {
 				printLog("current tuxedomirrors module is already installed", 'L2', '[INFO]');
 				# remove all tuxedo mirrors entries
 				foreach $sourceLine (@sourceLines) {
-					if (! ($sourceLine =~ /mirrors\.tuxedocomputers\./sxm) ) {
+					if (! ($sourceLine =~ /mirrors\.tuxedocomputers\./sm) ) {
 						print $FHsource "$sourceLine\n";
 					}
 				}
@@ -3445,7 +3488,7 @@ sub cleanSourcesList {
 #
 sub commentOut {
 	my $line = shift;
-	if (${$line} =~ /^#/sxm) {
+	if (${$line} =~ /^#/sm) {
 		return (0);
 	} else {
 		${$line} = "# ${$line}";
@@ -3474,11 +3517,11 @@ sub getSystemdState {
 	}
 	my $systemdCmd = "systemctl is-active $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
-	$systemdReturn =~ s/\s+//gsxm;
+	$systemdReturn =~ s/\s+//gsm;
 	printLog("systemd return for $systemdModule: $systemdReturn", 'L2', '[INFO]');
-	if ($systemdReturn =~ /^active/sxm) {
+	if ($systemdReturn =~ /^active/sm) {
 		return 'active';
-	} elsif ($systemdReturn =~ /^inactive/sxm) {
+	} elsif ($systemdReturn =~ /^inactive/sm) {
 		return 'inactive';
 	} else {
 		return (0);
@@ -3498,7 +3541,7 @@ sub getSystemdEnabled {
 	}
 	my $systemdCmd = "systemctl is-enabled $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
-	$systemdReturn =~ s/\s+//gsxm;
+	$systemdReturn =~ s/\s+//gsm;
 	printLog("systemd returns: $systemdReturn", 'L2', '[INFO]');
 	return ($systemdReturn);
 }
@@ -3860,7 +3903,7 @@ sub debianPackageModule {
 			# or LiveISO and set the verbose line
 			setDkmsVerbose( $module, 1 );
 
-			if (installPackage($presetModules{$module}{name})) {
+			if ( installPackage($presetModules{$module}{name}, $module) ) {
 				$presetModules{$module}{installed} = 'yes';
 				$presetModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, 'success');
@@ -3892,7 +3935,7 @@ sub debianPackageModule {
 	}
 	if ($action eq 'remove') {
 		if (removeWarningMessage("$presetModules{$module}{name}\n")) {
-			$success = removeDebianModule($module, 1, q{});
+			$success = removeDebianModule($module, $presetModules{$module}{restart}, q{});
 		}
 	}
 	return $success;
@@ -3925,7 +3968,7 @@ sub setDkmsVerbose {
 	} elsif ($value == 0) {
 		if (($presetModules{$module}{dkms} eq 'yes') && (($FAI && ($presetModules{$module}{FAI} eq 'yes')) || ($LiveISO && ($presetModules{$module}{LiveISO} eq 'yes')))) {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2', '[INFO]');
-			$result = edit_file { s/verbose="1"//gsxm } $dkmsFile, {'err_mode' => 'carp'};
+			$result = edit_file { s/verbose="1"//gsm } $dkmsFile, {'err_mode' => 'carp'};
 			if ($result >= 0) {
 				printLog("verbose DKMS substitution successful", 'L2', '[INFO]');
 				return (1);
@@ -3968,7 +4011,7 @@ sub deinstExcept {
 		printLog('something went wrong while searching for packages', 'L0', '[WARN]');
 		return (0);
 	}
-	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsxm;
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsm;
 	my @exceptDependencies = getPackageDependencies($except);
 
 	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
@@ -3977,15 +4020,15 @@ sub deinstExcept {
 	foreach $deinstKey (keys %retHash) {
 		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
 		# usefull for debug
-		if (grep( /^$deinstKey$/sxm, @exceptDependencies)) {
+		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
 			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
 		} else {
 			printLog("grep: $deinstKey not found in dependencies, delete!", 'L2', '[DEBUG]');
 		}
 		# check if it is installed/not exempt/not a dependency of the exemp
-		if (($retHash{$deinstKey} =~ /i./sxm) &&
+		if (($retHash{$deinstKey} =~ /i./sm) &&
 			!($deinstKey =~ $except) &&
-			!(grep( /^$deinstKey$/sxm, @exceptDependencies ))) {
+			!(grep( /^$deinstKey$/sm, @exceptDependencies ))) {
 			$deinstCounter++;
 			$deinstCmd .= q{ }.$deinstKey;
 			$deinstList .= q{ }.$deinstKey;
@@ -4037,9 +4080,9 @@ sub getPackageDependencies {
 	my @packages;
 	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
 	$result = `$searchCmd`;
-	@lines = split /\n/sxm, $result;
+	@lines = split /\n/sm, $result;
 	foreach $line (@lines) {
-		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sxm) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 			$pkgString = $1;
 			printLog("found dependency: $pkgString", 'L2', '[DEBUG]');
 			push @packages, $pkgString;
@@ -4058,7 +4101,7 @@ sub isPackageInRepo {
 	my $package = shift;
 	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
 	chop($returnFromSearch);
-	$returnFromSearch =~ s/ .*//sxm;
+	$returnFromSearch =~ s/ .*//sm;
 	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2', '[DEBUG]');
 	if ($package eq $returnFromSearch) {
 		printLog("package $package found in repos", 'L2', '[DEBUG]');
@@ -4121,11 +4164,14 @@ sub deinstallSinglePackage {
 #
 sub isPackageInstalled {
 	my $package = shift;
+	if ($package eq q{}) {
+		return (0);
+	}
 	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
 	my $retString = `$cmd`;
 	my $retValue = $?/$RETVAL_CONVERTER;
 	printLog("checking if $package is installed\nanswer: $retString", 'L2', '[DEBUG]');
-	if ($retString =~ m/^[ih][i]\s$/sxm) {
+	if ($retString =~ m/^[ih][i]\s$/sm) {
 		printLog("package $package is installed: $retString", 'L1', '[DEBUG]');
 		return (1);
 	} else {
@@ -4165,19 +4211,19 @@ sub arePackagesInstalled {
 	$retLines = `$packageQuery`;
 	$retValue = $?/$RETVAL_CONVERTER;
 	printLog("are packages installed retLines: $retLines retValue $retValue", 'L2', '[DEBUG]');
-	@lines = split /\n/sxm, $retLines;
+	@lines = split /\n/sm, $retLines;
 	foreach $line (@lines) {
 		# find packages that are not installed
-		if ($line =~ /dpkg-query:/sxm) {
-			$line =~ /.*matching\s(\S+)/sxm;
+		if ($line =~ /dpkg-query:/sm) {
+			$line =~ /.*matching\s(\S+)/sm;
 			setPackageInstallStatus( $1, 'not installed' );
 			push( @packagesNotInstalled, $1 );
 		# find not completely installed or removed packages
 		} else {
-			$line =~ /(\S+)\s*(\S+)/sxm;
+			$line =~ /(\S+)\s*(\S+)/sm;
 			setPackageInstallStatus( $1, $2 );
 			# only insert packages to be installed to array
-			if ($2 =~ /[uihrp][ncHUFWt]/sxm) {
+			if ($2 =~ /[uihrp][ncHUFWt]/sm) {
 				push( @packagesNotInstalled, $1 );
 			}
 		}
@@ -4200,7 +4246,7 @@ sub getPackageVersion {
 	my $retValue = $?/$RETVAL_CONVERTER;
 	printLog("version string for $package: $retString retValue: $retValue", 'L2', '[DEBUG]');
 	if ($retValue == 0) {
-		$retString =~ s/.*://sxm;
+		$retString =~ s/.*://sm;
 		if ($retString ne q{}) {
 			printLog("package $package has version: $retString", 'L1', '[DEBUG]');
 			return $retString;
@@ -4223,7 +4269,7 @@ sub getPackageVersion {
 # returns 0 if package was not installed
 #
 sub installPackage {
-	my $packageName = shift;
+	my ( $packageName, $module ) = shift;
 	my $retval;
 	if (isPackageInstalled($packageName)) {
 		return (1);
@@ -4266,6 +4312,10 @@ sub installPackage {
 						printLog('Could not repair package management, will try again later', 'L0', '[WARN]');
 						startTomteDelayed();
 					}
+				} elsif ($retval == 1) {
+					if ($presetModules{$module}{restart} eq 'yes') {
+						setRestartValues();
+					}
 				}
 			} else {
 				printLog("failed to get package management lock to install $packageName!!", 'L0', '[WARN]');
@@ -4292,7 +4342,7 @@ sub installPackage {
 sub initAvailablePackagesList {
 	@availableDebianPackages = `apt-cache pkgnames`;
 	chomp(@availableDebianPackages);
-	return;
+	return (0);
 }
 
 
@@ -4303,7 +4353,7 @@ sub initAvailablePackagesList {
 #
 sub isPackageAvailable {
 	my $package = shift;
-	if ( grep( /^$package$/sxm, @availableDebianPackages ) ) {
+	if ( grep( /^$package$/sm, @availableDebianPackages ) ) {
 		return (1);
 	}
 	return (0);
@@ -4413,7 +4463,7 @@ sub getAptMark {
 	my $package = shift;
 	my $retVal;
 	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	if ( $retVal =~ /$package/mgsx ) {
+	if ( $retVal =~ /$package/mgs ) {
 		printLog("package: $package mark is auto", 'L2', '[DEBUG]');
 		return (1);
 	} else {
@@ -4480,7 +4530,7 @@ sub installKernelFlavour {
 # returns an empty string if nothing was found or the version entry is wrong
 sub populateKernelPackages {
 	my $version = shift;
-	if ($version =~ /\s/sxm) {
+	if ($version =~ /\s/sm) {
 		printLog("something is wrong with the kernel version number", 'L0', '[ERROR]');
 		return q{};
 	}
@@ -4497,11 +4547,11 @@ sub populateKernelPackages {
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
 	$result = `$searchCommand`;
 	printLog("first result:\n$result", 'L2', '[DEBUG]');
-	@lines = split /\n/sxm, $result;
+	@lines = split /\n/sm, $result;
 	foreach $line (@lines) {
-		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sxm) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 			$packageString = $1;
-			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sxm) {
+			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 				printLog("Accepted: $packageString", 'L2', '[DEBUG]');
 				$packageLine .= " $packageString";
 				push @packages, $packageString;
@@ -4513,11 +4563,11 @@ sub populateKernelPackages {
 		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
 		$result = `$searchCommand`;
 		printLog("second result:\n$result", 'L2', '[DEBUG]');
-		@lines = split /\n/sxm, $result;
+		@lines = split /\n/sm, $result;
 		foreach $line (@lines) {
-			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sxm) {
+			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 				$packageString = $1;
-				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sxm) {
+				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 					printLog("Accepted: $packageString", 'L2', '[DEBUG]');
 					push @packages, $packageString;
 				}
@@ -4526,7 +4576,7 @@ sub populateKernelPackages {
 	}
 	$searchCommand = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '."linux-modules-extra-$version-tuxedo".' 2>&1';
 	$result = `$searchCommand`;
-	if ($result =~ m/^[uihrp][HUFWti]\s$/sxm) {
+	if ($result =~ m/^[uihrp][HUFWti]\s$/sm) {
 		push @packages, "linux-modules-extra-$version-tuxedo";
 	}
 	push @packages, ("linux-headers-$version-tuxedo", "linux-image-$version-tuxedo");
@@ -4574,21 +4624,21 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %headers;
 	# Get the list of installed linux-tuxedo headers using dpkg-query
 	# example: linux-tuxedo-5.15-headers-5.15.0-10033
-	my @headersList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-tuxedo-*-headers-*');
+	my @headersList = split /\n/sm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-tuxedo-*-headers-*');
 
 	# Check each header line and store installed headers with their versions
 	foreach my $line (@headersList) {
 		chomp $line;
-		my ($status, $version, $package) = split /=/sxm, $line, $MAX_HEADERS_TO_ANALYZE;
+		my ($status, $version, $package) = split /=/sm, $line, $MAX_HEADERS_TO_ANALYZE;
 		if (
 			# Check if $package is installed
 			"installed" eq $status &&
 
 			# Check if $package matches the expected pattern
-			$package =~ /^linux-tuxedo-.*-headers-.*$/sxm &&
+			$package =~ /^linux-tuxedo-.*-headers-.*$/sm &&
 
 			# Check if $package does not contain any whitespace characters
-			$package !~ /\s/sxm &&
+			$package !~ /\s/sm &&
 
 			# Check if the length of $package exceeds 50 characters
 			length($package) < $MAX_PACKAGE_NAME
@@ -4601,12 +4651,12 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %images;
 	# Get the list of installed linux-image packages using dpkg-query
 	# example: linux-image-5.15.0-10025-tuxedo
-	my @imagesList = split /\n/sxm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-image-*-tuxedo');
+	my @imagesList = split /\n/sm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-image-*-tuxedo');
 
 	# Check each images line and store installed headers with their versions
 	foreach my $line (@imagesList) {
 		chomp $line;
-		my ($status, $version, $package) = split /=/sxm, $line, $MAX_TO_DELETE_KERNEL;
+		my ($status, $version, $package) = split /=/sm, $line, $MAX_TO_DELETE_KERNEL;
 		if ("installed" eq $status){
 			$images{$version} = $package;
 		}
@@ -4614,7 +4664,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 
 	# Get the current kernel version by removing the "-tuxedo" suffix
 	my $currentKernelVersion = `uname -r`;
-	$currentKernelVersion =~ s/-tuxedo$//sxm;
+	$currentKernelVersion =~ s/-tuxedo$//sm;
 
 	my @headersOnly;
 	# Get the headers where no corresponding image exists
@@ -4626,7 +4676,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 
 		# Skip if the header version matches the current kernel version
 		# header version can be 6.5.0-10005.5 but currentKernelVersion is then just 6.5.0-10005
-		if ($key =~ /$currentKernelVersion/sxm) {
+		if ($key =~ /$currentKernelVersion/sm) {
 			next;
 		}
 
@@ -4645,10 +4695,10 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 		# Safety check: Verify the format and length of $oldestHeader
 		if (
 			# Check if $oldestHeader does not match the expected pattern
-			$oldestHeader !~ /^linux-tuxedo-.*-headers-.*$/sxm ||
+			$oldestHeader !~ /^linux-tuxedo-.*-headers-.*$/sm ||
 
 			# Check if $oldestHeader contains any whitespace characters
-			$oldestHeader =~ /\s/sxm ||
+			$oldestHeader =~ /\s/sm ||
 
 			# Check if the length of $oldestHeader exceeds 50 characters
 			length($oldestHeader) > $MAX_OLDEST_HEADER_NAME
@@ -4707,7 +4757,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 
 	if (opendir($DH,$bootDir)) {
 		while ($file = readdir($DH)) {
-			if ($file =~ /initrd\.img-(.*)-tuxedo$/sxm) {
+			if ($file =~ /initrd\.img-(.*)-tuxedo$/sm) {
 				printLog("found file: $file", 'L2', '[DEBUG]');
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
@@ -4716,7 +4766,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 					$fileListInitrd{$1} = $fileSize;
 				}
 			}
-			if ($file =~ /vmlinuz-(.*)-tuxedo/sxm) {
+			if ($file =~ /vmlinuz-(.*)-tuxedo/sm) {
 				printLog("found file: $file", 'L2', '[DEBUG]');
 				$fileSize = -s "$bootDir/$file";
 				printLog("size: $fileSize", 'L2', '[DEBUG]');
@@ -4749,8 +4799,8 @@ sub checkAndDeleteOldestTuxedoKernel {
 		$version = q{};
 		$version = $fileListResult[-1];
 		my $currentKernelVersion = `uname -r`;
-		$currentKernelVersion =~ s/-tuxedo$//sxm;
-		if (! ($currentKernelVersion =~ /$version/sxm)) {
+		$currentKernelVersion =~ s/-tuxedo$//sm;
+		if (! ($currentKernelVersion =~ /$version/sm)) {
 			printLog("not current running kernel => trying to delete version: $version", 'L2', '[INFO]');
 			# get all related kernel packages
 			my @packageList = populateKernelPackages($fileListResult[-1]);
@@ -4804,7 +4854,7 @@ sub removeDebianModule {
 			$presetModules{$module}{installed} = "no";
 			$presetModules{$module}{upgraded} = "yes";
 			$presetModules{$module}{required} = "no";
-			if ($restart) {
+			if ($restart =~ /yes/) {
 				setRestartValues($module);
 			}
 			$success = 1;
@@ -4852,14 +4902,14 @@ sub removeKernelParameters {
 		}
 		if ((-w $grubFile) && (open($GF, '>', $grubFile))) {
 			foreach $line (@grubLines) {
-				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sxm) {
+				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sxm) {
-							$line =~ s/$parameter//sxm;
+							$line =~ s/$parameter//sm;
 							$line =~ s/ +/ /g;
-							$line =~ s/=" /="/sxm;
-							$line =~ s/ "$/"/sxm;
+							$line =~ s/=" /="/sm;
+							$line =~ s/ "$/"/sm;
 							++$counter;
 						}
 					}
@@ -5025,7 +5075,7 @@ sub isLineInFile {
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
 		while( <FH> ) {
-			if ( $_ =~ /^$match$/sxm) {
+			if ( $_ =~ /^$match$/sm) {
 				return (1);
 			}
 		}
@@ -5052,7 +5102,7 @@ sub isTextInFile {
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
 		while( <FH> ) {
-			if ( $_ =~ /$match/sxm) {
+			if ( $_ =~ /$match/sm) {
 				return (1);
 			}
 		}
@@ -5167,7 +5217,7 @@ sub insertGrub {
 
     foreach( @grubLines ) {
 		# find the correct line
-		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["']/sxm ) {
+		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["']/sm ) {
 			foreach $parameter ( @{$parameters} ) {
 				if (insertGrubParameter(\$_, \$parameter)) {
 					++$inserted;
@@ -5203,26 +5253,26 @@ sub insertGrubParameter {
 	my ($line, $parameter) = @_;
 	my $cleanLine;
 
-	if ( !($$line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=/sxm)) {
+	if ( !($$line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=/sm)) {
 		printLog("grub kernel parameter line is malformed, can't insert $$parameter", 'L0', '[ERROR]');
 		return ($NEG_ONE);
 	}
 
 	$cleanLine = $$line;
-	$cleanLine =~ s/^\s+//sxm;
-	$cleanLine =~ s/\s+$//isxm;
-	$cleanLine =~ s/["']//gsxm;
-	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//sxm;
+	$cleanLine =~ s/^\s+//sm;
+	$cleanLine =~ s/\s+$//ism;
+	$cleanLine =~ s/["']//gsm;
+	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//sm;
 
-	if (($cleanLine =~ /^$$parameter /sxm) || ($cleanLine =~ /^$$parameter$/sxm) || ($cleanLine =~ / $$parameter$/sxm) || ($cleanLine =~ / $$parameter /sxm)) {
+	if (($cleanLine =~ /^$$parameter /sm) || ($cleanLine =~ /^$$parameter$/sm) || ($cleanLine =~ / $$parameter$/sxm) || ($cleanLine =~ / $$parameter /sxm)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
-		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/sxm) {
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"/sxm;
+		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT=".*)"/$1 $$parameter"/sm;
 		}
-		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/sxm) {
-			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'/sxm;
+		if ($$line =~ /GRUB_CMDLINE_LINUX_DEFAULT='/sm) {
+			$$line =~ s/^(GRUB_CMDLINE_LINUX_DEFAULT='.*)'/$1 $$parameter'/sm;
 		}
 		printLog("inserted '$$parameter' into grub line: $$line", 'L1', '[INFO]');
 		return (1);
@@ -5268,8 +5318,8 @@ sub messageDesktop {
 	}
 
 	foreach $mLine (@whoLines) {
-		if ($mLine =~ /\(:\d+\)/sxm) {
-			$mLine =~ /^(\w*).*\s(\d*)\s.*/sxm;
+		if ($mLine =~ /\(:\d+\)/sm) {
+			$mLine =~ /^(\w*).*\s(\d*)\s.*/sm;
 			$mUsername = $1;
 			$mPid = $2;
 		}
@@ -5291,7 +5341,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sxm;
+	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sm;
 	$dbusAddress = $1;
 	if ($dbusAddress eq q{}) {
 		printLog('No display for message output found, no DBUS address', 'L0', '[INFO]');
@@ -5445,15 +5495,15 @@ sub printLog {
 		$type = 'L1';
 	}
 	my $level = $type;
-	if ($level =~ /[0-2]/sxm) {
-		$level =~ s/\D//gsxm;
+	if ($level =~ /[0-2]/sm) {
+		$level =~ s/\D//gsm;
 		$level += 0;
 	} else {
 		$level = 1;
 		$level += 0;
 	}
-	if ($type =~ /[LlTt]/sxm) {
-		$type =~ s/[\W\d]//gsxm;
+	if ($type =~ /[LlTt]/sm) {
+		$type =~ s/[\W\d]//gsm;
 	} else {
 		$type = 'L';
 	}
@@ -5554,16 +5604,16 @@ sub readConfigFile {
 		while ( my $line=<$FH> ) {
 			chomp $line;
 			# ignore comments
-			if ($line =~ /^#/sxm) {
+			if ($line =~ /^#/sm) {
 				next;
 			}
 			# ignore empty lines
-			if ($line =~ /^(\s)*$/sxm) {
+			if ($line =~ /^(\s)*$/sm) {
 				next;
 			}
 			# check data format
 			if (validConfigLine($line)) {
-				my ($name, @cols) = split /\s+/sxm, $line;
+				my ($name, @cols) = split /\s+/sm, $line;
 				# check if module name exists in orig and return shortname
 				$shortname = validModuleName($name);
 				if ($shortname ne q{}) {
@@ -5600,7 +5650,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/sxm) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/sm) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line", 'L0', '[ERROR]');
@@ -5740,6 +5790,7 @@ sub initConfigFile {
 		writeConfigFile();
 		return;
 	}
+	return (0);
 }
 
 
@@ -5851,7 +5902,7 @@ sub isDisplayPresent {
 	} else {
 		foreach my $edidData (@edidRefs) {
 			$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
-			if ($edidInfo =~ /$edidSearchString/sxm) {
+			if ($edidInfo =~ /$edidSearchString/sm) {
 				return (1);
 			}
 		}
@@ -5899,6 +5950,8 @@ sub listStatus {
 		} else {
 			$upgradeAvailable = q{};
 		}
+
+
 		if (($localConfModules{$module}{installed} eq 'yes') &&
 			($localConfModules{$module}{required} eq 'no') &&
 			($presetModules{$module}{required} eq 'no')) {
@@ -6010,7 +6063,7 @@ sub listVersions {
 		if ($module eq 'nvidiadriver') {
 			$localConfModules{$module}{packageVersion} = getPackageVersion('nvidia-driver-*');
 		}
-		if ($module =~ /kernel.*/sxm ) {
+		if ($module =~ /kernel.*/sm ) {
 			$localConfModules{$module}{packageVersion} = getPackageVersion($presetModules{$module}{name});
 		}
 		if (($localConfModules{$module}{installed} eq 'yes') &&
@@ -7191,7 +7244,7 @@ sub configuredModulesExceptDefault {
 	my @defaultModules = ( 'tuxedorepos', 'tuxedomirrors' );
 	foreach ( @defaultModules ) {
 		for my $index (reverse 0..$#modulesList) {
-			if ($modulesList[$index] =~ /$_/sxm) {
+			if ($modulesList[$index] =~ /$_/sm) {
 				splice(@modulesList, $index, 1, ());
 			}
 		}
@@ -7409,7 +7462,7 @@ sub tuxedoDevice {
 		if ($boardname =~ /P65_P67RGRERA/sm) {
 			return (1);
 		}
-		if ($boardname =~ /P64_HJ,HK1/sxm) {
+		if ($boardname =~ /P64_HJ,HK1/sm) {
 			return (1);
 		}
 		if ($boardvendor =~ /TUXEDO/sm) {
@@ -7418,7 +7471,7 @@ sub tuxedoDevice {
 		if ($sysvendor =~ /TUXEDO/sm) {
 			return (1);
 		}
-		if ($boardname =~ /LAPQC71[AB]/sxm) {
+		if ($boardname =~ /LAPQC71[AB]/sm) {
 			return (1);
 		}
 	}
@@ -7439,7 +7492,7 @@ sub getChassisType {
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
 		$chassisTypeNbr = <$FH>;
-		$chassisTypeNbr =~ s/\n//gsxm;
+		$chassisTypeNbr =~ s/\n//gsm;
 		if (! close($FH)) {
 			printLog("Could not close $fileName", 'TL0', '[ERROR]');
 		}
@@ -7457,7 +7510,7 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
 	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
 	my $returnHostnamectl = `$hostnamectlCmd`;
-	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsxm) {
+	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsm) {
 		printLog("chassis is a virtual machine", 'TL2', '[DEBUG]');
 		printLog("machine will be treated as desktoppc", 'TL2', '[DEBUG]');
 		return ('desktoppc');
