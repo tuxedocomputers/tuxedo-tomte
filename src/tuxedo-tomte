@@ -4499,10 +4499,10 @@ printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '
 printLog("first dump:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
 
-foreach ( my $key %kernelsList ) {
-	foreach ( my $key2 %kernelsList{$key} ) {
-		printLog("$kernelsList{$key}{$key2}", 'TL0', '[DEBUG]');
-	}
+foreach my $key ( keys %kernelsList ) {
+	#foreach my $key2 ( keys  %kernelsList{$key} ) {
+		printLog("$kernelsList{$key}", 'TL0', '[DEBUG]');
+		#}
 }
 
 printLog("second dump", 'TL0', '[DEBUG]');
