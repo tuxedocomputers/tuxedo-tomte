@@ -4498,6 +4498,13 @@ printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
 printLog("first dump:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
+
+foreach ( my $key %kernelsList ) {
+	foreach ( my $key2 %kernelsList{$key} ) {
+		printLog("$kernelsList{$key}{$key2}", 'TL0', '[DEBUG]');
+	}
+}
+
 printLog("second dump", 'TL0', '[DEBUG]');
 print $dumperText Dumper(\%kernelsList);
 printLog("kernelsList: $dumperText", 'TL0', '[DEBUG]');
