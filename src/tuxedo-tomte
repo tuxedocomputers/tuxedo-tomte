@@ -228,7 +228,11 @@ my %presetModules = initialModuleSettings();
 my %supportedOSList = supportedOS();
 my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
-my %kernelsList = kernels();
+#TODO debug
+#my %kernelsList = kernels();
+my %kernelsList1 = kernels();
+my %kernelsList = %{ dclone(\%kernelsList1) };
+
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
@@ -4501,7 +4505,7 @@ print Dumper(\%kernelsList);
 
 foreach my $key ( keys %kernelsList ) {
 	#foreach my $key2 ( keys  %kernelsList{$key} ) {
-		printLog("$kernelsList{$key}", 'TL0', '[DEBUG]');
+		printLog("$key", 'TL0', '[DEBUG]');
 		#}
 }
 
