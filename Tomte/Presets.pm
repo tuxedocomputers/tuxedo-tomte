@@ -202,7 +202,7 @@ our %KERNELS = (
 
 	"jammy" => {
 		"linux-tuxedo-22.04" => "linux-tuxedo-22.04",
-		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge",
+		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge"
 	},
 
 	"noble" => {
