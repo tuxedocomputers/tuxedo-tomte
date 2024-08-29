@@ -4494,11 +4494,13 @@ sub installKernelFlavour {
 
 my $dumperText;
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
-printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
+printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
+printLog("first dump:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
+printLog("second dump", 'TL0', '[DEBUG]');
 print $dumperText Dumper(\%kernelsList);
-printLog("kernelsList: $$dumperText", 'L0', '[DEBUG]');
+printLog("kernelsList: $dumperText", 'TL0', '[DEBUG]');
 
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
@@ -5087,7 +5089,7 @@ sub isLineInFile {
 	my $match = shift;
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
-		while( <FH> ) {
+		while( <$FH> ) {
 			if ( $_ =~ /^$match$/sm) {
 				return (1);
 			}
