@@ -3360,6 +3360,7 @@ sub addRepoKey {
 	my $errorCode;
 	my $outputKey;
 	my $counter = 0;
+	my $sleepTime = 1; # seconds
 	# install TUXEDO keyring for repositories
 	if (! isPackageInstalled('tuxedo-archive-keyring')) {
 		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
@@ -3385,8 +3386,8 @@ sub addRepoKey {
 				} else {
 					printLog("something is wrong while looking for locks for keyring installation", 'L0', '[ERROR]');
 				}
-				printLog("problem installing keyring, trying again later", 'L0', '[WARN]');
-				sleep(1);
+				printLog("problem installing keyring, trying again in $sleepTime seconds", 'L0', '[WARN]');
+				sleep($sleepTime);
 			}
 			if (isPackageInstalled("tuxedo-archive-keyring")) {
 				printLog("TUXEDO keyring installed successfully", 'L2', '[INFO]');
@@ -4488,6 +4489,18 @@ sub installKernelFlavour {
 	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
 	my $retString;
 	my $exitStatus;
+
+	#TODO debug
+
+my $dumperText;
+printLog("flavour: $flavour", 'L0', '[DEBUG]');
+printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
+printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
+print Dumper(\%kernelsList);
+print $dumperText Dumper(\%kernelsList);
+printLog("kernelsList: $$dumperText", 'L0', '[DEBUG]');
+
+
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
 		${$failed} += 1;
