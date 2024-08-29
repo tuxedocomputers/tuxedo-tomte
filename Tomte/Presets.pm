@@ -196,17 +196,17 @@ our %OTHER_REPOS = (
 );
 
 our %KERNELS = (
-	"focal" => {
-		"linux-tuxedo-20.04" => "linux-tuxedo-20.04",
+	'focal' => {
+		'linux-tuxedo-20.04' => 'linux-tuxedo-20.04'
 	},
 
-	"jammy" => {
-		"linux-tuxedo-22.04" => "linux-tuxedo-22.04",
-		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge"
+	'jammy' => {
+		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04',
+		'linux-tuxedo-22.04-edge' => 'linux-tuxedo-22.04-edge'
 	},
 
-	"noble" => {
-		"linux-tuxedo-24.04" => "linux-tuxedo-24.04",
+	'noble' => {
+		'linux-tuxedo-24.04' => 'linux-tuxedo-24.04'
 	}
 );
 
