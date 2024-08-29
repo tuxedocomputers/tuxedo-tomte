@@ -4501,7 +4501,10 @@ print Dumper(\%kernelsList);
 printLog("second dump", 'TL0', '[DEBUG]');
 print $dumperText Dumper(\%kernelsList);
 printLog("kernelsList: $dumperText", 'TL0', '[DEBUG]');
-
+if (open($LOGFILE, '>>', '/var/log/tomte/tomte.log') ) {
+	print $LOGFILE "$dumperText\n";
+	close($LOGFILE);
+}
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
