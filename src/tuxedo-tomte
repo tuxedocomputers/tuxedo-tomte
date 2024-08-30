@@ -4516,13 +4516,6 @@ foreach my $key ( keys %kernelsList ) {
 		#}
 }
 
-printLog("second dump", 'TL0', '[DEBUG]');
-print $dumperText Dumper(\%kernelsList);
-printLog("kernelsList: $dumperText", 'TL0', '[DEBUG]');
-if (open($LOGFILE, '>>', '/var/log/tomte/tomte.log') ) {
-	print $LOGFILE "$dumperText\n";
-	close($LOGFILE);
-}
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
@@ -7680,10 +7673,22 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
+
+			#TODO debug
+			printLog("before initLogging", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 			initLogging();
+			printLog("before checkMode", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 			checkMode();
+			printLog("before prepareValues", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 			prepareValues();
+			printLog("before prerequisites", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 			prerequisites();
+			printLog("before all", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 			if ($argValue{module} eq "all") {
 				if ($LiveISO) {
 					printLog("starting Tomte in LiveISO mode", 'L0', '[INFO]');
@@ -7711,9 +7716,18 @@ if (scalar(@ARGV) != 0) {
 						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1', '[DEBUG]');
 					}
 				}
+			#TODO debug
+			printLog("before configureAllModules", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				configureAllModules();
+			printLog("before postConfigure", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				postConfigure();
+			printLog("before listSuccess", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				listSuccess();
+			printLog("before writeConfigFile", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				writeConfigFile();
 			} elsif (validModuleName($argValue{module}) ne q{}) {
 				if ($mode eq 'DONT_CONFIGURE') {
