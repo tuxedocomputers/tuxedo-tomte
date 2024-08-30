@@ -5087,7 +5087,7 @@ sub isLineInFile {
 	my $match = shift;
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
-		while( <FH> ) {
+		while( <$FH> ) {
 			if ( $_ =~ /^$match$/sm) {
 				return (1);
 			}
