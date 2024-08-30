@@ -6408,11 +6408,26 @@ sub configureAllModules {
 		# they are done in prerequisite and postrequisite subroutines
 		if (($presetModules{$module}{required} eq 'yes') &&
 			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
+
 			if ($presetModules{$module}{reconfigure} eq 'always') {
+				
+			#TODO debug
+				printLog("before reconfigure $module", 'TL0', '[DEBUG]');
+				print Dumper(\%kernelsList);
+				
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($presetModules{$module}{name});
+			#TODO debug
+				printLog("after reconfigure $module", 'TL0', '[DEBUG]');
+				print Dumper(\%kernelsList);
 			} else {
+			#TODO debug
+				printLog("before configure $module", 'TL0', '[DEBUG]');
+				print Dumper(\%kernelsList);
 				configureSingleModule($presetModules{$module}{name});
+			#TODO debug
+				printLog("after configure $module", 'TL0', '[DEBUG]');
+				print Dumper(\%kernelsList);
 			}
 		} elsif (($presetModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
@@ -7674,21 +7689,7 @@ if (scalar(@ARGV) != 0) {
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
 
-			#TODO debug
-			printLog("before initLogging", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
-			initLogging();
-			printLog("before checkMode", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
-			checkMode();
-			printLog("before prepareValues", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
-			prepareValues();
-			printLog("before prerequisites", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 			prerequisites();
-			printLog("before all", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 			if ($argValue{module} eq "all") {
 				if ($LiveISO) {
 					printLog("starting Tomte in LiveISO mode", 'L0', '[INFO]');
@@ -7723,11 +7724,7 @@ if (scalar(@ARGV) != 0) {
 			printLog("before postConfigure", 'TL0', '[DEBUG]');
 			print Dumper(\%kernelsList);
 				postConfigure();
-			printLog("before listSuccess", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				listSuccess();
-			printLog("before writeConfigFile", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				writeConfigFile();
 			} elsif (validModuleName($argValue{module}) ne q{}) {
 				if ($mode eq 'DONT_CONFIGURE') {
