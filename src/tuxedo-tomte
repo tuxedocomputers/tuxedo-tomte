@@ -6566,20 +6566,20 @@ sub reconfigureSingleModule {
 		if ($presetModules{$module}{upgrade} eq 'yes') {
 	#TODO debug
 			printLog("upgrade module: $module", 'L1', '[INFO]');
-	printLog("before updateModule", 'TL0', '[DEBUG]');
+	printLog("before updateModule $module", 'TL0', '[DEBUG]');
 	print Dumper(\%kernelsList);
 			updateModule($module);
 	#TODO debug
-	printLog("after updateModule", 'TL0', '[DEBUG]');
+	printLog("after updateModule $module", 'TL0', '[DEBUG]');
 	print Dumper(\%kernelsList);
 		} else {
 	#TODO debug
 			printLog("configure module: $module", 'L1', '[INFO]');
-	printLog("before configureModule", 'TL0', '[DEBUG]');
+	printLog("before configureModule $module", 'TL0', '[DEBUG]');
 	print Dumper(\%kernelsList);
 			configureModule($module);
 	#TODO debug
-	printLog("after configureModule", 'TL0', '[DEBUG]');
+	printLog("after configureModule $module", 'TL0', '[DEBUG]');
 	print Dumper(\%kernelsList);
 		}
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
