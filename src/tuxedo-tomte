@@ -4500,7 +4500,11 @@ sub getAptMark {
 # returns 1 if subroutine run through
 #
 sub installKernelFlavour {
+printLog("first dump 1:", 'TL0', '[DEBUG]');
+print Dumper(\%kernelsList);
 	my ($flavour, $failed, $somethingDone) = @_;
+printLog("first dump 2:", 'TL0', '[DEBUG]');
+print Dumper(\%kernelsList);
 	${$failed} = 0;
 	${$somethingDone} = 0;
 	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
@@ -4509,10 +4513,12 @@ sub installKernelFlavour {
 
 	#TODO debug
 
+printLog("first dump 3:", 'TL0', '[DEBUG]');
+print Dumper(\%kernelsList);
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
-printLog("first dump:", 'TL0', '[DEBUG]');
+printLog("first dump 4:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
 
 foreach my $key ( keys %kernelsList ) {
