@@ -228,7 +228,11 @@ my %presetModules = initialModuleSettings();
 my %supportedOSList = supportedOS();
 my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
-my %kernelsList = kernels();
+#TODO debug
+#my %kernelsList = kernels();
+my %kernelsList1 = kernels();
+my %kernelsList = %{ dclone(\%kernelsList1) };
+
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
@@ -4494,12 +4498,24 @@ sub installKernelFlavour {
 
 my $dumperText;
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
-printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
+printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
+printLog("first dump:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
-print $dumperText Dumper(\%kernelsList);
-printLog("kernelsList: $$dumperText", 'L0', '[DEBUG]');
 
+foreach my $key ( keys %kernelsList ) {
+	#foreach my $key2 ( keys  %kernelsList{$key} ) {
+		printLog("$key", 'TL0', '[DEBUG]');
+		#}
+}
+
+printLog("second dump", 'TL0', '[DEBUG]');
+print $dumperText Dumper(\%kernelsList);
+printLog("kernelsList: $dumperText", 'TL0', '[DEBUG]');
+if (open($LOGFILE, '>>', '/var/log/tomte/tomte.log') ) {
+	print $LOGFILE "$dumperText\n";
+	close($LOGFILE);
+}
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
