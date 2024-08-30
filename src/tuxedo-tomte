@@ -236,12 +236,6 @@ my %kernelsList = %{ dclone(\%kernelsList1) };
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
-printLog("right after initializing:", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
-print Dumper(\%supportedOSList);
-print Dumper(\%lockFilesList);
-print Dumper(\%postConfProgramsList);
-
 
 # hash to load the configfile
 # is a copy from presetModules to exclude undefined values
@@ -4503,7 +4497,6 @@ sub installKernelFlavour {
 
 	#TODO debug
 
-my $dumperText;
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
@@ -6571,11 +6564,23 @@ sub reconfigureSingleModule {
 		(($localConfModules{$module}{blocked} eq 'no') && ($presetModules{$module}{required} eq 'yes'))) {
 
 		if ($presetModules{$module}{upgrade} eq 'yes') {
+	#TODO debug
 			printLog("upgrade module: $module", 'L1', '[INFO]');
+	printLog("before updateModule", 'TL0', '[DEBUG]');
+	print Dumper(\%kernelsList);
 			updateModule($module);
+	#TODO debug
+	printLog("after updateModule", 'TL0', '[DEBUG]');
+	print Dumper(\%kernelsList);
 		} else {
+	#TODO debug
 			printLog("configure module: $module", 'L1', '[INFO]');
+	printLog("before configureModule", 'TL0', '[DEBUG]');
+	print Dumper(\%kernelsList);
 			configureModule($module);
+	#TODO debug
+	printLog("after configureModule", 'TL0', '[DEBUG]');
+	print Dumper(\%kernelsList);
 		}
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
@@ -7781,7 +7786,12 @@ if (scalar(@ARGV) != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
+			#TODO debug
+			printLog("before reConfigureAllModules", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				reconfigureAllModules();
+			printLog("after reConfigureAllModules", 'TL0', '[DEBUG]');
+			print Dumper(\%kernelsList);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
