@@ -236,6 +236,13 @@ my %kernelsList = %{ dclone(\%kernelsList1) };
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
+printLog("right after initializing:", 'TL0', '[DEBUG]');
+print Dumper(\%kernelsList);
+print Dumper(\%supportedOSList);
+print Dumper(\%lockFilesList);
+print Dumper(\%postConfProgramsList);
+
+
 # hash to load the configfile
 # is a copy from presetModules to exclude undefined values
 my %localConfModules = %{ dclone(\%presetModules) };
