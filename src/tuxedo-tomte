@@ -4313,7 +4313,10 @@ sub installPackage {
 					}
 				} elsif ($retval == 1) {
 					#TODO restart not neccessary if nvidia-driver-550 was installed before
+						print "before set restart values\n";
+						print Dumper(%presetModules);
 					if ($presetModules{$module}{restart} eq 'yes') {
+						#TODO debug
 						setRestartValues();
 					}
 				}
@@ -5337,20 +5340,22 @@ sub messageDesktop {
 	$environ = "/proc/$mPid/environ";
 	my $FH;
 	if ( (-e $environ) && open($FH, "<", $environ) ) {
-		$dbusAddress = do { local $/; <FH> };
-		if (! close(FH)) {
-			printLog("Can't close $environ", 'L0', '[WARN]');
+		#TODO test this
+		if (defined $FH) {
+			$dbusAddress = do { local $/; <FH> };
+			if (! close(FH)) {
+				printLog("Can't close $environ", 'L0', '[WARN]');
+			}
+			$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sm;
+			$dbusAddress = $1;
+			if ($dbusAddress eq q{}) {
+				printLog('No display for message output found, no DBUS address', 'L0', '[INFO]');
+				return (0);
+			}
+		} else {
+			printLog('No display for message output found', 'L1', '[INFO]');
+			return (0);
 		}
-	} else {
-		printLog('No display for message output found', 'L1', '[INFO]');
-		return (0);
-	}
-
-	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sm;
-	$dbusAddress = $1;
-	if ((undef $dbusAddress) || ($dbusAddress eq q{})) {
-		printLog('No display for message output found, no DBUS address', 'L0', '[INFO]');
-		return (0);
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
