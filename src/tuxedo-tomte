@@ -228,11 +228,7 @@ my %presetModules = initialModuleSettings();
 my %supportedOSList = supportedOS();
 my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
-#TODO debug
-#my %kernelsList = kernels();
-my %kernelsList1 = kernels();
-my %kernelsList = %{ dclone(\%kernelsList1) };
-
+my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
@@ -2190,21 +2186,9 @@ sub kerneltuxedo2404() {
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		# clean up oldest tuxedo kernel in /boot (if not used)
 
-#TODO debug
-printLog("before checkAndDelete", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 		checkAndDeleteOldestTuxedoKernel();
-printLog("before checkAndDelete2", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 		checkAndDeleteOldestRemnantLinuxHeader();
-printLog("after checkAndDelete2", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
-
-printLog("before installKernelFlavour", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 		installKernelFlavour('linux-tuxedo-24.04', \$instFailed, \$instDone);
-printLog("after installKernelFlavour", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 		if ($instFailed > 0) {
 			startTomteDelayed();
 			addToConfiguredModules($module, "failed");
@@ -4512,8 +4496,6 @@ print Dumper(\%kernelsList);
 	my $exitStatus;
 
 	#TODO debug
-printLog("first dump 3:", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 printLog("first dump 4 kernelsList:", 'TL0', '[DEBUG]');
@@ -6414,23 +6396,10 @@ sub configureAllModules {
 
 			if ($presetModules{$module}{reconfigure} eq 'always') {
 				
-			#TODO debug
-				printLog("before reconfigure $module", 'TL0', '[DEBUG]');
-				print Dumper(\%kernelsList);
-				
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($presetModules{$module}{name});
-			#TODO debug
-				printLog("after reconfigure $module", 'TL0', '[DEBUG]');
-				print Dumper(\%kernelsList);
 			} else {
-			#TODO debug
-				printLog("before configure $module", 'TL0', '[DEBUG]');
-				print Dumper(\%kernelsList);
 				configureSingleModule($presetModules{$module}{name});
-			#TODO debug
-				printLog("after configure $module", 'TL0', '[DEBUG]');
-				print Dumper(\%kernelsList);
 			}
 		} elsif (($presetModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
@@ -6574,23 +6543,11 @@ sub reconfigureSingleModule {
 		(($localConfModules{$module}{blocked} eq 'no') && ($presetModules{$module}{required} eq 'yes'))) {
 
 		if ($presetModules{$module}{upgrade} eq 'yes') {
-	#TODO debug
-			printLog("upgrade module: $module", 'L1', '[INFO]');
-	printLog("before updateModule $module", 'TL0', '[DEBUG]');
-	print Dumper(\%kernelsList);
+			printLog("update module: $module", 'L1', '[INFO]');
 			updateModule($module);
-	#TODO debug
-	printLog("after updateModule $module", 'TL0', '[DEBUG]');
-	print Dumper(\%kernelsList);
 		} else {
-	#TODO debug
 			printLog("configure module: $module", 'L1', '[INFO]');
-	printLog("before configureModule $module", 'TL0', '[DEBUG]');
-	print Dumper(\%kernelsList);
 			configureModule($module);
-	#TODO debug
-	printLog("after configureModule $module", 'TL0', '[DEBUG]');
-	print Dumper(\%kernelsList);
 		}
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' ) {
 		$configuredModules{$module} = 'nothingToDo';
@@ -7703,7 +7660,9 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
-
+			initLogging();
+			checkMode();
+			prepareValues();
 			prerequisites();
 			if ($argValue{module} eq "all") {
 				if ($LiveISO) {
@@ -7732,12 +7691,7 @@ if (scalar(@ARGV) != 0) {
 						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1', '[DEBUG]');
 					}
 				}
-			#TODO debug
-			printLog("before configureAllModules", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				configureAllModules();
-			printLog("before postConfigure", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
@@ -7796,12 +7750,7 @@ if (scalar(@ARGV) != 0) {
 					printLog("DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-			#TODO debug
-			printLog("before reConfigureAllModules", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				reconfigureAllModules();
-			printLog("after reConfigureAllModules", 'TL0', '[DEBUG]');
-			print Dumper(\%kernelsList);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
