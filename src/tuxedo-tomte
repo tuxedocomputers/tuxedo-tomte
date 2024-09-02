@@ -4497,14 +4497,6 @@ print Dumper(\%kernelsList);
 	my $retString;
 	my $exitStatus;
 
-	#TODO debug
-printLog("flavour: >$flavour<", 'TL0', '[DEBUG]');
-printLog("ubuntuCodename: >$ubuntuCodename<", 'TL0', '[DEBUG]');
-printLog("first dump 4 kernelsList:", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
-printLog("listEntry: $kernelsList{$ubuntuCodename}{$flavour}", 'TL0', '[DEBUG]');
-
-
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
 		${$failed} += 1;
