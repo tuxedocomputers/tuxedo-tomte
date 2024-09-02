@@ -658,6 +658,8 @@ sub readOSData {
 		exit (0);
 	}
 	foreach $line ( @osReleaseLines ) {
+		# removing leading/trailing whitespaces
+		$line =~ s/^\s+|\s+$//g;
 		if ( $line =~ /^NAME=/sm ) {
 			# e.g. Ubuntu
 			$line =~ /NAME=\"(.*)\"/sm;
@@ -4496,8 +4498,8 @@ print Dumper(\%kernelsList);
 	my $exitStatus;
 
 	#TODO debug
-printLog("flavour: $flavour", 'L0', '[DEBUG]');
-printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
+printLog("flavour: >$flavour<", 'TL0', '[DEBUG]');
+printLog("ubuntuCodename: >$ubuntuCodename<", 'TL0', '[DEBUG]');
 printLog("first dump 4 kernelsList:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
 printLog("listEntry: $kernelsList{$ubuntuCodename}{$flavour}", 'TL0', '[DEBUG]');
