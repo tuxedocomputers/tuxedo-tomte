@@ -2370,7 +2370,7 @@ sub nvidiadriver() {
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[ERROR]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2406,11 +2406,6 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-
-
-
-
-
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
@@ -4317,6 +4312,7 @@ sub installPackage {
 						startTomteDelayed();
 					}
 				} elsif ($retval == 1) {
+					#TODO restart not neccessary if nvidia-driver-550 was installed before
 					if ($presetModules{$module}{restart} eq 'yes') {
 						setRestartValues();
 					}
@@ -5352,7 +5348,7 @@ sub messageDesktop {
 
 	$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sm;
 	$dbusAddress = $1;
-	if ($dbusAddress eq q{}) {
+	if ((undef $dbusAddress) || ($dbusAddress eq q{})) {
 		printLog('No display for message output found, no DBUS address', 'L0', '[INFO]');
 		return (0);
 	}
@@ -5703,7 +5699,15 @@ sub writeConfigFile {
 	if ( open($FH, '>', $configFile) ) {
 		printLog("writing configfile", 'L1', '[INFO]');
 		print $FH "# name version installed blocked required hwid\n";
+
+			#TODO debug
+			print "values presetModules\n";
+			print Dumper(\%presetModules);
+
 		foreach my $name (sort keys %presetModules) {
+
+			#TODO debug
+			printLog("modulename: >$name<", 'TL0', '[DEBUG]');
 			# values have to be same as in readConfigFile
 			if ($presetModules{$name}{required} ne 'no') {
 				if ($presetModules{$name}{upgrade} eq 'yes') {
