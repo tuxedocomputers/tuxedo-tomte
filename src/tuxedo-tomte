@@ -4500,6 +4500,7 @@ printLog("flavour: $flavour", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 printLog("first dump 4 kernelsList:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
+printLog("listEntry: $kernelsList{$ubuntuCodename}{$flavour}", 'TL0', '[DEBUG]');
 
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
