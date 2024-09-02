@@ -4512,20 +4512,12 @@ print Dumper(\%kernelsList);
 	my $exitStatus;
 
 	#TODO debug
-
 printLog("first dump 3:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
 printLog("flavour: $flavour", 'L0', '[DEBUG]');
 printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
-printLog("kernelslist flavour: $kernelsList{$ubuntuCodename}{$flavour}", 'L0', '[DEBUG]');
-printLog("first dump 4:", 'TL0', '[DEBUG]');
+printLog("first dump 4 kernelsList:", 'TL0', '[DEBUG]');
 print Dumper(\%kernelsList);
-
-foreach my $key ( keys %kernelsList ) {
-	#foreach my $key2 ( keys  %kernelsList{$key} ) {
-		printLog("$key", 'TL0', '[DEBUG]');
-		#}
-}
 
 
 	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
