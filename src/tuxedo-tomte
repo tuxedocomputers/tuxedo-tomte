@@ -1265,7 +1265,7 @@ sub checkRequirements {
 # checks only for hardware
 # last check after configuring enything else for late hardware like eGPU's
 #
-sub checkRequirementsiLast {
+sub checkRequirementsLast {
 
 
 	printLog("in last check requirements", 'L1', '[INFO]');
