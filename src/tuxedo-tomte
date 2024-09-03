@@ -1267,6 +1267,9 @@ sub checkRequirements {
 #
 sub checkRequirementsiLast {
 
+
+	printLog("in last check requirements", 'L1', '[INFO]');
+
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	# TODO debug
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
