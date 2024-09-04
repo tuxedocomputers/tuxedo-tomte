@@ -1487,6 +1487,25 @@ sub tuxedorepos() {
 				$presetModules{$module}{upgraded} = "yes";
 			}
 		}
+		# remove obsolete entries if they still exist
+		if ($ubuntuCodename =~ /noble/) {
+			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-plasma.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-plasma.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-plasma.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-os.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-os.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
+			}
+		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
@@ -1502,17 +1521,22 @@ sub tuxedorepos() {
 				unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
 			}
 		}
+		# remove obsolete entries if they still exist
 		if ($ubuntuCodename =~ /noble/) {
 			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
 			}
 			if (-e '/etc/apt/sources.list.d/tuxedo-plasma.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-plasma.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-plasma.list');
 			}
 			if (-e '/etc/apt/sources.list.d/tuxedo-os.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-os.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
 			}
 			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
 			}
 		}
