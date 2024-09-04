@@ -1502,6 +1502,20 @@ sub tuxedorepos() {
 				unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
 			}
 		}
+		if ($ubuntuCodename =~ /noble/) {
+			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-plasma.list') {
+				unlink('/etc/apt/sources.list.d/tuxedo-plasma.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-os.list') {
+				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
+				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
+			}
+		}
 
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%essentialReposList);
