@@ -321,6 +321,8 @@ sub checkAndSetLocale {
 			my ($foundFolder, $localePath) = getMatchingLocaleForLang($languageCode);
 
             # Check if the directory exists
+			# TODO debug
+			printLog("foundFolder: $foundFolder" , 'TL0', '[DEBUG]');
             if ($foundFolder == 0) {
 				local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder;
 
@@ -1283,7 +1285,7 @@ sub checkRequirementsLast {
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
-	configureSingleModule('nvidiadriver');
+	configureSingleModule('nvidia-driver');
 
 	return (0);
 }
