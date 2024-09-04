@@ -1007,7 +1007,7 @@ our %DEVICES = (
 	'73' => {
 		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
 		board_name => ['GXxHRXx'],
-		fix => [q{}],
+		fix => ['noecwakeupfix'],
 		flavour => ['22.04'],
 		pci_id => q{},
 		cpu => q{},
@@ -2192,7 +2192,29 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no',
+	},
+	noecwakeupfix => {
+		name => 'no-EC-wakeup-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('noecwakupfix_description'),
+		postconf => 'updateGrub',
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => 'always',
+		restart => 'yes',
+		order => q{},
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no',
 	}
+
 );
 
 

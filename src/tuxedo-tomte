@@ -1256,6 +1256,11 @@ sub checkRequirements {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
+	if ($boardname =~ /GXxHRXx/sm) {
+		$presetModules{noecwakupfix}{required} = 'yes';
+		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
+	}
+
 	return (0);
 }
 
@@ -3225,6 +3230,25 @@ sub gfxmode() {
 	}
 	return (1);
 }
+
+
+
+###############################################################################
+# resolves: often wakes up seconds after being put to suspend
+#
+sub noecwakupfix() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 0, 'acpi.no_ec_wakeup=1');
+	return;
+}
+
+
+
+
+
+
+
 
 
 
