@@ -172,6 +172,7 @@ Readonly my $MAX_PACKAGE_NAME => 50;
 Readonly my $MAX_TO_DELETE_KERNEL => 3;
 Readonly my $MAX_OLDEST_HEADER_NAME => 50;
 Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
+Readonly my $TEST_ALL_MODULES => 0;
 
 # get current kernel version
 # if in FAI it should check which is the installed
@@ -6483,6 +6484,12 @@ sub configureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 
+	# for testing
+	if ($TEST_ALL_MODULES) {
+		printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
+		$presetModules{$module}{required} = 'yes';
+	}
+
 	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
@@ -6586,6 +6593,12 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	printLog("reconfigureSingleModule: $moduleName", 'L2', '[INFO]');
+
+	# for testing
+	if ($TEST_ALL_MODULES) {
+		printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
+		$presetModules{$module}{required} = 'yes';
+	}
 
 	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
