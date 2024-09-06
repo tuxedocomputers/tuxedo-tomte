@@ -2118,6 +2118,7 @@ sub nvidiadriver() {
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver550 = 'nvidia-driver-550';
+	my $nvidiaDriver560 = 'nvidia-driver-560';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($ubuntuCodename =~ /focal/) {
@@ -2173,28 +2174,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /jammy/) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560);
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2234,28 +2235,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /noble/) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550);
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560);
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2291,10 +2292,6 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
-
-
-
-
 
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
