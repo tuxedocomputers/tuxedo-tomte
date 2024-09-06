@@ -1604,7 +1604,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 6,
+		version => 7,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
