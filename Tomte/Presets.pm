@@ -203,8 +203,7 @@ our %KERNELS = (
 
 	'jammy' => {
 		'index' => '2',
-		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04',
-		'linux-tuxedo-22.04-edge' => 'linux-tuxedo-22.04-edge'
+		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04'
 	},
 
 	'noble' => {
@@ -1007,10 +1006,17 @@ our %DEVICES = (
 	'73' => {
 		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
 		board_name => ['GXxHRXx'],
+<<<<<<< HEAD
 		fix => ['noecwakeupfix'],
 		flavour => ['22.04'],
 		pci_id => q{},
 		cpu => q{},
+=======
+		fix => ['noecwakupfix'],
+		flavour => ['22.04', '24.04'],
+		pci_id => '',
+		cpu => '',
+>>>>>>> nextRelease
 		kernel => 'kerneltuxedo2204edge',
 		display => q{},
 		usb_device => q{},
@@ -2170,7 +2176,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'yes',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
 	},
 	gfxmode => {
 		name => 'gfxmode',
@@ -2212,7 +2218,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
+	},
+	noecwakeupfix => {
+		name => 'no-ec-wakeup-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('noecwakeupfix_description'),
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no'
 	}
 
 );
