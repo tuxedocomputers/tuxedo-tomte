@@ -72,7 +72,7 @@ $logLevel = $ENV{LOGLEVEL} // $logLevel;
 use Readonly;
 
 # for testing
-Readonly my $TEST_ALL_MODULES => 0;
+Readonly my $TEST_ALL_MODULES => 1;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
