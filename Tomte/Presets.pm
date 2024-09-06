@@ -58,8 +58,12 @@ our %ESSENTIAL_REPOS = (
 
 	"noble" => {
 		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
 		}
 	},
 
@@ -90,12 +94,20 @@ our %ESSENTIAL_REPOS = (
 
 	"TUXEDO OS 24.04" => {
 		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
 		},
 		"plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://plasma6.tuxedocomputers.com/\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
@@ -126,11 +138,18 @@ our %OTHER_REPOS = (
 	"noble" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+				"Types: deb\n".
+				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu\n".
+				"Suites: noble noble-updates\n".
+				"Components: main restricted universe multiverse\n".
+				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n".
+				"\n".
+				"Types: deb\n".
+				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu\n".
+				"Suites: noble-security\n".
+				"Components: main restricted universe multiverse\n".
+				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
 		}
 	},
 
@@ -189,8 +208,12 @@ our %OTHER_REPOS = (
 
 	"TUXEDO OS 24.04" => {
 		"plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://plasma6.tuxedocomputers.com/\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
