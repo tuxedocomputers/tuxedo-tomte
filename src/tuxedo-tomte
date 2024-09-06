@@ -1213,6 +1213,11 @@ sub checkRequirements {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
+
+	if ($boardname =~ /GXxHRXx/) {
+		$presetModules{noecwakeupfix}{required} = 'yes';
+		printLog("detected $presetModules{noecwakeupfix}{name} issue", 'L1', '[INFO]');
+	}
 }
 
 
@@ -3065,6 +3070,26 @@ sub gfxmode() {
 	}
 	return (1);
 }
+
+
+
+###############################################################################
+# Prevents spurious wake-up from suspend triggered by the EC
+#
+sub noecwakeupfix() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 0, 'acpi.ec_no_wakeup=1');
+}
+
+
+
+
+
+
+
+
+
 
 
 
