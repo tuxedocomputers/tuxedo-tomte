@@ -220,16 +220,15 @@ our %OTHER_REPOS = (
 
 our %KERNELS = (
 	"focal" => {
-		"linux-tuxedo-20.04" => "linux-tuxedo-20.04",
+		"linux-tuxedo-20.04" => "linux-tuxedo-20.04"
 	},
 
 	"jammy" => {
-		"linux-tuxedo-22.04" => "linux-tuxedo-22.04",
-		"linux-tuxedo-22.04-edge" => "linux-tuxedo-22.04-edge",
+		"linux-tuxedo-22.04" => "linux-tuxedo-22.04"
 	},
 
 	"noble" => {
-		"linux-tuxedo-24.04" => "linux-tuxedo-24.04",
+		"linux-tuxedo-24.04" => "linux-tuxedo-24.04"
 	}
 );
 
@@ -1027,8 +1026,8 @@ our %DEVICES = (
 	'73' => {
 		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
 		board_name => ['GXxHRXx'],
-		fix => [''],
-		flavour => ['22.04'],
+		fix => ['noecwakupfix'],
+		flavour => ['22.04', '24.04'],
 		pci_id => '',
 		cpu => '',
 		kernel => 'kerneltuxedo2204edge',
@@ -2190,7 +2189,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'yes',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
 	},
 	gfxmode => {
 		name => 'gfxmode',
@@ -2211,7 +2210,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => '',
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
+	},
+	noecwakeupfix => {
+		name => 'no-ec-wakeup-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('noecwakeupfix_description'),
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no'
 	}
 );
 
