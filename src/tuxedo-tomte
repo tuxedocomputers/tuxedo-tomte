@@ -1032,14 +1032,8 @@ sub checkRequirements {
 		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2004}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /jammy/) {
-		if (($boardname eq 'GXxHRXx') ||
-			($boardname eq 'GXxMRXx')) {
-			printLog("kernel $presetModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
-			$presetModules{kerneltuxedo2204edge}{required} = 'yes';
-		} else {
-			printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-			$presetModules{kerneltuxedo2204}{required} = 'yes';
-		}
+		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2204}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /noble/) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
@@ -2064,46 +2058,6 @@ sub kerneltuxedo2204() {
 		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
 	}
 }
-
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04-edge
-#
-sub kerneltuxedo2204edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-}
-
 
 
 
