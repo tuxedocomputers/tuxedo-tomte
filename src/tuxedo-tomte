@@ -69,10 +69,10 @@ use Data::Dumper;
 my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
+use Readonly;
+
 # for testing
 Readonly my $TEST_ALL_MODULES => 0;
-
-use Readonly;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
@@ -814,7 +814,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-<<<<<<< HEAD
 	if (!$FAI) {
 		if (($boardname =~ /X170SM/sm) ||
 			($boardname =~ /PB50_70DFx,DDx/sm) ||
@@ -1081,7 +1080,7 @@ sub checkRequirements {
 	} elsif ($ubuntuCodename =~ /jammy/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /noble/sm {
+	} elsif ($ubuntuCodename =~ /noble/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
@@ -1270,8 +1269,6 @@ sub checkRequirements {
 # last check after configuring enything else for late hardware like eGPU's
 #
 sub checkRequirementsLast {
-
-
 	printLog("in last check requirements", 'L1', '[INFO]');
 
 	my $nvidiaDevice = `lspci -nd 10de:`;
@@ -2266,6 +2263,7 @@ sub nvidiadriver() {
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver550 = 'nvidia-driver-550';
+	my $nvidiaDriver560 = 'nvidia-driver-560';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($ubuntuCodename =~ /focal/sm) {
@@ -2321,28 +2319,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /jammy/sm) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2382,28 +2380,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /noble/sm) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[ERROR]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[ERROR]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2449,7 +2447,7 @@ sub nvidiadriver() {
 			$nvidiaDriver = $nvidiaDriver510;
 		}
 		if ($ubuntuCodename =~ /(jammy|noble)/) {
-			$nvidiaDriver = $nvidiaDriver550;
+			$nvidiaDriver = $nvidiaDriver560;
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
 			my $counter = 0;
@@ -6574,7 +6572,7 @@ sub reconfigureAllModules {
 
 	foreach $module (keys %presetModules) {
 		# to debug on all modules
-		if ($installAllModules) {
+		if ($TEST_ALL_MODULES) {
 			$presetModules{$module}{required} = 'yes';
 		
 		}
