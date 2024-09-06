@@ -814,6 +814,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
+<<<<<<< HEAD
 	if (!$FAI) {
 		if (($boardname =~ /X170SM/sm) ||
 			($boardname =~ /PB50_70DFx,DDx/sm) ||
