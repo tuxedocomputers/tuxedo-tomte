@@ -824,7 +824,6 @@ sub checkRequirements {
 			($boardname =~ /EDUBOOK1502/sm) ||
 			($boardname =~ /NS50MU/sm) ||
 			($boardname =~ /NS50_70MU/sm) ||
-			($boardname =~ /NJ50_70CU/sm) ||
 			($boardname =~ /X170KM-G/sm )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == $NEG_ONE) {
@@ -1075,14 +1074,8 @@ sub checkRequirements {
 		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2004}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /jammy/sm) {
-		if (($boardname eq 'GXxHRXx') ||
-			($boardname eq 'GXxMRXx')) {
-			printLog("kernel $presetModules{kerneltuxedo2204edge}{name} will be default", 'L1', '[INFO]');
-			$presetModules{kerneltuxedo2204edge}{required} = 'yes';
-		} else {
-			printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-			$presetModules{kerneltuxedo2204}{required} = 'yes';
-		}
+		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
+		$presetModules{kerneltuxedo2204}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /noble/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
@@ -1583,6 +1576,25 @@ sub tuxedorepos() {
 				$presetModules{$module}{upgraded} = "yes";
 			}
 		}
+		# remove obsolete entries if they still exist
+		if ($ubuntuCodename =~ /noble/) {
+			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-plasma.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-plasma.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-plasma.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-os.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-os.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
+			}
+		}
 	}
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
@@ -1596,6 +1608,25 @@ sub tuxedorepos() {
 			if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
 				printLog("removing obsolete /etc/apt/sources.list.d/graphics-tuxedo.list", 'L0', '[INFO]');
 				unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
+			}
+		}
+		# remove obsolete entries if they still exist
+		if ($ubuntuCodename =~ /noble/) {
+			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-plasma.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-plasma.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-plasma.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-os.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-os.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
+			}
+			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
+				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
 			}
 		}
 
@@ -2176,47 +2207,6 @@ sub kerneltuxedo2204() {
 
 
 ###############################################################################
-# kernel-tuxedo-22.04-edge
-#
-sub kerneltuxedo2204edge() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-22.04-edge', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-	return;
-}
-
-
-
-
-
-
-###############################################################################
 # kernel-tuxedo-24.04
 #
 sub kerneltuxedo2404() {
@@ -2272,6 +2262,7 @@ sub nvidiadriver() {
 	my $output;
 	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver550 = 'nvidia-driver-550';
+	my $nvidiaDriver560 = 'nvidia-driver-560';
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		if ($ubuntuCodename =~ /focal/sm) {
@@ -2323,32 +2314,29 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 
-
-
-
 		} elsif ($ubuntuCodename =~ /jammy/sm) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2388,28 +2376,28 @@ sub nvidiadriver() {
 
 
 		} elsif ($ubuntuCodename =~ /noble/sm) {
-			my $tuxedoNvidiaDriver550 = 'tuxedo-nvidia-driver-550';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver550 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver550);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver550);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver550) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver550, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver550,'manual');
+					setAptMark($tuxedoNvidiaDriver560,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver550 can't be found in the repositories", 'L0', '[ERROR]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[ERROR]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2445,6 +2433,7 @@ sub nvidiadriver() {
 				$presetModules{$module}{installed} = "failed";
 				addToConfiguredModules($module, "failed");
 			}
+
 		} else {
 			printLog("unknown distribution/flavour, can't install nvidia drivers", 'TL0', '[WARN]');
 		}
@@ -3234,14 +3223,16 @@ sub gfxmode() {
 
 
 ###############################################################################
-# resolves: often wakes up seconds after being put to suspend
+# Prevents spurious wake-up from suspend triggered by the EC
 #
-sub noecwakupfix() {
+sub noecwakeupfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'acpi.no_ec_wakeup=1');
+	grubModuleEdit( $module, $action, 0, 'acpi.ec_no_wakeup=1');
 	return;
 }
+
+
 
 
 

@@ -58,8 +58,12 @@ our %ESSENTIAL_REPOS = (
 
 	"noble" => {
 		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
 		}
 	},
 
@@ -90,12 +94,20 @@ our %ESSENTIAL_REPOS = (
 
 	"TUXEDO OS 24.04" => {
 		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
 		},
 		"plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://plasma6.tuxedocomputers.com/\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
@@ -126,11 +138,18 @@ our %OTHER_REPOS = (
 	"noble" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
+				"Types: deb\n".
+				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu\n".
+				"Suites: noble noble-updates\n".
+				"Components: main restricted universe multiverse\n".
+				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n".
+				"\n".
+				"Types: deb\n".
+				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu\n".
+				"Suites: noble-security\n".
+				"Components: main restricted universe multiverse\n".
+				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
 		}
 	},
 
@@ -189,8 +208,12 @@ our %OTHER_REPOS = (
 
 	"TUXEDO OS 24.04" => {
 		"plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com/ubuntu noble main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
+			"content" => ["Types: deb\n".
+							"URIs: https://plasma6.tuxedocomputers.com/\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
@@ -204,7 +227,6 @@ our %KERNELS = (
 	'jammy' => {
 		'index' => '2',
 		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04',
-		'linux-tuxedo-22.04-edge' => 'linux-tuxedo-22.04-edge'
 	},
 
 	'noble' => {
@@ -1008,7 +1030,7 @@ our %DEVICES = (
 		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
 		board_name => ['GXxHRXx'],
 		fix => ['noecwakeupfix'],
-		flavour => ['22.04'],
+		flavour => ['22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
 		kernel => 'kerneltuxedo2204edge',
@@ -1585,7 +1607,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	nvidiadriver => {
 		name => 'nvidia-driver',
-		version => 6,
+		version => 7,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2170,7 +2192,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'yes',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
 	},
 	gfxmode => {
 		name => 'gfxmode',
@@ -2212,7 +2234,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		order => q{},
 		dkms => 'no',
 		FAI => 'yes',
-		LiveISO => 'no',
+		LiveISO => 'no'
+	},
+	noecwakeupfix => {
+		name => 'no-ec-wakeup-fix',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => '',
+		description => __('noecwakeupfix_description'),
+		postconf => 'updateGrub',
+		upgrade => '',
+		upgraded => '',
+		reconfigure => 'always',
+		restart => 'yes',
+		order => '',
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no'
 	}
 
 );
