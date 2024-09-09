@@ -790,7 +790,6 @@ sub checkRequirements {
 			($boardname =~ /EDUBOOK1502/) ||
 			($boardname =~ /NS50MU/) ||
 			($boardname =~ /NS50_70MU/) ||
-			($boardname =~ /NJ50_70CU/) ||
 			($boardname =~ /X170KM-G/ )) {
 			my $minKernelVersionFornoauxfix = '5.15.0-53';
 			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
