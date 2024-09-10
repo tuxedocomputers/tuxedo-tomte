@@ -16,6 +16,18 @@ if [[ $higherloglevel_present -gt 0 ]]; then
   echo "Found log level higher then 0!"
 fi
 
+# Check if a test all modules is set
+testallmodules_present=0
+echo "Checking for test all modules..."
+grep -Hn 'Readonly my \$TEST_ALL_MODULES =>' ./src/tuxedo-tomte | grep -vE 'Readonly my \$TEST_ALL_MODULES => 1' && testallmodules_present=1
+if [[ $testallmodules_present -gt 0 ]]; then
+  echo "Found test all modules higher then 0!"
+fi
+
+
+
+
+
 # Run the check_translations script and capture any output
 #echo "Checking translations..."
 #translation_differences_text=$(perl ./check_translations.pl 2>&1)
@@ -46,7 +58,7 @@ if [[ $syntax_incorrect -gt 0 ]]; then
 fi
 
 # Calculate the exit code as the sum of the variables
-exit_code=$((todo_present + higherloglevel_present + syntax_incorrect))
+exit_code=$((todo_present + higherloglevel_present + testallmodules_present + syntax_incorrect))
 
 # Output the exit code
 echo "Exit code: $exit_code"
