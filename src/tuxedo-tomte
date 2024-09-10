@@ -1592,7 +1592,7 @@ sub tuxedorepos() {
 				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
 			}
 			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
-				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
 			}
 		}
@@ -1626,7 +1626,7 @@ sub tuxedorepos() {
 				unlink('/etc/apt/sources.list.d/tuxedo-os.list');
 			}
 			if (-e '/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list') {
-				printLog("removing obsolete /etc/apt/sources.list.d/tuxedoi-ubuntu-mirrors.list", 'L0', '[INFO]');
+				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list');
 			}
 		}
@@ -3828,7 +3828,7 @@ sub LTEModuleFix {
 # createFile( $filePath, $content, $executable );
 # createFile( $filePath, $content );
 #
-# $executable has to be 1|"yes"|"+x" to be executable
+# $executable has to be "yes"|"+x" to be executable
 #
 # returns
 #        1 if the content was changed successfully
@@ -3836,7 +3836,7 @@ sub LTEModuleFix {
 #       -1 if there was an error writing to the file
 sub createFile {
     my ($filePath, $content, $executable) = @_;
-    $executable //= 0;  # Set default value if $executable is not provided
+    $executable //= 'no';  # Set default value if $executable is not provided
 
 	if (-e $filePath) {
 		# Read the current content of the file
@@ -3859,7 +3859,7 @@ sub createFile {
     }
 
     # If the file is supposed to be executable, set the execution permission
-    if($executable == 1 || $executable eq 'yes' || $executable eq '+x') {
+    if($executable eq 'yes' || $executable eq '+x') {
         if(system("chmod +x $filePath")) {
             return $NEG_ONE;  # Return -1 if there was an error setting the execution permission
         }
@@ -3869,7 +3869,7 @@ sub createFile {
     my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
 
 	my $fileIsExecutableCheck = 1;
-	if($executable == 1|| $executable eq 'yes'|| $executable eq '+x') {
+	if($executable eq 'yes'|| $executable eq '+x') {
 		$fileIsExecutableCheck = -x $filePath;
 	}
 
@@ -4346,10 +4346,17 @@ sub getPackageVersion {
 #
 sub installPackage {
 	my ( $packageName, $module ) = shift;
+	#TODO debug
+	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
+	
+	
 	my $retval;
 	if (isPackageInstalled($packageName)) {
 		return (1);
 	}
+	#TODO debug
+	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
+
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0', '[INFO]');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
@@ -4375,6 +4382,8 @@ sub installPackage {
 				lockPM();
 				printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
 				$retval = isPackageInstalled($packageName);
+	#TODO debug
+	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
 				if ($retval == 0) {
 					printLog("failed to install $packageName", 'L0', '[WARN]');
 					printLog("will try again later", 'L0', '[WARN]');
