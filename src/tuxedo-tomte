@@ -4345,7 +4345,7 @@ sub getPackageVersion {
 # returns 0 if package was not installed
 #
 sub installPackage {
-	my ( $packageName, $module ) = shift;
+	my ( $packageName, $module ) = @_;
 	#TODO debug
 	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
 	
