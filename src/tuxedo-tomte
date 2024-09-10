@@ -326,7 +326,7 @@ sub checkAndSetLocale {
             # Check if the directory exists
 			# TODO debug
 			printLog("foundFolder: $foundFolder" , 'TL0', '[DEBUG]');
-            if ($foundFolder == 0) {
+            if ($foundFolder eq q{}) {
 				local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder;
 
                 printLog("Found Tomte locale file in: $localePath", "L1", '[INFO]');
@@ -372,8 +372,7 @@ sub getMatchingLocaleForLang {
 	# Directory where the existing translations can be found
 	my $localeBasePath = "/usr/share/locale";
 
-	my $foundLanguage = 0;
-	my $localePath = 0;
+	my $foundLanguage = q{};
 
 	my @files = glob($localeBasePath . q{/} . $lang . "*/LC_MESSAGES/tomte.mo");
 
@@ -2121,6 +2120,33 @@ sub tuxedodrivers() {
 		}
 		if (isPackageInstalled('tuxedo-keyboard-ite')) {
 			debianPackageModule( 'tuxedokeyboardite', 'remove');
+		}
+	}
+	return;
+}
+
+
+
+
+###############################################################################
+# systemd-backlight-fix
+#
+sub systemdbacklightfix() {
+	my $module = shift;
+	my $action = shift;
+	if ($action eq 'install') {
+		printLog("$presetModules{$module}{name} is not anymore necessary", 'L0', '[INFO]');
+	}
+	if ($action eq 'remove') {
+		printLog("$presetModules{$module}{name} will be removed", 'L0', '[INFO]');
+		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
+			if (unlink('/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules')) {
+				printLog("$presetModules{$module}{name} has been successfully removed", 'L0', '[INFO]');
+			} else {
+				printLog("$presetModules{$module}{name} could not be removed", '', '[ERROR]');
+			}
+		} else {
+			printLog("$presetModules{$module}{name} is not installed", 'L2', '[INFO]');
 		}
 	}
 	return;
@@ -4366,6 +4392,7 @@ sub installPackage {
 					#TODO restart not neccessary if nvidia-driver-550 was installed before
 						print "before set restart values\n";
 						print Dumper(%presetModules);
+						printLog("module: $module presetRestart: $presetModules{$module}{restart}", 'TL0', '[DEBUG]');
 					if ($presetModules{$module}{restart} eq 'yes') {
 						#TODO debug
 						setRestartValues();
@@ -5266,7 +5293,7 @@ sub insertGrub {
 	    	push (@grubLines, $_);
 		}
 		if (! close($grubFH)) {
-			printLog("Can't close $grubFile", 'L0', '[ERROR]');
+			printLog("Can't close $grubFile: $!", 'L0', '[ERROR]');
 		}
     } else {
 		printLog("Err: $!", 'L0', '[ERROR]');
