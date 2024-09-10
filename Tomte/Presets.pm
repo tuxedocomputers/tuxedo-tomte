@@ -226,7 +226,7 @@ our %KERNELS = (
 
 	'jammy' => {
 		'index' => '2',
-		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04',
+		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04'
 	},
 
 	'noble' => {
@@ -1022,7 +1022,7 @@ our %DEVICES = (
 		flavour => ['22.04'],
 		pci_id => q{},
 		cpu => q{},
-		kernel => 'kerneltuxedo2204edge',
+		kernel => '',
 		display => q{},
 		usb_device => q{},
 	},
@@ -1033,7 +1033,7 @@ our %DEVICES = (
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
-		kernel => 'kerneltuxedo2204edge',
+		kernel => '',
 		display => q{},
 		usb_device => q{},
 	},
@@ -1044,7 +1044,7 @@ our %DEVICES = (
 		flavour => ['22.04'],
 		pci_id => q{},
 		cpu => q{},
-		kernel => 'kerneltuxedo2204edge',
+		kernel => '',
 		display => q{},
 		usb_device => q{},
 	},
@@ -1055,7 +1055,7 @@ our %DEVICES = (
 		flavour => ['22.04'],
 		pci_id => q{},
 		cpu => q{},
-		kernel => 'kerneltuxedo2204edge',
+		kernel => '',
 		display => q{},
 		usb_device => q{},
 	}
@@ -1562,27 +1562,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
-	},
-	kerneltuxedo2204edge => {
-		name => 'linux-tuxedo-22.04-edge',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => q{},
-		description => __('kerneltuxedo2204edge_description'),
-		postconf => q{},
-		upgrade => q{},
-		upgraded => q{},
-		reconfigure => 'always',
-		restart => 'yes',
-		order => q{},
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'no',
 	},
 	kerneltuxedo2404 => {
 		name => 'linux-tuxedo-24.04',

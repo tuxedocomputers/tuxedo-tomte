@@ -71,6 +71,9 @@ $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
 
+# for testing
+Readonly my $TEST_ALL_MODULES => 1;
+
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 local $ENV{LC_MESSAGES} = 'C';
@@ -1249,8 +1252,9 @@ sub checkRequirements {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
+
 	if ($boardname =~ /GXxHRXx/sm) {
-		$presetModules{noecwakupfix}{required} = 'yes';
+		$presetModules{noecwakeupfix}{required} = 'yes';
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
 
@@ -1266,8 +1270,6 @@ sub checkRequirements {
 # last check after configuring enything else for late hardware like eGPU's
 #
 sub checkRequirementsLast {
-
-
 	printLog("in last check requirements", 'L1', '[INFO]');
 
 	my $nvidiaDevice = `lspci -nd 10de:`;
@@ -2444,7 +2446,7 @@ sub nvidiadriver() {
 			$nvidiaDriver = $nvidiaDriver510;
 		}
 		if ($ubuntuCodename =~ /(jammy|noble)/) {
-			$nvidiaDriver = $nvidiaDriver550;
+			$nvidiaDriver = $nvidiaDriver560;
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
 			my $counter = 0;
@@ -6442,6 +6444,12 @@ sub configureAllModules {
 	my $module;
 	my $exit_status;
 	foreach $module (keys %presetModules) {
+		# for testing
+		if ($TEST_ALL_MODULES) {
+			printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
+			$presetModules{$module}{required} = 'yes';
+		}
+
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
 		if (($presetModules{$module}{required} eq 'yes') &&
@@ -6473,6 +6481,12 @@ sub configureSingleModule {
 	my $moduleName = shift;
 	my $module;
 	$module = getSubName($moduleName);
+
+	# for testing
+	if ($TEST_ALL_MODULES) {
+		printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
+		$presetModules{$module}{required} = 'yes';
+	}
 
 	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
@@ -6554,7 +6568,14 @@ sub removeSingleModule {
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
+	
+
 	foreach $module (keys %presetModules) {
+		# to debug on all modules
+		if ($TEST_ALL_MODULES) {
+			$presetModules{$module}{required} = 'yes';
+		
+		}
 		if (($presetModules{$module}{required} eq 'yes') &&
 			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
 			reconfigureSingleModule($presetModules{$module}{name});
@@ -6577,6 +6598,12 @@ sub reconfigureSingleModule {
 	my $module;
 	$module = getSubName($moduleName);
 	printLog("reconfigureSingleModule: $moduleName", 'L2', '[INFO]');
+
+	# for testing
+	if ($TEST_ALL_MODULES) {
+		printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
+		$presetModules{$module}{required} = 'yes';
+	}
 
 	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
