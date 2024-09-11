@@ -5324,7 +5324,7 @@ sub insertGrub {
 	# write the changes into grub config
     if ( open($grubFH, ">", $grubFile) ) {
 		print $grubFH @grubLines;
-		if (close ($grubFH)) {
+		if (! close($grubFH)) {
 			printLog("Can't close $grubFile", 'L0', '[ERROR]');
 		}
     } else {
