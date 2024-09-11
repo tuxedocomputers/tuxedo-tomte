@@ -3979,6 +3979,8 @@ sub debianPackageModule {
 			# or LiveISO and set the verbose line
 			setDkmsVerbose( $module, 1 );
 
+			#TODO debug
+			printLog("before installPackage name: $presetModules{$module}{name} module: $module", 'TL0', '[DEBUG]');
 			if ( installPackage($presetModules{$module}{name}, $module) ) {
 				$presetModules{$module}{installed} = 'yes';
 				$presetModules{$module}{upgraded} = 'yes';
@@ -5428,6 +5430,9 @@ sub messageDesktop {
 	my $FH;
 	if ( (-e $environ) && open($FH, "<", $environ) ) {
 		#TODO test this
+		if(! defined(openhandle($FH))) {
+			printLog("Filehandle NOT open!!!!!!", 'TL0', '[DEBUG]');
+		}
 		if (defined $FH) {
 			$dbusAddress = do { local $/; <FH> };
 			if (! close(FH)) {
@@ -5443,6 +5448,9 @@ sub messageDesktop {
 			printLog('No display for message output found', 'L1', '[INFO]');
 			return (0);
 		}
+	} else {
+		printLog("could not open $environ $!", 'L2', '[WARN]');
+		return (0);
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
