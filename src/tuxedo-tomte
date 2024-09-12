@@ -5199,6 +5199,10 @@ sub isTextInFile {
 	my $match = shift;
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
+		#TODO test this
+		if(! defined $FH) {
+			printLog("Filehandle NOT defined in isTextInFile!!!!!!", 'TL0', '[DEBUG]');
+		}
 		while( <FH> ) {
 			if ( $_ =~ /$match/sm) {
 				return (1);
@@ -5438,7 +5442,7 @@ sub messageDesktop {
 			printLog("Filehandle NOT open!!!!!!", 'TL0', '[DEBUG]');
 		}
 		if (defined $FH) {
-			$dbusAddress = do { local $/; <FH> };
+			$dbusAddress = do { local $/; $FH };
 			if (! close(FH)) {
 				printLog("Can't close $environ", 'L0', '[WARN]');
 			}
