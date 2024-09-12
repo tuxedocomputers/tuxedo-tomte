@@ -43,7 +43,6 @@ use File::FcntlLock;
 use File::Copy;
 use File::Find;
 use Cwd 'realpath';
-use Scalar::Util qw(openhandle);
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -325,11 +324,8 @@ sub checkAndSetLocale {
 			my ($foundFolder, $localePath) = getMatchingLocaleForLang($languageCode);
 
             # Check if the directory exists
-			# TODO debug
-			printLog("foundFolder: $foundFolder" , 'TL0', '[DEBUG]');
             if ($foundFolder eq q{}) {
 				local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder;
-
                 printLog("Found Tomte locale file in: $localePath", "L1", '[INFO]');
             } else {
 				if(length $languageCode == 2){
@@ -1014,11 +1010,8 @@ sub checkRequirements {
 
 	# get class codes from vendor ID
 	my $nvidiaDevice = `lspci -nd 10de:`;
-	# TODO debug
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
-	printLog("nvidiaDevice: $nvidiaDevice", 'L0', '[DEBUG]');
-	printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 	if (($nvidiaDevice =~ /030[02]:/)
 		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
 		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
@@ -1273,11 +1266,8 @@ sub checkRequirementsLast {
 	printLog("in last check requirements", 'L1', '[INFO]');
 
 	my $nvidiaDevice = `lspci -nd 10de:`;
-	# TODO debug
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
-	printLog("nvidiaDevice: $nvidiaDevice", 'L0', '[DEBUG]');
-	printLog("ubuntuCodename: $ubuntuCodename", 'L0', '[DEBUG]');
 	if (($nvidiaDevice =~ /030[02]:/)
 		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
 		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
@@ -3980,8 +3970,6 @@ sub debianPackageModule {
 			# or LiveISO and set the verbose line
 			setDkmsVerbose( $module, 1 );
 
-			#TODO debug
-			printLog("before installPackage name: $presetModules{$module}{name} module: $module", 'TL0', '[DEBUG]');
 			if ( installPackage($presetModules{$module}{name}, $module) ) {
 				$presetModules{$module}{installed} = 'yes';
 				$presetModules{$module}{upgraded} = 'yes';
@@ -4349,17 +4337,10 @@ sub getPackageVersion {
 #
 sub installPackage {
 	my ( $packageName, $module ) = @_;
-	#TODO debug
-	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
-	
-	
 	my $retval;
 	if (isPackageInstalled($packageName)) {
 		return (1);
 	}
-	#TODO debug
-	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
-
 	if ($FAI) {
 		printLog("install package $packageName", 'TL0', '[INFO]');
 		# usefull debug option: Debug::pkgDPkgProgressReporting=true
@@ -4385,8 +4366,6 @@ sub installPackage {
 				lockPM();
 				printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
 				$retval = isPackageInstalled($packageName);
-	#TODO debug
-	printLog("received module: $module packageName: $packageName", 'TL0', '[DEBUG]');
 				if ($retval == 0) {
 					printLog("failed to install $packageName", 'L0', '[WARN]');
 					printLog("will try again later", 'L0', '[WARN]');
@@ -4401,12 +4380,7 @@ sub installPackage {
 						startTomteDelayed();
 					}
 				} elsif ($retval == 1) {
-					#TODO restart not neccessary if nvidia-driver-550 was installed before
-						print "before set restart values\n";
-						print Dumper(%presetModules);
-						printLog("module: $module presetRestart: $presetModules{$module}{restart}", 'TL0', '[DEBUG]');
 					if ($presetModules{$module}{restart} eq 'yes') {
-						#TODO debug
 						setRestartValues($module);
 					}
 				}
@@ -5199,9 +5173,9 @@ sub isTextInFile {
 	my $match = shift;
 	my $FH;
 	if ( (-e $filename) && open($FH, '<', $filename) ) {
-		#TODO test this
 		if(! defined $FH) {
-			printLog("Filehandle NOT defined in isTextInFile!!!!!!", 'TL0', '[DEBUG]');
+			printLog("Filehandle NOT defined for $filename", 'TL0', '[WARN]');
+			return (0);
 		}
 		while( $FH ) {
 			if ( $_ =~ /$match/sm) {
@@ -5434,13 +5408,6 @@ sub messageDesktop {
 	$environ = "/proc/$mPid/environ";
 	my $FH;
 	if ( (-e $environ) && open($FH, "<", $environ) ) {
-		#TODO test this
-		if(! defined $FH) {
-			printLog("Filehandle NOT defined!!!!!!", 'TL0', '[DEBUG]');
-		}
-		if(! defined(openhandle($FH))) {
-			printLog("Filehandle NOT open!!!!!!", 'TL0', '[DEBUG]');
-		}
 		if (defined $FH) {
 			$dbusAddress = do { local $/; $FH };
 			if (! close($FH)) {
@@ -5808,14 +5775,7 @@ sub writeConfigFile {
 		printLog("writing configfile", 'L1', '[INFO]');
 		print $FH "# name version installed blocked required hwid\n";
 
-			#TODO debug
-			print "values presetModules\n";
-			print Dumper(\%presetModules);
-
 		foreach my $name (sort keys %presetModules) {
-
-			#TODO debug
-			printLog("modulename: >$name<", 'TL0', '[DEBUG]');
 			# values have to be same as in readConfigFile
 			if ($presetModules{$name}{required} ne 'no') {
 				if ($presetModules{$name}{upgrade} eq 'yes') {
@@ -5846,8 +5806,8 @@ sub writeConfigFile {
 					$hwid = $presetModules{$name}{hwid};
 					$installed = $presetModules{$name}{installed};
 				}
-				unless (($presetModules{$name}{installed} eq 'no') &&
-						($presetModules{$name}{required} eq 'no')) {
+				if (!(($presetModules{$name}{installed} eq 'no') &&
+					($presetModules{$name}{required} eq 'no'))) {
 					print $FH "$presetModules{$name}{name} ".
 						"$version ".
 						"$installed ".
