@@ -5203,7 +5203,7 @@ sub isTextInFile {
 		if(! defined $FH) {
 			printLog("Filehandle NOT defined in isTextInFile!!!!!!", 'TL0', '[DEBUG]');
 		}
-		while( <FH> ) {
+		while( $FH ) {
 			if ( $_ =~ /$match/sm) {
 				return (1);
 			}
@@ -5443,7 +5443,7 @@ sub messageDesktop {
 		}
 		if (defined $FH) {
 			$dbusAddress = do { local $/; $FH };
-			if (! close(FH)) {
+			if (! close($FH)) {
 				printLog("Can't close $environ", 'L0', '[WARN]');
 			}
 			$dbusAddress =~ /.*?(DBUS_SESSION_BUS_ADDRESS=unix:path=\/run\/user\/\d*\/bus).*/sm;
