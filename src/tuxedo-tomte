@@ -4549,11 +4549,7 @@ sub getAptMark {
 # returns 1 if subroutine run through
 #
 sub installKernelFlavour {
-printLog("first dump 1:", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 	my ($flavour, $failed, $somethingDone) = @_;
-printLog("first dump 2:", 'TL0', '[DEBUG]');
-print Dumper(\%kernelsList);
 	${$failed} = 0;
 	${$somethingDone} = 0;
 	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
