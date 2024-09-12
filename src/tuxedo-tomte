@@ -43,6 +43,7 @@ use File::FcntlLock;
 use File::Copy;
 use File::Find;
 use Cwd 'realpath';
+use Scalar::Util qw(openhandle);
 
 # for OLED backlight and edid decrypt
 use FindBin qw($Bin);
@@ -341,7 +342,7 @@ sub checkAndSetLocale {
 					my ($foundFolder2, $localePath2) = getMatchingLocaleForLang($languageCode);
 
 					# Check if the directory exists
-					if ($foundFolder2 == 0) {
+					if ($foundFolder2 eq q{}) {
 						if($languageCode ne $foundFolder2){
 							local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder2;
 						}
@@ -382,7 +383,7 @@ sub getMatchingLocaleForLang {
 		printLog("Found valid Tomte locale file in $localeBasePath/$foundLanguage", "L1", '[INFO]');
 		last;
 	}
-	if (! $foundLanguage) {
+	if ($foundLanguage eq q{}) {
 		printLog("Found no valid Tomte locale file in $localeBasePath/$lang", "L1", '[ERROR]');
 	}
 
@@ -4406,7 +4407,7 @@ sub installPackage {
 						printLog("module: $module presetRestart: $presetModules{$module}{restart}", 'TL0', '[DEBUG]');
 					if ($presetModules{$module}{restart} eq 'yes') {
 						#TODO debug
-						setRestartValues();
+						setRestartValues($module);
 					}
 				}
 			} else {
@@ -5430,6 +5431,9 @@ sub messageDesktop {
 	my $FH;
 	if ( (-e $environ) && open($FH, "<", $environ) ) {
 		#TODO test this
+		if(! defined $FH) {
+			printLog("Filehandle NOT defined!!!!!!", 'TL0', '[DEBUG]');
+		}
 		if(! defined(openhandle($FH))) {
 			printLog("Filehandle NOT open!!!!!!", 'TL0', '[DEBUG]');
 		}
