@@ -3622,7 +3622,7 @@ sub getSystemdEnabled {
 #
 sub commandSystemdModule {
 	my ($command, $systemdModule) = @_;
-	my $systemdCmd = "systemctl $command $systemdModule";
+	my $systemdCmd = "systemctl --quiet $command $systemdModule";
 	my $systemdReturn = `$systemdCmd`;
 	printLog("systemd returns: $systemdReturn", 'L2', '[INFO]');
 	return;
