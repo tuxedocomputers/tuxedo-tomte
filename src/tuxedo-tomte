@@ -66,13 +66,13 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
 
 # for testing
-Readonly my $TEST_ALL_MODULES => 1;
+Readonly my $TEST_ALL_MODULES => 0;
 
 # for console language and locale
 my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
