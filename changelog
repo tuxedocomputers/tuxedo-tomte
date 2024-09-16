@@ -1,3 +1,26 @@
+tuxedo-tomte (2.39.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * applied perlcritic to comply with PBP
+  * removed superfluous BIOS version for corefix
+  * added permanent driver for Nvidia eGPU
+  * added removal option for Nvidia driver
+  * added libreadonly-perl as dependency
+  * changed repo files to deb822 format for Ubuntu Noble
+  * added flag to force installation of all modules for testing purposes
+  * added noecwakeupfix for InfinityBook Pro AMD Gen9 with boardname: GXxHRXx
+  * removed kernel linux-tuxedo-22.04-edge
+  * InfinityBook Pro Gen9 uses now the default linux-tuxedo-22.04 kernel
+  * upgrade nvidia-driver to version 560 for Jammy and Noble
+  * removed NJ50_70CU from nokeyboardaftersuspendfix
+  * readded systemdbacklightfix for removal
+  * added option quiet for systemctl command
+  * raised loglevel for some critical events
+  * automatic upgrade for installed DKMS-packages if the kernel is being
+    upgraded (only for TUXEDO kernel and packages)
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 16 Sep 2024 14:11:23 +0200
+
 tuxedo-tomte (2.38.0) jammy; urgency=medium
 
   [ E. Mohr ]
