@@ -5173,7 +5173,7 @@ sub isTextInFile {
 			printLog("Filehandle NOT defined for $filename", 'TL0', '[WARN]');
 			return (0);
 		}
-		while( $FH ) {
+		while( <$FH> ) {
 			if ( $_ =~ /$match/sm) {
 				return (1);
 			}
