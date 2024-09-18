@@ -1014,7 +1014,7 @@ sub checkRequirements {
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
 		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
-		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
+		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -1270,7 +1270,7 @@ sub checkRequirementsLast {
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
 		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
-		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-550'))) {
+		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -2333,7 +2333,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 			}
 
-		} elsif ($ubuntuCodename =~ /jammy/sm) {
+		} elsif ($ubuntuCodename =~ /(jammy|noble)/sm) {
 			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
@@ -2356,67 +2356,6 @@ sub nvidiadriver() {
 				}
 			} else {
 				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
-			}
-
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-
-
-		} elsif ($ubuntuCodename =~ /noble/sm) {
-			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
-
-			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
-
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
-				$oldDriversRemoved += $oldDriversRemovedCounter;
-				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
-					messageLongInstall();
-					$wasInstalled = 0;
-					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
-					setDkmsVerbose( 'nvidiadriver', 0 );
-				} else {
-					setAptMark($tuxedoNvidiaDriver560,'manual');
-					$packageNvidiaDriver = 1;
-				}
-			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[ERROR]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
