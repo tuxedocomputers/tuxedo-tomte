@@ -5344,7 +5344,7 @@ sub messageDesktop {
 	my $FH;
 	if ( (-e $environ) && open($FH, "<", $environ) ) {
 		if (defined $FH) {
-			$dbusAddress = do { local $/; $FH };
+			$dbusAddress = do { local $/; <$FH> };
 			if (! close($FH)) {
 				printLog("Can't close $environ", 'L0', '[WARN]');
 			}
@@ -5364,7 +5364,7 @@ sub messageDesktop {
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
-	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]q{ }{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
+	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 	$retValue = $?/256;
