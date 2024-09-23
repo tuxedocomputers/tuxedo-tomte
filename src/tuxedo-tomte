@@ -191,7 +191,7 @@ printLog("", 'TL0', '[DEBUG]');
 printLog("rootDev: $rootDev rootIno: $rootIno", 'TL0', '[DEBUG]');
 	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
 printLog("procRootDev: $procRootDev procRootIno: $procRootIno", 'TL0', '[DEBUG]');
-	my $isInChroot = "$rootDev:$rootIno" ne "$procRootDev:$procRootIno";
+	my $isInChroot = ("$rootDev:$rootIno" ne "$procRootDev:$procRootIno");
 printLog("isInChroot: $isInChroot", 'TL0', '[DEBUG]');
 	return ($isInChroot);
 }
