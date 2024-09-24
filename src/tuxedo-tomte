@@ -5275,7 +5275,7 @@ sub insertGrubParameter {
 	$cleanLine =~ s/["']//gsm;
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//sm;
 
-	if (($cleanLine =~ /^$$parameter /sm) || ($cleanLine =~ /^$$parameter$/sm) || ($cleanLine =~ / $$parameter$/sxm) || ($cleanLine =~ / $$parameter /sxm)) {
+	if (($cleanLine =~ /^$$parameter /sm) || ($cleanLine =~ /^$$parameter$/sm) || ($cleanLine =~ / $$parameter$/sm) || ($cleanLine =~ / $$parameter /sm)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
