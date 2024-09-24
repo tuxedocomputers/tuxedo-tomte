@@ -180,19 +180,31 @@ Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 # if in FAI it should check which is the installed
 # kernel package version on target
 my $kernelRelease;
+
+
+###############################################################################
 # check whether we are in a chroot environment
+# returns 1 if in chroot
+# returns 0 if not
+#
 sub isChroot {
 	#TODO DEBUG
-printLog("", 'TL0', '[DEBUG]');
 	my $rootPath = q{/};
 	my $procRootPath = "/proc/1/root/.";
+	my $isInChroot = 0;
 
 	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
 printLog("rootDev: $rootDev rootIno: $rootIno", 'TL0', '[DEBUG]');
 	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
 printLog("procRootDev: $procRootDev procRootIno: $procRootIno", 'TL0', '[DEBUG]');
-	my $isInChroot = ("$rootDev:$rootIno" ne "$procRootDev:$procRootIno");
+printLog("compare: $rootDev:$rootIno $procRootDev:$procRootIno", 'TL0', '[DEBUG]');
+	$isInChroot = ("$rootDev:$rootIno" ne "$procRootDev:$procRootIno");
 printLog("isInChroot: $isInChroot", 'TL0', '[DEBUG]');
+	if ($isInChroot) {
+		printLog("in chroot environment", 'L2', '[DEBUG]');
+	} else {
+		printLog("not in chroot environment", 'L2', '[DEBUG]');
+	}
 	return ($isInChroot);
 }
 
@@ -214,6 +226,7 @@ printLog("uname kernel: $kernelRelease", 'TL0', '[DEBUG]');
 }
 $kernelRelease =~ s/[\n\r]//gsm;
 printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
+
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
