@@ -3100,8 +3100,12 @@ sub textboot() {
 	my @splashParameter = ('splash');
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
+	my $secCtr = 10;
 
-	removeKernelParameter($module, 1, 'no');
+	while (removeKernelParameter($module, 1, 'no') && ($secCtr > 0)) {
+		$secCtr -= 1;
+		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
+	}
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters($module, 1, @splashParameter);
 		grubModuleEdit($module, $action, 0, @nosplashParameter);
