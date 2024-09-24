@@ -192,13 +192,17 @@ sub isChroot {
 	my $rootPath = q{/};
 	my $procRootPath = "/proc/1/root/.";
 	my $isInChroot = 0;
+	my $rootString = q{};
+	my $procRootString = q{};
 
 	my ($rootDev, $rootIno) = (stat($rootPath))[0, 1];
 printLog("rootDev: $rootDev rootIno: $rootIno", 'TL0', '[DEBUG]');
 	my ($procRootDev, $procRootIno) = (stat(realpath($procRootPath)))[0, 1];
 printLog("procRootDev: $procRootDev procRootIno: $procRootIno", 'TL0', '[DEBUG]');
 printLog("compare: $rootDev:$rootIno $procRootDev:$procRootIno", 'TL0', '[DEBUG]');
-	$isInChroot = ("$rootDev:$rootIno" ne "$procRootDev:$procRootIno");
+	$rootString = "$rootDev:$rootIno";
+	$procRootString = "$procRootDev:$procRootIno";
+	$isInChroot = ($rootString ne $procRootString);
 printLog("isInChroot: $isInChroot", 'TL0', '[DEBUG]');
 	if ($isInChroot) {
 		printLog("in chroot environment", 'L2', '[DEBUG]');
