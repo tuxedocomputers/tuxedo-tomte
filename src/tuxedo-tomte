@@ -4920,17 +4920,17 @@ sub removeKernelParameters {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
 							$line =~ s/\ $parameter\ /\ /s;
-						}
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|').*\ $parameter("|')/s) {
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|').*\ $parameter("|')/s) {
 							$line =~ s/\ $parameter//s;
-						}
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')\ *$parameter(\ .*)("|')/s) {
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')\ *$parameter(\ .*)("|')/s) {
 							$line =~ s/$parameter\ //s;
+							++$counter;
 						}
 						$line =~ s/ +/ /g;
 						$line =~ s/=" /="/s;
 						$line =~ s/ "$/"/s;
-						++$counter;
 					}
 				}
 				print $GF "$line\n";
