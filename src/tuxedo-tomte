@@ -3102,7 +3102,7 @@ sub textboot() {
 	my $retPar;
 	my $secCtr = 10;
 
-	while (removeKernelParameter($module, 1, 'no') && ($secCtr > 0)) {
+	while (removeKernelParameters($module, 1, 'no') && ($secCtr > 0)) {
 		$secCtr -= 1;
 		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
 	}
@@ -4915,16 +4915,22 @@ sub removeKernelParameters {
 		}
 		if ((-w $grubFile) && (open($GF, '>', $grubFile))) {
 			foreach $line (@grubLines) {
-				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
+				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["|']/s) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/s) {
-							$line =~ s/$parameter//sm;
-							$line =~ s/ +/ /g;
-							$line =~ s/=" /="/sm;
-							$line =~ s/ "$/"/sm;
-							++$counter;
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
+							$line =~ s/\ $parameter\ /\ /s;
 						}
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|').*\ $parameter("|')/s) {
+							$line =~ s/\ $parameter//s;
+						}
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')\ *$parameter(\ .*)("|')/s) {
+							$line =~ s/$parameter\ //s;
+						}
+						$line =~ s/ +/ /g;
+						$line =~ s/=" /="/s;
+						$line =~ s/ "$/"/s;
+						++$counter;
 					}
 				}
 				print $GF "$line\n";
