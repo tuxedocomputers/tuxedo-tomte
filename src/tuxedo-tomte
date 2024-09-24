@@ -3100,6 +3100,8 @@ sub textboot() {
 	my @splashParameter = ('splash');
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
+
+	removeKernelParameter($module, 1, 'no');
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters($module, 1, @splashParameter);
 		grubModuleEdit($module, $action, 0, @nosplashParameter);
@@ -4912,7 +4914,7 @@ sub removeKernelParameters {
 				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sm) {
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/s) {
 							$line =~ s/$parameter//sm;
 							$line =~ s/ +/ /g;
 							$line =~ s/=" /="/sm;
