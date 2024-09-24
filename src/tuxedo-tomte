@@ -186,6 +186,7 @@ my $kernelRelease;
 # check whether we are in a chroot environment
 # returns 1 if in chroot
 # returns 0 if not
+# 0 is the default value
 #
 sub isChroot {
 	#TODO DEBUG
@@ -202,14 +203,14 @@ printLog("procRootDev: $procRootDev procRootIno: $procRootIno", 'TL0', '[DEBUG]'
 printLog("compare: $rootDev:$rootIno $procRootDev:$procRootIno", 'TL0', '[DEBUG]');
 	$rootString = "$rootDev:$rootIno";
 	$procRootString = "$procRootDev:$procRootIno";
-	$isInChroot = ($rootString ne $procRootString);
-printLog("isInChroot: $isInChroot", 'TL0', '[DEBUG]');
-	if ($isInChroot) {
+	if ($rootString ne $procRootString) {
 		printLog("in chroot environment", 'L2', '[DEBUG]');
+		return (1);
 	} else {
 		printLog("not in chroot environment", 'L2', '[DEBUG]');
+		return (0);
 	}
-	return ($isInChroot);
+	return (0);
 }
 
 if (isChroot) {
