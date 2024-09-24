@@ -4912,7 +4912,7 @@ sub removeKernelParameters {
 				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sxm) {
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sm) {
 							$line =~ s/$parameter//sm;
 							$line =~ s/ +/ /g;
 							$line =~ s/=" /="/sm;
