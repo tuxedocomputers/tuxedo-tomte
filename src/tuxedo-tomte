@@ -4940,6 +4940,12 @@ sub removeKernelParameters {
 			if (! close($GF) ) {
 				printLog("could not close $grubFile", 'L0', '[ERROR]');
 			}
+
+			# return if no module was given, as no modules may be configured
+			if ((!defined($module)) || ($module eq q{})) {
+				return ($counter);
+			}
+
 			if (! $silent) {
 				addToConfiguredModules($module, "removed");
 			}
@@ -4967,10 +4973,8 @@ sub removeKernelParameters {
 		$presetModules{$module}{installed} = "remove failed";
 		$presetModules{$module}{version} = $localConfModules{$module}{version};
 		$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
-printLog("return: 0", 'TL0', '[WARN]');
 		return (0);
 	}
-printLog("return: 0", 'TL0', '[WARN]');
 	return (0);
 }
 
