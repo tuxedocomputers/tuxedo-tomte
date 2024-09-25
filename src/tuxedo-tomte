@@ -184,18 +184,14 @@ my $kernelRelease;
 if ($FAI) {
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgKernel = `$searchCmd`;
-printLog("dpkgKernel: $dpkgKernel", 'TL0', '[DEBUG]');
-	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/smg;
+	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/mg;
 	my $hashSize = keys %kernelHash;
-printLog("hashSize: $hashSize", 'TL0', '[DEBUG]');
 	if ($hashSize != 0) {
 		my $firstkey = (sort(keys %kernelHash))[0];
 		$kernelRelease = $kernelHash{$firstkey};
-printLog("dpkg kernel: $kernelRelease", 'TL0', '[DEBUG]');
 	}
 } else {
 	$kernelRelease = `uname -r`;
-printLog("uname kernel: $kernelRelease", 'TL0', '[DEBUG]');
 }
 $kernelRelease =~ s/[\n\r]//gsm;
 printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
@@ -4952,7 +4948,6 @@ sub removeKernelParameters {
 			if ($counter > 0) {
 				$postConfProgramsList{updateGrub}{trigger} = 1;
 			}
-printLog("return: $counter", 'TL0', '[WARN]');
 			return ($counter);
 		} else {
 			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
@@ -4962,7 +4957,6 @@ printLog("return: $counter", 'TL0', '[WARN]');
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
 			$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
-printLog("return: 0", 'TL0', '[WARN]');
 			return (0);
 		}
 	} else {
