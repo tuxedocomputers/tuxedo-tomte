@@ -747,6 +747,15 @@ sub prerequisites {
 	my $module;
 	my @modulesList;
 	printLog("starting prerequisites", 'L1', '[INFO]');
+
+	# temporary workaround for no no no bug
+	# remove no's from /etc/default/grub
+	my $secCtr = 20;
+	while (removeKernelParameters($module, 1, 'no') && ($secCtr > 0)) {
+		$secCtr -= 1;
+		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
+	}
+
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
 		if (($presetModules{$module}{order} eq 'first') &&
@@ -3100,12 +3109,7 @@ sub textboot() {
 	my @splashParameter = ('splash');
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
-	my $secCtr = 10;
 
-	while (removeKernelParameters($module, 1, 'no') && ($secCtr > 0)) {
-		$secCtr -= 1;
-		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
-	}
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters($module, 1, @splashParameter);
 		grubModuleEdit($module, $action, 0, @nosplashParameter);
