@@ -743,7 +743,7 @@ sub prerequisites {
 	# temporary workaround for no no no bug
 	# remove no's from /etc/default/grub
 	my $secCtr = 20;
-	while (removeKernelParameters($module, 1, 'no') && ($secCtr > 0)) {
+	while (removeKernelParameters('', 1, 'no') && ($secCtr > 0)) {
 		$secCtr -= 1;
 		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
 	}
