@@ -4921,8 +4921,11 @@ sub removeKernelParameters {
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
 							$line =~ s/\ $parameter\ /\ /s;
 							++$counter;
-						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|').*\ $parameter("|')/s) {
-							$line =~ s/\ $parameter//s;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=".*\ $parameter"/s) {
+							$line =~ s/\ $parameter"/"/s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT='.*\ $parameter'/s) {
+							$line =~ s/\ $parameter'/'/s;
 							++$counter;
 						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')\ *$parameter(\ .*)("|')/s) {
 							$line =~ s/$parameter\ //s;
