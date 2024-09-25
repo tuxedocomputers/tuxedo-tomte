@@ -4919,16 +4919,25 @@ sub removeKernelParameters {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
+	#TODO debugs
+			printLog("at middle: $line", 'TL0', '[WARN]');
 							$line =~ s/\ $parameter\ /\ /s;
 							++$counter;
 						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=".*\ $parameter"/s) {
+			printLog("at end \": $line", 'TL0', '[WARN]');
 							$line =~ s/\ $parameter"/"/s;
 							++$counter;
 						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT='.*\ $parameter'/s) {
+			printLog("at end \': $line", 'TL0', '[WARN]');
 							$line =~ s/\ $parameter'/'/s;
 							++$counter;
-						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')\ *$parameter(\ .*)("|')/s) {
-							$line =~ s/$parameter\ //s;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="$parameter(\ .*)"/s) {
+			printLog("at beg \": $line", 'TL0', '[WARN]');
+							$line =~ s/"$parameter\ /"/s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT='$parameter(\ .*)'/s) {
+			printLog("at beg \': $line", 'TL0', '[WARN]');
+							$line =~ s/'$parameter\ /'/s;
 							++$counter;
 						}
 						$line =~ s/ +/ /g;
