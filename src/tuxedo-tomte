@@ -4960,6 +4960,7 @@ sub removeKernelParameters {
 			if ($counter > 0) {
 				$postConfProgramsList{updateGrub}{trigger} = 1;
 			}
+printLog("return: $counter", 'TL0', '[WARN]');
 			return ($counter);
 		} else {
 			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
@@ -4969,6 +4970,7 @@ sub removeKernelParameters {
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
 			$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
+printLog("return: 0", 'TL0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -4979,8 +4981,10 @@ sub removeKernelParameters {
 		$presetModules{$module}{installed} = "remove failed";
 		$presetModules{$module}{version} = $localConfModules{$module}{version};
 		$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
+printLog("return: 0", 'TL0', '[WARN]');
 		return (0);
 	}
+printLog("return: 0", 'TL0', '[WARN]');
 	return (0);
 }
 
