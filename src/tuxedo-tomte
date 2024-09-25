@@ -66,7 +66,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -775,6 +775,15 @@ sub prerequisites {
 	my $module;
 	my @modulesList;
 	printLog("starting prerequisites", 'L1', '[INFO]');
+
+	# temporary workaround for no no no bug
+	# remove no's from /etc/default/grub
+	my $secCtr = 20;
+	while (removeKernelParameters($module, 1, 'no') && ($secCtr > 0)) {
+		$secCtr -= 1;
+		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
+	}
+
 	foreach $module (sort keys %presetModules) {
 		# basically the required repos
 		if (($presetModules{$module}{order} eq 'first') &&
@@ -926,7 +935,7 @@ sub checkRequirements {
 
 	if (($boardname =~ /P95_HP/sm)
 		|| ($boardname =~ /P95_HR/sm)
-		|| ($boardname =~ /P95_HP,HR,HQ/smx)) {
+		|| ($boardname =~ /P95_HP,HR,HQ/sm)) {
 		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
 			$presetModules{backlightfix}{required} = 'yes';
 			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
@@ -3128,6 +3137,7 @@ sub textboot() {
 	my @splashParameter = ('splash');
 	my @nosplashParameter = ('nosplash');
 	my $retPar;
+
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		removeKernelParameters($module, 1, @splashParameter);
 		grubModuleEdit($module, $action, 0, @nosplashParameter);
@@ -4937,16 +4947,28 @@ sub removeKernelParameters {
 		}
 		if ((-w $grubFile) && (open($GF, '>', $grubFile))) {
 			foreach $line (@grubLines) {
-				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="/sm) {
+				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["|']/s) {
 					foreach $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
-						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="(|.* )$parameter( .*|)"/sxm) {
-							$line =~ s/$parameter//sm;
-							$line =~ s/ +/ /g;
-							$line =~ s/=" /="/sm;
-							$line =~ s/ "$/"/sm;
+						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
+							$line =~ s/\ $parameter\ /\ /s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=".*\ $parameter"/s) {
+							$line =~ s/\ $parameter"/"/s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT='.*\ $parameter'/s) {
+							$line =~ s/\ $parameter'/'/s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT="$parameter(\ .*)"/s) {
+							$line =~ s/"$parameter\ /"/s;
+							++$counter;
+						} elsif ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT='$parameter(\ .*)'/s) {
+							$line =~ s/'$parameter\ /'/s;
 							++$counter;
 						}
+						$line =~ s/ +/ /g;
+						$line =~ s/=" /="/s;
+						$line =~ s/ "$/"/s;
 					}
 				}
 				print $GF "$line\n";
@@ -4959,11 +4981,10 @@ sub removeKernelParameters {
 			}
 			$presetModules{$module}{installed} = "no";
 			$presetModules{$module}{upgraded} = "yes";
-			# temp removing for testing
-			#$presetModules{$module}{required} = "no";
 			if ($counter > 0) {
 				$postConfProgramsList{updateGrub}{trigger} = 1;
 			}
+printLog("return: $counter", 'TL0', '[WARN]');
 			return ($counter);
 		} else {
 			printLog("could not open and write $grubFile", 'TL0', '[ERROR]');
@@ -4973,6 +4994,7 @@ sub removeKernelParameters {
 			$presetModules{$module}{installed} = "remove failed";
 			$presetModules{$module}{version} = $localConfModules{$module}{version};
 			$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
+printLog("return: 0", 'TL0', '[WARN]');
 			return (0);
 		}
 	} else {
@@ -4983,8 +5005,10 @@ sub removeKernelParameters {
 		$presetModules{$module}{installed} = "remove failed";
 		$presetModules{$module}{version} = $localConfModules{$module}{version};
 		$presetModules{$module}{hwid} = $localConfModules{$module}{hwid};
+printLog("return: 0", 'TL0', '[WARN]');
 		return (0);
 	}
+printLog("return: 0", 'TL0', '[WARN]');
 	return (0);
 }
 
@@ -5303,7 +5327,7 @@ sub insertGrubParameter {
 	$cleanLine =~ s/["']//gsm;
 	$cleanLine =~ s/^GRUB_CMDLINE_LINUX_DEFAULT=//sm;
 
-	if (($cleanLine =~ /^$$parameter /sm) || ($cleanLine =~ /^$$parameter$/sm) || ($cleanLine =~ / $$parameter$/sxm) || ($cleanLine =~ / $$parameter /sxm)) {
+	if (($cleanLine =~ /^$$parameter /sm) || ($cleanLine =~ /^$$parameter$/sm) || ($cleanLine =~ / $$parameter$/sm) || ($cleanLine =~ / $$parameter /sm)) {
 		printLog("$$parameter is already in grub", 'L2', '[DEBUG]');
 		return (0);
 	} else {
