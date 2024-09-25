@@ -204,10 +204,10 @@ printLog("compare: $rootDev:$rootIno $procRootDev:$procRootIno", 'TL0', '[DEBUG]
 	$rootString = "$rootDev:$rootIno";
 	$procRootString = "$procRootDev:$procRootIno";
 	if ($rootString ne $procRootString) {
-		printLog("in chroot environment", 'L2', '[DEBUG]');
+		printLog("in chroot environment", 'TL0', '[DEBUG]');
 		return (1);
 	} else {
-		printLog("not in chroot environment", 'L2', '[DEBUG]');
+		printLog("not in chroot environment", 'TL0', '[DEBUG]');
 		return (0);
 	}
 	return (0);
