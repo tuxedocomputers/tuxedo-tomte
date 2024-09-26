@@ -66,8 +66,9 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
+my $force = 0;
 
 use Readonly;
 
@@ -6417,9 +6418,11 @@ sub configureAllModules {
 
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if (($presetModules{$module}{required} eq 'yes') &&
-			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
-
+		if ((($presetModules{$module}{required} eq 'yes') &&
+			($presetModules{$module}{order} ne 'first') &&
+			($presetModules{$module}{order} ne 'last')) ||
+			# force the installation for testing purposes
+			($force)) {
 			if ($presetModules{$module}{reconfigure} eq 'always') {
 				
 				# reconfigure modules with 'always' every single time
@@ -6467,6 +6470,15 @@ sub configureSingleModule {
 		return;
 	}
 
+	# for testing purposes
+	if ($force) {
+		if ($argValue{command} eq "force-update") {
+			updateModule($module);
+		} elsif ($argValue{command} eq "force-install") {
+			configureModule($module);
+		}
+	}
+
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
 	if ( (($localConfModules{$module}{installed} eq 'no') ||
@@ -6511,7 +6523,8 @@ sub removeSingleModule {
 		return;
 	}
 
-	if ($localConfModules{$module}{blocked} eq 'no') {
+	# force removal for testing purposes
+	if (($localConfModules{$module}{blocked} eq 'no') || $force) {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
 	}
@@ -7884,6 +7897,7 @@ if (scalar(@ARGV) != 0) {
 		}
 	# for testing purposes
 	} elsif ($argValue{command} eq "force-install") {
+		$force = 1;
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
@@ -7901,6 +7915,7 @@ if (scalar(@ARGV) != 0) {
 			print "Module name missing\n";
 		}
 	} elsif ($argValue{command} eq "force-update") {
+		$force = 1;
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
@@ -7921,6 +7936,7 @@ if (scalar(@ARGV) != 0) {
 			print "Module name missing\n";
 		}
 	} elsif ($argValue{command} eq "force-remove") {
+		$force = 1;
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
