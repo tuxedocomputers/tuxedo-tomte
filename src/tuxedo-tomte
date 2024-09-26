@@ -7882,6 +7882,66 @@ if (scalar(@ARGV) != 0) {
 		} else {
 			printLog("$logLevel", 'T0', '[DEBUG]');
 		}
+	# for testing purposes
+	} elsif ($argValue{command} eq "force-install") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				configureAllModules($argValue{module});
+				postConfigure();
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				configureSingleModule($argValue{module});
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "force-update") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				my $module;
+				foreach $module (keys %presetModules) {
+					updateModule($module);
+				}
+				postConfigure();
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				updateModule($argValue{module});
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "force-remove") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				my $module;
+				foreach $module (keys %presetModules) {
+					removeModule($module);
+				}
+				postConfigure();
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				removeModule($argValue{module});
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+
+
 	} else {
 		print "Unknown command: $argValue{command}\n";
 		help();
