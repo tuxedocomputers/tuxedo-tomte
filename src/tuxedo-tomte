@@ -6477,11 +6477,9 @@ sub configureSingleModule {
 		} elsif ($argValue{command} eq "force-install") {
 			configureModule($module);
 		}
-	}
-
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
-	if ( (($localConfModules{$module}{installed} eq 'no') ||
+	} elsif ( (($localConfModules{$module}{installed} eq 'no') ||
 		($localConfModules{$module}{installed} eq 'failed') ||
 	   	($presetModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
@@ -6797,6 +6795,11 @@ sub checkMode {
 sub checkModePermission {
 	my ($operation, $module) = (@_);
 	# this is a double check, just in case ...
+
+	# for testing purposes
+	if ($force) {
+		return (1);
+	}
 
 	if ($presetModules{$module}{required} eq 'prerequisite') {
 		printLog("module is prerequisite", 'L2', '[INFO]');
@@ -7901,7 +7904,7 @@ if (scalar(@ARGV) != 0) {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
-				configureAllModules($argValue{module});
+				configureAllModules();
 				postConfigure();
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
@@ -7921,12 +7924,12 @@ if (scalar(@ARGV) != 0) {
 			if ($argValue{module} eq 'all') {
 				my $module;
 				foreach $module (keys %presetModules) {
-					updateModule($module);
+					updateModule(getSubName($module));
 				}
 				postConfigure();
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				updateModule($argValue{module});
+				updateModule(getSubName($argValue{module}));
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
@@ -7942,12 +7945,12 @@ if (scalar(@ARGV) != 0) {
 			if ($argValue{module} eq 'all') {
 				my $module;
 				foreach $module (keys %presetModules) {
-					removeModule($module);
+					removeSingleModule($module);
 				}
 				postConfigure();
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				removeModule($argValue{module});
+				removeSingleModule($argValue{module});
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
