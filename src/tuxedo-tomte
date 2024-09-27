@@ -7037,7 +7037,7 @@ sub configureModule {
 	my $module = shift;
 	my $permission = checkModePermission('install', $module);
 	printLog("configure module: $module permission: $permission", 'L2', '[INFO]');
-	if ($permission) {
+	if ($permission || $force) {
 		$module->($module, 'install');
 	}
 	return (0);
@@ -7051,7 +7051,7 @@ sub removeModule {
 	my $module = shift;
 	my $permission = checkModePermission('remove', $module);
 	printLog("remove module: $module permission: $permission", 'L2', '[INFO]');
-	if ($permission) {
+	if ($permission || $force) {
 		$module->($module, 'remove');
 	}
 	return (0);
@@ -7066,7 +7066,7 @@ sub updateModule {
 	my $module = shift;
 	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2', '[INFO]');
-	if ($permission) {
+	if ($permission || $force) {
 		$module->($module, 'upgrade');
 	}
 	return (0);
