@@ -68,7 +68,6 @@ use Data::Dumper;
 # 2 = lots of debug
 my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
-my $force = 0;
 
 use Readonly;
 
@@ -6418,11 +6417,9 @@ sub configureAllModules {
 
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if ((($presetModules{$module}{required} eq 'yes') &&
-			($presetModules{$module}{order} ne 'first') &&
-			($presetModules{$module}{order} ne 'last')) ||
-			# force the installation for testing purposes
-			($force)) {
+		if (($presetModules{$module}{required} eq 'yes') &&
+			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
+
 			if ($presetModules{$module}{reconfigure} eq 'always') {
 				
 				# reconfigure modules with 'always' every single time
@@ -6470,16 +6467,9 @@ sub configureSingleModule {
 		return;
 	}
 
-	# for testing purposes
-	if ($force) {
-		if ($argValue{command} eq "force-update") {
-			updateModule($module);
-		} elsif ($argValue{command} eq "force-install") {
-			configureModule($module);
-		}
 	# grub file should always be checked for correct entries if there
 	# is a fix available for this system
-	} elsif ( (($localConfModules{$module}{installed} eq 'no') ||
+	if ( (($localConfModules{$module}{installed} eq 'no') ||
 		($localConfModules{$module}{installed} eq 'failed') ||
 	   	($presetModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
@@ -6522,7 +6512,7 @@ sub removeSingleModule {
 	}
 
 	# force removal for testing purposes
-	if (($localConfModules{$module}{blocked} eq 'no') || $force) {
+	if (($localConfModules{$module}{blocked} eq 'no')) {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
 	}
@@ -6796,11 +6786,6 @@ sub checkModePermission {
 	my ($operation, $module) = (@_);
 	# this is a double check, just in case ...
 
-	# for testing purposes
-	if ($force) {
-		return (1);
-	}
-
 	if ($presetModules{$module}{required} eq 'prerequisite') {
 		printLog("module is prerequisite", 'L2', '[INFO]');
 		# always permit if it is a prerequisite
@@ -7037,7 +7022,7 @@ sub checkModePermission {
 # configures a module, does no checks
 #
 sub configureModule {
-	my $module = shift;
+	my ($module, $force) = @_;
 	my $permission = checkModePermission('install', $module);
 	printLog("configure module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission || $force) {
@@ -7051,7 +7036,7 @@ sub configureModule {
 # remove a module, does no checks
 #
 sub removeModule {
-	my $module = shift;
+	my ($module, $force) = @_;
 	my $permission = checkModePermission('remove', $module);
 	printLog("remove module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission || $force) {
@@ -7066,7 +7051,7 @@ sub removeModule {
 # configures a module, does no checks
 #
 sub updateModule {
-	my $module = shift;
+	my ($module, $force) = @_;
 	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2', '[INFO]');
 	if ($permission || $force) {
@@ -7899,59 +7884,30 @@ if (scalar(@ARGV) != 0) {
 			printLog("$logLevel", 'T0', '[DEBUG]');
 		}
 	# for testing purposes
-	} elsif ($argValue{command} eq "force-install") {
-		$force = 1;
+	} elsif ($argValue{command} eq "force-install" || $argValue{command} eq "force-update" || $argValue{command} eq "force-remove") {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
-				configureAllModules();
-				postConfigure();
-				printLog('Tomte finished', 'L1', '[INFO]');
-			} elsif (validModuleName($argValue{module}) ne q{}) {
-				configureSingleModule($argValue{module});
-				postConfigure();
-				printLog('Tomte finished', 'L0', '[INFO]');
-			} else {
-				print "module $argValue{module} does not exist\n";
-			}
-		} else {
-			print "Module name missing\n";
-		}
-	} elsif ($argValue{command} eq "force-update") {
-		$force = 1;
-		if ($argValue{module} ne q{}) {
-			initLogging();
-			if ($argValue{module} eq 'all') {
-				my $module;
-				foreach $module (keys %presetModules) {
-					updateModule(getSubName($module));
+				foreach my $module (keys %presetModules) {
+					if ($argValue{command} eq "force-install") {
+						configureModule(getSubName($module), 1);
+					} elsif ($argValue{command} eq "force-update") {
+						updateModule(getSubName($module), 1);
+					} elsif ($argValue{command} eq "force-remove") {
+						removeModule(getSubName($module), 1);
+					}
 				}
 				postConfigure();
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				updateModule(getSubName($argValue{module}));
-				postConfigure();
-				printLog('Tomte finished', 'L0', '[INFO]');
-			} else {
-				print "module $argValue{module} does not exist\n";
-			}
-		} else {
-			print "Module name missing\n";
-		}
-	} elsif ($argValue{command} eq "force-remove") {
-		$force = 1;
-		if ($argValue{module} ne q{}) {
-			initLogging();
-			if ($argValue{module} eq 'all') {
-				my $module;
-				foreach $module (keys %presetModules) {
-					removeSingleModule($module);
+				if ($argValue{command} eq "force-install") {
+					configureModule(getSubName($argValue{module}), 1);
+				} elsif ($argValue{command} eq "force-update") {
+					updateModule(getSubName($argValue{module}), 1);
+				} elsif ($argValue{command} eq "force-remove") {
+					removeModule(getSubName($argValue{module}), 1);
 				}
 				postConfigure();
-				printLog('Tomte finished', 'L1', '[INFO]');
-			} elsif (validModuleName($argValue{module}) ne q{}) {
-				removeSingleModule($argValue{module});
-				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
 				print "module $argValue{module} does not exist\n";
@@ -7959,7 +7915,6 @@ if (scalar(@ARGV) != 0) {
 		} else {
 			print "Module name missing\n";
 		}
-
 
 	} else {
 		print "Unknown command: $argValue{command}\n";
