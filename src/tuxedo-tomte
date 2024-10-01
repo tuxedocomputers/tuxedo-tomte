@@ -6511,8 +6511,7 @@ sub removeSingleModule {
 		return;
 	}
 
-	# force removal for testing purposes
-	if (($localConfModules{$module}{blocked} eq 'no')) {
+	if ($localConfModules{$module}{blocked} eq 'no') {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
 		removeModule($module);
 	}
