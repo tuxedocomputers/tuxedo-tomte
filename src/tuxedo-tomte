@@ -7022,7 +7022,9 @@ sub checkModePermission {
 #
 sub configureModule {
 	my ($module, $force) = @_;
-	$force //= 0; # Set default value to 0 if not provided
+	if (! defined($force)) {
+		$force = 0; # Set default value to 0 if not provided
+	}
 
 	my $permission = checkModePermission('install', $module);
 	printLog("configure module: $module permission: $permission", 'L2', '[INFO]');
@@ -7038,7 +7040,9 @@ sub configureModule {
 #
 sub removeModule {
 	my ($module, $force) = @_;
-	$force //= 0; # Set default value to 0 if not provided
+	if (! defined($force)) {
+		$force = 0; # Set default value to 0 if not provided
+	}
 
 	my $permission = checkModePermission('remove', $module);
 	printLog("remove module: $module permission: $permission", 'L2', '[INFO]');
@@ -7055,7 +7059,9 @@ sub removeModule {
 #
 sub updateModule {
 	my ($module, $force) = @_;
-	$force //= 0; # Set default value to 0 if not provided
+	if (! defined($force)) {
+		$force = 0; # Set default value to 0 if not provided
+	}
 	
 	my $permission = checkModePermission('update', $module);
 	printLog("upgrade module: $module permission: $permission", 'L2', '[INFO]');
