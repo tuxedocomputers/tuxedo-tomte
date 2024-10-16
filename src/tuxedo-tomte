@@ -1276,7 +1276,7 @@ sub checkRequirementsLast {
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
-	configureSingleModule('nvidia-driver');
+	configureSingleModule('nvidia-driver', 0);
 
 	return (0);
 }
@@ -6406,6 +6406,10 @@ sub validModuleName {
 # no		no			no			no			no		.
 
 sub configureAllModules {
+	my ($force) = @_;
+	if (! defined ($force)) {
+		$force = 0;
+	}
 	my $module;
 	my $exit_status;
 	foreach $module (keys %presetModules) {
@@ -6417,20 +6421,22 @@ sub configureAllModules {
 
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if (($presetModules{$module}{required} eq 'yes') &&
-			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
+		if ((($presetModules{$module}{required} eq 'yes') &&
+			($presetModules{$module}{order} ne 'first') &&
+			($presetModules{$module}{order} ne 'last')) ||
+			$force) {
 
 			if ($presetModules{$module}{reconfigure} eq 'always') {
 				
 				# reconfigure modules with 'always' every single time
 				reconfigureSingleModule($presetModules{$module}{name});
 			} else {
-				configureSingleModule($presetModules{$module}{name});
+				configureSingleModule($presetModules{$module}{name}, $force);
 			}
 		} elsif (($presetModules{$module}{required} eq 'no') &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
-			removeSingleModule($presetModules{$module}{name});
+			removeSingleModule($presetModules{$module}{name}, $force);
 		}
 	}
 	return (0);
@@ -6443,7 +6449,10 @@ sub configureAllModules {
 # if not blocked, required and not installed
 #
 sub configureSingleModule {
-	my $moduleName = shift;
+	my ($moduleName, $force) = @_;
+	if (! defined($force)) {
+		$force = 0;
+	}
 	my $module;
 	$module = getSubName($moduleName);
 
@@ -6456,6 +6465,15 @@ sub configureSingleModule {
 	if ($module eq q{}) {
 		printLog("wrong module name", 'TL', '[WARN]');
 		return;
+	}
+
+	if ($force) {
+		if ($presetModules{$module}{upgrade} eq 'yes') {
+			updateModule($module, 1);
+		} else {
+			configureModule($module, 1);
+		}
+		return (0);
 	}
 
 	# check if in LiveISO and exit from subroutine if module should not be
@@ -6502,18 +6520,25 @@ sub configureSingleModule {
 # checks if the conditions to remove a module are met
 #
 sub removeSingleModule {
-	my $moduleName = shift;
+	my ($moduleName, $force) = shift;
 	my $module;
 	$module = getSubName($moduleName);
 
 	if ($module eq q{}) {
-		printLog("wrong module name", 'TL', '[WARN]');
+		printLog("wrong module name", 'TL0', '[WARN]');
+		return;
+	}
+
+	#TODO debug
+		printLog("force: $force", 'TL0', '[WARN]');
+	if ($force) {
+		removeModule($module, $force);
 		return;
 	}
 
 	if ($localConfModules{$module}{blocked} eq 'no') {
 		printLog("removing module $moduleName", 'TL', '[INFO]');
-		removeModule($module);
+		removeModule($module, $force);
 	}
 
 	if ( $localConfModules{$module}{blocked} eq 'yes' ) {
@@ -6533,7 +6558,6 @@ sub removeSingleModule {
 sub reconfigureAllModules {
 	my $module;
 	my $exit_status;
-	
 
 	foreach $module (keys %presetModules) {
 		# to debug on all modules
@@ -6585,7 +6609,8 @@ sub reconfigureSingleModule {
 	}
 
 	if (($presetModules{$module}{required} eq 'prerequisite') ||
-		(($localConfModules{$module}{blocked} eq 'no') && ($presetModules{$module}{required} eq 'yes'))) {
+		(($localConfModules{$module}{blocked} eq 'no') &&
+		($presetModules{$module}{required} eq 'yes'))) {
 
 		if ($presetModules{$module}{upgrade} eq 'yes') {
 			printLog("update module: $module", 'L1', '[INFO]');
@@ -6617,6 +6642,37 @@ sub reconfigureSingleModule {
 		printLog("module $module is not required by this system", 'L2', '[INFO]');
 		print "Module: $moduleName cannot be installed because:\n";
 		print "- it is not required by this system (this is the main reason)\n";
+	}
+	return (0);
+}
+
+
+
+###############################################################################
+# updates all modules
+# only used for testing
+#
+sub updateAllModules {
+	my ($force) = shift;
+
+	foreach my $module (keys %presetModules) {
+		updateSingleModule($module, $force);
+	}
+	return (0);
+}
+
+
+
+
+###############################################################################
+# remove all modules
+# only used for testing
+#
+sub removeAllModules {
+	my ($force) = shift;
+
+	foreach my $module (keys %presetModules) {
+		removeSingleModule($module, $force);
 	}
 	return (0);
 }
@@ -7045,7 +7101,8 @@ sub removeModule {
 	}
 
 	my $permission = checkModePermission('remove', $module);
-	printLog("remove module: $module permission: $permission", 'L2', '[INFO]');
+	#TODO debug
+	printLog("remove module: $module permission: $permission force: $force", 'L2', '[INFO]');
 	if ($permission || $force) {
 		$module->($module, 'remove');
 	}
@@ -7706,7 +7763,7 @@ if (scalar(@ARGV) != 0) {
 		initLogging();
 		setMode('AUTOMATIC');
 		prepareValues();
-		configureAllModules();
+		configureAllModules(0);
 		postConfigure();
 		listSuccess();
 		writeConfigFile();
@@ -7748,7 +7805,7 @@ if (scalar(@ARGV) != 0) {
 						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1', '[DEBUG]');
 					}
 				}
-				configureAllModules();
+				configureAllModules(0);
 				checkRequirementsLast();
 				postConfigure();
 				listSuccess();
@@ -7758,7 +7815,7 @@ if (scalar(@ARGV) != 0) {
 					printLog("Mode DONT_CONFIGURE is set", 'TL0', '[INFO]');
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
-				configureSingleModule($argValue{module});
+				configureSingleModule($argValue{module}, 0);
 				postConfigure();
 
 				listSuccess();
@@ -7779,7 +7836,7 @@ if (scalar(@ARGV) != 0) {
 				checkMode();
 				prepareValues();
 				prerequisites();
-				removeSingleModule($argValue{module});
+				removeSingleModule($argValue{module}, 0);
 				postConfigure();
 				listSuccess();
 				writeConfigFile();
@@ -7894,30 +7951,17 @@ if (scalar(@ARGV) != 0) {
 		} else {
 			printLog("$logLevel", 'T0', '[DEBUG]');
 		}
+
 	# for testing purposes
-	} elsif ($argValue{command} eq "force-install" || $argValue{command} eq "force-update" || $argValue{command} eq "force-remove") {
+	} elsif ($argValue{command} eq "force-install") {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
-				foreach my $module (keys %presetModules) {
-					if ($argValue{command} eq "force-install") {
-						configureModule(getSubName($module), 1);
-					} elsif ($argValue{command} eq "force-update") {
-						updateModule(getSubName($module), 1);
-					} elsif ($argValue{command} eq "force-remove") {
-						removeModule(getSubName($module), 1);
-					}
-				}
+				configureAllModules(1);
 				postConfigure();
-				printLog('Tomte finished', 'L1', '[INFO]');
+				printLog('Tomte finished', 'L0', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				if ($argValue{command} eq "force-install") {
-					configureModule(getSubName($argValue{module}), 1);
-				} elsif ($argValue{command} eq "force-update") {
-					updateModule(getSubName($argValue{module}), 1);
-				} elsif ($argValue{command} eq "force-remove") {
-					removeModule(getSubName($argValue{module}), 1);
-				}
+				configureSingleModule($argValue{module}, 1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} else {
@@ -7926,6 +7970,41 @@ if (scalar(@ARGV) != 0) {
 		} else {
 			print "Module name missing\n";
 		}
+	} elsif ($argValue{command} eq "force-update") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				updateAllModules(1);
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				updateSingleModule(getSubName($argValue{module}), 1);
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "force-remove") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				removeAllModules(1);
+				postConfigure();
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				removeSingleModule($argValue{module}, 1);
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+
 
 	} else {
 		print "Unknown command: $argValue{command}\n";
@@ -7937,7 +8016,8 @@ if (scalar(@ARGV) != 0) {
 
 # interrupt repeated delayed execution if not necessary anymore
 if (($startLaterAgain == 0) &&
-	(($argValue{command} eq 'configure') || ($argValue{command} eq 'reconfigure'))) {
+	(($argValue{command} eq 'configure') ||
+	($argValue{command} eq 'reconfigure'))) {
 	if (-e $triesFile) {
 		if (-w $triesFile) {
 			printLog('deleting triesFile', 'L2', '[DEBUG]');
