@@ -19,7 +19,7 @@ fi
 # Check if a test all modules is set
 testallmodules_present=0
 echo "Checking for test all modules..."
-grep -Hn 'Readonly my \$TEST_ALL_MODULES =>' ./src/tuxedo-tomte | grep -vE 'Readonly my \$TEST_ALL_MODULES => 1' && testallmodules_present=1
+grep -Hn 'Readonly my \$TEST_ALL_MODULES =>' ./src/tuxedo-tomte | grep -vE 'Readonly my \$TEST_ALL_MODULES => 0' && testallmodules_present=1
 if [[ $testallmodules_present -gt 0 ]]; then
   echo "Found test all modules higher then 0!"
 fi
@@ -57,11 +57,31 @@ if [[ $syntax_incorrect -gt 0 ]]; then
   perl -c ./Tomte/Presets.pm
 fi
 
+static_code_analysis_incorrect=0
+echo "Executing static code analysis in src/tuxedo-tomte..."
+perlcritic -5 ./src/tuxedo-tomte >/dev/null 2>&1 || static_code_analysis_incorrect=1
+if [[ $static_code_analysis_incorrect -gt 0 ]]; then
+  echo "Found warnings in src/tuxedo-tomte!"
+  perlcritic -5 ./src/tuxedo-tomte
+fi
+
+
+echo "Executing static code analysis in Tomte/Presets.pm..."
+perlcritic -5 ./Tomte/Presets.pm >/dev/null 2>&1 || static_code_analysis_incorrect=1
+if [[ $static_code_analysis_incorrect -gt 0 ]]; then
+  echo "Found warnings in Tomte/Presets.pm!"
+  perlcritic -5 ./Tomte/Presets.pm
+fi
+
+
+
+
 # Calculate the exit code as the sum of the variables
-exit_code=$((todo_present + higherloglevel_present + testallmodules_present + syntax_incorrect))
+exit_code=$((todo_present + higherloglevel_present + testallmodules_present + syntax_incorrect + static_code_analysis_incorrect))
 
 # Output the exit code
 echo "Exit code: $exit_code"
+echo "expected value is 0"
 
 # Exit with the calculated exit code
 exit $exit_code
