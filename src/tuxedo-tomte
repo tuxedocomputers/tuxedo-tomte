@@ -6520,7 +6520,11 @@ sub configureSingleModule {
 # checks if the conditions to remove a module are met
 #
 sub removeSingleModule {
-	my ($moduleName, $force) = shift;
+	my ($moduleName, $force) = @_;
+	if (! defined($force)) {
+		$force = 0;
+	}
+
 	my $module;
 	$module = getSubName($moduleName);
 
@@ -6529,8 +6533,6 @@ sub removeSingleModule {
 		return;
 	}
 
-	#TODO debug
-		printLog("force: $force", 'TL0', '[WARN]');
 	if ($force) {
 		removeModule($module, $force);
 		return;
@@ -6670,6 +6672,9 @@ sub updateAllModules {
 #
 sub removeAllModules {
 	my ($force) = shift;
+	if (! defined($force)) {
+		$force = 0;
+	}
 
 	foreach my $module (keys %presetModules) {
 		removeSingleModule($module, $force);
@@ -7101,7 +7106,6 @@ sub removeModule {
 	}
 
 	my $permission = checkModePermission('remove', $module);
-	#TODO debug
 	printLog("remove module: $module permission: $permission force: $force", 'L2', '[INFO]');
 	if ($permission || $force) {
 		$module->($module, 'remove');
@@ -7957,10 +7961,12 @@ if (scalar(@ARGV) != 0) {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
+				printLog("force install all modules", 'TL0', '[DEBUG]');
 				configureAllModules(1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
+				printLog("force install single module $argValue{module}", 'TL0', '[DEBUG]');
 				configureSingleModule($argValue{module}, 1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
@@ -7974,10 +7980,12 @@ if (scalar(@ARGV) != 0) {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
+				printLog("force update all modules", 'TL0', '[DEBUG]');
 				updateAllModules(1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
+				printLog("force update single module $argValue{module}", 'TL0', '[DEBUG]');
 				updateSingleModule(getSubName($argValue{module}), 1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
@@ -7991,10 +7999,12 @@ if (scalar(@ARGV) != 0) {
 		if ($argValue{module} ne q{}) {
 			initLogging();
 			if ($argValue{module} eq 'all') {
+				printLog("force remove all modules", 'TL0', '[DEBUG]');
 				removeAllModules(1);
 				postConfigure();
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
+				printLog("force remove single module $argValue{module}", 'TL0', '[DEBUG]');
 				removeSingleModule($argValue{module}, 1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
