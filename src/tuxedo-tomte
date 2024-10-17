@@ -5665,7 +5665,7 @@ sub readConfigFile {
 sub validConfigLine {
 	my $line = shift;
 	# name version installed blocked required hwid
-	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite)\s[a-zA-Z0-9\-]\s*$/sm) {
+	if ($line =~ /^[a-zA-Z0-9\-\.]+\s[a-zA-Z0-9\-]\s(yes|no|failed|LiveISO)\s(yes|no)\s(yes|no|prerequisite|permyes|permno)\s[a-zA-Z0-9\-]\s*$/sm) {
 		return (1);
 	} else {
 		printLog("found invalid configuration line in $configFile:\n$line", 'L0', '[ERROR]');
@@ -5741,8 +5741,10 @@ sub writeConfigFile {
 					$hwid = $presetModules{$name}{hwid};
 					$installed = $presetModules{$name}{installed};
 				}
-				if (!(($presetModules{$name}{installed} eq 'no') &&
-					($presetModules{$name}{required} eq 'no'))) {
+				if ((!(($presetModules{$name}{installed} eq 'no') &&
+					($presetModules{$name}{required} eq 'no'))) ||
+					($presetModules{$name}{required} eq 'permyes') ||
+					($presetModules{$name}{required} eq 'permno')) {
 					print $FH "$presetModules{$name}{name} ".
 						"$version ".
 						"$installed ".
@@ -7102,6 +7104,25 @@ sub updateModule {
 
 
 ###############################################################################
+# sets a module permanently to required or not required for testing purposes
+# $value = 1 means 'permyes'
+# $value = 0 means 'permno'
+#
+sub setRequired {
+	my ($module, $value) = @_;
+	my $name = getSubName($module);
+	if ($value) {
+		$presetModules{$name}{required} = 'permyes';
+	} else {
+		$presetModules{$name}{required} = 'permno';
+	}
+
+	writeConfigFile();
+}
+
+
+
+###############################################################################
 # remove warning message and confirmation
 # removeWarningMessage('message')
 # returns 1 if answered with y or Y
@@ -7964,6 +7985,40 @@ if (scalar(@ARGV) != 0) {
 				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
 				printLog("force remove single module $argValue{module}", 'TL0', '[DEBUG]');
+				removeSingleModule($argValue{module}, 1);
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "force-required") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				printLog("not implemented", 'TL0', '[DEBUG]');
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				printLog("force require single module $argValue{module}", 'TL0', '[DEBUG]');
+				removeSingleModule($argValue{module}, 1);
+				postConfigure();
+				printLog('Tomte finished', 'L0', '[INFO]');
+			} else {
+				print "module $argValue{module} does not exist\n";
+			}
+		} else {
+			print "Module name missing\n";
+		}
+	} elsif ($argValue{command} eq "force-not-required") {
+		if ($argValue{module} ne q{}) {
+			initLogging();
+			if ($argValue{module} eq 'all') {
+				printLog("not implemented", 'TL0', '[DEBUG]');
+				printLog('Tomte finished', 'L1', '[INFO]');
+			} elsif (validModuleName($argValue{module}) ne q{}) {
+				printLog("force unrequire single module $argValue{module}", 'TL0', '[DEBUG]');
 				removeSingleModule($argValue{module}, 1);
 				postConfigure();
 				printLog('Tomte finished', 'L0', '[INFO]');
