@@ -49,7 +49,6 @@ if [[ $syntax_incorrect -gt 0 ]]; then
 fi
 
 # Check if there are syntax errors in the code
-syntax_incorrect=0
 echo "Checking for syntax errors Tomte/Presets.pm..."
 perl -c ./Tomte/Presets.pm >/dev/null 2>&1 || syntax_incorrect=1
 if [[ $syntax_incorrect -gt 0 ]]; then
