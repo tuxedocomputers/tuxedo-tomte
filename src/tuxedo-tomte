@@ -6223,6 +6223,10 @@ sub transferConfigValues {
 	foreach my $name (sort keys %localConfModules) {
 		# always copy blocked status
 		$presetModules{$name}{blocked} = $localConfModules{$name}{blocked};
+		if ($localConfModules{$name}{required} =~ /(permyes|permno)/) {
+			printLog("permyes/no for $name found in configfile", 'TL2', '[DEBUG]');
+			$presetModules{$name}{required} = $localConfModules{$name}{required};
+		}
 		if (newVersion($name) || newHwid($name)) {
 			# new version or new hwid => upgrade necessary
 			$presetModules{$name}{upgrade} = 'yes';
@@ -6392,7 +6396,8 @@ sub configureAllModules {
 
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
-		if (($presetModules{$module}{required} eq 'yes') &&
+		if ((($presetModules{$module}{required} eq 'yes') ||
+			($presetModules{$module}{required} eq 'permyes')) &&
 			($presetModules{$module}{order} ne 'first') &&
 			($presetModules{$module}{order} ne 'last')) {
 
@@ -6403,7 +6408,8 @@ sub configureAllModules {
 			} else {
 				configureSingleModule($presetModules{$module}{name});
 			}
-		} elsif (($presetModules{$module}{required} eq 'no') &&
+		} elsif ((($presetModules{$module}{required} eq 'no') ||
+				($presetModules{$module}{required} eq 'permno')) &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeSingleModule($presetModules{$module}{name});
@@ -6449,12 +6455,14 @@ sub configureSingleModule {
 		($localConfModules{$module}{installed} eq 'failed') ||
 	   	($presetModules{$module}{postconf} eq 'updateGrub')) &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		$presetModules{$module}{required} eq 'yes') {
+		(($presetModules{$module}{required} eq 'yes') ||
+		($presetModules{$module}{required} eq 'permyes'))) {
 		printLog("configure module: $module", 'L1', '[INFO]');
 		configureModule($module);
 	} elsif ( $localConfModules{$module}{installed} eq 'yes' &&
 		$localConfModules{$module}{blocked} eq 'no' &&
-		$presetModules{$module}{required} eq 'yes' &&
+		(($presetModules{$module}{required} eq 'yes') ||
+		($presetModules{$module}{required} eq 'permyes')) &&
 		$presetModules{$module}{upgrade} eq 'yes' ) {
 		# upgrade if new version or hwid
 		printLog("upgrade module: $module", 'L1', '[INFO]');
@@ -6513,11 +6521,13 @@ sub reconfigureAllModules {
 			$presetModules{$module}{required} = 'yes';
 		
 		}
-		if (($presetModules{$module}{required} eq 'yes') &&
+		if ((($presetModules{$module}{required} eq 'yes') ||
+			($presetModules{$module}{required} eq 'permyes')) &&
 			($presetModules{$module}{order} ne 'first') &&
 			($presetModules{$module}{order} ne 'last')) {
 			reconfigureSingleModule($presetModules{$module}{name});
-		} elsif (($presetModules{$module}{required} eq 'no') &&
+		} elsif ((($presetModules{$module}{required} eq 'no') ||
+				($presetModules{$module}{required} eq 'no')) &&
 				(($localConfModules{$module}{installed} eq 'yes') ||
 				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeModule($module);
@@ -6560,7 +6570,8 @@ sub reconfigureSingleModule {
 
 	if (($presetModules{$module}{required} eq 'prerequisite') ||
 		(($localConfModules{$module}{blocked} eq 'no') &&
-		($presetModules{$module}{required} eq 'yes'))) {
+		(($presetModules{$module}{required} eq 'yes') ||
+		($presetModules{$module}{required} eq 'permyes')))) {
 
 		if ($presetModules{$module}{upgrade} eq 'yes') {
 			printLog("update module: $module", 'L1', '[INFO]');
@@ -6586,7 +6597,8 @@ sub reconfigureSingleModule {
 		}
 	}
 
-	if (($presetModules{$module}{required} eq 'no') &&
+	if ((($presetModules{$module}{required} eq 'no') ||
+		($presetModules{$module}{required} eq 'permno')) &&
 		($configuredModules{$module} ne 'remove failed') &&
 		($configuredModules{$module} ne 'removed')) {
 		printLog("module $module is not required by this system", 'L2', '[INFO]');
@@ -6656,7 +6668,8 @@ sub unblock {
 #
 sub blockAllModules {
 	foreach my $module (keys %presetModules) {
-		if (($presetModules{$module}{required} eq 'yes') &&
+		if ((($presetModules{$module}{required} eq 'yes') ||
+			($presetModules{$module}{required} eq 'permyes')) &&
 			($presetModules{$module}{blocked} ne 'yes') &&
 			($presetModules{$module}{required} ne 'prerequisite')) {
 			$presetModules{$module}{blocked} = 'yes';
@@ -6673,7 +6686,8 @@ sub blockAllModules {
 #
 sub unblockAllModules {
 	foreach my $module (keys %presetModules) {
-		if (($presetModules{$module}{required} eq 'yes') &&
+		if ((($presetModules{$module}{required} eq 'yes') ||
+			($presetModules{$module}{required} eq 'permyes')) &&
 			($presetModules{$module}{blocked} eq 'yes')) {
 			$presetModules{$module}{blocked} = 'no';
 			printLog("unblocking module $presetModules{$module}{name}", 'TL0', '[INFO]');
@@ -7057,8 +7071,6 @@ sub setRequired {
 	} else {
 		$presetModules{$name}{required} = 'permno';
 	}
-
-	writeConfigFile();
 }
 
 
@@ -7922,15 +7934,14 @@ if (scalar(@ARGV) != 0) {
 		}
 	} elsif ($argValue{command} eq "force-required") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			if ($argValue{module} eq 'all') {
 				printLog("not implemented", 'TL0', '[DEBUG]');
-				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				printLog("force require single module $argValue{module}", 'TL0', '[DEBUG]');
-				removeSingleModule($argValue{module}, 1);
-				postConfigure();
-				printLog('Tomte finished', 'L0', '[INFO]');
+				initLogging();
+				prepareValues();
+				printLog("force require single module $argValue{module}", 'TL0', '[INFO]');
+				setRequired($argValue{module}, 1);
+				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
@@ -7939,15 +7950,14 @@ if (scalar(@ARGV) != 0) {
 		}
 	} elsif ($argValue{command} eq "force-not-required") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			if ($argValue{module} eq 'all') {
 				printLog("not implemented", 'TL0', '[DEBUG]');
-				printLog('Tomte finished', 'L1', '[INFO]');
 			} elsif (validModuleName($argValue{module}) ne q{}) {
-				printLog("force unrequire single module $argValue{module}", 'TL0', '[DEBUG]');
-				removeSingleModule($argValue{module}, 1);
-				postConfigure();
-				printLog('Tomte finished', 'L0', '[INFO]');
+				initLogging();
+				prepareValues();
+				printLog("force unrequire single module $argValue{module}", 'TL0', '[INFO]');
+				setRequired($argValue{module}, 0);
+				writeConfigFile();
 			} else {
 				print "module $argValue{module} does not exist\n";
 			}
