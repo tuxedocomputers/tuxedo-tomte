@@ -805,39 +805,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (!$FAI) {
-		if (($boardname =~ /X170SM/sm) ||
-			($boardname =~ /PB50_70DFx,DDx/sm) ||
-			($boardname =~ /LAPQC71A/sm) ||
-			($boardname =~ /LAPQC71B/sm) ||
-			($boardname =~ /N141CU/sm) ||
-			($boardname =~ /N150CU/sm) ||
-			($boardname =~ /NH5xAx/sm) ||
-			($boardname =~ /NL5xRU/sm) ||
-			($boardname =~ /AURA1501/sm) ||
-			($boardname =~ /EDUBOOK1502/sm) ||
-			($boardname =~ /NS50MU/sm) ||
-			($boardname =~ /NS50_70MU/sm) ||
-			($boardname =~ /X170KM-G/sm )) {
-			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == $NEG_ONE) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		}
-	}
-
-	if (!$FAI) {
-		if ($boardname =~ /GM6XGxX/sm) {
-			my $minKernelVersionFornoauxfix = '6.8';
-			if ((version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 1) ||
-				(version_compare($kernelRelease, $minKernelVersionFornoauxfix) == 0)) {
-				$presetModules{nokeyboardaftersuspendfix}{required} = 'yes';
-				printLog("detected $presetModules{nokeyboardaftersuspendfix}{name} issue", 'L1', '[INFO]');
-			}
-		}
-	}
-
 	if ($boardname =~ /X35R/sm) {
 		$presetModules{elantechtouchpadfix}{required} = 'yes';
 		printLog("detected $presetModules{elantechtouchpadfix}{name} issue", 'L1', '[INFO]');
@@ -1462,29 +1429,6 @@ sub tuxedokeyboard() {
 
 
 
-
-
-###############################################################################
-# Fix for TUXEDO Notebooks, fixes no keyboard present after suspend on
-# - XC1711
-# - XUX711
-# - NH5xAx
-# - AURA1501/NL5xRU
-# - PB50_70DFx,DDx
-# - N150CU
-# - N141CU
-# - XC15
-# - IBS15v6
-# - EDUBOOK1502
-#
-sub nokeyboardaftersuspendfix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'i8042.reset', 'i8042.nomux', 'i8042.nopnp', 'i8042.noloop');
-	return;
-}
-
-
 ###############################################################################
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
 # - DX1708
@@ -1498,7 +1442,6 @@ sub backlightfix() {
 	grubModuleEdit( $module, $action, 0, 'i915.enable_dpcd_backlight=1');
 	return;
 }
-
 
 
 
