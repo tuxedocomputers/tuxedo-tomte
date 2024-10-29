@@ -316,41 +316,41 @@ sub checkAndSetLocale {
 			my ($foundFolder, $localePath) = getMatchingLocaleForLang($languageCode);
 
             # Check if the directory exists
-            if ($foundFolder eq q{}) {
-				local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder;
+            if ($foundFolder ne q{}) {
+				$ENV{'LANG'} = $ENV{'LANGUAGE'} = $foundFolder;
                 printLog("Found Tomte locale file in: $localePath", "L1", '[INFO]');
             } else {
 				if(length $languageCode == 2){
 					# already searched possible endings and didn't found
 					printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $defaultLocale", "L1", '[INFO]');
-					local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
+					$ENV{'LANG'} = $ENV{'LANGUAGE'} = $defaultLocale;
 				} else {
 					# reduce de_DE to de to search broader
 					$languageCode = (split /_/sm, $languageCode)[0];
 					my ($foundFolder2, $localePath2) = getMatchingLocaleForLang($languageCode);
 
 					# Check if the directory exists
-					if ($foundFolder2 eq q{}) {
+					if ($foundFolder2 ne q{}) {
 						if($languageCode ne $foundFolder2){
-							local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $foundFolder2;
+							$ENV{'LANG'} = $ENV{'LANGUAGE'} = $foundFolder2;
 						}
 
 						printLog("Found Tomte locale file in: $localePath2", "L1", '[INFO]');
 					} else {
 						printLog("Tomte locale file doesn't exist for requested language $lang. Setting to default: $defaultLocale", "L1", '[INFO]');
-						local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
+						$ENV{'LANG'} = $ENV{'LANGUAGE'} = $defaultLocale;
 					}
 				}
             }
         } else {
             printLog("Invalid LANG or LANGUAGE format: '$lang'", "L1", '[WARN]');
             printLog("Setting both to default: $defaultLocale", "L1", '[INFO]');
-            local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
+            $ENV{'LANG'} = $ENV{'LANGUAGE'} = $defaultLocale;
         }
     } else {
         # Neither LANG nor LANGUAGE is set. Setting both to default
         printLog("Neither LANG nor LANGUAGE is set. Setting both to default: $defaultLocale", "L1", '[WARN]');
-        local $ENV{'LANG'} = local $ENV{'LANGUAGE'} = $defaultLocale;
+        $ENV{'LANG'} = $ENV{'LANGUAGE'} = $defaultLocale;
     }
 	return;
 }
