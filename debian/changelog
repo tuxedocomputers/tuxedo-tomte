@@ -1,3 +1,47 @@
+tuxedo-tomte (2.40.0) jammy; urgency=medium
+
+  [ E. Mohr ]
+  * merge with master
+  * added force-install force-remove force-update for testing
+  * added force for testing purposes
+
+  [ emohrtuxedo ]
+  * added force to modules
+  * repaired forced update
+
+  [ M. Arnold ]
+  * reduced to direct installation wrapper
+  * removed left over changes
+
+  [ Maximilian Arnold ]
+  * ensure $force is set to 0 if not set
+  * reworked logical or operator to special if
+
+  [ E. Mohr ]
+  * modified perlcritics Loop iterator is not lexical warning
+  * partially finished
+  * removed debugs
+  * added check for static code analysis
+  * permyes and permno as values for testing
+  * removed and changed code as defined yesterday and documented in the issue
+  * merge with 474
+  * incorrect line deleted
+  * correct scalar name
+  * added permyes and permno for testing purposes
+  * replaced disablegucfix module with grubModuleEdit
+  * removed nokeyboardaftersuspendfix
+  * removed i8042noauxfix
+
+  [ M. Arnold ]
+  * fixed language issue and removed C.po
+
+  [ E. Mohr ]
+  * added support for KDE neon 24.04
+  * modified repos for TUXEDO OS 4
+  * release 2.40.0
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 20 Nov 2024 23:50:25 +0100
+
 tuxedo-tomte (2.39.2) jammy; urgency=medium
 
   [ E. Mohr ]
