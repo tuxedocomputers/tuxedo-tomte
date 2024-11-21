@@ -2910,51 +2910,7 @@ sub acpibacklightvideofix() {
 sub disablegucfix() {
 	my $module = shift;
 	my $action = shift;
-	my @kernelParameters = ('i915.enable_guc=2');
-	my $retval;
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = insertGrub($module, \@kernelParameters);
-		if ($retval < 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			if ($retval > 0) {
-				$postConfProgramsList{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
-			} else {
-				printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = insertGrub($module, \@kernelParameters);
-		if ($retval < 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			if ($retval > 0) {
-				$postConfProgramsList{updateGrub}{trigger} = 1;
-				addToConfiguredModules($module, "success");
-			} else {
-				printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-				addToConfiguredModules($module, "nothingToDo");
-			}
-		}
-	}
-	if ($action eq 'remove') {
-		if (removeWarningMessage("disable-guc-fix\n")) {
-			removeKernelParameters($module, 0, @kernelParameters);
-		}
-	}
+	grubModuleEdit($module, $action, 0, 'i915.enable_guc=2');
 	return;
 }
 
