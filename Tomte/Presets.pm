@@ -114,14 +114,6 @@ our %ESSENTIAL_REPOS = (
 							"Components: main\n".
 							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-os.sources"
-		},
-		"plasma" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://plasma6.tuxedocomputers.com/\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
@@ -166,7 +158,6 @@ our %OTHER_REPOS = (
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
 		}
 	},
-
 
 	"Linux Mint 21.1" => {
 		"name" => "vanessa",
@@ -221,14 +212,6 @@ our %OTHER_REPOS = (
 	},
 
 	"TUXEDO OS 24.04" => {
-		"plasma" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://plasma6.tuxedocomputers.com/\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
-		},
 		"mirrors" => {
 			"content" => [
 				"Types: deb\n".
@@ -243,6 +226,14 @@ our %OTHER_REPOS = (
 				"Components: main restricted universe multiverse\n".
 				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
+		},
+		"plasma" => {
+			"content" => ["Types: deb\n".
+							"URIs: https://plasma6.tuxedocomputers.com/\n".
+							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );

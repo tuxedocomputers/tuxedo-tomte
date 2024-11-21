@@ -1184,7 +1184,10 @@ sub checkRequirements {
 	my $minPlasmaWorkspaceVersion = '6.0.0';
 	readConfigIniValues();
 	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
-	if (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sm) || ($distributionVersion =~ /3 22\.04.*/sm) || ($distributionVersion =~ /4 24\.04.*/sm))) {
+	if (($distribution =~ /TUXEDO OS/sm) && ($distributionVersion =~ /24\.04.*/sm)) {
+		$plasma6Installed = 1;
+		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
+	} elsif (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sm) || ($distributionVersion =~ /3 22\.04.*/sm))) {
 		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
 
 		# check whether plasma6 is installed
@@ -3304,12 +3307,12 @@ sub createRepos {
 		printLog("key: $key distroKey: $distroKey", 'L2', '[DEBUG]');
 		if ($key ne 'name') {
 			# hack to set the TUXEDO plasma repos to the correct values
-			if ($plasma6Installed) {
+			if ($plasma6Installed && ($distroKey ne 'TUXEDO OS 24.04')) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
 				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors') || ($key eq 'plasma') || ($key eq 'txos')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
-			} elsif ($distribution =~ /TUXEDO OS/sm) {
+			} elsif (($distribution =~ /TUXEDO OS/sm) && ($distroKey ne 'TUXEDO OS 24.04')) {
 				printLog("plasma6: no", 'L2', '[DEBUG]');
 				if (($key eq 'nonplasma6txos') || ($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
