@@ -774,18 +774,6 @@ sub prerequisites {
 sub checkRequirements {
 	my $FH;
 
-	# check values for each module
-	if (($boardname =~ /NS50_70MU/) ||
-		($boardname =~ /NS50MU/)) {
-		unless ($FAI) {
-			my $minKernelVersionFornoauxfix = '5.15.0-53';
-			if (version_compare($kernelRelease, $minKernelVersionFornoauxfix) == -1) {
-				$presetModules{i8042noauxfix}{required} = 'yes';
-				printLog("detected $presetModules{i8042noauxfix}{name} issue", 'L1', '[INFO]');
-			}
-		}
-	}
-
 	if ($boardname =~ /PF5PU1G/sm) {
 		$presetModules{nobootonbattery}{required} = 'yes';
 		printLog("detected $presetModules{nobootonbattery}{name} issue", 'L1', '[INFO]');
@@ -1290,21 +1278,6 @@ sub findPciDevice {
 ###############################################################################
 ###############################################################################
 ###############################################################################
-
-
-
-
-
-###############################################################################
-# for touchpad problems
-#
-sub i8042noauxfix() {
-	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'i8042.noaux');
-	return;
-}
-
 
 
 

@@ -653,7 +653,7 @@ our %DEVICES = (
 	'37' => {
 		model => ['InfinityBook S 17 Gen6', 'InfinityBook S 15 Gen6'],
 		board_name => ['NS50_70MU', 'NS50MU'],
-		fix => ['i8042noauxfix'],
+		fix => [''],
 		flavour => ['18.04', '20.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
@@ -1728,28 +1728,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'yes'
-	},
-	i8042noauxfix => {
-	# obsolete since kernel 5.15.0-53
-		name => 'i8042noaux-fix',
-		version => 2,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => q{},
-		description => __('i8042noauxfix_description'),
-		postconf => 'updateGrub',
-		upgrade => q{},
-		upgraded => q{},
-		reconfigure => 'always',
-		restart => 'yes',
-		order => q{},
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'no'
 	},
 	lightdmlogindcheckgraphicalfix => {
 		name => 'lightdm-logind-check-graphical-fix',
