@@ -106,13 +106,13 @@ our %ESSENTIAL_REPOS = (
 							"URIs: https://txos.tuxedocomputers.com/ubuntu\n".
 							"Suites: noble\n".
 							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n".
 							"\n".
 							"Types: deb\n".
 							"URIs: https://txos-extra.tuxedocomputers.com/ubuntu\n".
 							"Suites: noble\n".
 							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-os.sources"
 		}
 	}
