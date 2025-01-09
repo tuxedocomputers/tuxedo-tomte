@@ -1920,7 +1920,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	disablegucfix => {
 		name => 'disable-guc-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
