@@ -2828,9 +2828,7 @@ sub acpibacklightvideofix() {
 sub disablegucfix() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'upgrade') {
-		grubModuleEdit($module, 'remove', 0, 'i915.enable_guc=2');
-	}
+	grubModuleEdit($module, 'remove', 0, 'i915.enable_guc=2');
 	grubModuleEdit($module, $action, 0, 'i915.enable_guc=0');
 	return;
 }
