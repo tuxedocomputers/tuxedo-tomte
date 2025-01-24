@@ -643,7 +643,7 @@ our %DEVICES = (
 		model => ['Kingston NVMe'],
 		board_name => [q{}],
 		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', '20.04', '22.04', '24.04'],
+		flavour => ['18.04', '20.04'],
 		pci_id => '2646:2263',
 		cpu => q{},
 		kernel => q{},
@@ -1437,7 +1437,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
