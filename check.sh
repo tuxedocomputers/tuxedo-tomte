@@ -19,7 +19,7 @@ fi
 # Check if a test all modules is set
 testallmodules_present=0
 echo "Checking for test all modules..."
-grep -Hn 'Readonly my \$TEST_ALL_MODULES =>' ./src/tuxedo-tomte | grep -vE 'Readonly my \$TEST_ALL_MODULES => 1' && testallmodules_present=1
+grep -Hn 'Readonly my \$TEST_ALL_MODULES =>' ./src/tuxedo-tomte | grep -vE 'Readonly my \$TEST_ALL_MODULES => 1;' && testallmodules_present=1
 if [[ $testallmodules_present -gt 0 ]]; then
   echo "Found test all modules higher then 0!"
 fi
