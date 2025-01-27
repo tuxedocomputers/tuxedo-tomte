@@ -197,7 +197,11 @@ if ($FAI) {
 	$kernelRelease = `uname -r`;
 }
 $kernelRelease =~ s/[\n\r]//gs;
-printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
+if ($kernelRelease =~ /0.0.0/) {
+	printLog("kernel version could not be detected, assuming default values", 'L2', '[DEBUG]');
+} else {
+	printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
+}
 
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
