@@ -1,3 +1,9 @@
+tuxedo-tomte (2.42.1) jammy; urgency=medium
+
+  * check/remove i915.enable_guc=2 from grub when using tuxedonvmefix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 27 Jan 2025 09:40:22 +0100
+
 tuxedo-tomte (2.42.0) jammy; urgency=medium
 
   * removed tuxedonvmefix for Ubuntu noble
