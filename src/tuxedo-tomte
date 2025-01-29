@@ -1214,8 +1214,10 @@ sub checkRequirements {
 		$presetModules{noecwakeupfix}{required} = 'yes';
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
-	if (($boardname =~ /4X4-8000 Series/sm) ||
-	   ($boardname =~ /TRINITY1501I/sm))	{
+	if ((($ubuntuCodename eq 'jammy') ||
+		($ubuntuCodename eq 'noble')) &&
+		(($boardname =~ /4X4-8000 Series/sm) ||
+		($boardname =~ /TRINITY1501I/sm))) {
 		$presetModules{tuxedobtoffsuspend}{required} = 'yes';
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
