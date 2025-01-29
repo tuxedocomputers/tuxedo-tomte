@@ -1080,7 +1080,7 @@ our %DEVICES = (
 		usb_device => q{},
 	},
 	'76' => {
-		model => ['TUXEDO Nano Pro Gen3'],
+		model => ['TUXEDO Nano Pro Gen13'],
 		board_name => ['4X4-8000 Series'],
 		fix => ['tuxedobtoffsuspend'],
 		flavour => ['22.04', '24.04'],
@@ -2233,7 +2233,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		package => 'yes',
 		packageVersion => 'unkwn',
 		fainame => q{},
-		description => __('tuxedowifisetregdomain_description'),
+		description => __('tuxedobtoffsuspend_description'),
 		postconf => q{},
 		upgrade => q{},
 		upgraded => q{},
