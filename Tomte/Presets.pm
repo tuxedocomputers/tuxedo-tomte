@@ -1078,6 +1078,17 @@ our %DEVICES = (
 		kernel => '',
 		display => q{},
 		usb_device => q{},
+	},
+	'76' => {
+		model => ['TUXEDO Nano Pro Gen3'],
+		board_name => ['4X4-8000 Series'],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => '',
+		display => q{},
+		usb_device => q{},
 	}
 );
 
@@ -2211,8 +2222,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
+	},
+	tuxedobtoffsuspend => {
+		name => 'tuxedo-bt-off-suspend',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('tuxedowifisetregdomain_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => 'yes',
+		order => q{},
+		dkms => 'yes',
+		FAI => 'yes',
+		LiveISO => 'no'
 	}
-
 );
 
 
