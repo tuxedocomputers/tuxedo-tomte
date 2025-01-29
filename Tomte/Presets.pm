@@ -2240,7 +2240,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		reconfigure => q{},
 		restart => 'yes',
 		order => q{},
-		dkms => 'yes',
+		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
 	}
