@@ -37,13 +37,14 @@ sub checkSyntax {
 sub checkLint {
 	my ($file) = @_;
 	my $cmd = "perlcritic $file";
-	`$cmd`;
+	my $output = `$cmd`;
 	my $retValue = $?;
 	# exit code from perlcritic means:
 	# 0 = no errors, no problems
 	# 1 = something went wrong
 	# 2 = some code did not pass the test
 	if ($retValue > 0) {
+		print "output from perlcritic:\n$output\n";
 		return (1);
 	} else {
 		return (0);
@@ -56,11 +57,11 @@ sub checkDiff {
 	if ($result == 0) {
 	} elsif ($result == 1) {
     	print "file: $fileA and file: $fileB are different!!\n";
-		print "they should be the same to continue the checks\n\n";
-		exit (1);
+		print "they should be the same\n\n";
+		return (1);
 	} else {
 		print "some error has occured comparing the files $fileA and $fileB\n\n";
-		exit (1);
+		return (1);
 	}
 }
 
