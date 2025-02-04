@@ -73,6 +73,8 @@ print "commitHash: >$commitHash<\n";
 my $commitBody = `dpkg-parsechangelog --show-field Changes | awk 'NR>3'`;
 print "--------------------------------------------\n";
 print "git commit ...\n";
+$commitMessage =~ s/"/\"/g;
+$commitBody =~ s/"/\"/g;
 $output = `git commit -m "$commitMessage" -m "$commitBody"`;
 print "$output\n";
 print "--------------------------------------------\n";
