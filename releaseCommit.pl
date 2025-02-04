@@ -25,16 +25,24 @@ my $versionString = `dpkg-parsechangelog | awk '/^Version:/ {print \$2}'`;
 print "Last version is $versionString\n";
 print "Please enter the new version as: X.X.X\n";
 my $versionTag = <STDIN>;
-my $commitMessage = "Version Release $versionTag\n";
+$versionTag =~ s/\s+//g;
+if ($versionTag !~ /^\d+\.\d+\.\d+$/) {
+	print "something is wrong with the release version !!";
+	exit (1);
+}
+print "version tag: >$versionTag<\n";
+my $commitMessage = "Version release $versionTag\n";
 
 # Set default email if environment variable is not given
 my $email = q{};
 my $debemail = q{};
 if (defined($ENV{'EMAIL'})) {
 	$email = $ENV{EMAIL};
+	print "using $email as \$EMAIL\n";
 }
 if (defined($ENV{'DEBEMAIL'})) {
 	$debemail = $ENV{DEBEMAIL};
+	print "using $debemail as \$DEBEMAIL\n";
 }
 if (($email eq q{}) && ($debemail eq q{})) {
 	print 'default emailaddress not set\n';
@@ -43,10 +51,18 @@ if (($email eq q{}) && ($debemail eq q{})) {
 }
 
 my $branch = `git symbolic-ref --short HEAD`;
+$branch =~ s/\s+//g;
+print "branch: >$branch<\n";
 my $commitHash = `git log -1 --pretty="%H" -- debian/changelog`;
-`gbp dch --verbose --debian-branch="\$branch" --new-version="\$versionTag" --since="\$commitHash"`;
+$commitHash =~ s/\s+//g;
+print "commitHash: >$commitHash<\n";
+print "--------------------------------------------\n";
+print "gbp dch ...\n";
+my $output = `gbp dch --verbose --debian-branch="$branch" --new-version="$versionTag" --since="$commitHash"`;
+print "$output\n";
 `head debian/changelog -n 5`;
-`vim debian/changelog`;
+system('vim debian/changelog');
+print "commitHash: >$commitHash<\n";
 `dch --release ""`;
 `cp debian/changelog changelog`;
 
@@ -55,7 +71,13 @@ my $commitHash = `git log -1 --pretty="%H" -- debian/changelog`;
 `git add changelog`;
 
 my $commitBody = `dpkg-parsechangelog --show-field Changes | awk 'NR>3'`;
-`git commit -m "\$commitMessage" -m "\$commitBody"`;
-`git tag \$versionTag`;
+print "--------------------------------------------\n";
+print "git commit ...\n";
+$output = `git commit -m "$commitMessage" -m "$commitBody"`;
+print "$output\n";
+print "--------------------------------------------\n";
+print "git tag ...\n";
+$output = `git tag $versionTag`;
+print "$output\n";
 
 print "done!\n";
