@@ -10,6 +10,12 @@ print "Check git status\n";
 # check
 print "Check for consistency\n";
 `./codeCheck.pl`;
+my $exitCode = $?;
+if ($exitCode != 0) {
+	print "code check returns with $exitCode ... something is not right with the code\nproceed with caution\n";
+} else {
+	print "code check returns with $exitCode ... looks great to build release\n";
+}
 
 print "Do you wish to proceed based on these informations? (press enter to continue)\n";
 <STDIN>;
