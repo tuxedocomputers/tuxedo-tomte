@@ -6,7 +6,8 @@ use File::Compare;
 
 my %testResults;
 
-# removes all whitespaces from input and string from file
+# counts occurences of $string in $file
+# straps the string from whitespaces
 sub countStrings {
 	my ($string, $file) = @_;
 	my $count = 0;
@@ -23,7 +24,7 @@ sub countStrings {
 	return ($count);
 }
 
-
+# checks syntax with "perl -c"
 sub checkSyntax {
 	my ($file) = @_;
 	my $cmd = "perl -c $file";
@@ -36,6 +37,7 @@ sub checkSyntax {
 	}
 }
 
+# suntax analysis tool using "perlcritic"
 sub checkLint {
 	my ($file) = @_;
 	my $cmd = "perlcritic $file";
@@ -52,6 +54,7 @@ sub checkLint {
 	}
 }
 
+# checks whether $fileA is equal $fileB
 sub checkDiff {
 	my ($fileA, $fileB) = @_;
 	my $result = compare($fileA,$fileB);
@@ -67,7 +70,7 @@ sub checkDiff {
 	return (0);
 }
 
-# Check if a TODO is present in the code
+# Check if a "#TODO" is present in the code
 print "Checking for TODOs...\n";
 $testResults{'TODOs'} = countStrings('#TODO', './src/tuxedo-tomte');
 if ($testResults{'TODOs'}) {
@@ -91,13 +94,18 @@ if ($testResults{'installAllModules'}) {
 
 # Run the translationsCheck script and capture any output
 print "Checking translations...\n";
-my $checkTranslationsOutput = `perl ./translationsCheck.pl 2>&1`;
-$testResults{'translations'} = $?;
+my $checkTranslationsOutput = `./translationsCheck.pl`;
+$testResults{'translations'} = `echo $?`;
+print "######################################\ntrans output\n$checkTranslationsOutput";
+print "###testResults: $testResults{'translations'}\n";
+
+print "######## testResults trans: $testResults{'translations'}\n";
 
 if ($testResults{'translations'} != 0) {
 	print "Found translations differences!\n";
 	print "$checkTranslationsOutput\n";
 }
+print "############### end translations\n";
 
 # check if the current module is same as the one we are testing
 # the module has to be installed in the host system for

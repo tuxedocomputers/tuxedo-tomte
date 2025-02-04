@@ -40,7 +40,7 @@ sub loadMsgIdsFromDirectories {
 	open($FH, '<', $filePath) or warn "Couldn't open $filePath: $!";
 
 	while (my $line = <$FH>) {
-		if (my ($match) = $line =~ /msgid "(.*?)"/) {
+		if (my ($match) = $line =~ /^msgid "(.*?)"/) {
 			if(length($match) > 0){
 				push @{$msgids{$languageCode}}, $match;
 			}
@@ -76,7 +76,7 @@ sub compareLanguageWithTomteAndPrintDiff {
 
 	print "Found $orphanMsgidsSize message ID's only present in language file >$languageCode<:\n";
 	if($orphanMsgidsSize > 0){
-		foreach my $msgid (@orphanMsgids){
+		foreach my $msgid (@orphanMsgids) {
 			if (defined $msgid) {
 				print "orphanMsgid: $msgid\n";
 			} else {
@@ -87,8 +87,8 @@ sub compareLanguageWithTomteAndPrintDiff {
 	print "\n";
 
 	print "Found $orphanStubsSize stubs only present in Tomte code:\n";
-	if($orphanStubsSize > 0){
-		foreach my $stub (@orphanStubs){
+	if($orphanStubsSize > 0) {
+		foreach my $stub (@orphanStubs) {
 			if (defined $stub) {
 				print "orphanStub: $stub\n";
 			} else {
@@ -157,5 +157,8 @@ foreach my $languageCode (keys %msgids){
 	$differences += compareLanguageWithTomteAndPrintDiff($languageCode);
 }
 
-print "differences: $differences\n";
-exit ($differences);
+if ($differences != 0) {
+	exit (1);
+}
+
+exit (0);
