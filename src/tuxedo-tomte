@@ -1214,8 +1214,7 @@ sub checkRequirements {
 		$presetModules{noecwakeupfix}{required} = 'yes';
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
-	if ((($ubuntuCodename eq 'jammy') ||
-		($ubuntuCodename eq 'noble')) &&
+	if (($ubuntuCodename =~ /(jammy|noble)/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
 		($boardname =~ /4X4-5000 Series/sm))) {
