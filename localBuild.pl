@@ -7,7 +7,27 @@ use File::Copy;
 use File::Copy::Recursive qw( dircopy );
 use File::Path qw( make_path rmtree );
 use File::chdir;
+use File::Slurp qw(read_file write_file);
 use POSIX qw( strftime );
+use Dpkg::Changelog;
+
+# files which do not belong to the public
+# and must be removed before publication
+my @notForPublicFiles = (
+	'codeCheck.pl',
+	'localBuild.pl',
+	'locale_handling.md',
+	'README.md',
+	'releaseCommit.pl',
+	'translationsCheck.pl',
+	'archive/TomteTomb.pl',
+	'archive',
+	'.git',
+	'.gitattributes',
+	'.gitignore',
+	'.gitlab-ci.yml',
+	'.*.swp',
+	'tuxedo-tomte');
 
 # Set default email if environment variable is not given
 sub setEmail {
@@ -24,6 +44,21 @@ sub setEmail {
 	}
 }
 
+sub build {
+	# replaces placeholder with current version numbers
+	my $versionInChangelog = `dpkg-parsechangelog --show-field Version`;
+	my $data = read_file 'src/tuxedo-tomte', {binmode => ':utf8'};
+	$data =~ s/API-Change.Feature-Release.Hotfix-Release/$versionInChangelog/g;
+	write_file 'src/tuxedo-tomte', {binmode => ':utf8'}, $data;
+
+	# build the package
+	print "build package ...\n";
+	my $output = `dpkg-buildpackage --build=full -uc -us`;
+	print "return from dpkg-buildpackage:\n$output";
+	print "done building package !!\n";
+	print "the resulting files are in the folder above this one\n";
+}
+
 my $codeCheckOutput = `./codeCheck.pl`;
 print "$codeCheckOutput\n";
 
@@ -37,19 +72,17 @@ if ($input ne 'y') {
 
 my $currentPath = cwd;
 
+# clean up possible old remnants
 rmtree('/tmp/tuxedo-tomte');
 my $baseBuildDirectory = '/tmp/tuxedo-tomte/build_local_deb';
-my $gitCloneDir = $currentPath;
-$gitCloneDir =~ s/.*\///;
-my $buildDirectory = $baseBuildDirectory.'/'.$gitCloneDir;
+my $buildDirectory = $baseBuildDirectory.'/tuxedo-tomte';
 make_path($buildDirectory) or die "-> could not create build directory : $!\n";
 dircopy($currentPath, $buildDirectory) or die "-> can't copy directory : $!";
 $CWD = $buildDirectory;
 
-# Extract version details for creating test version
+# extract version details for creating test version
 my $lastChangelogVersion = `dpkg-parsechangelog --show-field Version`;
 $lastChangelogVersion =~ s/\s+//;
-
 my $branchName = `git branch --show-current`;
 $branchName =~ s/\s+//g;
 my $issueNumber = $branchName;
@@ -60,15 +93,26 @@ $timeStamp =~ s/\s+//g;
 $timeStamp = strftime("%Y%m%d-%H%M%S", localtime($timeStamp));
 
 $input = '0';
-print "-> make a final release for publication? y/n\n".
-		"(version would be: $lastChangelogVersion, only say 'y' if you REALLY know what you are doing!!)\n";
+print "make a final release for publication? y/n\n".
+	"(last version was: $lastChangelogVersion, only say 'y' if you REALLY know what you are doing!!)\n";
 $input = <STDIN>;
 $input =~ s/\s+//g;
 
 my $finalVersion;
+my $finalRelease = 'no';
+my $newVersion;
 if ($input eq 'y') {
-	$finalVersion = "$lastChangelogVersion";
+	print "enter new release version number:\n";
+	$newVersion = <STDIN>;
+	$newVersion =~ s/\s+//g;
+	if ($newVersion eq $lastChangelogVersion) {
+		print "new version number is equal to last version number !!!: $newVersion\n";
+		exit (0);
+	}
+	$finalRelease = 'yes';
+	$finalVersion = "$newVersion";
 } else {
+	$finalRelease = 'no';
 	$finalVersion="$lastChangelogVersion-test-$timeStamp-$issueNumber";
 }
 
@@ -79,9 +123,38 @@ $commitHash =~ s/\s+//g;
 my $command = "gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"";
 `$command`;
 
+if ($finalRelease eq 'yes') {
+	system( 'vim debian/changelog' );
+	`dch --release ""`;
+	copy('debian/changelog', 'changelog');
+	`git add changelog`;
+	`git add debian/changelog`;
+	my $commitBody = `dpkg-parsechangelog --show-field Changes | awk 'NR>3'`;
+	print "--------------------------------------------\n";
+	print "-> git commit ...\n";
+	my $commitMessage = "Version Release $finalVersion";
+	$commitBody =~ s/\"/\\"/g;
+	print ">$commitMessage< >$commitBody<\n";
+	my $output = `git commit -m "$commitMessage" -m "$commitBody"`;
+	print "$output\n";
+	print "--------------------------------------------\n";
+	print "-> git tag ...\n";
+	$output = `git tag $finalVersion`;
+	print "$output\n";
+}
+
+# remove stuff that does not belong into the package
+foreach my $name (@notForPublicFiles) {
+	if (-d $name) {
+		rmtree($name);
+	} else {
+		unlink glob "$name";
+	}
+}
+
 # Run the build script
 print "-> Running build script...\n";
-`./build.pl`;
+build();
 
 # Change back to the original directory
 chdir($currentPath);

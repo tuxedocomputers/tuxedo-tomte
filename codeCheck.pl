@@ -29,7 +29,7 @@ sub checkSyntax {
 	my ($file) = @_;
 	my $cmd = "perl -c $file";
 	`$cmd`;
-	my $retValue = $?;
+	my $retValue = $?>>8;
 	if ($retValue == 0) {
 		return (0); # syntax ok
 	} else {
@@ -37,12 +37,12 @@ sub checkSyntax {
 	}
 }
 
-# suntax analysis tool using "perlcritic"
+# syntax analysis tool using "perlcritic"
 sub checkLint {
 	my ($file) = @_;
 	my $cmd = "perlcritic $file";
 	`$cmd`;
-	my $retValue = $?;
+	my $retValue = $?>>8;
 	# exit code from perlcritic means:
 	# 0 = no errors, no problems
 	# 1 = something went wrong
@@ -95,11 +95,10 @@ if ($testResults{'installAllModules'}) {
 # Run the translationsCheck script and capture any output
 print "Checking translations...\n";
 my $checkTranslationsOutput = `./translationsCheck.pl`;
-$testResults{'translations'} = `echo $?`;
-print "######################################\ntrans output\n$checkTranslationsOutput";
-print "###testResults: $testResults{'translations'}\n";
-
-print "######## testResults trans: $testResults{'translations'}\n";
+$testResults{'translations'} = $?;
+$testResults{'translations'} =~ s/\s+//;
+$testResults{'translations'} = $testResults{'translations'} >> 8;
+print "######################################\ntranslations output\n$checkTranslationsOutput";
 
 if ($testResults{'translations'} != 0) {
 	print "Found translations differences!\n";
@@ -142,7 +141,8 @@ if ($testResults{'lintErrorsPresets'}) {
 my $sumExitCodes = 0;
 
 # print results
-print "\nRESULTS\n";
+print "\nRESULTS\n".
+    "errors <=> type\n";
 foreach my $key (keys %testResults) {
 	$sumExitCodes += $testResults{$key};
 	print "$testResults{$key} <=> $key\n";
