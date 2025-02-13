@@ -198,6 +198,7 @@ if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
 execute("ls -l", "ls -l");
 execute("pwd", "pwd");
 print "baseBuildDirectory: $baseBuildDirectory\n";
+rmtree("$baseBuildDirectory/tuxedo-tomte");
 $command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
 print "command: $command\n";
 stop("before tar");
