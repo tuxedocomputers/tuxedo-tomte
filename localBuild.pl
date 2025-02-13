@@ -180,6 +180,7 @@ stop("after removing files");
 # Run the build script
 print "-> Running build script...\n";
 build();
+stop("after build");
 
 # Change back to the original directory
 chdir($currentPath);
@@ -195,6 +196,8 @@ if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
 	print "old tar file exists -> removing\n";
 	unlink("tuxedo-tomte_$finalVersion\.tar\.gz");
 }
+execute("ls -l", "ls -l");
+execute("pwd", "pwd");
 execute("-> building compressed file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
 
 # Remove the temporary build directory
