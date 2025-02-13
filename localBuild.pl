@@ -199,7 +199,7 @@ if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
 execute("ls -l", "ls -l");
 execute("pwd", "pwd");
 print "baseBuildDirectory: $baseBuildDirectory\n";
-my $command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
+$command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
 print "command: $command\n";
 stop("before tar");
 execute("-> building compressed tar-file ...", "$command");
