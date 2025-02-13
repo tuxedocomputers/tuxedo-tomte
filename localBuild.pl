@@ -11,6 +11,28 @@ use File::Slurp qw(read_file write_file);
 use POSIX qw( strftime );
 use Dpkg::Changelog;
 
+sub stop {
+	my ($string) = @_;
+	print "$string\n";
+	my $input = <STDIN>;
+}
+
+# executes a given command, prints a given description and the output
+sub execute {
+	my ($description, $command) = @_;
+	print "$description\n";
+	my $output = `$command`;
+	my $retValue = $?;
+	my $retMessage = q{};
+	if ($retValue == 0) {
+		$retMessage = "no errors: $retValue";
+	} else {
+		$retMessage = "errors found !!!: $retValue";
+	}
+	print "$output\n$retMessage\n";
+	return (0);
+}
+
 # files which do not belong to the public
 # and must be removed before publication
 my @notForPublicFiles = (
@@ -123,6 +145,7 @@ $commitHash =~ s/\s+//g;
 my $command = "gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"";
 `$command`;
 
+
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
 	`dch --release ""`;
@@ -135,18 +158,11 @@ if ($finalRelease eq 'yes') {
 	my $commitMessage = "Version Release $finalVersion";
 	$commitBody =~ s/\"/\\"/g;
 	print ">$commitMessage< >$commitBody<\n";
-	my $output = `git commit -m "$commitMessage" -m "$commitBody"`;
-	print "$output\n";
+	execute(">$commitMessage< >$commitBody<", "git commit -m \"$commitMessage\" -m \"$commitBody\"");
 	print "--------------------------------------------\n";
-	print "-> git tag $finalVersion\n";
-	$output = `git tag $finalVersion`;
-	print "$output\n";
-	print "-> git push\n";
-	$output = `git push`;
-	print "$output\n";
-	print "-> git push origin $finalVersion\n";
-	$output = `git push origin $finalVersion`;
-	print "$output\n";
+	execute("--> git tag $finalVersion", "git tag $finalVersion");
+	execute("--> git push", "git push");
+	execute("--> git push origin $finalVersion", "git push origin $finalVersion");
 }
 
 # remove stuff that does not belong into the package
@@ -158,6 +174,8 @@ foreach my $name (@notForPublicFiles) {
 	}
 }
 
+stop("after removing files");
+
 # Run the build script
 print "-> Running build script...\n";
 build();
@@ -166,10 +184,17 @@ build();
 chdir($currentPath);
 chdir('..');
 
-print "-> copying deb-file ...\n";
-`cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb .`;
-print "-> building compressed file ...\n";
-`tar czf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.`;
+# remove the old files if they exist
+if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
+	print "old file exists -> removing\n";
+	unlink("tuxedo-tomte_$finalVersion\_\*\.deb");
+}
+execute("-> copying deb-file ...", "cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb \.");
+if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
+	print "old file exists -> removing\n";
+	unlink("tuxedo-tomte_$finalVersion\.tar\.gz");
+}
+execute("-> building compressed file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
 
 # Remove the temporary build directory
 print "-> Removing temporary build directory...\n";
