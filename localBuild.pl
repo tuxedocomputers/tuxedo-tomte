@@ -49,8 +49,7 @@ my @notForPublicFiles = (
 	'.gitattributes',
 	'.gitignore',
 	'.gitlab-ci.yml',
-	'.*.swp',
-	'tuxedo-tomte');
+	'.*.swp');
 
 # Set default email if environment variable is not given
 sub setEmail {
