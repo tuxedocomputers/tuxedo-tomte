@@ -138,8 +138,14 @@ if ($finalRelease eq 'yes') {
 	my $output = `git commit -m "$commitMessage" -m "$commitBody"`;
 	print "$output\n";
 	print "--------------------------------------------\n";
-	print "-> git tag ...\n";
+	print "-> git tag $finalVersion\n";
 	$output = `git tag $finalVersion`;
+	print "$output\n";
+	print "-> git push\n";
+	$output = `git push`;
+	print "$output\n";
+	print "-> git push origin $finalVersion\n";
+	$output = `git push origin $finalVersion`;
 	print "$output\n";
 }
 
