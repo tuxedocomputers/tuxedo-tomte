@@ -28,6 +28,7 @@ sub execute {
 		$retMessage = "no errors: $retValue";
 	} else {
 		$retMessage = "errors found !!!: $retValue";
+		exit (1);
 	}
 	print "$output\n$retMessage\n";
 	return (0);
