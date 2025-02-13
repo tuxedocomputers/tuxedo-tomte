@@ -122,6 +122,8 @@ readConfigIniValues();
 if (defined($configIniValues->{initvalues}->{loglevel})) {
 	$logLevel = $configIniValues->{initvalues}->{loglevel};
 }
+
+# overwrite loglevel if set as environment variable
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 my $tomteFirstInstallFile = '/tmp/tomteFirstInstall';
 
@@ -182,6 +184,7 @@ Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 my $kernelRelease;
 
 if ($FAI) {
+	printLog("starting Tomte version $VERSION in FAI", 'TL0', '[DEBUG]');
 	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
 	my $dpkgKernel = `$searchCmd`;
 	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/g;
@@ -938,11 +941,13 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
-	# get vendor text from vendor ID:device ID
-	my @tuxedonvmefixDevices = ('2646:2263');
-	if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
-		$presetModules{tuxedonvmefix}{required} = 'yes';
-		printLog("detected $presetModules{tuxedonvmefix}{name} issue", 'L1', '[INFO]');
+	if ($ubuntuCodename =~ /focal/sm) {
+		# get vendor text from vendor ID:device ID
+		my @tuxedonvmefixDevices = ('2646:2263');
+		if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
+			$presetModules{tuxedonvmefix}{required} = 'yes';
+			printLog("detected $presetModules{tuxedonvmefix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -1208,6 +1213,13 @@ sub checkRequirements {
 	if ($boardname =~ /GXxHRXx/sm) {
 		$presetModules{noecwakeupfix}{required} = 'yes';
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
+	}
+	if (($ubuntuCodename =~ /(jammy|noble)/) &&
+		(($boardname =~ /4X4-8000 Series/sm) ||
+		($boardname =~ /4X4-7000 Series\/D5/sm) ||
+		($boardname =~ /4X4-5000 Series/sm))) {
+		$presetModules{tuxedobtoffsuspend}{required} = 'yes';
+		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
 
 	return (0);
@@ -1781,16 +1793,7 @@ sub tuxedonvmefix() {
 	my $fwVersion = 'S5Z42109';
 	my $nvmeUpdateSuccess = 0;
 	my $nvmeFWPackageWasInstalled = 0;
-	if (isPackageInstalled('tuxedo-nvme-fix')) {
-		if (! deinstallSinglePackage('tuxedo-nvme-fix')) {
-			printLog('obsolete package tuxedo-nvme-fix was successfully removed', 'L0', '[INFO]');
-		} else {
-			printLog('could not remove obsolete package tuxedo-nvme-fix, will try again next time', 'L0', '[WARN]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-			return (0);
-		}
-	}
+
 	if (($action eq 'install') || ($action eq 'upgrade')) {
 		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
@@ -1867,8 +1870,11 @@ sub tuxedonvmefix() {
 		}
 	}
 	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
+		if (removePackage('a2000-s5z42109', '')) {
+			printLog("package a2000-s5z42109 has been removed successfully as we don't need it any more", 'L2', '[INFO]');
+		} else {
+			printLog("something went wrong while trying to remove the package a2000-s5z42109", 'TL0', '[ERROR]');
+		}
 	}
 	return;
 }
@@ -2828,7 +2834,8 @@ sub acpibacklightvideofix() {
 sub disablegucfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit($module, $action, 0, 'i915.enable_guc=2');
+	grubModuleEdit($module, 'remove', 0, 'i915.enable_guc=2');
+	grubModuleEdit($module, $action, 0, 'i915.enable_guc=0');
 	return;
 }
 
@@ -3069,6 +3076,17 @@ sub noecwakeupfix() {
 	return;
 }
 
+
+
+###############################################################################
+# Installs package tuxedo-bt-off-suspend
+#
+sub tuxedobtoffsuspend() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+	return;
+}
 
 
 
@@ -4003,9 +4021,9 @@ sub isPackageInRepo {
 
 ###############################################################################
 # Deinstalls a package
-# returns 1 if the search for the packages failed or if the deinstallation was
+# returns 1 if the search for the package failed or if the deinstallation was
 # unsuccessful
-# returns 0 if everything was ok, even if no package were found
+# returns 0 if everything was ok, even if no package was found
 #
 sub deinstallSinglePackage {
 	my $deinst = shift;
@@ -4030,10 +4048,11 @@ sub deinstallSinglePackage {
 			}
 		} else {
 			printLog("package deinstallation failed!! Could not get package manager lock", 'L0', '[WARN]');
-			return (0);
+			return (1);
 		}
 	} else {
-		printLog("package $deinst was not found", 'L0', '[WARN]');
+		printLog("package $deinst is not installed", 'L0', '[WARN]');
+		return (0);
 	}
 	return;
 }

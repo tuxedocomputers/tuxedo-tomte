@@ -38,7 +38,7 @@ our %SUPPORTED_OS = (
 	"KDE neon" => ["20.04", "22.04", "24.04"],
 	"Ubuntu" => ["20.04", "22.04", "24.04"],
 	"Linux Mint" => ["21.1", "21.2", "21.3", "22"],
-	"elementary OS" => ["6.1", "7.1", "8"]
+	"elementary OS" => ["6.1", "7.1"]
 );
 
 our %ESSENTIAL_REPOS = (
@@ -643,7 +643,7 @@ our %DEVICES = (
 		model => ['Kingston NVMe'],
 		board_name => [q{}],
 		fix => ['tuxedonvmefix'],
-		flavour => ['18.04', '20.04', '22.04', '24.04'],
+		flavour => ['18.04', '20.04'],
 		pci_id => '2646:2263',
 		cpu => q{},
 		kernel => q{},
@@ -1078,6 +1078,39 @@ our %DEVICES = (
 		kernel => '',
 		display => q{},
 		usb_device => q{},
+	},
+	'76' => {
+		model => ['TUXEDO Nano Pro Gen13'],
+		board_name => ['4X4-8000 Series'],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => '',
+		display => q{},
+		usb_device => q{},
+	},
+	'77' => {
+		model => ['TUXEDO Nano Pro Gen11'],
+		board_name => ['4X4-5000 Series'],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => '',
+		display => q{},
+		usb_device => q{},
+	},
+	'78' => {
+		model => ['TUXEDO Nano Pro Gen12'],
+		board_name => ['4X4-7000 Series/D5'],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => '',
+		display => q{},
+		usb_device => q{},
 	}
 );
 
@@ -1437,7 +1470,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedonvmefix => {
 		name => 'tuxedo-nvme-fix',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -1920,7 +1953,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	disablegucfix => {
 		name => 'disable-guc-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
@@ -2211,8 +2244,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
+	},
+	tuxedobtoffsuspend => {
+		name => 'tuxedo-bt-off-suspend',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('tuxedobtoffsuspend_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => 'yes',
+		order => q{},
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no'
 	}
-
 );
 
 

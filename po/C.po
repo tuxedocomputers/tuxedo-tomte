@@ -226,7 +226,7 @@ msgid "acpibacklightvideofix_description"
 msgstr "Fixes boot delays/freezes in Nvidia modes"
 
 msgid "disablegucfix_description"
-msgstr "Disables GuC submission on Intel iGPU while keeping HuC"
+msgstr "Disables GuC and HuC load for Intel iGPU driver (i915)"
 
 msgid "tuxedodrivers_description"
 msgstr "Drivers for several platform devices for TUXEDO notebooks"
@@ -260,4 +260,7 @@ msgstr "Sets grub into best resolution"
 
 msgid "noecwakeupfix_description"
 msgstr "Prevents spurious wake-up from suspend triggered by the EC"
+
+msgid "tuxedobtoffsuspend_description"
+msgstr "Workaround for broken Bluetooth suspend issues. Effectively turns off Bluetooth before suspend and restores it after resume"
 

@@ -1,8 +1,33 @@
-tuxedo-tomte (2.41.0) jammy; urgency=medium
+tuxedo-tomte (2.43.1) jammy; urgency=medium
 
-  * added support for elementary OS 8
+  * added boardnames "4X4-5000 Series" and "4X4-7000 Series/D5" to module
+    tuxedobtoffsuspend
 
- -- E. Mohr <tux@tuxedocomputers.com>  Thu, 05 Dec 2024 17:27:46 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 04 Feb 2025 14:45:04 +0100
+
+tuxedo-tomte (2.43.0) jammy; urgency=medium
+
+  * added module tuxedobtoffsuspend
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 29 Jan 2025 16:49:37 +0100
+
+tuxedo-tomte (2.42.1) jammy; urgency=medium
+
+  * check/remove i915.enable_guc=2 from grub when using tuxedonvmefix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 27 Jan 2025 09:40:22 +0100
+
+tuxedo-tomte (2.42.0) jammy; urgency=medium
+
+  * removed tuxedonvmefix for Ubuntu noble
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 22 Jan 2025 12:47:47 +0100
+
+tuxedo-tomte (2.41.2) jammy; urgency=medium
+
+  * modified parameter for disablegucfix
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 15 Jan 2025 22:13:17 +0100
 
 tuxedo-tomte (2.40.2) jammy; urgency=medium
 
