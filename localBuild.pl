@@ -201,7 +201,9 @@ execute("pwd", "pwd");
 print "baseBuildDirectory: $baseBuildDirectory\n";
 my $command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
 print "command: $command\n";
-execute("-> building compressed file ...", "$command");
+stop("before tar");
+execute("-> building compressed tar-file ...", "$command");
+stop("after packaging");
 
 # Remove the temporary build directory
 print "-> Removing temporary build directory...\n";
