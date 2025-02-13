@@ -186,12 +186,12 @@ chdir('..');
 
 # remove the old files if they exist
 if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
-	print "old file exists -> removing\n";
+	print "old deb file exists -> removing\n";
 	unlink("tuxedo-tomte_$finalVersion\_\*\.deb");
 }
 execute("-> copying deb-file ...", "cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb \.");
 if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
-	print "old file exists -> removing\n";
+	print "old tar file exists -> removing\n";
 	unlink("tuxedo-tomte_$finalVersion\.tar\.gz");
 }
 execute("-> building compressed file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
