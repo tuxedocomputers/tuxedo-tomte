@@ -198,7 +198,10 @@ if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
 }
 execute("ls -l", "ls -l");
 execute("pwd", "pwd");
-execute("-> building compressed file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
+print "baseBuildDirectory: $baseBuildDirectory\n";
+my $command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
+print "command: $command\n";
+execute("-> building compressed file ...", "$command");
 
 # Remove the temporary build directory
 print "-> Removing temporary build directory...\n";
