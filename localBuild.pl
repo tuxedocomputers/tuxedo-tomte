@@ -11,6 +11,23 @@ use File::Slurp qw(read_file write_file);
 use POSIX qw( strftime );
 use Dpkg::Changelog;
 
+# executes a given command, prints a given description and the output
+sub execute {
+	my ($description, $command) = @_;
+	print "$description\n";
+	my $output = `$command`;
+	my $retValue = $?;
+	my $retMessage = q{};
+	if ($retValue == 0) {
+		$retMessage = "no errors: $retValue";
+	} else {
+		$retMessage = "errors found !!!: $retValue";
+		exit (1);
+	}
+	print "$output\n$retMessage\n";
+	return (0);
+}
+
 # files which do not belong to the public
 # and must be removed before publication
 my @notForPublicFiles = (
@@ -26,8 +43,7 @@ my @notForPublicFiles = (
 	'.gitattributes',
 	'.gitignore',
 	'.gitlab-ci.yml',
-	'.*.swp',
-	'tuxedo-tomte');
+	'.*.swp');
 
 # Set default email if environment variable is not given
 sub setEmail {
@@ -55,12 +71,10 @@ sub build {
 	print "build package ...\n";
 	my $output = `dpkg-buildpackage --build=full -uc -us`;
 	print "return from dpkg-buildpackage:\n$output";
-	print "done building package !!\n";
-	print "the resulting files are in the folder above this one\n";
+	print "done building package files !!\n";
 }
 
-my $codeCheckOutput = `./codeCheck.pl`;
-print "$codeCheckOutput\n";
+execute('codeCheck.pl', './codeCheck.pl');
 
 my $input;
 print "-> Do you wish to proceed based on these informations? y/n\n";
@@ -120,8 +134,7 @@ my $commitHash = `git log -1 --pretty="%H" -- debian/changelog`;
 $commitHash =~ s/\s+//g;
 
 # Generate a new entry in the debian changelog file
-my $command = "gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"";
-`$command`;
+execute("gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"");
 
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
@@ -135,12 +148,11 @@ if ($finalRelease eq 'yes') {
 	my $commitMessage = "Version Release $finalVersion";
 	$commitBody =~ s/\"/\\"/g;
 	print ">$commitMessage< >$commitBody<\n";
-	my $output = `git commit -m "$commitMessage" -m "$commitBody"`;
-	print "$output\n";
+	execute(">$commitMessage< >$commitBody<", "git commit -m \"$commitMessage\" -m \"$commitBody\"");
 	print "--------------------------------------------\n";
-	print "-> git tag ...\n";
-	$output = `git tag $finalVersion`;
-	print "$output\n";
+	execute("--> git tag $finalVersion", "git tag $finalVersion");
+	execute("--> git push", "git push");
+	execute("--> git push origin $finalVersion", "git push origin $finalVersion");
 }
 
 # remove stuff that does not belong into the package
@@ -160,12 +172,20 @@ build();
 chdir($currentPath);
 chdir('..');
 
-print "-> copying deb-file ...\n";
-`cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb .`;
-print "-> building compressed file ...\n";
-`tar czf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.`;
+# remove the old files if they exist
+if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
+	print "old deb file found -> removing\n";
+	unlink("tuxedo-tomte_$finalVersion\_\*\.deb");
+}
+execute("-> copying deb-file ...", "cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb \.");
+if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
+	print "old tar file found -> removing\n";
+	unlink("tuxedo-tomte_$finalVersion\.tar\.gz");
+}
+rmtree("$baseBuildDirectory/tuxedo-tomte");
+execute("-> building compressed tar-file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
 
 # Remove the temporary build directory
 print "-> Removing temporary build directory...\n";
 rmtree('/tmp/tuxedo-tomte');
-print "done!\n";
+print "done! the files are one directory above\n";

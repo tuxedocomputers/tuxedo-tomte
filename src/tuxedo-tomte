@@ -797,6 +797,7 @@ sub checkRequirements {
 
 	if (($boardname =~ /APX958/sm) ||
 		($boardname =~ /R14FA1/sm) ||
+		($boardname =~ /GXxHRXx/sm) ||
 		($boardname =~ /R14FA2/sm)) {
 		$presetModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
