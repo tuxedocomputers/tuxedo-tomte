@@ -60,7 +60,7 @@ sub checkDiff {
 	my $result = compare($fileA,$fileB);
 	if ($result == 0) {
 	} elsif ($result == 1) {
-    	print "file: $fileA and file: $fileB are different!!\n";
+   	print "file: $fileA and file: $fileB are different!!\n";
 		print "they should be the same to continue the checks\n\n";
 		return (1);
 	} else {
