@@ -11,12 +11,6 @@ use File::Slurp qw(read_file write_file);
 use POSIX qw( strftime );
 use Dpkg::Changelog;
 
-sub stop {
-	my ($string) = @_;
-	print "$string\n";
-	my $input = <STDIN>;
-}
-
 # executes a given command, prints a given description and the output
 sub execute {
 	my ($description, $command) = @_;
@@ -77,12 +71,10 @@ sub build {
 	print "build package ...\n";
 	my $output = `dpkg-buildpackage --build=full -uc -us`;
 	print "return from dpkg-buildpackage:\n$output";
-	print "done building package !!\n";
-	print "the resulting files are in the folder above this one\n";
+	print "done building package files !!\n";
 }
 
-my $codeCheckOutput = `./codeCheck.pl`;
-print "$codeCheckOutput\n";
+execute('codeCheck.pl', './codeCheck.pl');
 
 my $input;
 print "-> Do you wish to proceed based on these informations? y/n\n";
@@ -142,9 +134,7 @@ my $commitHash = `git log -1 --pretty="%H" -- debian/changelog`;
 $commitHash =~ s/\s+//g;
 
 # Generate a new entry in the debian changelog file
-my $command = "gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"";
-`$command`;
-
+execute("gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"");
 
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
@@ -174,12 +164,9 @@ foreach my $name (@notForPublicFiles) {
 	}
 }
 
-stop("after removing files");
-
 # Run the build script
 print "-> Running build script...\n";
 build();
-stop("after build");
 
 # Change back to the original directory
 chdir($currentPath);
@@ -187,25 +174,18 @@ chdir('..');
 
 # remove the old files if they exist
 if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
-	print "old deb file exists -> removing\n";
+	print "old deb file found -> removing\n";
 	unlink("tuxedo-tomte_$finalVersion\_\*\.deb");
 }
 execute("-> copying deb-file ...", "cp $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb \.");
 if (-e "tuxedo-tomte_$finalVersion\.tar\.gz") {
-	print "old tar file exists -> removing\n";
+	print "old tar file found -> removing\n";
 	unlink("tuxedo-tomte_$finalVersion\.tar\.gz");
 }
-execute("ls -l", "ls -l");
-execute("pwd", "pwd");
-print "baseBuildDirectory: $baseBuildDirectory\n";
 rmtree("$baseBuildDirectory/tuxedo-tomte");
-$command = "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.";
-print "command: $command\n";
-stop("before tar");
-execute("-> building compressed tar-file ...", "$command");
-stop("after packaging");
+execute("-> building compressed tar-file ...", "tar czvf tuxedo-tomte_$finalVersion\.tar\.gz -C $baseBuildDirectory \.");
 
 # Remove the temporary build directory
 print "-> Removing temporary build directory...\n";
 rmtree('/tmp/tuxedo-tomte');
-print "done!\n";
+print "done! the files are one directory above\n";
