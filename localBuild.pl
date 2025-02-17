@@ -17,14 +17,13 @@ sub execute {
 	print "$description\n";
 	my $output = `$command`;
 	my $retValue = $?;
-	my $retMessage = q{};
 	if ($retValue == 0) {
-		$retMessage = "no errors: $retValue";
+	  print "$output\nno errors: $retValue\n";
+	  return (0);
 	} else {
-		$retMessage = "errors found !!!: $retValue";
-		exit (1);
+    print "$output\nerrors found !!!: $retValue\n";
+		return (1);
 	}
-	print "$output\n$retMessage\n";
 	return (0);
 }
 
@@ -134,7 +133,7 @@ my $commitHash = `git log -1 --pretty="%H" -- debian/changelog`;
 $commitHash =~ s/\s+//g;
 
 # Generate a new entry in the debian changelog file
-execute("gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"");
+execute("-> generate new entry in changelog", "gbp dch --verbose --debian-branch \"$branchName\" --new-version \"$finalVersion\" --since=\"$commitHash\"");
 
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
