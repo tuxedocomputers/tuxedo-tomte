@@ -19,13 +19,12 @@ sub execute {
 	my $retValue = $?;
 	my $retMessage = q{};
 	if ($retValue == 0) {
-		$retMessage = "no errors: $retValue";
+		print "$retMessage\nno errors: $retValue";
+    return (1);
 	} else {
-		$retMessage = "errors found !!!: $retValue";
-		exit (1);
+		print "$retMessage\nerrors found !!!: $retValue";
+  	return (0);
 	}
-	print "$output\n$retMessage\n";
-	return (0);
 }
 
 # files which do not belong to the public
