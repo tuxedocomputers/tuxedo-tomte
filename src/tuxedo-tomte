@@ -3133,6 +3133,7 @@ sub createRepos {
 	my $sourcesFileName = $sourcesListDir.'sources.list';
 
 	my $distroKey = exists($repos{$completeDistVersion}) ? $completeDistVersion : $ubuntuCodename;
+	printLog("detected distroKey: $distroKey", 'TL2', '[DEBUG]');
 
 	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$distroKey}{deb}) {
