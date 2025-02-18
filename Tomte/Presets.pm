@@ -1323,7 +1323,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 5,
+		version => 6,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
