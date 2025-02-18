@@ -3135,7 +3135,7 @@ sub createRepos {
 
 	if (exists($repos{$completeDistVersion})) {
 		$distroKey = $completeDistVersion;
-	} elsif ($distribution !~ /(Linux Mint)/) {
+	} else {
 		$distroKey = $ubuntuCodename;
 	}
 	printLog("detected distroKey: >$distroKey<", 'TL2', '[DEBUG]');
