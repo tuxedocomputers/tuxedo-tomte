@@ -159,58 +159,6 @@ our %OTHER_REPOS = (
 		}
 	},
 
-	"Linux Mint 21.1" => {
-		"name" => "vanessa",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com vanessa main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.2" => {
-		"name" => "victoria",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com victoria main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.3" => {
-		"name" => "virginia",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com virginia main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 22" => {
-		"name" => "wilma",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com wilma main upstream import backport #id:linuxmint_main"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
 	"TUXEDO OS 24.04" => {
 		"mirrors" => {
 			"content" => [

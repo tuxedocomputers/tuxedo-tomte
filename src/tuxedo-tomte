@@ -1223,6 +1223,17 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
 
+	# workaround for Linux Mint and mirror repositories
+	if ($distribution =~ /(Linux Mint)/) {
+		$presetModules{'tuxedomirrors'}{'required'} = 'no';
+		$presetModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$presetModules{'tuxedomirrors'}{'order'} = q{};
+		$localConfModules{'tuxedomirrors'}{'required'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'order'} = q{};
+		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
+	}
+
 	return (0);
 }
 
