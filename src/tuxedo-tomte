@@ -1223,6 +1223,17 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
 
+	# workaround for Linux Mint and mirror repositories
+	if ($distribution =~ /(Linux Mint)/) {
+		$presetModules{'tuxedomirrors'}{'required'} = 'no';
+		$presetModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$presetModules{'tuxedomirrors'}{'order'} = q{};
+		$localConfModules{'tuxedomirrors'}{'required'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'order'} = q{};
+		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
+	}
+
 	return (0);
 }
 
@@ -1485,7 +1496,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (!(($ubuntuCodename =~ /jammy/sm) && ($distribution =~ /Linux Mint/sm))) {
+			if (!(($ubuntuCodename =~ /(jammy|noble)/sm) && ($distribution =~ /Linux Mint/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
@@ -3131,9 +3142,14 @@ sub createRepos {
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
+	my $distroKey = q{};
 
-	my $distroKey = exists($repos{$completeDistVersion}) ? $completeDistVersion : $ubuntuCodename;
-	printLog("detected distroKey: $distroKey", 'TL2', '[DEBUG]');
+	if (exists($repos{$completeDistVersion})) {
+		$distroKey = $completeDistVersion;
+	} else {
+		$distroKey = $ubuntuCodename;
+	}
+	printLog("detected distroKey: >$distroKey<", 'TL2', '[DEBUG]');
 
 	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$distroKey}{deb}) {
