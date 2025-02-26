@@ -1103,7 +1103,7 @@ our %DEVICES = (
 	},
 	'78' => {
 		model => ['TUXEDO Nano Pro Gen12'],
-		board_name => ['4X4-7000 Series/D5'],
+		board_name => ['4X4-7000 Series/D5', '4X4-7040 Series/D5'],
 		fix => ['tuxedobtoffsuspend'],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},

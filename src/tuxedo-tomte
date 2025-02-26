@@ -1218,6 +1218,7 @@ sub checkRequirements {
 	if (($ubuntuCodename =~ /(jammy|noble)/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
+		($boardname =~ /4X4-7040 Series\/D5/sm) ||
 		($boardname =~ /4X4-5000 Series/sm))) {
 		$presetModules{tuxedobtoffsuspend}{required} = 'yes';
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
