@@ -137,7 +137,7 @@ execute("-> generate new entry in changelog", "gbp dch --verbose --debian-branch
 
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
-	`dch --release ""`;
+	`dch --distribution noble --release ""`;
 	copy('debian/changelog', 'changelog');
 	`git add changelog`;
 	`git add debian/changelog`;
