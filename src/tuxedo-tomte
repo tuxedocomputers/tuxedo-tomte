@@ -3498,32 +3498,6 @@ sub deactivatePackagekit {
 
 
 
-
-###############################################################################
-# sets the systemd module to active and unmasks it
-# returns 1 if successful, 0 if not
-#
-sub activatePackagekit {
-	if ($packagekitState eq 'inactive') {
-		printLog("packagekit is inactive => activating ...", 'L2', '[INFO]');
-		commandSystemdModule('unmask', 'packagekit');
-		if (getSystemdState('packagekit') eq 'active') {
-			$packagekitState = 'active';
-			return (1);
-		} else {
-			$packagekitState = 'active';
-			return (0);
-		}
-	} else {
-		$packagekitState = 'active';
-		printLog("packagekit is already active", 'L2', '[INFO]');
-		return (1);
-	}
-}
-
-
-
-
 ###############################################################################
 # creates a file if the content isn't already the same
 # it removes the file if the module gets removed
