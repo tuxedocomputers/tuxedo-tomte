@@ -171,6 +171,9 @@ build();
 chdir($currentPath);
 chdir('..');
 
+# check whether the resulting package is sane
+execute("-> lint the new package", "lintian $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb");
+
 # remove the old files if they exist
 if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
 	print "old deb file found -> removing\n";

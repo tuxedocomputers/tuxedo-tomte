@@ -143,7 +143,7 @@ my $sumExitCodes = 0;
 # print results
 print "\nRESULTS\n".
     "errors <=> type\n";
-foreach my $key (keys %testResults) {
+foreach my $key (sort keys %testResults) {
 	$sumExitCodes += $testResults{$key};
 	print "$testResults{$key} <=> $key\n";
 }
