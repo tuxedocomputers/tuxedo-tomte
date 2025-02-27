@@ -110,6 +110,10 @@ print "############### end translations\n";
 # the module has to be installed in the host system for
 # the tests to work correctly
 $testResults{'PresetsModule'} = checkDiff('Tomte/Presets.pm', '/usr/share/perl5/Tomte/Presets.pm');
+if ($testResults{'PresetsModule'}) {
+	print "the locally installed module (/usr/share/perl5/Tomte/Presets.pm) is ".
+			"not identical with the one in the branch\n\n";
+}
 
 
 # Check if there are syntax errors in the code

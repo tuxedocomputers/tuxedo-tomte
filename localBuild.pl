@@ -17,9 +17,10 @@ sub execute {
 	print "$description\n";
 	my $output = `$command`;
 	my $retValue = $?;
+	$retValue = $retValue >> 8;
 	if ($retValue == 0) {
-	  print "$output\nno errors: $retValue\n";
-	  return (0);
+		print "$output\nno errors: $retValue\n";
+		return (0);
 	} else {
     print "$output\nerrors found !!!: $retValue\n";
 		return (1);
