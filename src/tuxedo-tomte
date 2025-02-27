@@ -4980,7 +4980,7 @@ sub isLineInFile {
 			printLog("can't close file $filename", 'L0', '[WARN]');
 		}
 	} else {
-		printLog("can't open file $filename", 'L0', '[WARN]');
+		printLog("can't open file $filename", 'L1', '[WARN]');
 	}
 	return (0);
 }
@@ -5011,7 +5011,7 @@ sub isTextInFile {
 			printLog("can't close file $filename", 'L0', '[WARN]');
 		}
 	} else {
-		printLog("can't open file $filename", 'L0', '[WARN]');
+		printLog("can't open file $filename", 'L1', '[WARN]');
 	}
 	return (0);
 }
