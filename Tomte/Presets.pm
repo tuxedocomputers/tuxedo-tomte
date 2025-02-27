@@ -159,58 +159,6 @@ our %OTHER_REPOS = (
 		}
 	},
 
-	"Linux Mint 21.1" => {
-		"name" => "vanessa",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com vanessa main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.2" => {
-		"name" => "victoria",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com victoria main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.3" => {
-		"name" => "virginia",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com virginia main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 22" => {
-		"name" => "wilma",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com wilma main upstream import backport #id:linuxmint_main"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
 	"TUXEDO OS 24.04" => {
 		"mirrors" => {
 			"content" => [
@@ -1036,9 +984,9 @@ our %DEVICES = (
 		usb_device => q{},
 	},
 	'73' => {
-		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
+		model => ['TUXEDO InfinityBook 14/15 AMD Gen9'],
 		board_name => ['GXxHRXx'],
-		fix => ['noecwakeupfix'],
+		fix => ['noecwakeupfix', 'amdgpudisablepsr'],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
@@ -1049,17 +997,6 @@ our %DEVICES = (
 	'74' => {
 		model => ['TUXEDO InfinityBook 15 Intel Gen9'],
 		board_name => ['GXxMRXx'],
-		fix => [q{}],
-		flavour => ['22.04', '24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => '',
-		display => q{},
-		usb_device => q{},
-	},
-	'75' => {
-		model => ['TUXEDO InfinityBook 15 AMD Gen9'],
-		board_name => ['GXxHRXx'],
 		fix => [q{}],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
@@ -1312,7 +1249,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 5,
+		version => 6,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',

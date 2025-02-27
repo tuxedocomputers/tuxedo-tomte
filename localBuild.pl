@@ -137,7 +137,7 @@ execute("-> generate new entry in changelog", "gbp dch --verbose --debian-branch
 
 if ($finalRelease eq 'yes') {
 	system( 'vim debian/changelog' );
-	`dch --release ""`;
+	`dch --distribution noble --release ""`;
 	copy('debian/changelog', 'changelog');
 	`git add changelog`;
 	`git add debian/changelog`;
@@ -170,6 +170,9 @@ build();
 # Change back to the original directory
 chdir($currentPath);
 chdir('..');
+
+# check whether the resulting package is sane
+execute("-> lint the new package", "lintian $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb");
 
 # remove the old files if they exist
 if (-e "tuxedo-tomte_$finalVersion\_\*\.deb") {
