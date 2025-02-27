@@ -996,9 +996,11 @@ sub checkRequirements {
 		printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
-		$presetModules{tuxedooledbrt}{required} = 'yes';
-		printLog("detected $presetModules{tuxedooledbrt}{name} issue", 'L1', '[INFO]');
+	if ($ubuntuCodename !~ /(focal|noble)/sm) {
+		if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
+			$presetModules{tuxedooledbrt}{required} = 'yes';
+			printLog("detected $presetModules{tuxedooledbrt}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	if (-e "/etc/default/apport") {
