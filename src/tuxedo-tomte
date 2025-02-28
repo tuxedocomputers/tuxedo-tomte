@@ -4653,7 +4653,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 
 	my @fileListResult;
 	foreach my $versionKey (keys %fileListInitrd) {
-		if (exists $fileListVmlinuz{$version}) {
+		if (exists $fileListVmlinuz{$versionKey}) {
 			printLog("matching vmlinuz found with version: $versionKey", 'L2', '[DEBUG]');
 			push (@fileListResult, $versionKey);
 		}
