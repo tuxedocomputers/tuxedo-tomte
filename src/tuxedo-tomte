@@ -5105,7 +5105,7 @@ sub insertGrub {
 		# find the correct line
 		if ( $grubLine =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["']/sm ) {
 			foreach my $parameter ( @{$parameters} ) {
-				if (insertGrubParameter(\$_, \$parameter)) {
+				if (insertGrubParameter(\$grubLine, \$parameter)) {
 					++$inserted;
 				}
 			}
