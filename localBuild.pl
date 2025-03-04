@@ -173,7 +173,7 @@ chdir($currentPath);
 chdir('..');
 
 # check whether the resulting package is sane
-if (execute("-> lint the new package", "lintian $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb")) {
+if (execute("-> lint the new package", "lintian -EvI --pedantic --show-overrides --color=auto $baseBuildDirectory/tuxedo-tomte_$finalVersion\_\*\.deb")) {
 	print "lintian found errors in the package ... aborting !!\n";
 	exit (0);
 }
