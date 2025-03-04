@@ -996,13 +996,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($ubuntuCodename !~ /(focal|noble)/sm) {
-		if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
-			$presetModules{tuxedooledbrt}{required} = 'yes';
-			printLog("detected $presetModules{tuxedooledbrt}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
 	if (-e "/etc/default/apport") {
 		# apportfix will always be installed as a workaround
 		$presetModules{apportfix}{required} = 'yes';
@@ -2374,20 +2367,6 @@ sub nvidiadriver() {
 # Installs Linux device driver for several Realtek Ethernet controllers
 #
 sub r8168dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-###############################################################################
-# Installs package tuxedo-oled-brt to control the brightness of OLED displays
-# using xrandr and dbus
-# The original program is from System76 https://github.com/pop-os/system76-oled
-#
-sub tuxedooledbrt() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
