@@ -61,4 +61,52 @@ sub compareMD5sum {
 }
 
 
+###############################################################################
+# checks if packages given by an array are installed
+# @notInstalledPackages = arePackagesInstalled( @packages )
+# returns all packages that are not installed
+#
+sub arePackagesInstalled {
+	my @packages = @_;
+	my $queryHead = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\\n\'";
+	my $queryTail = " 2>&1";
+	my $packageQuery = $queryHead;
+	my @lines;
+	my $retLines;
+	my $retValue; 
+	my @packagesNotInstalled;
+    
+	if (scalar(@packages) == 0) {
+		return (q{});
+	}
+	foreach my $package (@packages) {
+		$packageQuery .= " $package";
+	}
+
+	$packageQuery .= $queryTail;
+	$retLines = `$packageQuery`;
+	$retValue = $?/$RETVAL_CONVERTER;
+	printLog("are packages installed retLines: $retLines retValue $retValue", 'L2', '[DEBUG]');
+	@lines = split /\n/sm, $retLines;
+	foreach my $line (@lines) {
+		# find packages that are not installed
+		if ($line =~ /dpkg-query:/sm) {
+			$line =~ /.*matching\s(\S+)/sm;
+			setPackageInstallStatus( $1, 'not installed' );
+			push( @packagesNotInstalled, $1 );
+			# find not completely installed or removed packages
+		} else {
+			$line =~ /(\S+)\s*(\S+)/sm;
+			setPackageInstallStatus( $1, $2 );
+			# only insert packages to be installed to array
+			if ($2 =~ /[uihrp][ncHUFWt]/sm) {
+				push( @packagesNotInstalled, $1 );
+			}
+		}
+	}
+	return ( @packagesNotInstalled );
+}
+
+
+
 1;
