@@ -1572,6 +1572,27 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	apportfix => {
+		name => 'apport-fix',
+		version => 2,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'no',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('apportfix_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => 'no',
+		order => q{},
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'yes'
+	},
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
 		version => 1,
