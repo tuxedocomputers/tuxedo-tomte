@@ -4360,11 +4360,12 @@ sub populateKernelPackages {
 	my @lines;
 	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
+	$result = q{};
 	$result = `$searchCommand`;
 	printLog("first result:\n$result", 'L2', '[DEBUG]');
 	@lines = split /\n/sm, $result;
-	foreach my $line (@lines) {
-		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
+	foreach my $lineFirstResult (@lines) {
+		if ($lineFirstResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 			$packageString = $1;
 			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 				printLog("Accepted: $packageString", 'L2', '[DEBUG]');
@@ -4376,11 +4377,13 @@ sub populateKernelPackages {
 	if (@packages) {
 		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
 		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
+		$result = q{};
 		$result = `$searchCommand`;
 		printLog("second result:\n$result", 'L2', '[DEBUG]');
+		@lines = ();
 		@lines = split /\n/sm, $result;
-		foreach my $line (@lines) {
-			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
+		foreach my $lineSecondResult (@lines) {
+			if ($lineSecondResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 				$packageString = $1;
 				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 					printLog("Accepted: $packageString", 'L2', '[DEBUG]');
