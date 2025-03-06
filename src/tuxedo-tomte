@@ -1782,7 +1782,6 @@ sub tuxedotouchpadswitch() {
 sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
-	my $nvmeDir;
 	my %nvmeDevice;
 	my $output;
 	my $retValue = 0;
@@ -1791,7 +1790,7 @@ sub tuxedonvmefix() {
 	my $nvmeFWPackageWasInstalled = 0;
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
+		while ( defined (my $nvmeDir = glob '/sys/class/nvme/*' )) {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
 			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sm;
 			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
