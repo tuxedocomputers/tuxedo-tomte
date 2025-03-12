@@ -201,6 +201,7 @@ printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
+my $lsusbOutput = `lsusb 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname = q{};
 $boardname = readFirstLineOfFile($boardnameFilename);
@@ -1205,13 +1206,14 @@ sub checkRequirements {
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my $lsusbMediaTekWirelessDevice = `lsusb -d 0e8d:0616`;
+	my $lsusbMediaTekWirelessDeviceUsbId = '1d6b:0002';
+	#my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
 	if (($ubuntuCodename =~ /(jammy|noble)/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
 		($boardname =~ /4X4-7040 Series\/D5/sm) ||
 		($boardname =~ /4X4-5000 Series/sm) ||
-		($lsusbMediaTekWirelessDevice =~ /MediaTek Inc. Wireless_Device/sm))) {
+		($lsusbOutput =~ /^Bus ... Device ...: ID $lsusbMediaTekWirelessDeviceUsbId .*$/m))) {
 		$presetModules{tuxedobtoffsuspend}{required} = 'yes';
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
