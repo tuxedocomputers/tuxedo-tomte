@@ -1026,6 +1026,18 @@ our %DEVICES = (
 		kernel => '',
 		display => q{},
 		usb_device => q{},
+	},
+	'79' => {
+		model => ['MediaTek Wireless Device'],
+		board_name => [q{}],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['24.04', 'TUXEDO OS'],
+		pci_id => q{},
+		usb_id => ['0x14c3:0608'],
+		cpu => q{},
+		kernel => q{},
+		display => q{},
+		usb_device => ['0x0e8d:0616'],
 	}
 );
 
