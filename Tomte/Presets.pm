@@ -1033,11 +1033,11 @@ our %DEVICES = (
 		fix => ['tuxedobtoffsuspend'],
 		flavour => ['22.04', '24.04', 'TUXEDO OS'],
 		pci_id => q{},
-		usb_id => ['0x14c3:0608'],
+		usb_id => ['0e8d:0616'],
 		cpu => q{},
 		kernel => q{},
 		display => q{},
-		usb_device => ['0x0e8d:0616'],
+		usb_device => q{},
 	}
 );
 
