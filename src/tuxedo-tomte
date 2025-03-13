@@ -1206,8 +1206,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my $lsusbMediaTekWirelessDeviceUsbId = '1d6b:0002';
-	#my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
+	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
 	if (($ubuntuCodename =~ /(jammy|noble)/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
