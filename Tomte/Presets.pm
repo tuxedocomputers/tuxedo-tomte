@@ -1038,6 +1038,17 @@ our %DEVICES = (
 		kernel => q{},
 		display => q{},
 		usb_device => q{},
+	},
+	'80' => {
+		model => ['TUXEDO Stellaris Slim AMD Gen6'],
+		board_name => ['GMxHGxx'],
+		fix => ['amdgpudisablepsr'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => q{},
+		display => q{},
+		usb_device => q{}
 	}
 );
 
