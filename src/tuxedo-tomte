@@ -7374,7 +7374,7 @@ sub getChassisType {
 	# special handling in case of virtual machines
 	if ($chassisTypeNbr eq '1') {
 		printLog("chassis defined as virtual machine ...", 'TL2', '[DEBUG]');
-		if (isLineInFile('/sys/devices/virtual/dmi/id/board_vendor', 'nb.*')) {
+		if (isLineInFile('/sys/devices/virtual/dmi/id/board_vendor', '(?i)nb.*')) {
 			printLog("this virtual machine defined as notebook", 'TL2', '[DEBUG]');
 			return ('notebook');
 		} else {
