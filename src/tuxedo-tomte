@@ -7370,6 +7370,19 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+
+	# special handling in case of virtual machines
+	if ($chassisTypeNbr eq '1') {
+		printLog("chassis defined as virtual machine ...", 'TL2', '[DEBUG]');
+		if (isLineInFile('nb.*')) {
+			printLog("this virtual machine defined as notebook", 'TL2', '[DEBUG]');
+			return ('notebook');
+		} else {
+			printLog("this virtual machine defined as desktoppc", 'TL2', '[DEBUG]');
+			return ('desktoppc');
+		}
+	}
+
 	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
 	my $returnHostnamectl = `$hostnamectlCmd`;
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsm) {
