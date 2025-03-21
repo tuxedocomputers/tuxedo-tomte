@@ -5362,6 +5362,8 @@ sub printLog {
 	}
 
 	if ($FAI) {
+		my $timestamp = getLoggingTime();
+		print "$severity $timestamp $message\n";
 		if (!(-e $faiLogFile)) {
 			print "logfile does not exist, creating one\n";
 			if (open($FAILOGFILE, ">", $faiLogFile)) {
@@ -5373,7 +5375,6 @@ sub printLog {
 			}
 		}
 		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
-			my $timestamp = getLoggingTime();
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
 			} else {
