@@ -84,7 +84,7 @@ my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 printLog("##############################################################################", 'L0', '[INFO]');
 my $faiLogDir = '/var/log/';
-my $faiLogFile = $faiLogDir.'fai-tomte.log';
+my $faiLogfile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
 my $faiLogfileExists = 0;	# 0 = no, 1 = exists
 
@@ -5364,32 +5364,33 @@ sub printLog {
 	}
 
 	if ($FAI) {
+		my $timestamp = getLoggingTime();
+		print "$severity $timestamp $message\n";
 		if ($faiLogfileExists == 0) {
-			if (!(-e $faiLogFile)) {
+			if (!(-e $faiLogfile)) {
 				print "logfile does not exist, creating one\n";
-				if (open($FAILOGFILE, ">", $faiLogFile)) {
+				if (open($FAILOGFILE, ">", $faiLogfile)) {
 					if (!close($FAILOGFILE)) {
-						print "[ERROR] couldn't close $faiLogFile\n";
+						print "[ERROR] couldn't close $faiLogfile\n";
 					} else {
 						$faiLogfileExists = 1;
 					}
 				} else {
-					print "[ERROR] couldn't create $faiLogFile\n";
+					print "[ERROR] couldn't create $faiLogfile\n";
 				}
 			}
 		}
-		if ( ($faiLogfileExists == 1) && open($FAILOGFILE, '>>', $faiLogFile) ) {
-			my $timestamp = getLoggingTime();
+		if ( ($faiLogfileExists == 1) && open($FAILOGFILE, '>>', $faiLogfile) ) {
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
 			} else {
 				print $FAILOGFILE "$timestamp $message\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] couldn't close $faiLogFile\n";
+				print "[ERROR] couldn't close $faiLogfile\n";
 			}
 		} else {
-			print "could not open FAI-Tomte logfile\n";
+			print "could not open $faiLogfile logfile\n";
 		}
 
 	} elsif ($level <= $logLevel) {
@@ -5848,21 +5849,21 @@ sub listStatus {
 		}
 	}
 	if ($printIt && $FAI) {
-		if (! (-e $faiLogFile)) {
+		if (! (-e $faiLogfile)) {
 			print "logfile does not exist, creating one\n";
-			if (! open($FAILOGFILE, ">", $faiLogFile)) {
-				print "[ERROR] could not create the logfile $faiLogFile\n";
+			if (! open($FAILOGFILE, ">", $faiLogfile)) {
+				print "[ERROR] could not create the logfile $faiLogfile\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] could not close the logfile $faiLogFile\n";
+				print "[ERROR] could not close the logfile $faiLogfile\n";
 			}
 		}
-		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+		if (open($FAILOGFILE, '>>', $faiLogfile) ) {
 			for my $row (@arr) {
 				print $FAILOGFILE "@{$row}\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] could not close the logfile $faiLogFile\n";
+				print "[ERROR] could not close the logfile $faiLogfile\n";
 			}
 		} else {
 			print "could not open logfile\n";
