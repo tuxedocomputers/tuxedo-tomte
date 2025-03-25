@@ -7354,7 +7354,7 @@ sub tuxedoDevice {
 # returns 0 if there was an error or nothing was detected
 #
 sub getChassisType {
-	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $fileName = '/sys/class/dmi/id/chassis_type';
 	my $chassisTypeNbr;
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
@@ -7379,7 +7379,7 @@ sub getChassisType {
 	# special handling in case of virtual machines
 	if ($chassisTypeNbr eq '1') {
 		printLog("chassis defined as virtual machine ...", 'TL2', '[DEBUG]');
-		if (isLineInFile('/sys/devices/virtual/dmi/id/board_vendor', '(?i)nb.*')) {
+		if (isLineInFile('/sys/class/dmi/id/board_vendor', '(?i)nb.*')) {
 			printLog("this virtual machine defined as notebook", 'TL2', '[DEBUG]');
 			return ('notebook');
 		} else {
