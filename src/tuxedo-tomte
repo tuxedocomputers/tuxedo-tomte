@@ -86,6 +86,7 @@ printLog("######################################################################
 my $faiLogDir = '/var/log/';
 my $faiLogFile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
+my $faiLogfileExists = 0;	# 0 = no, 1 = exists
 
 checkAndSetLocale();
 
@@ -5238,7 +5239,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel", "FAI", "DONT_CONFIGURE", "AUTOMATIC", "UPDATES_ONLY"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq q{}) {
@@ -5363,17 +5364,21 @@ sub printLog {
 	}
 
 	if ($FAI) {
-		if (!(-e $faiLogFile)) {
-			print "logfile does not exist, creating one\n";
-			if (open($FAILOGFILE, ">", $faiLogFile)) {
-				if (!close($FAILOGFILE)) {
-					print "[ERROR] couldn't close $faiLogFile\n";
+		if ($faiLogfileExists == 0) {
+			if (!(-e $faiLogFile)) {
+				print "logfile does not exist, creating one\n";
+				if (open($FAILOGFILE, ">", $faiLogFile)) {
+					if (!close($FAILOGFILE)) {
+						print "[ERROR] couldn't close $faiLogFile\n";
+					} else {
+						$faiLogfileExists = 1;
+					}
+				} else {
+					print "[ERROR] couldn't create $faiLogFile\n";
 				}
-			} else {
-				print "[ERROR] couldn't create $faiLogFile\n";
 			}
 		}
-		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+		if ( ($faiLogfileExists == 1) && open($FAILOGFILE, '>>', $faiLogFile) ) {
 			my $timestamp = getLoggingTime();
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
@@ -5384,7 +5389,7 @@ sub printLog {
 				print "[ERROR] couldn't close $faiLogFile\n";
 			}
 		} else {
-			print "could not open logfile\n";
+			print "could not open FAI-Tomte logfile\n";
 		}
 
 	} elsif ($level <= $logLevel) {
@@ -7403,6 +7408,11 @@ sub getChassisType {
 ###############################################################################
 # MAIN PROGRAM
 
+if ($argValue{command} eq "FAI") {
+	$FAI = 1;
+}
+initLogging();
+
 $chassisType = getChassisType();
 printLog("chassistype will be: $chassisType", 'TL2', '[DEBUG]');
 if ($chassisType eq '0') {
@@ -7501,11 +7511,10 @@ if (scalar(@ARGV) != 0) {
 
 	# FAI
 	} elsif ($argValue{command} eq "FAI") {
-		print "Starting tuxedo-tomte $VERSION in FAI mode\n".
+		printLog("starting Tomte $VERSION in FAI mode", 'L0', '[INFO]');
+		print( "Starting tuxedo-tomte $VERSION in FAI mode\n".
 				"This should not be used in a normal situation\n".
-				"only when installing a new system with FAI\n";
-		$FAI = 1;
-		initLogging();
+				"only when installing a new system with FAI\n" );
 		setMode('AUTOMATIC');
 		prepareValues();
 		configureAllModules();
@@ -7519,7 +7528,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			checkMode();
 			prepareValues();
 			prerequisites();
@@ -7577,7 +7585,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne q{}) {
 			if (validModuleName($argValue{module}) ne q{}) {
-				initLogging();
 				checkMode();
 				prepareValues();
 				prerequisites();
@@ -7601,7 +7608,6 @@ if (scalar(@ARGV) != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			checkMode();
 			prepareValues();
 			prerequisites();
@@ -7635,7 +7641,6 @@ if (scalar(@ARGV) != 0) {
 	# block
 	} elsif ($argValue{command} eq "block") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				blockAllModules();
@@ -7655,7 +7660,6 @@ if (scalar(@ARGV) != 0) {
 	# unblock
 	} elsif ($argValue{command} eq "unblock") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				unblockAllModules();
@@ -7676,7 +7680,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
-		initLogging();
 		setMode($argValue{command});
 		prepareValues();
 		printLog('Tomte finished', 'L0', '[INFO]');
