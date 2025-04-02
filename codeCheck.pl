@@ -60,7 +60,7 @@ sub checkDiff {
 	my $result = compare($fileA,$fileB);
 	if ($result == 0) {
 	} elsif ($result == 1) {
-    	print "file: $fileA and file: $fileB are different!!\n";
+   	print "file: $fileA and file: $fileB are different!!\n";
 		print "they should be the same to continue the checks\n\n";
 		return (1);
 	} else {
@@ -110,6 +110,10 @@ print "############### end translations\n";
 # the module has to be installed in the host system for
 # the tests to work correctly
 $testResults{'PresetsModule'} = checkDiff('Tomte/Presets.pm', '/usr/share/perl5/Tomte/Presets.pm');
+if ($testResults{'PresetsModule'}) {
+	print "the locally installed module (/usr/share/perl5/Tomte/Presets.pm) is ".
+			"not identical with the one in the branch\n\n";
+}
 
 
 # Check if there are syntax errors in the code
@@ -143,7 +147,7 @@ my $sumExitCodes = 0;
 # print results
 print "\nRESULTS\n".
     "errors <=> type\n";
-foreach my $key (keys %testResults) {
+foreach my $key (sort keys %testResults) {
 	$sumExitCodes += $testResults{$key};
 	print "$testResults{$key} <=> $key\n";
 }

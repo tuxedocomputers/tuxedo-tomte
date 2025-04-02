@@ -1,3 +1,54 @@
+tuxedo-tomte (2.49.0) noble; urgency=medium
+
+  * added virtual machine support
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Mar 2025 17:54:18 +0100
+
+tuxedo-tomte (2.48.0) noble; urgency=medium
+
+  * added TUXEDO Stellaris Slim AMD Gen6 with boardname GMxHGxx
+    to amdgpudisablepsr
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Tue, 18 Mar 2025 16:36:08 +0100
+
+tuxedo-tomte (2.47.0) noble; urgency=medium
+
+  * added device with USB-ID 0e8d:0616 to module tuxedobtoffsuspend
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 13 Mar 2025 14:15:42 +0100
+
+tuxedo-tomte (2.46.0) noble; urgency=medium
+
+  * added device with boardname "4X4-7040 Series/D5" for module tuxedobtoffsuspend
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 06 Mar 2025 13:14:45 +0100
+
+tuxedo-tomte (2.45.2) noble; urgency=medium
+
+  * updated copyright year
+  * removed module tuxedooledbrt
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 06 Mar 2025 11:25:32 +0100
+
+tuxedo-tomte (2.45.1) noble; urgency=medium
+
+  * removed tuxedo-mirrors module for all Linux Mint, already existing entries
+    will remain untouched
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Feb 2025 10:22:06 +0100
+
+tuxedo-tomte (2.45.0) jammy; urgency=medium
+
+  * added Linux Mint 22.1
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 17 Feb 2025 13:44:32 +0100
+
+tuxedo-tomte (2.44.0) jammy; urgency=medium
+
+  * added boardname GXxHRXx to amdgpudisablepsr
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 13 Feb 2025 17:16:29 +0100
+
 tuxedo-tomte (2.43.1) jammy; urgency=medium
 
   * added boardnames "4X4-5000 Series" and "4X4-7000 Series/D5" to module

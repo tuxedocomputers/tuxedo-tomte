@@ -84,8 +84,9 @@ my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
 printLog("##############################################################################", 'L0', '[INFO]');
 my $faiLogDir = '/var/log/';
-my $faiLogFile = $faiLogDir.'fai-tomte.log';
+my $faiLogfile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
+my $faiLogfileExists = 0;	# 0 = no, 1 = exists
 
 checkAndSetLocale();
 
@@ -201,6 +202,7 @@ printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
 
 
 my $lspciOutput = `lspci -vn 2>/dev/null`;
+my $lsusbOutput = `lsusb 2>/dev/null`;
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname = q{};
 $boardname = readFirstLineOfFile($boardnameFilename);
@@ -249,8 +251,7 @@ my %configuredModules;
 # simple print out of all supported devices and fixes
 #
 sub printTuxedoDevices {
-	my $ID;
-	foreach $ID (keys %devicesList) {
+	foreach my $ID (keys %devicesList) {
 		if ((defined $devicesList{$ID}) && ($devicesList{$ID} ne q{}) && (exists $devicesList{$ID})) {
 			printIfExistsNotUndefinedNotEmpty("$ID", "model");
 			printIfExistsNotUndefinedNotEmpty("$ID", "board_name");
@@ -434,9 +435,8 @@ sub isLocked {
 # returns -1 if something went wrong
 #
 sub isPMlocked {
-	my $key;
 	my $result;
-	foreach $key (keys %lockFilesList) {
+	foreach my $key (keys %lockFilesList) {
 		$result = isLocked($key);
 		if ($result == 1) {
 			printLog("Locking: one or more files are locked", 'L2', '[DEBUG]');
@@ -545,7 +545,6 @@ sub releaseLock {
 # returns 0 if some could not be locked
 #
 sub lockPM {
-	my $key;
 	my $lockFilesListHashSize = keys %lockFilesList;
 	my $processedLockFiles = 0;
 
@@ -554,7 +553,7 @@ sub lockPM {
 		return (1);
 	}
 	printLog("Locking: trying to lock all files for Tomte", 'L2', '[DEBUG]');
-	foreach $key (keys %lockFilesList) {
+	foreach my $key (keys %lockFilesList) {
 		# stop if can't get lock
 		last if (acquireLock($key) != 1);
 		$processedLockFiles++;
@@ -580,12 +579,11 @@ sub lockPM {
 #
 sub unlockPM {
 	my $reason = shift;
-	my $key;
 	my $hashSize = keys %lockFilesList;
 	my $countReleased = 0;
 	my $countToRelease = 0;
 	printLog("Locking: attempting to unlock all files for >$reason< ...", 'L2', '[DEBUG]');
-	foreach $key (keys %lockFilesList) {
+	foreach my $key (keys %lockFilesList) {
 		printLog("Locking: is $key locked?: $lockFilesList{$key}{locked}", 'L2', '[DEBUG]');
 		if ($lockFilesList{$key}{locked}) {
 			printLog("Locking: try to unlock", 'L2', '[DEBUG]');
@@ -645,7 +643,6 @@ sub countLinesInString {
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
 	my @osReleaseLines;
-	my $line;
 
 	@osReleaseLines = read_file($osReleaseFile, 'err_mode' => 'carp');
 
@@ -653,7 +650,7 @@ sub readOSData {
 		print "Can't determine the operating system\n";
 		exit (0);
 	}
-	foreach $line ( @osReleaseLines ) {
+	foreach my $line ( @osReleaseLines ) {
 		# removing leading/trailing whitespaces
 		$line =~ s/^\s+|\s+$//g;
 		if ( $line =~ /^NAME=/sm ) {
@@ -739,7 +736,6 @@ sub isOSSupported {
 # install missing parts
 #
 sub prerequisites {
-	my $module;
 	my @modulesList;
 	printLog("starting prerequisites", 'L1', '[INFO]');
 
@@ -751,7 +747,7 @@ sub prerequisites {
 		printLog("removed 'no' from grub", 'L2', '[DEBUG]');
 	}
 
-	foreach $module (sort keys %presetModules) {
+	foreach my $module (sort keys %presetModules) {
 		# basically the required repos
 		if (($presetModules{$module}{order} eq 'first') &&
 			($presetModules{$module}{blocked} eq 'no')) {
@@ -797,7 +793,9 @@ sub checkRequirements {
 
 	if (($boardname =~ /APX958/sm) ||
 		($boardname =~ /R14FA1/sm) ||
-		($boardname =~ /R14FA2/sm)) {
+		($boardname =~ /GXxHRXx/sm) ||
+		($boardname =~ /R14FA2/sm) ||
+		($boardname =~ /GMxHGxx/sm)) {
 		$presetModules{amdgpudisablepsr}{required} = 'yes';
 		printLog("detected $presetModules{amdgpudisablepsr}{name} issue", 'L1', '[INFO]');
 	}
@@ -993,11 +991,6 @@ sub checkRequirements {
 		($boardname =~ m/NL57PU/sm)) {
 		$presetModules{r8168dkms}{required} = 'yes';
 		printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
-	}
-
-	if (isDisplayPresent("SDC Model 41001 Serial Number 0")) {
-		$presetModules{tuxedooledbrt}{required} = 'yes';
-		printLog("detected $presetModules{tuxedooledbrt}{name} issue", 'L1', '[INFO]');
 	}
 
 	if (-e "/etc/default/apport") {
@@ -1214,12 +1207,27 @@ sub checkRequirements {
 		$presetModules{noecwakeupfix}{required} = 'yes';
 		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
+
+	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
 	if (($ubuntuCodename =~ /(jammy|noble)/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
-		($boardname =~ /4X4-5000 Series/sm))) {
+		($boardname =~ /4X4-7040 Series\/D5/sm) ||
+		($boardname =~ /4X4-5000 Series/sm) ||
+		(findUsbDevice($lsusbOutput, $lsusbMediaTekWirelessDeviceUsbId)))) {
 		$presetModules{tuxedobtoffsuspend}{required} = 'yes';
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
+	}
+
+	# workaround for Linux Mint and mirror repositories
+	if ($distribution =~ /(Linux Mint)/) {
+		$presetModules{'tuxedomirrors'}{'required'} = 'no';
+		$presetModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$presetModules{'tuxedomirrors'}{'order'} = q{};
+		$localConfModules{'tuxedomirrors'}{'required'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'reconfigure'} = 'no';
+		$localConfModules{'tuxedomirrors'}{'order'} = q{};
+		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
 	}
 
 	return (0);
@@ -1260,8 +1268,7 @@ sub checkRequirementsLast {
 #
 sub findPciDevice {
 	my ($lspciList, @pciDevices) = @_;
-	my $pciDevice;
-	foreach $pciDevice (@pciDevices) {
+	foreach my $pciDevice (@pciDevices) {
 		if ($lspciList =~ /$pciDevice/sm) {
 			return (1);
 		}
@@ -1271,7 +1278,19 @@ sub findPciDevice {
 
 
 
-
+###############################################################################
+# returns true if the USB device or subdevice was found
+# parameter is an array of PCI devices (RegExp are allowed)
+#       
+sub findUsbDevice {
+	my ($lsusbList, @usbDevices) = @_;
+	foreach my $usbDevice (@usbDevices) {
+		if ($lsusbList =~ /^Bus ... Device ...: ID $usbDevice .*$/m) {
+			return (1);
+		}
+	}
+	return (0);
+}
 
 
 
@@ -1484,7 +1503,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (!(($ubuntuCodename =~ /jammy/sm) && ($distribution =~ /Linux Mint/sm))) {
+			if (!(($ubuntuCodename =~ /(jammy|noble)/sm) && ($distribution =~ /Linux Mint/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
@@ -1787,7 +1806,6 @@ sub tuxedonvmefix() {
 	my $module = shift;
 	my $action = shift;
 	my %nvmeDevice;
-	my $nvmeDir;
 	my $output;
 	my $retValue = 0;
 	my $fwVersion = 'S5Z42109';
@@ -1795,7 +1813,7 @@ sub tuxedonvmefix() {
 	my $nvmeFWPackageWasInstalled = 0;
 
 	if (($action eq 'install') || ($action eq 'upgrade')) {
-		while ( defined ($nvmeDir = glob '/sys/class/nvme/*' )) {
+		while ( defined (my $nvmeDir = glob '/sys/class/nvme/*' )) {
 			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
 			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sm;
 			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
@@ -1804,12 +1822,12 @@ sub tuxedonvmefix() {
 			$nvmeDevice{$nvmeDir}{'subvendor'} = readFirstLineOfFile("$nvmeDir/device/subsystem_vendor");
 			$nvmeDevice{$nvmeDir}{'firmware'} = readFirstLineOfFile("$nvmeDir/firmware_rev");
 		}
-		foreach $nvmeDir ( keys %nvmeDevice ) {
-			if (($nvmeDevice{$nvmeDir}{model} =~ /SA2000M8(?:25|50|100)0G/sm) &&
-				($nvmeDevice{$nvmeDir}{subdevice} =~ /0x2263/sm) &&
-				($nvmeDevice{$nvmeDir}{subvendor} =~ /0x2646/sm)) {
-				printLog("nvme device on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
-				if ($nvmeDevice{$nvmeDir}{firmware} lt $fwVersion) {
+		foreach my $nvmeDirKey ( keys %nvmeDevice ) {
+			if (($nvmeDevice{$nvmeDirKey}{model} =~ /SA2000M8(?:25|50|100)0G/sm) &&
+				($nvmeDevice{$nvmeDirKey}{subdevice} =~ /0x2263/sm) &&
+				($nvmeDevice{$nvmeDirKey}{subvendor} =~ /0x2646/sm)) {
+				printLog("nvme device on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
+				if ($nvmeDevice{$nvmeDirKey}{firmware} lt $fwVersion) {
 					printLog("firmware upgrade required", 'L0', '[INFO]');
 					# firmware upgrade is required
 					if (! isPackageInstalled('nvme-cli')) {
@@ -1823,8 +1841,8 @@ sub tuxedonvmefix() {
 						$nvmeFWPackageWasInstalled = 1;
 					}
 					if (installPackage('a2000-s5z42109', 'tuxedonvmefix')) {
-						printLog("upload firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
-						$output = `nvme fw-download $nvmeDevice{$nvmeDir}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
+						printLog("upload firmware on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
+						$output = `nvme fw-download $nvmeDevice{$nvmeDirKey}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
 						$retValue = $?/$RETVAL_CONVERTER;
 						if ($retValue != 0) {
 							printLog('firmware could not be uploaded!', 'L0', '[WARN]');
@@ -1833,8 +1851,8 @@ sub tuxedonvmefix() {
 							addToConfiguredModules($module, "failed");
 							return (0);
 						}
-						printLog("activate firmware on $nvmeDevice{$nvmeDir}{'device'}", 'L0', '[INFO]');
-						$output = `nvme fw-activate $nvmeDevice{$nvmeDir}{'device'} --slot=1 --action=1`;
+						printLog("activate firmware on $nvmeDevice{$nvmeDirKey}{'device'}", 'L0', '[INFO]');
+						$output = `nvme fw-activate $nvmeDevice{$nvmeDirKey}{'device'} --slot=1 --action=1`;
 						$retValue = $?/$RETVAL_CONVERTER;
 						if ($retValue != 0) {
 							printLog('firmware could not be activated', 'TL0', '[WARN]');
@@ -1854,7 +1872,7 @@ sub tuxedonvmefix() {
 						return (0);
 					}
 				} else {
-					printLog("firmware already installed on $nvmeDevice{$nvmeDir}{'device'}", 'L1', '[INFO]');
+					printLog("firmware already installed on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
 					$presetModules{$module}{installed} = "yes";
 					$presetModules{$module}{upgraded} = "yes";
 				}
@@ -2371,20 +2389,6 @@ sub nvidiadriver() {
 # Installs Linux device driver for several Realtek Ethernet controllers
 #
 sub r8168dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-###############################################################################
-# Installs package tuxedo-oled-brt to control the brightness of OLED displays
-# using xrandr and dbus
-# The original program is from System76 https://github.com/pop-os/system76-oled
-#
-sub tuxedooledbrt() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
@@ -3130,8 +3134,14 @@ sub createRepos {
 	my $sourcesListDir = '/etc/apt/';
 	my $sourcesListDirD = '/etc/apt/sources.list.d/';
 	my $sourcesFileName = $sourcesListDir.'sources.list';
+	my $distroKey = q{};
 
-	my $distroKey = exists($repos{$completeDistVersion}) ? $completeDistVersion : $ubuntuCodename;
+	if (exists($repos{$completeDistVersion})) {
+		$distroKey = $completeDistVersion;
+	} else {
+		$distroKey = $ubuntuCodename;
+	}
+	printLog("detected distroKey: >$distroKey<", 'TL2', '[DEBUG]');
 
 	# if either testdeb or testmirrors exist, leave everything as it is
 	if (exists $repos{$distroKey}{deb}) {
@@ -3325,7 +3335,6 @@ sub addRepoKey {
 sub cleanSourcesList {
 	my $FHsource;
 	my @sourceLines;
-	my $sourceLine;
 	my $sourcesListFile = '/etc/apt/sources.list';
 	if ($ubuntuCodename eq 'noble') {
 		$sourcesListFile = '/etc/apt/sources.list.d/ubuntu.sources';
@@ -3355,7 +3364,7 @@ sub cleanSourcesList {
 			}
 			if ((($localConfModules{'tuxedomirrors'}{version} + 0) < 5) || (-e $tomteFirstInstallFile)) {
 				printLog("old tuxedomirrors module installed", 'L2', '[INFO]');
-				foreach $sourceLine (@sourceLines) {
+				foreach my $sourceLine (@sourceLines) {
 					if (commentOut(\$sourceLine)) {
 						$modified = 1;
 					}
@@ -3366,7 +3375,7 @@ sub cleanSourcesList {
 			} else {
 				printLog("current tuxedomirrors module is already installed", 'L2', '[INFO]');
 				# remove all tuxedo mirrors entries
-				foreach $sourceLine (@sourceLines) {
+				foreach my $sourceLine (@sourceLines) {
 					if (! ($sourceLine =~ /mirrors\.tuxedocomputers\./sm) ) {
 						print $FHsource "$sourceLine\n";
 					}
@@ -3493,32 +3502,6 @@ sub deactivatePackagekit {
 		return (1);
 	}
 }
-
-
-
-
-###############################################################################
-# sets the systemd module to active and unmasks it
-# returns 1 if successful, 0 if not
-#
-sub activatePackagekit {
-	if ($packagekitState eq 'inactive') {
-		printLog("packagekit is inactive => activating ...", 'L2', '[INFO]');
-		commandSystemdModule('unmask', 'packagekit');
-		if (getSystemdState('packagekit') eq 'active') {
-			$packagekitState = 'active';
-			return (1);
-		} else {
-			$packagekitState = 'active';
-			return (0);
-		}
-	} else {
-		$packagekitState = 'active';
-		printLog("packagekit is already active", 'L2', '[INFO]');
-		return (1);
-	}
-}
-
 
 
 
@@ -3904,7 +3887,6 @@ sub deinstExcept {
 	$retValue = $?/$RETVAL_CONVERTER;
 	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
 	my $deinstCmd;
-	my $deinstKey;
 	my $deinstList =q{};
 	if ($retValue != 0) {
 		if ($retValue == 1) {
@@ -3920,7 +3902,7 @@ sub deinstExcept {
 	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
 	my $deinstCounter = 0;
 
-	foreach $deinstKey (keys %retHash) {
+	foreach my $deinstKey (keys %retHash) {
 		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
 		# usefull for debug
 		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
@@ -3978,13 +3960,12 @@ sub getPackageDependencies {
 	my $package = shift;
 	my $result;
 	my @lines;
-	my $line;
 	my $pkgString;
 	my @packages;
 	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
 	$result = `$searchCmd`;
 	@lines = split /\n/sm, $result;
-	foreach $line (@lines) {
+	foreach my $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 			$pkgString = $1;
 			printLog("found dependency: $pkgString", 'L2', '[DEBUG]');
@@ -4083,58 +4064,6 @@ sub isPackageInstalled {
 		return (0);
 	}
 }
-
-
-
-
-###############################################################################
-# checks if packages given by an array are installed
-# @notInstalledPackages = arePackagesInstalled( @packages )
-# returns all packages that are not installed
-#
-sub arePackagesInstalled {
-	my @packages = @_;
-	my $queryHead = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\\n\'";
-	my $queryTail = " 2>&1";
-	my $packageQuery = $queryHead;
-	my $package;
-	my $line;
-	my @lines;
-	my $retLines;
-	my $retValue;
-	my @packagesNotInstalled;
-
-	if (scalar(@packages) == 0) {
-		return (q{});
-	}
-	foreach $package (@packages) {
-		$packageQuery .= " $package";
-	}
-
-	$packageQuery .= $queryTail;
-	$retLines = `$packageQuery`;
-	$retValue = $?/$RETVAL_CONVERTER;
-	printLog("are packages installed retLines: $retLines retValue $retValue", 'L2', '[DEBUG]');
-	@lines = split /\n/sm, $retLines;
-	foreach $line (@lines) {
-		# find packages that are not installed
-		if ($line =~ /dpkg-query:/sm) {
-			$line =~ /.*matching\s(\S+)/sm;
-			setPackageInstallStatus( $1, 'not installed' );
-			push( @packagesNotInstalled, $1 );
-		# find not completely installed or removed packages
-		} else {
-			$line =~ /(\S+)\s*(\S+)/sm;
-			setPackageInstallStatus( $1, $2 );
-			# only insert packages to be installed to array
-			if ($2 =~ /[uihrp][ncHUFWt]/sm) {
-				push( @packagesNotInstalled, $1 );
-			}
-		}
-	}
-	return ( @packagesNotInstalled );
-}
-
 
 
 
@@ -4446,15 +4375,15 @@ sub populateKernelPackages {
 	my $packageString;
 	my $searchCommand;
 	my $result;
-	my $line;
 	my @lines;
 	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
+	$result = q{};
 	$result = `$searchCommand`;
 	printLog("first result:\n$result", 'L2', '[DEBUG]');
 	@lines = split /\n/sm, $result;
-	foreach $line (@lines) {
-		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
+	foreach my $lineFirstResult (@lines) {
+		if ($lineFirstResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 			$packageString = $1;
 			if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 				printLog("Accepted: $packageString", 'L2', '[DEBUG]');
@@ -4466,11 +4395,13 @@ sub populateKernelPackages {
 	if (@packages) {
 		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
 		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
+		$result = q{};
 		$result = `$searchCommand`;
 		printLog("second result:\n$result", 'L2', '[DEBUG]');
+		@lines = ();
 		@lines = split /\n/sm, $result;
-		foreach $line (@lines) {
-			if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
+		foreach my $lineSecondResult (@lines) {
+			if ($lineSecondResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
 				$packageString = $1;
 				if ($packageString =~ /^linux-.*(?:image|headers|modules|unsigned)-.*/sm) {
 					printLog("Accepted: $packageString", 'L2', '[DEBUG]');
@@ -4687,10 +4618,10 @@ sub checkAndDeleteOldestTuxedoKernel {
 	}
 
 	my @fileListResult;
-	foreach $version (keys %fileListInitrd) {
-		if (exists $fileListVmlinuz{$version}) {
-			printLog("matching vmlinuz found with version: $version", 'L2', '[DEBUG]');
-			push (@fileListResult, $version);
+	foreach my $versionKey (keys %fileListInitrd) {
+		if (exists $fileListVmlinuz{$versionKey}) {
+			printLog("matching vmlinuz found with version: $versionKey", 'L2', '[DEBUG]');
+			push (@fileListResult, $versionKey);
 		}
 	}
 
@@ -4795,10 +4726,8 @@ sub removeDebianModule {
 #
 sub removeKernelParameters {
 	my ($module, $silent, @parameters) = @_;
-	my $parameter;
 	my $GF;
 	my @grubLines;
-	my $line;
 	my $counter = 0;
 	if ((-r $grubFile) && (open($GF, '<', $grubFile))) {
 		chomp(@grubLines = <$GF>);
@@ -4806,9 +4735,9 @@ sub removeKernelParameters {
 			printLog("could not close $GF", 'L0', '[WARN]');
 		}
 		if ((-w $grubFile) && (open($GF, '>', $grubFile))) {
-			foreach $line (@grubLines) {
+			foreach my $line (@grubLines) {
 				if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["|']/s) {
-					foreach $parameter (@parameters) {
+					foreach my $parameter (@parameters) {
 						printLog("removing kernel parameter: $parameter", 'L2', '[INFO]');
 						if ($line =~ /^GRUB_CMDLINE_LINUX_DEFAULT=("|')(.*\ )$parameter(\ .*)("|')/s) {
 							$line =~ s/\ $parameter\ /\ /s;
@@ -4910,7 +4839,6 @@ sub aptgetRefreshModule {
 	my $exitStatus = 1;
 	my $refreshTriesDone = 0;
 	my $refreshWait = 1;
-	my $module;
 	if ( !($LiveISO && $noNetwork)) {
 		if (checkNetwork($NETWORK_CHECKS, 1)) {
 			deactivatePackagekit();
@@ -4928,7 +4856,7 @@ sub aptgetRefreshModule {
 						if ($exitStatus == 7) {
 							printLog('possible network problems', 'L0', '[WARN]');
 						}
-						foreach $module (@aptgetModules) {
+						foreach my $module (@aptgetModules) {
 							addToConfiguredModules($module, "failed");
 							if ($refreshTriesDone <= $refreshTries) {
 								printLog("will try to refresh the repos again", 'L2', '[INFO]');
@@ -4938,7 +4866,7 @@ sub aptgetRefreshModule {
 						sleep($refreshWait);
 					} else {
 						printLog("success: update packages", 'L1', '[INFO]');
-						foreach $module (@aptgetModules) {
+						foreach my $module (@aptgetModules) {
 							addToConfiguredModules($module, "success");
 						}
 					}
@@ -4950,7 +4878,7 @@ sub aptgetRefreshModule {
 			}
 		} else {
 			printLog("no network available, repos could not be updated", 'TL0', '[WARN]');
-			foreach $module (@aptgetModules) {
+			foreach my $module (@aptgetModules) {
 				addToConfiguredModules($module, "failed");
 			}
 			setNoNetwork(1);
@@ -5004,7 +4932,7 @@ sub isLineInFile {
 			printLog("can't close file $filename", 'L0', '[WARN]');
 		}
 	} else {
-		printLog("can't open file $filename", 'L0', '[WARN]');
+		printLog("can't open file $filename", 'L1', '[WARN]');
 	}
 	return (0);
 }
@@ -5035,7 +4963,7 @@ sub isTextInFile {
 			printLog("can't close file $filename", 'L0', '[WARN]');
 		}
 	} else {
-		printLog("can't open file $filename", 'L0', '[WARN]');
+		printLog("can't open file $filename", 'L1', '[WARN]');
 	}
 	return (0);
 }
@@ -5124,7 +5052,6 @@ sub insertGrub {
     my @grubLines;
 	my $module = shift;
     my $parameters = shift;
-    my $parameter;
 	my $inserted = 0;
 
 	if ( (-e $grubFile) && open($grubFH, "<", $grubFile) ) {
@@ -5140,11 +5067,11 @@ sub insertGrub {
 		return ($NEG_ONE);
     }
 
-    foreach( @grubLines ) {
+    foreach my $grubLine ( @grubLines ) {
 		# find the correct line
-		if ( $_ =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["']/sm ) {
-			foreach $parameter ( @{$parameters} ) {
-				if (insertGrubParameter(\$_, \$parameter)) {
+		if ( $grubLine =~ /^GRUB_CMDLINE_LINUX_DEFAULT=["']/sm ) {
+			foreach my $parameter ( @{$parameters} ) {
+				if (insertGrubParameter(\$grubLine, \$parameter)) {
 					++$inserted;
 				}
 			}
@@ -5232,7 +5159,6 @@ sub messageDesktop {
 
 	my $mUsername = q{};
 	my $mPid = q{};
-	my $mLine = q{};
 	my @whoLines = `who -u`;
 	my $environ = q{};
 	my $dbusAddress;
@@ -5242,7 +5168,7 @@ sub messageDesktop {
 		return (0);
 	}
 
-	foreach $mLine (@whoLines) {
+	foreach my $mLine (@whoLines) {
 		if ($mLine =~ /\(:\d+\)/sm) {
 			$mLine =~ /^(\w*).*\s(\d*)\s.*/sm;
 			$mUsername = $1;
@@ -5313,7 +5239,7 @@ sub messageLongInstall {
 #
 sub initLogging {
 	my %options;
-	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
+	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel", "FAI", "DONT_CONFIGURE", "AUTOMATIC", "UPDATES_ONLY"} = ();
 
 	# do not log if no arguments
 	if ($argValue{command} eq q{}) {
@@ -5438,28 +5364,33 @@ sub printLog {
 	}
 
 	if ($FAI) {
-		if (!(-e $faiLogFile)) {
-			print "logfile does not exist, creating one\n";
-			if (open($FAILOGFILE, ">", $faiLogFile)) {
-				if (!close($FAILOGFILE)) {
-					print "[ERROR] couldn't close $faiLogFile\n";
+		my $timestamp = getLoggingTime();
+		print "$severity $timestamp $message\n";
+		if ($faiLogfileExists == 0) {
+			if (!(-e $faiLogfile)) {
+				print "logfile does not exist, creating one\n";
+				if (open($FAILOGFILE, ">", $faiLogfile)) {
+					if (!close($FAILOGFILE)) {
+						print "[ERROR] couldn't close $faiLogfile\n";
+					} else {
+						$faiLogfileExists = 1;
+					}
+				} else {
+					print "[ERROR] couldn't create $faiLogfile\n";
 				}
-			} else {
-				print "[ERROR] couldn't create $faiLogFile\n";
 			}
 		}
-		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
-			my $timestamp = getLoggingTime();
+		if ( ($faiLogfileExists == 1) && open($FAILOGFILE, '>>', $faiLogfile) ) {
 			if (defined($severity)) {
 				print $FAILOGFILE "$severity $timestamp $message\n";
 			} else {
 				print $FAILOGFILE "$timestamp $message\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] couldn't close $faiLogFile\n";
+				print "[ERROR] couldn't close $faiLogfile\n";
 			}
 		} else {
-			print "could not open logfile\n";
+			print "could not open $faiLogfile logfile\n";
 		}
 
 	} elsif ($level <= $logLevel) {
@@ -5869,12 +5800,11 @@ sub isDisplayPresent {
 #
 sub listStatus {
 	my @arr = ( ['Name', 'Version', 'Installed', 'Blocked', 'Required'] );
-	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
 	my $upgradeAvailable = q{};
 
-	foreach $module (sort keys %localConfModules) {
+	foreach my $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
@@ -5919,21 +5849,21 @@ sub listStatus {
 		}
 	}
 	if ($printIt && $FAI) {
-		if (! (-e $faiLogFile)) {
+		if (! (-e $faiLogfile)) {
 			print "logfile does not exist, creating one\n";
-			if (! open($FAILOGFILE, ">", $faiLogFile)) {
-				print "[ERROR] could not create the logfile $faiLogFile\n";
+			if (! open($FAILOGFILE, ">", $faiLogfile)) {
+				print "[ERROR] could not create the logfile $faiLogfile\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] could not close the logfile $faiLogFile\n";
+				print "[ERROR] could not close the logfile $faiLogfile\n";
 			}
 		}
-		if (open($FAILOGFILE, '>>', $faiLogFile) ) {
+		if (open($FAILOGFILE, '>>', $faiLogfile) ) {
 			for my $row (@arr) {
 				print $FAILOGFILE "@{$row}\n";
 			}
 			if (! close($FAILOGFILE)) {
-				print "[ERROR] could not close the logfile $faiLogFile\n";
+				print "[ERROR] could not close the logfile $faiLogfile\n";
 			}
 		} else {
 			print "could not open logfile\n";
@@ -5976,14 +5906,13 @@ sub listStatus {
 #
 sub listVersions {
 	my @arr = ( ['Name', 'Packageversion', 'Version', 'Installed', 'Blocked', 'Required'] );
-	my $module;
 	my $noneRequired = 1;
 	my $printIt = 0;
 	my $upgradeAvailable = q{};
 
 	print "tuxedo-tomte $VERSION\n";
 
-	foreach $module (sort keys %localConfModules) {
+	foreach my $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
@@ -6063,8 +5992,7 @@ sub listVersions {
 #
 sub checkNoFailedModules {
 	my $successfull = 1;
-	my $module;
-	foreach $module (sort keys %localConfModules) {
+	foreach my $module (sort keys %localConfModules) {
 		if (($localConfModules{$module}{installed} eq 'no') &&
 			($presetModules{$module}{required} eq 'yes')) {
 			$successfull = 0;
@@ -6080,7 +6008,6 @@ sub checkNoFailedModules {
 
 
 sub listStatusJson {
-	my $module;
 	my $upgradeAvailable = q{};
 	my %list;
 
@@ -6093,7 +6020,7 @@ sub listStatusJson {
 	}
 
 
-	foreach $module (sort keys %localConfModules) {
+	foreach my $module (sort keys %localConfModules) {
 		if($presetModules{$module}{upgrade} eq 'yes') {
 			$upgradeAvailable = ' - upgrade available';
 		} else {
@@ -6136,8 +6063,7 @@ sub listStatusJson {
 # copies always 'blocked'
 #
 sub transferConfigValues {
-	my $name;
-	foreach $name (sort keys %localConfModules) {
+	foreach my $name (sort keys %localConfModules) {
 		# always copy blocked status
 		$presetModules{$name}{blocked} = $localConfModules{$name}{blocked};
 		if (newVersion($name) || newHwid($name)) {
@@ -6225,8 +6151,7 @@ sub addToConfiguredModules {
 #
 sub getSubName {
 	my $moduleName = shift;
-	my $module;
-	foreach $module ( keys %presetModules ) {
+	foreach my $module ( keys %presetModules ) {
 		if (defined $presetModules{$module}{name}) {
 			if ( $moduleName eq $presetModules{$module}{name} ) {
 				return $module;
@@ -6244,8 +6169,7 @@ sub getSubName {
 #
 sub validModuleName {
 	my $moduleName = shift;
-	my $module;
-	foreach $module ( keys %presetModules ) {
+	foreach my $module ( keys %presetModules ) {
 		if (defined $presetModules{$module}{name}) {
 			if ($presetModules{$module}{name} eq $moduleName) {
 				return $module;
@@ -6302,9 +6226,8 @@ sub validModuleName {
 # no		no			no			no			no		.
 
 sub configureAllModules {
-	my $module;
 	my $exit_status;
-	foreach $module (keys %presetModules) {
+	foreach my $module (keys %presetModules) {
 		# for testing
 		if ($TEST_ALL_MODULES) {
 			printLog("testing all modules: >$module<", 'TL0', '[DEBUG]');
@@ -6427,11 +6350,10 @@ sub removeSingleModule {
 # ommits modules which are "prerequisite" or as order "first" or "last"
 #
 sub reconfigureAllModules {
-	my $module;
 	my $exit_status;
 	
 
-	foreach $module (keys %presetModules) {
+	foreach my $module (keys %presetModules) {
 		# to debug on all modules
 		if ($TEST_ALL_MODULES) {
 			$presetModules{$module}{required} = 'yes';
@@ -6577,8 +6499,7 @@ sub unblock {
 # blocks all modules
 #
 sub blockAllModules {
-	my $module;
-	foreach $module (keys %presetModules) {
+	foreach my $module (keys %presetModules) {
 		if (($presetModules{$module}{required} eq 'yes') &&
 			($presetModules{$module}{blocked} ne 'yes') &&
 			($presetModules{$module}{required} ne 'prerequisite')) {
@@ -6595,8 +6516,7 @@ sub blockAllModules {
 # unblocks all modules
 #
 sub unblockAllModules {
-	my $module;
-	foreach $module (keys %presetModules) {
+	foreach my $module (keys %presetModules) {
 		if (($presetModules{$module}{required} eq 'yes') &&
 			($presetModules{$module}{blocked} eq 'yes')) {
 			$presetModules{$module}{blocked} = 'no';
@@ -6617,13 +6537,12 @@ sub unblockAllModules {
 #
 sub setMode {
 	my $requestedMode = shift;
-	my $key;
 
 	$mode = checkMode();
 	if ($mode eq $requestedMode) {
 		printLog("Requested mode '$requestedMode' is already set", 'TL0', '[INFO]');
 	} else {
-		foreach $key (keys %modeFile) {
+		foreach my $key (keys %modeFile) {
 			if ($key eq $requestedMode) {
 				write_file($modeFile{$requestedMode}, {'err_mode' => 'carp'}, q{});
 				printLog("creating modefile: $modeFile{$requestedMode} for $requestedMode", 'TL0', '[INFO]');
@@ -7010,13 +6929,12 @@ sub isatty {
 # starts system programs (if necessary) to activate the module changes
 #
 sub postConfigure {
-	my $sysProgram;
 	my $exitStatus;
 	my $postConfTrigger = 0;
 	my $output;
 	my $command;
 	printLog("initializing post-configuration", 'TL0', '[INFO]');
-	foreach $sysProgram (keys %postConfProgramsList) {
+	foreach my $sysProgram (keys %postConfProgramsList) {
 		if ($postConfProgramsList{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram", 'L1', '[INFO]');
 			$command = $postConfProgramsList{$sysProgram}{command}.' 2>&1';
@@ -7111,9 +7029,8 @@ sub startTomteDelayed {
 sub postSetModulesState {
 	my $sysProgram = shift;
 	my $status = shift;
-	my $module;
 	$postConfProgramsList{$sysProgram}{status} = $status;
-	foreach $module (keys %configuredModules) {
+	foreach my $module (keys %configuredModules) {
 		$configuredModules{$module}{status} = $status;
 	}
 	return (0);
@@ -7125,8 +7042,6 @@ sub postSetModulesState {
 # or executed correctly and which not
 #
 sub listSuccess {
-	my $confProgram;
-	my $confModule;
 	my @failedPrograms;
 	my @failedModules;
 	my @successModules;
@@ -7134,13 +7049,13 @@ sub listSuccess {
 	my @removedModules;
 	my $successOrFailed = 0;
 
-	foreach $confProgram (keys %postConfProgramsList) {
+	foreach my $confProgram (keys %postConfProgramsList) {
 		if ($postConfProgramsList{$confProgram}{status} eq "failed") {
 			$successOrFailed = 1;
 			push(@failedPrograms, $postConfProgramsList{$confProgram}{command});
 		}
 	}
-	foreach $confModule (keys %configuredModules) {
+	foreach my $confModule (keys %configuredModules) {
 		if ($configuredModules{$confModule} eq "failed") {
 			$successOrFailed = 1;
 			push(@failedModules, $confModule);
@@ -7219,8 +7134,7 @@ sub configuredModulesExceptDefault {
 #
 sub printNameDescriptionModules {
 	my @elements = @_;
-	my $element;
-	foreach $element (@elements) {
+	foreach my $element (@elements) {
 		print "- $presetModules{$element}{name}: $presetModules{$element}{description}\n";
 	}
 	return (0);
@@ -7232,8 +7146,7 @@ sub printNameDescriptionModules {
 #
 sub printNameDescriptionPrograms {
 	my @elements = @_;
-	my $element;
-	foreach $element (@elements) {
+	foreach my $element (@elements) {
 		print "- $element: $postConfProgramsList{$element}{description}\n";
 	}
 	return (0);
@@ -7265,8 +7178,7 @@ sub moduleDescription {
 # show all modules
 #
 sub modulesList() {
-	my $module;
-	foreach $module (keys %presetModules) {
+	foreach my $module (keys %presetModules) {
 		print "$presetModules{$module}{name}\n";
 	}
 	return (0);
@@ -7395,8 +7307,7 @@ sub prepareValues {
 # to be installed
 #
 sub reportPlannedChanges {
-	my $module;
-	foreach $module (sort keys %presetModules) {
+	foreach my $module (sort keys %presetModules) {
 		if ($presetModules{$module}{required} eq 'yes') {
 			if (($localConfModules{$module}{installed} eq 'no') &&
 				($localConfModules{$module}{blocked} eq 'no') &&
@@ -7444,7 +7355,7 @@ sub tuxedoDevice {
 # returns 0 if there was an error or nothing was detected
 #
 sub getChassisType {
-	my $fileName = '/sys/devices/virtual/dmi/id/chassis_type';
+	my $fileName = '/sys/class/dmi/id/chassis_type';
 	my $chassisTypeNbr;
 	my $FH;
 	if ((-e $fileName) && open($FH, "<", $fileName)) {
@@ -7465,6 +7376,19 @@ sub getChassisType {
 	if ($chassisTypeNbr eq '34') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '35') { return ('desktoppc'); }
 	if ($chassisTypeNbr eq '36') { return ('desktoppc'); }
+
+	# special handling in case of virtual machines
+	if ($chassisTypeNbr eq '1') {
+		printLog("chassis defined as virtual machine ...", 'TL2', '[DEBUG]');
+		if (isLineInFile('/sys/class/dmi/id/board_vendor', '(?i)nb.*')) {
+			printLog("this virtual machine defined as notebook", 'TL2', '[DEBUG]');
+			return ('notebook');
+		} else {
+			printLog("this virtual machine defined as desktoppc", 'TL2', '[DEBUG]');
+			return ('desktoppc');
+		}
+	}
+
 	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
 	my $returnHostnamectl = `$hostnamectlCmd`;
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsm) {
@@ -7484,6 +7408,11 @@ sub getChassisType {
 ###############################################################################
 ###############################################################################
 # MAIN PROGRAM
+
+if ($argValue{command} eq "FAI") {
+	$FAI = 1;
+}
+initLogging();
 
 $chassisType = getChassisType();
 printLog("chassistype will be: $chassisType", 'TL2', '[DEBUG]');
@@ -7583,11 +7512,10 @@ if (scalar(@ARGV) != 0) {
 
 	# FAI
 	} elsif ($argValue{command} eq "FAI") {
-		print "Starting tuxedo-tomte $VERSION in FAI mode\n".
+		printLog("starting Tomte $VERSION in FAI mode", 'L0', '[INFO]');
+		print( "Starting tuxedo-tomte $VERSION in FAI mode\n".
 				"This should not be used in a normal situation\n".
-				"only when installing a new system with FAI\n";
-		$FAI = 1;
-		initLogging();
+				"only when installing a new system with FAI\n" );
 		setMode('AUTOMATIC');
 		prepareValues();
 		configureAllModules();
@@ -7601,7 +7529,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "configure") {
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			checkMode();
 			prepareValues();
 			prerequisites();
@@ -7659,7 +7586,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif ($argValue{command} eq "remove") {
 		if ($argValue{module} ne q{}) {
 			if (validModuleName($argValue{module}) ne q{}) {
-				initLogging();
 				checkMode();
 				prepareValues();
 				prerequisites();
@@ -7683,7 +7609,6 @@ if (scalar(@ARGV) != 0) {
 			unlink($triesFile);
 		}
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			checkMode();
 			prepareValues();
 			prerequisites();
@@ -7717,7 +7642,6 @@ if (scalar(@ARGV) != 0) {
 	# block
 	} elsif ($argValue{command} eq "block") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				blockAllModules();
@@ -7737,7 +7661,6 @@ if (scalar(@ARGV) != 0) {
 	# unblock
 	} elsif ($argValue{command} eq "unblock") {
 		if ($argValue{module} ne q{}) {
-			initLogging();
 			prepareValues();
 			if ($argValue{module} eq 'all') {
 				unblockAllModules();
@@ -7758,7 +7681,6 @@ if (scalar(@ARGV) != 0) {
 	} elsif (($argValue{command} eq "DONT_CONFIGURE") ||
 			($argValue{command} eq "AUTOMATIC") ||
 			($argValue{command} eq "UPDATES_ONLY")) {
-		initLogging();
 		setMode($argValue{command});
 		prepareValues();
 		printLog('Tomte finished', 'L0', '[INFO]');

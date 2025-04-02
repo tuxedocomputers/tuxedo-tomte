@@ -26,7 +26,7 @@ msgstr "Neustart erforderlich"
 msgid "Please restart the system for the changes to take effect. Tomte could not install all the fixes and will try again the next time it is activated"
 msgstr "Bitte starten Sie das System neu, damit die Änderungen wirksam werden. Tomte konnte nicht alle Fixes installieren und wird es beim nächsten Aktivieren erneut versuchen."
 
-msgid "Tomte ready"
+msgid "Tomte finished"
 msgstr "Tomte fertig"
 
 msgid "Tomte could not install all the fixes and will try again the next time it is activated"
@@ -168,9 +168,6 @@ msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
 msgid "kerneltuxedo2204_description"
 msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
 
-msgid "kerneltuxedo2204edge_description"
-msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
-
 msgid "kerneltuxedo2404_description"
 msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
 
@@ -178,13 +175,10 @@ msgid "nvidiadriver_description"
 msgstr "Erforderliche Nvidia-Treiber"
 
 msgid "amdgpudisablepsr_description"
-msgstr "Deaktiviert PSR aus"
+msgstr "Deaktiviert Panel Self Refresh (PSR)"
 
 msgid "r8168dkms_description"
 msgstr "Linux-Gerätetreiber für mehrere Realtek-Ethernet-Controller"
-
-msgid "tuxedooledbrt_description"
-msgstr "Workaround zur Steuerung der OLED-Displayhelligkeit mit dbus und xrandr"
 
 msgid "apportfix_description"
 msgstr "Workaround für undefinierte Probleme mit Apport"

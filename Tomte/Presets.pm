@@ -159,58 +159,6 @@ our %OTHER_REPOS = (
 		}
 	},
 
-	"Linux Mint 21.1" => {
-		"name" => "vanessa",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com vanessa main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.2" => {
-		"name" => "victoria",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com victoria main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 21.3" => {
-		"name" => "virginia",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com virginia main upstream import backport"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
-	"Linux Mint 22" => {
-		"name" => "wilma",
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu noble-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse",
-				"deb http://packages.linuxmint.com wilma main upstream import backport #id:linuxmint_main"
-			],
-			"filename" => "/etc/apt/sources.list.d/official-package-repositories.list"
-		}
-	},
-
 	"TUXEDO OS 24.04" => {
 		"mirrors" => {
 			"content" => [
@@ -588,7 +536,7 @@ our %DEVICES = (
 		model => ['all models'],
 		board_name => [q{}],
 		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors'],
-		flavour => ['18.04', '20.04', '24.04'],
+		flavour => ['18.04', '20.04', '22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
 		kernel => q{},
@@ -626,17 +574,6 @@ our %DEVICES = (
 		cpu => q{},
 		kernel => q{},
 		display => q{},
-		usb_device => q{}
-	},
-	'35' => {
-		model => ['all with OLED display'],
-		board_name => [q{}],
-		fix => ['tuxedooledbrt'],
-		flavour => ['18.04', '20.04', '22.04', '24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => 'SDC Model 41001 Serial Number 0',
 		usb_device => q{}
 	},
 	'36' => {
@@ -677,17 +614,6 @@ our %DEVICES = (
 		board_name => ['NL5xNU'],
 		fix => [],
 		flavour => ['18.04', '20.04', '24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
-	},
-	'40' => {
-		model => ['all models'],
-		board_name => [q{}],
-		fix => ['apportfix', 'tuxedorepos', 'tuxedomirrors'],
-		flavour => ['22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
 		kernel => q{},
@@ -1047,9 +973,9 @@ our %DEVICES = (
 		usb_device => q{},
 	},
 	'73' => {
-		model => ['TUXEDO InfinityBook 14 AMD Gen9'],
+		model => ['TUXEDO InfinityBook 14/15 AMD Gen9'],
 		board_name => ['GXxHRXx'],
-		fix => ['noecwakeupfix'],
+		fix => ['noecwakeupfix', 'amdgpudisablepsr'],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
 		cpu => q{},
@@ -1060,17 +986,6 @@ our %DEVICES = (
 	'74' => {
 		model => ['TUXEDO InfinityBook 15 Intel Gen9'],
 		board_name => ['GXxMRXx'],
-		fix => [q{}],
-		flavour => ['22.04', '24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => '',
-		display => q{},
-		usb_device => q{},
-	},
-	'75' => {
-		model => ['TUXEDO InfinityBook 15 AMD Gen9'],
-		board_name => ['GXxHRXx'],
 		fix => [q{}],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
@@ -1103,7 +1018,7 @@ our %DEVICES = (
 	},
 	'78' => {
 		model => ['TUXEDO Nano Pro Gen12'],
-		board_name => ['4X4-7000 Series/D5'],
+		board_name => ['4X4-7000 Series/D5', '4X4-7040 Series/D5'],
 		fix => ['tuxedobtoffsuspend'],
 		flavour => ['22.04', '24.04'],
 		pci_id => q{},
@@ -1111,6 +1026,29 @@ our %DEVICES = (
 		kernel => '',
 		display => q{},
 		usb_device => q{},
+	},
+	'79' => {
+		model => ['MediaTek Wireless Device'],
+		board_name => [q{}],
+		fix => ['tuxedobtoffsuspend'],
+		flavour => ['22.04', '24.04', 'TUXEDO OS'],
+		pci_id => q{},
+		usb_id => ['0e8d:0616'],
+		cpu => q{},
+		kernel => q{},
+		display => q{},
+		usb_device => q{},
+	},
+	'80' => {
+		model => ['TUXEDO Stellaris Slim AMD Gen6'],
+		board_name => ['GMxHGxx'],
+		fix => ['amdgpudisablepsr'],
+		flavour => ['22.04', '24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => q{},
+		display => q{},
+		usb_device => q{}
 	}
 );
 
@@ -1323,7 +1261,7 @@ our %INITIAL_MODULES_SETTINGS = (
 	},
 	tuxedomirrors => {
 		name => 'tuxedo-mirrors',
-		version => 5,
+		version => 6,
 		installed => 'no',
 		blocked => 'no',
 		required => 'yes',
@@ -1654,27 +1592,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		restart => 'no',
 		order => q{},
 		dkms => 'yes',
-		FAI => 'yes',
-		LiveISO => 'yes'
-	},
-	tuxedooledbrt => {
-		name => 'tuxedo-oled-brt',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'yes',
-		packageVersion => 'unkwn',
-		fainame => q{},
-		description => __('tuxedooledbrt_description'),
-		postconf => q{},
-		upgrade => q{},
-		upgraded => q{},
-		reconfigure => q{},
-		restart => 'yes',
-		order => q{},
-		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
@@ -2213,7 +2130,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		package => 'no',
 		packageVersion => 'unkwn',
 		fainame => q{},
-		description => __('noecwakupfix_description'),
+		description => __('noecwakeupfix_description'),
 		postconf => 'updateGrub',
 		upgrade => q{},
 		upgraded => q{},
