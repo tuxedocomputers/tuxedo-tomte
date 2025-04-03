@@ -648,7 +648,7 @@ sub readOSData {
 
 	if ( !@osReleaseLines ) {
 		print "Can't determine the operating system\n";
-		exit (0);
+		exit (1);
 	}
 	foreach my $line ( @osReleaseLines ) {
 		# removing leading/trailing whitespaces
@@ -5284,7 +5284,7 @@ sub initLogging {
 			printLog("Err: $!", 'L1', '[ERROR]');
 			$noLogFile =1;
 			print "[ERROR] Could not open logFile $logFile\n$!\n";
-			exit (0);
+			exit (1);
 		}
 	} else {
 		# create a new logFile
@@ -5303,7 +5303,7 @@ sub initLogging {
 			printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 			$noLogFile =1;
 			print "Could not create logFile $logFile\n";
-			exit (0);
+			exit (1);
 		}
 	}
 }
@@ -5604,7 +5604,7 @@ sub writeConfigFile {
 	} else {
 		printLog("Err: $!", 'L0', 'L1', '[ERROR]');
 		printLog("can't write to configfile $configFile $!", 'TL0', '[FATAL]');
-		exit (0);
+		exit (1);
 	}
 	return (0);
 }
@@ -5623,7 +5623,7 @@ sub initConfigDir {
 		if (! ( -d $configDir )) {
 			$noConfigFile = 1;
 			printLog("could not create $configDir, that's really bad!!", 'TL0', '[FATAL]');
-			exit (0);
+			exit (1);
 		}
 	}
 	return (1);
@@ -7267,7 +7267,7 @@ sub help {
 	print __('HELP_help'), "\n";
 	print "\n\n";
 	print __('HELP_footer'), "\n";
-	exit 0;
+	exit (0);
 }
 
 
@@ -7418,18 +7418,18 @@ $chassisType = getChassisType();
 printLog("chassistype will be: $chassisType", 'TL2', '[DEBUG]');
 if ($chassisType eq '0') {
 	print "Something went wrong and I could not determine what type of system this might be ...\n";
-	exit (0);
+	exit (1);
 }
 
 if ((!tuxedoDevice()) && ($chassisType eq 'notebook')) {
 	print "It seems that this is not a TUXEDO device. Please contact TUXEDO Computers if this is a mistake.\n";
-	exit (0);
+	exit (1);
 }
 
 readOSData();
 
 if (!isOSSupported()) {
-	exit (0);
+	exit (1);
 }
 
 # define for each argvalues procedures
@@ -7441,7 +7441,7 @@ if (scalar(@ARGV) != 0) {
 
 	if (exists $options{$argValue{command}} && (! isRoot() )) {
 		print "You must have root access to use this option\n";
-		exit (0);
+		exit (1);
 	}
 
 	# check whether it is a LiveISO installation
