@@ -7719,6 +7719,10 @@ if (($startLaterAgain == 0) &&
 	}
 }
 
+# final exit code
+#TODO debug
+exit (1);
+
 END {
 	my %options;
 	@options{"configure", "reconfigure", "remove", "block", "unblock", "update", "loglevel"} = ();
