@@ -7720,8 +7720,7 @@ if (($startLaterAgain == 0) &&
 }
 
 # final exit code
-#TODO debug
-exit (1);
+exit (0);
 
 END {
 	my %options;
