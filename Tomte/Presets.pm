@@ -100,20 +100,6 @@ our %ESSENTIAL_REPOS = (
 							"Components: main\n".
 							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
-		},
-		"txos" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://txos.tuxedocomputers.com/ubuntu\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n".
-							"\n".
-							"Types: deb\n".
-							"URIs: https://txos-extra.tuxedocomputers.com/ubuntu\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.sources"
 		}
 	}
 );
@@ -174,14 +160,6 @@ our %OTHER_REPOS = (
 				"Components: main restricted universe multiverse\n".
 				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
-		},
-		"plasma" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://plasma6.tuxedocomputers.com/\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/neon-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os-plasma.sources"
 		}
 	}
 );
