@@ -5004,10 +5004,18 @@ sub networkStatus {
 sub waitForNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
-	for ( my $i=1; $i<=$triesNbr; $i++ ) {
+	# only check network status repeatedly $triesNbr times the first time
+	my $triesAlreadyDone = triesAlreadyDone();
+	printLog("tries to do: $triesNbr tries done: $triesAlreadyDone", 'TL2', '[DEBUG]');
+	if ($triesAlreadyDone <= 1) {
+		for ( my $i=1; $i<=$triesNbr; $i++ ) {
+			if (networkStatus()) { return (1); }
+			printLog("waiting for network: $i of $triesNbr", 'TL0', '[INFO]');
+			sleep ($wait);
+		}
+	} else {
 		if (networkStatus()) { return (1); }
-		printLog("waiting for network: $i of $triesNbr", 'TL0', '[INFO]');
-		sleep ($wait);
+		printLog("done waiting for network", 'TL0', '[INFO]');
 	}
 	return (0);
 }
