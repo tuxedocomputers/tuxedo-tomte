@@ -7021,7 +7021,7 @@ sub startTomteDelayed {
 		# This might not be completely reliable, specially when starting a fresh installed system
 		my $systemctlCmd = 'systemd-run --on-active="'.$SYSTEMD_DELAY.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
 
-		printLog("systemctlCmd: $systemctlCmd", 'TL0', '[DEBUG]');
+		printLog("systemctlCmd: $systemctlCmd", 'L0', '[DEBUG]');
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
 		$retVal = system($systemctlCmd);
 		printLog("ret value: $retVal", 'L0', '[DEBUG]');
