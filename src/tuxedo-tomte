@@ -66,7 +66,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -164,14 +164,13 @@ my $plasma6Installed = 0;
 
 Readonly my $SYSTEMD_DELAY => 30;
 Readonly my $TRIES_LIMIT => 12;
+Readonly my $NETWORK_CHECKS => 10;
 Readonly my $NEG_ONE => -1;
-Readonly my $WAIT_TIME => 10;
 Readonly my $FILE_MODE_SIXFOURFOUR => '0644';
 Readonly my $FILE_MODE_SEVENZEROZERO => '0700';
 Readonly my $CONFIGURATION_VALUE_3 => 3;
 Readonly my $CONFIGURATION_VALUE_2 => 2;
 Readonly my $RETVAL_CONVERTER => 256;
-Readonly my $NETWORK_CHECKS => 15;
 Readonly my $MAX_KERNEL_PACKAGES_REMOVE => 20;
 Readonly my $MAX_HEADERS_TO_ANALYZE => 3;
 Readonly my $MAX_PACKAGE_NAME => 50;
@@ -756,8 +755,8 @@ sub prerequisites {
 		}
 	}
 
-	# wait max. 10 sec. as it takes some time to get network
-	if (checkNetwork($WAIT_TIME,1)) {
+	# wait max. $NETWORK_CHECKS sec. as it takes some time to get network
+	if (checkNetwork( $NETWORK_CHECKS, 1 )) {
 		aptgetRefreshModule(1, @modulesList);
 		printLog("ending prerequisites", 'L1', '[INFO]');
 	}
@@ -4120,7 +4119,7 @@ sub installPackage {
 	} elsif (!($LiveISO && $noNetwork)) {
 		messageLongInstall();
 		printLog("install package $packageName", 'L0', '[INFO]');
-		if (checkNetwork($WAIT_TIME, 1)) {
+		if (checkNetwork( $NETWORK_CHECKS, 1)) {
 			deactivatePackagekit();
 			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
 				printLog("installing $packageName", 'L2', '[DEBUG]');
@@ -4809,7 +4808,7 @@ sub removeKernelParameters {
 ###############################################################################
 # setNoNetwork( 0 or 1 )
 # sets the network availability variable
-# 0 = network
+# 0 = network available
 # 1 = no network
 #
 sub setNoNetwork {
@@ -4840,7 +4839,7 @@ sub aptgetRefreshModule {
 	my $refreshTriesDone = 0;
 	my $refreshWait = 1;
 	if ( !($LiveISO && $noNetwork)) {
-		if (checkNetwork($NETWORK_CHECKS, 1)) {
+		if (checkNetwork( $NETWORK_CHECKS, 1 )) {
 			deactivatePackagekit();
 			while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
 				my $command = $consoleLanguage.'apt-get update 2>/dev/null';
@@ -5007,9 +5006,11 @@ sub waitForNetwork {
 	# only check network status repeatedly $triesNbr times the first time
 	my $triesAlreadyDone = triesAlreadyDone();
 	printLog("tries to do: $triesNbr tries done: $triesAlreadyDone", 'TL2', '[DEBUG]');
-	if ($triesAlreadyDone <= 1) {
+	if ($triesAlreadyDone < 1) {
 		for ( my $i=1; $i<=$triesNbr; $i++ ) {
-			if (networkStatus()) { return (1); }
+			if (networkStatus()) {
+				return (1);
+			}
 			printLog("waiting for network: $i of $triesNbr", 'TL0', '[INFO]');
 			sleep ($wait);
 		}
@@ -5024,7 +5025,7 @@ sub waitForNetwork {
 
 
 ###############################################################################
-# checkNetwork('number of tries', 'wait seconds')
+# checkNetwork('number of tries', 'delay between checks')
 # returns 1 if found
 # returns 0 if not found
 #
