@@ -5005,18 +5005,17 @@ sub waitForNetwork {
 	my $wait = shift;
 	# only check network status repeatedly $triesNbr times the first time
 	my $triesAlreadyDone = triesAlreadyDone();
-	printLog("tries to do: $triesNbr tries done: $triesAlreadyDone", 'TL2', '[DEBUG]');
 	if ($triesAlreadyDone < 1) {
 		for ( my $i=1; $i<=$triesNbr; $i++ ) {
 			if (networkStatus()) {
 				return (1);
 			}
-			printLog("waiting for network: $i of $triesNbr", 'TL0', '[INFO]');
+			printLog("waiting for network: $i of $triesNbr", 'L2', '[INFO]');
 			sleep ($wait);
 		}
 	} else {
 		if (networkStatus()) { return (1); }
-		printLog("done waiting for network", 'TL0', '[INFO]');
+		printLog("done waiting for network", 'L2', '[INFO]');
 	}
 	return (0);
 }
@@ -5039,7 +5038,7 @@ sub checkNetwork {
 			return (1);
 		} else {
 			setNoNetwork(1);
-			printLog('no network found!! some fixes might not be applied correctly', 'TL0', '[WARN]');
+			printLog('no network found!! some fixes might not be applied correctly', 'L0', '[WARN]');
 			startTomteDelayed();
 			return (0);
 		}
