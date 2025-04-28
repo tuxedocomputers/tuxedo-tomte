@@ -7006,7 +7006,8 @@ sub startTomteDelayed {
 			} else {
 				if (defined($message)) {
 					messageDesktop(__('Tomte finished'), $message, 2, 'dialog-warning');
-				} else {
+				} elsif (!$noNetwork && somethingFailed()) {
+					# only message if we have a working network connection and something could not be fixed
 					messageDesktop(__('Tomte finished'), __('Tomte could not install all the fixes and will try again the next time it is activated'), 2, 'dialog-warning');
 					print "\nNot all the fixes could be installed\n";
 				}
@@ -7043,6 +7044,26 @@ sub postSetModulesState {
 	}
 	return (0);
 }
+
+
+
+###############################################################################
+# returns the amount of failed modules or programs that configure some modules
+sub somethingFailed {
+	my $counter = 0;
+	foreach my $confProgram (keys %postConfProgramsList) {
+		if ($postConfProgramsList{$confProgram}{status} eq "failed") {
+			$counter++;
+		}
+	}
+	foreach my $confModule (keys %configuredModules) {
+		if ($configuredModules{$confModule} eq "failed") {
+			$counter++;
+		}
+	}
+	return ($counter);
+}
+
 
 
 ###############################################################################
