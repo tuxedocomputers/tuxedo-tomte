@@ -1920,7 +1920,7 @@ sub fingerprintreader() {
 	my $wasInstalled = 1;
 	my $packagefprintd;
 	my $packagelibpam;
-	if ($action eq 'install') {
+	if (($action eq 'install') && !$noNetwork) {
 		# check if the package is already installed
 		if( ! isPackageInstalled('fprintd') ) {
 			$wasInstalled = 0;
@@ -2228,7 +2228,7 @@ sub nvidiadriver() {
 	my $nvidiaDriver550 = 'nvidia-driver-550';
 	my $nvidiaDriver560 = 'nvidia-driver-560';
 
-	if (($action eq 'install') || ($action eq 'upgrade')) {
+	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
 		if ($ubuntuCodename =~ /focal/sm) {
 			if (isPackageInRepo($nvidiaDriver510)) {
 				# deinstall other nvidia drivers
@@ -3779,7 +3779,7 @@ sub debianPackageModule {
 	my ($module, $action) = @_;
 	my $success = 0;
 
-	if ($action eq 'install') {
+	if (($action eq 'install') && !$noNetwork) {
 		# check before if the package is already installed
 		if (! isPackageInstalled($presetModules{$module}{name})) {
 			messageLongInstall();
@@ -3814,7 +3814,7 @@ sub debianPackageModule {
 			$success = 1;
 		}
 	}
-	if ($action eq 'upgrade') {
+	if (($action eq 'upgrade') && !$noNetwork) {
 		printLog("upgrade not necessary for packages", '[INFO]');
 		$success = 0;
 	}
@@ -4117,9 +4117,9 @@ sub installPackage {
 		printLog("return from apt-get:\n$retval", 'TL2', '[DEBUG]');
 		$retval = isPackageInstalled($packageName);
 	} elsif (!($LiveISO && $noNetwork)) {
-		messageLongInstall();
-		printLog("install package $packageName", 'L0', '[INFO]');
 		if (checkNetwork( $NETWORK_CHECKS, 1)) {
+			messageLongInstall();
+			printLog("install package $packageName", 'L0', '[INFO]');
 			deactivatePackagekit();
 			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
 				printLog("installing $packageName", 'L2', '[DEBUG]');
@@ -5212,10 +5212,10 @@ sub messageDesktop {
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
-	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
+	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-tomte\">}' 5000";
 
 	`$mCmd`;
-	$retValue = $?/256;
+	$retValue = $? >> 8;
 
 	if ($retValue != 0) {
 		printLog("No display for message output found with command:\n$mCmd", 'L0', '[DEBUG]');
@@ -7617,7 +7617,6 @@ if (scalar(@ARGV) != 0) {
 			if (validModuleName($argValue{module}) ne q{}) {
 				checkMode();
 				prepareValues();
-				prerequisites();
 				removeSingleModule($argValue{module});
 				postConfigure();
 				listSuccess();
