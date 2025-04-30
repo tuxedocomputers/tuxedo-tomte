@@ -5212,7 +5212,7 @@ sub messageDesktop {
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
-	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-tomte\">}' 5000";
+	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
 
 	`$mCmd`;
 	$retValue = $? >> 8;
