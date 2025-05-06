@@ -7128,7 +7128,7 @@ sub listSuccess {
 	if ($restartSystem == 1) {
 		messageDesktop(__('Restart required'), __('Please restart the system for the changes to take effect.'), 2, 'dialog-warning');
 		print "\nPlease restart the system for the changes to take effect\n";
-	} elsif ( !$noNetwork && configuredModulesExceptDefault(@successModules) ) {
+	} elsif ( configuredModulesExceptDefault(@successModules) ) {
 		messageDesktop(__('TUXEDO Tomte finished'), __('TUXEDO Tomte finished applying all the required fixes available for this system.'), 1, 'dialog-information');
 	}
 	return (0);
