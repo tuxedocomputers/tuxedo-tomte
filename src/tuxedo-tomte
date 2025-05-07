@@ -1387,6 +1387,18 @@ sub tuxedocontrolcenter() {
 
 
 
+###############################################################################
+# Keyboard & keyboard backlight driver for TUXEDO notebooks
+# this is an obsolete stump only for jammy to remove this package
+#       
+sub tuxedokeyboard() { 
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+	return;
+}
+
+
 
 ###############################################################################
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
@@ -1724,6 +1736,19 @@ sub huaweime906shpfix(){
 # Uniwill touchpad LED fix
 #
 sub tuxedotouchpadswitch() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+	return;
+}
+
+
+
+###############################################################################
+# tuxedo-keyboard-ite
+# this is an obsolete stump only for jammy to remove this package
+#       
+sub tuxedokeyboardite() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );

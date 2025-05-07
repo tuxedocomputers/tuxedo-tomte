@@ -1129,6 +1129,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# obsolete module only for removal in jammy
+	tuxedokeyboard => {
+		name => 'tuxedo-keyboard',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('tuxedokeyboard_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => q{no},
+		order => q{},
+		dkms => 'yes',
+		FAI => 'yes',
+		LiveISO => 'yes'
+	},
 	backlightfix => {
 		name => 'backlight-fix',
 		version => 1,
@@ -1315,6 +1337,28 @@ our %INITIAL_MODULES_SETTINGS = (
 		restart => q{no},
 		order => q{},
 		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'yes'
+	},
+	# obsolete module only for removal in jammy
+	tuxedokeyboardite => {
+		name => 'tuxedo-keyboard-ite',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 2,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('tuxedokeyboardite_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => 'no',
+		order => q{},
+		dkms => 'yes',
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
