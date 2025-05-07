@@ -33,22 +33,15 @@ use Data::Dumper;
 
 
 our %SUPPORTED_OS = (
-	"TUXEDO OS" => ["20.04", "22.04", "24.04"],
-	"TUXEDO_OS Plasma" => ["20.04", "22.04", "24.04"],
-	"KDE neon" => ["20.04", "22.04", "24.04"],
-	"Ubuntu" => ["20.04", "22.04", "24.04"],
+	"TUXEDO OS" => ["22.04", "24.04"],
+	"TUXEDO_OS Plasma" => ["22.04", "24.04"],
+	"KDE neon" => ["22.04", "24.04"],
+	"Ubuntu" => ["22.04", "24.04"],
 	"Linux Mint" => ["21.1", "21.2", "21.3", "22", "22.1"],
-	"elementary OS" => ["6.1", "7.1", "8"]
+	"elementary OS" => ["7.1", "8"]
 );
 
 our %ESSENTIAL_REPOS = (
-	"focal" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		}
-	},
-
 	"jammy" => {
 		"deb" => {
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
@@ -105,17 +98,6 @@ our %ESSENTIAL_REPOS = (
 );
 
 our %OTHER_REPOS = (
-	"focal" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-
 	"jammy" => {
 		"mirrors" => {
 			"content" => [
@@ -165,11 +147,6 @@ our %OTHER_REPOS = (
 );
 
 our %KERNELS = (
-	'focal' => {
-		'index' => '1',
-		'linux-tuxedo-20.04' => 'linux-tuxedo-20.04'
-	},
-
 	'jammy' => {
 		'index' => '2',
 		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04'
