@@ -33,12 +33,9 @@ use Data::Dumper;
 
 
 our %SUPPORTED_OS = (
-	"TUXEDO OS" => ["20.04", "22.04", "24.04"],
-	"TUXEDO_OS Plasma" => ["20.04", "22.04", "24.04"],
-	"KDE neon" => ["20.04", "22.04", "24.04"],
-	"Ubuntu" => ["20.04", "22.04", "24.04"],
-	"Linux Mint" => ["21.1", "21.2", "21.3", "22", "22.1"],
-	"elementary OS" => ["6.1", "7.1", "8"]
+	"KDE neon" => ["20.04"],
+	"Ubuntu" => ["20.04"],
+	"elementary OS" => ["6.1"]
 );
 
 our %ESSENTIAL_REPOS = (
@@ -47,60 +44,6 @@ our %ESSENTIAL_REPOS = (
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu focal main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		}
-	},
-
-	"jammy" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		}
-	},
-
-	"noble" => {
-		"deb" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
-		}
-	},
-
-	"TUXEDO OS 22.04" => {
-		"deb" => {
-			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
-		},
-		"nonplasma6txos" => {
-			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-		},
-		"nonplasma6plasma" => {
-			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		},
-		"plasma6txos" => {
-			"content" => [
-				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
-			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-			},
-		"plasma6plasma" => {
-			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
-		}
-	},
-
-	"TUXEDO OS 24.04" => {
-		"deb" => {
-			"content" => ["Types: deb\n".
-							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
-							"Suites: noble\n".
-							"Components: main\n".
-							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
-		}
 	}
 );
 
@@ -108,58 +51,18 @@ our %OTHER_REPOS = (
 	"focal" => {
 		"mirrors" => {
 			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu focal-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse"
+				"deb http://archive.ubuntu.com/ubuntu/ focal main restricted",
+				"deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted",
+				"deb http://archive.ubuntu.com/ubuntu/ focal universe",
+				"deb http://archive.ubuntu.com/ubuntu/ focal-updates universe",
+				"deb http://archive.ubuntu.com/ubuntu/ focal multiverse",
+				"deb http://archive.ubuntu.com/ubuntu/ focal-updates multiverse",
+				"deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse",
+				"deb http://security.ubuntu.com/ubuntu focal-security main restricted",
+				"deb http://security.ubuntu.com/ubuntu focal-security universe",
+				"deb http://security.ubuntu.com/ubuntu focal-security multiverse"
 			],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-
-	"jammy" => {
-		"mirrors" => {
-			"content" => [
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse",
-				"deb https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse"
-			],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.list"
-		}
-	},
-
-	"noble" => {
-		"mirrors" => {
-			"content" => [
-				"Types: deb\n".
-				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu\n".
-				"Suites: noble noble-updates\n".
-				"Components: main restricted universe multiverse\n".
-				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n".
-				"\n".
-				"Types: deb\n".
-				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu\n".
-				"Suites: noble-security\n".
-				"Components: main restricted universe multiverse\n".
-				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
-		}
-	},
-
-	"TUXEDO OS 24.04" => {
-		"mirrors" => {
-			"content" => [
-				"Types: deb\n".
-				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/archive.ubuntu.com/ubuntu\n".
-				"Suites: noble noble-updates\n".
-				"Components: main restricted universe multiverse\n".
-				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n".
-				"\n".
-				"Types: deb\n".
-				"URIs: https://mirrors.tuxedocomputers.com/ubuntu/mirror/security.ubuntu.com/ubuntu\n".
-				"Suites: noble-security\n".
-				"Components: main restricted universe multiverse\n".
-				"Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-ubuntu-mirrors.sources"
 		}
 	}
 );
@@ -169,16 +72,6 @@ our %KERNELS = (
 		'index' => '1',
 		'linux-tuxedo-20.04' => 'linux-tuxedo-20.04'
 	},
-
-	'jammy' => {
-		'index' => '2',
-		'linux-tuxedo-22.04' => 'linux-tuxedo-22.04'
-	},
-
-	'noble' => {
-		'index' => '3',
-		'linux-tuxedo-24.04' => 'linux-tuxedo-24.04'
-	}
 );
 
 
