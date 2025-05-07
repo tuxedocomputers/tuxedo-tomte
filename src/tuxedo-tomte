@@ -888,13 +888,6 @@ sub checkRequirements {
 	}
 
 	# all notebooks require this
-	if ( ($chassisType eq 'notebook') &&
-		($ubuntuCodename =~ /focal/sm)) {
-		$presetModules{tuxedokeyboard}{required} = 'yes';
-		printLog("detected $presetModules{tuxedokeyboard}{name} issue", 'L1', '[INFO]');
-	}
-
-	# all notebooks require this
 	# the temporary fix has to be removed for now as it causes boot delay issues
 	# on some notebooks
 	# not necessary on 24.04
@@ -903,24 +896,6 @@ sub checkRequirements {
 		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
 			printLog("former $presetModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
 			$presetModules{systemdbacklightfix}{required} = 'no';
-		}
-	}
-
-	if (($boardname =~ /X170SM/sm) ||
-		($boardname =~ /X170KM-G/sxm) ||
-		($boardname =~ /PCx0Dx_GN20/sm) ||
-		($boardname =~ /GMxZGxx/sm) ||
-		($boardname =~ /GMxAGxx/sm) ||
-		($boardname =~ /GMxTGxx/sm) ||
-		($boardname =~ /GMxRGxx/sm) ||
-		($boardname =~ /LAPQC71A/sm) ||
-		($boardname =~ /PD5x_7xPNP_PNR_PNN_PNT/sm) ||
-		($boardname =~ /LAPQC71B/sm) ||
-		($boardname =~ /GMxPXxx/sm) ||
-		($boardname =~ /GM6XGxX/sm)) {
-		if ($ubuntuCodename =~ /focal/sm) {
-			$presetModules{tuxedokeyboardite}{required} = 'yes';
-			printLog("detected $presetModules{tuxedokeyboardite}{name} issue", 'L1', '[INFO]');
 		}
 	}
 
@@ -936,15 +911,6 @@ sub checkRequirements {
 	if ($ubuntuCodename =~ /noble/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
-	}
-
-	if ($ubuntuCodename =~ /focal/sm) {
-		# get vendor text from vendor ID:device ID
-		my @tuxedonvmefixDevices = ('2646:2263');
-		if ( findPciDevice($lspciOutput, @tuxedonvmefixDevices) ) {
-			$presetModules{tuxedonvmefix}{required} = 'yes';
-			printLog("detected $presetModules{tuxedonvmefix}{name} issue", 'L1', '[INFO]');
-		}
 	}
 
 	my $fingerprintLsUsb = `lsusb`;
@@ -971,7 +937,6 @@ sub checkRequirements {
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
-		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
 		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
@@ -1016,13 +981,7 @@ sub checkRequirements {
 
 
 	# kernel
-	if (($ubuntuCodename =~ /focal/sm) && ($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/sm)) {
-		printLog("kernel $presetModules{kerneltuxedo2204}{name} should be installed", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /focal/sm) {
-		printLog("kernel $presetModules{kerneltuxedo2004}{name} will be default", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2004}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /jammy/sm) {
+	if ($ubuntuCodename =~ /jammy/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2204}{required} = 'yes';
 	} elsif ($ubuntuCodename =~ /noble/sm) {
@@ -1194,8 +1153,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($ubuntuCodename eq 'focal') ||
-		($ubuntuCodename eq 'jammy') ||
+	if (($ubuntuCodename eq 'jammy') ||
 		($ubuntuCodename eq 'noble') &&
 		(!($distribution =~ /TUXEDO OS/sm))) {
 		$presetModules{gfxmode}{required} = 'yes';
@@ -1247,7 +1205,6 @@ sub checkRequirementsLast {
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
-		|| (($ubuntuCodename =~ /focal/) && isPackageInstalled('nvidia-driver-510'))
 		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
@@ -1430,18 +1387,6 @@ sub tuxedocontrolcenter() {
 
 
 
-###############################################################################
-# Keyboard & keyboard backlight driver for TUXEDO notebooks
-#
-sub tuxedokeyboard() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
 
 ###############################################################################
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
@@ -1543,17 +1488,6 @@ sub tuxedorepos() {
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 
-		# remove obsolete TUXEDO repos in focal as they don't exist anymore
-		if ($ubuntuCodename =~ /focal/sm) {
-			if (-e '/etc/apt/sources.list.d/oibaf-tuxedo.list') {
-				printLog("removing obsolete /etc/apt/sources.list.d/oibaf-tuxedo.list", 'L0', '[INFO]');
-				unlink ('/etc/apt/sources.list.d/oibaf-tuxedo.list');
-			}
-			if (-e '/etc/apt/sources.list.d/graphics-tuxedo.list') {
-				printLog("removing obsolete /etc/apt/sources.list.d/graphics-tuxedo.list", 'L0', '[INFO]');
-				unlink ('/etc/apt/sources.list.d/graphics-tuxedo.list');
-			}
-		}
 		# remove obsolete entries if they still exist
 		if ($ubuntuCodename =~ /noble/) {
 			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
@@ -1798,118 +1732,6 @@ sub tuxedotouchpadswitch() {
 
 
 
-###############################################################################
-# Kingston A2000 NVME drives freezing after deep APST sleep fix
-#
-sub tuxedonvmefix() {
-	my $module = shift;
-	my $action = shift;
-	my %nvmeDevice;
-	my $output;
-	my $retValue = 0;
-	my $fwVersion = 'S5Z42109';
-	my $nvmeUpdateSuccess = 0;
-	my $nvmeFWPackageWasInstalled = 0;
-
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		while ( defined (my $nvmeDir = glob '/sys/class/nvme/*' )) {
-			$nvmeDevice{$nvmeDir}{'device'} = $nvmeDir;
-			$nvmeDevice{$nvmeDir}{'device'} =~ /.*(nvme.*)/sm;
-			$nvmeDevice{$nvmeDir}{'device'} = '/dev/'.$1;
-			$nvmeDevice{$nvmeDir}{'model'} = readFirstLineOfFile("$nvmeDir/model");
-			$nvmeDevice{$nvmeDir}{'subdevice'} = readFirstLineOfFile("$nvmeDir/device/subsystem_device");
-			$nvmeDevice{$nvmeDir}{'subvendor'} = readFirstLineOfFile("$nvmeDir/device/subsystem_vendor");
-			$nvmeDevice{$nvmeDir}{'firmware'} = readFirstLineOfFile("$nvmeDir/firmware_rev");
-		}
-		foreach my $nvmeDirKey ( keys %nvmeDevice ) {
-			if (($nvmeDevice{$nvmeDirKey}{model} =~ /SA2000M8(?:25|50|100)0G/sm) &&
-				($nvmeDevice{$nvmeDirKey}{subdevice} =~ /0x2263/sm) &&
-				($nvmeDevice{$nvmeDirKey}{subvendor} =~ /0x2646/sm)) {
-				printLog("nvme device on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
-				if ($nvmeDevice{$nvmeDirKey}{firmware} lt $fwVersion) {
-					printLog("firmware upgrade required", 'L0', '[INFO]');
-					# firmware upgrade is required
-					if (! isPackageInstalled('nvme-cli')) {
-						if (! installPackage('nvme-cli', 'tuxedonvmefix')) {
-							$presetModules{$module}{installed} = "failed";
-							addToConfiguredModules($module, "failed");
-							return (0);
-						}
-					}
-					if (isPackageInstalled('a2000-s5z42109')) {
-						$nvmeFWPackageWasInstalled = 1;
-					}
-					if (installPackage('a2000-s5z42109', 'tuxedonvmefix')) {
-						printLog("upload firmware on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
-						$output = `nvme fw-download $nvmeDevice{$nvmeDirKey}{'device'} -f /lib/firmware/a2000/$fwVersion.bin`;
-						$retValue = $?/$RETVAL_CONVERTER;
-						if ($retValue != 0) {
-							printLog('firmware could not be uploaded!', 'L0', '[WARN]');
-							printLog($output, 'L0', '[WARN]');
-							$presetModules{$module}{installed} = "failed";
-							addToConfiguredModules($module, "failed");
-							return (0);
-						}
-						printLog("activate firmware on $nvmeDevice{$nvmeDirKey}{'device'}", 'L0', '[INFO]');
-						$output = `nvme fw-activate $nvmeDevice{$nvmeDirKey}{'device'} --slot=1 --action=1`;
-						$retValue = $?/$RETVAL_CONVERTER;
-						if ($retValue != 0) {
-							printLog('firmware could not be activated', 'TL0', '[WARN]');
-							printLog($output, 'TL0', '[WARN]');
-							$presetModules{$module}{installed} = "failed";
-							addToConfiguredModules($module, "failed");
-							return (0);
-						}
-						setRestartValues($module);
-						$presetModules{$module}{installed} = "yes";
-						$presetModules{$module}{upgraded} = "yes";
-						printLog('nvme firmware was successfully updated', 'L0', '[INFO]');
-						$nvmeUpdateSuccess = 1;
-					} else {
-						$presetModules{$module}{installed} = "failed";
-						addToConfiguredModules($module, "failed");
-						return (0);
-					}
-				} else {
-					printLog("firmware already installed on $nvmeDevice{$nvmeDirKey}{'device'}", 'L1', '[INFO]');
-					$presetModules{$module}{installed} = "yes";
-					$presetModules{$module}{upgraded} = "yes";
-				}
-			}
-		}
-		if ($nvmeUpdateSuccess) {
-			addToConfiguredModules($module, "success");
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-		}
-		if (! $nvmeFWPackageWasInstalled) {
-			deinstallSinglePackage('a2000-s5z42109');
-		}
-	}
-	if ($action eq 'remove') {
-		if (removePackage('a2000-s5z42109', '')) {
-			printLog("package a2000-s5z42109 has been removed successfully as we don't need it any more", 'L2', '[INFO]');
-		} else {
-			printLog("something went wrong while trying to remove the package a2000-s5z42109", 'TL0', '[ERROR]');
-		}
-	}
-	return;
-}
-
-
-
-
-###############################################################################
-# tuxedo-keyboard-ite
-#
-sub tuxedokeyboardite() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
 
 ###############################################################################
 # fingerprint-reader
@@ -2092,42 +1914,6 @@ sub systemdbacklightfix() {
 
 
 
-###############################################################################
-# kernel-tuxedo-20.04
-#
-sub kerneltuxedo2004() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-20.04', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-	return;
-}
-
 
 
 ###############################################################################
@@ -2224,61 +2010,11 @@ sub nvidiadriver() {
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
 	my $output;
-	my $nvidiaDriver510 = 'nvidia-driver-510';
 	my $nvidiaDriver550 = 'nvidia-driver-550';
 	my $nvidiaDriver560 = 'nvidia-driver-560';
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
-		if ($ubuntuCodename =~ /focal/sm) {
-			if (isPackageInRepo($nvidiaDriver510)) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver510);
-			}
-
-			# check if the package is already installed
-			if( ! isPackageInstalled($nvidiaDriver510) ) {
-				messageLongInstall();
-				$wasInstalled = 0;
-				$packageNvidiaDriver = installPackage($nvidiaDriver510, 'nvidiadriver');
-			} else {
-				setAptMark($nvidiaDriver510,'manual');
-				$packageNvidiaDriver = 1;
-			}
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-		} elsif ($ubuntuCodename =~ /(jammy|noble)/sm) {
+		if ($ubuntuCodename =~ /(jammy|noble)/sm) {
 			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
 
 			# check if the drivers to install are actually available in repos
@@ -2343,9 +2079,6 @@ sub nvidiadriver() {
 	}
 	if ($action eq 'remove') {
 		my $nvidiaDriver = q{};
-		if ($ubuntuCodename =~ /focal/) {
-			$nvidiaDriver = $nvidiaDriver510;
-		}
 		if ($ubuntuCodename =~ /(jammy|noble)/) {
 			$nvidiaDriver = $nvidiaDriver560;
 		}
@@ -3170,22 +2903,7 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
-	if (($ubuntuCodename ne 'jammy') && ($ubuntuCodename ne 'noble')) {
-			if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
-				edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-				edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
-			}
-
-		if(-e '/etc/apt/sources.list.d/graphics-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/graphics.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/graphics-tuxedo.list', {'err_mode' => 'carp'};
-		}
-
-		if(-e '/etc/apt/sources.list.d/oibaf-tuxedo.list'){
-			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-			edit_file { s/deb http:\/\/oibaf.tuxedocomputers.com\/ubuntu focal main//gsm } '/etc/apt/sources.list.d/oibaf-tuxedo.list', {'err_mode' => 'carp'};
-		}
-	} else {
+	if (($ubuntuCodename eq 'jammy') || ($ubuntuCodename eq 'noble')) {
 		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
 			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
