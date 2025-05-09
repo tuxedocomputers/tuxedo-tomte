@@ -11,7 +11,9 @@ use File::Slurp qw(write_file read_file);
 
 use Data::Dumper;
 
+use lib "$RealBin";
 use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+
 
 my %msgids;
 my %msgStubs;
@@ -37,11 +39,12 @@ sub loadMsgIdsFromDirectories {
 	print "found language code: $languageCode\n";
 
 	my $FH;
+	print "opening $filePath\n";
 	open($FH, '<', $filePath) or warn "Couldn't open $filePath: $!";
 
 	while (my $line = <$FH>) {
 		if (my ($match) = $line =~ /^msgid "(.*?)"/) {
-			if(length($match) > 0){
+			if(length($match) > 0) {
 				push @{$msgids{$languageCode}}, $match;
 			}
 		}
@@ -49,34 +52,34 @@ sub loadMsgIdsFromDirectories {
 	close $FH;
 }
 
-# Subroutine to compare stubs and msgids
+# Subroutine to compare stubs and msgids for a languageCode
 sub compareLanguageWithTomteAndPrintDiff {
-	my ($languageCode) = @_;
+	my $languageCode = shift;
 	print "#########################################################\n";
 	print "Comparing stubs in code with msgIds from >$languageCode<..\n";
 	my %uniqueStubs = %{ dclone(\%msgStubs) };
 	my %returnHash;
-	my @orphanMsgids;
 	my @orphanStubs;
+	my @orphanMsgId;
 
 	# create list with orphan stubs
-	foreach my $item (@{$msgids{$languageCode}}) {
-		if (exists $uniqueStubs{$item}) {
-			delete $uniqueStubs{$item};  # Remove common items
+	foreach my $msgid (@{$msgids{$languageCode}}) {
+		if (exists $uniqueStubs{$msgid}) {
+			delete $uniqueStubs{$msgid};  # Remove common items
 		} else {
-			push @orphanStubs, $item;
+			push @orphanMsgId, $msgid;
 		}
 	}
 
 	# Remaining items are msgIds without stub
-	@orphanMsgids = keys %uniqueStubs;
+	@orphanStubs = keys %uniqueStubs;
 
-	my $orphanMsgidsSize = scalar @orphanMsgids;
 	my $orphanStubsSize = scalar @orphanStubs;
+	my $orphanMsgIdSize = scalar @orphanMsgId;
 
-	print "Found $orphanMsgidsSize message ID's only present in language file >$languageCode<:\n";
-	if($orphanMsgidsSize > 0){
-		foreach my $msgid (@orphanMsgids) {
+	print "Found $orphanStubsSize stubs only present in Tomte code:\n";
+	if($orphanStubsSize > 0){
+		foreach my $msgid (@orphanStubs) {
 			if (defined $msgid) {
 				print "orphanMsgid: $msgid\n";
 			} else {
@@ -86,18 +89,18 @@ sub compareLanguageWithTomteAndPrintDiff {
 	}
 	print "\n";
 
-	print "Found $orphanStubsSize stubs only present in Tomte code:\n";
-	if($orphanStubsSize > 0) {
-		foreach my $stub (@orphanStubs) {
-			if (defined $stub) {
-				print "orphanStub: $stub\n";
+	print "Found $orphanMsgIdSize message ID's only present in language file >$languageCode<:\n";
+	if($orphanMsgIdSize > 0) {
+		foreach my $msgid (@orphanMsgId) {
+			if (defined $msgid) {
+				print "orphanStub: $msgid\n";
 			} else {
 				print "Undefined value\n";  # Or handle it in another way
 			}
 		}
 	}
 	print "\n";
-	return $orphanMsgidsSize + $orphanStubsSize;
+	return $orphanStubsSize + $orphanMsgIdSize;
 }
 
 # loads message stubs from files with source code
