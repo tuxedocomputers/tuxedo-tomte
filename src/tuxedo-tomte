@@ -989,8 +989,9 @@ sub checkRequirements {
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
+	# only for removal as it is built into the kernel
 	if ($boardname =~ m/X170KM-G/sm) {
-		$presetModules{thunderboltbootdelayfix}{required} = 'yes';
+		$presetModules{thunderboltbootdelayfix}{required} = 'no';
 		printLog("detected $presetModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
 	}
 
@@ -2246,14 +2247,13 @@ sub i915enablepsrfix() {
 # booting the system
 # - X170KM-G
 # adds some parameters and deletes one if found
+# module is obsolete as it is built into the kernel
 #
 sub thunderboltbootdelayfix() {
 	my $module = shift;
 	my $action = shift;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
-	}
-	grubModuleEdit( $module, $action, 0, 'modprobe.blacklist=thunderbolt');
+	edit_file { s/thunderbolt.tuxedo_icm_driver_ready_timeout=2000//gsm } '/etc/default/grub', {'err_mode' => 'carp'};
+	grubModuleEdit( $module, 'remove', 0, 'modprobe.blacklist=thunderbolt');
 	return;
 }
 
