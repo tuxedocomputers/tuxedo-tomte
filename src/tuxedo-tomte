@@ -1188,6 +1188,11 @@ sub checkRequirements {
 		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
 	}
 
+	if ($boardname =~ /4X4-KRK Series/sm) {
+		$presetModules{krackanpointusb4suspendfix}{required} = 'yes';
+		printLog("detected $presetModules{krackanpointusb4suspendfix}{name} issue", 'L1', '[INFO]');
+	}
+
 	return (0);
 }
 
@@ -2849,6 +2854,17 @@ sub tuxedobtoffsuspend() {
 	return;
 }
 
+
+
+###############################################################################
+# Workaround for USB4 suspend problems with AMD Krackan point
+#
+sub krackanpointusb4suspendfix() {
+	my $module = shift;
+	my $action = shift;
+	grubModuleEdit( $module, $action, 0, 'processor.max_cstate=2');
+	return;
+}
 
 
 
