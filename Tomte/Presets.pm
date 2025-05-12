@@ -861,17 +861,6 @@ our %DEVICES = (
 		display => q{},
 		usb_device => q{}
 	},
-	'69' => {
-		model => ['all'],
-		board_name => [q{}],
-		fix => ['tuxedoplasmaupgrade'],
-		flavour => ['TUXEDO OS 2 22.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
-	},
 	'70' => {
 		model => ['all with ethernet controller YT6801'],
 		board_name => [q{}],
@@ -1929,6 +1918,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# obsolete module only for removal in jammy
 	tuxedoplasmaupgrade => {
 		name => 'tuxedo-plasma-upgrade',
 		version => 1,

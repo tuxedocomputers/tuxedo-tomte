@@ -6,6 +6,50 @@ use 5.010;
 
 package TomteTomb;
 
+sub oldCheckRequirements {
+
+	# tuxedoplasmaupgrade installation
+	my $minPlasmaWorkspaceVersion = '6.0.0';
+	readConfigIniValues();
+	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
+	if (($distribution =~ /TUXEDO OS/sm) && ($distributionVersion =~ /24\.04.*/sm)) {
+		$plasma6Installed = 1;
+		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
+	} elsif (($distribution =~ /TUXEDO OS/sm) && (($distributionVersion =~ /2 22\.04.*/sm) || ($distributionVersion =~ /3 22\.04.*/sm))) {
+		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
+
+		# check whether plasma6 is installed
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
+			if (! ($versionCompareResult == $NEG_ONE) ) {
+				$plasma6Installed = 1;
+				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
+			} else {
+				$plasma6Installed = 0;
+				printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
+			}
+		} else {
+			$plasma6Installed = 0;
+			printLog("could not determine plasma version", 'L2', '[DEBUG]');
+		}
+
+		# check whether tuxedoplasmaupgrade should be installed or if it
+		# has been installed already in the past because we don't want to install it again
+		if ($plasma6Installed == 0) {
+			if (((! defined($configIniValues->{tuxedoplasmaupgrade}->{installed})) || ($configIniValues->{tuxedoplasmaupgrade}->{installed} ne '1')) && ($plasma6Installed != 1)) {
+				printLog("tuxedoplasmaupgrade not defined in $configIniFile or value ne '1', means it has not been installed before", 'L2', '[DEBUG]');
+				$presetModules{tuxedoplasmaupgrade}{required} = 'yes';
+				printLog("detected $presetModules{tuxedoplasmaupgrade}{name} issue", 'L1', '[INFO]');
+			} elsif ($configIniValues->{tuxedoplasmaupgrade}->{installed} eq '1') {
+				printLog("tuxedo-plasma-upgrade has been installed already in the past", 'L2', '[DEBUG]');
+			} else {
+				printLog("tuxedoplasmaupgrade: undefined state detected", 'L2', '[DEBUG]');
+			}
+		}
+	}
+}
+
 ###############################################################################
 # returns the brand of the CPU (AMD or Intel)
 # returns undef if no file was found
