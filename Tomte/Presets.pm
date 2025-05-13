@@ -65,20 +65,10 @@ our %ESSENTIAL_REPOS = (
 			"content" => ["deb https://deb.tuxedocomputers.com/ubuntu jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.list"
 		},
-		"nonplasma6txos" => {
-			"content" => ["deb https://txos.tuxedocomputers.com/ubuntu jammy main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-		},
 		"nonplasma6plasma" => {
 			"content" => ["deb https://plasma.tuxedocomputers.com jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"
 		},
-		"plasma6txos" => {
-			"content" => [
-				"deb https://txos.tuxedocomputers.com/ubuntu jammy main",
-			   	"deb https://txos.tuxedocomputers.com/ubuntu jammy-plasma main"],
-			"filename" => "/etc/apt/sources.list.d/tuxedo-os.list"
-			},
 		"plasma6plasma" => {
 			"content" => ["deb https://plasma6.tuxedocomputers.com jammy main"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-plasma.list"

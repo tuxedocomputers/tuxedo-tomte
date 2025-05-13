@@ -1093,8 +1093,36 @@ sub checkRequirements {
 	}
 
 	# remove tuxedoplasmaupgrade
-	if ($ubuntuCodename eq 'jammy') {
+	if (($ubuntuCodename eq 'jammy') && ($distribution =~ /TUXEDO OS/sm)) {
 		$presetModules{tuxedoplasmaupgrade}{required} = 'no';
+	}
+
+	# tuxedoplasmaupgrade installation
+	my $minPlasmaWorkspaceVersion = '6.0.0';
+	printLog("distribution: $distribution distributionVersion: $distributionVersion", 'L2', '[DEBUG]');
+	if (($distribution =~ /TUXEDO OS/sm) && ($distributionVersion =~ /24\.04.*/sm)) {
+		$plasma6Installed = 1;
+		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
+	} elsif (($distribution =~ /TUXEDO OS/sm) &&
+			(($distributionVersion =~ /2 22\.04.*/sm) ||
+			($distributionVersion =~ /3 22\.04.*/sm))) {
+		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
+
+		# check whether plasma6 is installed
+		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion); 
+			if (! ($versionCompareResult == $NEG_ONE) ) {
+				$plasma6Installed = 1;
+				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
+			} else {
+				$plasma6Installed = 0;
+				printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
+			}
+		} else {
+			$plasma6Installed = 0;
+			printLog("could not determine plasma version", 'L2', '[DEBUG]');
+		}
 	}
 
 	if (($ubuntuCodename eq 'jammy') ||
@@ -2655,9 +2683,6 @@ sub tuxedoplasmaupgrade() {
 	my $action = shift;
 	if ($action =~ /remove/sm) {
 		debianPackageModule( $module, $action );
-		if (isPackageInstalled('tuxedo-plasma-upgrade')) {
-			deinstallSinglePackage('tuxedo-plasma-upgrade');
-		}
 	} else {
 		printLog("other actions besides remove are not possible for this module", 'TL0', '[INFO]');
 	}
@@ -2909,12 +2934,12 @@ sub createRepos {
 			# hack to set the TUXEDO plasma repos to the correct values
 			if ($plasma6Installed && ($distroKey ne 'TUXEDO OS 24.04')) {
 				printLog("plasma6: yes", 'L2', '[DEBUG]');
-				if (($key eq 'plasma6txos') || ($key eq 'plasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors') || ($key eq 'plasma') || ($key eq 'txos')) {
+				if (($key eq 'plasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} elsif (($distribution =~ /TUXEDO OS/sm) && ($distroKey ne 'TUXEDO OS 24.04')) {
 				printLog("plasma6: no", 'L2', '[DEBUG]');
-				if (($key eq 'nonplasma6txos') || ($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
+				if (($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} else {
