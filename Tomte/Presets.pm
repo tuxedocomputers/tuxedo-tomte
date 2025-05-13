@@ -1908,10 +1908,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
-	# obsolete module only for removal in jammy
+	# obsolete module only for removal in TUXEDO OS 2
 	tuxedoplasmaupgrade => {
 		name => 'tuxedo-plasma-upgrade',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
