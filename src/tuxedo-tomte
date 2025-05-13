@@ -1188,7 +1188,7 @@ sub checkRequirements {
 		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ /4X4-KRK Series/sm) {
+	if (($ubuntuCodename =~ /noble/sm) && ($boardname =~ /4X4-KRK Series/sm)) {
 		$presetModules{krackanpointusb4suspendfix}{required} = 'yes';
 		printLog("detected $presetModules{krackanpointusb4suspendfix}{name} issue", 'L1', '[INFO]');
 	}
