@@ -1114,7 +1114,7 @@ sub checkRequirements {
 		# check whether plasma6 is installed
 		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
 		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
-			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion); 
+			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
 			if (! ($versionCompareResult == $NEG_ONE) ) {
 				$plasma6Installed = 1;
 				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
