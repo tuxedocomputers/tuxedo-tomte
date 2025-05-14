@@ -6,7 +6,6 @@ use 5.010;
 
 package TomteTomb;
 
-
 ###############################################################################
 # returns the brand of the CPU (AMD or Intel)
 # returns undef if no file was found
