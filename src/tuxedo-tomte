@@ -1097,7 +1097,7 @@ sub checkRequirements {
 		# TODO debug
 		printLog("set tuxedoplasmaupgrade to no", 'L2', '[DEBUG]');
 		if (isPackageInstalled('tuxedo-plasma-upgrade')) {
-			$presetModules{tuxedoplasmaupgrade}{installed} = 'yes';
+			$localConfModules{tuxedoplasmaupgrade}{installed} = 'yes';
 		}
 		$presetModules{tuxedoplasmaupgrade}{required} = 'no';
 	}
