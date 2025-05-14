@@ -1094,6 +1094,8 @@ sub checkRequirements {
 
 	# remove tuxedoplasmaupgrade
 	if (($ubuntuCodename eq 'jammy') && ($distribution =~ /TUXEDO OS/sm)) {
+		# TODO debug
+		printLog("set tuxedoplasmaupgrade to no", 'L2', '[DEBUG]');
 		$presetModules{tuxedoplasmaupgrade}{required} = 'no';
 	}
 
@@ -2682,6 +2684,7 @@ sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
 	if ($action =~ /remove/sm) {
+		printLog("tuxedoplasmaupgrade module, removing the plasma-upgrade package", 'L2', '[DEBUG]');
 		debianPackageModule( $module, $action );
 	} else {
 		printLog("other actions besides remove are not possible for this module", 'TL0', '[INFO]');
@@ -2933,12 +2936,12 @@ sub createRepos {
 		if ($key ne 'name') {
 			# hack to set the TUXEDO plasma repos to the correct values
 			if ($plasma6Installed && ($distroKey ne 'TUXEDO OS 24.04')) {
-				printLog("plasma6: yes", 'L2', '[DEBUG]');
+				printLog("adding plasma6-repo", 'L2', '[DEBUG]');
 				if (($key eq 'plasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
 			} elsif (($distribution =~ /TUXEDO OS/sm) && ($distroKey ne 'TUXEDO OS 24.04')) {
-				printLog("plasma6: no", 'L2', '[DEBUG]');
+				printLog("adding non-plasma6-repo", 'L2', '[DEBUG]');
 				if (($key eq 'nonplasma6plasma') || ($key eq 'deb') || ($key eq 'mirrors')) {
 					$repoFileText = join "\n", @{$repos{$distroKey}{$key}{content}};
 				}
