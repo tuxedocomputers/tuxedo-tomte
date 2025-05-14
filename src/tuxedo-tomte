@@ -1096,6 +1096,9 @@ sub checkRequirements {
 	if (($ubuntuCodename eq 'jammy') && ($distribution =~ /TUXEDO OS/sm)) {
 		# TODO debug
 		printLog("set tuxedoplasmaupgrade to no", 'L2', '[DEBUG]');
+		if (isPackageInstalled('tuxedo-plasma-upgrade')) {
+			$presetModules{tuxedoplasmaupgrade}{installed} = 'yes';
+		}
 		$presetModules{tuxedoplasmaupgrade}{required} = 'no';
 	}
 
