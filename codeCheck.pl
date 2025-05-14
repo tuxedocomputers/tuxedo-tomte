@@ -79,7 +79,7 @@ if ($testResults{'TODOs'}) {
 
 # Check if a higher log level is set
 print "Checking for higher log level...\n";
-$testResults{'higherloglevel'} = countStrings('$logLevel=0', './src/tuxedo-tomte');
+$testResults{'higherloglevel'} = countStrings('\$logLevel=1', './src/tuxedo-tomte') + countStrings('\$logLevel=2', './src/tuxedo-tomte');
 if ($testResults{'higherloglevel'}) {
 	print "Found log level higher then 0!\n\n";
 }
