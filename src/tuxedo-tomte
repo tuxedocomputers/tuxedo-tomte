@@ -66,7 +66,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -1094,8 +1094,6 @@ sub checkRequirements {
 
 	# remove tuxedoplasmaupgrade
 	if (($ubuntuCodename eq 'jammy') && ($distribution =~ /TUXEDO OS/sm)) {
-		# TODO debug
-		printLog("set tuxedoplasmaupgrade to no", 'L2', '[DEBUG]');
 		if (isPackageInstalled('tuxedo-plasma-upgrade')) {
 			$localConfModules{tuxedoplasmaupgrade}{installed} = 'yes';
 		}
@@ -2687,7 +2685,6 @@ sub tuxedoplasmaupgrade() {
 	my $module = shift;
 	my $action = shift;
 	if ($action =~ /remove/sm) {
-		printLog("tuxedoplasmaupgrade module, removing the plasma-upgrade package", 'L2', '[DEBUG]');
 		debianPackageModule( $module, $action );
 	} else {
 		printLog("other actions besides remove are not possible for this module", 'TL0', '[INFO]');
