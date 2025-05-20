@@ -114,6 +114,13 @@ if ($testResults{'PresetsModule'}) {
 	print "the locally installed module (/usr/share/perl5/Tomte/Presets.pm) is ".
 			"not identical with the one in the branch\n\n";
 }
+$testResults{'NvidiaListModule'} = checkDiff('Tomte/NvidiaList.pm', '/usr/share/perl5/Tomte/NvidiaList.pm');
+if ($testResults{'NvidiaListModule'}) {
+	print "the locally installed module (/usr/share/perl5/Tomte/NvidiaList.pm) is ".
+			"not identical with the one in the branch\n\n";
+}
+
+
 
 
 # Check if there are syntax errors in the code
@@ -129,6 +136,12 @@ if ($testResults{'syntaxErrorsPresets'}) {
 	print "Found syntax errors in Tomte/Presets.pm!\n\n";
 }
 
+print "Checking for syntax errors Tomte/NvidiaList.pm...\n";
+$testResults{'syntaxErrorsNvidiaList'} = checkSyntax('./Tomte/NvidiaList.pm');
+if ($testResults{'syntaxErrorsNvidiaList'}) {
+	print "Found syntax errors in Tomte/NvidiaList.pm!\n\n";
+}
+
 print "Checking for lint errors src/tuxedo-tomte...\n";
 $testResults{'lintErrorsTomte'} = checkLint('./src/tuxedo-tomte');
 if ($testResults{'lintErrorsTomte'}) {
@@ -139,6 +152,12 @@ print "Checking for lint errors Tomte/Presets.pm...\n";
 $testResults{'lintErrorsPresets'} = checkLint('./Tomte/Presets.pm');
 if ($testResults{'lintErrorsPresets'}) {
 	print "Found lint errors in Tomte/Presets.pm!\n\n";
+}
+
+print "Checking for lint errors Tomte/NvidiaList.pm...\n";
+$testResults{'lintErrorsNvidiaList'} = checkLint('./Tomte/NvidiaList.pm');
+if ($testResults{'lintErrorsNvidiaList'}) {
+	print "Found lint errors in Tomte/NvidiaList.pm!\n\n";
 }
 
 # Calculate the exit code as the sum of the variables

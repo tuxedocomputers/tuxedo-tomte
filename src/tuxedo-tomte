@@ -33,6 +33,7 @@ local $SIG{__WARN__} = sub {
 };
 
 use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+use Tomte::NvidiaList qw( nvidiaPackage nvidiaProductID );
 
 use Storable qw(dclone);
 
@@ -231,6 +232,8 @@ my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
+my %nvidiaPackage = nvidiaPackage();
+my %nvidiaProductIDList = nvidiaProductID();
 
 # hash to load the configfile
 # is a copy from presetModules to exclude undefined values
@@ -937,7 +940,9 @@ sub checkRequirements {
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
 	if (($nvidiaDevice =~ /030[02]:/)
-		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
+		|| (($ubuntuCodename =~ /(jammy|noble)/)
+		&& (isPackageInstalled($nvidiaPackage{'open'})
+		|| isPackageInstalled($nvidiaPackage{'closed'})))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -2036,7 +2041,6 @@ sub nvidiadriver() {
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
 	my $output;
-	my $nvidiaDriver550 = 'nvidia-driver-550';
 	my $nvidiaDriver560 = 'nvidia-driver-560';
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
@@ -3671,8 +3675,7 @@ sub deinstExcept {
 			$deinstCmd .= ' >/dev/null 2>&1';
 			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
 			if (unlockPM("$deinstCmd") && (isPMlocked() == 0)) {
-				printLog("deinstalling: $deinstList", 'L2', '[DEBUG]');
-				$retText = `$deinstCmd`;
+				printLog("deinstalling: $deinstList", 'L2', '[DEBUG]');$retText = `$deinstCmd`;
 				lockPM();
 			}
 		}
@@ -3689,6 +3692,39 @@ sub deinstExcept {
 	} else {
 		printLog('nothing to deinstall', 'L1', '[INFO]');
 		return (1);
+	}
+}
+
+
+
+###############################################################################
+# finds out which nvidia metapackage should be installed
+#
+sub nvidiaMetapackage {
+	my $deviceID = q{};
+	my $subvendorIDGroup = q{};
+	my $type;
+	my @lines = split "\n", $lspciOutput;
+	while (my ($index, $element) = each @lines) {
+		if ($element =~ /.*10de:([0-9a-f]{4}) .*\[VGA controller\].*/) {
+			$deviceID = uc($1);
+			$lines[$index+1] =~ /.*Subsystem: ([0-9a-f]{4}):([0-9a-f]{4})/;
+			$subvendorIDGroup = uc($1) . uc($2);
+			printLog("IDs found: $deviceID $subvendorIDGroup", 'L2', '[INFO]');
+		}
+		last;
+	}
+	if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
+		#TODO debug
+		printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L2', '[INFO]');
+		printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[INFO]');
+		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
+	} elsif (exists $nvidiaProductIDList{$deviceID}{'none'}) {
+		printLog("found: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L2', '[INFO]');
+		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[INFO]');
+		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
+	} else {
+		return q{};
 	}
 }
 
