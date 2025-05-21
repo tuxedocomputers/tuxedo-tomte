@@ -25,8 +25,8 @@ our @EXPORT_OK = qw( nvidiaPackage nvidiaProductID );
 
 
 our %NVIDIA_PACKAGE = (
-	'open' => 'nvidia-driver-570-open',
-	'closed' => 'nvidia-driver-570'
+	'open' => 'tuxedo-nvidia-driver-570-open',
+	'closed' => 'tuxedo-nvidia-driver-570'
 );
 
 our %NVIDIA_PRODUCT_ID = (

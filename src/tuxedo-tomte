@@ -2041,32 +2041,39 @@ sub nvidiadriver() {
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
 	my $output;
-	my $nvidiaDriver560 = 'nvidia-driver-560';
+	my $tuxedoNvidiaDriver = nvidiaMetapackage();
+	my $nvidiaDriver = $tuxedoNvidiaDriver;
+	if ($tuxedoNvidiaDriver eq q{}) {
+		printLog("no supported nvidia driver found for this GPU", 'L2', '[INFO]');
+		$presetModules{$module}{installed} = "failed";
+		addToConfiguredModules($module, "failed");
+		return;
+	}
+	$nvidiaDriver = s/^tuxedo-//;
+	printLog("driver to remove: $nvidiaDriver", 'L2', '[DEBUG]');
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
 		if ($ubuntuCodename =~ /(jammy|noble)/sm) {
-			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
-
 			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
+			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
 				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
+				if( ! isPackageInstalled($tuxedoNvidiaDriver) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver, 'nvidiadriver');
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
-					setAptMark($tuxedoNvidiaDriver560,'manual');
+					setAptMark($tuxedoNvidiaDriver,'manual');
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
@@ -2110,7 +2117,7 @@ sub nvidiadriver() {
 	if ($action eq 'remove') {
 		my $nvidiaDriver = q{};
 		if ($ubuntuCodename =~ /(jammy|noble)/) {
-			$nvidiaDriver = $nvidiaDriver560;
+			$nvidiaDriver = nvidiaMetapackage();
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
 			my $counter = 0;
