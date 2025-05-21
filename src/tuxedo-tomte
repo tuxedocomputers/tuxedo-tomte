@@ -3705,27 +3705,36 @@ sub nvidiaMetapackage {
 	my $subvendorIDGroup = q{};
 	my $type;
 	my @lines = split "\n", $lspciOutput;
+	my $nvidiaGPU = 0;
 	while (my ($index, $element) = each @lines) {
-		if ($element =~ /.*10de:([0-9a-f]{4}) .*\[VGA controller\].*/) {
+		if ($element =~ /.*030[02]:.*10de:([0-9a-f]{4}).*/) {
+			$nvidiaGPU = 1;
 			$deviceID = uc($1);
 			$lines[$index+1] =~ /.*Subsystem: ([0-9a-f]{4}):([0-9a-f]{4})/;
 			$subvendorIDGroup = uc($1) . uc($2);
 			printLog("IDs found: $deviceID $subvendorIDGroup", 'L2', '[INFO]');
+			last;
 		}
-		last;
 	}
 	if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
 		#TODO debug
+		printLog("found matching DeviceID and SubvendorIDs\n", 'L2', '[DEBUG]');
 		printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L2', '[INFO]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[INFO]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
 	} elsif (exists $nvidiaProductIDList{$deviceID}{'none'}) {
+		printLog("found matching DeviceID with empty SubvendorIDs\n", 'L2', '[DEBUG]');
 		printLog("found: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L2', '[INFO]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[INFO]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
-	} else {
-		return q{};
+	} elsif ($nvidiaGPU) {
+		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs\n", 'L2', '[DEBUG]');
+		printLog("thats the default case\n", 'L2', '[DEBUG]');
+		printLog("no known video card detected, the open driver will be applied\n", 'L2', '[DEBUG]');
+		return $nvidiaPackage{'open'};
 	}
+	printLog("no Nvidia GPU found\n", 'L2', '[DEBUG]');
+	return q{};
 }
 
 
