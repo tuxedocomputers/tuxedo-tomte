@@ -3735,8 +3735,7 @@ sub nvidiaMetapackage {
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
 	} elsif ($nvidiaGPU) {
 		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("thats the default case", 'L2', '[DEBUG]');
-		printLog("no known video card detected => the open driver will be installed", 'L2', '[DEBUG]');
+		printLog("Nvidia video card not in our lists => the open driver will be installed", 'L2', '[DEBUG]');
 		return $nvidiaPackage{'open'};
 	}
 	printLog("no Nvidia GPU found", 'L2', '[DEBUG]');
