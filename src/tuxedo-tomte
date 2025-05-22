@@ -2044,12 +2044,12 @@ sub nvidiadriver() {
 	my $tuxedoNvidiaDriver = nvidiaMetapackage();
 	my $nvidiaDriver = $tuxedoNvidiaDriver;
 	if ($tuxedoNvidiaDriver eq q{}) {
-		printLog("no supported nvidia driver found for this GPU", 'L2', '[INFO]');
+		printLog("no supported Nvidia driver found for this GPU", 'L2', '[INFO]');
 		$presetModules{$module}{installed} = "failed";
 		addToConfiguredModules($module, "failed");
 		return;
 	}
-	$nvidiaDriver = s/^tuxedo-//;
+	$nvidiaDriver =~ s/^tuxedo-//g;
 	printLog("driver to remove: $nvidiaDriver", 'L2', '[DEBUG]');
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
@@ -3724,22 +3724,22 @@ sub nvidiaMetapackage {
 		}
 	}
 	if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
-		printLog("found matching DeviceID and SubvendorIDs\n", 'L2', '[DEBUG]');
+		printLog("found matching DeviceID and SubvendorIDs", 'L2', '[DEBUG]');
 		printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L2', '[DEBUG]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[DEBUG]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
 	} elsif (exists $nvidiaProductIDList{$deviceID}{'none'}) {
-		printLog("found matching DeviceID with empty SubvendorIDs\n", 'L2', '[DEBUG]');
+		printLog("found matching DeviceID with empty SubvendorIDs", 'L2', '[DEBUG]');
 		printLog("found: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L2', '[DEBUG]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
 	} elsif ($nvidiaGPU) {
-		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs\n", 'L2', '[DEBUG]');
-		printLog("thats the default case\n", 'L2', '[DEBUG]');
-		printLog("no known video card detected, the open driver will be installed\n", 'L2', '[DEBUG]');
+		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
+		printLog("thats the default case", 'L2', '[DEBUG]');
+		printLog("no known video card detected => the open driver will be installed", 'L2', '[DEBUG]');
 		return $nvidiaPackage{'open'};
 	}
-	printLog("no Nvidia GPU found\n", 'L2', '[DEBUG]');
+	printLog("no Nvidia GPU found", 'L2', '[DEBUG]');
 	return q{};
 }
 
