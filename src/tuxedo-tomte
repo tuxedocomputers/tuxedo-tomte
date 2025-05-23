@@ -3728,7 +3728,7 @@ sub nvidiaMetapackage {
 		}
 	}
 	if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
-		printLog("found matching DeviceID and SubvendorIDs", 'L2', '[DEBUG]');
+		printLog("found matching DeviceID with matching SubvendorIDs", 'L2', '[DEBUG]');
 		printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L0', '[INFO]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[DEBUG]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
@@ -3742,6 +3742,15 @@ sub nvidiaMetapackage {
 		printLog("found a variant of: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L0', '[INFO]');
 		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
 		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
+	} elsif (exists $nvidiaProductIDList{$deviceID}) {
+		printLog("found matching DeviceID while ignoring SubvendorIDs", 'L2', '[DEBUG]');
+		printLog("the GPUs name can't be determined exactly", 'L2', '[DEBUG]');
+		foreach my $anyKey (keys %{ $nvidiaProductIDList{$deviceID} }) {
+			$type = $nvidiaProductIDList{$deviceID}{$anyKey}{'type'};
+			last;
+		}
+		printLog("type: $type", 'L2', '[DEBUG]');
+		return $type;
 	} elsif ($nvidiaGPU) {
 		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
 		printLog("Nvidia GPU not in the list => the open driver will be installed", 'L2', '[DEBUG]');
