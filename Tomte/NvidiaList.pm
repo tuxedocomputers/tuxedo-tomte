@@ -14,6 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with TUXEDO Tomte. If not, see <https://www.gnu.org/licenses/>.
 
+# This list is not meant to be edited manually but to be created by
+# a script using as input the websites with the primary information
+# for Nvidia devices and required drivers:
+# Nvidia: https://download.nvidia.com/XFree86/Linux-x86_64/575.51.02/README/supportedchips.html
+# Opem-GPU: https://github.com/NVIDIA/open-gpu-kernel-modules
+
+
 package Tomte::NvidiaList;
 
 use strict qw(vars subs);
