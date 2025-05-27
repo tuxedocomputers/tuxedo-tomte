@@ -36,6 +36,8 @@ use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos 
 use Tomte::NvidiaList qw( nvidiaPackage nvidiaProductID );
 
 use Storable qw(dclone);
+use autovivification;
+no autovivification;
 
 # for file locking
 use Fcntl qw(:DEFAULT :flock :seek :Fcompat);
@@ -3720,7 +3722,7 @@ sub nvidiaMetapackage {
 	while (my ($index, $element) = each @lines) {
 		if ($element =~ /.*030[02]:.*(10de|104a|12d2):([0-9a-f]{4}).*/) {
 			$nvidiaGPU = 1;
-			$deviceID = uc($1);
+			$deviceID = uc($2);
 			$lines[$index+1] =~ /.*Subsystem: ([0-9a-f]{4}):([0-9a-f]{4})/;
 			$subvendorIDGroup = uc($1) . uc($2);
 			printLog("IDs found: $deviceID $subvendorIDGroup", 'L2', '[INFO]');
