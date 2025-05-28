@@ -20,8 +20,6 @@
 # Nvidia: https://download.nvidia.com/XFree86/Linux-x86_64/575.51.02/README/supportedchips.html
 # Opem-GPU: https://github.com/NVIDIA/open-gpu-kernel-modules
 
-# version 1
-
 package Tomte::NvidiaList;
 
 use strict qw(vars subs);
@@ -37,6 +35,8 @@ our %NVIDIA_PACKAGE = (
 	'closed' => 'tuxedo-nvidia-driver-570'
 );
 
+
+# version: 202505281846
 
 our %NVIDIA_PRODUCT_ID = (
           '0020' => {
