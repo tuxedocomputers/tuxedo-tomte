@@ -69,7 +69,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
