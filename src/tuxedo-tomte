@@ -941,10 +941,11 @@ sub checkRequirements {
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
-	if (($nvidiaDevice =~ /030[02]:/)
+	if (isNvidiaGPUInstalled()
 		|| (($ubuntuCodename =~ /(jammy|noble)/)
 		&& (isPackageInstalled($nvidiaPackage{'open'})
-		|| isPackageInstalled($nvidiaPackage{'closed'})))) {
+		|| isPackageInstalled($nvidiaPackage{'closed'})
+		|| isPackageInstalled('nvidia-driver-560')))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
@@ -1212,7 +1213,7 @@ sub checkRequirementsLast {
 	my $nvidiaDevice = `lspci -nd 10de:`;
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an EGPU is being used and it is temporarily not connected to the device
-	if (($nvidiaDevice =~ /030[02]:/)
+	if (isNvidiaGPUInstalled()
 		|| (($ubuntuCodename =~ /(jammy|noble)/) && isPackageInstalled('nvidia-driver-560'))) {
 		$presetModules{nvidiadriver}{required} = 'yes';
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
@@ -2043,19 +2044,83 @@ sub nvidiadriver() {
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
 	my $output;
-	my $tuxedoNvidiaDriver = nvidiaMetapackage();
-	my $nvidiaDriver = $tuxedoNvidiaDriver;
-	if ($tuxedoNvidiaDriver eq q{}) {
-		printLog("no supported Nvidia driver found for this GPU", 'L2', '[INFO]');
-		$presetModules{$module}{installed} = "failed";
-		addToConfiguredModules($module, "failed");
-		return;
-	}
-	$nvidiaDriver =~ s/^tuxedo-//g;
+
+	my $nvidiaDriver =~ s/^tuxedo-//g;
 	printLog("driver to remove: $nvidiaDriver", 'L2', '[DEBUG]');
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
-		if ($ubuntuCodename =~ /(jammy|noble)/sm) {
+		if ($ubuntuCodename =~ /jammy/sm) {
+			my $nvidiaDriver550 = 'nvidia-driver-550';
+			my $nvidiaDriver560 = 'nvidia-driver-560';
+			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
+
+			# check if the drivers to install are actually available in repos
+			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
+				# deinstall other nvidia drivers
+				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
+
+				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
+				$oldDriversRemoved += $oldDriversRemovedCounter;
+				# check if the package is already installed
+				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
+					messageLongInstall();
+					$wasInstalled = 0;
+					setDkmsVerbose( 'nvidiadriver', 1 );
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
+					setDkmsVerbose( 'nvidiadriver', 0 );
+				} else {
+					setAptMark($tuxedoNvidiaDriver560,'manual');
+					$packageNvidiaDriver = 1;
+				}
+			} else {
+				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
+			}
+
+			if( ! isPackageInstalled('nvidia-prime') ) {
+				$wasInstalled = 0;
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
+			} else {
+				$packageNvidiaPrime = 1;
+			}
+
+			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+				# temporarily activated fix
+				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
+					$output = `gpu-manager && prime-select nvidia`;
+					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					printLog("$output", 'L2', '[DEBUG]');
+				}
+			}
+
+			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
+			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
+				if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
+					if ($wasInstalled) {
+						printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
+						addToConfiguredModules($module, "nothingToDo");
+					} else {
+						printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
+						addToConfiguredModules($module, "success");
+						setRestartValues($module);
+					}
+					$presetModules{$module}{installed} = "yes";
+					$presetModules{$module}{upgraded} = "yes";
+				} else {
+					printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
+					$presetModules{$module}{installed} = "failed";
+					addToConfiguredModules($module, "failed");
+				}
+			}
+
+		} elsif ($ubuntuCodename =~ /noble/sm) {
+			my $tuxedoNvidiaDriver = nvidiaMetapackage();
+			my $nvidiaDriver = $tuxedoNvidiaDriver;
+			if ($tuxedoNvidiaDriver eq q{}) {
+				printLog("no supported Nvidia driver found for this GPU", 'L2', '[INFO]');
+				$presetModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
+				return;
+			}
 			# check if the drivers to install are actually available in repos
 			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
 				# deinstall other nvidia drivers
@@ -2118,7 +2183,9 @@ sub nvidiadriver() {
 	}
 	if ($action eq 'remove') {
 		my $nvidiaDriver = q{};
-		if ($ubuntuCodename =~ /(jammy|noble)/) {
+		if ($ubuntuCodename =~ /jammy/) {
+			$nvidiaDriver = 'nvidia-driver-560';
+		} elsif ($ubuntuCodename =~ /noble/) {
 			$nvidiaDriver = nvidiaMetapackage();
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
@@ -3719,47 +3786,69 @@ sub nvidiaMetapackage {
 	my $type;
 	my @lines = split "\n", $lspciOutput;
 	my $nvidiaGPU = 0;
-	while (my ($index, $element) = each @lines) {
-		if ($element =~ /.*030[02]:.*(10de|104a|12d2):([0-9a-f]{4}).*/) {
-			$nvidiaGPU = 1;
-			$deviceID = uc($2);
-			$lines[$index+1] =~ /.*Subsystem: ([0-9a-f]{4}):([0-9a-f]{4})/;
-			$subvendorIDGroup = uc($1) . uc($2);
-			printLog("IDs found: $deviceID $subvendorIDGroup", 'L2', '[INFO]');
-			last;
+	if (isNvidiaGPUInstalled()) {
+		while (my ($index, $element) = each @lines) {
+			if ($element =~ /.*030[02]:.*(10de|104a|12d2):([0-9a-f]{4}).*/) {
+				$nvidiaGPU = 1;
+				$deviceID = uc($2);
+				$lines[$index+1] =~ /.*Subsystem: ([0-9a-f]{4}):([0-9a-f]{4})/;
+				$subvendorIDGroup = uc($1) . uc($2);
+				printLog("IDs found: $deviceID $subvendorIDGroup", 'L2', '[INFO]');
+				last;
+			}
 		}
-	}
-	if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
-		printLog("found matching DeviceID with matching SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L0', '[INFO]');
-		printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[DEBUG]');
-		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
-	} elsif (exists $nvidiaProductIDList{$deviceID}{'none'}) {
-		printLog("found matching DeviceID with empty SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("found: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L0', '[INFO]');
-		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
-		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
-	} elsif (exists $nvidiaProductIDList{$deviceID}) {
-		printLog("found matching DeviceID with non matching SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("found a variant of: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L0', '[INFO]');
-		printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
-		return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
-	} elsif (exists $nvidiaProductIDList{$deviceID}) {
-		printLog("found matching DeviceID while ignoring SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("the GPUs name can't be determined exactly", 'L2', '[DEBUG]');
-		foreach my $anyKey (keys %{ $nvidiaProductIDList{$deviceID} }) {
-			$type = $nvidiaProductIDList{$deviceID}{$anyKey}{'type'};
-			last;
+		if (exists $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}) {
+			printLog("found matching DeviceID with matching SubvendorIDs", 'L2', '[DEBUG]');
+			printLog("found: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'name'}", 'L0', '[INFO]');
+			printLog("type: $nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}", 'L2', '[DEBUG]');
+			return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{$subvendorIDGroup}{'type'}};
+		} elsif (exists $nvidiaProductIDList{$deviceID}{'none'}) {
+			printLog("found matching DeviceID with empty SubvendorIDs", 'L2', '[DEBUG]');
+			printLog("found: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L0', '[INFO]');
+			printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
+			return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
+		} elsif (exists $nvidiaProductIDList{$deviceID}) {
+			printLog("found matching DeviceID with non matching SubvendorIDs", 'L2', '[DEBUG]');
+			printLog("found a variant of: $nvidiaProductIDList{$deviceID}{'none'}{'name'}", 'L0', '[INFO]');
+			printLog("type: $nvidiaProductIDList{$deviceID}{'none'}{'type'}", 'L2', '[DEBUG]');
+			return $nvidiaPackage{$nvidiaProductIDList{$deviceID}{'none'}{'type'}};
+		} elsif (exists $nvidiaProductIDList{$deviceID}) {
+			printLog("found matching DeviceID while ignoring SubvendorIDs", 'L2', '[DEBUG]');
+			printLog("the GPUs name can't be determined exactly", 'L2', '[DEBUG]');
+			foreach my $anyKey (keys %{ $nvidiaProductIDList{$deviceID} }) {
+				$type = $nvidiaProductIDList{$deviceID}{$anyKey}{'type'};
+				last;
+			}
+			printLog("type: $type", 'L2', '[DEBUG]');
+			return $type;
+		} elsif ($nvidiaGPU) {
+			printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
+			printLog("Nvidia GPU not in the list => the open driver will be installed", 'L2', '[DEBUG]');
+			return $nvidiaPackage{'open'};
 		}
-		printLog("type: $type", 'L2', '[DEBUG]');
-		return $type;
-	} elsif ($nvidiaGPU) {
-		printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
-		printLog("Nvidia GPU not in the list => the open driver will be installed", 'L2', '[DEBUG]');
-		return $nvidiaPackage{'open'};
+		printLog("no Nvidia GPU found", 'L2', '[DEBUG]');
+		return q{};
 	}
-	printLog("no Nvidia GPU found", 'L2', '[DEBUG]');
 	return q{};
+}
+
+
+
+###############################################################################
+# uses lspci output to find the Nvidia GPU
+# returns 0 if none found
+# returns 1 if the GPU was found
+#
+sub isNvidiaGPUInstalled {
+    my @lines = split "\n", $lspciOutput;
+    my $nvidiaGPU = 0;
+    while (my ($index, $element) = each @lines) {
+        if ($element =~ /.*030[02]:.*(10de|104a|12d2):.*/) {
+            printLog("Nvidia GPU detected", 'L2', '[DEBUG]');
+            return (1);
+        }
+    }
+    return (0);
 }
 
 
