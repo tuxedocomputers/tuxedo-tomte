@@ -2045,9 +2045,6 @@ sub nvidiadriver() {
 	my $oldDriversRemoved = 0;
 	my $output;
 
-	my $nvidiaDriver =~ s/^tuxedo-//g;
-	printLog("driver to remove: $nvidiaDriver", 'L2', '[DEBUG]');
-
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
 		if ($ubuntuCodename =~ /jammy/sm) {
 			my $nvidiaDriver550 = 'nvidia-driver-550';
