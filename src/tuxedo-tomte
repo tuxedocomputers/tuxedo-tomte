@@ -2110,7 +2110,7 @@ sub nvidiadriver() {
 			}
 
 		} elsif ($ubuntuCodename =~ /noble/sm) {
-			my $tuxedoNvidiaDriver = nvidiaMetapackage();
+			my $tuxedoNvidiaDriver = $nvidiaPackage{nvidiaMetapackage()};
 			my $nvidiaDriver = $tuxedoNvidiaDriver;
 			if ($tuxedoNvidiaDriver eq q{}) {
 				printLog("no supported Nvidia driver found for this GPU", 'L2', '[INFO]');
@@ -2118,6 +2118,7 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 				return;
 			}
+			printLog("the Nvidia package $tuxedoNvidiaDriver will be used", 'L2', '[DEBUG]');
 			# check if the drivers to install are actually available in repos
 			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
 				# deinstall other nvidia drivers
@@ -2183,7 +2184,7 @@ sub nvidiadriver() {
 		if ($ubuntuCodename =~ /jammy/) {
 			$nvidiaDriver = 'nvidia-driver-560';
 		} elsif ($ubuntuCodename =~ /noble/) {
-			$nvidiaDriver = nvidiaMetapackage();
+			$nvidiaDriver = $nvidiaPackage{nvidiaMetapackage()};
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
 			my $counter = 0;
@@ -3821,7 +3822,7 @@ sub nvidiaMetapackage {
 		} elsif ($nvidiaGPU) {
 			printLog("found NO matching DeviceID with fully matching or empty SubvendorIDs", 'L2', '[DEBUG]');
 			printLog("Nvidia GPU not in the list => the open driver will be installed", 'L2', '[DEBUG]');
-			return $nvidiaPackage{'open'};
+			return 'open';
 		}
 		printLog("no Nvidia GPU found", 'L2', '[DEBUG]');
 		return q{};
