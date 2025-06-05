@@ -69,7 +69,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -2091,27 +2091,24 @@ sub nvidiadriver() {
 
 			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
 			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-					if ($wasInstalled) {
-						printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-						addToConfiguredModules($module, "nothingToDo");
-					} else {
-						printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-						addToConfiguredModules($module, "success");
-						setRestartValues($module);
-					}
-					$presetModules{$module}{installed} = "yes";
-					$presetModules{$module}{upgraded} = "yes";
+				if ($wasInstalled) {
+					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
+					addToConfiguredModules($module, "nothingToDo");
 				} else {
-					printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
-					$presetModules{$module}{installed} = "failed";
-					addToConfiguredModules($module, "failed");
+					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
+					addToConfiguredModules($module, "success");
+					setRestartValues($module);
 				}
+				$presetModules{$module}{installed} = "yes";
+				$presetModules{$module}{upgraded} = "yes";
+			} else {
+				printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
+				$presetModules{$module}{installed} = "failed";
+				addToConfiguredModules($module, "failed");
 			}
 
 		} elsif ($ubuntuCodename =~ /noble/sm) {
 			my $nvidiaPackageType = nvidiaMetapackage();
-			#TODO debug
 			printLog("nvidiaPackageType: $nvidiaPackageType", 'L2', '[DEBUG]');
 			my $tuxedoNvidiaDriver = $nvidiaPackage{$nvidiaPackageType};
 			if (!defined $tuxedoNvidiaDriver
