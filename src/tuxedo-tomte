@@ -2512,7 +2512,7 @@ sub samsungnvmefix() {
 sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'mem_sleep_default=deep' );
+	grubModuleEdit( $module, 'remove', 0, 'mem_sleep_default=deep' );
 	return;
 }
 
