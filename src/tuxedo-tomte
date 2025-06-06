@@ -1034,7 +1034,7 @@ sub checkRequirements {
 	}
 
 	#TODO debug
-	if $localConfModules{nvmequirkswitchtodeepsleepfix}{installed} eq 'yes' {
+	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
 		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
 		my @samsungNvme990Devices = ('144d:a80d');
 		if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
