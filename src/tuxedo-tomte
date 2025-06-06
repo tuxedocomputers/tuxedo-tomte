@@ -234,9 +234,6 @@ my %kernelsList = kernels();
 my %lockFilesList = lockFiles();
 my %postConfProgramsList = postConfPrograms();
 
-my %nvidiaPackage = nvidiaPackage();
-my %nvidiaProductIDList = nvidiaProductID();
-
 # hash to load the configfile
 # is a copy from presetModules to exclude undefined values
 my %localConfModules = %{ dclone(\%presetModules) };
@@ -776,6 +773,7 @@ sub prerequisites {
 #
 sub checkRequirements {
 	my $FH;
+	my %nvidiaPackage = nvidiaPackage();
 
 	if ($boardname =~ /PF5PU1G/sm) {
 		$presetModules{nobootonbattery}{required} = 'yes';
@@ -2044,6 +2042,7 @@ sub nvidiadriver() {
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
 	my $output;
+	my %nvidiaPackage = nvidiaPackage();
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
 		if ($ubuntuCodename =~ /jammy/sm) {
@@ -3785,6 +3784,7 @@ sub nvidiaMetapackage {
 	my $type;
 	my @lines = split "\n", $lspciOutput;
 	my $nvidiaGPU = 0;
+	my %nvidiaProductIDList = nvidiaProductID();
 	if (isNvidiaGPUInstalled()) {
 		while (my ($index, $element) = each @lines) {
 			if ($element =~ /.*030[02]:.*(10de|104a|12d2):([0-9a-f]{4}).*/) {
