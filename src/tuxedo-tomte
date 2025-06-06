@@ -1033,7 +1033,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	#TODO debug
+	# only for removal of nvmequirkswitchtodeepsleepfix
 	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
 		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
 		my @samsungNvme990Devices = ('144d:a80d');
@@ -2512,6 +2512,7 @@ sub samsungnvmefix() {
 
 ###############################################################################
 # InfinityBook 15/17 Gen8 in combination with some Samsung SSDs
+# only for removal of kernel parameter set some time ago
 #
 sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
