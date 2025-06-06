@@ -1033,11 +1033,15 @@ sub checkRequirements {
 		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my @samsungNvme990Devices = ('144d:a80d');
-	if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
-		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
-		$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
-		printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+	#TODO debug
+	if $localConfModules{nvmequirkswitchtodeepsleepfix}{installed} eq 'yes' {
+		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
+		my @samsungNvme990Devices = ('144d:a80d');
+		if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
+			( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
+			$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
+			printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 
