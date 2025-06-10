@@ -1,3 +1,12 @@
+tuxedo-tomte (2.53.0) noble; urgency=medium
+
+  * added handling for possibly absent eGPUs
+  * added Nvidia configuration list and mechanism to choose between open
+    and closed tuxedo-nvidia-driver-570 for noble
+  * remove nvmequirkswitchtodeepsleepfix if present
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Tue, 10 Jun 2025 15:16:37 +0200
+
 tuxedo-tomte (2.52.0) noble; urgency=medium
 
   * remove tuxedoplasmaupgrade from TUXEDO OS jammy
