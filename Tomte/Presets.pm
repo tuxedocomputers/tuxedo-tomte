@@ -843,7 +843,7 @@ our %DEVICES = (
 	'68' => {
 		model => ['TUXEDO InfinityBook S 15/17 - Gen8'],
 		board_name => ['NS5X_NS7XAU', 'NS5X_7XAU'], # case insensitive
-		fix => ['nvmequirkswitchtodeepsleepfix'],
+		fix => [q{}],
 		flavour => ['22.04', '24.04'],
 		pci_id => '144d:a80d',
 		cpu => q{},
@@ -1866,9 +1866,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# only for removal
 	nvmequirkswitchtodeepsleepfix => {
 		name => 'nvme-quirk-switch-to-deep-sleep-fix',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',

@@ -1033,11 +1033,15 @@ sub checkRequirements {
 		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	my @samsungNvme990Devices = ('144d:a80d');
-	if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
-		( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
-		$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
-		printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+	# only for removal of nvmequirkswitchtodeepsleepfix
+	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
+		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
+		my @samsungNvme990Devices = ('144d:a80d');
+		if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
+			( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
+			$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
+			printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 
@@ -2508,11 +2512,12 @@ sub samsungnvmefix() {
 
 ###############################################################################
 # InfinityBook 15/17 Gen8 in combination with some Samsung SSDs
+# only for removal of kernel parameter set some time ago
 #
 sub nvmequirkswitchtodeepsleepfix() {
 	my $module = shift;
 	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'mem_sleep_default=deep' );
+	grubModuleEdit( $module, 'remove', 0, 'mem_sleep_default=deep' );
 	return;
 }
 
