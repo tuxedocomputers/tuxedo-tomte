@@ -57,7 +57,16 @@ our %ESSENTIAL_REPOS = (
 							"Components: main\n".
 							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
+		},
+		"testdeb2" => { #TODO ONLY FOR TESTING !!!
+			"content" => ["Types: deb\n".
+							"URIs: https://testdeb2.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble-nvidia\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/nvidia.sources"
 		}
+
 	},
 
 	"TUXEDO OS 22.04" => {
@@ -83,7 +92,16 @@ our %ESSENTIAL_REPOS = (
 							"Components: main\n".
 							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
+		},
+		"testdeb2" => { #TODO ONLY FOR TESTING !!!
+			"content" => ["Types: deb\n".
+							"URIs: https://testdeb2.tuxedocomputers.com/ubuntu\n".
+							"Suites: noble-nvidia\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/nvidia.sources"
 		}
+
 	}
 );
 
