@@ -1193,6 +1193,11 @@ sub checkRequirements {
 		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
 	}
 
+	if (($ubuntuCodename =~ /noble/) &&
+		($boardname =~ /4X4-KRK Series/sm)) {
+		$presetModules{'krackanpointusb4suspendfix'}{'required'} = 'yes';
+	}
+
 	return (0);
 }
 
@@ -2914,7 +2919,15 @@ sub tuxedobtoffsuspend() {
 }
 
 
-
+###############################################################################
+# Installs package tuxedo-fix-krackan-point-usb4-suspend
+#
+sub krackanpointusb4suspendfix() {
+	my $module = shift;
+	my $action = shift;
+	debianPackageModule( $module, $action );
+	return;
+}
 
 
 

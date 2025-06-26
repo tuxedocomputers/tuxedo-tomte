@@ -961,6 +961,17 @@ our %DEVICES = (
 		kernel => q{},
 		display => q{},
 		usb_device => q{}
+	},
+	'81' => {
+		model => ['TUXEDO Nano Pro Gen14 AMD'],
+		board_name => ['4X4-KRK Series'],
+		fix => ['krackanpointusb4suspendfix'],
+		flavour => ['24.04'],
+		pci_id => q{},
+		cpu => q{},
+		kernel => q{},
+		display => q{},
+		usb_device => q{}
 	}
 );
 
@@ -2047,6 +2058,27 @@ our %INITIAL_MODULES_SETTINGS = (
 		packageVersion => 'unkwn',
 		fainame => q{},
 		description => __('tuxedobtoffsuspend_description'),
+		postconf => q{},
+		upgrade => q{},
+		upgraded => q{},
+		reconfigure => q{},
+		restart => 'yes',
+		order => q{},
+		dkms => 'no',
+		FAI => 'yes',
+		LiveISO => 'no'
+	},
+	krackanpointusb4suspendfix => {
+		name => 'tuxedo-fix-krackan-point-usb4-suspend',
+		version => 1,
+		installed => 'no',
+		blocked => 'no',
+		required => 'no',
+		hwid => 1,
+		package => 'yes',
+		packageVersion => 'unkwn',
+		fainame => q{},
+		description => __('krackanpointusb4suspendfix_description'),
 		postconf => q{},
 		upgrade => q{},
 		upgraded => q{},
