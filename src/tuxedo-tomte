@@ -1465,7 +1465,7 @@ sub tuxedorepos() {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
+			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
 			if (!(($ubuntuCodename =~ /(jammy|noble)/sm) && ($distribution =~ /Linux Mint/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
@@ -1535,7 +1535,7 @@ sub tuxedorepos() {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
 		} else {
-			# $thirPartyMirrorsFile is needed for Ubuntu's which use update-manager,
+			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
 			if (! (($ubuntuCodename =~ /jammy/sm) && ($distribution =~ /Linux Mint/sm)) ) {
 				if (! -e $thirdPartyMirrorsFile) {
