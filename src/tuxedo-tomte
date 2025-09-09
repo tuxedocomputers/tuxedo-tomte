@@ -4291,6 +4291,17 @@ sub installKernelFlavour {
 		} elsif ($exitStatus != 0) {
 			printLog("installation of kernel meta package failed !!!", 'L0', '[ERROR]');
 			printLog("$retString", 'L0', '[ERROR]');
+			if ($retString =~ /dpkg --configure -a/) {
+				printLog("package management demands repair", 'L0', '[ERROR]');
+				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+					printLog("executing --configure -a", 'L0', '[DEBUG]');
+					`dpkg --configure -a`;
+					lockPM();
+				} else {
+					printLog('Could not repair package management, will try again later', 'L0', '[WARN]');
+				}
+				startTomteDelayed();
+			}
 			${$failed} += 1;
 		}
 	}
