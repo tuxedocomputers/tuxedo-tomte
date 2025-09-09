@@ -33,12 +33,12 @@ use Data::Dumper;
 
 
 our %SUPPORTED_OS = (
-	"TUXEDO OS" => ["22.04", "24.04"],
-	"TUXEDO_OS Plasma" => ["22.04", "24.04"],
-	"KDE neon" => ["22.04", "24.04"],
-	"Ubuntu" => ["22.04", "24.04"],
-	"Linux Mint" => ["21.1", "21.2", "21.3", "22", "22.1"],
-	"elementary OS" => ["7.1", "8"]
+	"TUXEDO OS" => ["22.04"],
+	"TUXEDO_OS Plasma" => ["22.04"],
+	"KDE neon" => ["22.04"],
+	"Ubuntu" => ["22.04"],
+	"Linux Mint" => ["21.1", "21.2", "21.3"],
+	"elementary OS" => ["7.1"]
 );
 
 our %ESSENTIAL_REPOS = (
