@@ -120,9 +120,6 @@ msgstr "Ermöglicht die Aktivierung der dedizierten NVIDIA-Grafik auf Geräten m
 msgid "tuxedocontrolcenter_description"
 msgstr "TUXEDO Control Center-Anwendung"
 
-msgid "tuxedokeyboard_description"
-msgstr "Treiber für Tastatur & Tastaturbeleuchtung für TUXEDO-Notebooks (überflüssig)"
-
 msgid "backlightfix_description"
 msgstr "Behebt Hintergrundbeleuchtungsprobleme für DX1708, GTX1060 mit AUO-Modell 12701 und 21229-Displays"
 
@@ -150,17 +147,11 @@ msgstr "Behebt das Problem, dass das Elantech-Touchpad nicht funktioniert"
 msgid "tuxedotouchpadswitch_description"
 msgstr "Fügt die Hardwareaktivierung/deaktivierung für Touchpads mit LED-Anzeige auf verschiedenen TUXEDO-Notebooks hinzu"
 
-msgid "tuxedokeyboardite_description"
-msgstr "Treiber für die Tastaturbeleuchtung für ITE-Geräte (überflüssig)"
-
 msgid "fingerprintreader_description"
 msgstr "Pakete, die für den Betrieb des Fingerabdrucklesers auf bestimmten TUXEDO-Notebooks benötigt werden"
 
 msgid "tuxedorestoreaudiofix_description"
 msgstr "Systemd-Dienst, der nach fehlenden Audiogeräten sucht"
-
-msgid "kerneltuxedo2204_description"
-msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
 
 msgid "kerneltuxedo2404_description"
 msgstr "Auswahl, Installation und Bereinigung von TUXEDO-Linux-Kernels"
@@ -195,9 +186,6 @@ msgstr "Behebt die Hintergrundbeleuchtungssteuerung für Nvidia-GPUs"
 msgid "earlyloadbacklightcontrolfix_description"
 msgstr "Für eine funktionierende Hintergrundbeleuchtungssteuerung mit Nvidia muss der i915 früher geladen werden"
 
-msgid "tuxedor8125dkms_description"
-msgstr "Neuster Treiber für RTL8125 2.5GbE-Controller, behebt Ethernet-Bug"
-
 msgid "cardreaderfix_description"
 msgstr "udev-Regel, die den Stromsparzustand für den Kartenleser RTS522A unterbindet"
 
@@ -230,9 +218,6 @@ msgstr "Lädt und entlädt das ath12k WLAN Kernel-Modul, um den Standby-Modus zu
 
 msgid "nvmequirkswitchtodeepsleepfix_description"
 msgstr "Löscht nicht mehr notwendigen Fix"
-
-msgid "tuxedoplasmaupgrade_description"
-msgstr "Anwendung die Plasma 6 installiert (überflüssig)"
 
 msgid "tuxedoyt6801_description"
 msgstr "Treiber für Motorcomm YT6801 Netzwerkcontroller"

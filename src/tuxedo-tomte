@@ -69,7 +69,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -644,8 +644,8 @@ sub countLinesInString {
 # $distributionVersionID
 # e.g.:
 # $distribution = 'Ubuntu'
-# $distributionVersionID = '22.04'
-# $completeDistVersion = 'Ubuntu 22.04'
+# $distributionVersionID = '24.04'
+# $completeDistVersion = 'Ubuntu 24.04'
 #
 sub readOSData {
 	my $osReleaseFile = '/etc/os-release';
@@ -666,17 +666,17 @@ sub readOSData {
 			$distribution = $1;
 		}
 		if ( $line =~ /^VERSION_ID=/sm ) {
-			# e.g. 22.04
+			# e.g. 24.04
 			$line =~ /VERSION_ID=\"(.*)\"/sm;
 			$distributionVersionID = $1;
 		}
 		if ( $line =~ /^UBUNTU_CODENAME=/sm ) {
-			# e.g. jammy
+			# e.g. noble
 			$line =~ /UBUNTU_CODENAME=(.*)/sm;
 			$ubuntuCodename = $1;
 		}
 		if ( $line =~ /^VERSION=/sxm ) {
-			# e.g. 22.04.4 LTS (Jammy Jellyfish)
+			# e.g. 24.04.4 LTS (Jammy Jellyfish)
 			$line =~ /VERSION=\"(.*)\"/sm;
 			$distributionVersion = $1;
 		}
@@ -908,15 +908,6 @@ sub checkRequirements {
 		}
 	}
 
-	if ($ubuntuCodename =~ /jammy/sm) {
-		$presetModules{tuxedodrivers}{required} = 'yes';
-		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
-		$presetModules{tuxedokeyboardite}{required} = 'no';
-		printLog("will remove obsolete $presetModules{tuxedokeyboardite}{name} package", 'L1', '[INFO]');
-		$presetModules{tuxedokeyboard}{required} = 'no';
-		printLog("will remove obsolete $presetModules{tuxedokeyboard}{name} package", 'L1', '[INFO]');
-	}
-
 	if ($ubuntuCodename =~ /noble/sm) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
@@ -987,10 +978,7 @@ sub checkRequirements {
 
 
 	# kernel
-	if ($ubuntuCodename =~ /jammy/sm) {
-		printLog("kernel $presetModules{kerneltuxedo2204}{name} will be default", 'L1', '[INFO]');
-		$presetModules{kerneltuxedo2204}{required} = 'yes';
-	} elsif ($ubuntuCodename =~ /noble/sm) {
+	if ($ubuntuCodename =~ /noble/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
@@ -1017,14 +1005,6 @@ sub checkRequirements {
 		($boardname =~ m/PHxTQx1/sm)) {
 		$presetModules{earlyloadbacklightcontrolfix}{required} = 'yes';
 		printLog("detected $presetModules{earlyloadbacklightcontrolfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	my @r8125Devices = ('10ec:8125');
-	if (!($ubuntuCodename =~ /noble/sm)) {
-		if ( findPciDevice($lspciOutput, @r8125Devices) ) {
-			$presetModules{tuxedor8125dkms}{required} = 'yes';
-			printLog("detected $presetModules{tuxedor8125dkms}{name} issue", 'L1', '[INFO]');
-		}
 	}
 
 	# if cardreader Realtek RTS522A found
@@ -1091,23 +1071,10 @@ sub checkRequirements {
 		printLog("detected $presetModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($completeDistVersion =~ /elementary OS 7.1/sm) {
-		$presetModules{elementaryosdkmspinningfix}{required} = 'yes';
-		printLog("detected $presetModules{elementaryosdkmspinningfix}{name} issue", 'L1', '[INFO]');
-	}
-
 	my @ath12kstandbyfixDevices = ('17cb:1107');
 	if ( findPciDevice($lspciOutput, @ath12kstandbyfixDevices) ) {
 		$presetModules{ath12kstandbyfix}{required} = 'yes';
 		printLog("detected $presetModules{ath12kstandbyfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	# remove tuxedoplasmaupgrade
-	if (($ubuntuCodename eq 'jammy') && ($distribution =~ /TUXEDO OS/sm)) {
-		if (isPackageInstalled('tuxedo-plasma-upgrade')) {
-			$localConfModules{tuxedoplasmaupgrade}{installed} = 'yes';
-		}
-		$presetModules{tuxedoplasmaupgrade}{required} = 'no';
 	}
 
 	# tuxedoplasmaupgrade installation
@@ -1116,30 +1083,9 @@ sub checkRequirements {
 	if (($distribution =~ /TUXEDO OS/sm) && ($distributionVersion =~ /24\.04.*/sm)) {
 		$plasma6Installed = 1;
 		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
-	} elsif (($distribution =~ /TUXEDO OS/sm) &&
-			(($distributionVersion =~ /2 22\.04.*/sm) ||
-			($distributionVersion =~ /3 22\.04.*/sm))) {
-		printLog("found flavour compatible for plasma6", 'L2', '[DEBUG]');
-
-		# check whether plasma6 is installed
-		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-		if ((defined($currentPlasmaWorkspaceVersion)) && ($currentPlasmaWorkspaceVersion ne q{})) {
-			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaWorkspaceVersion);
-			if (! ($versionCompareResult == $NEG_ONE) ) {
-				$plasma6Installed = 1;
-				printLog("plasma 6 is installed", 'L2', '[DEBUG]');
-			} else {
-				$plasma6Installed = 0;
-				printLog("current plasma version: $currentPlasmaWorkspaceVersion below '6'", 'L2', '[DEBUG]');
-			}
-		} else {
-			$plasma6Installed = 0;
-			printLog("could not determine plasma version", 'L2', '[DEBUG]');
-		}
 	}
 
-	if (($ubuntuCodename eq 'jammy') ||
-		($ubuntuCodename eq 'noble') ||
+	if (($ubuntuCodename eq 'noble') ||
 		($distribution =~ /TUXEDO OS/sm)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
@@ -1159,8 +1105,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($ubuntuCodename eq 'jammy') ||
-		($ubuntuCodename eq 'noble') &&
+	if (($ubuntuCodename eq 'noble') &&
 		(!($distribution =~ /TUXEDO OS/sm))) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
@@ -1172,7 +1117,7 @@ sub checkRequirements {
 	}
 
 	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
-	if (($ubuntuCodename =~ /(jammy|noble)/) &&
+	if (($ubuntuCodename =~ /noble/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
 		($boardname =~ /4X4-7040 Series\/D5/sm) ||
@@ -1396,19 +1341,6 @@ sub tuxedocontrolcenter() {
 
 
 ###############################################################################
-# Keyboard & keyboard backlight driver for TUXEDO notebooks
-# this is an obsolete stump only for jammy to remove this package
-#       
-sub tuxedokeyboard() { 
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-###############################################################################
 # Fixes backlight issue with AUO Model 12701 and 21229 displays on
 # - DX1708
 # - P95_HP
@@ -1467,7 +1399,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (!(($ubuntuCodename =~ /(jammy|noble)/sm) && ($distribution =~ /Linux Mint/sm))) {
+			if (!(($ubuntuCodename =~ /noble/sm) && ($distribution =~ /Linux Mint/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
@@ -1537,7 +1469,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (! (($ubuntuCodename =~ /jammy/sm) && ($distribution =~ /Linux Mint/sm)) ) {
+			if (! (($ubuntuCodename =~ /noble/sm) && ($distribution =~ /Linux Mint/sm)) ) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
@@ -1753,20 +1685,6 @@ sub tuxedotouchpadswitch() {
 
 
 ###############################################################################
-# tuxedo-keyboard-ite
-# this is an obsolete stump only for jammy to remove this package
-#       
-sub tuxedokeyboardite() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-
-###############################################################################
 # fingerprint-reader
 #
 sub fingerprintreader() {
@@ -1945,50 +1863,6 @@ sub systemdbacklightfix() {
 
 
 
-
-
-
-
-###############################################################################
-# kernel-tuxedo-22.04
-#
-sub kerneltuxedo2204() {
-	my $module = shift;
-	my $action = shift;
-	my $instFailed = 0;
-	my $instDone = 0;
-	if (($action eq 'install') || ($action eq 'upgrade')) {
-		# clean up oldest tuxedo kernel in /boot (if not used)
-		checkAndDeleteOldestTuxedoKernel();
-		checkAndDeleteOldestRemnantLinuxHeader();
-
-		installKernelFlavour('linux-tuxedo-22.04', \$instFailed, \$instDone);
-		if ($instFailed > 0) {
-			startTomteDelayed();
-			addToConfiguredModules($module, "failed");
-			$presetModules{$module}{installed} = "failed";
-		} elsif ($instDone > 0) {
-			addToConfiguredModules($module, "success");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			setRestartValues($module);
-		} else {
-			addToConfiguredModules($module, "nothingToDo");
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-	return;
-}
-
-
-
-
-
 ###############################################################################
 # kernel-tuxedo-24.04
 #
@@ -2046,68 +1920,7 @@ sub nvidiadriver() {
 	my %nvidiaPackage = nvidiaPackage();
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
-		if ($ubuntuCodename =~ /jammy/sm) {
-			my $nvidiaDriver550 = 'nvidia-driver-550';
-			my $nvidiaDriver560 = 'nvidia-driver-560';
-			my $tuxedoNvidiaDriver560 = 'tuxedo-nvidia-driver-560';
-
-			# check if the drivers to install are actually available in repos
-			if (isPackageInRepo( $tuxedoNvidiaDriver560 )) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $nvidiaDriver560);
-
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver560);
-				$oldDriversRemoved += $oldDriversRemovedCounter;
-				# check if the package is already installed
-				if( ! isPackageInstalled($tuxedoNvidiaDriver560) ) {
-					messageLongInstall();
-					$wasInstalled = 0;
-					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver560, 'nvidiadriver');
-					setDkmsVerbose( 'nvidiadriver', 0 );
-				} else {
-					setAptMark($tuxedoNvidiaDriver560,'manual');
-					$packageNvidiaDriver = 1;
-				}
-			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver560 can't be found in the repositories", 'L0', '[WARN]');
-			}
-
-			if( ! isPackageInstalled('nvidia-prime') ) {
-				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
-			} else {
-				$packageNvidiaPrime = 1;
-			}
-
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
-				# temporarily activated fix
-				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
-				}
-			}
-
-			printLog("oldDriversRemoved: $oldDriversRemoved packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $oldDriversRemoved && $packageNvidiaDriver && $packageNvidiaPrime ) {
-				if ($wasInstalled) {
-					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
-					addToConfiguredModules($module, "nothingToDo");
-				} else {
-					printLog("installed $presetModules{$module}{name}", 'L1', '[INFO]');
-					addToConfiguredModules($module, "success");
-					setRestartValues($module);
-				}
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-			} else {
-				printLog("$presetModules{$module}{name} installation failed", 'L0', '[WARN]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			}
-
-		} elsif ($ubuntuCodename =~ /noble/sm) {
+		if ($ubuntuCodename =~ /noble/sm) {
 			my $nvidiaPackageType = nvidiaMetapackage();
 			printLog("nvidiaPackageType: $nvidiaPackageType", 'L2', '[DEBUG]');
 			my $tuxedoNvidiaDriver = $nvidiaPackage{$nvidiaPackageType};
@@ -2182,9 +1995,7 @@ sub nvidiadriver() {
 	}
 	if ($action eq 'remove') {
 		my $nvidiaDriver = q{};
-		if ($ubuntuCodename =~ /jammy/) {
-			$nvidiaDriver = 'nvidia-driver-560';
-		} elsif ($ubuntuCodename =~ /noble/) {
+		if ($ubuntuCodename =~ /noble/) {
 			$nvidiaDriver = $nvidiaPackage{nvidiaMetapackage()};
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
@@ -2478,19 +2289,6 @@ sub earlyloadbacklightcontrolfix() {
 
 
 ###############################################################################
-# Installs the newest driver for RTL8125 2.5GbE Controller
-# Solves some ethernet problems/hang/slow connection
-#
-sub tuxedor8125dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-###############################################################################
 # Forces cardreader Realtek RTS522A to stay on when device goes into idle
 # - if USB device 0x10ec:0x522a detected
 #
@@ -2682,61 +2480,6 @@ sub disablegucfix() {
 
 
 
-
-###############################################################################
-# pinning on Elementary OS to ensure we provide the correct dkms version
-#
-sub elementaryosdkmspinningfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval;
-	my $fileName = '/etc/apt/preferences.d/tuxedo-computers';
-	my $fileText =  "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!!\n".
-					"Package: dkms\n".
-					"Pin: release a=tuxedo,n=jammy\n".
-					"Pin-Priority: 1000\n";
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		if (-e $fileName) {
-			if (removeWarningMessage("elementaryos-dkms-pinning-fix\n")) {
-				printLog("removing $module", 'TL0', '[INFO]');
-				if (unlink($fileName)) {
-					printLog("$presetModules{$module}{name} removed", 'TL0', '[INFO]');
-				} else {
-					printLog('can\'t remove fix', 'TL0', '[ERROR]');
-				}
-				$presetModules{$module}{installed} = 'no';
-				$presetModules{$module}{upgraded} = 'yes';
-				addToConfiguredModules($module, 'removed');
-			}
-		} else {
-			$presetModules{$module}{installed} = 'no';
-			$presetModules{$module}{upgraded} = 'yes';
-			addToConfiguredModules($module, 'removed');
-			printLog("$presetModules{$module}{name} was already removed", 'TL0', '[INFO]');
-		}
-	}
-	return;
-}
-
-
-
 ###############################################################################
 # Boot delays/freezes in nvidia modes
 #
@@ -2757,23 +2500,6 @@ case $1 in
 esac
 END_TXT
 	createFileModule( $module, $action, '/usr/lib/systemd/system-sleep/tuxedo-ath12k-standby-fix', $content, "+x");
-	return;
-}
-
-
-
-
-###############################################################################
-# TUXEDO plasma6 upgrader, obsolete and only for removal in jammy
-#
-sub tuxedoplasmaupgrade() {
-	my $module = shift;
-	my $action = shift;
-	if ($action =~ /remove/sm) {
-		debianPackageModule( $module, $action );
-	} else {
-		printLog("other actions besides remove are not possible for this module", 'TL0', '[INFO]');
-	}
 	return;
 }
 
@@ -3005,7 +2731,7 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
-	if (($ubuntuCodename eq 'jammy') || ($ubuntuCodename eq 'noble')) {
+	if ($ubuntuCodename eq 'noble') {
 		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
 			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
@@ -3872,9 +3598,6 @@ sub iseGPUHandlingRequired {
 			eGPUPossibleValue('closed');
 			return (1);
 		}
-	} elsif ($ubuntuCodename =~ /jammy/
-		&& isPackageInstalled('nvidia-driver-560')) {
-		return (1);
 	}
 	return (0);
 }

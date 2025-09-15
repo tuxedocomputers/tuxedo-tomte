@@ -120,9 +120,6 @@ msgstr "Enables activation of discrete NVIDIA graphics on devices with built-in 
 msgid "tuxedocontrolcenter_description"
 msgstr "TUXEDO Control Center Application"
 
-msgid "tuxedokeyboard_description"
-msgstr "Keyboard & keyboard backlight driver for TUXEDO notebooks (obsolete)"
-
 msgid "backlightfix_description"
 msgstr "Fixes backlight issues for DX1708, GTX1060 with AUO Model 12701 and 21229 displays"
 
@@ -150,17 +147,11 @@ msgstr "Fixes non working Elantech touchpad"
 msgid "tuxedotouchpadswitch_description"
 msgstr "Adds hardware enable/disable for touchpads with LED indicator on several TUXEDO notebooks"
 
-msgid "tuxedokeyboardite_description"
-msgstr "Keyboard back-light driver for ITE devices (obsolete)"
-
 msgid "fingerprintreader_description"
 msgstr "Packages needed for fingerprint reader to work on certain TUXEDO notebooks"
 
 msgid "tuxedorestoreaudiofix_description"
 msgstr "Systemd service which rescans for missing audio devices"
-
-msgid "kerneltuxedo2204_description"
-msgstr "Selects, installs and cleans up TUXEDO Linux kernels"
 
 msgid "kerneltuxedo2404_description"
 msgstr "Selects, installs and cleans up TUXEDO Linux kernels"
@@ -195,9 +186,6 @@ msgstr "Fixes backlight control for Nvidia GPUs"
 msgid "earlyloadbacklightcontrolfix_description"
 msgstr "For backlight control working with Nvidia, the i915 needs to be loaded earlier"
 
-msgid "tuxedor8125dkms_description"
-msgstr "Newest driver for RTL8125 2.5GbE Controller, fixes ethernet bug"
-
 msgid "cardreaderfix_description"
 msgstr "udev rule which inhibits power idle state for cardreader RTS522A"
 
@@ -230,9 +218,6 @@ msgstr "Loads and unloads the ath12k wifi kernel module to enable standby."
 
 msgid "nvmequirkswitchtodeepsleepfix_description"
 msgstr "Removes the fix"
-
-msgid "tuxedoplasmaupgrade_description"
-msgstr "Application to upgrade the system to Plasma 6 (obsolete)"
 
 msgid "tuxedoyt6801_description"
 msgstr "Driver for Motorcomm YT6801 Ethernet controller"
