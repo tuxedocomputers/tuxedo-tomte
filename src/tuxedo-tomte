@@ -1399,7 +1399,10 @@ sub tuxedorepos() {
 		} else {
 			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (!(($ubuntuCodename =~ /noble/sm) && ($distribution =~ /Linux Mint/sm))) {
+			if (($ubuntuCodename =~ /noble/sm) &&
+					(($distribution =~ /TUXEDO OS/sm) ||
+					($distribution =~ /Ubuntu/sm) ||
+					($distribution =~ /elementary OS/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
