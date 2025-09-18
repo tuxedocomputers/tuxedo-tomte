@@ -461,17 +461,6 @@ our %DEVICES = (
 		display => q{},
 		usb_device => 'ME906'
 	},
-	'43' => {
-		model => ['all with cardreader Realtek RTS522A'],
-		board_name => [q{}],
-		fix => ['cardreaderfix'],
-		flavour => ['24.04'],
-		pci_id => ['10ec:522a'],
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
-	},
 	'45' => {
 		model => ['TUXEDO Pulse 15 Gen2'],
 		board_name => ['PF5LUXG'],
@@ -1389,27 +1378,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
-	},
-	cardreaderfix => {
-		name => 'cardreader-fix',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => q{},
-		description => __('cardreaderfix_description'),
-		postconf => q{},
-		upgrade => q{},
-		upgraded => q{},
-		reconfigure => q{},
-		restart => 'yes',
-		order => q{},
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'yes'
 	},
 	samsungnvmefix => {
 		name => 'samsung-nvme-fix',

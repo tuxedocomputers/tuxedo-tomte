@@ -186,9 +186,6 @@ msgstr "Behebt die Hintergrundbeleuchtungssteuerung für Nvidia-GPUs"
 msgid "earlyloadbacklightcontrolfix_description"
 msgstr "Für eine funktionierende Hintergrundbeleuchtungssteuerung mit Nvidia muss der i915 früher geladen werden"
 
-msgid "cardreaderfix_description"
-msgstr "udev-Regel, die den Stromsparzustand für den Kartenleser RTS522A unterbindet"
-
 msgid "samsungnvmefix_description"
 msgstr "Fix für das Aufwachen von Samsung NVMe aus dem Ruhezustand"
 
@@ -209,9 +206,6 @@ msgstr "Treiber für mehrere Plattformgeräte für TUXEDO-Notebooks"
 
 msgid "systemdbacklightfix_description"
 msgstr "Damit systemd-backlight alle Tastaturen mit Hintergrundbeleuchtung findet"
-
-msgid "elementaryosdkmspinningfix_description"
-msgstr "Pinning damit Pakete von TUXEDO bevorzugt installiert werden"
 
 msgid "ath12kstandbyfix_description"
 msgstr "Lädt und entlädt das ath12k WLAN Kernel-Modul, um den Standby-Modus zu ermöglichen."

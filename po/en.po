@@ -186,9 +186,6 @@ msgstr "Fixes backlight control for Nvidia GPUs"
 msgid "earlyloadbacklightcontrolfix_description"
 msgstr "For backlight control working with Nvidia, the i915 needs to be loaded earlier"
 
-msgid "cardreaderfix_description"
-msgstr "udev rule which inhibits power idle state for cardreader RTS522A"
-
 msgid "samsungnvmefix_description"
 msgstr "fix for Samsung NVMe wake up from sleep"
 
@@ -209,9 +206,6 @@ msgstr "Drivers for several platform devices for TUXEDO notebooks"
 
 msgid "systemdbacklightfix_description"
 msgstr "Makes systemd-backlight catch all keyboard backlight devices"
-
-msgid "elementaryosdkmspinningfix_description"
-msgstr "Pinning to ensure the TUXEDO packages get priority at installation and upgrade"
 
 msgid "ath12kstandbyfix_description"
 msgstr "Loads and unloads the ath12k wifi kernel module to enable standby."
