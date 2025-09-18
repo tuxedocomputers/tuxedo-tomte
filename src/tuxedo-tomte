@@ -875,27 +875,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	# if Huawei LTE ME936 device found
-	my $lsusbHuawei936 = `lsusb -d 12d1:15bb`;
-	if ($lsusbHuawei936 =~ /ME936/sm) {
-		$presetModules{huaweime936fix}{required} = 'yes';
-		printLog("detected $presetModules{huaweime936fix}{name} issue", 'L1', '[INFO]');
-	}
-
-	# if Huawei LTE ME906s device found
-	my $lsusbHuawei906s = `lsusb -d 12d1:15c1`;
-	if ($lsusbHuawei906s =~ /ME906s/sm) {
-		$presetModules{huaweime906sfix}{required} = 'yes';
-		printLog("detected $presetModules{huaweime906sfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	# if Huawei LTE ME906s HP rebranded device found
-	my $lsusbHuawei906sHP = `lsusb -d 03f0:a31d`;
-	if ($lsusbHuawei906sHP =~ /hp/ism) {
-		$presetModules{huaweime906shpfix}{required} = 'yes';
-		printLog("detected $presetModules{huaweime906shpfix}{name} issue", 'L1', '[INFO]');
-	}
-
 	# all notebooks require this
 	# the temporary fix has to be removed for now as it causes boot delay issues
 	# on some notebooks
@@ -1635,46 +1614,6 @@ sub elantechtouchpadfix() {
 	grubModuleEdit( $module, $action, 0, 'psmouse.elantech_smbus=0' );
 	return;
 }
-
-
-
-###############################################################################
-# Creates a configuration to use Huawei-ME936
-# - if USB device 12d1:15bb detected
-#
-sub huaweime936fix(){
-	my $module = shift;
-	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me936', '12d1', '15bb', $CONFIGURATION_VALUE_3);
-	return;
-}
-
-
-
-###############################################################################
-# Creates a configuration to use Huawei-ME906
-# - if USB device 12d1:15c1 detected
-#
-sub huaweime906sfix(){
-	my $module = shift;
-	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me906s', '12d1', '15c1', $CONFIGURATION_VALUE_2);
-	return;
-}
-
-
-
-###############################################################################
-# Creates a configuration to use Huawei-ME906 HP rebranded
-# - if USB device 03f0:a31d detected
-#
-sub huaweime906shpfix(){
-	my $module = shift;
-	my $action = shift;
-	LTEModuleFix( $module, $action, 'huawei-me906s-hp', '03f0', 'a31d', 2);
-	return;
-}
-
 
 
 
@@ -3125,63 +3064,6 @@ sub createFileModule {
 	return;
 }
 
-
-
-
-###############################################################################
-# Creates a udev configuration to use specific LTE modules
-#
-sub LTEModuleFix {
-	my ($module, $action, $name, $vendor, $product, $bConfigurationValue) = @_;
-	my $retval1;
-	my $retval2;
-	my $fileName1 = "/etc/modprobe.d/$name.conf";
-	my $fileName2 = "/etc/udev/rules.d/77-mm-$name.rules";
-	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"options usbserial vendor=0x$vendor product=0x$product\n";
-	my $fileText2 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"ACTION==\"add|change\", SUBSYSTEM==\"usb\", ENV{DEVTYPE}==\"usb_device\", ATTR{idVendor}==\"$vendor\", ATTR{idProduct}==\"$product\", ATTR{bNumConfigurations}==\"3\", ATTR{bConfigurationValue}!=\"$bConfigurationValue\" ATTR{bConfigurationValue}=\"$bConfigurationValue\"\n";
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
-		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
-		if ($retval1 == 0 || $retval2 == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L1', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
-		$retval2 = write_file($fileName2, {'err_mode' => 'carp'}, $fileText2);
-		if ($retval1 == 0 || $retval2 == 0) {
-			printLog("$presetModules{$module}{name} upgrade failed", 'L1', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'remove') {
-		unlink($fileName1);
-		unlink($fileName2);
-
-		$presetModules{$module}{installed} = 'no';
-		$presetModules{$module}{upgraded} = 'yes';
-		addToConfiguredModules($module, 'removed');
-	}
-	return;
-}
 
 
 ###############################################################################
