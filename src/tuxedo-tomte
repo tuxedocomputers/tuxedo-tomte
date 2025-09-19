@@ -1007,13 +1007,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{earlyloadbacklightcontrolfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	# if cardreader Realtek RTS522A found
-	my @cardreaderDevices = (qr/10ec:522a/sm);
-	if ( findPciDevice($lspciOutput, @cardreaderDevices) ) {
-		$presetModules{cardreaderfix}{required} = 'yes';
-		printLog("detected $presetModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
-	}
-
 	# only for removal of nvmequirkswitchtodeepsleepfix
 	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
 		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
@@ -1024,7 +1017,6 @@ sub checkRequirements {
 			printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
 		}
 	}
-
 
 	# get vendor text from vendor ID:device ID
 	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
@@ -2279,44 +2271,6 @@ sub earlyloadbacklightcontrolfix() {
 
 	if ($action eq 'upgrade') {
 		# not neccessary
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[INFO]');
-	}
-	return;
-}
-
-
-
-###############################################################################
-# Forces cardreader Realtek RTS522A to stay on when device goes into idle
-# - if USB device 0x10ec:0x522a detected
-#
-sub cardreaderfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval1;
-	my $fileName1 = '/etc/udev/rules.d/45-tuxedo-force-realtek-522a-cardreader-on.rules';
-	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x10ec\", ATTR{device}==\"0x522a\", RUN+=\"/bin/sh -c 'echo on > /sys/bus/pci/devices/\$kernel/power/control'\"\n";
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
-		if ($retval1 == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
 	}
 	if ($action eq 'remove') {
 		# not implemented yet
