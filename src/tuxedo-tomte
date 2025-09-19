@@ -1014,11 +1014,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{cardreaderfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/PF5LUXG/sm) {
-		$presetModules{samsungnvmefix}{required} = 'yes';
-		printLog("detected $presetModules{samsungnvmefix}{name} issue", 'L1', '[INFO]');
-	}
-
 	# only for removal of nvmequirkswitchtodeepsleepfix
 	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
 		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
@@ -2329,68 +2324,6 @@ sub cardreaderfix() {
 	}
 	return;
 }
-
-
-
-###############################################################################
-# Pulse gen 2 in combination with some Samsung SSDs do not wake up from sleep
-# This workaround allows suspend (s2idle) wake-up to function
-#
-sub samsungnvmefix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval;
-	my $fileName = '/lib/udev/rules.d/99-pulse1502-samsung-nvme.rules';
-	my $niceTime = getBackupFileTime();
-	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80a\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa808\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa80c\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR\{vendor}==\"0x144d\", ATTR\{device}==\"0xa809\", RUN+=\"/bin/sh -c 'echo 0 | tee /sys/bus/pci/devices/\$kernel/d3cold_allowed'\"\n";
-	if ($action eq 'install') {
-		if (isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80a", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
-			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa808", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
-			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa80c", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"') &&
-			isLineInFile($fileName, 'SUBSYSTEM=="pci", ACTION=="add", ATTR\{vendor}=="0x144d", ATTR\{device}=="0xa809", RUN\+="\/bin\/sh -c \'echo 0 \| tee \/sys\/bus\/pci\/devices\/\$kernel\/d3cold_allowed\'"')) {
-			printLog("entries for samsungnvmefix are already present", 'TL2', '[DEBUG]');
-			$localConfModules{$module}{installed} = 'yes';
-			$presetModules{$module}{upgraded} = "yes";
-			$configuredModules{$module} = 'nothingToDo';
-		} else {
-			printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-			$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-			if ($retval == 0) {
-				printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-				$presetModules{$module}{installed} = "failed";
-				addToConfiguredModules($module, "failed");
-			} else {
-				$presetModules{$module}{installed} = "yes";
-				$presetModules{$module}{upgraded} = "yes";
-				addToConfiguredModules($module, "success");
-				setRestartValues($module);
-			}
-		}
-	}
-	if ($action eq 'upgrade') {
-		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		if ($retval == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-	}
-	return;
-}
-
 
 
 
