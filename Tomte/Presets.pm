@@ -538,17 +538,6 @@ our %DEVICES = (
 		display => q{},
 		usb_device => q{}
 	},
-	'52' => {
-		model => ['all with Intel Gen13 PCI USB controller'],
-		board_name => [q{}],
-		fix => ['intelgenXIIIpowerctlfix'],
-		flavour => ['24.04'],
-		pci_id => '8086:1135',
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
-	},
 	'53' => {
 		model => ['all with plasma-workspace >=5.25'],
 		board_name => [q{}],
@@ -1378,27 +1367,6 @@ our %INITIAL_MODULES_SETTINGS = (
 		dkms => 'no',
 		FAI => 'yes',
 		LiveISO => 'no'
-	},
-	intelgenXIIIpowerctlfix => {
-		name => 'intel-gen13-powerctl-fix',
-		version => 1,
-		installed => 'no',
-		blocked => 'no',
-		required => 'no',
-		hwid => 1,
-		package => 'no',
-		packageVersion => 'unkwn',
-		fainame => q{},
-		description => __('intelgenXIIIpowerctlfix_description'),
-		postconf => q{},
-		upgrade => q{},
-		upgraded => q{},
-		reconfigure => q{},
-		restart => 'yes',
-		order => q{},
-		dkms => 'no',
-		FAI => 'yes',
-		LiveISO => 'yes'
 	},
 	tuxedodgpurun => {
 		name => 'tuxedo-dgpu-run',

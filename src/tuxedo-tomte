@@ -1018,13 +1018,6 @@ sub checkRequirements {
 		}
 	}
 
-	# get vendor text from vendor ID:device ID
-	my @intelgenXIIIpowerctlfixDevices = ('8086:1135');
-	if ( findPciDevice($lspciOutput, @intelgenXIIIpowerctlfixDevices) ) {
-		$presetModules{intelgenXIIIpowerctlfix}{required} = 'yes';
-		printLog("detected $presetModules{intelgenXIIIpowerctlfix}{name} issue", 'L1', '[INFO]');
-	}
-
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaWorkspaceVersion = q{};
 	my $versionCompareResult;
@@ -2303,46 +2296,6 @@ sub tuxedodgpurun() {
 	my $module = shift;
 	my $action = shift;
 	debianPackageModule( $module, $action );
-	return;
-}
-
-
-
-
-###############################################################################
-# Fixes power control problems with Intel Gen13 devices
-# Manually sets power control to 'auto' to allow sleeping when not in use
-# - if PCI USB device 0x8086:0x1135 detected
-#
-sub intelgenXIIIpowerctlfix() {
-	my $module = shift;
-	my $action = shift;
-	my $retval1;
-	my $fileName1 = '/etc/udev/rules.d/99-intel-rpl-powerctl.rules';
-	my $niceTime = getBackupFileTime();
-	my $fileText1 = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! ".$niceTime."\n".
-		"SUBSYSTEM==\"pci\", ACTION==\"add\", ATTR{vendor}==\"0x8086\", ATTR{device}==\"0x1135\", RUN+=\"/bin/sh -c 'echo auto | tee /sys/bus/pci/devices/\$kernel/power/control'\"\n";
-	if ($action eq 'install') {
-		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retval1 = write_file($fileName1, {'err_mode' => 'carp'}, $fileText1);
-		if ($retval1 == 0) {
-			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
-			$presetModules{$module}{installed} = "failed";
-			addToConfiguredModules($module, "failed");
-		} else {
-			$presetModules{$module}{installed} = "yes";
-			$presetModules{$module}{upgraded} = "yes";
-			addToConfiguredModules($module, "success");
-			setRestartValues($module);
-		}
-	}
-	if ($action eq 'upgrade') {
-		# not implemented yet
-	}
-	if ($action eq 'remove') {
-		# not implemented yet
-		printLog("remove is not implemented yet for this module", 'TL0', '[WARN]');
-	}
 	return;
 }
 
