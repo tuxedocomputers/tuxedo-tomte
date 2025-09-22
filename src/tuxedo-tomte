@@ -774,12 +774,22 @@ sub prerequisites {
 
 
 ###############################################################################
+# section for clean-up of old modules
+#
+sub cleanUpModules {
+	return (0);
+}
+
+
+###############################################################################
 # check whether the module is required for the system
 # checks only for hardware
 #
 sub checkRequirements {
 	my $FH;
 	my %nvidiaPackage = nvidiaPackage();
+
+	cleanUpModules();
 
 	if ($boardname =~ /PF5PU1G/sm) {
 		$presetModules{nobootonbattery}{required} = 'yes';
@@ -2972,13 +2982,24 @@ sub createFile {
 # where $silent = 0 means normal operation and
 # $silent = 1 means that it will not activate addToConfiguredModules
 #
+# returns 0 if operation failed
+# returns 1 if operation succeeded or entry already existed
+#
 sub grubModuleEdit {
 	my ($module, $action, $silent, @kernelParameters) = @_;
 	my $retVal;
+	
 	if ($LiveISO) {
 		printLog("not changing grub for $module as this is a LiveISO", 'L0', '[INFO]');
 		return (0);
 	}
+
+	# do nothing if module is blocked
+	if ($localConfModules{$module}{blocked} eq 'yes') {
+		printLog("module: $module is blocked and will not be modified", 'L2' ,'[DEBUG]');
+		return (0);
+	}
+
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
@@ -2990,6 +3011,7 @@ sub grubModuleEdit {
 			if (!$silent) {
 				addToConfiguredModules($module, "failed");
 			}
+			return (0);
 		} else {
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
@@ -2998,14 +3020,17 @@ sub grubModuleEdit {
 				if (!$silent) {
 					addToConfiguredModules($module, "success");
 				}
+				return (1);
 			} else {
 				printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
 				if (!$silent) {
 					addToConfiguredModules($module, "nothingToDo");
 				}
+				return (0);
 			}
 		}
 	}
+	
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retVal = insertGrub($module, \@kernelParameters);
@@ -3015,6 +3040,7 @@ sub grubModuleEdit {
 			if (!$silent) {
 				addToConfiguredModules($module, "failed");
 			}
+			return (0);
 		} else {
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
@@ -3023,20 +3049,30 @@ sub grubModuleEdit {
 				if (!$silent) {
 					addToConfiguredModules($module, "success");
 				}
+				return (1);
 			} else {
 				printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
 				if (!$silent) {
 					addToConfiguredModules($module, "nothingToDo");
 				}
+				return (1);
 			}
 		}
 	}
+	
 	if ($action eq 'remove') {
-		if (removeWarningMessage("$presetModules{$module}{name}\n")) {
-			removeKernelParameters($module, $silent, @kernelParameters);
+		# don't ask the user if in silent mode
+		if ($silent || removeWarningMessage("$presetModules{$module}{name}\n")) {
+			if (removeKernelParameters($module, $silent, @kernelParameters) > 0) {
+				return (1);
+			} else {
+				return (0);
+			}
+		} else {
+			return (0);
 		}
 	}
-	return;
+	return (0);
 }
 
 
@@ -4973,7 +5009,9 @@ sub writeConfigFile {
 
 		foreach my $name (sort keys %presetModules) {
 			# values have to be same as in readConfigFile
-			if ($presetModules{$name}{required} ne 'no') {
+			# blocked values should always be present
+			if (($presetModules{$name}{required} ne 'no') ||
+				($presetModules{$name}{blocked} eq 'yes')) {
 				if ($presetModules{$name}{upgrade} eq 'yes') {
 					# upgrade available
 					if ($presetModules{$name}{upgraded} eq 'yes') {
@@ -5002,8 +5040,11 @@ sub writeConfigFile {
 					$hwid = $presetModules{$name}{hwid};
 					$installed = $presetModules{$name}{installed};
 				}
+				# don't add to list if it is not installed and not required
+				# but add to list if it is blocked
 				if (!(($presetModules{$name}{installed} eq 'no') &&
-					($presetModules{$name}{required} eq 'no'))) {
+					($presetModules{$name}{required} eq 'no')) ||
+					($presetModules{$name}{blocked} eq 'yes')) {
 					print $FH "$presetModules{$name}{name} ".
 						"$version ".
 						"$installed ".
@@ -5653,7 +5694,8 @@ sub configureAllModules {
 		# prerequisites are automatically ommited (required=prerequisite)
 		# they are done in prerequisite and postrequisite subroutines
 		if (($presetModules{$module}{required} eq 'yes') &&
-			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
+			($presetModules{$module}{order} ne 'first') &&
+			($presetModules{$module}{order} ne 'last')) {
 
 			if ($presetModules{$module}{reconfigure} eq 'always') {
 				
@@ -5775,11 +5817,16 @@ sub reconfigureAllModules {
 			$presetModules{$module}{required} = 'yes';
 		
 		}
-		if (($presetModules{$module}{required} eq 'yes') &&
-			($presetModules{$module}{order} ne 'first') && ($presetModules{$module}{order} ne 'last')) {
+		if ($presetModules{$module}{blocked} eq 'yes') {
+			print "Module $presetModules{$module}{name} can't be modified because:\n";
+			print "- it is blocked (maybe use 'unblock')\n";
+		} elsif (($presetModules{$module}{required} eq 'yes') &&
+			($presetModules{$module}{order} ne 'first') &&
+			($presetModules{$module}{order} ne 'last')) {
 			reconfigureSingleModule($presetModules{$module}{name});
 		} elsif (($presetModules{$module}{required} eq 'no') &&
-				(($localConfModules{$module}{installed} eq 'yes') || ($localConfModules{$module}{installed} eq 'failed'))) {
+				(($localConfModules{$module}{installed} eq 'yes') ||
+				($localConfModules{$module}{installed} eq 'failed'))) {
 			removeModule($module);
 		}
 	}
@@ -6349,7 +6396,7 @@ sub postConfigure {
 	my $postConfTrigger = 0;
 	my $output;
 	my $command;
-	printLog("initializing post-configuration", 'TL0', '[INFO]');
+	printLog("\ninitializing post-configuration", 'TL0', '[INFO]');
 	foreach my $sysProgram (keys %postConfProgramsList) {
 		if ($postConfProgramsList{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram", 'L1', '[INFO]');
@@ -6503,6 +6550,9 @@ sub listSuccess {
 			push(@nothingToDoModules, $confModule);
 		} elsif ($configuredModules{$confModule} eq "removed") {
 			push(@removedModules, $confModule);
+		} else {
+			# put the modules without defined value into "nothingToDo"
+			push(@nothingToDoModules, $confModule);
 		}
 	}
 	if (@successModules) {
