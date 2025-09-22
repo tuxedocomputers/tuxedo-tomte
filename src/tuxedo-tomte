@@ -3341,8 +3341,11 @@ sub grubModuleEdit {
 	if ($action eq 'remove') {
 		# don't ask the user if in silent mode
 		if ($silent || removeWarningMessage("$presetModules{$module}{name}\n")) {
-			removeKernelParameters($module, $silent, @kernelParameters);
-			return (1);
+			if (removeKernelParameters($module, $silent, @kernelParameters) > 0) {
+				return (1);
+			} else {
+				return (0);
+			}
 		} else {
 			return (0);
 		}
