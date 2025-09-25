@@ -777,6 +777,10 @@ sub prerequisites {
 # section for clean-up of old modules
 #
 sub cleanUpModules {
+	# remove disableguxfix
+	if ($localConfModules{disablegucfix}{installed} eq 'yes') {
+		$presetModules{disablegucfix}{required} = 'no';
+	}
 	return (0);
 }
 
@@ -1032,12 +1036,6 @@ sub checkRequirements {
 		($boardname =~ m/GMxTGxx/sm)) {
 		$presetModules{acpibacklightvideofix}{required} = 'yes';
 		printLog("detected $presetModules{acpibacklightvideofix}{name} issue", 'L1', '[INFO]');
-	}
-	if (($boardname =~ /PH4PRX1_PH6PRX1/sm) ||
-   		($boardname =~ /PH4PG31/sm) ||
-		($boardname =~ /PH6PG01_PH6PG71/sm)) {
-		$presetModules{disablegucfix}{required} = 'yes';
-		printLog("detected $presetModules{disablegucfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my @ath12kstandbyfixDevices = ('17cb:1107');
@@ -2264,12 +2262,12 @@ sub acpibacklightvideofix() {
 
 ###############################################################################
 # disabled GuC submission while keeping HuC on Intel iGPU
-#
+# this module is obsolete and only for removal
+#       
 sub disablegucfix() {
 	my $module = shift;
-	my $action = shift;
 	grubModuleEdit($module, 'remove', 0, 'i915.enable_guc=2');
-	grubModuleEdit($module, $action, 0, 'i915.enable_guc=0');
+	grubModuleEdit($module, 'remove', 0, 'i915.enable_guc=0');
 	return;
 }
 
