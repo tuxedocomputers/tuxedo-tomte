@@ -6380,7 +6380,7 @@ sub postConfigure {
 	my $postConfTrigger = 0;
 	my $output;
 	my $command;
-	printLog("initializing post-configuration", 'TL0', '[INFO]');
+	printLog("\ninitializing post-configuration", 'TL0', '[INFO]');
 	foreach my $sysProgram (keys %postConfProgramsList) {
 		if ($postConfProgramsList{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram", 'L1', '[INFO]');
