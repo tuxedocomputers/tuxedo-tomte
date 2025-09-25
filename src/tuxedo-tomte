@@ -2422,7 +2422,7 @@ sub gfxmode() {
 #
 sub noecwakeupfix() {
 	my $module = shift;
-	grubModuleEdit( $module, 'remove', 0, 'acpi.ec_no_wakeup=1' );
+	grubModuleEdit( $module, 'remove', 1, 'acpi.ec_no_wakeup=1' );
 	return;
 }
 
