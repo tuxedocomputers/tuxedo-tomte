@@ -1526,7 +1526,7 @@ our %INITIAL_MODULES_SETTINGS = (
 		LiveISO => 'no',
 	},
 	noecwakeupfix => {
-		name => 'no-EC-wakeup-fix',
+		name => 'no-ec-wakeup-fix',
 		version => 2,
 		installed => 'no',
 		blocked => 'no',
