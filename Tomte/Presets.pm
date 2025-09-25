@@ -626,17 +626,6 @@ our %DEVICES = (
 		display => q{},
 		usb_device => q{}
 	},
-	'64' => {
-		model => ['all notebooks'],
-		board_name => [q{}],
-		fix => ['systemdbacklightfix'],
-		flavour => ['24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => q{},
-		usb_device => q{}
-	},
 	'67' => {
 		model => ['Sirius 16 - Gen1'],
 		board_name => ['APX958'],
@@ -1356,9 +1345,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# obsolete, only for removal
 	systemdbacklightfix => {
 		name => 'systemd-backlight-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',

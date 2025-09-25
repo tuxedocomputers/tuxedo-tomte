@@ -777,6 +777,10 @@ sub prerequisites {
 # section for clean-up of old modules
 #
 sub cleanUpModules {
+	# remove systemdbacklightfix
+	if ($localConfModules{systemdbacklightfix}{installed} eq 'yes') {
+		$presetModules{systemdbacklightfix}{required} = 'no';
+	}
 	return (0);
 }
 
@@ -883,18 +887,6 @@ sub checkRequirements {
 	if ($boardname =~ /NH5xAx/sm) {
 		$presetModules{corefix}{required} = 'yes';
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
-	}
-
-	# all notebooks require this
-	# the temporary fix has to be removed for now as it causes boot delay issues
-	# on some notebooks
-	# not necessary on 24.04
-	# when deleting this workaround, also delete the module entry from the config
-	if (($chassisType eq 'notebook') && (!($distributionVersionID =~ /24.04/sm))) {
-		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
-			printLog("former $presetModules{systemdbacklightfix}{name} issue detected, removing it", 'L1', '[INFO]');
-			$presetModules{systemdbacklightfix}{required} = 'no';
-		}
 	}
 
 	if ($ubuntuCodename =~ /noble/sm) {
@@ -1771,27 +1763,21 @@ sub tuxedodrivers() {
 
 
 
-
 ###############################################################################
 # systemd-backlight-fix
+# this module is obsolete and only for removal
 #
 sub systemdbacklightfix() {
 	my $module = shift;
-	my $action = shift;
-	if ($action eq 'install') {
-		printLog("$presetModules{$module}{name} is not anymore necessary", 'L0', '[INFO]');
-	}
-	if ($action eq 'remove') {
-		printLog("$presetModules{$module}{name} will be removed", 'L0', '[INFO]');
-		if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
-			if (unlink('/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules')) {
-				printLog("$presetModules{$module}{name} has been successfully removed", 'L0', '[INFO]');
-			} else {
-				printLog("$presetModules{$module}{name} could not be removed", '', '[ERROR]');
-			}
+	printLog("$presetModules{$module}{name} will be removed", 'L0', '[INFO]');
+	if (-e '/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules') {
+		if (unlink('/etc/udev/rules.d/99-tuxedo-systemd-backlight-fix.rules')) {
+			printLog("$presetModules{$module}{name} has been successfully removed", 'L0', '[INFO]');
 		} else {
-			printLog("$presetModules{$module}{name} is not installed", 'L2', '[INFO]');
+			printLog("$presetModules{$module}{name} could not be removed", '', '[ERROR]');
 		}
+	} else {
+		printLog("$presetModules{$module}{name} is not installed", 'L2', '[INFO]');
 	}
 	return;
 }
