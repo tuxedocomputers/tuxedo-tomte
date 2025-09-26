@@ -780,6 +780,9 @@ sub cleanUpModules {
 	# remove systemdbacklightfix
 	if ($localConfModules{systemdbacklightfix}{installed} eq 'yes') {
 		$presetModules{systemdbacklightfix}{required} = 'no';
+	# remove backlightfix
+	if ($localConfModules{backlightfix}{installed} eq 'yes') {
+		$presetModules{backlightfix}{required} = 'no';
 	}
 	return (0);
 }
@@ -866,22 +869,6 @@ sub checkRequirements {
 	if ($boardvendor =~ /NB02/sm) {
 		$presetModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $presetModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
-	}
-
-	if ($boardname =~ /N8xEJEK/sm) {
-		if (isDisplayPresent("AUO Model 12701 Serial Number 585803690")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if (($boardname =~ /P95_HP/sm)
-		|| ($boardname =~ /P95_HR/sm)
-		|| ($boardname =~ /P95_HP,HR,HQ/sm)) {
-		if (isDisplayPresent("AUO Model 21229 Serial Number 808797180")) {
-			$presetModules{backlightfix}{required} = 'yes';
-			printLog("detected $presetModules{backlightfix}{name} issue", 'L1', '[INFO]');
-		}
 	}
 
 	if ($boardname =~ /NH5xAx/sm) {
@@ -1302,16 +1289,12 @@ sub tuxedocontrolcenter() {
 
 
 ###############################################################################
-# Fixes backlight issue with AUO Model 12701 and 21229 displays on
-# - DX1708
-# - P95_HP
-# - P95_HR
-# - P95_HP,HR,HQ
+# removes backlightfix
+# this module is obsolete and only for removal
 #
 sub backlightfix() {
 	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'i915.enable_dpcd_backlight=1');
+	grubModuleEdit( $module, 'remove', 1, 'i915.enable_dpcd_backlight=1');
 	return;
 }
 

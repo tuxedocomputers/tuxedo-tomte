@@ -175,17 +175,6 @@ our %DEVICES = (
 		display => q{},
 		usb_device => q{}
 	},
-	'5' => {
-		model => ['TUXEDO Book DX1508', 'TUXEDO Book DX1708'],
-		board_name => ['N8xEJEK'],
-		fix => ['backlightfix'],
-		flavour => ['24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => 'AUO Model 12701 Serial Number 585803690',
-		usb_device => q{}
-	},
 	'6' => {
 		model => ['TUXEDO Book XA15 Gen10'],
 		board_name => ['NH5xAx'],
@@ -448,28 +437,6 @@ our %DEVICES = (
 		cpu => q{},
 		kernel => q{},
 		display => q{},
-		usb_device => q{}
-	},
-	'46' => {
-		model => ['TUXEDO InsanityBook 15 v1'],
-		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
-		fix => ['backlightfix'],
-		flavour => ['24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => 'AUO Model 21229 Serial Number 808797180',
-		usb_device => q{}
-	},
-	'47' => {
-		model => ['XP1507'],
-		board_name => ['P95_HP', 'P95_HR', 'P95_HP,HR,HQ'],
-		fix => ['backlightfix'],
-		flavour => ['24.04'],
-		pci_id => q{},
-		cpu => q{},
-		kernel => q{},
-		display => 'AUO Model 21229 Serial Number 808797180',
 		usb_device => q{}
 	},
 	'48' => {
@@ -883,9 +850,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# only for removal in 24.04
 	backlightfix => {
 		name => 'backlight-fix',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
