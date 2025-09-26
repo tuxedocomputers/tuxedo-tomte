@@ -789,6 +789,9 @@ sub cleanUpModules {
 	# remove noecwakeupfix
 	if ($localConfModules{noecwakeupfix}{installed} eq 'yes') {
 		$presetModules{noecwakeupfix}{required} = 'no';
+	# remove amdgpubacklightauxoff
+	if ($localConfModules{amdgpubacklightauxoff}{installed} eq 'yes') {
+		$presetModules{amdgpubacklightauxoff}{required} = 'no';
 	}
 	return (0);
 }
@@ -932,15 +935,6 @@ sub checkRequirements {
 		# apportfix will always be installed as a workaround
 		$presetModules{apportfix}{required} = 'yes';
 		printLog("detected $presetModules{apportfix}{name} issue", 'L1', '[INFO]');
-	}
-
-	if (($boardname =~ m/GMxNGxx/sm) ||
-		($boardname =~ m/GMxZGxx/sm)) {
-		if (isDisplayPresent("BOE Model 2423 Serial Number 0") ||
-			isDisplayPresent("BOE Model 2420 Serial Number 0")) {
-			$presetModules{amdgpubacklightauxoff}{required} = 'yes';
-			printLog("detected $presetModules{amdgpubacklightauxoff}{name} issue", 'L1', '[INFO]');
-		}
 	}
 
 	if (($boardname =~ m/PHxTxX1/sm) ||
@@ -1997,20 +1991,16 @@ sub apportfix() {
 
 
 
-
-
 ###############################################################################
 # Fixes backlight issue with BOE Model 2423 Serial Number 0 displays on
 # - GMxNGxx
+# this module is obsolete and only for removal
 #
 sub amdgpubacklightauxoff() {
 	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'amdgpu.backlight=0' );
+	grubModuleEdit( $module, 'remove', 1, 'amdgpu.backlight=0' );
 	return;
 }
-
-
 
 
 

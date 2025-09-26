@@ -1103,9 +1103,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'yes'
 	},
+	# this module is obsolete and only for removal
 	amdgpubacklightauxoff => {
 		name => 'amdgpu-backlight-aux-off',
-		version => 1,
+		version => 2,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
