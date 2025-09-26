@@ -780,15 +780,19 @@ sub cleanUpModules {
 	# remove systemdbacklightfix
 	if ($localConfModules{systemdbacklightfix}{installed} eq 'yes') {
 		$presetModules{systemdbacklightfix}{required} = 'no';
+	}
 	# remove backlightfix
 	if ($localConfModules{backlightfix}{installed} eq 'yes') {
 		$presetModules{backlightfix}{required} = 'no';
+	}
 	# remove disableguxfix
 	if ($localConfModules{disablegucfix}{installed} eq 'yes') {
 		$presetModules{disablegucfix}{required} = 'no';
+	}
 	# remove noecwakeupfix
 	if ($localConfModules{noecwakeupfix}{installed} eq 'yes') {
 		$presetModules{noecwakeupfix}{required} = 'no';
+	}
 	# remove amdgpubacklightauxoff
 	if ($localConfModules{amdgpubacklightauxoff}{installed} eq 'yes') {
 		$presetModules{amdgpubacklightauxoff}{required} = 'no';
