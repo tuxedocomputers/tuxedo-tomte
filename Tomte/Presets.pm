@@ -497,7 +497,7 @@ our %DEVICES = (
 	'54' => {
 		model => ['TUXEDO InfinityBook Pro 14/16 Gen8'],
 		board_name => ['PH4PRX1_PH6PRX1', 'PH4PG31', 'PH6PG01_PH6PG71'],
-		fix => ['tuxedotouchpadswitch', 'disablegucfix'],
+		fix => ['tuxedotouchpadswitch'],
 		flavour => ['24.04'],
 		pci_id => q{},
 		cpu => q{},
@@ -1271,9 +1271,10 @@ our %INITIAL_MODULES_SETTINGS = (
 		FAI => 'yes',
 		LiveISO => 'no'
 	},
+	# obsolete, only for removal
 	disablegucfix => {
 		name => 'disable-guc-fix',
-		version => 2,
+		version => 3,
 		installed => 'no',
 		blocked => 'no',
 		required => 'no',
