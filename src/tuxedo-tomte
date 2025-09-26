@@ -47,11 +47,6 @@ use File::Copy;
 use File::Find;
 use Cwd 'realpath';
 
-# for OLED backlight and edid decrypt
-use FindBin qw($Bin);
-use lib "$Bin/.";
-use Parse::EDID qw(parse_edid);
-
 use Time::HiRes qw(usleep);
 use Dpkg::Version;
 use JSON;
@@ -780,15 +775,19 @@ sub cleanUpModules {
 	# remove systemdbacklightfix
 	if ($localConfModules{systemdbacklightfix}{installed} eq 'yes') {
 		$presetModules{systemdbacklightfix}{required} = 'no';
+	}
 	# remove backlightfix
 	if ($localConfModules{backlightfix}{installed} eq 'yes') {
 		$presetModules{backlightfix}{required} = 'no';
+	}
 	# remove disableguxfix
 	if ($localConfModules{disablegucfix}{installed} eq 'yes') {
 		$presetModules{disablegucfix}{required} = 'no';
+	}
 	# remove noecwakeupfix
 	if ($localConfModules{noecwakeupfix}{installed} eq 'yes') {
 		$presetModules{noecwakeupfix}{required} = 'no';
+	}
 	# remove amdgpubacklightauxoff
 	if ($localConfModules{amdgpubacklightauxoff}{installed} eq 'yes') {
 		$presetModules{amdgpubacklightauxoff}{required} = 'no';
@@ -5064,125 +5063,6 @@ sub initConfigFile {
 	}
 	return (0);
 }
-
-
-###############################################################################
-# searches the sysfs subdirectory for active monitor entries
-# and returns them as an array
-#
-sub findActiveEDIDs {
-	my $cards_dir = '/sys/class/drm';
-	my $dir_handle;
-	my @edidfile;
-	my $enabledFileContent;
-	my $statusFileContent;
-
-	my $edidTrigger = 0;
-
-	if ( !opendir ($dir_handle, $cards_dir)) {
-		printLog("Err: $!", 'L1', '[WARN]');
-		printLog("unable to open $cards_dir: $!", 'L1', '[WARN]');
-		return @edidfile;
-	}
-	my @FILES = grep { $_ ne q{.} && $_ ne q{..} } readdir($dir_handle);
-	foreach my $file (@FILES) {
-		my $path = "$cards_dir/$file";
-		if ( -d $path ) {
-			my $enabledFile = "$path/enabled";
-			if ( -e $enabledFile ) {
-				if (open(my $fh1, '<', $enabledFile)) {
-					$enabledFileContent = <$fh1>;
-					if (! close($fh1)) {
-						printLog("Couldn't close $enabledFile", 'L0', '[ERROR]');
-					}
-					if ($enabledFileContent =~ /enabled/sm) {
-						my $statusFile = "$path/status";
-						if ( -e $statusFile ) {
-							if (!-e $file) {
-								return (0);
-							}
-							my $fh2;
-							if (! open($fh2, '<', $statusFile)) {
-								printLog("Couldn't open $statusFile", 'L0', '[ERROR]');
-							}
-							$statusFileContent = <$fh2>;
-							if (! close($fh2)) {
-								printLog("Couldn't close $enabledFile", 'L0', '[ERROR]');
-							}
-							if ($statusFileContent =~ /connected/sm) {
-								push @edidfile, "$path/edid";
-								$edidTrigger = 1;
-							}
-						}
-					}
-				} else {
-					printLog("Couldn't open $enabledFile", 'L0', '[ERROR]');
-				}
-			} else {
-				printLog("file $enabledFile not found", 'L2', '[WARN]');
-			}
-		}
-	}
-	if (! $edidTrigger ) {
-		printLog('no enabled and active edid files found!', 'L1', '[WARN]');
-	}
-	return @edidfile;
-}
-
-
-###############################################################################
-# gets valid edid files
-# converts edid data into an array of hash references to presetModules
-#
-sub getEDIDData {
-	my @edidFiles = findActiveEDIDs();
-	my @edidRefs;
-	my $FH;
-	my $fileContent;
-	foreach ( @edidFiles ) {
-		if ( (-e $_) && open($FH, '<', $_) ) {
-			$fileContent = do { local $/; <$FH> };
-			if (! close($FH)) {
-				printLog("could not close $_ $!", 'L0', '[ERROR]');
-			}
-			push @edidRefs, parse_edid($fileContent);
-		} else {
-			printLog("Err: $!", 'L1', '[ERROR]');
-			printLog("could not open file $_ $!", 'L0', '[ERROR]');
-		}
-	}
-	# returns array of hash references to module
-	return @edidRefs;
-}
-
-
-
-###############################################################################
-# returns 1 if the display described by a string is connected, otherwise 0
-# the requesting string is build by appending the following data as returned by
-# edid-decode
-# manufacturer_name Model product_code Serial Number serial_number
-# the values from manufacturer_name, product_code and serial_number are
-# extracted by Parse::EDID
-#
-sub isDisplayPresent {
-	my $edidSearchString = shift;
-	my @edidRefs = getEDIDData();
-	my $edidInfo;
-	if (@edidRefs == 0) {
-		return (0);
-	} else {
-		foreach my $edidData (@edidRefs) {
-			$edidInfo = $$edidData{manufacturer_name}." Model ".$$edidData{product_code}." Serial Number ".$$edidData{serial_number};
-			if ($edidInfo =~ /$edidSearchString/sm) {
-				return (1);
-			}
-		}
-	}
-	printLog("edid string not found", 'L1', '[WARN]');
-	return (0);
-}
-
 
 
 
