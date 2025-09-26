@@ -786,6 +786,9 @@ sub cleanUpModules {
 	# remove disableguxfix
 	if ($localConfModules{disablegucfix}{installed} eq 'yes') {
 		$presetModules{disablegucfix}{required} = 'no';
+	# remove noecwakeupfix
+	if ($localConfModules{noecwakeupfix}{installed} eq 'yes') {
+		$presetModules{noecwakeupfix}{required} = 'no';
 	}
 	return (0);
 }
@@ -1054,11 +1057,6 @@ sub checkRequirements {
 		(!($distribution =~ /TUXEDO OS/sm))) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
-	}
-
-	if ($boardname =~ /GXxHRXx/sm) {
-		$presetModules{noecwakeupfix}{required} = 'yes';
-		printLog("detected $presetModules{noecwakupfix}{name} issue", 'L1', '[INFO]');
 	}
 
 	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
@@ -2385,11 +2383,11 @@ sub gfxmode() {
 
 ###############################################################################
 # Prevents spurious wake-up from suspend triggered by the EC
+# this module is obsolete and only for removal
 #
 sub noecwakeupfix() {
 	my $module = shift;
-	my $action = shift;
-	grubModuleEdit( $module, $action, 0, 'acpi.ec_no_wakeup=1');
+	grubModuleEdit( $module, 'remove', 1, 'acpi.ec_no_wakeup=1' );
 	return;
 }
 
