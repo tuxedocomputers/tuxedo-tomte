@@ -9,7 +9,7 @@ Homepage: https://www.tuxedocomputers.com
 Package: tuxedo-tomte
 Architecture: all
 Depends: ${misc:Depends}, perl, libfile-fcntllock-perl, libdpkg-perl, libjson-perl, libconfig-tiny-perl, libintl-perl, libfile-slurp-perl, libreadonly-perl, libautovivification-perl
-Pre-Depends: libparse-edid-perl, packagekit-tools
+Pre-Depends: packagekit-tools
 Description: little helper that provides services, updates and fixes for TUXEDO devices
  TUXEDO Tomte is a little helper that provides services, updates and fixes for
  TUXEDO devices in the background. It does not send any information, telemetry
