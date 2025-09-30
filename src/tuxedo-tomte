@@ -1058,8 +1058,8 @@ sub checkRequirements {
 		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
 	}
 
-	if (($distributionType eq 'noble') ||
-		($distributionType eq 'trixie') ||
+	if (($distributionType =~ /noble/) ||
+		($distributionType =~ /trixie/) ||
 		($distribution =~ /TUXEDO OS/sm)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
@@ -1079,15 +1079,15 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($distributionType eq 'noble') &&
-		(!($distribution =~ /TUXEDO OS/)) ||
-		$distributionType eq 'trixie') {
+	if ((($distributionType =~ /noble/) &&
+		($distribution !~ /TUXEDO OS/)) ||
+		$distributionType =~ /trixie/) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
 
 	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
-	if (($distributionType =~ /(noble|trixie)/) &&
+	if (($distributionType =~ /noble|trixie/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
 		($boardname =~ /4X4-7040 Series\/D5/sm) ||
@@ -1098,7 +1098,7 @@ sub checkRequirements {
 	}
 
 	# workaround for Linux Mint and Debian GNU mirror repositories
-	if ($distribution =~ /(Linux Mint|Debian GNU)/) {
+	if ($distribution =~ /Linux Mint|Debian GNU/) {
 		$presetModules{'tuxedomirrors'}{'required'} = 'no';
 		$presetModules{'tuxedomirrors'}{'reconfigure'} = 'no';
 		$presetModules{'tuxedomirrors'}{'order'} = q{};
