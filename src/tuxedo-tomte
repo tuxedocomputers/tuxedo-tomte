@@ -915,21 +915,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/NHxxRZQ/sm) {
-		# starting at kernel version 6.1 driver r8169 is included and supports the present device
-		my $kernelVersionWithR8169 = '6.1';
-		if (version_compare($kernelVersionWithR8169, $kernelRelease) == 1) {
-			$presetModules{r8168dkms}{required} = 'yes';
-			printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
-		}
-	}
-
-	if (($boardname =~ m/NL45PU2/sm) ||
-		($boardname =~ m/NL57PU/sm)) {
-		$presetModules{r8168dkms}{required} = 'yes';
-		printLog("detected $presetModules{r8168dkms}{name} issue", 'L1', '[INFO]');
-	}
-
 	if (-e "/etc/default/apport") {
 		# apportfix will always be installed as a workaround
 		$presetModules{apportfix}{required} = 'yes';
@@ -1919,19 +1904,6 @@ sub nvidiadriver() {
 			}
 		}
 	}
-	return;
-}
-
-
-
-
-###############################################################################
-# Installs Linux device driver for several Realtek Ethernet controllers
-#
-sub r8168dkms() {
-	my $module = shift;
-	my $action = shift;
-	debianPackageModule( $module, $action );
 	return;
 }
 
