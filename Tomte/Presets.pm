@@ -106,7 +106,7 @@ our %OTHER_REPOS = (
 our %KERNELS = (
 	'noble' => {
 		'index' => '3',
-		'linux-tuxedo-24.04' => 'linux-tuxedo-24.04'
+		'linux-tuxedo-24.04' => 'linux-tuxedo'
 	}
 );
 
