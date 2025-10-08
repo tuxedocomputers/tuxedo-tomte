@@ -21,7 +21,7 @@ use warnings;
 use 5.010;
 
 use parent 'Exporter';
-our @EXPORT_OK = qw( supportedOS essentialRepos otherRepos kernels devices initialModuleSettings lockFiles postConfPrograms );
+our @EXPORT_OK = qw( supportedOS essentialRepos otherRepos kernels devices initialModuleSettings lockFiles postConfPrograms distributionType );
 
 # for Translations
 use Locale::TextDomain ('tomte', '/usr/share/locale');
@@ -38,7 +38,17 @@ our %SUPPORTED_OS = (
 	"KDE neon" => ['24.04'],
 	"Ubuntu" => ['24.04'],
 	"Linux Mint" => ['22', '22.1', '22.2'],
-	"elementary OS" => ['8']
+	"elementary OS" => ['8'],
+	"Debian GNU/Linux" => ["13"]
+);
+
+our %DISTRIBUTION_TYPE = (
+	"noble" => "noble",
+	"trixie" => "trixie",
+	"wilma" => "noble",
+	"xia" => "noble",
+	"zara" => "noble",
+	"circe" => "noble"
 );
 
 our %ESSENTIAL_REPOS = (
@@ -47,6 +57,17 @@ our %ESSENTIAL_REPOS = (
 			"content" => ["Types: deb\n".
 							"URIs: https://deb.tuxedocomputers.com/ubuntu\n".
 							"Suites: noble\n".
+							"Components: main\n".
+							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
+			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
+		}
+	},
+
+	"trixie" => {
+		"deb" => {
+			"content" => ["Types: deb\n".
+							"URIs: https://deb.tuxedocomputers.com/debian\n".
+							"Suites: trixie\n".
 							"Components: main\n".
 							"Signed-By: /usr/share/keyrings/tuxedo-archive-keyring.gpg\n"],
 			"filename" => "/etc/apt/sources.list.d/tuxedo-computers.sources"
@@ -1558,6 +1579,10 @@ sub devices {
 
 sub supportedOS {
 	return %SUPPORTED_OS;
+}
+
+sub distributionType {
+	return %DISTRIBUTION_TYPE;
 }
 
 sub essentialRepos {

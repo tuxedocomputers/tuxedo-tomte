@@ -32,7 +32,7 @@ local $SIG{__WARN__} = sub {
 	printLog($warning, "L0", '[WARN]');
 };
 
-use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms );
+use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos otherRepos kernels lockFiles postConfPrograms distributionType );
 use Tomte::NvidiaList qw( nvidiaPackage nvidiaProductID );
 
 use Storable qw(dclone);
@@ -96,8 +96,13 @@ my %argValue = (
 	module => q{},
 );
 
-if (scalar(@ARGV) > 0) { $argValue{command} = $ARGV[0]; }
-if (scalar(@ARGV) > 1) { $argValue{module} = $ARGV[1]; }
+printLog("arguments: @ARGV", 'L2', '[INFO]');
+if (scalar(@ARGV) > 0) {
+	$argValue{command} = $ARGV[0];
+}
+if (scalar(@ARGV) > 1) {
+	$argValue{module} = $ARGV[1];
+}
 
 # make sure this is the only running instance
 use Fcntl ':flock';
@@ -140,7 +145,8 @@ my $distribution;
 my $distributionVersionID;
 my $distributionVersion;
 my $completeDistVersion;
-my $ubuntuCodename = q{};
+my $versionCodename = q{};
+my $distributionType = q{};
 my $FAI = 0;
 if ($argValue{command} eq 'FAI') {
 	$FAI = 1;
@@ -229,6 +235,7 @@ if ($sessionID =~ /(.{7})/sm) {
 my %devicesList = devices();
 my %presetModules = initialModuleSettings();
 my %supportedOSList = supportedOS();
+my %distributionTypeList = distributionType();
 my %essentialReposList = essentialRepos();
 my %otherReposList = otherRepos();
 my %kernelsList = kernels();
@@ -665,10 +672,13 @@ sub readOSData {
 			$line =~ /VERSION_ID=\"(.*)\"/sm;
 			$distributionVersionID = $1;
 		}
-		if ( $line =~ /^UBUNTU_CODENAME=/sm ) {
-			# e.g. noble
-			$line =~ /UBUNTU_CODENAME=(.*)/sm;
-			$ubuntuCodename = $1;
+		if ( $line =~ /^VERSION_CODENAME=/ ) {
+			# e.g. noble|trixie
+			$line =~ /VERSION_CODENAME=(.*)/;
+			$versionCodename = $1;
+			$distributionType = $distributionTypeList{$versionCodename};
+			printLog("found VERSION_CODENAME: $versionCodename", 'L2', '[DEBUG]');
+			printLog("setting distributionType to: $distributionType", 'L2', '[DEBUG]');
 		}
 		if ( $line =~ /^VERSION=/sxm ) {
 			# e.g. 24.04.4 LTS (Jammy Jellyfish)
@@ -884,7 +894,7 @@ sub checkRequirements {
 		printLog("detected $presetModules{corefix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($ubuntuCodename =~ /noble/sm) {
+	if ($distributionType =~ /noble|trixie/) {
 		$presetModules{tuxedodrivers}{required} = 'yes';
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
@@ -910,15 +920,19 @@ sub checkRequirements {
 
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an eGPU is being used and it is temporarily not connected to the device
-	if (isNvidiaGPUInstalled() || iseGPUHandlingRequired()) {
-		$presetModules{nvidiadriver}{required} = 'yes';
-		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
+	if ($distributionType =~ /noble/) {
+		if (isNvidiaGPUInstalled() || iseGPUHandlingRequired()) {
+			$presetModules{nvidiadriver}{required} = 'yes';
+			printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
-	if (-e "/etc/default/apport") {
-		# apportfix will always be installed as a workaround
-		$presetModules{apportfix}{required} = 'yes';
-		printLog("detected $presetModules{apportfix}{name} issue", 'L1', '[INFO]');
+	if ($distributionType =~ /noble/) {
+		if (-e "/etc/default/apport") {
+			# apportfix will always be installed as a workaround
+			$presetModules{apportfix}{required} = 'yes';
+			printLog("detected $presetModules{apportfix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	if (($boardname =~ m/PHxTxX1/sm) ||
@@ -930,15 +944,17 @@ sub checkRequirements {
 
 
 	# kernel
-	if ($ubuntuCodename =~ /noble/sm) {
+	if ($distributionType =~ /noble/sm) {
 		printLog("kernel $presetModules{kerneltuxedo2404}{name} will be default", 'L1', '[INFO]');
 		$presetModules{kerneltuxedo2404}{required} = 'yes';
 	}
 
 	# only for removal as it is built into the kernel
-	if ($boardname =~ m/X170KM-G/sm) {
-		$presetModules{thunderboltbootdelayfix}{required} = 'no';
-		printLog("detected $presetModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
+	if ($distributionType =~ /noble/) {
+		if ($boardname =~ m/X170KM-G/) {
+			$presetModules{thunderboltbootdelayfix}{required} = 'no';
+			printLog("detected $presetModules{thunderboltbootdelayfix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	if ((($boardname =~ m/NV4XMB,ME,MZ/sm) ||
@@ -948,9 +964,11 @@ sub checkRequirements {
 		printLog("detected $presetModules{lightdmlogindcheckgraphicalfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if ($boardname =~ m/GMxTGxx/sm) {
-		$presetModules{nvidiabacklightcontrolfix}{required} = 'yes';
-		printLog("detected $presetModules{nvidiabacklightcontrolfix}{name} issue", 'L1', '[INFO]');
+	if ($distributionType =~ /noble/) {
+		if ($boardname =~ m/GMxTGxx/) {
+			$presetModules{nvidiabacklightcontrolfix}{required} = 'yes';
+			printLog("detected $presetModules{nvidiabacklightcontrolfix}{name} issue", 'L1', '[INFO]');
+		}
 	}
 
 	if (($boardname =~ m/NV4XMB,ME,MZ/sm) ||
@@ -960,29 +978,38 @@ sub checkRequirements {
 	}
 
 	# only for removal of nvmequirkswitchtodeepsleepfix
-	if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
-		printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
-		my @samsungNvme990Devices = ('144d:a80d');
-		if ((($boardname =~ m/NS5X_NS7XAU/ism) || ($boardname =~ m/NS5X_7XAU/ism)) &&
-			( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
-			$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
-			printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+	if ($distributionType =~ /noble/) {
+		if ($localConfModules{nvmequirkswitchtodeepsleepfix}{required} eq 'yes') {
+			printLog("nvmefix in list, will mark to remove it", 'L2', '[DEBUG]');
+			my @samsungNvme990Devices = ('144d:a80d');
+			if ((($boardname =~ m/NS5X_NS7XAU/) || ($boardname =~ m/NS5X_7XAU/ism)) &&
+				( findPciDevice($lspciOutput, @samsungNvme990Devices) )) {
+				$presetModules{nvmequirkswitchtodeepsleepfix}{required} = 'yes';
+				printLog("detected $presetModules{nvmequirkswitchtodeepsleepfix}{name} issue", 'L1', '[INFO]');
+			}
 		}
 	}
 
 	my $minPlasmaDesktopVersion = '5.25';
 	my $currentPlasmaWorkspaceVersion = q{};
 	my $versionCompareResult;
-	my $lspciGpus = q{};
-	$lspciGpus = `lspci -d ::0300`;
-	if (countLinesInString($lspciGpus) >= 2) {
-		printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
-		$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
-		if ($currentPlasmaWorkspaceVersion ne q{}) {
-			$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
-			if (! ($versionCompareResult == $NEG_ONE) ) {
-				$presetModules{tuxedodgpurun}{required} = 'yes';
-				printLog("detected $presetModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+
+	# ommit Debian trixie as we don't install the Nvidia drivers
+	if ($distributionType =~ /noble/) {
+		my $minPlasmaDesktopVersion = '5.25';
+		my $lspciGpus = q{};
+		$lspciGpus = `lspci -d ::0300`;
+		if (countLinesInString($lspciGpus) >= 2) {
+			printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
+			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
+			if ($currentPlasmaWorkspaceVersion ne q{}) {
+				$versionCompareResult = version_compare($currentPlasmaWorkspaceVersion, $minPlasmaDesktopVersion);
+				if (! ($versionCompareResult == $NEG_ONE) ) {
+					$presetModules{tuxedodgpurun}{required} = 'yes';
+					printLog("detected $presetModules{tuxedodgpurun}{name} issue", 'L1', '[INFO]');
+				}
+			} else {
+				printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 			}
 		} else {
 			printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
@@ -1011,7 +1038,8 @@ sub checkRequirements {
 		printLog("we just assume plasma 6 is installed", 'L2', '[DEBUG]');
 	}
 
-	if (($ubuntuCodename eq 'noble') ||
+	if (($distributionType =~ /noble/) ||
+		($distributionType =~ /trixie/) ||
 		($distribution =~ /TUXEDO OS/sm)) {
 		my @tuxedoyt6801Devices = ('1f0a:6801');
 		if ( findPciDevice($lspciOutput, @tuxedoyt6801Devices) ) {
@@ -1031,14 +1059,15 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedowifisetregdomain}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($ubuntuCodename eq 'noble') &&
-		(!($distribution =~ /TUXEDO OS/sm))) {
+	if ((($distributionType =~ /noble/) &&
+		($distribution !~ /TUXEDO OS/)) ||
+		$distributionType =~ /trixie/) {
 		$presetModules{gfxmode}{required} = 'yes';
 		printLog("detected $presetModules{gfxmode}{name} issue", 'L1', '[INFO]');
 	}
 
 	my $lsusbMediaTekWirelessDeviceUsbId = '0e8d:0616';
-	if (($ubuntuCodename =~ /noble/) &&
+	if (($distributionType =~ /noble|trixie/) &&
 		(($boardname =~ /4X4-8000 Series/sm) ||
 		($boardname =~ /4X4-7000 Series\/D5/sm) ||
 		($boardname =~ /4X4-7040 Series\/D5/sm) ||
@@ -1048,18 +1077,18 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedobtoffsuspend}{name} issue", 'L1', '[INFO]');
 	}
 
-	# workaround for Linux Mint and mirror repositories
-	if ($distribution =~ /Linux Mint/) {
+	# workaround for Linux Mint and Debian GNU mirror repositories
+	if ($distribution =~ /Linux Mint|Debian GNU/) {
 		$presetModules{'tuxedomirrors'}{'required'} = 'no';
 		$presetModules{'tuxedomirrors'}{'reconfigure'} = 'no';
 		$presetModules{'tuxedomirrors'}{'order'} = q{};
 		$localConfModules{'tuxedomirrors'}{'required'} = 'no';
 		$localConfModules{'tuxedomirrors'}{'reconfigure'} = 'no';
 		$localConfModules{'tuxedomirrors'}{'order'} = q{};
-		printLog("detected Linux Mint, repos will be left unchanged", 'L1', '[INFO]');
+		printLog("detected $distribution, repos will be left unchanged", 'L1', '[INFO]');
 	}
 
-	if (($ubuntuCodename =~ /noble/) &&
+	if (($distributionType =~ /noble|trixie/) &&
 		($boardname =~ /4X4-KRK Series/sm)) {
 		$presetModules{'krackanpointusb4suspendfix'}{'required'} = 'yes';
 	}
@@ -1080,10 +1109,12 @@ sub checkRequirementsLast {
 
 	# if the right nvidia driver is installed, it should show up in 'tomte list'
 	# this is for the case when an eGPU is being used and it is temporarily not connected to the device
-	if (($presetModules{nvidiadriver}{required} ne 'yes') && isNvidiaGPUInstalled()) {
-		$presetModules{nvidiadriver}{required} = 'yes';
-		printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
-		configureSingleModule('nvidia-driver');
+	if ($distributionType =~ /noble/sm) {
+		if (($presetModules{nvidiadriver}{required} ne 'yes') && isNvidiaGPUInstalled()) {
+			$presetModules{nvidiadriver}{required} = 'yes';
+			printLog("detected $presetModules{nvidiadriver}{name} issue", 'L1', '[INFO]');
+			configureSingleModule('nvidia-driver');
+		}
 	}
 
 	return (0);
@@ -1316,7 +1347,7 @@ sub tuxedorepos() {
 		} else {
 			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (($ubuntuCodename =~ /noble/sm) &&
+			if (($distributionType =~ /noble/sm) &&
 					(($distribution =~ /TUXEDO OS/sm) ||
 					($distribution =~ /Ubuntu/sm) ||
 					($distribution =~ /elementary OS/sm))) {
@@ -1338,7 +1369,7 @@ sub tuxedorepos() {
 			}
 		}
 		# remove obsolete entries if they still exist
-		if ($ubuntuCodename =~ /noble/) {
+		if ($distributionType =~ /noble/) {
 			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
 				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
@@ -1361,7 +1392,7 @@ sub tuxedorepos() {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
 
 		# remove obsolete entries if they still exist
-		if ($ubuntuCodename =~ /noble/) {
+		if ($distributionType =~ /noble/) {
 			if (-e '/etc/apt/sources.list.d/tuxedo-computers.list') {
 				printLog("removing obsolete /etc/apt/sources.list.d/tuxedo-computers.list", 'L0', '[INFO]');
 				unlink('/etc/apt/sources.list.d/tuxedo-computers.list');
@@ -1389,10 +1420,10 @@ sub tuxedorepos() {
 		} else {
 			# $thirdPartyMirrorsFile is needed for Ubuntu's which use update-manager,
 			# Mint uses mintUpdate instead
-			if (($ubuntuCodename =~ /noble/sm) &&
-					(($distribution =~ /TUXEDO OS/sm) ||
-					($distribution =~ /Ubuntu/sm) ||
-					($distribution =~ /elementary OS/sm))) {
+			if (($distributionType =~ /noble/sm) &&
+				(($distribution =~ /TUXEDO OS/sm) ||
+				($distribution =~ /Ubuntu/sm) ||
+				($distribution =~ /elementary OS/sm))) {
 				if (! -e $thirdPartyMirrorsFile) {
 					printLog("$thirdPartyMirrorsFile not present, will create one ...", 'L0', '[WARN]');
 					if (! (write_file($thirdPartyMirrorsFile, {'err_mode' => 'carp'}, $thirdPartyMirrorsFileText)) ) {
@@ -1797,7 +1828,7 @@ sub nvidiadriver() {
 	my %nvidiaPackage = nvidiaPackage();
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
-		if ($ubuntuCodename =~ /noble/sm) {
+		if ($distributionType =~ /noble/) {
 			my $nvidiaPackageType = nvidiaMetapackage();
 			printLog("nvidiaPackageType: $nvidiaPackageType", 'L2', '[DEBUG]');
 			my $tuxedoNvidiaDriver = $nvidiaPackage{$nvidiaPackageType};
@@ -1872,7 +1903,7 @@ sub nvidiadriver() {
 	}
 	if ($action eq 'remove') {
 		my $nvidiaDriver = q{};
-		if ($ubuntuCodename =~ /noble/) {
+		if ($distributionType =~ /noble/) {
 			$nvidiaDriver = $nvidiaPackage{nvidiaMetapackage()};
 		}
 		if (removeWarningMessage("nvidia-driver\n")) {
@@ -2419,7 +2450,7 @@ sub createRepos {
 	if (exists($repos{$completeDistVersion})) {
 		$distroKey = $completeDistVersion;
 	} else {
-		$distroKey = $ubuntuCodename;
+		$distroKey = $distributionType;
 	}
 	printLog("detected distroKey: >$distroKey<", 'TL2', '[DEBUG]');
 
@@ -2451,7 +2482,7 @@ sub createRepos {
 	# workaround for possible old entries in sources list
 	# do NOT add more distributions/kernelsList here as this is meant only for
 	# old installations where those entries might still exist
-	if ($ubuntuCodename eq 'noble') {
+	if ($distributionType eq 'noble') {
 		if(-e '/etc/apt/sources.list.d/tuxedo-computers.list'){
 			edit_file { s/deb http:\/\/deb.tuxedocomputers.com\/ubuntu jammy main//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
 			edit_file { s/# Added by TUXEDO Tomte//gsm } '/etc/apt/sources.list.d/tuxedo-computers.list', {'err_mode' => 'carp'};
@@ -2601,7 +2632,7 @@ sub cleanSourcesList {
 	my $FHsource;
 	my @sourceLines;
 	my $sourcesListFile = '/etc/apt/sources.list';
-	if ($ubuntuCodename eq 'noble') {
+	if ($distributionType eq 'noble') {
 		$sourcesListFile = '/etc/apt/sources.list.d/ubuntu.sources';
 	}
 	my $modified = 0;
@@ -3278,7 +3309,7 @@ sub isNvidiaGPUInstalled {
 # returns 0 if no handling necessary
 #
 sub iseGPUHandlingRequired {
-	if ($ubuntuCodename =~ /noble/) {
+	if ($distributionType =~ /noble/) {
 		my %nvidiaPackage = nvidiaPackage();
 		if (isPackageInstalled($nvidiaPackage{'open'})) {
 			eGPUPossibleValue('open');
@@ -3679,13 +3710,13 @@ sub installKernelFlavour {
 	my $retString;
 	my $exitStatus;
 
-	if (!(exists $kernelsList{$ubuntuCodename}{$flavour})) {
+	if (!(exists $kernelsList{$distributionType}{$flavour})) {
 		printLog("flavour $flavour does not exist!!", 'TL0', '[FATAL]');
 		${$failed} += 1;
 		return (0);
 	}
 
-	$installCmd .= " $kernelsList{$ubuntuCodename}{$flavour}";
+	$installCmd .= " $kernelsList{$distributionType}{$flavour}";
 	$installCmd .= ' 2>&1';
 	printLog("install kernel metapackage", 'L2', '[INFO]');
 	printLog("install command: $installCmd", 'L2', '[DEBUG]');
@@ -3696,10 +3727,10 @@ sub installKernelFlavour {
 		lockPM();
 		printLog("return from install:\n$retString", 'L2', '[DEBUG]');
 		if (($retString =~ /is already the newest version/sm) && ($exitStatus == 0)) {
-			printLog("$kernelsList{$ubuntuCodename}{$flavour} is already the newest version", 'L2', '[INFO]');
+			printLog("$kernelsList{$distributionType}{$flavour} is already the newest version", 'L2', '[INFO]');
 		} elsif ($exitStatus == 0) {
 			${$somethingDone} = 1;
-			printLog("$kernelsList{$ubuntuCodename}{$flavour} has been installed", 'L2', '[INFO]');
+			printLog("$kernelsList{$distributionType}{$flavour} has been installed", 'L2', '[INFO]');
 		} elsif ($exitStatus != 0) {
 			printLog("installation of kernel meta package failed !!!", 'L0', '[ERROR]');
 			printLog("$retString", 'L0', '[ERROR]');
@@ -6820,6 +6851,7 @@ if (scalar(@ARGV) != 0) {
 
 	# configure
 	} elsif ($argValue{command} eq "configure") {
+		printLog("starting Tomte $VERSION in configure mode", 'L2', '[INFO]');
 		# check if there is a second argument
 		if ($argValue{module} ne q{}) {
 			checkMode();
@@ -6877,6 +6909,7 @@ if (scalar(@ARGV) != 0) {
 
 	# remove
 	} elsif ($argValue{command} eq "remove") {
+		printLog("starting Tomte $VERSION in remove mode", 'L2', '[INFO]');
 		if ($argValue{module} ne q{}) {
 			if (validModuleName($argValue{module}) ne q{}) {
 				checkMode();
@@ -6895,6 +6928,7 @@ if (scalar(@ARGV) != 0) {
 
 	# reconfigure
 	} elsif ($argValue{command} eq "reconfigure") {
+		printLog("starting Tomte $VERSION in reconfigure mode", 'L2', '[INFO]');
 		# reconfigure interrupts repeated execution
 		if (-e $triesFile) {
 			printLog('delete triesFile', 'L2', '[DEBUG]');
