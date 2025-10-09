@@ -1,3 +1,22 @@
+tuxedo-tomte (2.56.0) noble; urgency=medium
+
+  * added Debian 13 (trixie)
+  * removed jammy and all jammy based distributions
+  * removed ltemodulefix and Huawei fixes (not needed anymore)
+  * removed intelgenXIIIpowerctlfix (not needed anymore)
+  * removed cardreaderfix (not needed anymore)
+  * removed samsungnvmefix (not needed anymore)
+  * removed amdgpubacklightauxoff (not needed anymore)
+  * removed noecwakeupfix (not needed anymore)
+  * removed disablegucfix (not needed anymore)
+  * removed backlightfix (not needed anymore)
+  * removed systemdbacklightfix (not needed anymore)
+  * removed r8168dkms (not needed anymore)
+  * removed EDID subroutines (not needed anymore)
+  * changed kernel metapackage name to linux-tuxedo
+
+ -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 09 Oct 2025 10:24:41 +0200
+
 tuxedo-tomte (2.55.0) noble; urgency=medium
 
   * added Linux Mint 22.2
