@@ -36,6 +36,7 @@ use Tomte::Presets qw( devices initialModuleSettings supportedOS essentialRepos 
 use Tomte::NvidiaList qw( nvidiaPackage nvidiaProductID );
 
 use Storable qw(dclone);
+use IPC::Run qw( run timeout );
 use autovivification;
 no autovivification;
 
@@ -64,7 +65,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -191,12 +192,20 @@ Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 # get current kernel version
 # if in FAI it should check which is the installed
 # kernel package version on target
-my $kernelRelease;
+my $kernelRelease = q{};
 
 if ($FAI) {
 	printLog("starting Tomte version $VERSION in FAI", 'TL0', '[DEBUG]');
-	my $searchCmd = 'dpkg-query -f \'${db:Status-Abbrev} ${Package} ${Version}\n\' -W \'linux-image-*\'';
-	my $dpkgKernel = `$searchCmd`;
+	# get the kernel version installed in the target
+	my @searchCommand = (
+		"dpkg-query" => (
+			"-f" => '${db:Status-Abbrev} ${Package} ${Version}\n',
+			"-W" => ('linux-image-*'),
+		)
+	);
+	my $dpkgKernel = q{};
+	runProcessArray( \$dpkgKernel, undef, 60, undef, @searchCommand );
+	$dpkgKernel =~ s/'//g;
 	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/g;
 	my $hashSize = keys %kernelHash;
 	if ($hashSize != 0) {
@@ -204,14 +213,18 @@ if ($FAI) {
 		$kernelRelease = $kernelHash{$firstkey};
 	}
 } else {
-	$kernelRelease = `uname -r`;
+	# get the kernel version
+	runProcess( \$kernelRelease, undef, 60, undef, 'uname -r' );
 }
 $kernelRelease =~ s/[\n\r]//gs;
-printLog("detected kernel version: $kernelRelease", 'L2', '[DEBUG]');
+printLog("detected kernel version: >$kernelRelease<", 'L2', '[DEBUG]');
 
-
-my $lspciOutput = `lspci -vn 2>/dev/null`;
-my $lsusbOutput = `lsusb 2>/dev/null`;
+# get lspci data
+my $lspciOutput = q{};
+runProcess( \$lspciOutput, undef, 20, undef, 'lspci -vn' );
+# get lsusb data
+my $lsusbOutput = q{};
+runProcess( \$lsusbOutput, undef, 20, undef, 'lsusb' );
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname = q{};
 $boardname = readFirstLineOfFile($boardnameFilename);
@@ -439,7 +452,7 @@ sub isLocked {
 # checks if all required files for package management are unlocked
 # only use if it is not required to lock the files simultaneus or race
 # conditions will rise!!
-# returns 1 if any of the required files is locked
+# returns 1 if all of the required files are locked
 # returns 0 if all of the required files are unlocked
 # returns -1 if something went wrong
 #
@@ -549,7 +562,7 @@ sub releaseLock {
 
 ###############################################################################
 # locks all packagemanagement files
-# it unlocks all files if some were locked by another process
+# it unlocks all own locked files if some were locked by another process
 # returns 1 if all files could be locked
 # returns 0 if some could not be locked
 #
@@ -624,8 +637,6 @@ sub readFirstLineOfFile {
 
 
 
-
-
 ###############################################################################
 # counts the lines in a given string
 #
@@ -637,7 +648,6 @@ sub countLinesInString {
 	# was last line a whole line with a "\n"?;
 	return $numlines + ($lastchar ne "\n");
 }
-
 
 
 
