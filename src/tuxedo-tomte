@@ -909,7 +909,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{tuxedodrivers}{name} issue", 'L1', '[INFO]');
 	}
 
-	my $fingerprintLsUsb = `lsusb`;
 	my @fingerprintRegExp = (
 		qr/147e:100[0123]/sm,
 		qr/147e:20(15|16|20)/sm,
@@ -917,7 +916,7 @@ sub checkRequirements {
 		qr/147e:500[23]/sm,
 		qr/0483:201[56]/sm,
 		qr/1c7a:0603/sm);
-	foreach my $fpkey (map { $fingerprintLsUsb =~ $_ } @fingerprintRegExp) {
+	foreach my $fpkey (map { $lsusbOutput =~ $_ } @fingerprintRegExp) {
 		$presetModules{fingerprintreader}{required} = 'yes';
 		printLog("detected $presetModules{fingerprintreader}{name} issue", 'L1', '[INFO]');
 		last;
@@ -1008,7 +1007,8 @@ sub checkRequirements {
 	if ($distributionType =~ /noble/) {
 		my $minPlasmaDesktopVersion = '5.25';
 		my $lspciGpus = q{};
-		$lspciGpus = `lspci -d ::0300`;
+		# get the GPU information
+		runProcess( \$lspciGpus, undef, 20, undef, 'lspci -d ::0300' );
 		if (countLinesInString($lspciGpus) >= 2) {
 			printLog("more than 1 GPU found" , 'L2', '[DEBUG]');
 			$currentPlasmaWorkspaceVersion = getPackageVersion('plasma-workspace');
@@ -1622,14 +1622,14 @@ sub fingerprintreader() {
 		if( ! isPackageInstalled('fprintd') ) {
 			$wasInstalled = 0;
 			messageLongInstall();
-			$packagefprintd = installPackage('fprintd', 'fingerprintreader');
+			$packagefprintd = installPackage('fprintd', 'fingerprintreader', 300);
 		} else {
 			$packagefprintd = 1;
 		}
 		if( ! isPackageInstalled('libpam-fprintd') ) {
 			$wasInstalled = 0;
 			messageLongInstall();
-			$packagelibpam = installPackage('libpam-fprintd', 'fingerprintreader');
+			$packagelibpam = installPackage('libpam-fprintd', 'fingerprintreader', 300);
 		} else {
 			$packagelibpam = 1;
 		}
@@ -1692,8 +1692,8 @@ sub fingerprintreader() {
 sub tuxedorestoreaudiofix() {
 	my $module = shift;
 	my $action = shift;
-	my $retval1;
-	my $retval2;
+	my $retval1 = q{};
+	my $retval2 = q{};
 	my $fileName = '/lib/systemd/system/restore-audiocards.service';
 	my $fileText = "# added by tuxedo-tomte, any changes might be overwritten by Tomte as needed!! \n".
 		"[Unit]\n".
@@ -1714,7 +1714,8 @@ sub tuxedorestoreaudiofix() {
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval1 = write_file($fileName, {'err_mode' => 'carp'}, $fileText);
-		$retval2 = system('systemctl --now enable restore-audiocards.service');
+
+		runProcess( undef, undef, 60, \$retval2, 'systemctl --now enable restore-audiocards.service' );
 		if ($retval1 == 0 || $retval2 != 0) {
 			if ($retval2 != 0) {
 				printLog('systemd could not initialize restore-audiocards.service', 'L0', '[WARN]');
@@ -1852,20 +1853,24 @@ sub nvidiadriver() {
 			}
 			printLog("the Nvidia package $tuxedoNvidiaDriver will be used", 'L2', '[DEBUG]');
 			# check if the drivers to install are actually available in repos
+			# before removing old drivers
 			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
-				# deinstall other nvidia drivers
-				$oldDriversRemoved = deinstExcept('nvidia-driver-', $tuxedoNvidiaDriver);
+				# uninstall other nvidia drivers
+				$oldDriversRemoved = uninstallExcept('nvidia-driver-', $tuxedoNvidiaDriver);
 
-				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver);
+				my $oldDriversRemovedCounter = uninstallExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
 				# check if the package is already installed
 				if( ! isPackageInstalled($tuxedoNvidiaDriver) ) {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver, 'nvidiadriver');
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver, 'nvidiadriver', 600);
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
+					$packageNvidiaDriver = 1;
+				}
+				if ($packageNvidiaDriver == 1) {
 					setAptMark($tuxedoNvidiaDriver,'manual');
 					$packageNvidiaDriver = 1;
 				}
@@ -1875,7 +1880,7 @@ sub nvidiadriver() {
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver');
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver', 300);
 			} else {
 				$packageNvidiaPrime = 1;
 			}
@@ -1883,9 +1888,9 @@ sub nvidiadriver() {
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					$output = `gpu-manager && prime-select nvidia`;
+					runProcess( \$output, undef, 600, undef, 'gpu-manager && prime-select nvidia' );
 					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog("$output", 'L2', '[DEBUG]');
+					printLog(">$output<", 'L2', '[DEBUG]');
 				}
 			}
 
@@ -1919,14 +1924,14 @@ sub nvidiadriver() {
 		if (removeWarningMessage("nvidia-driver\n")) {
 			my $counter = 0;
 			if( isPackageInstalled($nvidiaDriver) ) {
-				if (!deinstallSinglePackage($nvidiaDriver)) {
+				if (!uninstallSinglePackage($nvidiaDriver)) {
 					$counter = $counter+1;
 				}
 			} else {
 				$counter = $counter+1;
 			}
 			if( isPackageInstalled('nvidia-prime') ) {
-				if (!deinstallSinglePackage('nvidia-prime')) {
+				if (!uninstallSinglePackage('nvidia-prime')) {
 					$counter = $counter+1;
 				}
 			} else {
@@ -1966,6 +1971,7 @@ sub apportfix() {
 			$retval = edit_file { s/enabled=1/enabled=0/gsm } '/etc/default/apport', {'err_mode' => 'carp'};
 			if ($retval == 1) {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
+				# TODO stop apport?
 				#`service apport stop`;
 				#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 				#`systemctl disable apport.service`;
@@ -1979,6 +1985,7 @@ sub apportfix() {
 			}
 		} elsif (isLineInFile('/etc/default/apport', 'enabled=0')) {
 			printLog('apport was already disabled in /etc/default/apport', 'L1', '[DEBUG]');
+			# TODO stop apport?
 			#`service apport stop`;
 			#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 			#`systemctl disable apport.service`;
@@ -2442,6 +2449,158 @@ sub krackanpointusb4suspendfix() {
 # subs for tuxedorepos & tuxedomirrors
 #
 
+
+
+###############################################################################
+# usage:
+# runProcessArray( \$rPAOutput, \$rPAErrors, $rPATimeout, \$rPACommandExitCode, @rPACommand )
+# @sPACommand consists of the program to start and its arguments as an array where
+# each parameter is a separate element
+# $rPAOutput: the output of the command
+# $rPAErrors: the error messages of the command
+# $rPATimeout: the maximum time the program is allowed to run before it gets shut down
+# undef might be used for all parameters except @rPACommand and $rPATimeout
+# use undef if you are not interested in the values returns
+# use undef as refernces where references are used (\undef)
+#
+# $returnValue: the exit code of the command
+# returns 1 if the exit code of the command is 0
+# returns empty string in any other case
+#
+# This is usefull in case of complicated parameters with spaces or characters
+# that have to be escaped
+#
+sub runProcessArray {
+	my ($rPAOutput, $rPAErrors, $rPATimeout, $rPACommandExitCode, @rPACommand) = @_;
+	#TODO debug
+	printLog("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 'L2', '');
+	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
+	# initialize variables if they are undefined
+	if (!defined $rPAOutput) {
+		#TODO
+		printLog("rPAOutput not defined", 'L2', '');
+		printLog("\$\$rPAOutput before defining: >$$rPAOutput<", 'L2', '');
+		printLog("\$rPAOutput before defining: >$rPAOutput<", 'L2', '');
+		$$rPAOutput = q{};
+		printLog("\$\$rPAOutput after defining: >$$rPAOutput<", 'L2', '');
+		printLog("\$rPAOutput after defining: >$rPAOutput<", 'L2', '');
+	}
+	if (!defined $rPAErrors) {
+		$$rPAErrors = q{};
+	}
+	# default value for $sPATimeout
+	if (!defined $rPATimeout) {
+		$rPATimeout = 5;
+	}
+	if (!defined $rPACommandExitCode) {
+		$$rPACommandExitCode = q{};
+	}
+	my $rPARunExitCode = q{};
+
+	# set the timeout to some extreme high value in FAI
+	# in case of bad connection or some other network problem
+	if ($FAI) {
+		$rPATimeout = 600;
+	}
+
+	# execute the command with exception handling
+	eval {
+		# run returns 1 if command returns 0, otherwise returns nothing
+		$rPARunExitCode = run \@rPACommand, \undef, $rPAOutput, $rPAErrors, timeout ( $rPATimeout, exception=>'timeout' );
+		# get the exit code of the command
+		$$rPACommandExitCode = $?;
+	};
+
+	# catch the exception
+	if ($@ =~ /timeout/) {
+		if ($$rPACommandExitCode eq q{}) {
+			$$rPACommandExitCode = $?;
+		}
+		printLog("\n-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-", 'L2', '[ERROR]');
+		printLog("Timed out after $rPATimeout sec. ...", 'TL0', '[ERROR]');
+		printLog("run exit code: >$rPARunExitCode<", 'TL0', '[DEBUG]');
+		printLog("command exit code: >$$rPACommandExitCode<", 'TL0', '[DEBUG]');
+		if ($FAI) {
+			printLog("external process call:\n@rPACommand\nhang. Tomte aborted further operations", 'TL0', '[ERROR]');
+			exit (1);
+		}
+	} else {
+		if ($$rPACommandExitCode eq q{}) {
+			$$rPACommandExitCode = $?;
+		}
+		printLog("Completed task", 'L2', '[DEBUG]');
+		printLog("run exit code: >$rPARunExitCode<", 'L2', '[DEBUG]');
+		printLog("command exit code: >$$rPACommandExitCode<", 'L2', '[DEBUG]');
+	}
+	if (defined $$rPAOutput) {
+		chomp($$rPAOutput);
+		# TODO debug
+		# to avoid printing out the huge list of packages
+		if ( ! grep(/pkgnames/, @rPACommand) ) {
+			printLog("runProcess output:\n>$$rPAOutput<", 'L2', '[DEBUG]');
+		}
+	}
+	if (defined $$rPAErrors) {
+		chomp($$rPAErrors);
+		printLog("runProcess errors:\n>$$rPAErrors<", 'L2', '[DEBUG]');
+	}
+	# make sure to convert into numeral
+	if (defined $$rPACommandExitCode) {
+		$$rPACommandExitCode += 0;;
+	}
+	printLog("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n", 'L2', '');
+
+	return ($rPARunExitCode);
+}
+
+
+
+###############################################################################
+# usage:
+# runProcess( \$rPOutput, \$rPErrors, $rPTimeout, \$rPCommandExitCode, $rPCommand )
+# $rPCommand consists of the program to start and its arguments all in one string
+# $rPOutput: the output of the command
+# $rPErrors: the error messages of the command
+# $rPTimeout: the maximum time the program is allowed to run before it gets shut down
+# undef might be used for all parameters except $rPCommand and $rPTimeout
+# use undef if you are not interested in the value
+#
+# $returnValue: the exit code of the command
+# returns 1 if the exit code of the command is 0
+# returns empty string in any other case
+#
+# Should be used for simple commands like e.g. 'lspci -vn'
+#
+sub runProcess {
+	my ($rPOutput, $rPErrors, $rPTimeout, $rPCommandExitCode, $rPCommand) = @_;
+	# initialize variables if they are undefined
+	if (!defined $rPOutput) {
+		$$rPOutput = q{};
+	}
+	if (!defined $rPErrors) {
+		$$rPErrors = q{};
+	}
+	# default value for $sPTimeout
+	if (!defined $rPTimeout) {
+		$rPTimeout = 5;
+	}
+	if (!defined $rPCommandExitCode) {
+		$$rPCommandExitCode = q{};
+	}
+	# $sPCommand is a requisite, exit with an error if not defined
+	if (!defined $rPCommand) {
+		printLog("runProcess: command not defined !!", 'TL2', '[ERROR]');
+		return (1);
+	}
+	my @rPCommandSplit = split(' ', $rPCommand);
+
+	my $rPRunExitCode = runProcessArray( $rPOutput, $rPErrors, $rPTimeout, $rPCommandExitCode, @rPCommandSplit );
+
+	return ($rPRunExitCode);
+}
+
+
+
 ###############################################################################
 # Adds the TUXEDO repos to the system with public key
 # returns 2 if successful and changes to repos were made
@@ -2583,20 +2742,30 @@ sub addRepoKey {
 	if (! isPackageInstalled('tuxedo-archive-keyring')) {
 		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
 		if ( checkNetwork( $NETWORK_CHECKS, 1 ) ) {
-			$outputKey = `wget -r -nd --no-parent -P /tmp/ -A 'tuxedo-archive-keyring*.deb' https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/`;
+			# get the keyring for TUXEDO repos
+			runProcess( \$outputKey, undef, 120, undef, 'wget -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
+			printLog(">$outputKey<", 'L2', '[INFO]');
 			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < $NETWORK_CHECKS) {
 				$counter++;
-				my $command = $consoleLanguage.'apt-get -y --allow-unauthenticated -o Dpkg::lock::timeout=0 install /tmp/tuxedo-archive-keyring* 2>/dev/null';
-				if (unlockPM("$command") && (isPMlocked() == 0)) {
-					printLog("executing: $command", 'L2', '[DEBUG]');
-					$outputKey = `$command`;
-					$errorCode = $?/$RETVAL_CONVERTER;
+				my @command = (
+					'apt-get' => (
+						'-y',
+						'--allow-unauthenticated',
+						'-o' => 'Dpkg::lock::timeout=0',
+						'install' => glob( '/tmp/tuxedo-archive-keyring*' ),
+					)
+				);
+				my $commandString = join(' ', @command);
+				if (unlockPM($commandString) && (isPMlocked() == 0)) {
+					printLog("executing: $commandString", 'L2', '[DEBUG]');
+					runProcessArray( \$outputKey, '2>&1', 120, \$errorCode, @command );
 					lockPM();
 					if ($errorCode != 0) {
 						printLog("error code apt-get: $errorCode", 'L0', '[ERROR]');
 						printLog("output apt-get: $outputKey", 'L0', '[ERROR]');
+						repairPackageManagement();
 					} else {
 						printLog("no errors installing keyrings", 'L2', '[INFO]');
 						last;
@@ -2733,10 +2902,11 @@ sub getSystemdState {
 	if ($FAI) {
 		return (0);
 	}
-	my $systemdCmd = "systemctl is-active $systemdModule";
-	my $systemdReturn = `$systemdCmd`;
+	my $systemdCommand = "systemctl is-active $systemdModule";
+	my $systemdReturn = q{};
+	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
-	printLog("systemd return for $systemdModule: $systemdReturn", 'L2', '[INFO]');
+	printLog("systemd return for $systemdModule: >$systemdReturn<", 'L2', '[INFO]');
 	if ($systemdReturn =~ /^active/sm) {
 		return 'active';
 	} elsif ($systemdReturn =~ /^inactive/sm) {
@@ -2757,10 +2927,11 @@ sub getSystemdEnabled {
 	if ($FAI) {
 		return (0);
 	}
-	my $systemdCmd = "systemctl is-enabled $systemdModule";
-	my $systemdReturn = `$systemdCmd`;
+	my $systemdReturn = q{};
+	my $systemdCommand = "systemctl is-enabled $systemdModule";
+	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
-	printLog("systemd returns: $systemdReturn", 'L2', '[INFO]');
+	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
 	return ($systemdReturn);
 }
 
@@ -2773,9 +2944,10 @@ sub getSystemdEnabled {
 #
 sub commandSystemdModule {
 	my ($command, $systemdModule) = @_;
-	my $systemdCmd = "systemctl --quiet $command $systemdModule";
-	my $systemdReturn = `$systemdCmd`;
-	printLog("systemd returns: $systemdReturn", 'L2', '[INFO]');
+	my $systemdReturn = q{};
+	my $systemdCommand = "systemctl --quiet $command $systemdModule";
+	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
+	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
 	return;
 }
 
@@ -2912,32 +3084,34 @@ sub createFile {
 		}
 	}
 
-    # Write the new content to the file
-    if(! write_file($filePath, {'err_mode' => 'carp'}, $content)) {
-        return $NEG_ONE;  # Return -1 if there was an error writing to the file
-    }
+	# Write the new content to the file
+	if(! write_file($filePath, {'err_mode' => 'carp'}, $content)) {
+		return $NEG_ONE;  # Return -1 if there was an error writing to the file
+	}
 
-    # If the file is supposed to be executable, set the execution permission
-    if($executable eq 'yes' || $executable eq '+x') {
-        if(system("chmod +x $filePath")) {
-            return $NEG_ONE;  # Return -1 if there was an error setting the execution permission
-        }
-    }
+	# If the file is supposed to be executable, set the execution permission
+	if($executable eq 'yes' || $executable eq '+x') {
+		my $returnValue = q{};
+		runProcess( undef, undef, 30, \$returnValue, "chmod +x $filePath" );
+		if ($returnValue) {
+			return $NEG_ONE;  # Return -1 if there was an error setting the execution permission
+		}
+	}
 
-    # Read the current content of the file again
-    my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
+	# Read the current content of the file again
+	my $currentContent = read_file($filePath, {'err_mode' => 'carp'});
 
 	my $fileIsExecutableCheck = 1;
 	if($executable eq 'yes'|| $executable eq '+x') {
 		$fileIsExecutableCheck = -x $filePath;
 	}
 
-    # Check if the content of the file is not the same as the provided content
-    if ($currentContent ne $content || ! $fileIsExecutableCheck) {
-        return $NEG_ONE;  # Return -1 if the content is not correctly written to the file
-    }
+	# Check if the content of the file is not the same as the provided content
+	if ($currentContent ne $content || ! $fileIsExecutableCheck) {
+		return $NEG_ONE;  # Return -1 if the content is not correctly written to the file
+	}
 
-    return 1;  # Return 1 if the content was changed successfully
+	return 1;  # Return 1 if the content was changed successfully
 }
 
 
@@ -2953,8 +3127,7 @@ sub createFile {
 #
 sub grubModuleEdit {
 	my ($module, $action, $silent, @kernelParameters) = @_;
-	my $retVal;
-	
+	my $returnValue;
 	if ($LiveISO) {
 		printLog("not changing grub for $module as this is a LiveISO", 'L0', '[INFO]');
 		return (0);
@@ -2969,9 +3142,9 @@ sub grubModuleEdit {
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		printLog("kernelparameters to insert: @kernelParameters", 'L2', '[DEBUG]');
-		$retVal = insertGrub($module, \@kernelParameters);
-		printLog("retVal: $retVal", 'L2', '[DEBUG]');
-		if ($retVal < 0) {
+		$returnValue = insertGrub($module, \@kernelParameters);
+		printLog("returnValue: $returnValue", 'L2', '[DEBUG]');
+		if ($returnValue < 0) {
 			printLog("$presetModules{$module}{name} installation failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			if (!$silent) {
@@ -2981,7 +3154,7 @@ sub grubModuleEdit {
 		} else {
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
-			if ($retVal > 0) {
+			if ($returnValue > 0) {
 				$postConfProgramsList{updateGrub}{trigger} = 1;
 				if (!$silent) {
 					addToConfiguredModules($module, "success");
@@ -2999,8 +3172,8 @@ sub grubModuleEdit {
 	
 	if ($action eq 'upgrade') {
 		printLog("upgrading $presetModules{$module}{name}", 'L1', '[INFO]');
-		$retVal = insertGrub($module, \@kernelParameters);
-		if ($retVal < 0) {
+		$returnValue = insertGrub($module, \@kernelParameters);
+		if ($returnValue < 0) {
 			printLog("$presetModules{$module}{name} upgrade failed", 'L0', '[INFO]');
 			$presetModules{$module}{installed} = "failed";
 			if (!$silent) {
@@ -3010,7 +3183,7 @@ sub grubModuleEdit {
 		} else {
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
-			if ($retVal > 0) {
+			if ($returnValue > 0) {
 				$postConfProgramsList{updateGrub}{trigger} = 1;
 				if (!$silent) {
 					addToConfiguredModules($module, "success");
@@ -3064,7 +3237,7 @@ sub debianPackageModule {
 			# or LiveISO and set the verbose line
 			setDkmsVerbose( $module, 1 );
 
-			if ( installPackage($presetModules{$module}{name}, $module) ) {
+			if ( installPackage($presetModules{$module}{name}, $module, 600) ) {
 				$presetModules{$module}{installed} = 'yes';
 				$presetModules{$module}{upgraded} = 'yes';
 				addToConfiguredModules($module, 'success');
@@ -3146,26 +3319,36 @@ sub setDkmsVerbose {
 ###############################################################################
 # Deinstalls all packages beginning with a given string except the one given as
 # second parameter
-# returns 0 if the search for the packages failed or if the deinstallation was
+# returns 0 if the search for the packages failed or if the uninstallation was
 # unsuccessful
 # returns 1 if everything was ok, even if no packages were found
 #
 # !!!!! WARNING !!!! this is mostly adapted to the nvidia installation module
 #
-sub deinstExcept {
-	my $deinst = shift;
+sub uninstallExcept {
+	my $uninstall = shift;
 	my $except = shift;
-	my $retValue = q{};
-	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
-	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
-	my $retString = `$searchCmd`;
-	$retValue = $?/$RETVAL_CONVERTER;
-	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
-	my $deinstCmd;
-	my $deinstList =q{};
-	if ($retValue != 0) {
-		if ($retValue == 1) {
-			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1', '[DEBUG]');
+	my $returnValue = q{};
+	my @searchCommand = (
+		'dpkg-query' => (
+			'-W',
+			'-f' => '${Package} ${db:Status-Abbrev}\n',
+			"$uninstall*",
+		),
+	);
+
+	printLog("search command: @searchCommand", 'L2', '[DEBUG]');
+	my $retString = q{};
+
+	runProcessArray( \$retString, '2>&1', 300, \$returnValue, @searchCommand );
+
+	$retString =~ s/'//g;
+	printLog("first result for $uninstall:\n$retString", 'L2', '[DEBUG]');
+	my $uninstallCommand;
+	my $uninstallList = q{};
+	if ($returnValue != 0) {
+		if ($returnValue == 256) {
+			printLog("no packages found matching search string to uninstall packages: $uninstall with except pattern: $except", 'L1', '[DEBUG]');
 			return (1);
 		}
 		printLog('something went wrong while searching for packages', 'L0', '[WARN]');
@@ -3174,52 +3357,62 @@ sub deinstExcept {
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsm;
 	my @exceptDependencies = getPackageDependencies($except);
 
-	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
-	my $deinstCounter = 0;
+	my @uninstallCommand = (
+		'apt-get' => (
+			'-yq' => 'remove',
+			'-o Dpkg::lock::timeout=0',
+		)
+	);
 
-	foreach my $deinstKey (keys %retHash) {
-		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
+	my $uninstallCounter = 0;
+
+	foreach my $uninstallKey (keys %retHash) {
+		printLog("uninstallKey: $uninstallKey except: $except retHash: $retHash{$uninstallKey}", 'L2', '[DEBUG]');
 		# usefull for debug
-		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
-			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
+		if (grep( /^$uninstallKey$/sm, @exceptDependencies)) {
+			printLog("grep: $uninstallKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
 		} else {
-			printLog("grep: $deinstKey not found in dependencies, delete!", 'L2', '[DEBUG]');
+			printLog("grep: $uninstallKey not found in dependencies, delete!", 'L2', '[DEBUG]');
 		}
 		# check if it is installed/not exempt/not a dependency of the exemp
-		if (($retHash{$deinstKey} =~ /i./sm) &&
-			!($deinstKey =~ $except) &&
-			!(grep( /^$deinstKey$/sm, @exceptDependencies ))) {
-			$deinstCounter++;
-			$deinstCmd .= q{ }.$deinstKey;
-			$deinstList .= q{ }.$deinstKey;
+		if (($retHash{$uninstallKey} =~ /i./sm) &&
+			!($uninstallKey =~ $except) &&
+			!(grep( /^$uninstallKey$/sm, @exceptDependencies ))) {
+			$uninstallCounter++;
+			push( @uninstallCommand, $uninstallKey );
+			$uninstallList .= q{ }.$uninstallKey;
 		}
 	}
-	if ($deinstCounter != 0) {
-		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0', '[DEBUG]');
+	if ($uninstallCounter != 0) {
+		printLog("uninstallCounter not 0, uninstalling: $uninstallList", 'L0', '[DEBUG]');
 		my $retText = q{};
 		if ($FAI) {
-			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
-			$retText = `$deinstCmd`;
+			printLog("command to uninstall: @uninstallCommand", 'L2', '[DEBUG]');
+			runProcessArray( \$retText, undef, 500, \$returnValue, @uninstallCommand );
+			if ($returnValue != 0) {
+				repairPackageManagement();
+			}
 		} else {
-			$deinstCmd .= ' >/dev/null 2>&1';
-			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
-			if (unlockPM("$deinstCmd") && (isPMlocked() == 0)) {
-				printLog("deinstalling: $deinstList", 'L2', '[DEBUG]');$retText = `$deinstCmd`;
+			printLog("command to uninstall: @uninstallCommand", 'L2', '[DEBUG]');
+			if (unlockPM(@uninstallCommand) && (isPMlocked() == 0)) {
+				printLog("uninstalling: $uninstallList", 'L2', '[DEBUG]');
+				runProcessArray( \$retText, '2>&1', 500, \$returnValue, @uninstallCommand );
+				if ($returnValue != 0) {
+					repairPackageManagement();
+				}
 				lockPM();
 			}
 		}
-		$retValue = q{};
-		$retValue = $?/$RETVAL_CONVERTER;
-		if ($retValue != 0) {
-			printLog("failed to deinstall packages, retvalue: >$retValue<", 'L0', '[WARN]');
+		if ($returnValue != 0) {
+			printLog("failed to uninstall packages, retvalue: >$returnValue<", 'L0', '[WARN]');
 			printLog("retText: $retText", 'L0', '[WARN]');
 			return (0);
 		} else {
-			printLog('deinstallation of packages successful', 'L1', '[INFO]');
+			printLog('removal of packages successful', 'L1', '[INFO]');
 			return (1);
 		}
 	} else {
-		printLog('nothing to deinstall', 'L1', '[INFO]');
+		printLog('nothing to uninstall', 'L1', '[INFO]');
 		return (1);
 	}
 }
@@ -3360,8 +3553,8 @@ sub getPackageDependencies {
 	my @lines;
 	my $pkgString;
 	my @packages;
-	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
-	$result = `$searchCmd`;
+	#my $searchCmd = 'apt-cache depends --important '.$package;
+	runProcess( \$result, undef, 120, undef, "apt-cache depends --important $package" );
 	@lines = split /\n/sm, $result;
 	foreach my $line (@lines) {
 		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
@@ -3381,7 +3574,8 @@ sub getPackageDependencies {
 #
 sub isPackageInRepo {
 	my $package = shift;
-	my $returnFromSearch = `apt-cache search --names-only ^$package\$`;
+	my $returnFromSearch = q{};
+	runProcess( \$returnFromSearch, undef, 120, undef, "apt-cache search --names-only $package" );
 	chop($returnFromSearch);
 	$returnFromSearch =~ s/ .*//sm;
 	printLog("package: >$package< returnFromSearch: >$returnFromSearch<", '2', '[DEBUG]');
@@ -3400,37 +3594,47 @@ sub isPackageInRepo {
 
 ###############################################################################
 # Deinstalls a package
-# returns 1 if the search for the package failed or if the deinstallation was
+# returns 1 if the search for the package failed or if the uninstallation was
 # unsuccessful
 # returns 0 if everything was ok, even if no package was found
 #
-sub deinstallSinglePackage {
-	my $deinst = shift;
-	my $aptgetDeinst = 'apt-get -yq remove -o Dpkg::lock::timeout=0';
-	my $retValue;
+sub uninstallSinglePackage {
+	my $package = shift;
+	my @aptgetDeinst = (
+		'apt-get' => (
+			'-yq' => 'remove',
+			'-o Dpkg::lock::timeout=0',
+			$package,
+		)
+	);
 
-	$aptgetDeinst .= " $deinst";
-	printLog("deinstalling: $deinst", 'L0', '[INFO]');
-	$aptgetDeinst .= " >/dev/null 2>&1";
-	if (isPackageInstalled($deinst)) {
+	my $uninstallString = join(' ', @aptgetDeinst);
+	$uninstallString .= " $package";
+	printLog("uninstalling: $package", 'L0', '[INFO]');
+	if (isPackageInstalled($package)) {
 		deactivatePackagekit();
-		if (unlockPM("$aptgetDeinst") && (isPMlocked() == 0)) {
-			printLog("executing deinstallation", 'L2', '[DEBUG]');
-			if (system($aptgetDeinst)) {
-				$retValue = $?/$RETVAL_CONVERTER;
+		if (unlockPM($uninstallString) && (isPMlocked() == 0)) {
+			printLog("executing uninstallation", 'L2', '[DEBUG]');
+			my $returnValue = q{};
+			my $output = q{};
+			runProcessArray( \$output, '2>&1', 120, \$returnValue, @aptgetDeinst );
+			printLog(">$output<", 'L2', '[DEBUG]');
+			if ($returnValue != 0) {
+				printLog("failed to remove package, retvalue: $returnValue", 'L0', '[WARN]');
+				repairPackageManagement();
 				lockPM();
-				printLog("failed to deinstall package, retvalue: $retValue", 'L0', '[WARN]');
 				return (1);
 			} else {
-				printLog('deinstallation of package successful', 'L0', '[INFO]');
+				lockPM();
+				printLog('removal of package successful', 'L0', '[INFO]');
 				return (0);
 			}
 		} else {
-			printLog("package deinstallation failed!! Could not get package manager lock", 'L0', '[WARN]');
+			printLog("package removal failed!! Could not get package manager lock", 'L0', '[WARN]');
 			return (1);
 		}
 	} else {
-		printLog("package $deinst is not installed", 'L0', '[WARN]');
+		printLog("package $package is not installed", 'L0', '[WARN]');
 		return (0);
 	}
 	return;
@@ -3450,11 +3654,19 @@ sub isPackageInstalled {
 	if ($package eq q{}) {
 		return (0);
 	}
-	my $cmd = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '.$package.' 2>&1';
-	my $retString = `$cmd`;
-	my $retValue = $?/$RETVAL_CONVERTER;
-	printLog("checking if $package is installed\nanswer: $retString", 'L2', '[DEBUG]');
-	if ($retString =~ m/^[ih][i]\s$/sm) {
+	my @searchCommand = (
+		'dpkg-query' => (
+			'-W',
+			'-f' => '${db:Status-Abbrev}',
+			$package,
+		)
+	);
+
+	my $retString = q{};
+	runProcessArray( \$retString, '2>&1', 120, undef, @searchCommand );
+	$retString =~ s/'//g;
+	printLog("checking if $package is installed\nanswer: >$retString<", 'L2', '[DEBUG]');
+	if ($retString =~ /^[ih][i].*$/sm) {
 		printLog("package $package is installed: $retString", 'L1', '[DEBUG]');
 		return (1);
 	} else {
@@ -3471,12 +3683,12 @@ sub isPackageInstalled {
 #
 sub getPackageVersion {
 	my $package = shift;
-	my $cmd = $consoleLanguage.'dpkg-query --showformat=\'${Version}\' --show '.$package.' 2>&1';
 	my $retString = q{};
-	$retString = `$cmd`;
-	my $retValue = $?/$RETVAL_CONVERTER;
-	printLog("version string for $package: $retString retValue: $retValue", 'L2', '[DEBUG]');
-	if ($retValue == 0) {
+	my $returnValue = q{};
+	runProcess( \$retString, '2>&1', 5, \$returnValue, "dpkg-query --showformat='\${Version}' --show $package" );
+	$retString =~ s/'//g;
+	printLog("version string for $package: >$retString< returnValue: >$returnValue<", 'L2', '[DEBUG]');
+	if ($returnValue == 0) {
 		$retString =~ s/.*://sm;
 		if ($retString ne q{}) {
 			printLog("package $package has version: $retString", 'L1', '[DEBUG]');
@@ -3493,89 +3705,113 @@ sub getPackageVersion {
 
 
 
-
 ###############################################################################
 # installs a package by apt-get
+# installPackage( package name, module, timeout )
 # returns 1 if successful
 # returns 0 if package was not installed
 #
 sub installPackage {
-	my ( $packageName, $module ) = @_;
-	my $retval;
-	if (isPackageInstalled($packageName)) {
-		return (1);
-	}
-	if ($FAI) {
-		printLog("install package $packageName", 'TL0', '[INFO]');
-		# usefull debug option: Debug::pkgDPkgProgressReporting=true
-		if ($logLevel > 1) {
-			$retval = `apt-get -o Debug::pkgDPkgProgressReporting=true -o Dpkg::lock::timeout=0 -y install $packageName`;
-		} else {
-			$retval = `apt-get -y install -o Dpkg::lock::timeout=0 $packageName`;
-		}
-		printLog("return from apt-get:\n$retval", 'TL2', '[DEBUG]');
-		$retval = isPackageInstalled($packageName);
-	} elsif (!($LiveISO && $noNetwork)) {
+	my ( $packageName, $module, $timeout ) = @_;
+	my $retval = q{};
+	my $installed = q{};
+	if (!$noNetwork) {
 		if (checkNetwork( $NETWORK_CHECKS, 1)) {
+			my $installCommand = q{};
+			my $output = q{};
 			messageLongInstall();
 			printLog("install package $packageName", 'L0', '[INFO]');
 			deactivatePackagekit();
-			if (unlockPM("apt-get -yq install $packageName") && (isPMlocked() == 0)) {
-				printLog("installing $packageName", 'L2', '[DEBUG]');
-				if ($logLevel > 1) {
-					$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install $packageName >>$logFile 2>&1`;
-				} else {
-					$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install $packageName >/dev/null 2>&1`;
-				}
+			my @installCommand = q{};
+			if ($FAI || ($logLevel > 1)) {
+				# usefull debug option: Debug::pkgDPkgProgressReporting=true
+				@installCommand = (
+					'apt-get' => (
+						'-o Debug::pkgDPkgProgressReporting=true',
+						'-o Dpkg::lock::timeout=0',
+						'-yq' => 'install',
+						$packageName,
+					)
+				);	
+			} else {
+				# the normal way packages are installed
+				@installCommand = (
+					'apt-get' => (
+						'-yq',
+						'-o Dpkg::lock::timeout=0',
+						'install',
+						$packageName,
+					)
+				);
+			}
+			if (unlockPM("@installCommand") && (isPMlocked() == 0)) {
+				runProcessArray( \$output, undef, $timeout, \$retval, @installCommand );
 				lockPM();
-				printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
-				$retval = isPackageInstalled($packageName);
-				if ($retval == 0) {
+				$installed = isPackageInstalled($packageName);
+				if ($installed == 0) {
 					printLog("failed to install $packageName", 'L0', '[WARN]');
 					printLog("will try again later", 'L0', '[WARN]');
 					# repair a possibly wrecked package manager
-					if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
-						printLog("executing --configure -a", 'L2', '[DEBUG]');
-						`dpkg --configure -a`;
-						lockPM();
-						startTomteDelayed();
-					} else {
-						printLog('Could not repair package management, will try again later', 'L0', '[WARN]');
-						startTomteDelayed();
-					}
-				} elsif ($retval == 1) {
-					if ($presetModules{$module}{restart} eq 'yes') {
-						setRestartValues($module);
-					}
+					repairPackageManagement();
+					startTomteDelayed();
 				}
 			} else {
-				printLog("failed to get package management lock to install $packageName!!", 'L0', '[WARN]');
-				startTomteDelayed();
-				return (0);
+				if ($presetModules{$module}{restart} eq 'yes') {
+					setRestartValues($module);
+				}
 			}
-		} else {
-			printLog("no network connection found, can't install packages!!", 'TL0', '[WARN]');
-			startTomteDelayed();
 		}
 	} else {
-		printLog("not installing package $packageName because no network detected", 'L0', '[WARN]');
+		printLog("no network connection found, can't install packages!!", 'TL0', '[WARN]');
 		startTomteDelayed();
 	}
-	return $retval;
+	return $installed;
 }
-
 
 
 
 ###############################################################################
-# fills the hash value with all the available packages
+# repairs a possible broken package manager
+# returns 1 
 #
-sub initAvailablePackagesList {
-	@availableDebianPackages = `apt-cache pkgnames`;
-	chomp(@availableDebianPackages);
+# TODO combine it with the issue for apt --fix-broken 613
+# and try to make it better
+sub repairPackageManagement {
+	my $success = q{};
+	if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
+		printLog("executing --configure -a", 'L2', '[DEBUG]');
+		runProcess( undef, undef, 120, \$success, 'dpkg --configure -a' );
+		lockPM();
+		if ($success == 0) {
+			# command has been executed and was successfull
+			printLog("package management is in good state", 'L2', '[DEBUG]');
+			return (1);
+		} else {
+			printLog("could not repair package management", 'L2', '[DEBUG]');
+			return (0);
+		}
+	}
+	# command could not be executed
+	printLog("could not execute package management repair, could not get locks", 'L2', '[WARN]');
 	return (0);
 }
 
+
+
+###############################################################################
+# fills the array with all the available packages
+#
+sub initAvailablePackagesList {
+	my $packagesList = q{};
+	my $errors = q{};
+	my $returnValue = q{};
+	runProcess( \$packagesList, \$errors, 120, \$returnValue, "apt-cache pkgnames" );
+	if ($returnValue) {
+		printLog("Could not get the packages list: >$errors<", 'L2', '[WARN]');
+	}
+	@availableDebianPackages = split("\n", $packagesList);
+	return (0);
+}
 
 
 
@@ -3623,13 +3859,26 @@ sub removePackage {
 	}
 	if (unlockPM("apt-get -yq remove $parameter $packageName") && (isPMlocked() == 0)) {
 		printLog("removing $packageName", 'L2', '[DEBUG]');
-		$retval = `$consoleLanguage apt-get -yq -o Dpkg::lock::timeout=0 remove $parameter $packageName >/dev/null 2>&1`;
+		my $output = q{};
+		my @removeCommand = (
+			'apt-get' => (
+				'-yq',
+				'-o Dpkg::lock::timeout=0',
+				'remove',
+				$parameter,
+				$packageName,
+			)
+		);
+
+		runProcessArray( \$output, undef, 120, \$retval, @removeCommand );
+		printLog(">$output<", 'L2', '[INFO]');
 		lockPM();
-		printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
+		printLog("return from apt-get:\n>$retval<", 'L2', '[DEBUG]');
 		$retval = isPackageInstalled($packageName);
-		if ($retval == 1) {
+		if ($retval != 0) {
 			printLog("failed to remove $packageName", 'L0', '[WARN]');
 			printLog("will try again later", 'L0', '[INFO]');
+			repairPackageMangement();
 			startTomteDelayed();
 			return (0);
 		}
@@ -3652,14 +3901,13 @@ sub removePackage {
 #
 sub setAptMark {
 	my ($package, $mark) = @_;
-	my $exitStatus;
+	my $exitStatus = q{};
 	my $retString;
 	my $aptMark = getAptMark($package);
 	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
-		$retString = `$consoleLanguage apt-mark manual $package`;
-		$exitStatus = $?;
-		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		runProcess( \$retString, undef, 30, \$exitStatus, "apt-mark manual $package" );
+		printLog("result: >$retString< exitStatus: >$exitStatus<", 'L2', '[INFO]');
 		if (($retString =~ /set to manually installed/sm) && ($exitStatus == 0)) {
 			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
 			return (1);
@@ -3669,9 +3917,8 @@ sub setAptMark {
 		}
 	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
-		$retString = `$consoleLanguage apt-mark auto $package`;
-		$exitStatus = $?;
-		printLog("result: $retString exitStatus: $exitStatus", 'L2', '[INFO]');
+		runProcess( \$retString, undef, 30, \$exitStatus, "apt-mark auto $package" );
+		printLog("result: >$retString< exitStatus: >$exitStatus<", 'L2', '[INFO]');
 		if (($retString =~ /set to automatically installed/sm) && ($exitStatus == 0)) {
 			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
 			return (1);
@@ -3692,9 +3939,9 @@ sub setAptMark {
 #
 sub getAptMark {
 	my $package = shift;
-	my $retVal;
-	$retVal = `$consoleLanguage apt-mark showauto $package`;
-	if ( $retVal =~ /$package/mgs ) {
+	my $returnValue;
+	runProcess( \$returnValue, undef, 30, undef, "apt-mark showauto $package" );
+	if ( $returnValue =~ /$package/mgs ) {
 		printLog("package: $package mark is auto", 'L2', '[DEBUG]');
 		return (1);
 	} else {
@@ -3716,7 +3963,6 @@ sub installKernelFlavour {
 	my ($flavour, $failed, $somethingDone) = @_;
 	${$failed} = 0;
 	${$somethingDone} = 0;
-	my $installCmd = 'apt-get install -yq -o Dpkg::lock::timeout=0';
 	my $retString;
 	my $exitStatus;
 
@@ -3726,16 +3972,21 @@ sub installKernelFlavour {
 		return (0);
 	}
 
-	$installCmd .= " $kernelsList{$distributionType}{$flavour}";
-	$installCmd .= ' 2>&1';
-	printLog("install kernel metapackage", 'L2', '[INFO]');
-	printLog("install command: $installCmd", 'L2', '[DEBUG]');
-	if (unlockPM("$installCmd") && (isPMlocked() == 0)) {
+	my @installCommand = (
+		'apt-get' => (
+			'install',
+			'-yq',
+			'-o Dpkg::lock::timeout=0',
+			$kernelsList{$distributionType}{$flavour},
+		)
+	);
+	my $installCommandString = join(' ', @installCommand);
+	printLog("install kernel metapackage $kernelsList{$distributionType}{$flavour}", 'L2', '[INFO]');
+	if (unlockPM($installCommandString) && (isPMlocked() == 0)) {
 		printLog("executing installation", 'L2', '[DEBUG]');
-		$retString = `$installCmd`;
-		$exitStatus = $?/$RETVAL_CONVERTER;
+		runProcessArray( \$retString, '2>&1', 600, \$exitStatus, @installCommand );
 		lockPM();
-		printLog("return from install:\n$retString", 'L2', '[DEBUG]');
+		printLog("return from install:\n>$retString<", 'L2', '[DEBUG]');
 		if (($retString =~ /is already the newest version/sm) && ($exitStatus == 0)) {
 			printLog("$kernelsList{$distributionType}{$flavour} is already the newest version", 'L2', '[INFO]');
 		} elsif ($exitStatus == 0) {
@@ -3744,17 +3995,8 @@ sub installKernelFlavour {
 		} elsif ($exitStatus != 0) {
 			printLog("installation of kernel meta package failed !!!", 'L0', '[ERROR]');
 			printLog("$retString", 'L0', '[ERROR]');
-			if ($retString =~ /dpkg --configure -a/) {
-				printLog("package management demands repair", 'L0', '[ERROR]');
-				if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
-					printLog("executing --configure -a", 'L0', '[DEBUG]');
-					`dpkg --configure -a`;
-					lockPM();
-				} else {
-					printLog('Could not repair package management, will try again later', 'L0', '[WARN]');
-				}
-				startTomteDelayed();
-			}
+			# just in case the package management is broken
+			repairPackageManagement();
 			${$failed} += 1;
 		}
 	}
@@ -3783,13 +4025,12 @@ sub populateKernelPackages {
 	my $packageLine;
 	my $packageString;
 	my $searchCommand;
-	my $result;
+	my $result = q{};
 	my @lines;
-	$searchCommand = $consoleLanguage."apt-cache depends --important @rootPackages";
+	$searchCommand = "apt-cache depends --important @rootPackages";
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
-	$result = q{};
-	$result = `$searchCommand`;
-	printLog("first result:\n$result", 'L2', '[DEBUG]');
+	runProcess( \$result, undef, 600, undef, $searchCommand );
+	printLog("first result:\n>$result<", 'L2', '[DEBUG]');
 	@lines = split /\n/sm, $result;
 	foreach my $lineFirstResult (@lines) {
 		if ($lineFirstResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
@@ -3802,11 +4043,11 @@ sub populateKernelPackages {
 		}
 	}
 	if (@packages) {
-		$searchCommand = $consoleLanguage.'apt-cache depends --important --installed '.$packageLine;
+		$searchCommand = 'apt-cache depends --important --installed '.$packageLine;
 		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
 		$result = q{};
-		$result = `$searchCommand`;
-		printLog("second result:\n$result", 'L2', '[DEBUG]');
+		runProcess( \$result, undef, 600, undef, $searchCommand );
+		printLog("second result:\n>$result<", 'L2', '[DEBUG]');
 		@lines = ();
 		@lines = split /\n/sm, $result;
 		foreach my $lineSecondResult (@lines) {
@@ -3819,8 +4060,15 @@ sub populateKernelPackages {
 			}
 		}
 	}
-	$searchCommand = $consoleLanguage.'dpkg-query -W -f=\'${db:Status-Abbrev}\' '."linux-modules-extra-$version-tuxedo".' 2>&1';
-	$result = `$searchCommand`;
+	my @searchCommand = (
+		'dpkg-query' => (
+			'-W',
+			'-f${db:Status-Abbrev}',
+			"linux-modules-extra-$version-tuxedo",
+		)
+	);
+	runProcessArray( \$result, '2>&1', 600, undef, @searchCommand );
+	$result =~ s/'//g;
 	if ($result =~ m/^[uihrp][HUFWti]\s$/sm) {
 		push @packages, "linux-modules-extra-$version-tuxedo";
 	}
@@ -3869,7 +4117,19 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %headers;
 	# Get the list of installed linux-tuxedo headers using dpkg-query
 	# example: linux-tuxedo-5.15-headers-5.15.0-10033
-	my @headersList = split /\n/sm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-tuxedo-*-headers-*');
+# TODO test this thouroughly
+	my $headersListString = q{};
+	my @queryHeaders = (
+ 		'dpkg-query' => (
+ 			'-W',
+ 			'-f${db:Status-Status}=${Version}=${Package}\n',
+			'linux-tuxedo-*-headers-*',
+		)
+	);
+	runProcessArray(\$headersListString, undef, 600, undef, @queryHeaders);
+
+	my @headersList;
+	@headersList = split /\n/sm, $headersListString;
 
 	# Check each header line and store installed headers with their versions
 	foreach my $line (@headersList) {
@@ -3877,16 +4137,16 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 		my ($status, $version, $package) = split /=/sm, $line, $MAX_HEADERS_TO_ANALYZE;
 		if (
 			# Check if $package is installed
-			"installed" eq $status &&
+			($status eq 'installed') &&
 
 			# Check if $package matches the expected pattern
-			$package =~ /^linux-tuxedo-.*-headers-.*$/sm &&
+			($package =~ /^linux-tuxedo-.*-headers-.*$/sm) &&
 
 			# Check if $package does not contain any whitespace characters
-			$package !~ /\s/sm &&
+			($package !~ /\s/sm) &&
 
 			# Check if the length of $package exceeds 50 characters
-			length($package) < $MAX_PACKAGE_NAME
+			(length($package) < $MAX_PACKAGE_NAME)
 
 		) {
 			$headers{$version} = $package;
@@ -3896,19 +4156,31 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %images;
 	# Get the list of installed linux-image packages using dpkg-query
 	# example: linux-image-5.15.0-10025-tuxedo
-	my @imagesList = split /\n/sm, qx(dpkg-query -W -f='\${db:Status-Status}=\${Version}=\${Package}\nq{ }linux-image-*-tuxedo');
+# TODO test this thouroughly
+	my $imagesListString = q{};
+	my @queryImages = (
+		'dpkg-query' => (
+			'-W',
+			'-f${db:Status-Status}=${Version}=${Package}\n',
+			'linux-image-*-tuxedo',
+		)
+	);
+	runProcessArray(\$imagesListString, undef, 600, undef, @queryImages);
+	my @imagesList;
+	@imagesList = split /\n/sm, $imagesListString;
 
 	# Check each images line and store installed headers with their versions
 	foreach my $line (@imagesList) {
 		chomp $line;
 		my ($status, $version, $package) = split /=/sm, $line, $MAX_TO_DELETE_KERNEL;
-		if ("installed" eq $status){
+		if ($status eq 'installed'){
 			$images{$version} = $package;
 		}
 	}
 
 	# Get the current kernel version by removing the "-tuxedo" suffix
-	my $currentKernelVersion = `uname -r`;
+	my $currentKernelVersion = q{};
+	runProcess( \$currentKernelVersion, undef, 600, undef, 'uname -r' );
 	$currentKernelVersion =~ s/-tuxedo$//sm;
 
 	my @headersOnly;
@@ -3940,13 +4212,13 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 		# Safety check: Verify the format and length of $oldestHeader
 		if (
 			# Check if $oldestHeader does not match the expected pattern
-			$oldestHeader !~ /^linux-tuxedo-.*-headers-.*$/sm ||
+			($oldestHeader !~ /^linux-tuxedo-.*-headers-.*$/sm) ||
 
 			# Check if $oldestHeader contains any whitespace characters
-			$oldestHeader =~ /\s/sm ||
+			($oldestHeader =~ /\s/sm) ||
 
 			# Check if the length of $oldestHeader exceeds 50 characters
-			length($oldestHeader) > $MAX_OLDEST_HEADER_NAME
+			(length($oldestHeader) > $MAX_OLDEST_HEADER_NAME)
 		) {
 				printLog("Skipping removal of header $oldestHeader due to invalid format or length", "L0", '[WARN]');
 				return 0;
@@ -3955,17 +4227,28 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 		printLog("Removing header $oldestHeader", "L2", '[INFO]');
 
 		# Construct the apt-get purge command to remove the oldest header
-		my $purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader";
-		printLog("purge command: $purgeCommand", 'L2', '[DEBUG]');
+		my @purgeCommand = (
+			'apt-get' => (
+				'purge',
+				'-o Dpkg::lock::timeout=0',
+				'--assume-yes' => $oldestHeader,
+			)
+		);
+		printLog("purge command: @purgeCommand", 'L2', '[DEBUG]');
 
 		# Attempt to unlock the package management and check if it's unlocked
-		if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+		if (unlockPM("purge command: @purgeCommand") && (isPMlocked() == 0)) {
 			# Execute the purge command and capture the result and error
 			printLog("executing purge", 'L2', '[DEBUG]');
-			my $result = `$purgeCommand`;
-			my $error = $?;
+			my $result = q{};
+			my $error = q{};
+			runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
+			if ($error != 0) {
+				printLog("header: $oldestHeader there were problems to remove it", 'L0', '[ERROR]');
+				repairPackageManagement();
+			}
 			lockPM();
-			printLog("result: $result\nerror: $error", 'L2', '[DEBUG]');
+			printLog("result: >$result<\nerror: >$error<", 'L2', '[DEBUG]');
 
 			# Log the success message
 			printLog("successfully removed old header $oldestHeader", 'L0', '[INFO]');
@@ -4043,29 +4326,40 @@ sub checkAndDeleteOldestTuxedoKernel {
 		printLog("sorted filelist: @fileListResult", 'L2', '[DEBUG]');
 		$version = q{};
 		$version = $fileListResult[-1];
-		my $currentKernelVersion = `uname -r`;
+		my $currentKernelVersion = q{};
+		runProcess( \$currentKernelVersion, undef, 600, undef, 'uname -r' );
 		$currentKernelVersion =~ s/-tuxedo$//sm;
 		if (! ($currentKernelVersion =~ /$version/sm)) {
 			printLog("not current running kernel => trying to delete version: $version", 'L2', '[INFO]');
 			# get all related kernel packages
 			my @packageList = populateKernelPackages($fileListResult[-1]);
 			# purge package
-			$purgeCommand = $consoleLanguage."apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList";
-			printLog("purge command: $purgeCommand", 'L2', '[DEBUG]');
+			my @purgeCommand = (
+				'apt-get' => (
+					'purge',
+					'-o Dpkg::lock::timeout=0',
+					'--assume-yes' => @packageList,
+				)
+			);
+			my $purgeCommandString = join(' ', @purgeCommand);
+			printLog("purge command: $purgeCommandString", 'L2', '[DEBUG]');
 			my $result;
 			my $error;
-			if (unlockPM("purge command: $purgeCommand") && (isPMlocked() == 0)) {
+			if (unlockPM("purge command: $purgeCommandString") && (isPMlocked() == 0)) {
 				printLog("executing purge", 'L2', '[DEBUG]');
-				$result = `$purgeCommand`;
-				$error = $?;
+				runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
+				if ($error != 0) {
+					printLog("could not remove @packageList", 'L0', '[WARN]');
+					repairPackageManagement();
+				}
 				lockPM();
-				printLog("result: $result\nerror: $error", 'L2', '[DEBUG]');
+				printLog("result: >$result<\nerror: >$error<", 'L2', '[DEBUG]');
 
 				# log success
 				printLog("successfully removed old kernel $version", 'L0', '[INFO]');
 
 			} else {
-				printLog("could not remove the kernel $version as package management is busy", 'L0', '[WARN]');
+				printLog("could not remove the kernel $version, could not get lock on package management", 'L0', '[WARN]');
 			}
 		} else {
 			printLog("kernel version ($version) to delete is the same as the one currently running => abort", 'L0', '[WARN]');
@@ -4252,11 +4546,10 @@ sub aptgetRefreshModule {
 		if (checkNetwork( $NETWORK_CHECKS, 1 )) {
 			deactivatePackagekit();
 			while (($exitStatus != 0) && ($refreshTriesDone <= $refreshTries)) {
-				my $command = $consoleLanguage.'apt-get update 2>/dev/null';
-				if(unlockPM($command) && (isPMlocked() == 0)) {
+				my $updateCommand = 'apt-get update';
+				if(unlockPM($updateCommand) && (isPMlocked() == 0)) {
 					printLog("executing apt-get update", 'L2', '[DEBUG]');
-					$output = `$command`;
-					$exitStatus = $?/$RETVAL_CONVERTER;
+					runProcess( \$output, undef, 120, \$exitStatus, $updateCommand );
 					initAvailablePackagesList();
 					lockPM();
 					if ($exitStatus != 0) {
@@ -4573,11 +4866,14 @@ sub messageDesktop {
 	my $body = shift;
 	my $urgency = shift;
 	my $icon = shift;
-	my $retValue = 0;
+	my $returnValue = 0;
 
 	my $mUsername = q{};
 	my $mPid = q{};
-	my @whoLines = `who -u`;
+	my @whoLines = q{};
+	my $whoLinesAsScalar = q{};
+	runProcess( \$whoLinesAsScalar, undef, 5, undef, 'who -u' );
+	@whoLines = split("\n", $whoLinesAsScalar);
 	my $environ = q{};
 	my $dbusAddress;
 
@@ -4622,13 +4918,30 @@ sub messageDesktop {
 	}
 
 	printLog("messaging desktop", 'L2', '[INFO]');
-	my $mCmd = $consoleLanguage."sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify \"TUXEDO Tomte\" $sessionID \"$icon\" '$summary' '$body' '[]' '{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}' 5000";
-
-	`$mCmd`;
-	$retValue = $? >> 8;
-
-	if ($retValue != 0) {
-		printLog("No display for message output found with command:\n$mCmd", 'L0', '[DEBUG]');
+	my @messageCommand = (
+		'sudo' => (
+			'-u',
+			$mUsername,
+			$dbusAddress,
+			'gdbus',
+			'call',
+			'--session',
+			'--dest=org.freedesktop.Notifications',
+			'--object-path=/org/freedesktop/Notifications',
+			'--method=org.freedesktop.Notifications.Notify',
+			'"TUXEDO Tomte"',
+			$sessionID,
+			$icon,
+			$summary,
+			$body,
+			"[]",
+			"{\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">}",
+			'5000',
+		)
+	);
+	runProcessArray( \undef, \undef, 5, \$returnValue, @messageCommand );
+	if ($returnValue != 0) {
+		printLog("No display for message output found with command:\n@messageCommand", 'L0', '[DEBUG]');
 		return (0);
 	}
 	return (1);
@@ -4700,7 +5013,7 @@ sub initLogging {
 			return;
 		} else {
 			printLog("Err: $!", 'L1', '[ERROR]');
-			$noLogFile =1;
+			$noLogFile = 1;
 			print "[ERROR] Could not open logFile $logFile\n$!\n";
 			exit (0);
 		}
@@ -6242,14 +6555,13 @@ sub postConfigure {
 	my $exitStatus;
 	my $postConfTrigger = 0;
 	my $output;
-	my $command;
-	printLog("\ninitializing post-configuration", 'TL0', '[INFO]');
+	printLog("initializing post-configuration", 'TL0', '[INFO]');
 	foreach my $sysProgram (keys %postConfProgramsList) {
 		if ($postConfProgramsList{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram", 'L1', '[INFO]');
-			$command = $postConfProgramsList{$sysProgram}{command}.' 2>&1';
-			$output = `$command`;
-			$exitStatus = $?;
+			my $postCommand = $postConfProgramsList{$sysProgram}{command};
+			runProcess( \$output, '2>&1', 600, \$exitStatus, $postCommand );
+			printLog("postConfigure: >$output<", 'L2', '[DEBUG]');
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgramsList{$sysProgram}{command}", 'L1', '[INFO]');
 				postSetModulesState($sysProgram, "success");
@@ -6277,7 +6589,7 @@ sub postConfigure {
 #
 sub startTomteDelayed {
 	my $message = shift;
-	my $retVal;
+	my $returnValue;
 	$restartSystem = 0;
 	my $triesValue;
 
@@ -6322,12 +6634,20 @@ sub startTomteDelayed {
 	if ($startLaterAgain == 0) {
 		$startLaterAgain = 1;
 		# This might not be completely reliable, specially when starting a fresh installed system
-		my $systemctlCmd = 'systemd-run --on-active="'.$SYSTEMD_DELAY.'sec" tuxedo-tomte configure all >/dev/null 2>&1';
-
-		printLog("systemctlCmd: $systemctlCmd", 'L0', '[DEBUG]');
+		my $delay = $SYSTEMD_DELAY.'sec';
+		my @systemctlCommand = (
+			'systemd-run' => (
+				"--on-active=$delay",
+				'tuxedo-tomte',
+				'configure',
+				'all',
+			)
+		);
+		my $systemctlCommandString = join(' ', @systemctlCommand);
+		printLog("systemctlCmd: $systemctlCommandString", 'L0', '[DEBUG]');
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
-		$retVal = system($systemctlCmd);
-		printLog("ret value: $retVal", 'L0', '[DEBUG]');
+		runProcessArray( \undef, \undef, 600, \$returnValue, @systemctlCommand);
+		printLog("ret value: >$returnValue<", 'L0', '[DEBUG]');
 	}
 	return (0);
 }
@@ -6723,8 +7043,8 @@ sub getChassisType {
 		}
 	}
 
-	my $hostnamectlCmd = $consoleLanguage.'hostnamectl';
-	my $returnHostnamectl = `$hostnamectlCmd`;
+	my $returnHostnamectl = q{};
+	runProcess( \$returnHostnamectl, undef, 5, undef, 'hotnamectl' );
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsm) {
 		printLog("chassis is a virtual machine", 'TL2', '[DEBUG]');
 		printLog("machine will be treated as desktoppc", 'TL2', '[DEBUG]');
@@ -6879,19 +7199,33 @@ if (scalar(@ARGV) != 0) {
 					printLog("only prerequisite modules will be installed", 'TL0', '[INFO]');
 				}
 				# Update Tuxedo Tomte to ensure current version
+				my @updateCommand = (
+					'apt-get' => (
+						'-yq',
+						'-o Dpkg::lock::timeout=0',
+						'install',
+						'tuxedo-tomte',
+					)
+				);
 				if (! ($LiveISO or $FAI)){
-					if (unlockPM("apt-get -yq install tuxedo-tomte") && (isPMlocked() == 0)) {
-						my $retval;
+					if (unlockPM(@updateCommand) && (isPMlocked() == 0)) {
+						my $output = q{};
+						my $returnValue = q{};
 						printLog("executing tuxedo-tomte installation", 'L2', '[DEBUG]');
 						if ($logLevel > 1) {
-							$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte >>$logFile 2>&1`;
+							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
+							printLog(">$output<", 'L1', '[DEBUG]');
 						} else {
-							$retval = `apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte >/dev/null 2>&1`;
+							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
+						}
+						if ($returnValue != 0) {
+							printLog("tuxedo-tomte could not be updated", 'L0', '[ERROR]');
+							repairPackageManagement();
 						}
 						lockPM();
-						printLog("return from apt-get:\n$retval", 'L2', '[DEBUG]');
+						printLog("return from apt-get:\n$output", 'L2', '[DEBUG]');
 					} else {
-						printLog("Couldn't get PM-Locks for 'apt-get -yq install tuxedo-tomte'", 'L1', '[DEBUG]');
+						printLog("Couldn't get PM-Locks for @updateCommand", 'L1', '[DEBUG]');
 					}
 				}
 				configureAllModules();
@@ -7087,14 +7421,17 @@ END {
 				# if you reboot the system after a FAI installation in OEM, please,
 				# just make a new FAI installation! to make sure everything is proper
 				printLog("after FAI installation detected, this is probably the OEM stage", 'L2', '[DEBUG]');
-				my $calamaresProcesses = `pgrep -c calamares`;
-				printLog("calamares processes found: $calamaresProcesses", 'L2', '[DEBUG]');
+				my $calamaresProcesses = q{};
+				runProcess( \$calamaresProcesses, undef, 5, undef, 'pgrep -c calamares' );
+				printLog("calamares processes found: >$calamaresProcesses<", 'L2', '[DEBUG]');
 				printLog("first boot out of OEM, setting second reboot flag", 'L2', '[DEBUG]');
 				$configIniValues->{installation}->{FAI} = 'second reboot after FAI';
 				writeConfigIniFile();
 			} elsif (!$FAI && defined($configIniValues->{installation}->{FAI}) && ($configIniValues->{installation}->{FAI} eq 'second reboot after FAI')) {
 				printLog("after FAI installation second stage detected, this is probably the OEM stage", 'L2', '[DEBUG]');
-				my $calamaresProcesses = `pgrep -c calamares`;
+				my $calamaresProcesses = q{};
+				runProcess( \$calamaresProcesses, undef, 5, undef, 'pgrep -c calamares' );
+				print "calamaresProcesses: $calamaresProcesses\n";
 				if ($calamaresProcesses =~ /0/gsm) {
 					printLog("third boot out of OEM, no calamares detected, deleting boot flag", 'L2', '[DEBUG]');
 					delete $configIniValues->{installation};
