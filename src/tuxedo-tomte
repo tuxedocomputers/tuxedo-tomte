@@ -2461,7 +2461,8 @@ sub krackanpointusb4suspendfix() {
 # $rPATimeout: the maximum time the program is allowed to run before it gets shut down
 # undef might be used for all parameters except @rPACommand and $rPATimeout
 # use undef if you are not interested in the values returns
-# use undef as refernces where references are used (\undef)
+# use undef as references where references are used as \undef
+# make sure to predefine all references if not using undef e.g. as $variable = q{}
 #
 # $returnValue: the exit code of the command
 # returns 1 if the exit code of the command is 0
@@ -2521,6 +2522,8 @@ sub runProcessArray {
 
 	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
 	# initialize variables if they are undefined
+	# TODO change all occurences of referenced variables to NOT initialize them
+	# as they are undef constants !!! and that will cause problems
 	if (!defined $$rPAOutput) {
 		#TODO
 		printLog("rPAOutput not defined", 'L2', '');
