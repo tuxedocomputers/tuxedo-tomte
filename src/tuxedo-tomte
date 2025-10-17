@@ -204,7 +204,7 @@ if ($FAI) {
 		)
 	);
 	my $dpkgKernel = q{};
-	runProcessArray( \$dpkgKernel, \undef, 60, \undef, @searchCommand );
+	runProcessArray( \$dpkgKernel, undef, 60, undef, @searchCommand );
 	$dpkgKernel =~ s/'//g;
 	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/g;
 	my $hashSize = keys %kernelHash;
@@ -2473,94 +2473,40 @@ sub krackanpointusb4suspendfix() {
 #
 sub runProcessArray {
 	my ($rPAOutput, $rPAErrors, $rPATimeout, $rPACommandExitCode, @rPACommand) = @_;
-	#TODO debug
 	printLog("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 'L2', '');
 	
-	printLog("abc test", 'L2', '');
-	my $abc = q{};
-	if (defined $abc) {
-		printLog("\$abc is defined: $abc", 'L2', '');
-	} else {
-		printLog("\$abc is not defined: $abc", 'L2', '');
-	}
-	printLog("\\\$abc: \$abc", 'L2', '');
-	my $address = \$abc;
-	if (defined $address) {
-		printLog("\$address is defined: $address", 'L2', '');
-	} else {
-		printLog("\$address is not defined: $address", 'L2', '');
-	}
-	$$address = q{};
-	if (defined $$address) {
-		printLog("\$\$address is defined: $$address", 'L2', '');
-	} else {
-		printLog("\$\$address is not defined: $$address", 'L2', '');
-	}
-	$$address = 'test';
-	if (defined $$address) {
-		printLog("\$\$address is defined: $$address", 'L2', '');
-	} else {
-		printLog("\$\$address is not defined: $$address", 'L2', '');
-	}
-	printLog("\$abc: >$abc<", 'L2', '');
-	$abc = \undef;
-	if (defined $abc) {
-		printLog("\$abc is defined: >$abc<", 'L2', '');
-	} else {
-		printLog("\$abc is not defined: >$abc<", 'L2', '');
-	}
-	if (defined $$abc) {
-		printLog("\$\$abc is defined: >$$abc<", 'L2', '');
-	} else {
-		printLog("\$\$abc is not defined: >$$abc<", 'L2', '');
-	}
-	#printLog("\$abc: >$abc<", 'L2', '');
-	#printLog("\$\$abc: >$$abc<", 'L2', '');
-	#$$abc = 'test';
-	#printLog("\$\$abc: >$$abc<", 'L2', '');
-
-
 	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
 	# initialize variables if they are undefined
 	# TODO change all occurences of referenced variables to NOT initialize them
 	# as they are undef constants !!! and that will cause problems
-	if (!defined $$rPAOutput) {
-		#TODO
-		printLog("rPAOutput not defined", 'L2', '');
-		printLog("\$\$rPAOutput before defining: >$$rPAOutput<", 'L2', '');
-		printLog("\$rPAOutput before defining: >$rPAOutput<", 'L2', '');
+	if (!defined($rPAOutput)) {
+		printLog('$rPAOutput not defined -> initializing as q{}', 'L2', '[INFO]');
 		$$rPAOutput = q{};
-		printLog("\$\$rPAOutput after defining: >$$rPAOutput<", 'L2', '');
-		printLog("\$rPAOutput after defining: >$rPAOutput<", 'L2', '');
 	}
-	if (!defined $$rPAErrors) {
+	if (!defined($$rPAOutput)) {
+		printLog('$$rPAOutput not defined -> initializing as q{}', 'L2', '[INFO]');
+		$$rPAOutput = q{};
+	}
+	if (!defined($rPAErrors)) {
+		printLog('$rPAErrors not defined -> initializing as q{}', 'L2', '[INFO]');
+		$$rPAErrors = q{};
+	}
+	if (!defined($$rPAErrors)) {
+		printLog('$$rPAErrors not defined -> initializing as q{}', 'L2', '[INFO]');
 		$$rPAErrors = q{};
 	}
 	# default value for $sPATimeout
-	if (!defined $rPATimeout) {
+	if (!defined($rPATimeout)) {
 		$rPATimeout = 5;
+		printLog('$$rPATimeout not defined -> initializing as $rPATimeout', 'L2', '[INFO]');
 	}
-	#TODO debug
-	printLog("\$rpaCommandExitCode: $rPACommandExitCode", 'L2', ''); # SCALAR()
-	printLog("\$\$rpaCommandExitCode: $$rPACommandExitCode", 'L2', ''); # Use of uninit....
-	if (!defined $rPACommandExitCode) { # defined
-		printLog("\$rpaCommandExitCode not defined", 'L2', '');
-	}
-	if (!defined $$rPACommandExitCode) { # not defined
-		printLog("\$\$rpaCommandExitCode not defined", 'L2', '');
-	}
-	if (!defined $$rPACommandExitCode) {
-		printLog("\$\$rpaCommandExitCode not defined", 'L2', '');
-		$$rPACommandExitCode = 'test';
-		printLog("after defining \$\$ with test", 'L2', '');
+	if (!defined($rPACommandExitCode)) {
+		printLog('$rPACommandExitCode not defined -> initializing as q{}', 'L2', '[INFO]');
 		$$rPACommandExitCode = q{};
-		printLog("after defining \$\$ with q", 'L2', '');
-		printLog("\$rpaCommandExitCode: $rPACommandExitCode", 'L2', '');
-		printLog("\$\$rpaCommandExitCode: $$rPACommandExitCode", 'L2', '');
-		$rPACommandExitCode = q{};
-		printLog("after defining \$", 'L2', '');
-		printLog("\$rpaCommandExitCode: $rPACommandExitCode", 'L2', '');
-		printLog("\$\$rpaCommandExitCode: $$rPACommandExitCode", 'L2', '');
+	}
+	if (!defined($$rPACommandExitCode)) {
+		printLog('$$rPACommandExitCode not defined -> initializing as q{}', 'L2', '[INFO]');
+		$$rPACommandExitCode = q{};
 	}
 	my $rPARunExitCode = q{};
 
@@ -2613,7 +2559,7 @@ sub runProcessArray {
 	}
 	# make sure to convert into numeral
 	if (defined $$rPACommandExitCode) {
-		$$rPACommandExitCode += 0;;
+		$$rPACommandExitCode += 0;
 	}
 	printLog("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n", 'L2', '');
 
@@ -2799,10 +2745,8 @@ sub createRepos {
 # returns 0 if not
 #
 sub addRepoKey {
-	my $output;
-	my $retval;
-	my $errorCode;
-	my $outputKey;
+	my $errorCode = q{};
+	my $outputKey = q{};
 	my $counter = 0;
 	my $sleepTime = 1; # seconds
 	# install TUXEDO keyring for repositories
@@ -2810,8 +2754,7 @@ sub addRepoKey {
 		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
 		if ( checkNetwork( $NETWORK_CHECKS, 1 ) ) {
 			# get the keyring for TUXEDO repos
-			runProcess( \$outputKey, undef, 120, undef, 'wget -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
-			printLog(">$outputKey<", 'L2', '[INFO]');
+			runProcess( undef, undef, 120, undef, 'wget -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
 			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < $NETWORK_CHECKS) {
@@ -3455,7 +3398,7 @@ sub uninstallExcept {
 		my $retText = q{};
 		if ($FAI) {
 			printLog("command to uninstall: @uninstallCommand", 'L2', '[DEBUG]');
-			runProcessArray( \$retText, \undef, 500, \$returnValue, @uninstallCommand );
+			runProcessArray( \$retText, undef, 500, \$returnValue, @uninstallCommand );
 			if ($returnValue != 0) {
 				repairPackageManagement();
 			}
@@ -3730,7 +3673,7 @@ sub isPackageInstalled {
 	);
 
 	my $retString = q{};
-	runProcessArray( \$retString, '2>&1', 120, \undef, @searchCommand );
+	runProcessArray( \$retString, '2>&1', 120, undef, @searchCommand );
 	$retString =~ s/'//g;
 	printLog("checking if $package is installed\nanswer: >$retString<", 'L2', '[DEBUG]');
 	if ($retString =~ /^[ih][i].*$/sm) {
@@ -3812,7 +3755,7 @@ sub installPackage {
 				);
 			}
 			if (unlockPM("@installCommand") && (isPMlocked() == 0)) {
-				runProcessArray( \$output, \undef, $timeout, \$retval, @installCommand );
+				runProcessArray( \$output, undef, $timeout, \$retval, @installCommand );
 				lockPM();
 				$installed = isPackageInstalled($packageName);
 				if ($installed == 0) {
@@ -3937,7 +3880,7 @@ sub removePackage {
 			)
 		);
 
-		runProcessArray( \$output, \undef, 120, \$retval, @removeCommand );
+		runProcessArray( \$output, undef, 120, \$retval, @removeCommand );
 		printLog(">$output<", 'L2', '[INFO]');
 		lockPM();
 		printLog("return from apt-get:\n>$retval<", 'L2', '[DEBUG]');
@@ -4134,7 +4077,7 @@ sub populateKernelPackages {
 			"linux-modules-extra-$version-tuxedo",
 		)
 	);
-	runProcessArray( \$result, '2>&1', 600, \undef, @searchCommand );
+	runProcessArray( \$result, '2>&1', 600, undef, @searchCommand );
 	$result =~ s/'//g;
 	if ($result =~ m/^[uihrp][HUFWti]\s$/sm) {
 		push @packages, "linux-modules-extra-$version-tuxedo";
@@ -4193,7 +4136,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			'linux-tuxedo-*-headers-*',
 		)
 	);
-	runProcessArray(\$headersListString, \undef, 600, \undef, @queryHeaders);
+	runProcessArray(\$headersListString, undef, 600, undef, @queryHeaders);
 
 	my @headersList;
 	@headersList = split /\n/sm, $headersListString;
@@ -4232,7 +4175,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			'linux-image-*-tuxedo',
 		)
 	);
-	runProcessArray(\$imagesListString, \undef, 600, \undef, @queryImages);
+	runProcessArray(\$imagesListString, undef, 600, undef, @queryImages);
 	my @imagesList;
 	@imagesList = split /\n/sm, $imagesListString;
 
@@ -4309,7 +4252,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			printLog("executing purge", 'L2', '[DEBUG]');
 			my $result = q{};
 			my $error = q{};
-			runProcessArray( \$result, \undef, 600, \$error, @purgeCommand );
+			runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
 			if ($error != 0) {
 				printLog("header: $oldestHeader there were problems to remove it", 'L0', '[ERROR]');
 				repairPackageManagement();
@@ -4414,7 +4357,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 			my $error;
 			if (unlockPM("purge command: $purgeCommandString") && (isPMlocked() == 0)) {
 				printLog("executing purge", 'L2', '[DEBUG]');
-				runProcessArray( \$result, \undef, 600, \$error, @purgeCommand );
+				runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
 				if ($error != 0) {
 					printLog("could not remove @packageList", 'L0', '[WARN]');
 					repairPackageManagement();
@@ -5006,7 +4949,7 @@ sub messageDesktop {
 			'5000',
 		)
 	);
-	runProcessArray( \undef, \undef, 5, \$returnValue, @messageCommand );
+	runProcessArray( undef, undef, 5, \$returnValue, @messageCommand );
 	if ($returnValue != 0) {
 		printLog("No display for message output found with command:\n@messageCommand", 'L0', '[DEBUG]');
 		return (0);
@@ -6713,7 +6656,7 @@ sub startTomteDelayed {
 		my $systemctlCommandString = join(' ', @systemctlCommand);
 		printLog("systemctlCmd: $systemctlCommandString", 'L0', '[DEBUG]');
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
-		runProcessArray( \undef, \undef, 600, \$returnValue, @systemctlCommand);
+		runProcessArray( undef, undef, 600, \$returnValue, @systemctlCommand);
 		printLog("ret value: >$returnValue<", 'L0', '[DEBUG]');
 	}
 	return (0);
@@ -7280,10 +7223,10 @@ if (scalar(@ARGV) != 0) {
 						my $returnValue = q{};
 						printLog("executing tuxedo-tomte installation", 'L2', '[DEBUG]');
 						if ($logLevel > 1) {
-							runProcessArray( \$output, \undef, 600, \$returnValue, @updateCommand );
+							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
 							printLog(">$output<", 'L1', '[DEBUG]');
 						} else {
-							runProcessArray( \$output, \undef, 600, \$returnValue, @updateCommand );
+							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
 						}
 						if ($returnValue != 0) {
 							printLog("tuxedo-tomte could not be updated", 'L0', '[ERROR]');
