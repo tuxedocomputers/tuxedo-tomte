@@ -1973,8 +1973,10 @@ sub apportfix() {
 				printLog('apport has been disabled in /etc/default/apport', 'L0', '[INFO]');
 				# TODO stop apport?
 				#`service apport stop`;
+				runProcess( undef, undef, 10, undef, 'service apport stop' );
 				#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 				#`systemctl disable apport.service`;
+				runProcess( undef, undef, 10, undef, 'systemctl disable apport.service' );
 				#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
 				$presetModules{$module}{installed} = "yes";
 				$presetModules{$module}{upgraded} = "yes";
@@ -1987,8 +1989,10 @@ sub apportfix() {
 			printLog('apport was already disabled in /etc/default/apport', 'L1', '[DEBUG]');
 			# TODO stop apport?
 			#`service apport stop`;
+			runProcess( undef, undef, 10, undef, 'service apport stop' );
 			#printLog("service apport stop returned: $?", 'L2', '[DEBUG]');
 			#`systemctl disable apport.service`;
+			runProcess( undef, undef, 10, undef, 'systemctl disable apport.service' );
 			#printLog("systemctl disable apport.service returned: $?", 'L2', '[DEBUG]');
 			$presetModules{$module}{installed} = "yes";
 			$presetModules{$module}{upgraded} = "yes";
@@ -2458,43 +2462,22 @@ sub krackanpointusb4suspendfix() {
 # each parameter is a separate element
 # $rPAOutput: the output of the command
 # $rPAErrors: the error messages of the command
-# $rPATimeout: the maximum time the program is allowed to run before it gets shut down
+# $rPATimeout: the maximum time the process is allowed to run before it gets shut down
 # undef might be used for all parameters except @rPACommand and $rPATimeout
 # use undef if you are not interested in the values returns
-# use undef as references where references are used as \undef
-# make sure to predefine all references if not using undef e.g. as $variable = q{}
+# e.g.: runProcessArray( \$output, undef, $timeout, undef, $command )
 #
 # $returnValue: the exit code of the command
 # returns 1 if the exit code of the command is 0
 # returns empty string in any other case
 #
-# This is usefull in case of complicated parameters with spaces or characters
-# that have to be escaped
-#
 sub runProcessArray {
 	my ($rPAOutput, $rPAErrors, $rPATimeout, $rPACommandExitCode, @rPACommand) = @_;
+	#TODO formatting for debug
 	printLog("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 'L2', '');
 	
 	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
-	# initialize variables if they are undefined
-	# TODO change all occurences of referenced variables to NOT initialize them
-	# as they are undef constants !!! and that will cause problems
-	if (!defined($rPAOutput)) {
-		printLog('$rPAOutput not defined -> initializing as q{}', 'L2', '[INFO]');
-		$$rPAOutput = q{};
-	}
-	if (!defined($$rPAOutput)) {
-		printLog('$$rPAOutput not defined -> initializing as q{}', 'L2', '[INFO]');
-		$$rPAOutput = q{};
-	}
-	if (!defined($rPAErrors)) {
-		printLog('$rPAErrors not defined -> initializing as q{}', 'L2', '[INFO]');
-		$$rPAErrors = q{};
-	}
-	if (!defined($$rPAErrors)) {
-		printLog('$$rPAErrors not defined -> initializing as q{}', 'L2', '[INFO]');
-		$$rPAErrors = q{};
-	}
+
 	# default value for $sPATimeout
 	if (!defined($rPATimeout)) {
 		$rPATimeout = 5;
@@ -2519,7 +2502,7 @@ sub runProcessArray {
 	# execute the command with exception handling
 	eval {
 		# run returns 1 if command returns 0, otherwise returns nothing
-		$rPARunExitCode = run \@rPACommand, \undef, $rPAOutput, $rPAErrors, timeout ( $rPATimeout, exception=>'timeout' );
+		$rPARunExitCode = run @rPACommand, \undef, $rPAOutput, $rPAErrors, timeout ( $rPATimeout, exception=>'timeout' );
 		# get the exit code of the command
 		$$rPACommandExitCode = $?;
 	};
@@ -2530,9 +2513,9 @@ sub runProcessArray {
 			$$rPACommandExitCode = $?;
 		}
 		printLog("\n-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-", 'L2', '[ERROR]');
-		printLog("Timed out after $rPATimeout sec. ...", 'TL0', '[ERROR]');
-		printLog("run exit code: >$rPARunExitCode<", 'TL0', '[DEBUG]');
-		printLog("command exit code: >$$rPACommandExitCode<", 'TL0', '[DEBUG]');
+		printLog("Timed out after $rPATimeout sec. ...", 'L0', '[ERROR]');
+		printLog("run exit code: >$rPARunExitCode<", 'L0', '[DEBUG]');
+		printLog("command exit code: >$$rPACommandExitCode<", 'L0', '[DEBUG]');
 		if ($FAI) {
 			printLog("external process call:\n@rPACommand\nhang. Tomte aborted further operations", 'TL0', '[ERROR]');
 			exit (1);
@@ -2547,7 +2530,6 @@ sub runProcessArray {
 	}
 	if (defined $$rPAOutput) {
 		chomp($$rPAOutput);
-		# TODO debug
 		# to avoid printing out the huge list of packages
 		if ( ! grep(/pkgnames/, @rPACommand) ) {
 			printLog("runProcess output:\n>$$rPAOutput<", 'L2', '[DEBUG]');
@@ -2582,7 +2564,8 @@ sub runProcessArray {
 # returns 1 if the exit code of the command is 0
 # returns empty string in any other case
 #
-# Should be used for simple commands like e.g. 'lspci -vn'
+# Should be used for simple commands like e.g. 'lspci -vn' where the command for
+# rPCommand can be simplified as a string
 #
 sub runProcess {
 	my ($rPOutput, $rPErrors, $rPTimeout, $rPCommandExitCode, $rPCommand) = @_;
