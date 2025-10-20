@@ -2478,6 +2478,12 @@ sub runProcessArray {
 	
 	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
 
+	printLog("rPACommand: @rPACommand", 'L2', '[DEBUG]');
+	if (!@rPACommand) {
+		printLog("command is not defined", 'L0', '[ERROR]');
+		return (0);
+	}
+
 	# default value for $sPATimeout
 	if (!defined($rPATimeout)) {
 		$rPATimeout = 5;
