@@ -61,6 +61,7 @@ use File::Slurp qw(append_file write_file read_file edit_file);
 
 # for debugging
 use Data::Dumper;
+$ENV{IPCRUNDEBUG} = 'data';
 # logLevel:
 # 0 = normal
 # 1 = some debug
@@ -2469,6 +2470,7 @@ sub krackanpointusb4suspendfix() {
 #
 # $returnValue: the exit code of the command
 # returns 1 if the exit code of the command is 0
+# returns 0 if something went wrong
 # returns empty string in any other case
 #
 sub runProcessArray {
@@ -2478,9 +2480,8 @@ sub runProcessArray {
 	
 	printLog("runProcess command: @rPACommand", 'L2', '[DEBUG]');
 
-	printLog("rPACommand: @rPACommand", 'L2', '[DEBUG]');
 	if (!@rPACommand) {
-		printLog("command is not defined", 'L0', '[ERROR]');
+		printLog("command is not defined but is necessary", 'L0', '[ERROR]');
 		return (0);
 	}
 
@@ -2489,11 +2490,7 @@ sub runProcessArray {
 		$rPATimeout = 5;
 		printLog('$$rPATimeout not defined -> initializing as $rPATimeout', 'L2', '[INFO]');
 	}
-	if (!defined($rPACommandExitCode)) {
-		printLog('$rPACommandExitCode not defined -> initializing as q{}', 'L2', '[INFO]');
-		$$rPACommandExitCode = q{};
-	}
-	if (!defined($$rPACommandExitCode)) {
+	if (($rPACommandExitCode != \undef) && (!defined($$rPACommandExitCode))) {
 		printLog('$$rPACommandExitCode not defined -> initializing as q{}', 'L2', '[INFO]');
 		$$rPACommandExitCode = q{};
 	}
@@ -2507,15 +2504,24 @@ sub runProcessArray {
 
 	# execute the command with exception handling
 	eval {
+		#TODO debug
+		printLog("command: >@rPACommand< output: >$rPAOutput< errors: >$rPAErrors< timeout: >$rPATimeout< runExitCode: >$rPARunExitCode< cmdExitCode: >$rPACommandExitCode<", 'TL2', '[DEBUG]');
+		printLog("output: >$$rPAOutput< errors: >$$rPAErrors< runExitCode: >$$rPARunExitCode< cmdExitCode: >$$rPACommandExitCode<", 'TL2', '[DEBUG]');
 		# run returns 1 if command returns 0, otherwise returns nothing
 		$rPARunExitCode = run @rPACommand, \undef, $rPAOutput, $rPAErrors, timeout ( $rPATimeout, exception=>'timeout' );
 		# get the exit code of the command
-		$$rPACommandExitCode = $?;
+		if (defined($rPACommandExitCode)) {
+			$$rPACommandExitCode = $?;
+		}
 	};
 
 	# catch the exception
 	if ($@ =~ /timeout/) {
-		if ($$rPACommandExitCode eq q{}) {
+		#TODO debug
+		printLog("in timeout !!", 'TL2', '[DEBUG]');
+		printLog("command: >@rPACommand< output: >$rPAOutput< errors: >$rPAErrors< timeout: >$rPATimeout< runExitCode: >$rPARunExitCode< cmdExitCode: >$rPACommandExitCode<", 'TL2', '[DEBUG]');
+		printLog("output: >$$rPAOutput< errors: >$$rPAErrors< runExitCode: >$$rPARunExitCode< cmdExitCode: >$$rPACommandExitCode<", 'TL2', '[DEBUG]');
+		if (defined($rPACommandExitCode)) {
 			$$rPACommandExitCode = $?;
 		}
 		printLog("\n-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-", 'L2', '[ERROR]');
@@ -2527,7 +2533,11 @@ sub runProcessArray {
 			exit (1);
 		}
 	} else {
-		if ($$rPACommandExitCode eq q{}) {
+		#TODO debug
+		printLog("not in timeout !!", 'TL2', '[DEBUG]');
+		printLog("command: >@rPACommand< output: >$rPAOutput< errors: >$rPAErrors< timeout: >$rPATimeout< runExitCode: >$rPARunExitCode< cmdExitCode: >$rPACommandExitCode<", 'TL2', '[DEBUG]');
+		printLog("output: >$$rPAOutput< errors: >$$rPAErrors< runExitCode: >$$rPARunExitCode< cmdExitCode: >$$rPACommandExitCode<", 'TL2', '[DEBUG]');
+		if (defined($rPACommandExitCode)) {
 			$$rPACommandExitCode = $?;
 		}
 		printLog("Completed task", 'L2', '[DEBUG]');
