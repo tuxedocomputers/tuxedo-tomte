@@ -61,7 +61,6 @@ use File::Slurp qw(append_file write_file read_file edit_file);
 
 # for debugging
 use Data::Dumper;
-$ENV{IPCRUNDEBUG} = 'data';
 # logLevel:
 # 0 = normal
 # 1 = some debug
@@ -1871,6 +1870,8 @@ sub nvidiadriver() {
 				} else {
 					$packageNvidiaDriver = 1;
 				}
+				# just to be sure it is numeric
+				my $packageNvidiaDriver += 0;
 				if ($packageNvidiaDriver == 1) {
 					setAptMark($tuxedoNvidiaDriver,'manual');
 					$packageNvidiaDriver = 1;
@@ -2464,8 +2465,6 @@ sub krackanpointusb4suspendfix() {
 #
 sub runProcessArray {
 	my ($rPAOutput, $rPAErrors, $rPATimeout, $rPACommandExitCode, @rPACommand) = @_;
-	#TODO formatting for debug
-	printLog("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 'L2', '');
 
 	if (!@rPACommand) {
 		printLog("\$rPAcommand is not defined", 'L0', '[ERROR]');
@@ -2513,7 +2512,6 @@ sub runProcessArray {
 		if ($$rPACommandExitCode eq q{}) {
 			$$rPACommandExitCode = $?;
 		}
-		printLog("\n-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-", 'L2', '[ERROR]');
 		printLog("Timed out after $rPATimeout sec. ...", 'L0', '[ERROR]');
 		printLog("run exit code: >$rPARunExitCode<", 'L0', '[DEBUG]');
 		printLog("command exit code: >$$rPACommandExitCode<", 'L0', '[DEBUG]');
@@ -2541,7 +2539,6 @@ sub runProcessArray {
 	if (defined $$rPACommandExitCode) {
 		$$rPACommandExitCode += 0;
 	}
-	printLog("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n", 'L2', '');
 
 	return ($rPARunExitCode);
 }
@@ -3286,7 +3283,7 @@ sub setDkmsVerbose {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2', '[INFO]');
 			$result = edit_file { s/verbose="1"//gsm } $dkmsFile, {'err_mode' => 'carp'};
 			if ($result >= 0) {
-				printLog("verbose DKMS substitution successful", 'L2', '[INFO]');
+				printLog("verbose DKMS substitution successfull", 'L2', '[INFO]');
 				return (1);
 			}
 		}
@@ -3756,8 +3753,6 @@ sub installPackage {
 # repairs a possible broken package manager
 # returns 1 
 #
-# TODO combine it with the issue for apt --fix-broken 613
-# and try to make it better
 sub repairPackageManagement {
 	my $success = q{};
 	if (unlockPM('dpkg --configure -a') && (isPMlocked() == 0)) {
@@ -4099,7 +4094,6 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %headers;
 	# Get the list of installed linux-tuxedo headers using dpkg-query
 	# example: linux-tuxedo-5.15-headers-5.15.0-10033
-# TODO test this thouroughly
 	my $headersListString = q{};
 	my @queryHeaders = (
  		'dpkg-query' => (
@@ -4138,7 +4132,6 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 	my %images;
 	# Get the list of installed linux-image packages using dpkg-query
 	# example: linux-image-5.15.0-10025-tuxedo
-# TODO test this thouroughly
 	my $imagesListString = q{};
 	my @queryImages = (
 		'dpkg-query' => (
