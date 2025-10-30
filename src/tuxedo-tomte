@@ -4243,7 +4243,6 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 				repairPackageManagement();
 			}
 			lockPM();
-			printLog("result: >$result<\nerror: >$error<", 'L2', '[DEBUG]');
 
 			# Log the success message
 			printLog("successfully removed old header $oldestHeader", 'L0', '[INFO]');
@@ -6647,7 +6646,6 @@ sub startTomteDelayed {
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
 		# systemd-run --on-active=$delay tuxedo-tomte configure all
 		runProcessArray( undef, undef, 600, \$returnValue, @systemctlCommand);
-		printLog("ret value: >$returnValue<", 'L0', '[DEBUG]');
 	}
 	return (0);
 }
