@@ -204,6 +204,7 @@ if ($FAI) {
 		)
 	);
 	my $dpkgKernel = q{};
+	# dpkg-query -f '${db:Status-Abbrev} ${Package} ${Version} -W 'linux-image-*'
 	runProcessArray( \$dpkgKernel, undef, 60, undef, @searchCommand );
 	$dpkgKernel =~ s/'//g;
 	my %kernelHash = $dpkgKernel =~ /ii (.*) (.*)/g;
@@ -1871,7 +1872,8 @@ sub nvidiadriver() {
 					$packageNvidiaDriver = 1;
 				}
 				# just to be sure it is numeric
-				my $packageNvidiaDriver += 0;
+				$packageNvidiaDriver += 0;
+
 				if ($packageNvidiaDriver == 1) {
 					setAptMark($tuxedoNvidiaDriver,'manual');
 					$packageNvidiaDriver = 1;
@@ -2535,6 +2537,7 @@ sub runProcessArray {
 		chomp($$rPAErrors);
 		printLog("runProcess errors:\n>$$rPAErrors<", 'L2', '[DEBUG]');
 	}
+	printLog("runProcess timeout:\n>$rPATimeout<", 'L2', '[DEBUG]');
 	# make sure to convert into numeral
 	if (defined $$rPACommandExitCode) {
 		$$rPACommandExitCode += 0;
@@ -2739,6 +2742,7 @@ sub addRepoKey {
 				my $commandString = join(' ', @command);
 				if (unlockPM($commandString) && (isPMlocked() == 0)) {
 					printLog("executing: $commandString", 'L2', '[DEBUG]');
+					# apt-get -y --allow-unauthenticated -o Dpkg::lock::timeout=0 install glob( '/tmp/tuxedo-archive-keyring*' )
 					runProcessArray( \$outputKey, '2>&1', 120, \$errorCode, @command );
 					lockPM();
 					if ($errorCode != 0) {
@@ -2885,6 +2889,7 @@ sub getSystemdState {
 	my $systemdReturn = q{};
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
+	# systemctl is-active $systemdModule
 	printLog("systemd return for $systemdModule: >$systemdReturn<", 'L2', '[INFO]');
 	if ($systemdReturn =~ /^active/sm) {
 		return 'active';
@@ -2908,6 +2913,7 @@ sub getSystemdEnabled {
 	}
 	my $systemdReturn = q{};
 	my $systemdCommand = "systemctl is-enabled $systemdModule";
+	# systemctl is-enabled $systemdModule
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
 	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
@@ -2925,6 +2931,7 @@ sub commandSystemdModule {
 	my ($command, $systemdModule) = @_;
 	my $systemdReturn = q{};
 	my $systemdCommand = "systemctl --quiet $command $systemdModule";
+	# systemctl --quiet $command $systemdModule
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
 	return;
@@ -3319,6 +3326,7 @@ sub uninstallExcept {
 	printLog("search command: @searchCommand", 'L2', '[DEBUG]');
 	my $retString = q{};
 
+	# dpkg-query -W -f '${Package} ${db:Status-Abbrev}' $uninstall*
 	runProcessArray( \$retString, '2>&1', 300, \$returnValue, @searchCommand );
 
 	$retString =~ s/'//g;
@@ -3367,6 +3375,7 @@ sub uninstallExcept {
 		my $retText = q{};
 		if ($FAI) {
 			printLog("command to uninstall: @uninstallCommand", 'L2', '[DEBUG]');
+			# apt-get -yq remove -o Dpkg::lock::timeout=0 $uninstallList
 			runProcessArray( \$retText, undef, 500, \$returnValue, @uninstallCommand );
 			if ($returnValue != 0) {
 				repairPackageManagement();
@@ -3375,6 +3384,7 @@ sub uninstallExcept {
 			printLog("command to uninstall: @uninstallCommand", 'L2', '[DEBUG]');
 			if (unlockPM(@uninstallCommand) && (isPMlocked() == 0)) {
 				printLog("uninstalling: $uninstallList", 'L2', '[DEBUG]');
+				# apt-get -yq remove -o Dpkg::lock::timeout=0 $uninstallList
 				runProcessArray( \$retText, '2>&1', 500, \$returnValue, @uninstallCommand );
 				if ($returnValue != 0) {
 					repairPackageManagement();
@@ -3532,7 +3542,7 @@ sub getPackageDependencies {
 	my @lines;
 	my $pkgString;
 	my @packages;
-	#my $searchCmd = 'apt-cache depends --important '.$package;
+
 	runProcess( \$result, undef, 120, undef, "apt-cache depends --important $package" );
 	@lines = split /\n/sm, $result;
 	foreach my $line (@lines) {
@@ -3554,6 +3564,7 @@ sub getPackageDependencies {
 sub isPackageInRepo {
 	my $package = shift;
 	my $returnFromSearch = q{};
+
 	runProcess( \$returnFromSearch, undef, 120, undef, "apt-cache search --names-only $package" );
 	chop($returnFromSearch);
 	$returnFromSearch =~ s/ .*//sm;
@@ -3596,6 +3607,7 @@ sub uninstallSinglePackage {
 			printLog("executing uninstallation", 'L2', '[DEBUG]');
 			my $returnValue = q{};
 			my $output = q{};
+			# apt-get -yq remove -o Dpkg::lock::timeout=0 $package
 			runProcessArray( \$output, '2>&1', 120, \$returnValue, @aptgetDeinst );
 			printLog(">$output<", 'L2', '[DEBUG]');
 			if ($returnValue != 0) {
@@ -3642,6 +3654,7 @@ sub isPackageInstalled {
 	);
 
 	my $retString = q{};
+	# dpkg-query -W -f ${db:Status-Abbrev} $package
 	runProcessArray( \$retString, '2>&1', 120, undef, @searchCommand );
 	$retString =~ s/'//g;
 	printLog("checking if $package is installed\nanswer: >$retString<", 'L2', '[DEBUG]');
@@ -3724,6 +3737,7 @@ sub installPackage {
 				);
 			}
 			if (unlockPM("@installCommand") && (isPMlocked() == 0)) {
+				# apt-get -yq -o Dpkg::lock::timeout=0 install $packageName
 				runProcessArray( \$output, undef, $timeout, \$retval, @installCommand );
 				lockPM();
 				$installed = isPackageInstalled($packageName);
@@ -3834,7 +3848,7 @@ sub removePackage {
 		printLog("parameter was undefined", 'L2', '[WARN]');
 		$parameter = q{};
 	}
-	if (unlockPM("apt-get -yq remove $parameter $packageName") && (isPMlocked() == 0)) {
+	if (unlockPM("apt-get -yq -o Dpkg::lock::timeout=0 remove $parameter $packageName") && (isPMlocked() == 0)) {
 		printLog("removing $packageName", 'L2', '[DEBUG]');
 		my $output = q{};
 		my @removeCommand = (
@@ -3847,10 +3861,9 @@ sub removePackage {
 			)
 		);
 
+		# apt-get -yq -o Dpkg::lock::timeout=0 remove $parameter $packageName
 		runProcessArray( \$output, undef, 120, \$retval, @removeCommand );
-		printLog(">$output<", 'L2', '[INFO]');
 		lockPM();
-		printLog("return from apt-get:\n>$retval<", 'L2', '[DEBUG]');
 		$retval = isPackageInstalled($packageName);
 		if ($retval != 0) {
 			printLog("failed to remove $packageName", 'L0', '[WARN]');
@@ -3961,6 +3974,7 @@ sub installKernelFlavour {
 	printLog("install kernel metapackage $kernelsList{$distributionType}{$flavour}", 'L2', '[INFO]');
 	if (unlockPM($installCommandString) && (isPMlocked() == 0)) {
 		printLog("executing installation", 'L2', '[DEBUG]');
+		# apt-get install -yq -o Dpkg::lock::timeout=0 $kernelsList{$distributionType}{$flavour}
 		runProcessArray( \$retString, '2>&1', 600, \$exitStatus, @installCommand );
 		lockPM();
 		printLog("return from install:\n>$retString<", 'L2', '[DEBUG]');
@@ -4006,7 +4020,8 @@ sub populateKernelPackages {
 	my @lines;
 	$searchCommand = "apt-cache depends --important @rootPackages";
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
-	runProcess( \$result, undef, 600, undef, $searchCommand );
+	# apt-cache depends --important @rootPackages
+	runProcess( \$result, undef, 120, undef, $searchCommand );
 	printLog("first result:\n>$result<", 'L2', '[DEBUG]');
 	@lines = split /\n/sm, $result;
 	foreach my $lineFirstResult (@lines) {
@@ -4023,6 +4038,7 @@ sub populateKernelPackages {
 		$searchCommand = 'apt-cache depends --important --installed '.$packageLine;
 		printLog("second searchcommand: $searchCommand", 'L2', '[DEBUG]');
 		$result = q{};
+		# apt-cache depends --important --installed $packageLine
 		runProcess( \$result, undef, 600, undef, $searchCommand );
 		printLog("second result:\n>$result<", 'L2', '[DEBUG]');
 		@lines = ();
@@ -4044,6 +4060,7 @@ sub populateKernelPackages {
 			"linux-modules-extra-$version-tuxedo",
 		)
 	);
+	# dpkg-query -W -f${db:Status-Abbrev} linux-modules-extra-$version-tuxedo
 	runProcessArray( \$result, '2>&1', 600, undef, @searchCommand );
 	$result =~ s/'//g;
 	if ($result =~ m/^[uihrp][HUFWti]\s$/sm) {
@@ -4102,6 +4119,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			'linux-tuxedo-*-headers-*',
 		)
 	);
+	# dpkg-query -W -f '${db:Status-Status}=${Version}=${Package}\n' linux-tuxedo-*-headers-*
 	runProcessArray(\$headersListString, undef, 600, undef, @queryHeaders);
 
 	my @headersList;
@@ -4140,6 +4158,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			'linux-image-*-tuxedo',
 		)
 	);
+	# dpkg-query -W -f${db:Status-Status}=${Version}=${Package}\n' linux-image-*-tuxedo
 	runProcessArray(\$imagesListString, undef, 600, undef, @queryImages);
 	my @imagesList;
 	@imagesList = split /\n/sm, $imagesListString;
@@ -4217,6 +4236,7 @@ sub checkAndDeleteOldestRemnantLinuxHeader {
 			printLog("executing purge", 'L2', '[DEBUG]');
 			my $result = q{};
 			my $error = q{};
+			# apt-get purge -o Dpkg::lock::timeout=0 --assume-yes $oldestHeader
 			runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
 			if ($error != 0) {
 				printLog("header: $oldestHeader there were problems to remove it", 'L0', '[ERROR]');
@@ -4322,6 +4342,7 @@ sub checkAndDeleteOldestTuxedoKernel {
 			my $error;
 			if (unlockPM("purge command: $purgeCommandString") && (isPMlocked() == 0)) {
 				printLog("executing purge", 'L2', '[DEBUG]');
+				# apt-get purge -o Dpkg::lock::timeout=0 --assume-yes @packageList
 				runProcessArray( \$result, undef, 600, \$error, @purgeCommand );
 				if ($error != 0) {
 					printLog("could not remove @packageList", 'L0', '[WARN]');
@@ -4524,6 +4545,7 @@ sub aptgetRefreshModule {
 				my $updateCommand = 'apt-get update';
 				if(unlockPM($updateCommand) && (isPMlocked() == 0)) {
 					printLog("executing apt-get update", 'L2', '[DEBUG]');
+					# apt-get update
 					runProcess( \$output, undef, 120, \$exitStatus, $updateCommand );
 					initAvailablePackagesList();
 					lockPM();
@@ -4914,6 +4936,7 @@ sub messageDesktop {
 			'5000',
 		)
 	);
+	# sudo -u $mUsername $dbusAddress gdbus call --session --dest=org.freedesktop.Notifications --object-path=/org/freedesktop/Notifications --method=org.freedesktop.Notifications.Notify "TUXEDO Tomte" $sessionID $icon $summary $body [] {\"urgency\": <$urgency>, \"desktop-entry\": <\"tuxedo-control-center\">} 5000
 	runProcessArray( undef, undef, 5, \$returnValue, @messageCommand );
 	if ($returnValue != 0) {
 		printLog("No display for message output found with command:\n@messageCommand", 'L0', '[DEBUG]');
@@ -6535,6 +6558,7 @@ sub postConfigure {
 		if ($postConfProgramsList{$sysProgram}{trigger} == 1 ) {
 			printLog("starting $sysProgram", 'L1', '[INFO]');
 			my $postCommand = $postConfProgramsList{$sysProgram}{command};
+			# $postConfProgramsList{$sysProgram}{command}
 			runProcess( \$output, '2>&1', 600, \$exitStatus, $postCommand );
 			printLog("postConfigure: >$output<", 'L2', '[DEBUG]');
 			if ($exitStatus == 0) {
@@ -6621,6 +6645,7 @@ sub startTomteDelayed {
 		my $systemctlCommandString = join(' ', @systemctlCommand);
 		printLog("systemctlCmd: $systemctlCommandString", 'L0', '[DEBUG]');
 		printLog("starting \"systemd-run tuxedo-tomte configure all\" for delayed configuration", 'L0', '[DEBUG]');
+		# systemd-run --on-active=$delay tuxedo-tomte configure all
 		runProcessArray( undef, undef, 600, \$returnValue, @systemctlCommand);
 		printLog("ret value: >$returnValue<", 'L0', '[DEBUG]');
 	}
@@ -7019,7 +7044,7 @@ sub getChassisType {
 	}
 
 	my $returnHostnamectl = q{};
-	runProcess( \$returnHostnamectl, undef, 5, undef, 'hotnamectl' );
+	runProcess( \$returnHostnamectl, undef, 5, undef, 'hostnamectl' );
 	if ($returnHostnamectl =~ /^\s+Chassis: vm/gsm) {
 		printLog("chassis is a virtual machine", 'TL2', '[DEBUG]');
 		printLog("machine will be treated as desktoppc", 'TL2', '[DEBUG]');
@@ -7188,9 +7213,11 @@ if (scalar(@ARGV) != 0) {
 						my $returnValue = q{};
 						printLog("executing tuxedo-tomte installation", 'L2', '[DEBUG]');
 						if ($logLevel > 1) {
+							# apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte
 							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
 							printLog(">$output<", 'L1', '[DEBUG]');
 						} else {
+							# apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte
 							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
 						}
 						if ($returnValue != 0) {
