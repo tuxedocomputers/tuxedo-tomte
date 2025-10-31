@@ -81,7 +81,6 @@ local $ENV{DEBIAN_FRONTEND} = 'noninteractive';
 my $logDir = '/var/log/tomte/';
 my $logFile = $logDir.'tomte.log';
 my $LOGFILE;
-printLog("##############################################################################", 'L0', '[INFO]');
 my $faiLogDir = '/var/log/';
 my $faiLogfile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
@@ -1871,12 +1870,9 @@ sub nvidiadriver() {
 				} else {
 					$packageNvidiaDriver = 1;
 				}
-				# just to be sure it is numeric
-				$packageNvidiaDriver += 0;
 
 				if ($packageNvidiaDriver == 1) {
 					setAptMark($tuxedoNvidiaDriver,'manual');
-					$packageNvidiaDriver = 1;
 				}
 			} else {
 				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver can't be found in the repositories", 'L0', '[WARN]');
@@ -3665,6 +3661,7 @@ sub isPackageInstalled {
 		printLog("package $package is not installed: $retString", 'L1', '[DEBUG]');
 		return (0);
 	}
+	return (0);
 }
 
 
@@ -3706,7 +3703,7 @@ sub getPackageVersion {
 sub installPackage {
 	my ( $packageName, $module, $timeout ) = @_;
 	my $retval = q{};
-	my $installed = q{};
+	my $installed = 0;
 	if (!$noNetwork) {
 		if (checkNetwork( $NETWORK_CHECKS, 1)) {
 			my $installCommand = q{};
@@ -3741,7 +3738,7 @@ sub installPackage {
 				runProcessArray( \$output, undef, $timeout, \$retval, @installCommand );
 				lockPM();
 				$installed = isPackageInstalled($packageName);
-				if ($installed == 0) {
+				if ($installed != 1) {
 					printLog("failed to install $packageName", 'L0', '[WARN]');
 					printLog("will try again later", 'L0', '[WARN]');
 					# repair a possibly wrecked package manager
@@ -3758,6 +3755,7 @@ sub installPackage {
 		printLog("no network connection found, can't install packages!!", 'TL0', '[WARN]');
 		startTomteDelayed();
 	}
+
 	return $installed;
 }
 
@@ -4730,7 +4728,11 @@ sub waitForNetwork {
 sub checkNetwork {
 	my $triesNbr = shift;
 	my $wait = shift;
-	if ((! $FAI) && ($noNetwork == 0)) {
+	if ($FAI) {
+		# in FAI: automatically assume that network is available
+		return (1);
+	}
+	if ($noNetwork == 0) {
 		if (waitForNetwork($triesNbr, $wait)) {
 			setNoNetwork(0);
 			printLog('found network !', 'L1', '[INFO]');
@@ -5003,6 +5005,7 @@ sub initLogging {
 			if (! close $LOGFILE) {
 				printLog("could not close $logFile", 'L0', '[ERROR]');
 			}
+			printLog("##########################################################", 'L0', '[INFO]');
 			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
 			if ($FAI) {
 				printLog('in FAI mode', 'L0', '[INFO]');
