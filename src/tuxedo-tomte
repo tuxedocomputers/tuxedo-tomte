@@ -1022,10 +1022,8 @@ sub checkRequirements {
 				printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
 			}
 		} else {
-			printLog("plasma-workspace version could not be determined", 'L2', '[INFO]');
+			printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 		}
-	} else {
-		printLog("less than 2 GPU found" , 'L2', '[DEBUG]');
 	}
 
 	if (($boardname =~ m/PD5x_7xPNP_PNR_PNN_PNT/sm) ||
@@ -1835,7 +1833,6 @@ sub nvidiadriver() {
 	my $packagePythonCairo = 0;
 	my $packagePythonGtk2 = 0;
 	my $oldDriversRemoved = 0;
-	my $output;
 	my %nvidiaPackage = nvidiaPackage();
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
@@ -1888,9 +1885,13 @@ sub nvidiadriver() {
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					runProcess( \$output, undef, 600, undef, 'gpu-manager && prime-select nvidia' );
+					my $output = q{};
+					my $returnValue = q{};
+					my $errors = q{};
+					my $cec = q{};
+					$returnValue = runProcess( \$output, $errors, 600, $cec, 'gpu-manager && prime-select nvidia' );
+					#$returnValue = runProcess( \$output, undef, 600, undef, 'gpu-manager && prime-select nvidia' );
 					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
-					printLog(">$output<", 'L2', '[DEBUG]');
 				}
 			}
 
