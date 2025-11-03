@@ -1885,13 +1885,15 @@ sub nvidiadriver() {
 			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
 				# temporarily activated fix
 				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
-					my $output = q{};
 					my $returnValue = q{};
-					my $errors = q{};
-					my $cec = q{};
-					$returnValue = runProcess( \$output, $errors, 600, $cec, 'gpu-manager && prime-select nvidia' );
-					#$returnValue = runProcess( \$output, undef, 600, undef, 'gpu-manager && prime-select nvidia' );
-					printLog('selecting NVIDIA GPU: on', 'TL0', '[INFO]');
+					$returnValue = runProcess( undef, undef, 600, undef, 'gpu-manager' );
+					my $output = q{};
+					$returnValue = runProcess( \$output, undef, 600, undef, 'prime-select nvidia' );
+					if ($output =~ /^.*Done$/m) {
+						printLog('return from prime-select nvidia: Done', 'TL0', '[INFO]');
+					} else {
+						printLog('prime-select nvidia failed', 'TL0', '[WARN]');
+					}
 				}
 			}
 
@@ -2490,6 +2492,7 @@ sub runProcessArray {
 		$rPATimeout = 5;
 		printLog("\$rPATimeout not defined -> initializing as $rPATimeout", 'L2', '[INFO]');
 	}
+
 	my $rPARunExitCode = q{};
 
 	# set the timeout to some extreme high value in FAI
@@ -2516,6 +2519,7 @@ sub runProcessArray {
 		printLog("command exit code: >$$rPACommandExitCode<", 'L0', '[DEBUG]');
 		if ($FAI) {
 			printLog("external process call:\n@rPACommand\nhang. Tomte aborted further operations", 'TL0', '[ERROR]');
+			# exit Tomte as the installation failed and there is no reason to continue
 			exit (1);
 		}
 	} else {
@@ -2538,6 +2542,11 @@ sub runProcessArray {
 	# make sure to convert into numeral
 	if (defined $$rPACommandExitCode) {
 		$$rPACommandExitCode += 0;
+	}
+	if ($rPARunExitCode != 1) {
+		printLog("runProcess failed: @rPACommand", 'L0', '[WARN]');
+		printLog("output:\n$rPAOutput", 'L0', '[WARN]');
+		printLog("error:\n$rPAErrors", 'L0', '[WARN]');
 	}
 
 	return ($rPARunExitCode);
@@ -2887,7 +2896,6 @@ sub getSystemdState {
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
 	# systemctl is-active $systemdModule
-	printLog("systemd return for $systemdModule: >$systemdReturn<", 'L2', '[INFO]');
 	if ($systemdReturn =~ /^active/sm) {
 		return 'active';
 	} elsif ($systemdReturn =~ /^inactive/sm) {
@@ -2913,7 +2921,6 @@ sub getSystemdEnabled {
 	# systemctl is-enabled $systemdModule
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
 	$systemdReturn =~ s/\s+//gsm;
-	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
 	return ($systemdReturn);
 }
 
@@ -2930,7 +2937,6 @@ sub commandSystemdModule {
 	my $systemdCommand = "systemctl --quiet $command $systemdModule";
 	# systemctl --quiet $command $systemdModule
 	runProcess( \$systemdReturn, undef, 30, undef, $systemdCommand );
-	printLog("systemd returns: >$systemdReturn<", 'L2', '[INFO]');
 	return;
 }
 
@@ -3606,7 +3612,6 @@ sub uninstallSinglePackage {
 			my $output = q{};
 			# apt-get -yq remove -o Dpkg::lock::timeout=0 $package
 			runProcessArray( \$output, '2>&1', 120, \$returnValue, @aptgetDeinst );
-			printLog(">$output<", 'L2', '[DEBUG]');
 			if ($returnValue != 0) {
 				printLog("failed to remove package, retvalue: $returnValue", 'L0', '[WARN]');
 				repairPackageManagement();
@@ -3896,7 +3901,6 @@ sub setAptMark {
 	if ( $aptMark && ($mark eq 'manual') ) {
 		printLog("package $package is set to \"auto\", changing to \"manual\" now", 'L1', '[INFO]');
 		runProcess( \$retString, undef, 30, \$exitStatus, "apt-mark manual $package" );
-		printLog("result: >$retString< exitStatus: >$exitStatus<", 'L2', '[INFO]');
 		if (($retString =~ /set to manually installed/sm) && ($exitStatus == 0)) {
 			printLog("return value confirmed set to manually installed", 'L2', '[DEBUG]');
 			return (1);
@@ -3907,7 +3911,6 @@ sub setAptMark {
 	} elsif ( !$aptMark && ($mark eq 'auto') ) {
 		printLog("package $package is set to \"manual\", changing to \"auto\" now", 'L1', '[INFO]');
 		runProcess( \$retString, undef, 30, \$exitStatus, "apt-mark auto $package" );
-		printLog("result: >$retString< exitStatus: >$exitStatus<", 'L2', '[INFO]');
 		if (($retString =~ /set to automatically installed/sm) && ($exitStatus == 0)) {
 			printLog("return value confirmed set to automatically installed", 'L2', '[DEBUG]');
 			return (1);
@@ -3976,7 +3979,6 @@ sub installKernelFlavour {
 		# apt-get install -yq -o Dpkg::lock::timeout=0 $kernelsList{$distributionType}{$flavour}
 		runProcessArray( \$retString, '2>&1', 600, \$exitStatus, @installCommand );
 		lockPM();
-		printLog("return from install:\n>$retString<", 'L2', '[DEBUG]');
 		if (($retString =~ /is already the newest version/sm) && ($exitStatus == 0)) {
 			printLog("$kernelsList{$distributionType}{$flavour} is already the newest version", 'L2', '[INFO]');
 		} elsif ($exitStatus == 0) {
@@ -4021,7 +4023,6 @@ sub populateKernelPackages {
 	printLog("first searchcommand: $searchCommand", 'L2', '[DEBUG]');
 	# apt-cache depends --important @rootPackages
 	runProcess( \$result, undef, 120, undef, $searchCommand );
-	printLog("first result:\n>$result<", 'L2', '[DEBUG]');
 	@lines = split /\n/sm, $result;
 	foreach my $lineFirstResult (@lines) {
 		if ($lineFirstResult =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
@@ -4039,7 +4040,6 @@ sub populateKernelPackages {
 		$result = q{};
 		# apt-cache depends --important --installed $packageLine
 		runProcess( \$result, undef, 600, undef, $searchCommand );
-		printLog("second result:\n>$result<", 'L2', '[DEBUG]');
 		@lines = ();
 		@lines = split /\n/sm, $result;
 		foreach my $lineSecondResult (@lines) {
@@ -6563,7 +6563,6 @@ sub postConfigure {
 			my $postCommand = $postConfProgramsList{$sysProgram}{command};
 			# $postConfProgramsList{$sysProgram}{command}
 			runProcess( \$output, '2>&1', 600, \$exitStatus, $postCommand );
-			printLog("postConfigure: >$output<", 'L2', '[DEBUG]');
 			if ($exitStatus == 0) {
 				printLog("success: $postConfProgramsList{$sysProgram}{command}", 'L1', '[INFO]');
 				postSetModulesState($sysProgram, "success");
@@ -7217,7 +7216,6 @@ if (scalar(@ARGV) != 0) {
 						if ($logLevel > 1) {
 							# apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte
 							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
-							printLog(">$output<", 'L1', '[DEBUG]');
 						} else {
 							# apt-get -yq -o Dpkg::lock::timeout=0 install tuxedo-tomte
 							runProcessArray( \$output, undef, 600, \$returnValue, @updateCommand );
