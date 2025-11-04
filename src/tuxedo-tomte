@@ -65,7 +65,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -2460,7 +2460,8 @@ sub krackanpointusb4suspendfix() {
 # use undef if you are not interested in the values returns
 # e.g.: runProcessArray( \$output, undef, $timeout, undef, $command )
 #
-# $returnValue: the exit code of the command
+# $rPACommandExitCode: the exit code of the command
+#
 # returns 1 if the exit code of the command is 0
 # returns empty string in any other case
 #
@@ -2475,15 +2476,15 @@ sub runProcessArray {
 	}
 	if (!defined $rPAOutput) {
 		printLog("\$rPAOutput not defined -> defining", 'L2', '[WARN]');
-		$rPAOutput = q{};
+		$$rPAOutput = q{};
 	}
 	if (!defined $rPAErrors) {
 		printLog("\$rPAErrors not defined -> defining", 'L2', '[WARN]');
-		$rPAErrors = q{};
+		$$rPAErrors = q{};
 	}
 	if (!defined $rPACommandExitCode) {
 		printLog("\$rPACommandExitCode not defined -> defining", 'L2', '[WARN]');
-		$rPACommandExitCode = q{};
+		$$rPACommandExitCode = q{};
 	}
 
 
@@ -2527,6 +2528,11 @@ sub runProcessArray {
 		printLog("run exit code: >$rPARunExitCode<", 'L2', '[DEBUG]');
 		printLog("command exit code: >$$rPACommandExitCode<", 'L2', '[DEBUG]');
 	}
+	if ($rPARunExitCode != 1) {
+		printLog("runProcess failed: >@rPACommand<", 'L0', '[WARN]');
+	} else {
+		printLog("runProcess successfull: >@rPACommand<", 'L0', '[WARN]');
+	}
 	if (defined $$rPAOutput) {
 		chomp($$rPAOutput);
 		# to avoid printing out the huge list of packages
@@ -2542,11 +2548,6 @@ sub runProcessArray {
 	# make sure to convert into numeral
 	if (defined $$rPACommandExitCode) {
 		$$rPACommandExitCode += 0;
-	}
-	if ($rPARunExitCode != 1) {
-		printLog("runProcess failed: @rPACommand", 'L0', '[WARN]');
-		printLog("output:\n$rPAOutput", 'L0', '[WARN]');
-		printLog("error:\n$rPAErrors", 'L0', '[WARN]');
 	}
 
 	return ($rPARunExitCode);
@@ -2732,7 +2733,7 @@ sub addRepoKey {
 		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
 		if ( checkNetwork( $NETWORK_CHECKS, 1 ) ) {
 			# get the keyring for TUXEDO repos
-			runProcess( undef, undef, 120, undef, 'wget -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
+			runProcess( undef, undef, 120, undef, 'wget --no-verbose -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
 			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < $NETWORK_CHECKS) {
