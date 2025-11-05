@@ -63,6 +63,7 @@ sub setEmail {
 sub build {
 	# replaces placeholder with current version numbers
 	my $versionInChangelog = `dpkg-parsechangelog --show-field Version`;
+	$versionInChangelog =~ s/\s//g;
 	my $data = read_file 'src/tuxedo-tomte', {binmode => ':utf8'};
 	$data =~ s/API-Change.Feature-Release.Hotfix-Release/$versionInChangelog/g;
 	write_file 'src/tuxedo-tomte', {binmode => ':utf8'}, $data;

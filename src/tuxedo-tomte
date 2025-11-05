@@ -65,7 +65,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 0;
+my $logLevel = 2;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -86,6 +86,8 @@ my $faiLogfile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
 my $faiLogfileExists = 0;	# 0 = no, 1 = exists
 
+printLog("Starting Tomte $VERSION #######################################################", 'L0', '[INFO]');
+printLog("###############################################################################", 'L0', '[INFO]');
 checkAndSetLocale();
 
 ###############################################################################
@@ -194,7 +196,9 @@ Readonly my $MAX_FILESIZE_KERNEL_DELETE => 1_000_000;
 my $kernelRelease = q{};
 
 if ($FAI) {
-	printLog("starting Tomte version $VERSION in FAI", 'TL0', '[DEBUG]');
+	print( "Starting tuxedo-tomte $VERSION in FAI mode\n".
+			"This should not be used in a normal situation\n".
+			"only when installing a new system with FAI\n" );
 	# get the kernel version installed in the target
 	my @searchCommand = (
 		"dpkg-query" => (
@@ -5007,11 +5011,6 @@ sub initLogging {
 			if (! close $LOGFILE) {
 				printLog("could not close $logFile", 'L0', '[ERROR]');
 			}
-			printLog("##########################################################", 'L0', '[INFO]');
-			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
-			if ($FAI) {
-				printLog('in FAI mode', 'L0', '[INFO]');
-			}
 			return;
 		} else {
 			printLog("Err: $!", 'L1', '[ERROR]');
@@ -5027,14 +5026,10 @@ sub initLogging {
 			if (! close($LOGFILE)) {
 				print "[ERROR] couldn't close $logFile";
 			}
-			printLog("starting Tomte $VERSION", 'L0', '[INFO]');
-			if ($FAI) {
-				printLog('in FAI mode', 'L0', '[INFO]');
-			}
 			return;
 		} else {
 			printLog("Err: $!", 'L0', 'L1', '[ERROR]');
-			$noLogFile =1;
+			$noLogFile = 1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
 		}
@@ -5107,6 +5102,7 @@ sub printLog {
 						print "[ERROR] couldn't close $faiLogfile\n";
 					} else {
 						$faiLogfileExists = 1;
+						printLog("Starting Tomte $VERSION in FAI", 'TL0', '[INFO]');
 					}
 				} else {
 					print "[ERROR] couldn't create $faiLogfile\n";
@@ -7168,10 +7164,6 @@ if (scalar(@ARGV) != 0) {
 
 	# FAI
 	} elsif ($argValue{command} eq "FAI") {
-		printLog("starting Tomte $VERSION in FAI mode", 'L0', '[INFO]');
-		print( "Starting tuxedo-tomte $VERSION in FAI mode\n".
-				"This should not be used in a normal situation\n".
-				"only when installing a new system with FAI\n" );
 		setMode('AUTOMATIC');
 		prepareValues();
 		configureAllModules();
