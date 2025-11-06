@@ -86,10 +86,6 @@ my $faiLogfile = $faiLogDir.'fai-tomte.log';
 my $FAILOGFILE;
 my $faiLogfileExists = 0;	# 0 = no, 1 = exists
 
-printLog("Starting Tomte $VERSION #######################################################", 'L0', '[INFO]');
-printLog("###############################################################################", 'L0', '[INFO]');
-checkAndSetLocale();
-
 ###############################################################################
 # Argument values given to script
 #
@@ -98,13 +94,17 @@ my %argValue = (
 	module => q{},
 );
 
-printLog("arguments: @ARGV", 'L2', '[INFO]');
 if (scalar(@ARGV) > 0) {
 	$argValue{command} = $ARGV[0];
 }
 if (scalar(@ARGV) > 1) {
 	$argValue{module} = $ARGV[1];
 }
+
+printLog("arguments: @ARGV", 'L2', '[INFO]');
+
+checkAndSetLocale();
+
 
 # make sure this is the only running instance
 use Fcntl ':flock';
@@ -5006,14 +5006,17 @@ sub initLogging {
 		# append if logFile exists
 		if ( open($LOGFILE, '>>', $logFile) )
 		{
-			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			if (! close $LOGFILE) {
 				printLog("could not close $logFile", 'L0', '[ERROR]');
 			}
+			if ($noLogFile) {
+				printLog("Starting Tomte $VERSION ##########", 'L0', '[INFO]');
+			}
+			$noLogFile = 0;
 			return;
 		} else {
-			printLog("Err: $!", 'L1', '[ERROR]');
+			print "Err: $!\n";
 			$noLogFile = 1;
 			print "[ERROR] Could not open logFile $logFile\n$!\n";
 			exit (0);
@@ -5021,14 +5024,17 @@ sub initLogging {
 	} else {
 		# create a new logFile
 		if ( open($LOGFILE, '>', $logFile) ) {
-			$noLogFile = 0;
 			$timestamp = getLoggingTime();
 			if (! close($LOGFILE)) {
 				print "[ERROR] couldn't close $logFile";
 			}
+			if ($noLogFile) {
+				printLog("Starting Tomte $VERSION ##########", 'L0', '[INFO]');
+			}
+			$noLogFile = 0;
 			return;
 		} else {
-			printLog("Err: $!", 'L0', 'L1', '[ERROR]');
+			print "Err: $!\n";
 			$noLogFile = 1;
 			print "Could not create logFile $logFile\n";
 			exit (0);
