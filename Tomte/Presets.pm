@@ -37,7 +37,7 @@ our %SUPPORTED_OS = (
 	"TUXEDO_OS Plasma" => ['24.04'],
 	"KDE neon" => ['24.04'],
 	"Ubuntu" => ['24.04'],
-	"Linux Mint" => ['22', '22.1', '22.2'],
+	"Linux Mint" => ['22', '22.1', '22.2', '22.3'],
 	"elementary OS" => ['8'],
 	"Debian GNU/Linux" => ["13"]
 );
@@ -48,7 +48,8 @@ our %DISTRIBUTION_TYPE = (
 	"wilma" => "noble",
 	"xia" => "noble",
 	"zara" => "noble",
-	"circe" => "noble"
+	"circe" => "noble",
+	"zena" => "noble"
 );
 
 our %ESSENTIAL_REPOS = (
