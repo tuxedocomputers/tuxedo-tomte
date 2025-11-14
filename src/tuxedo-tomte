@@ -499,7 +499,7 @@ sub acquireLock {
 		$fs->l_whence( SEEK_SET );
 		$fs->l_start( 0 );
 		if ($fs->lock( $FH, F_SETLK )) {
-			printLog("Locking: locking successfull", 'L2', '[DEBUG]');
+			printLog("Locking: locking successful", 'L2', '[DEBUG]');
 			$num = <$FH> || 0;
 			$lockFilesList{$key}{'FH'} = $FH;
 			$lockFilesList{$key}{'number'} = $num;
@@ -758,7 +758,7 @@ sub isOSSupported {
 
 
 ###############################################################################
-# check basic requirements the system should fullfill and
+# check basic requirements the system should fulfill and
 # install missing parts
 #
 sub prerequisites {
@@ -2289,7 +2289,7 @@ sub tuxedoyt6801() {
 
 
 ###############################################################################
-# Installs module usefull for Wi-Fi
+# Installs module useful for Wi-Fi
 #
 sub tuxedowifisetregdomain() {
 	my $module = shift;
@@ -2535,7 +2535,7 @@ sub runProcessArray {
 	if ($rPARunExitCode != 1) {
 		printLog("runProcess failed: >@rPACommand<", 'L2', '[WARN]');
 	} else {
-		printLog("runProcess successfull: >@rPACommand<", 'L2', '[WARN]');
+		printLog("runProcess successful: >@rPACommand<", 'L2', '[WARN]');
 	}
 	if (defined $$rPAOutput) {
 		chomp($$rPAOutput);
@@ -3215,8 +3215,8 @@ sub grubModuleEdit {
 ###############################################################################
 # add's, upgrades or deletes debian packages
 # debianPackageModule( module, install|upgrade|remove );
-# returns 1 if successfull
-# returns 0 if not succesfull
+# returns 1 if successful
+# returns 0 if not successful
 #
 sub debianPackageModule {
 	my ($module, $action) = @_;
@@ -3298,7 +3298,7 @@ sub setDkmsVerbose {
 			printLog("substitute 'verbose' in dkms file $dkmsFile for $module", 'L2', '[INFO]');
 			$result = edit_file { s/verbose="1"//gsm } $dkmsFile, {'err_mode' => 'carp'};
 			if ($result >= 0) {
-				printLog("verbose DKMS substitution successfull", 'L2', '[INFO]');
+				printLog("verbose DKMS substitution successful", 'L2', '[INFO]');
 				return (1);
 			}
 		}
@@ -3363,7 +3363,7 @@ sub uninstallExcept {
 
 	foreach my $uninstallKey (keys %retHash) {
 		printLog("uninstallKey: $uninstallKey except: $except retHash: $retHash{$uninstallKey}", 'L2', '[DEBUG]');
-		# usefull for debug
+		# useful for debug
 		if (grep( /^$uninstallKey$/sm, @exceptDependencies)) {
 			printLog("grep: $uninstallKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
 		} else {
@@ -3724,7 +3724,7 @@ sub installPackage {
 			deactivatePackagekit();
 			my @installCommand = q{};
 			if ($FAI || ($logLevel > 1)) {
-				# usefull debug option: Debug::pkgDPkgProgressReporting=true
+				# useful debug option: Debug::pkgDPkgProgressReporting=true
 				@installCommand = (
 					'apt-get' => (
 						'-o Debug::pkgDPkgProgressReporting=true',
@@ -3783,7 +3783,7 @@ sub repairPackageManagement {
 		runProcess( undef, undef, 120, \$success, 'dpkg --configure -a' );
 		lockPM();
 		if ($success == 0) {
-			# command has been executed and was successfull
+			# command has been executed and was successful
 			printLog("package management is in good state", 'L2', '[DEBUG]');
 			return (1);
 		} else {
@@ -4380,8 +4380,8 @@ sub checkAndDeleteOldestTuxedoKernel {
 # if restart = 0 => don't restart
 # if restart = 1 => restart
 # checks if the package is installed
-# returns 1 if successfull
-# returns 0 if not successfull
+# returns 1 if successful
+# returns 0 if not successful
 #
 sub removeDebianModule {
 	my ($module, $restart, $parameter) = (@_);
@@ -5612,18 +5612,18 @@ sub listVersions {
 # returns 0 if something went wrong
 #
 sub checkNoFailedModules {
-	my $successfull = 1;
+	my $successful = 1;
 	foreach my $module (sort keys %localConfModules) {
 		if (($localConfModules{$module}{installed} eq 'no') &&
 			($presetModules{$module}{required} eq 'yes')) {
-			$successfull = 0;
+			$successful = 0;
 		}
 		if (($localConfModules{$module}{installed} eq 'no') &&
 			($presetModules{$module}{required} eq 'prerequisite')) {
-			$successfull = 0;
+			$successful = 0;
 		}
 	}
-	return $successfull;
+	return $successful;
 }
 
 
@@ -5742,10 +5742,10 @@ sub addToConfiguredModules {
 		if ($status =~ /failed/sm) {
 			printLog("failed to install $presetModules{$module}{name}", 'L0', '[ERROR]');
 		} elsif ($status =~ /success/sm) {
-			printLog("succesfully installed $presetModules{$module}{name}", 'L0', '[INFO]');
+			printLog("successfully installed $presetModules{$module}{name}", 'L0', '[INFO]');
 		} elsif ($status =~ /removed/sm) {
 			if (($mode ne 'DONT_CONFIGURE') || ($mode ne 'UPDATES_ONLY')) {
-				printLog("succesfully removed $presetModules{$module}{name}", 'L0', '[INFO]');
+				printLog("successfully removed $presetModules{$module}{name}", 'L0', '[INFO]');
 				print "The module $presetModules{$module}{name} has been removed. Please block it with:\n";
 				print "\$ sudo tomte block $presetModules{$module}{name}\n";
 				print "unless you set the mode DONT_CONFIGURE or UPDATE_ONLY\n";
