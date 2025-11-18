@@ -64,7 +64,7 @@ use Data::Dumper;
 # 0 = normal
 # 1 = some debug
 # 2 = lots of debug
-my $logLevel = 2;
+my $logLevel = 0;
 $logLevel = $ENV{LOGLEVEL} // $logLevel;
 
 use Readonly;
@@ -1845,9 +1845,9 @@ sub nvidiadriver() {
 			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $tuxedoNvidiaDriver);
-
 				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
+
 				# check if the package is already installed
 				if( ! isPackageInstalled($tuxedoNvidiaDriver) ) {
 					messageLongInstall();
@@ -3164,11 +3164,21 @@ sub deinstExcept {
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsm;
 	my @exceptDependencies = getPackageDependencies($except);
 
+	# for the tuxedo meta package
+	if ($except =~ /^tuxedo-.*/) {
+		my @tmpDependencies = @exceptDependencies;;
+		foreach my $package (@tmpDependencies) {
+			my @secondDependencies = getPackageDependencies($package);
+			push @exceptDependencies, @secondDependencies;
+			printLog("exceptDependency added: @secondDependencies", 'L2', '[DEBUG]');
+		}
+	}
+
 	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
 	my $deinstCounter = 0;
 
 	foreach my $deinstKey (keys %retHash) {
-		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
+		printLog("deinstKey: $deinstKey exceptDependencies: @exceptDependencies retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
 		# usefull for debug
 		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
 			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
