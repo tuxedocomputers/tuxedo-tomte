@@ -1851,7 +1851,7 @@ sub nvidiadriver() {
 					$packageNvidiaDriver = 1;
 				}
 			} else {
-				printLog("old nvidia packages will not be uninstalled as the required packages for the new driver $tuxedoNvidiaDriver can't be found in the repositories", 'L0', '[WARN]');
+				printLog("the required packages for the new driver $tuxedoNvidiaDriver can't be found in the repositories", 'L0', '[WARN]');
 			}
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
