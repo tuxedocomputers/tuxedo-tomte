@@ -1845,9 +1845,9 @@ sub nvidiadriver() {
 			if (isPackageInRepo( $tuxedoNvidiaDriver )) {
 				# deinstall other nvidia drivers
 				$oldDriversRemoved = deinstExcept('nvidia-driver-', $tuxedoNvidiaDriver);
-
 				my $oldDriversRemovedCounter = deinstExcept('tuxedo-nvidia-driver-', $tuxedoNvidiaDriver);
 				$oldDriversRemoved += $oldDriversRemovedCounter;
+
 				# check if the package is already installed
 				if( ! isPackageInstalled($tuxedoNvidiaDriver) ) {
 					messageLongInstall();
@@ -3146,13 +3146,15 @@ sub deinstExcept {
 	my $deinst = shift;
 	my $except = shift;
 	my $retValue = q{};
+
+	# find all packages which name begin with $deinst
 	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
 	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
 	my $retString = `$searchCmd`;
 	$retValue = $?/$RETVAL_CONVERTER;
 	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
 	my $deinstCmd;
-	my $deinstList =q{};
+	my $deinstList = q{};
 	if ($retValue != 0) {
 		if ($retValue == 1) {
 			printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1', '[DEBUG]');
@@ -3162,13 +3164,30 @@ sub deinstExcept {
 		return (0);
 	}
 	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsm;
-	my @exceptDependencies = getPackageDependencies($except);
+
+	# make a list of packages which belong to the meta package in $except
+	# for the tuxedo- meta package:
+	# the meta package is a meta package of meta packages
+	# the package nvidia-driver-xxx lies on the second dependency level
+	my @exceptDependencies;
+	push @exceptDependencies, $except;
+	if ($except =~ /^tuxedo-.*/) {
+		my @tmpDependencies = getPackageDependencies($except);
+		push @exceptDependencies, @tmpDependencies;
+		foreach my $package (@tmpDependencies) {
+			my @secondDependencies = getPackageDependencies($package);
+			push @exceptDependencies, @secondDependencies;
+			printLog("exceptDependency added: @secondDependencies", 'L2', '[DEBUG]');
+		}
+	}
 
 	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
 	my $deinstCounter = 0;
 
+	# remove all dependency packages from list of installed packages
+	# to build a list of packges which should be removed
 	foreach my $deinstKey (keys %retHash) {
-		printLog("deinstKey: $deinstKey except: $except retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
+		printLog("deinstKey: $deinstKey exceptDependencies: @exceptDependencies retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
 		# usefull for debug
 		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
 			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
@@ -3184,6 +3203,7 @@ sub deinstExcept {
 			$deinstList .= q{ }.$deinstKey;
 		}
 	}
+
 	if ($deinstCounter != 0) {
 		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0', '[DEBUG]');
 		my $retText = q{};
