@@ -18,6 +18,8 @@ my $consoleLanguage = 'LANG=C;LANGUAGE=C;';
 
 Readonly my $RETVAL_CONVERTER => 256;
 
+my $FAI = q{};
+
 
 
 ###############################################################################
@@ -241,6 +243,130 @@ sub arePackagesInstalled {
 	return ( @packagesNotInstalled );
 }
 
+
+###############################################################################
+# Deinstalls all packages beginning with a given string except the one given as
+# second parameter
+# returns 0 if the search for the packages failed or if the deinstallation was
+# unsuccessful
+# returns 1 if everything was ok, even if no packages were found
+#
+# !!!!! WARNING !!!! this is mostly adapted to the nvidia installation module
+#
+sub deinstExcept {
+	my $deinst = shift;
+	my $except = shift;
+	my $retValue = q{};
+
+	# find all packages which name begin with $deinst
+	my $searchCmd = $consoleLanguage."dpkg-query -W -f=\'\${Package} \${db:Status-Abbrev}\n\' $deinst*"." 2>&1";
+	printLog("search command: $searchCmd", 'L2', '[DEBUG]');
+	my $retString = `$searchCmd`;
+	$retValue = $?/$RETVAL_CONVERTER;
+	printLog("first result for $deinst:\n$retString", 'L2', '[DEBUG]');
+	my $deinstCmd;
+	my $deinstList = q{};
+	if ($retValue != 0) {
+		if ($retValue == 1) {
+    		printLog("no packages found matching search string to deinstall packages: $deinst with except pattern: $except", 'L1', '[DEBUG]');
+			return (1);
+		}
+		printLog('something went wrong while searching for packages', 'L0', '[WARN]');
+		return (0);
+	}
+	my %retHash = $retString =~ /(\S+)\s*(\S+)/gsm;
+
+	# make a list of packages which belong to the meta package in $except
+	# for the tuxedo- meta package:
+	# the meta package is a meta package of meta packages
+	# the package nvidia-driver-xxx lies on the second dependency level
+	my @exceptDependencies;
+	push @exceptDependencies, $except;
+	if ($except =~ /^tuxedo-.*/) {
+		my @tmpDependencies = getPackageDependencies($except);
+		push @exceptDependencies, @tmpDependencies;
+		foreach my $package (@tmpDependencies) {
+			my @secondDependencies = getPackageDependencies($package);
+			push @exceptDependencies, @secondDependencies;
+			printLog("exceptDependency added: @secondDependencies", 'L2', '[DEBUG]');
+		}
+	}
+
+	$deinstCmd = $consoleLanguage.'apt-get -yq remove -o Dpkg::lock::timeout=0';
+	my $deinstCounter = 0;
+
+	# remove all dependency packages from list of installed packages
+	# to build a list of packges which should be removed
+	foreach my $deinstKey (keys %retHash) {
+		printLog("deinstKey: $deinstKey exceptDependencies: @exceptDependencies retHash: $retHash{$deinstKey}", 'L2', '[DEBUG]');
+		# usefull for debug
+		if (grep( /^$deinstKey$/sm, @exceptDependencies)) {
+			printLog("grep: $deinstKey found in dependencies, do NOT delete!", 'L2', '[DEBUG]');
+		} else {
+			printLog("grep: $deinstKey not found in dependencies, delete!", 'L2', '[DEBUG]');
+		}
+		# check if it is installed/not exempt/not a dependency of the exemp
+		if (($retHash{$deinstKey} =~ /i./sm) &&
+			!($deinstKey =~ $except) &&
+			!(grep( /^$deinstKey$/sm, @exceptDependencies ))) {
+			$deinstCounter++;
+			$deinstCmd .= q{ }.$deinstKey;
+			$deinstList .= q{ }.$deinstKey;
+		}
+	}
+
+	if ($deinstCounter != 0) {
+		printLog("deinstCounter not 0, deinstalling: $deinstList", 'L0', '[DEBUG]');
+		my $retText = q{};
+		if ($FAI) {
+			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
+			$retText = `$deinstCmd`;
+		} else {
+			$deinstCmd .= ' >/dev/null 2>&1';
+			printLog("command to deinstall: $deinstCmd", 'L2', '[DEBUG]');
+			if (unlockPM("$deinstCmd") && (isPMlocked() == 0)) {
+				printLog("deinstalling: $deinstList", 'L2', '[DEBUG]');$retText = `$deinstCmd`;
+				lockPM();
+			}
+		}
+		$retValue = q{};
+		$retValue = $?/$RETVAL_CONVERTER;
+		if ($retValue != 0) {
+			printLog("failed to deinstall packages, retvalue: >$retValue<", 'L0', '[WARN]');
+			printLog("retText: $retText", 'L0', '[WARN]');
+			return (0);
+		} else {
+			printLog('deinstallation of packages successful', 'L1', '[INFO]');
+			return (1);
+		}
+	} else {
+		printLog('nothing to deinstall', 'L1', '[INFO]');
+		return (1);
+	}
+}
+
+
+###############################################################################
+# Finds all dependencies for a given package and returns them in an array
+#
+sub getPackageDependencies {
+	my $package = shift;
+	my $result;
+	my @lines;
+	my $pkgString;
+	my @packages;
+	my $searchCmd = $consoleLanguage.'apt-cache depends --important '.$package;
+	$result = `$searchCmd`;
+	@lines = split /\n/sm, $result;
+	foreach my $line (@lines) {
+		if ($line =~ /\s[\s|]Depends:\s[<]?([a-z0-9\-\_\.]+)[>]?/sm) {
+			$pkgString = $1;
+			printLog("found dependency: $pkgString", 'L2', '[DEBUG]');
+			push @packages, $pkgString;
+		}
+	}
+	return @packages;
+}
 
 
 1;
