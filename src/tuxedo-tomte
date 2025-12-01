@@ -1866,7 +1866,8 @@ sub nvidiadriver() {
 					messageLongInstall();
 					$wasInstalled = 0;
 					setDkmsVerbose( 'nvidiadriver', 1 );
-					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver, 'nvidiadriver', 600);
+					# set timeout for kernel install to a safe high value
+					$packageNvidiaDriver = installPackage($tuxedoNvidiaDriver, 'nvidiadriver', 360000);
 					setDkmsVerbose( 'nvidiadriver', 0 );
 				} else {
 					$packageNvidiaDriver = 1;
@@ -1881,7 +1882,8 @@ sub nvidiadriver() {
 
 			if( ! isPackageInstalled('nvidia-prime') ) {
 				$wasInstalled = 0;
-				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver', 300);
+				# set timeout for kernel install to a safe high value
+				$packageNvidiaPrime = installPackage('nvidia-prime', 'nvidiadriver', 360000);
 			} else {
 				$packageNvidiaPrime = 1;
 			}
@@ -2503,7 +2505,7 @@ sub runProcessArray {
 	# set the timeout to some extreme high value in FAI
 	# in case of bad connection or some other network problem
 	if ($FAI) {
-		$rPATimeout = 600;
+		$rPATimeout = 1200;
 	}
 
 	# execute the command with exception handling
@@ -3982,7 +3984,8 @@ sub installKernelFlavour {
 	if (unlockPM($installCommandString) && (isPMlocked() == 0)) {
 		printLog("executing installation", 'L2', '[DEBUG]');
 		# apt-get install -yq -o Dpkg::lock::timeout=0 $kernelsList{$distributionType}{$flavour}
-		runProcessArray( \$retString, '2>&1', 600, \$exitStatus, @installCommand );
+		# set timeout for kernel install to a safe high value
+		runProcessArray( \$retString, '2>&1', 360000, \$exitStatus, @installCommand );
 		lockPM();
 		if (($retString =~ /is already the newest version/sm) && ($exitStatus == 0)) {
 			printLog("$kernelsList{$distributionType}{$flavour} is already the newest version", 'L2', '[INFO]');
@@ -5847,7 +5850,6 @@ sub validModuleName {
 # no		no			no			no			no		.
 
 sub configureAllModules {
-	my $exit_status;
 	foreach my $module (keys %presetModules) {
 		# for testing
 		if ($TEST_ALL_MODULES) {
