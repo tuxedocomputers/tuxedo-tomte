@@ -149,7 +149,7 @@ our %KERNELS = (
 # - Kernel (if needed, regex)
 # - display (if needed, as array)
 # - USB device (if needed)
-# default kernel tuxeookernel2404 is not listed
+# default kernel tuxedokernel2404 is not listed
 # only kernels that deviate from the default are listed
 #
 our %DEVICES = (
