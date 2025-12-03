@@ -7042,7 +7042,7 @@ if (scalar(@ARGV) != 0) {
 					if ($argValue{command} eq "force-install") {
 						$module->($module, 'install');
 					} elsif ($argValue{command} eq "force-update") {
-						$module->($module, 'update');
+						$module->($module, 'upgrade');
 					} elsif ($argValue{command} eq "force-remove") {
 						$module->($module, 'remove');
 					}
@@ -7054,7 +7054,7 @@ if (scalar(@ARGV) != 0) {
 				if ($argValue{command} eq "force-install") {
 					$module->($module, 'install');
 				} elsif ($argValue{command} eq "force-update") {
-					$module->($module, 'update');
+					$module->($module, 'upgrade');
 				} elsif ($argValue{command} eq "force-remove") {
 					$module->($module, 'remove');
 				}
