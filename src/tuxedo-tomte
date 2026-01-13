@@ -1352,7 +1352,27 @@ sub tuxedorepos() {
 	if ($action eq 'install') {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = createRepos(\%essentialReposList);
-		addRepoKey();
+
+
+		# cannot check for TUXEDO OS directly due to missing tuxedo-base-files
+		if(
+			(
+				isPackageInstalled('tuxedo-common-settings') || 
+				isPackageInstalled('tuxedoos-desktop') || 
+				-e '/etc/apt/sources.list.d/tuxedo-os.sources'
+			) && (! isPackageInstalled('tuxedo-base-files'))) {
+			printLog("TUXEDO base-files is not installed on a TUXEDO OS", 'L0', '[WARN]');
+			printLog("Trying to install `tuxedo-base-files`", 'L2', '[INFO]');
+			if( installPackage('tuxedo-base-files', 'tuxedorepos', 300) ) {
+				printLog("Successfully installed `tuxedo-base-files`", 'L2', '[INFO]');
+			} else {
+				printLog("Failed to install `tuxedo-base-files`", 'L2', '[INFO]');
+			}
+		}
+
+		if(! ($distribution =~ /TUXEDO OS/sm) ) {
+			addRepoKey();
+		}
 		if ($retval == 0) {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -1425,7 +1445,9 @@ sub tuxedorepos() {
 
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%essentialReposList);
-		addRepoKey();
+		if(! ($distribution =~ /TUXEDO OS/sm) ) {
+			addRepoKey();
+		}
 		if ($retval == 0) {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -1484,7 +1506,9 @@ sub tuxedomirrors() {
 		printLog("applying $presetModules{$module}{name}", 'L1', '[INFO]');
 		$retval = createRepos(\%otherReposList);
 		$retval3 = cleanSourcesList($otherReposList{$completeDistVersion}{mirrors}{filename});
-		addRepoKey();
+		if(! ($distribution =~ /TUXEDO OS/sm) ) {
+			addRepoKey();
+		}
 		if ($retval == 0) {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -1505,7 +1529,9 @@ sub tuxedomirrors() {
 		backupFile('/etc/apt/sources.list');
 		$retval = createRepos(\%otherReposList);
 		$retval3 = cleanSourcesList($otherReposList{$completeDistVersion}{mirrors}{filename});
-		addRepoKey();
+		if(! ($distribution =~ /TUXEDO OS/sm) ) {
+			addRepoKey();
+		}
 		if ($retval == 0) {
 			$presetModules{$module}{installed} = "failed";
 			addToConfiguredModules($module, "failed");
@@ -2724,12 +2750,16 @@ sub addRepoKey {
 	my $outputKey = q{};
 	my $counter = 0;
 	my $sleepTime = 1; # seconds
-	# install TUXEDO keyring for repositories
-	if (! isPackageInstalled('tuxedo-archive-keyring')) {
-		printLog("TUXEDO keyring is not installed", 'L0', '[WARN]');
-		if ( checkNetwork( $NETWORK_CHECKS, 1 ) ) {
+	# install TUXEDO repository for repositories
+	if (! isPackageInstalled('tuxedo-repository')) {
+		printLog("TUXEDO repository is not installed", 'L0', '[WARN]');
+		printLog("Trying to install `tuxedo-repository`", 'L2', '[INFO]');
+		if( installPackage('tuxedo-repository', 'tuxedorepos', 300) ) {
+			printLog("Successfully installed `tuxedo-repository`", 'L2', '[INFO]');
+			return (1);
+		} elsif ( checkNetwork( $NETWORK_CHECKS, 1 ) ) {
 			# get the keyring for TUXEDO repos
-			runProcess( undef, undef, 120, undef, 'wget --no-verbose -r -nd --no-parent -P /tmp/ -A tuxedo-archive-keyring*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-archive-keyring/' );
+			runProcess( undef, undef, 120, undef, 'wget --no-verbose -r -nd --no-parent -P /tmp/ -A tuxedo-repository*.deb https://deb.tuxedocomputers.com/ubuntu/pool/main/t/tuxedo-repository/' );
 			deactivatePackagekit();
 			# wait a bit for package management to settle down
 			while ($counter < $NETWORK_CHECKS) {
@@ -2739,13 +2769,13 @@ sub addRepoKey {
 						'-y',
 						'--allow-unauthenticated',
 						'-o' => 'Dpkg::lock::timeout=0',
-						'install' => glob( '/tmp/tuxedo-archive-keyring*' ),
+						'install' => glob( '/tmp/tuxedo-repository*' ),
 					)
 				);
 				my $commandString = join(' ', @command);
 				if (unlockPM($commandString) && (isPMlocked() == 0)) {
 					printLog("executing: $commandString", 'L2', '[DEBUG]');
-					# apt-get -y --allow-unauthenticated -o Dpkg::lock::timeout=0 install glob( '/tmp/tuxedo-archive-keyring*' )
+					# apt-get -y --allow-unauthenticated -o Dpkg::lock::timeout=0 install glob( '/tmp/tuxedo-repository*' )
 					runProcessArray( \$outputKey, '2>&1', 120, \$errorCode, @command );
 					lockPM();
 					if ($errorCode != 0) {
@@ -2753,20 +2783,20 @@ sub addRepoKey {
 						printLog("output apt-get: $outputKey", 'L0', '[ERROR]');
 						repairPackageManagement();
 					} else {
-						printLog("no errors installing keyrings", 'L2', '[INFO]');
+						printLog("no errors installing tuxedo-repository", 'L2', '[INFO]');
 						last;
 					}
 				} else {
-					printLog("something is wrong while looking for locks for keyring installation", 'L0', '[ERROR]');
+					printLog("something is wrong while looking for locks for tuxedo-repository installation", 'L0', '[ERROR]');
 				}
 				printLog("problem installing keyring, trying again in $sleepTime seconds", 'L0', '[WARN]');
 				sleep($sleepTime);
 			}
-			if (isPackageInstalled("tuxedo-archive-keyring")) {
-				printLog("TUXEDO keyring installed successfully", 'L2', '[INFO]');
+			if (isPackageInstalled("tuxedo-repository")) {
+				printLog("TUXEDO repository installed successfully", 'L2', '[INFO]');
 				return (1);
 			} else {
-				printLog("The TUXEDO repository key could not be installed!", 'TL0', '[ERROR]');
+				printLog("TUXEDO repository could not be installed!", 'TL0', '[ERROR]');
 				if (!$LiveISO) {
 					printLog("Tomte will try again in few minutes or after reboot or if startet manually with:\nsudo tomte configure all", 'TL0', '[INFO]');
 				}
