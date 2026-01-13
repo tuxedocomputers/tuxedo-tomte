@@ -45,21 +45,6 @@ my @notForPublicFiles = (
 	'.gitlab-ci.yml',
 	'.*.swp');
 
-# Set default email if environment variable is not given
-sub setEmail {
-	my $email = q{};
-	my $debemail = q{};
-	if (defined($ENV{'EMAIL'})) {
-		$email = $ENV{EMAIL};
-	} elsif (defined($ENV{'DEBEMAIL'})) {
-		$debemail = $ENV{DEBEMAIL};
-	} else {
-		print '-> default emailaddress not set\n';
-		print '-> setting tux@tuxedocomputers.com\n';
-		$ENV{'DEBEMAIL'} = 'tux@tuxedocomputers.com';
-	}
-}
-
 sub build {
 	# replaces placeholder with current version numbers
 	my $versionInChangelog = `dpkg-parsechangelog --show-field Version`;
@@ -74,6 +59,11 @@ sub build {
 	print "return from dpkg-buildpackage:\n$output";
 	print "done building package files !!\n";
 }
+
+
+
+print '-> setting tux@tuxedocomputers.com as emailaddress\n';
+$ENV{'DEBEMAIL'} = 'tux@tuxedocomputers.com';
 
 execute('codeCheck.pl', './codeCheck.pl');
 
