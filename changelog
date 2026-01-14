@@ -8,31 +8,31 @@ tuxedo-tomte (2.61.0) noble; urgency=medium
 
   * added timeouts to terminate external processes
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 03 Dec 2025 21:44:01 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 03 Dec 2025 21:44:01 +0100
 
 tuxedo-tomte (2.60.0) noble; urgency=medium
 
   * added force-[install/update/remove] for testing
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 03 Dec 2025 13:55:11 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 03 Dec 2025 13:55:11 +0100
 
 tuxedo-tomte (2.59.0) noble; urgency=medium
 
-  * removed superflous subroutines to remove unneeded Nvidia drivers
+  * removed superfluous subroutines to remove unneeded Nvidia drivers
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Nov 2025 19:24:19 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Nov 2025 19:24:19 +0100
 
 tuxedo-tomte (2.58.0) noble; urgency=medium
 
   * changed Nvidia meta package name
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Nov 2025 09:36:24 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Nov 2025 09:36:24 +0100
 
 tuxedo-tomte (2.57.0) noble; urgency=medium
 
   * added Linux Mint 22.3 (zena)
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 13 Nov 2025 14:18:42 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 13 Nov 2025 14:18:42 +0100
 
 tuxedo-tomte (2.56.0) noble; urgency=medium
 
@@ -51,13 +51,13 @@ tuxedo-tomte (2.56.0) noble; urgency=medium
   * removed EDID subroutines (not needed anymore)
   * changed kernel metapackage name to linux-tuxedo
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 09 Oct 2025 10:24:41 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 09 Oct 2025 10:24:41 +0200
 
 tuxedo-tomte (2.55.0) noble; urgency=medium
 
   * added Linux Mint 22.2
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 17 Jul 2025 10:06:39 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 17 Jul 2025 10:06:39 +0200
 
 tuxedo-tomte (2.54.1) noble; urgency=medium
 
@@ -65,7 +65,7 @@ tuxedo-tomte (2.54.1) noble; urgency=medium
   * added module krackanpointusb4suspendfix to TUXEDO Nano Pro Gen14 AMD with
     boardname "4X4-KRK Series"
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Fri, 27 Jun 2025 12:06:58 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 27 Jun 2025 12:06:58 +0200
 
 tuxedo-tomte (2.53.0) noble; urgency=medium
 
@@ -74,13 +74,13 @@ tuxedo-tomte (2.53.0) noble; urgency=medium
     and closed tuxedo-nvidia-driver-570 for noble
   * remove nvmequirkswitchtodeepsleepfix if present
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Tue, 10 Jun 2025 15:16:37 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 10 Jun 2025 15:16:37 +0200
 
 tuxedo-tomte (2.52.0) noble; urgency=medium
 
   * remove tuxedoplasmaupgrade from TUXEDO OS jammy
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 14 May 2025 18:52:07 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 14 May 2025 18:52:07 +0200
 
 tuxedo-tomte (2.51.0) noble; urgency=medium
 
@@ -88,58 +88,58 @@ tuxedo-tomte (2.51.0) noble; urgency=medium
   * removed obsolete modules thunderboltbootdelayfix, tuxedokeyboard,
     tuxedokeyboardite and tuxedonvmefix
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Fri, 09 May 2025 20:38:56 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 09 May 2025 20:38:56 +0200
 
 tuxedo-tomte (2.50.1) noble; urgency=medium
 
   * modified notification handling when whithout network connection
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Tue, 06 May 2025 13:06:08 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 06 May 2025 13:06:08 +0200
 
 tuxedo-tomte (2.50.0) noble; urgency=medium
 
   * added Elementary OS 8
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Mon, 07 Apr 2025 12:30:02 +0200
+ -- E. Mohr <tux@tuxedocomputers.com>  Mon, 07 Apr 2025 12:30:02 +0200
 
 tuxedo-tomte (2.49.0) noble; urgency=medium
 
   * added virtual machine support
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Mar 2025 17:54:18 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Mar 2025 17:54:18 +0100
 
 tuxedo-tomte (2.48.0) noble; urgency=medium
 
   * added TUXEDO Stellaris Slim AMD Gen6 with boardname GMxHGxx
     to amdgpudisablepsr
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Tue, 18 Mar 2025 16:36:08 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Tue, 18 Mar 2025 16:36:08 +0100
 
 tuxedo-tomte (2.47.0) noble; urgency=medium
 
   * added device with USB-ID 0e8d:0616 to module tuxedobtoffsuspend
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 13 Mar 2025 14:15:42 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 13 Mar 2025 14:15:42 +0100
 
 tuxedo-tomte (2.46.0) noble; urgency=medium
 
   * added device with boardname "4X4-7040 Series/D5" for module tuxedobtoffsuspend
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 06 Mar 2025 13:14:45 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 06 Mar 2025 13:14:45 +0100
 
 tuxedo-tomte (2.45.2) noble; urgency=medium
 
   * updated copyright year
   * removed module tuxedooledbrt
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 06 Mar 2025 11:25:32 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 06 Mar 2025 11:25:32 +0100
 
 tuxedo-tomte (2.45.1) noble; urgency=medium
 
   * removed tuxedo-mirrors module for all Linux Mint, already existing entries
     will remain untouched
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Wed, 26 Feb 2025 10:22:06 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Wed, 26 Feb 2025 10:22:06 +0100
 
 tuxedo-tomte (2.45.0) jammy; urgency=medium
 
@@ -151,7 +151,7 @@ tuxedo-tomte (2.44.0) jammy; urgency=medium
 
   * added boardname GXxHRXx to amdgpudisablepsr
 
- -- E. Mohr <e.mohr@tuxedocomputers.com>  Thu, 13 Feb 2025 17:16:29 +0100
+ -- E. Mohr <tux@tuxedocomputers.com>  Thu, 13 Feb 2025 17:16:29 +0100
 
 tuxedo-tomte (2.43.1) jammy; urgency=medium
 
