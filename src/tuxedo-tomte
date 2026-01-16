@@ -2299,6 +2299,10 @@ END_TXT
 sub tuxedoyt6801() {
 	my $module = shift;
 	my $action = shift;
+	if ($action eq 'remove') {
+		printLog("$module can't be removed, it is indispensable for a wired network connection", 'L2', '[WARN]');
+		return;
+	}
 	debianPackageModule( $module, $action );
 	return;
 }
