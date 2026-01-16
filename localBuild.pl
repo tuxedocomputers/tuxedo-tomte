@@ -62,7 +62,7 @@ sub build {
 
 
 
-print '-> setting tux@tuxedocomputers.com as emailaddress\n';
+print "-> setting tux\@tuxedocomputers.com as emailaddress\n";
 $ENV{'DEBEMAIL'} = 'tux@tuxedocomputers.com';
 
 execute('codeCheck.pl', './codeCheck.pl');
