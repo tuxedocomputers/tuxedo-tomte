@@ -223,12 +223,21 @@ if ($FAI) {
 $kernelRelease =~ s/[\n\r]//gs;
 printLog("detected kernel version: >$kernelRelease<", 'L2', '[DEBUG]');
 
+my $returnValue = q{};
 # get lspci data
 my $lspciOutput = q{};
-runProcess( \$lspciOutput, undef, 20, undef, 'lspci -vn' );
+if (!runProcess( \$lspciOutput, undef, 20, undef, 'lspci -vn' )) {
+	print "lspci is not working, Tomte will try again later\n";
+	startTomteDelayed("lspci is not working, Tomte will try again later");
+	exit(1);
+}
 # get lsusb data
 my $lsusbOutput = q{};
-runProcess( \$lsusbOutput, undef, 20, undef, 'lsusb' );
+if (!runProcess( \$lsusbOutput, undef, 20, undef, 'lsusb' )) {
+	print "lspci is not working, Tomte will try again later\n";
+	startTomteDelayed("lsusb is not working, Tomte will try again later");
+	exit(1);
+}
 my $boardnameFilename = "/sys/class/dmi/id/board_name";
 my $boardname = q{};
 $boardname = readFirstLineOfFile($boardnameFilename);
@@ -2299,10 +2308,6 @@ END_TXT
 sub tuxedoyt6801() {
 	my $module = shift;
 	my $action = shift;
-	if ($action eq 'remove') {
-		printLog("$module can't be removed, it is indispensable for a wired network connection", 'L2', '[WARN]');
-		return;
-	}
 	debianPackageModule( $module, $action );
 	return;
 }
