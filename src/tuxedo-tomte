@@ -2564,12 +2564,15 @@ sub runProcessArray {
 	}
 	if (defined $$rPAOutput) {
 		chomp($$rPAOutput);
+		printLog("runProcess output:\n", 'L2', '[DEBUG]');
 		# to avoid printing out huge lists
 		printLinesTill( $$rPAOutput, 25 );
 	}
 	if (defined $$rPAErrors) {
 		chomp($$rPAErrors);
-		printLog("runProcess errors:\n>$$rPAErrors<", 'L2', '[DEBUG]');
+		printLog("runProcess errors:\n", 'L2', '[DEBUG]');
+		# to avoid printing out huge lists
+		printLinesTill( $$rPAErrors, 25 );
 	}
 	printLog("runProcess timeout:\n>$rPATimeout<", 'L2', '[DEBUG]');
 	# make sure to convert into numeral
@@ -2641,7 +2644,7 @@ sub printLinesTill {
 		}
 		$output .= "... $remnant lines omitted\n";
 	}
-	printLog("$output", 'L2', '[DEBUG]');
+	printLog($output, 'L2', '[DEBUG]');
 }
 
 
