@@ -2638,11 +2638,13 @@ sub printLinesTill {
 		foreach my $line (@lines) {
 			$output .= $line . "\n";
 			$counter++;
-			if ($counter >= $maxLines) {
+			if ($counter > $maxLines) {
 				last;
 			}
 		}
 		$output .= "... $remnant lines omitted\n";
+	} else {
+		$output = $string;
 	}
 	printLog($output, 'L2', '[DEBUG]');
 }
