@@ -6529,6 +6529,10 @@ sub startTomteDelayed {
 	$restartSystem = 0;
 	my $triesValue;
 
+	if (!isRoot()) {
+		return (0);
+	}
+
 	if ($LiveISO) {
 		printLog("not starting Tomte delayed as this is a live ISO", 'L0', '[INFO]');
 		return (0);
