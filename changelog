@@ -1,3 +1,10 @@
+tuxedo-tomte (2.61.3) noble; urgency=medium
+
+  * start again delayed on failed lspci or lsusb
+  * truncate output length from system tasks in logfile
+
+ -- E. Mohr <tux@tuxedocomputers.com>  Fri, 23 Jan 2026 19:54:11 +0100
+
 tuxedo-tomte (2.61.2) noble; urgency=medium
 
   * blocked removal of tuxedo-yt6801 caused by broken lspci
