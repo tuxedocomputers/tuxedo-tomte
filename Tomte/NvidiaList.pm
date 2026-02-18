@@ -33,8 +33,8 @@ our @EXPORT_OK = qw( nvidiaPackage nvidiaProductID );
 # Please check sub deinstExcept() whether the name and the dependencies
 # of the meta packages still apply to the subroutine
 our %NVIDIA_PACKAGE = (
-	'open' => 'tuxedo-nvidia-default-open',
-	'closed' => 'tuxedo-nvidia-default'
+	'open' => 'nvidia-driver-open',
+	'closed' => 'nvidia-driver'
 );
 
 
