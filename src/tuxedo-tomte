@@ -873,42 +873,6 @@ sub checkRequirements {
 		printLog("detected $presetModules{elantechtouchpadfix}{name} issue", 'L1', '[INFO]');
 	}
 
-	if (($boardname =~ /LAPQC71A/sm) ||
-		($boardname =~ /LAPQC71B/sm) ||
-		($boardname =~ /PF5PU1G/sm) ||
-		($boardname =~ /POLARIS1501A1650TI/sm) ||
-		($boardname =~ /POLARIS1501A2060/sm) ||
-		($boardname =~ /POLARIS1501I1650TI/sm) ||
-		($boardname =~ /POLARIS1501I2060/sm) ||
-		($boardname =~ /POLARIS1701A1650TI/sm) ||
-		($boardname =~ /POLARIS1701A2060/sm) ||
-		($boardname =~ /POLARIS1701I1650TI/sm) ||
-		($boardname =~ /POLARIS1701I2060/sm) ||
-		($boardname =~ /PULSE1401/sm) ||
-		($boardname =~ /PULSE1501/sm) ||
-		($boardname =~ /TRINITY1501I/sm) ||
-		($boardname =~ /TRINITY1701I/sm) ||
-		($boardname =~ /PHxTxX1/sm) ||
-		($boardname =~ /PH4TQx1/sm) ||
-		($boardname =~ /PHxTQx1/sm) || #alias to PH4TQx1
-		($boardname =~ /GMxNGxx/sm) ||
-		($boardname =~ /GMxZGxx/sm) ||
-		($boardname =~ /GMxTGxx/sm) ||
-		($boardname =~ /GMxAGxx/sm) ||
-		($boardname =~ /GMxMGxx/sm) ||
-		($boardname =~ /GMxRGxx/sm) ||
-		($boardname =~ /PF5LUXG/sm) ||
-		($boardname =~ /PHxARX1_PHxAQF1/sm) ||
-		($boardname =~ /PH6AG01_PH6AQ71_PH6AQI1/sm) ||
-		($boardname =~ /GMxPXxx/sm) ||
-		($boardname =~ /PH4PRX1_PH6PRX1/sm) ||
-		($boardname =~ /PH4PG31/sm) ||
-		($boardname =~ /PH6PG01_PH6PG71/sm) ||
-		($boardname =~ /GM6XGxX/sm)) {
-		$presetModules{tuxedotouchpadswitch}{required} = 'yes';
-		printLog("detected $presetModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
-	}
-
 	if ($boardvendor =~ /NB02/sm) {
 		$presetModules{tuxedotouchpadswitch}{required} = 'yes';
 		printLog("detected $presetModules{tuxedotouchpadswitch}{name} issue", 'L1', '[INFO]');
