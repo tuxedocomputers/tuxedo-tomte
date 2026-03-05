@@ -33,8 +33,8 @@ our @EXPORT_OK = qw( nvidiaPackage nvidiaProductID );
 # Please check sub deinstExcept() whether the name and the dependencies
 # of the meta packages still apply to the subroutine
 our %NVIDIA_PACKAGE = (
-	'open' => 'tuxedo-nvidia-default-open',
-	'closed' => 'tuxedo-nvidia-default'
+	'open' => 'nvidia-driver-open',
+	'closed' => 'nvidia-driver'
 );
 
 
@@ -6226,1527 +6226,1527 @@ our %NVIDIA_PRODUCT_ID = (
           '1340' => {
                       '103C2B2B' => {
                                       'name' => 'NVIDIA GeForce 830A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 830M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1341' => {
                       '17AA3697' => {
                                       'name' => 'NVIDIA GeForce 840A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA3699' => {
                                       'name' => 'NVIDIA GeForce 840A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA369C' => {
                                       'name' => 'NVIDIA GeForce 840A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36AF' => {
                                       'name' => 'NVIDIA GeForce 840A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 840M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1344' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 845M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1346' => {
                       '17AA30BA' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA362C' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA362F' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA3636' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 930M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1347' => {
                       '17AA36B9' => {
                                       'name' => 'NVIDIA GeForce 940A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36BA' => {
                                       'name' => 'NVIDIA GeForce 940A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 940M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1348' => {
                       '103C2B5C' => {
                                       'name' => 'NVIDIA GeForce 945A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 945M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1349' => {
                       '17AA3124' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA364B' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36C3' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36D1' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36D8' => {
                                       'name' => 'NVIDIA GeForce 930A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce 930M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '134B' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 940MX',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '134D' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 940MX',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '134E' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 930MX',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '134F' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 920MX',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '137A' => {
                       '17AA2225' => {
                                       'name' => 'Quadro K620M',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2232' => {
                                       'name' => 'Quadro M500M',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA505A' => {
                                       'name' => 'Quadro M500M',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'noname',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '137B' => {
                       'none' => {
                                   'name' => 'Quadro M520',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1380' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1381' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 750',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1382' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 745',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1390' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 845M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1391' => {
                       '17AA3697' => {
                                       'name' => 'NVIDIA GeForce GTX 850A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 850M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1392' => {
                       '1028066A' => {
                                       'name' => 'NVIDIA GeForce GPU',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1043861E' => {
                                       'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '104386D9' => {
                                       'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 860M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1393' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 840M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1398' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 845M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1399' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 945M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '139A' => {
                       '17AA362C' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA362F' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA363F' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA3640' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA3647' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36B9' => {
                                       'name' => 'NVIDIA GeForce GTX 950A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 950M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '139B' => {
                       '1025107A' => {
                                       'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '102806A3' => {
                                       'name' => 'NVIDIA GeForce GTX 860M',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C2B4C' => {
                                       'name' => 'NVIDIA GeForce GTX 960A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA3649' => {
                                       'name' => 'NVIDIA GeForce GTX 750Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA36BF' => {
                                       'name' => 'NVIDIA GeForce GTX 960A',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '19DAC248' => {
                                       'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1AFA8A75' => {
                                       'name' => 'NVIDIA GeForce GTX 750Ti',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 960M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '139C' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 940M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '139D' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 750 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B0' => {
                       'none' => {
                                   'name' => 'Quadro M2000M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B1' => {
                       'none' => {
                                   'name' => 'Quadro M1000M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B2' => {
                       'none' => {
                                   'name' => 'Quadro M600M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B3' => {
                       'none' => {
                                   'name' => 'Quadro K2200M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B4' => {
                       'none' => {
                                   'name' => 'Quadro M620',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B6' => {
                       'none' => {
                                   'name' => 'Quadro M1200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13B9' => {
                       'none' => {
                                   'name' => 'NVS 810',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13BA' => {
                       'none' => {
                                   'name' => 'Quadro K2200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13BB' => {
                       'none' => {
                                   'name' => 'Quadro K620',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13BC' => {
                       'none' => {
                                   'name' => 'Quadro K1200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13C0' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13C2' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 970',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13D7' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13D8' => {
                       '14621198' => {
                                       'name' => 'NVIDIA GeForce GTX 960',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621199' => {
                                       'name' => 'NVIDIA GeForce GTX 960',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '19DAB282' => {
                                       'name' => 'NVIDIA GeForce GTX 960',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '19DAB284' => {
                                       'name' => 'NVIDIA GeForce GTX 960',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '19DAB286' => {
                                       'name' => 'NVIDIA GeForce GTX 960',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 970M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13D9' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 965M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13DA' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F0' => {
                       'none' => {
                                   'name' => 'Quadro M5000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F1' => {
                       'none' => {
                                   'name' => 'Quadro M4000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F2' => {
                       'none' => {
                                   'name' => 'Tesla M60',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F3' => {
                       'none' => {
                                   'name' => 'Tesla M6',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F8' => {
                       '10DE11DD' => {
                                       'name' => 'Quadro M5000 SE',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro M5000M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13F9' => {
                       'none' => {
                                   'name' => 'Quadro M4000M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13FA' => {
                       '10DE11C9' => {
                                       'name' => 'Quadro M3000 SE',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro M3000M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '13FB' => {
                       'none' => {
                                   'name' => 'Quadro M5500',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1401' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 960',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1402' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 950',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1406' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 960',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1407' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 750',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1427' => {
                       '1458D003' => {
                                       'name' => 'NVIDIA GeForce GTX 950',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 965M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1430' => {
                       'none' => {
                                   'name' => 'Quadro M2000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1431' => {
                       'none' => {
                                   'name' => 'Tesla M4',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1436' => {
                       'none' => {
                                   'name' => 'Quadro M2200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '15F0' => {
                       'none' => {
                                   'name' => 'Quadro GP100',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '15F7' => {
                       'none' => {
                                   'name' => 'Tesla P100-PCIE-12GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '15F8' => {
                       'none' => {
                                   'name' => 'Tesla P100-PCIE-16GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '15F9' => {
                       'none' => {
                                   'name' => 'Tesla P100-SXM2-16GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1617' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1618' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 970M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1619' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 965M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '161A' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1667' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 965M',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '174D' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX130',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '174E' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX110',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '179C' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce 940MX',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '17C2' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX TITAN X',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '17C8' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 980 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '17F0' => {
                       'none' => {
                                   'name' => 'Quadro M6000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '17F1' => {
                       'none' => {
                                   'name' => 'Quadro M6000 24GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '17FD' => {
                       '10DE1173' => {
                                       'name' => 'Tesla M40 24GB',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Tesla M40',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B00' => {
                       'none' => {
                                   'name' => 'NVIDIA TITAN X (Pascal)',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B02' => {
                       '10DE123E' => {
                                       'name' => 'NVIDIA TITAN Xp COLLECTORS EDITION',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10DE123F' => {
                                       'name' => 'NVIDIA TITAN Xp COLLECTORS EDITION',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA TITAN Xp',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B06' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1080 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B30' => {
                       'none' => {
                                   'name' => 'Quadro P6000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B38' => {
                       'none' => {
                                   'name' => 'Tesla P40',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B80' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1080',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B81' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1070',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B82' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1070 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B83' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 6GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B84' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 3GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1B87' => {
                       'none' => {
                                   'name' => 'NVIDIA P104-100',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BA0' => {
                       '10280887' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1080',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BA1' => {
                       '102808A1' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '102808A2' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431CCE' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14581651' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14581653' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '146211E8' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '146211E9' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621225' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621226' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621227' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '15589501' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '155895E1' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1A582000' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1D051032' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1070',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BA2' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1070',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB0' => {
                       'none' => {
                                   'name' => 'Quadro P5000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB1' => {
                       'none' => {
                                   'name' => 'Quadro P4000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB4' => {
                       'none' => {
                                   'name' => 'Tesla P6',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB5' => {
                       '17AA2268' => {
                                       'name' => 'Quadro P5200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2269' => {
                                       'name' => 'Quadro P5200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P5200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB6' => {
                       'none' => {
                                   'name' => 'Quadro P5000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB7' => {
                       '146211E9' => {
                                       'name' => 'Quadro P4000 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '15589501' => {
                                       'name' => 'Quadro P4000 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P4000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB8' => {
                       'none' => {
                                   'name' => 'Quadro P3000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BB9' => {
                       '155895E1' => {
                                       'name' => 'Quadro P4200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2268' => {
                                       'name' => 'Quadro P4200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2269' => {
                                       'name' => 'Quadro P4200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P4200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BBB' => {
                       '17AA225F' => {
                                       'name' => 'Quadro P3200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2262' => {
                                       'name' => 'Quadro P3200 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P3200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BC7' => {
                       'none' => {
                                   'name' => 'NVIDIA P104-101',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BE0' => {
                       '10251221' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1025123E' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '102807C0' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280876' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1028088B' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431031' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431BF0' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1458355B' => {
                                       'name' => 'NVIDIA GeForce GTX 1080 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1080',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1BE1' => {
                       '103C84DB' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '104316F0' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '38422009' => {
                                       'name' => 'NVIDIA GeForce GTX 1070 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1070',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C02' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 3GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C03' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 6GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C04' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 5GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C06' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060 6GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C07' => {
                       'none' => {
                                   'name' => 'NVIDIA P106-100',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C09' => {
                       'none' => {
                                   'name' => 'NVIDIA P106-090',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C20' => {
                       '10280802' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280803' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280825' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280827' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280885' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10280886' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C8467' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C8478' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C8581' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621244' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '155895E5' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA39B9' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1A582000' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1A582001' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1D051059' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C21' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C22' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C23' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C30' => {
                       'none' => {
                                   'name' => 'Quadro P2000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C31' => {
                       'none' => {
                                   'name' => 'Quadro P2200',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C60' => {
                       '103C8390' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C8467' => {
                                       'name' => 'NVIDIA GeForce GTX 1060 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1060',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C61' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C62' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C81' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C82' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C83' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C8C' => {
                       '1028087C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C8519' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C856A' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462123C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462126C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2266' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2267' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA39FF' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C8D' => {
                       '103C84E9' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C84EB' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C856A' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1043114F' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431341' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431351' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431481' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '104314A1' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '104318C1' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431B5E' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462126C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '152D1217' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1D721707' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C8F' => {
                       '1462123C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462126C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462126D' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621284' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621297' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 Ti with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050 Ti',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C90' => {
                       '102809C1' => {
                                       'name' => 'NVIDIA GeForce MX250',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX150',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C91' => {
                       '103C856A' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '103C86E3' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '152D1232' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C92' => {
                       '1043149F' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '10431B31' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '14621245' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '1462126C' => {
                                       'name' => 'NVIDIA GeForce GTX 1050 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'NVIDIA GeForce GTX 1050',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C94' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX350',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1C96' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX350',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CB1' => {
                       'none' => {
                                   'name' => 'Quadro P1000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CB2' => {
                       'none' => {
                                   'name' => 'Quadro P600',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CB3' => {
                       'none' => {
                                   'name' => 'Quadro P400',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CB6' => {
                       'none' => {
                                   'name' => 'Quadro P620',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CBA' => {
                       '17AA2266' => {
                                       'name' => 'Quadro P2000 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '17AA2267' => {
                                       'name' => 'Quadro P2000 with Max-Q Design',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P2000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CBB' => {
                       'none' => {
                                   'name' => 'Quadro P1000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CBC' => {
                       'none' => {
                                   'name' => 'Quadro P600',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CBD' => {
                       'none' => {
                                   'name' => 'Quadro P620',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CFA' => {
                       'none' => {
                                   'name' => 'Quadro P2000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1CFB' => {
                       '102B2600' => {
                                       'name' => 'Matrox D-Series D1480',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       '102B2700' => {
                                       'name' => 'Matrox D-Series D1450',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro P1000',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D01' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GT 1030',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D02' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce GT 1010',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D10' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX150',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D11' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX230',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D12' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX150',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D13' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX250',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D16' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX330',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D33' => {
                       'none' => {
                                   'name' => 'Quadro P500',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D34' => {
                       'none' => {
                                   'name' => 'Quadro P520',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D52' => {
                       'none' => {
                                   'name' => 'NVIDIA GeForce MX250',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1D81' => {
                       'none' => {
                                   'name' => 'NVIDIA TITAN V',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB1' => {
                       '10DE1307' => {
                                       'name' => 'Tesla V100-SXM2-16GB-LS',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Tesla V100-SXM2-16GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB3' => {
                       'none' => {
                                   'name' => 'Tesla V100-FHHL-16GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB4' => {
                       '10DE1306' => {
                                       'name' => 'Tesla V100-PCIE-16GB-LS',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Tesla V100-PCIE-16GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB5' => {
                       '10DE1308' => {
                                       'name' => 'Tesla V100-SXM2-32GB-LS',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Tesla V100-SXM2-32GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB6' => {
                       'none' => {
                                   'name' => 'Tesla V100-PCIE-32GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB7' => {
                       'none' => {
                                   'name' => 'Tesla V100-DGXS-32GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DB8' => {
                       '10DE131D' => {
                                       'name' => 'Tesla V100-SXM3-32GB-H',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Tesla V100-SXM3-32GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DBA' => {
                       '10DE12EB' => {
                                       'name' => 'NVIDIA TITAN V JHH Special Edition',
-                                      'type' => 'closed'
+                                      'type' => 'legacy'
                                     },
                       'none' => {
                                   'name' => 'Quadro GV100',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DF0' => {
                       'none' => {
                                   'name' => 'Tesla PG500-216',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DF2' => {
                       'none' => {
                                   'name' => 'Tesla PG503-216',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1DF6' => {
                       'none' => {
                                   'name' => 'Tesla V100S-PCIE-32GB',
-                                  'type' => 'closed'
+                                  'type' => 'legacy'
                                 }
                     },
           '1E02' => {

@@ -1834,6 +1834,7 @@ sub nvidiadriver() {
 	my $wasInstalled = 1;
 	my $packageNvidiaDriver = 0;
 	my $packageNvidiaPrime = 0;
+	my $packageNvidiaPinning = 0;
 	my %nvidiaPackage = nvidiaPackage();
 
 	if ((($action eq 'install') || ($action eq 'upgrade')) && !$noNetwork) {
@@ -1849,6 +1850,15 @@ sub nvidiadriver() {
 				addToConfiguredModules($module, "failed");
 				return;
 			}
+
+			if( ! isPackageInstalled('tuxedo-nvidia-driver-default-pinning') ) {
+				$wasInstalled = 0;
+				# set timeout for kernel install to a safe high value
+				$packageNvidiaPinning = installPackage('tuxedo-nvidia-driver-default-pinning', 'nvidiadriver', 360000);
+			} else {
+				$packageNvidiaPinning = 1;
+			}
+
 			printLog("the Nvidia package $tuxedoNvidiaDriver will be used", 'L2', '[DEBUG]');
 			# check if the drivers to install are actually available in repos
 			# before removing old drivers
@@ -1880,7 +1890,7 @@ sub nvidiadriver() {
 				$packageNvidiaPrime = 1;
 			}
 
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+			if( $packageNvidiaDriver && $packageNvidiaPrime && $packageNvidiaPinning ) {
 				# temporarily activated fix
 				if ($FAI || ($presetModules{$module}{installed} eq 'no')) {
 					my $returnValue = q{};
@@ -1894,8 +1904,8 @@ sub nvidiadriver() {
 					}
 				}
 			}
-			printLog("packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime", 'L2', '[DEBUG]');
-			if( $packageNvidiaDriver && $packageNvidiaPrime ) {
+			printLog("packageNvidiaDriver: $packageNvidiaDriver packageNvidiaPrime: $packageNvidiaPrime packageNvidiaPinning: $packageNvidiaPinning", 'L2', '[DEBUG]');
+			if( $packageNvidiaDriver && $packageNvidiaPrime && $packageNvidiaPinning ) {
 				if ($wasInstalled) {
 					printLog("$presetModules{$module}{name} was already installed", 'L1', '[INFO]');
 					addToConfiguredModules($module, "nothingToDo");
